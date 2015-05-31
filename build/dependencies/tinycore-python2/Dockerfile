@@ -96,30 +96,16 @@ RUN tce-load -wic \
     && find /usr/local \( -type d -a -name test -o -name tests \) | sudo xargs rm -rf \
     && sudo rm -rf /usr/src/python
 
-# Instructions after here are run with 'root' user
-USER root
-
-# !! TODO
-# tar up the follwing to stdout
-#
-# /usr/local/bin/python-config
-# /usr/local/bin/python2-config
-# /usr/local/bin/python
-# /usr/local/bin/python2.7
-# /usr/local/bin/python2.7-config
-# /usr/local/bin/python2
-# /usr/local/lib/python2.7
-# /usr/local/lib/python2.7/config/python.o
-# /usr/local/lib/python2.7/config/libpython2.7.a
-# /usr/local/lib/python2.7/idlelib/Icons/python.gif
-# /usr/local/lib/libpython2.7.so
-# /usr/local/lib/pkgconfig/python-2.7.pc
-# /usr/local/lib/pkgconfig/python.pc
-# /usr/local/lib/pkgconfig/python2.pc
-# /usr/local/lib/libpython2.7.so.1.0
-# /usr/local/include/python2.7
-# /usr/local/include/python2.7/pythonrun.h
-# /usr/local/share/man/man1/python.1
-# /usr/local/share/man/man1/python2.7.1
-# /usr/local/share/man/man1/python2.1
-CMD ["python2"]
+# write resulting build to stdout
+RUN mkdir /tmp/python2
+WORKDIR /tmp/python2
+RUN cp -R /usr/local/lib/python2.7 . && tar cf python.tar python2.7 && rm -rf python2.7
+RUN cp -R /usr/local/include/python2.7 . && tar cf python-include.tar python2.7 && rm -rf python2.7
+RUN cp -R /usr/local/bin/python2.7 .
+RUN cp -R /usr/local/bin/python2.7-config .
+RUN cp -R /usr/local/lib/libpython2.7.so .
+RUN cp -R /usr/local/lib/libpython2.7.so.1.0 .
+RUN cp -R /usr/local/lib/pkgconfig/python-2.7.pc .
+RUN cp -R /usr/local/share/man/man1/python2.7.1 .
+RUN cd /tmp && tar cf python2.tar /tmp/python2
+CMD ["cat", "/tmp/python2.tar"]
