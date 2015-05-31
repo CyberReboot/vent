@@ -1,14 +1,20 @@
 #!/bin/bash
 
-# !! TODO add flag to run with --no-cache
-
 cd dependencies/tinycore-python2
 echo "building python for tinycore linux..."
-docker build -t tce-python .
+if [ "$1" == "--no-cache" ]; then
+    docker build --no-cache -t tce-python .
+else
+    docker build -t tce-python .
+fi
 docker run --rm tce-python > python2.tar
 cd -
 echo "building vent..."
-docker build -t vent .
+if [ "$1" == "--no-cache" ]; then
+    docker build --no-cache -t vent .
+else
+    docker build -t vent .
+fi
 docker run --rm vent > vent.iso
 rm -rf dependencies/tinycore-python2/python2.tar
 echo "done..."
