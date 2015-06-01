@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.7
 
+import ConfigParser
 import curses
 import os
 
@@ -20,6 +21,9 @@ COMMAND = "command"
 EXITMENU = "exitmenu"
 INFO = "info"
 SETTING = "setting"
+
+modes = []
+# !! TODO read in template file using configparser
 
 menu_data = {
   'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
@@ -47,7 +51,7 @@ menu_data = {
     },
     { 'title': "System Info", 'type': MENU, 'subtitle': '',
       'options': [
-        { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps -a | wc -l' },
+        { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
         { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
       ]
     },

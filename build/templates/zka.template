@@ -1,0 +1,5 @@
+[info]
+name:"zero knowledge, active"
+
+[service]
+schedule:{"all":"hourly"}
