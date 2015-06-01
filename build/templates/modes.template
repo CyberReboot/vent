@@ -1,6 +1,6 @@
 [plugins]
-lkw:all
-ska:all
-skp:all
-zka:all
-zkp:all
+lkw = all
+ska = all
+skp = all
+zka = all
+zkp = all

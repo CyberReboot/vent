@@ -1,5 +1,5 @@
 [info]
-name:"zero knowledge, passive"
+name = "zero knowledge, passive"
 
 [service]
-schedule:{"p0f":"continuous", "nmap":"5-minute"}
+schedule = {"p0f":"continuous", "nmap":"5-minute"}

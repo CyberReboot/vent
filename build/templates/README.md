@@ -5,11 +5,11 @@ the tools in the plugin, or just specific ones in a comma delimited list.
 
 ```
 [plugins]
-lkw:p0f,nmap
-ska:all
-skp:all
-zka:all
-zkp:all
+lkw = p0f,nmap
+ska = all
+skp = all
+zka = all
+zkp = all
 ```
 
 ### Specific Plugin Templates
@@ -21,18 +21,18 @@ frequencies.  Frequency options include: `continuous`, `[1,5,10,20,30]-minute`, 
 
 ```
 [info]
-name:"zero knowledge, active"
+name = "zero knowledge, active"
 
 [service]
-schedule:{"all":"hourly"}
+schedule = {"all":"hourly"}
 ```
 
 or
 
 ```
 [info]
-name:"zero knowledge, passive"
+name = "zero knowledge, passive"
 
 [service]
-schedule:{"p0f":"continuous", "nmap":"5-minute"}
+schedule = {"p0f":"continuous", "nmap":"5-minute"}
 ```
