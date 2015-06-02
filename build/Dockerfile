@@ -1,4 +1,5 @@
 FROM boot2docker/boot2docker
+MAINTAINER Charlie Lewis <clewis@iqt.org>
 ADD . $ROOTFS/data/
 ADD custom $ROOTFS/etc/rc.d/custom
 ADD motd $ROOTFS/etc/motd

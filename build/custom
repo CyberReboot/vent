@@ -4,5 +4,6 @@ if [ ! -f "/var/lib/boot2docker/bootlocal.sh" ]; then
 	mv /data/bootlocal.sh /var/lib/boot2docker/bootlocal.sh
 	chmod +x /var/lib/boot2docker/bootlocal.sh
 	mv /data/profile /var/lib/boot2docker/profile
+	docker load -i /data/management/vent-management.tar
 	reboot
 fi
