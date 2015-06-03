@@ -3,6 +3,7 @@
 import ConfigParser
 import curses
 import os
+import sys
 
 from subprocess import call, check_output, PIPE, Popen
 
@@ -22,20 +23,60 @@ EXITMENU = "exitmenu"
 INFO = "info"
 SETTING = "setting"
 
+# path that exists on the iso
+#template_dir = "/data/templates/"
+#plugins_dir = "/data/plugins/"
+template_dir = "templates/"
+plugins_dir = "plugins/"
+
 modes = []
+try:
+    config = ConfigParser.RawConfigParser()
+    config.read(template_dir+'modes.template')
+    plugin_array = config.options("plugins")
+    plugins = {}
+    for plug in plugin_array:
+        plugins[plug] = config.get("plugins", plug)
+
+    for plugin in plugins:
+        p = {}
+        try:
+            config = ConfigParser.RawConfigParser()
+            config.read(template_dir+plugin+'.template')
+            plugin_name = config.get("info", "name")
+            p['title'] = plugin_name
+            p['type'] = MENU
+            p['subtitle'] = 'Please select a tool to configure...'
+            p['options'] = []
+            if plugins[plugin] == 'all':
+                tools = [ name for name in os.listdir(plugins_dir+plugin) if os.path.isdir(os.path.join(plugins_dir+plugin, name)) ]
+                for tool in tools:
+                    t = {}
+                    t['title'] = tool
+                    t['type'] = SETTING
+                    t['command'] = ''
+                    p['options'].append(t)
+            else:
+                for tool in plugins[plugin].split(","):
+                    t = {}
+                    t['title'] = tool
+                    t['type'] = SETTING
+                    t['command'] = ''
+                    p['options'].append(t)
+            modes.append(p)
+        except:
+            # if no name is provided, it doesn't get listed
+            pass
+except:
+    print "unable to get the configuration of modes from the templates.\n"
+
 # !! TODO read in template file using configparser
 
 menu_data = {
   'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
   'options':[
     { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select a mode to run vent in...',
-      'options': [
-        { 'title': "Zero Knowledge, Passive", 'type': COMMAND, 'command': '' },
-        { 'title': "Zero Knowledge, Aggressive", 'type': COMMAND, 'command': '' },
-        { 'title': "Some Knowledge, Passive", 'type': COMMAND, 'command': '' },
-        { 'title': "Some Knowledge, Aggressive", 'type': COMMAND, 'command': '' },
-        { 'title': "Lots of Knowledge, Go Wild", 'type': COMMAND, 'command': '' },
-      ]
+      'options': modes
     },
     { 'title': "Vent Settings", 'type': MENU, 'subtitle': 'Please select a vent setting to change...',
       'options': [
