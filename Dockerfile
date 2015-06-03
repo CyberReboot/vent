@@ -23,6 +23,8 @@ RUN tar xf python.tar \
 RUN tar xf python-include.tar \
     && mv python2.7 $ROOTFS/usr/local/include/python2.7
 RUN rm -rf $ROOTFS/data/dependencies
+RUN rm -rf $ROOTFS/data/.git
+RUN rm -rf $ROOTFS/data/.gitignore
 
 RUN /make_iso.sh
 CMD ["cat", "/boot2docker.iso"]

@@ -2,6 +2,8 @@
 
 # !! TODO this script is pretty brittle, it should do better error checking
 
+rm -rf vent.iso
+
 cd dependencies/tinycore-python2
 echo "building python for tinycore linux..."
 if [ "$1" == "--no-cache" ]; then
