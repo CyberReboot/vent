@@ -24,10 +24,8 @@ INFO = "info"
 SETTING = "setting"
 
 # path that exists on the iso
-#template_dir = "/data/templates/"
-#plugins_dir = "/data/plugins/"
-template_dir = "templates/"
-plugins_dir = "plugins/"
+template_dir = "/data/templates/"
+plugins_dir = "/data/plugins/"
 
 modes = []
 try:
