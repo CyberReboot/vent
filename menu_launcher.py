@@ -96,6 +96,12 @@ menu_data = {
         { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
       ]
     },
+    { 'title': "Build Plugins", 'type': MENU, 'subtitle': '',
+      'options': [
+        { 'title': "Build new plugins", 'type': INFO, 'command': '' },
+        { 'title': "Force rebuild all", 'type': INFO, 'command': '' },
+      ]
+    },
     { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
     { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
   ]
