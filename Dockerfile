@@ -25,6 +25,8 @@ RUN tar xf python-include.tar \
 RUN rm -rf $ROOTFS/data/dependencies
 RUN rm -rf $ROOTFS/data/.git
 RUN rm -rf $ROOTFS/data/.gitignore
+RUN chmod -R 777 $ROOTFS/data/plugins
+RUN chmod -R 777 $ROOTFS/data/templates
 
 RUN /make_iso.sh
 CMD ["cat", "/boot2docker.iso"]
