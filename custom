@@ -8,6 +8,5 @@ if [ ! -f "/var/lib/boot2docker/bootlocal.sh" ]; then
 	mv /data/profile /var/lib/boot2docker/profile
 	docker load -i /data/management/vent-management.tar
 	echo $'Match User docker\n\tAllowTCPForwarding no\n\tX11Forwarding no\n\tForceCommand /data/wrapper.sh' >> /usr/local/etc/ssh/sshd_config
-	cd /data/plugins && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && docker build -t $(echo {} | sed 's%^.\/%%') .)' ';'
 	reboot
 fi

@@ -98,8 +98,8 @@ menu_data = {
     },
     { 'title': "Build Plugins", 'type': MENU, 'subtitle': '',
       'options': [
-        { 'title': "Build new plugins", 'type': INFO, 'command': '' },
-        { 'title': "Force rebuild all", 'type': INFO, 'command': '' },
+        { 'title': "Build new plugins", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins.sh' },
+        { 'title': "Force rebuild all", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins.sh --no-cache' },
       ]
     },
     { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
