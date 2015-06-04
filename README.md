@@ -29,6 +29,7 @@ with docker-machine cli:
 ```
 python -m SimpleHTTPServer
 docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhost:8000/vent.iso vent
+docker-machine ssh vent
 ```
 
 copy up new templates and plugins
