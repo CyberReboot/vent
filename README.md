@@ -29,6 +29,10 @@ with docker-machine cli:
 ```
 python -m SimpleHTTPServer
 docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhost:8000/vent.iso vent
+# other options to customize the size of the vm are available as well:
+# --virtualbox-cpu-count "1"
+# --virtualbox-disk-size "20000"
+# --virtualbox-memory "1024"
 docker-machine ssh vent
 ```
 
