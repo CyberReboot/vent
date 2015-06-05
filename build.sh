@@ -2,7 +2,7 @@
 
 # !! TODO this script is pretty brittle, it should do better error checking
 
-# !! TODO have a flag for --build-no-plugins to not build plugins on the first boot
+# !! TODO have a flag for --build-plugins to build plugins on the first boot
 rm -rf vent.iso
 
 cd dependencies/tinycore-python2
