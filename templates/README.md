@@ -21,7 +21,7 @@ frequencies.  Frequency options include: `continuous`, `[1,5,10,20,30]-minute`, 
 
 ```
 [info]
-name = "zero knowledge, active"
+name = "zero knowledge, passive"
 
 [service]
 schedule = {"all":"hourly"}
@@ -31,7 +31,7 @@ or
 
 ```
 [info]
-name = "zero knowledge, passive"
+name = "zero knowledge, active"
 
 [service]
 schedule = {"p0f":"continuous", "nmap":"5-minute"}
