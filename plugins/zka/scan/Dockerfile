@@ -1,5 +1,11 @@
-FROM python:2.7.9
+FROM ubuntu:14.04.2
 MAINTAINER Charlie Lewis <clewis@iqt.org>
+
+RUN apt-get update && apt-get install -y build-essential \
+                                         python-dev \
+                                         python-setuptools \
+                                         python-software-properties \
+                                         software-properties-common
 
 ADD . /scan
 WORKDIR /scan
