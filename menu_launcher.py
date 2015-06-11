@@ -27,6 +27,34 @@ SETTING = "setting"
 template_dir = "/data/templates/"
 plugins_dir = "/data/plugins/"
 
+def run_plugins():
+    modes = []
+    try:
+        config = ConfigParser.RawConfigParser()
+        config.read(template_dir+'modes.template')
+        plugin_array = config.options("plugins")
+        plugins = {}
+        for plug in plugin_array:
+            plugins[plug] = config.get("plugins", plug)
+
+        for plugin in plugins:
+            p = {}
+            try:
+                config = ConfigParser.RawConfigParser()
+                config.read(template_dir+plugin+'.template')
+                plugin_name = config.get("info", "name")
+                p['title'] = plugin_name
+                p['type'] = COMMAND
+                p['command'] = 'echo "running '+plugin_name+'..."; sleep 10'
+                modes.append(p)
+            except:
+                # if no name is provided, it doesn't get listed
+                pass
+    except:
+        print "unable to get the configuration of modes from the templates.\n"
+
+    return modes
+
 def update_plugins():
     modes = []
     try:
@@ -75,19 +103,29 @@ def update_plugins():
 menu_data = {
   'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
   'options':[
-    { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select a mode to run vent in...',
-      'options': update_plugins()
-    },
-    { 'title': "Vent Settings", 'type': MENU, 'subtitle': 'Please select a vent setting to change...',
+    { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option...',
       'options': [
-        { 'title': "Data", 'type': SETTING, 'command': '' },
+        { 'title': "Run", 'type': MENU, 'subtitle': '',
+          'options': run_plugins()
+        },
+        { 'title': "Configure", 'type': MENU, 'subtitle': '',
+          'options': update_plugins()
+        }
       ]
     },
-    { 'title': "Host Settings", 'type': MENU, 'subtitle': 'Please select a host setting to change...',
+    { 'title': "Settings", 'type': MENU, 'subtitle': 'Please select a setting to change...',
       'options': [
+        { 'title': "Data", 'type': SETTING, 'command': '' },
         { 'title': "Hostname", 'type': SETTING, 'command': '' },
         { 'title': "IP Address", 'type': SETTING, 'command': '' },
         { 'title': "SSH Keys", 'type': SETTING, 'command': '' },
+      ]
+    },
+    { 'title': "Visualization", 'type': MENU, 'subtitle': 'Please select an option...',
+      'options': [
+        { 'title': "Start", 'type': COMMAND, 'command': '' },
+        { 'title': "Stop", 'type': COMMAND, 'command': '' },
+        { 'title': "Status", 'type': INFO, 'command': 'echo "Currently stopped."' },
       ]
     },
     { 'title': "System Info", 'type': MENU, 'subtitle': '',
@@ -102,6 +140,7 @@ menu_data = {
         { 'title': "Force rebuild all", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins.sh --no-cache' },
       ]
     },
+    { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
     { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
     { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
   ]
