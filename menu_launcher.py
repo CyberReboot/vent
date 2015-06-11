@@ -98,8 +98,6 @@ def update_plugins():
         print "unable to get the configuration of modes from the templates.\n"
     return modes
 
-# !! TODO read in template file using configparser
-
 menu_data = {
   'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
   'options':[
@@ -125,6 +123,7 @@ menu_data = {
       'options': [
         { 'title': "Start", 'type': COMMAND, 'command': '' },
         { 'title': "Stop", 'type': COMMAND, 'command': '' },
+        { 'title': "Force rebuild visualization container", 'type': COMMAND, 'command': '/bin/sh /data/build_viz.sh --no-cache' },
         { 'title': "Status", 'type': INFO, 'command': 'echo "Currently stopped."' },
       ]
     },
@@ -134,10 +133,10 @@ menu_data = {
         { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
       ]
     },
-    { 'title': "Build Plugins", 'type': MENU, 'subtitle': '',
+    { 'title': "Build", 'type': MENU, 'subtitle': '',
       'options': [
-        { 'title': "Build new plugins", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins.sh' },
-        { 'title': "Force rebuild all", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins.sh --no-cache' },
+        { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins_collectors.sh' },
+        { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins_collectors.sh --no-cache' },
       ]
     },
     { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
