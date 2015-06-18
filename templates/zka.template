@@ -3,3 +3,6 @@ name = "zero knowledge, active"
 
 [service]
 schedule = {"all":"hourly"}
+
+[dns]
+command = ""
