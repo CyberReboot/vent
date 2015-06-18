@@ -1,0 +1,8 @@
+[info]
+name = "visualization"
+
+[service]
+schedule = {"all":"continuous"}
+
+[honeycomb]
+run = ""

@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y dnsutils git
 ADD . /dns
 
 WORKDIR /dns
+VOLUME /dns
 
 ENTRYPOINT ["./list-servers.pl"]
 CMD ["-h"]
