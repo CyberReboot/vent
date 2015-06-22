@@ -5,4 +5,4 @@ name = "visualization"
 schedule = {"all":"continuous"}
 
 [honeycomb]
-run = ""
+run_command = ""

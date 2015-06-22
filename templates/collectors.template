@@ -1,0 +1,8 @@
+[info]
+name = "collectors"
+
+[service]
+schedule = {"all":"continuous"}
+
+[dns]
+run_command = ""

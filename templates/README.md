@@ -12,12 +12,18 @@ zka = all
 zkp = all
 ```
 
-### Specific Plugin Templates
+### Collectors, Visualization, and Specific Plugin Templates
 
 Specify a name and schedule to run tools at.  A schedule is a dictionary of
 tools that can specify either all at a frequency or each tool at specific
-frequencies.  Frequency options include: `continuous`, `[1,5,10,20,30]-minute`, `hourly`,
-`quarter-daily`, `semi-daily`, `daily`.
+frequencies.  Frequency options include: `continuous`, `[1,5,10,20,30]-minute`,
+`hourly`, `quarter-daily`, `semi-daily`, `daily`.
+
+Specify specific tools and modify parameters to how they are run, such at
+`run_command`
+
+`Info` and `Service` sections are for specifying how vent deals with and
+presents tools, all other sections are tool specific.
 
 ```
 [info]
