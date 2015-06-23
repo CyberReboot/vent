@@ -85,7 +85,7 @@ def read_template_types(template_type):
                             tool_dict[template_type+"-"+section] = []
                         tool_dict[template_type+"-"+section].append(instructions)
         else:
-            template_name = "all"
+            info_name = "all"
     except:
         pass
     return info_name, service_schedule, tool_dict
