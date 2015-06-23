@@ -10,6 +10,7 @@ def execute_template(template_type, template_execution, info_name, service_sched
     return
 
 def read_template_types(template_type):
+    # read in templates for plugins, collectors, and visualization
     template_path = '/data/templates/'+template_type+'.template'
     info_name = ""
     service_schedule = ""
@@ -30,16 +31,15 @@ def read_template_types(template_type):
                elif section != "info" and section != "service":
                    instructions[option] = config.get(section, option)
            if section != "info" and section != "service":
-               tool_dict[section] = []
-               tool_dict[section].append(instructions)
+               instructions['Image'] = template_type+'/'+section
+               tool_dict[template_type+"-"+section] = []
+               tool_dict[template_type+"-"+section].append(instructions)
     except:
        pass
     print json.dumps(tool_dict)
     return info_name, service_schedule, tool_dict
 
 def main():
-    print sys.argv
-    # read in templates for plugins, collectors, and visualization
     if len(sys.argv) < 3:
         sys.exit()
     else:

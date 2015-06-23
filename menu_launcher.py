@@ -27,7 +27,7 @@ SETTING = "setting"
 template_dir = "/data/templates/"
 plugins_dir = "/data/plugins/"
 
-def run_plugins():
+def run_plugins(action):
     modes = []
     try:
         config = ConfigParser.RawConfigParser()
@@ -45,11 +45,16 @@ def run_plugins():
                 plugin_name = config.get("info", "name")
                 p['title'] = plugin_name
                 p['type'] = COMMAND
-                p['command'] = 'echo "running '+plugin_name+'..."; sleep 10'
+                p['command'] = 'python2.7 /data/template_parser.py '+plugin+' '+action
                 modes.append(p)
             except:
                 # if no name is provided, it doesn't get listed
                 pass
+        p = {}
+        p['title'] = "all"
+        p['type'] = COMMAND
+        p['command'] = 'python2.7 /data/template_parser.py plugins '+action
+        modes.append(p)
     except:
         print "unable to get the configuration of modes from the templates.\n"
 
@@ -103,8 +108,14 @@ menu_data = {
   'options':[
     { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option...',
       'options': [
-        { 'title': "Run", 'type': MENU, 'subtitle': '',
-          'options': run_plugins()
+        { 'title': "Start", 'type': MENU, 'subtitle': '',
+          'options': run_plugins("start")
+        },
+        { 'title': "Stop", 'type': MENU, 'subtitle': '',
+          'options': run_plugins("stop")
+        },
+        { 'title': "Status", 'type': MENU, 'subtitle': '',
+          'options': run_plugins("status")
         },
         { 'title': "Configure", 'type': MENU, 'subtitle': '',
           'options': update_plugins()
