@@ -121,10 +121,10 @@ menu_data = {
     },
     { 'title': "Visualization", 'type': MENU, 'subtitle': 'Please select an option...',
       'options': [
-        { 'title': "Start", 'type': COMMAND, 'command': '' },
-        { 'title': "Stop", 'type': COMMAND, 'command': '' },
-        { 'title': "Force rebuild visualization container", 'type': COMMAND, 'command': '/bin/sh /data/build_viz.sh --no-cache' },
-        { 'title': "Status", 'type': INFO, 'command': 'echo "Currently stopped."' },
+        { 'title': "Start", 'type': COMMAND, 'command': 'python2.7 /data/template_parser.py visualization start' },
+        { 'title': "Stop", 'type': COMMAND, 'command': 'python2.7 /data/template_parser.py visualization stop' },
+        { 'title': "Force rebuild visualization container(s)", 'type': COMMAND, 'command': '/bin/sh /data/build_viz.sh --no-cache' },
+        { 'title': "Status", 'type': INFO, 'command': 'python2.7 /data/template_parser.py visualization status' },
       ]
     },
     { 'title': "System Info", 'type': MENU, 'subtitle': '',

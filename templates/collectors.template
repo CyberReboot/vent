@@ -5,4 +5,4 @@ name = "collectors"
 schedule = {"all":"continuous"}
 
 [dns]
-run_command = ""
+Cmd = ""

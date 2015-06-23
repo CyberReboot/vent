@@ -5,4 +5,4 @@ name = "zero knowledge, active"
 schedule = {"all":"hourly"}
 
 [dns]
-command = ""
+Cmd = ""
