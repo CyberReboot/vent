@@ -53,7 +53,7 @@ def run_plugins(action):
         p = {}
         p['title'] = "all"
         p['type'] = COMMAND
-        p['command'] = 'python2.7 /data/template_parser.py plugins '+action
+        p['command'] = 'python2.7 /data/template_parser.py all '+action
         modes.append(p)
     except:
         print "unable to get the configuration of modes from the templates.\n"

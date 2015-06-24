@@ -9,4 +9,6 @@ if [ ! -f "/var/lib/boot2docker/bootlocal.sh" ]; then
 	docker load -i /data/management/vent-management.tar
 	echo $'Match User docker\n\tAllowTCPForwarding no\n\tX11Forwarding no\n\tForceCommand /data/wrapper.sh' >> /usr/local/etc/ssh/sshd_config
 	reboot
+else
+	docker run -d -v /mnt/sda1/var/lib/boot2docker/tls:/certs -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp vent-management
 fi
