@@ -12,10 +12,12 @@ plugins_dir = "/data/plugins/"
 def execute_template(template_type, template_execution, info_name, service_schedule, tool_dict):
     # note for plugin, also run collector
     # for visualization, make aware of where the data is
-    print info_name
-    print service_schedule
     try:
-        with open('/tmp/vent-'+template_execution+'.txt', 'a') as f:
+        # !! TODO consider creating a subdirectory
+        with open('/tmp/vent_'+template_execution+'.txt', 'a') as f:
+            f.write(info_name+"|")
+            json.dump(service_schedule, f)
+            f.write("|")
             json.dump(tool_dict, f)
             f.write("\n")
     except:
@@ -57,7 +59,7 @@ def read_template_types(template_type):
                             options = config.options(section)
                             for option in options:
                                 if section == "service" and option == "schedule":
-                                    service_schedule[plugin] = config.get(section, option)
+                                    service_schedule[plugin] = json.loads(config.get(section, option))
                         tool_dict[plugin+"-"+tool[plugin]] = []
                         instructions = {}
                         instructions['Image'] = plugin+'/'+tool[plugin]
@@ -75,7 +77,7 @@ def read_template_types(template_type):
                     if section == "info" and option == "name":
                         info_name = config.get(section, option)
                     elif section == "service" and option == "schedule":
-                        service_schedule[template_type] = config.get(section, option)
+                        service_schedule[template_type] = json.loads(config.get(section, option))
                     elif section != "info" and section != "service":
                         instructions[option] = config.get(section, option)
                 if template_type == "visualization" or template_type == "collectors":
@@ -85,7 +87,7 @@ def read_template_types(template_type):
                             tool_dict[template_type+"-"+section] = []
                         tool_dict[template_type+"-"+section].append(instructions)
         else:
-            info_name = "all"
+            info_name = "\"all\""
     except:
         pass
     return info_name, service_schedule, tool_dict
