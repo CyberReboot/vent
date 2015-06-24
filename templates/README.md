@@ -46,6 +46,8 @@ schedule = {"p0f":"continuous", "nmap":"5-minute"}
 
 ### Container run options
 
+***NOTE*** Content length for the total request can be no more than 1023.
+
 ```
     {
          "Hostname": "",
