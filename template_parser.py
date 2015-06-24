@@ -6,8 +6,8 @@ import os
 import sys
 import time
 
-template_dir = "/data/templates/"
-plugins_dir = "/data/plugins/"
+template_dir = "templates/"
+plugins_dir = "plugins/"
 
 def execute_template(template_type, template_execution, info_name, service_schedule, tool_dict):
     # note for plugin, also run collector
@@ -33,6 +33,8 @@ def read_template_types(template_type):
     try:
         if template_type != "visualization" and template_type != "collectors":
             config = ConfigParser.RawConfigParser()
+            # needed to preserve case sensitive options
+            config.optionxform=str
             config.read(template_dir+'modes.template')
             plugin_array = config.options("plugins")
             plugins = {}
@@ -60,14 +62,15 @@ def read_template_types(template_type):
                             for option in options:
                                 if section == "service" and option == "schedule":
                                     service_schedule[plugin] = json.loads(config.get(section, option))
-                        tool_dict[plugin+"-"+tool[plugin]] = []
                         instructions = {}
                         instructions['Image'] = plugin+'/'+tool[plugin]
-                        tool_dict[plugin+"-"+tool[plugin]].append(instructions)
+                        tool_dict[plugin+"-"+tool[plugin]] = instructions
 
         if template_type != "all":
             with open(template_path): pass
             config = ConfigParser.RawConfigParser()
+            # needed to preserve case sensitive options
+            config.optionxform=str
             config.read(template_path)
             sections = config.sections()
             for section in sections:
@@ -83,9 +86,7 @@ def read_template_types(template_type):
                 if template_type == "visualization" or template_type == "collectors":
                     if section != "info" and section != "service":
                         instructions['Image'] = template_type+'/'+section
-                        if not template_type+"-"+section in tool_dict:
-                            tool_dict[template_type+"-"+section] = []
-                        tool_dict[template_type+"-"+section].append(instructions)
+                        tool_dict[template_type+"-"+section] = instructions
         else:
             info_name = "\"all\""
     except:

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # loop forever
 # read in configuration of tools/settings
@@ -14,6 +14,7 @@
 # container_id=$(echo -e 'POST /containers/create?name=foo HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n{"Image":"redis"}' | nc -U /var/run/docker.sock | tail -1 | jq '.Id') && echo -e "POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n{}'" | nc -U /var/run/docker.sock
 
 #docker run -it -v /mnt/sda1/var/lib/boot2docker/tls:/certs -v /var/run/docker.sock:/var/run/docker.sock vent-management /bin/bash
+#container_id=$(echo -e 'POST /containers/create?name=foo HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n' | nc -U /var/run/docker.sock | tail -1 | jq '.Id') && echo -e "POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n{}'" | nc -U /var/run/docker.sock
 
 unset n
 sep='|'
@@ -23,13 +24,19 @@ while read -r line; do
   rest=${line#*"$sep"}
   second=${rest%%"$sep"*}
   last=${rest#*"$sep"}
-  echo
-  echo "first: $first"
-  echo
-  echo "second: $second"
-  echo
-  echo "last: $last"
-  echo
+  # first is name of mode/profile/type
+  # second is schedule for the mode/profile/type
+  # last is the image names and params to run them with
+  length=$(echo "$last" | jq -c -M '.[]' | wc -l)
+  i=0
+  while [ $i -lt $length ]; do
+    name="echo '$last' | jq 'keys' | jq -M '.[$i]'"
+    name=$(eval $name)
+    p="echo '$last' | jq -c -M '.$name'"
+    p=$(eval $p)
+    echo "$name: $p"
+    : $[i++]
+  done
   : $[n++]
 done < vent_start.txt
 sed -i "1,$n d" vent_start.txt

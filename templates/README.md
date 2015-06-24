@@ -42,3 +42,57 @@ name = "zero knowledge, active"
 [service]
 schedule = {"p0f":"continuous", "nmap":"5-minute"}
 ```
+
+### Container run options
+
+```
+    {
+         "Hostname": "",
+         "Domainname": "",
+         "User": "",
+         "Memory": 0,
+         "MemorySwap": 0,
+         "CpuShares": 512,
+         "Cpuset": "0,1",
+         "AttachStdin": false,
+         "AttachStdout": true,
+         "AttachStderr": true,
+         "Tty": false,
+         "OpenStdin": false,
+         "StdinOnce": false,
+         "Env": null,
+         "Cmd": [
+                 "date"
+         ],
+         "Entrypoint": "",
+         "Image": "ubuntu",
+         "Volumes": {
+                 "/tmp": {}
+         },
+         "WorkingDir": "",
+         "NetworkDisabled": false,
+         "MacAddress": "12:34:56:78:9a:bc",
+         "ExposedPorts": {
+                 "22/tcp": {}
+         },
+         "HostConfig": {
+           "Binds": ["/tmp:/tmp"],
+           "Links": ["redis3:redis"],
+           "LxcConf": {"lxc.utsname":"docker"},
+           "PortBindings": { "22/tcp": [{ "HostPort": "11022" }] },
+           "PublishAllPorts": false,
+           "Privileged": false,
+           "ReadonlyRootfs": false,
+           "Dns": ["8.8.8.8"],
+           "DnsSearch": [""],
+           "ExtraHosts": null,
+           "VolumesFrom": ["parent", "other:ro"],
+           "CapAdd": ["NET_ADMIN"],
+           "CapDrop": ["MKNOD"],
+           "RestartPolicy": { "Name": "", "MaximumRetryCount": 0 },
+           "NetworkMode": "bridge",
+           "Devices": []
+           "SecurityOpt": [""],
+        }
+    }
+```
