@@ -6,8 +6,8 @@ import os
 import sys
 import time
 
-template_dir = "templates/"
-plugins_dir = "plugins/"
+template_dir = "/data/templates/"
+plugins_dir = "/data/plugins/"
 
 def execute_template(template_type, template_execution, info_name, service_schedule, tool_dict):
     # note for plugin, also run collector
