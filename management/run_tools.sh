@@ -37,7 +37,13 @@ start_containers() {
       name=$(eval $name)
       p="echo '$last' | jq -c -M '.$name'"
       p=$(eval $p)
+      name=${name:1:${#name}-2}
       echo "$name: $p"
+      one="echo -e 'POST /containers/create?name=$name HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 1023\r\n\r\n$p'"
+      container_id=$(eval $one | nc -U /var/run/docker.sock | tail -1 | jq '.Id')
+      echo "$container_id"
+      two="echo -e \"POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n{}'\" | nc -U /var/run/docker.sock"
+      eval $two
       : $[i++]
     done
     : $[n++]
@@ -47,6 +53,14 @@ start_containers() {
     sed -i "1,$n d" /tmp/vent_start.txt
   fi
 
+}
+
+stop_containers() {
+  echo
+}
+
+status_containers() {
+  echo
 }
 
 while true; do
