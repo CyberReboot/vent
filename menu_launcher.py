@@ -103,59 +103,6 @@ def update_plugins():
         print "unable to get the configuration of modes from the templates.\n"
     return modes
 
-menu_data = {
-  'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
-  'options':[
-    { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option...',
-      'options': [
-        { 'title': "Start", 'type': MENU, 'subtitle': '',
-          'options': run_plugins("start")
-        },
-        { 'title': "Stop", 'type': MENU, 'subtitle': '',
-          'options': run_plugins("stop")
-        },
-        { 'title': "Status", 'type': MENU, 'subtitle': '',
-          'options': run_plugins("status")
-        },
-        { 'title': "Configure", 'type': MENU, 'subtitle': '',
-          'options': update_plugins()
-        }
-      ]
-    },
-    { 'title': "Settings", 'type': MENU, 'subtitle': 'Please select a setting to change...',
-      'options': [
-        { 'title': "Data", 'type': SETTING, 'command': '' },
-        { 'title': "Hostname", 'type': SETTING, 'command': '' },
-        { 'title': "IP Address", 'type': SETTING, 'command': '' },
-        { 'title': "SSH Keys", 'type': SETTING, 'command': '' },
-      ]
-    },
-    { 'title': "Visualization", 'type': MENU, 'subtitle': 'Please select an option...',
-      'options': [
-        { 'title': "Start", 'type': COMMAND, 'command': 'python2.7 /data/template_parser.py visualization start' },
-        { 'title': "Stop", 'type': COMMAND, 'command': 'python2.7 /data/template_parser.py visualization stop' },
-        { 'title': "Force rebuild visualization container(s)", 'type': COMMAND, 'command': '/bin/sh /data/build_viz.sh --no-cache' },
-        { 'title': "Status", 'type': INFO, 'command': 'python2.7 /data/template_parser.py visualization status' },
-      ]
-    },
-    { 'title': "System Info", 'type': MENU, 'subtitle': '',
-      'options': [
-        { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
-        { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
-      ]
-    },
-    { 'title': "Build", 'type': MENU, 'subtitle': '',
-      'options': [
-        { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins_collectors.sh' },
-        { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins_collectors.sh --no-cache' },
-      ]
-    },
-    { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
-    { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
-    { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
-  ]
-}
-
 def runmenu(menu, parent):
     if parent is None:
         lastoption = "Exit"
@@ -257,6 +204,63 @@ def processmenu(menu, parent=None):
         elif menu['options'][getin]['type'] == EXITMENU:
             exitmenu = True
 
-processmenu(menu_data)
-curses.endwin()
-os.system('clear')
+def main():
+    menu_data = {
+      'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
+      'options':[
+        { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option...',
+          'options': [
+            { 'title': "Start", 'type': MENU, 'subtitle': '',
+              'options': run_plugins("start")
+            },
+            { 'title': "Stop", 'type': MENU, 'subtitle': '',
+              'options': run_plugins("stop")
+            },
+            { 'title': "Status", 'type': MENU, 'subtitle': '',
+              'options': run_plugins("status")
+            },
+            { 'title': "Configure", 'type': MENU, 'subtitle': '',
+              'options': update_plugins()
+            }
+          ]
+        },
+        { 'title': "Settings", 'type': MENU, 'subtitle': 'Please select a setting to change...',
+          'options': [
+            { 'title': "Data", 'type': SETTING, 'command': '' },
+            { 'title': "Hostname", 'type': SETTING, 'command': '' },
+            { 'title': "IP Address", 'type': SETTING, 'command': '' },
+            { 'title': "SSH Keys", 'type': SETTING, 'command': '' },
+          ]
+        },
+        { 'title': "Visualization", 'type': MENU, 'subtitle': 'Please select an option...',
+          'options': [
+            { 'title': "Start", 'type': COMMAND, 'command': 'python2.7 /data/template_parser.py visualization start' },
+            { 'title': "Stop", 'type': COMMAND, 'command': 'python2.7 /data/template_parser.py visualization stop' },
+            { 'title': "Force rebuild visualization container(s)", 'type': COMMAND, 'command': '/bin/sh /data/build_viz.sh --no-cache' },
+            { 'title': "Status", 'type': INFO, 'command': 'python2.7 /data/template_parser.py visualization status' },
+          ]
+        },
+        { 'title': "System Info", 'type': MENU, 'subtitle': '',
+          'options': [
+            { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
+            { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
+          ]
+        },
+        { 'title': "Build", 'type': MENU, 'subtitle': '',
+          'options': [
+            { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins_collectors.sh' },
+            { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins_collectors.sh --no-cache' },
+          ]
+        },
+        { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
+        { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
+        { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
+      ]
+    }
+
+    processmenu(menu_data)
+    curses.endwin()
+    os.system('clear')
+
+if __name__ == "__main__":
+    main()
