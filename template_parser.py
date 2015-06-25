@@ -72,7 +72,13 @@ def read_template_types(template_type):
                                         service_schedule[plugin] = json.loads(config.get(section, option))
                                     elif section != "info" and section != "service":
                                         if section == tool[plugin]:
-                                            instructions[option] = config.get(section, option)
+                                            option_val = config.get(section, option)
+                                            # TODO should also check if array or dict
+                                            try:
+                                                option_val = int(option_val)
+                                            except:
+                                                pass
+                                            instructions[option] = option_val
                                             instructions['Image'] = plugin+'/'+tool[plugin]
                                             tool_dict[plugin+"-"+tool[plugin]] = instructions
                                 if not (plugin+"-"+tool[plugin]) in tool_dict:
@@ -99,7 +105,13 @@ def read_template_types(template_type):
                     elif section == "service" and option == "schedule":
                         service_schedule[template_type] = json.loads(config.get(section, option))
                     elif section != "info" and section != "service":
-                        instructions[option] = config.get(section, option)
+                        option_val = config.get(section, option)
+                        # TODO should also check if array or dict
+                        try:
+                            option_val = int(option_val)
+                        except:
+                            pass
+                        instructions[option] = option_val
                 if section != "info" and section != "service":
                     instructions['Image'] = template_type+'/'+section
                     tool_dict[template_type+"-"+section] = instructions
