@@ -4,5 +4,5 @@ name = "zero knowledge, active"
 [service]
 schedule = {"all":"hourly"}
 
-[dns]
-Cmd = ""
+[scan]
+Tty = true

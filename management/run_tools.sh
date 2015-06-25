@@ -73,6 +73,5 @@ while true; do
   if [ -f "/tmp/vent_status.txt" ]; then
     status_containers
   fi
-  echo "sleeping..."
   sleep 1
 done

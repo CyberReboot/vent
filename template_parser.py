@@ -38,8 +38,11 @@ def read_template_types(template_type):
             config.read(template_dir+'modes.template')
             plugin_array = config.options("plugins")
             plugins = {}
-            for plug in plugin_array:
-                plugins[plug] = config.get("plugins", plug)
+            if template_type == "all":
+                for plug in plugin_array:
+                    plugins[plug] = config.get("plugins", plug)
+            else:
+                plugins[template_type] = config.get("plugins", template_type)
 
             t = []
             for plugin in plugins:
@@ -52,19 +55,33 @@ def read_template_types(template_type):
                         t.append({plugin:tool})
 
             for tool in t:
-                for plugin in tool:
+                keys = list(set(tool.keys()))
+                for plugin in keys:
+                    config = ConfigParser.RawConfigParser()
+                    # needed to preserve case sensitive options
+                    config.optionxform=str
+                    config.read(template_dir+plugin+'.template')
+                    sections = config.sections()
                     if template_type == plugin or template_type == "all":
-                        config = ConfigParser.RawConfigParser()
-                        config.read(template_dir+plugin+'.template')
-                        sections = config.sections()
-                        for section in sections:
-                            options = config.options(section)
-                            for option in options:
-                                if section == "service" and option == "schedule":
-                                    service_schedule[plugin] = json.loads(config.get(section, option))
-                        instructions = {}
-                        instructions['Image'] = plugin+'/'+tool[plugin]
-                        tool_dict[plugin+"-"+tool[plugin]] = instructions
+                        if len(sections) > 0:
+                            for section in sections:
+                                instructions = {}
+                                options = config.options(section)
+                                for option in options:
+                                    if section == "service" and option == "schedule":
+                                        service_schedule[plugin] = json.loads(config.get(section, option))
+                                    elif section != "info" and section != "service":
+                                        if section == tool[plugin]:
+                                            instructions[option] = config.get(section, option)
+                                            instructions['Image'] = plugin+'/'+tool[plugin]
+                                            tool_dict[plugin+"-"+tool[plugin]] = instructions
+                                if not (plugin+"-"+tool[plugin]) in tool_dict:
+                                    instructions['Image'] = plugin+'/'+tool[plugin]
+                                    tool_dict[plugin+"-"+tool[plugin]] = instructions
+                        else:
+                            instructions = {}
+                            instructions['Image'] = plugin+'/'+tool[plugin]
+                            tool_dict[plugin+"-"+tool[plugin]] = instructions
 
         if template_type != "all":
             with open(template_path): pass
@@ -83,10 +100,9 @@ def read_template_types(template_type):
                         service_schedule[template_type] = json.loads(config.get(section, option))
                     elif section != "info" and section != "service":
                         instructions[option] = config.get(section, option)
-                if template_type == "visualization" or template_type == "collectors":
-                    if section != "info" and section != "service":
-                        instructions['Image'] = template_type+'/'+section
-                        tool_dict[template_type+"-"+section] = instructions
+                if section != "info" and section != "service":
+                    instructions['Image'] = template_type+'/'+section
+                    tool_dict[template_type+"-"+section] = instructions
         else:
             info_name = "\"all\""
     except:
