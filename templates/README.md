@@ -46,7 +46,7 @@ schedule = {"p0f":"continuous", "nmap":"5-minute"}
 
 ### Container run options
 
-***NOTE*** Content length for the total request can be no more than 1023. You also should never use a `\` as it will be stripped out.  Similarly, in order to properly parse, any `"[]"` will become `[]` and `"{}"` will become `{}` where the contents inside the brackets/curlies will remain unchanged
+***NOTE*** Content length for the total request can be no more than 1023. You also should never use a `\` as it will be stripped out.  Similarly, in order to properly parse, any `"[]"` will become `[]` and `"{}"` will become `{}` where the contents inside the brackets/curlies will remain unchanged.
 
 ```
     {
