@@ -73,7 +73,6 @@ def read_template_types(template_type):
                                     elif section != "info" and section != "service":
                                         if section == tool[plugin]:
                                             option_val = config.get(section, option)
-                                            # TODO should also check if array or dict
                                             try:
                                                 option_val = int(option_val)
                                             except:
@@ -106,7 +105,6 @@ def read_template_types(template_type):
                         service_schedule[template_type] = json.loads(config.get(section, option))
                     elif section != "info" and section != "service":
                         option_val = config.get(section, option)
-                        # TODO should also check if array or dict
                         try:
                             option_val = int(option_val)
                         except:

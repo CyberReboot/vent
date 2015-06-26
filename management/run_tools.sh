@@ -41,6 +41,11 @@ start_containers() {
       p=${p//\"false\"/false}
       p=${p//\"true\"/true}
       p=${p//\"null\"/null}
+      p="${p//\"\{/\{}"
+      p="${p//\}\"/\}}"
+      p="${p//\"\[/\[}"
+      p="${p//\]\"/\]}"
+      p=$(echo "$p" | sed 's/\\//g')
       echo "$name: $p"
       one="echo -e 'POST /containers/create?name=$name HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 1023\r\n\r\n$p'"
       container_id=$(eval $one | nc -U /var/run/docker.sock | tail -1 | jq '.Id')

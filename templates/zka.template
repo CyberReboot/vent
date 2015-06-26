@@ -6,5 +6,4 @@ schedule = {"all":"hourly"}
 
 [scan]
 Tty = true
-# !! TODO "{\"NetworkMode\":\"host\"}"
-#HostConfig = {"NetworkMode":"host"}
+HostConfig = {"NetworkMode":"host"}
