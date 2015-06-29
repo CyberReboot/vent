@@ -127,6 +127,8 @@ sub commit {
   $out = `$cmd`;
   $cmd = "cd /dns; mkdir -p dyn_data; cp $file dyn_data/; git add dyn_data/$file_parts[$#file_parts]; git commit -a -m \"update dns records\";";
   $out = `$cmd`;
+  $cmd = "zip -r dns.zip /dns && mv dns.zip /data/;";
+  $out = `$cmd`;
 }
 
 sub nslookup {

@@ -1,11 +1,11 @@
 FROM ubuntu:14.04.2
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-RUN apt-get update && apt-get install -y dnsutils git
+RUN apt-get update && apt-get install -y dnsutils git zip
 ADD . /dns
 
 WORKDIR /dns
-VOLUME /dns
+VOLUME /data
 
 ENTRYPOINT ["./list-servers.pl"]
 CMD ["-h"]

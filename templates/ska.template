@@ -1,0 +1,8 @@
+[info]
+name = "some knowledge, active"
+
+[service]
+schedule = {"all":"hourly"}
+
+#[dns]
+#Cmd = ["domain", "domain controller", "subnet prefix"]
