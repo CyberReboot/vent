@@ -79,13 +79,16 @@ def read_template_types(template_type):
                                                 pass
                                             instructions[option] = option_val
                                             instructions['Image'] = plugin+'/'+tool[plugin]
+                                            instructions['Volumes'] = {"/data": {}}
                                             tool_dict[plugin+"-"+tool[plugin]] = instructions
                                 if not (plugin+"-"+tool[plugin]) in tool_dict:
                                     instructions['Image'] = plugin+'/'+tool[plugin]
+                                    instructions['Volumes'] = {"/data": {}}
                                     tool_dict[plugin+"-"+tool[plugin]] = instructions
                         else:
                             instructions = {}
                             instructions['Image'] = plugin+'/'+tool[plugin]
+                            instructions['Volumes'] = {"/data": {}}
                             tool_dict[plugin+"-"+tool[plugin]] = instructions
 
         if template_type != "all":
@@ -112,6 +115,7 @@ def read_template_types(template_type):
                         instructions[option] = option_val
                 if section != "info" and section != "service":
                     instructions['Image'] = template_type+'/'+section
+                    instructions['Volumes'] = {"/data": {}}
                     tool_dict[template_type+"-"+section] = instructions
         else:
             info_name = "\"all\""
