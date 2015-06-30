@@ -34,6 +34,14 @@ def read_template_types(template_type):
     service_schedule = {}
     tool_collectors = {}
     tool_dict = {}
+
+    # special case for visualization
+    viz_instructions = {}
+    viz_instructions['Image'] = 'visualization/honeycomb'
+    viz_instructions['Volumes'] = {"/honeycomb-data": {}}
+    viz_instructions['HostConfig'] = {"PublishAllPorts": "true"}
+    tool_dict["visualization-honeycomb"] = viz_instructions
+
     try:
         if template_type != "visualization" and template_type != "collectors":
             config = ConfigParser.RawConfigParser()
@@ -66,7 +74,7 @@ def read_template_types(template_type):
                     config.optionxform=str
                     config.read(template_dir+plugin+'.template')
                     sections = config.sections()
-                    cmd = [tool[plugin]+"-data"]
+                    cmd = ["get_data.py", "/"+tool[plugin]+"-data"]
                     if template_type == plugin or template_type == "all":
                         if len(sections) > 0:
                             for section in sections:
@@ -84,13 +92,13 @@ def read_template_types(template_type):
                                             except:
                                                 pass
                                             if option == 'data_path':
-                                                if len(cmd) == 3:
+                                                if len(cmd) == 4:
                                                     cmd.insert(1, option_val)
                                                 else:
                                                     cmd.append(option_val)
                                                 d_path = 1
                                             elif option == 'site_path':
-                                                if len(cmd) == 1:
+                                                if len(cmd) == 2:
                                                     cmd.append("")
                                                     cmd.append(option_val)
                                                 else:
@@ -100,11 +108,12 @@ def read_template_types(template_type):
                                             instructions['Image'] = plugin+'/'+tool[plugin]
                                             instructions['Volumes'] = {"/"+tool[plugin]+"-data": {}}
                                             tool_dict[plugin+"-"+tool[plugin]] = instructions
-                                if d_path:
+                                if d_path == 1:
                                     collector_instructions['Image'] = "visualization/honeycomb"
                                     collector_instructions['Cmd'] = cmd
-                                    collector_instructions['HostConfig'] = {"VolumesFrom":[plugin+"-"+tool[plugin]]}
+                                    collector_instructions['HostConfig'] = {"VolumesFrom":[plugin+"-"+tool[plugin], 'visualization-honeycomb']}
                                     tool_collectors[plugin+"-"+tool[plugin]+"-collector"] = collector_instructions
+                                    d_path = 0
                                 if not (plugin+"-"+tool[plugin]) in tool_dict:
                                     instructions['Image'] = plugin+'/'+tool[plugin]
                                     instructions['Volumes'] = {"/"+tool[plugin]+"-data": {}}
@@ -125,6 +134,7 @@ def read_template_types(template_type):
             for section in sections:
                 instructions = {}
                 options = config.options(section)
+                cmd = ["get_data.py", "/"+section+"-data"]
                 for option in options:
                     if section == "info" and option == "name":
                         info_name = config.get(section, option)
@@ -137,24 +147,25 @@ def read_template_types(template_type):
                         except:
                             pass
                         if option == 'data_path':
-                            if len(cmd) == 3:
+                            if len(cmd) == 4:
                                 cmd.insert(1, option_val)
                             else:
                                 cmd.append(option_val)
                             d_path = 1
                         elif option == 'site_path':
-                            if len(cmd) == 1:
+                            if len(cmd) == 2:
                                 cmd.append("")
                                 cmd.append(option_val)
                             else:
                                 cmd.append(option_val)
                         else:
                             instructions[option] = option_val
-                if d_path:
+                if d_path == 1:
                     collector_instructions['Image'] = "visualization/honeycomb"
                     collector_instructions['Cmd'] = cmd
-                    collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section]}
+                    collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, 'visualization-honeycomb']}
                     tool_collectors[template_type+"-"+section+"-collector"] = collector_instructions
+                    d_path = 0
                 if section != "info" and section != "service":
                     instructions['Image'] = template_type+'/'+section
                     instructions['Volumes'] = {"/"+section+"-data": {}}

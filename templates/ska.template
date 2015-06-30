@@ -6,4 +6,4 @@ schedule = {"all":"hourly"}
 
 [dns]
 data_path = dyn_data/output.csv
-Cmd = ["b.internal", "b.internal", "10"]
+#Cmd = ["domain", "domain controller", "subnet prefix"]
