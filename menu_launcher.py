@@ -232,14 +232,6 @@ def main():
             { 'title': "SSH Keys", 'type': SETTING, 'command': '' },
           ]
         },
-        { 'title': "Visualization", 'type': MENU, 'subtitle': 'Please select an option...',
-          'options': [
-            { 'title': "Start", 'type': COMMAND, 'command': 'python2.7 /data/template_parser.py visualization start' },
-            { 'title': "Stop", 'type': COMMAND, 'command': 'python2.7 /data/template_parser.py visualization stop' },
-            { 'title': "Force rebuild visualization container(s)", 'type': COMMAND, 'command': '/bin/sh /data/build_viz.sh --no-cache' },
-            { 'title': "Status", 'type': INFO, 'command': 'python2.7 /data/template_parser.py visualization status' },
-          ]
-        },
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
           'options': [
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
@@ -248,8 +240,8 @@ def main():
         },
         { 'title': "Build", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins_collectors.sh' },
-            { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_plugins_collectors.sh --no-cache' },
+            { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh' },
+            { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh --no-cache' },
           ]
         },
         { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
