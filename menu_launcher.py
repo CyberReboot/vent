@@ -234,6 +234,7 @@ def main():
         },
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
           'options': [
+            { 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /data/visualization/get_url.sh' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
           ]
