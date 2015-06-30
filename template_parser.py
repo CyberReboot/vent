@@ -98,7 +98,7 @@ def read_template_types(template_type):
                                             else:
                                                 instructions[option] = option_val
                                             instructions['Image'] = plugin+'/'+tool[plugin]
-                                            instructions['Volumes'] = {"/"tool[plugin]+"-data": {}}
+                                            instructions['Volumes'] = {"/"+tool[plugin]+"-data": {}}
                                             tool_dict[plugin+"-"+tool[plugin]] = instructions
                                 if d_path:
                                     collector_instructions['Image'] = "visualization/honeycomb"
