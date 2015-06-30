@@ -9,7 +9,7 @@ import time
 template_dir = "/data/templates/"
 plugins_dir = "/data/plugins/"
 
-def execute_template(template_type, template_execution, info_name, service_schedule, tool_dict):
+def execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict):
     # note for plugin, also run collector
     # for visualization, make aware of where the data is
     try:
@@ -17,6 +17,8 @@ def execute_template(template_type, template_execution, info_name, service_sched
         with open('/tmp/vent_'+template_execution+'.txt', 'a') as f:
             f.write(info_name+"|")
             json.dump(service_schedule, f)
+            f.write("|")
+            json.dump(tool_collectors, f)
             f.write("|")
             json.dump(tool_dict, f)
             f.write("\n")
@@ -28,7 +30,9 @@ def read_template_types(template_type):
     # read in templates for plugins, collectors, and visualization
     template_path = template_dir+template_type+'.template'
     info_name = ""
+    d_path = 0
     service_schedule = {}
+    tool_collectors = {}
     tool_dict = {}
     try:
         if template_type != "visualization" and template_type != "collectors":
@@ -62,10 +66,12 @@ def read_template_types(template_type):
                     config.optionxform=str
                     config.read(template_dir+plugin+'.template')
                     sections = config.sections()
+                    cmd = [tool[plugin]+"-data"]
                     if template_type == plugin or template_type == "all":
                         if len(sections) > 0:
                             for section in sections:
                                 instructions = {}
+                                collector_instructions = {}
                                 options = config.options(section)
                                 for option in options:
                                     if section == "service" and option == "schedule":
@@ -77,18 +83,36 @@ def read_template_types(template_type):
                                                 option_val = int(option_val)
                                             except:
                                                 pass
-                                            instructions[option] = option_val
+                                            if option == 'data_path':
+                                                if len(cmd) == 3:
+                                                    cmd.insert(1, option_val)
+                                                else:
+                                                    cmd.append(option_val)
+                                                d_path = 1
+                                            elif option == 'site_path':
+                                                if len(cmd) == 1:
+                                                    cmd.append("")
+                                                    cmd.append(option_val)
+                                                else:
+                                                    cmd.append(option_val)
+                                            else:
+                                                instructions[option] = option_val
                                             instructions['Image'] = plugin+'/'+tool[plugin]
-                                            instructions['Volumes'] = {"/data": {}}
+                                            instructions['Volumes'] = {"/"tool[plugin]+"-data": {}}
                                             tool_dict[plugin+"-"+tool[plugin]] = instructions
+                                if d_path:
+                                    collector_instructions['Image'] = "visualization/honeycomb"
+                                    collector_instructions['Cmd'] = cmd
+                                    collector_instructions['HostConfig'] = {"VolumesFrom":[plugin+"-"+tool[plugin]]}
+                                    tool_collectors[plugin+"-"+tool[plugin]+"-collector"] = collector_instructions
                                 if not (plugin+"-"+tool[plugin]) in tool_dict:
                                     instructions['Image'] = plugin+'/'+tool[plugin]
-                                    instructions['Volumes'] = {"/data": {}}
+                                    instructions['Volumes'] = {"/"+tool[plugin]+"-data": {}}
                                     tool_dict[plugin+"-"+tool[plugin]] = instructions
                         else:
                             instructions = {}
                             instructions['Image'] = plugin+'/'+tool[plugin]
-                            instructions['Volumes'] = {"/data": {}}
+                            instructions['Volumes'] = {"/"+tool[plugin]+"-data": {}}
                             tool_dict[plugin+"-"+tool[plugin]] = instructions
 
         if template_type != "all":
@@ -112,16 +136,34 @@ def read_template_types(template_type):
                             option_val = int(option_val)
                         except:
                             pass
-                        instructions[option] = option_val
+                        if option == 'data_path':
+                            if len(cmd) == 3:
+                                cmd.insert(1, option_val)
+                            else:
+                                cmd.append(option_val)
+                            d_path = 1
+                        elif option == 'site_path':
+                            if len(cmd) == 1:
+                                cmd.append("")
+                                cmd.append(option_val)
+                            else:
+                                cmd.append(option_val)
+                        else:
+                            instructions[option] = option_val
+                if d_path:
+                    collector_instructions['Image'] = "visualization/honeycomb"
+                    collector_instructions['Cmd'] = cmd
+                    collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section]}
+                    tool_collectors[template_type+"-"+section+"-collector"] = collector_instructions
                 if section != "info" and section != "service":
                     instructions['Image'] = template_type+'/'+section
-                    instructions['Volumes'] = {"/data": {}}
+                    instructions['Volumes'] = {"/"+section+"-data": {}}
                     tool_dict[template_type+"-"+section] = instructions
         else:
             info_name = "\"all\""
     except:
         pass
-    return info_name, service_schedule, tool_dict
+    return info_name, service_schedule, tool_collectors, tool_dict
 
 def main():
     if len(sys.argv) < 3:
@@ -129,8 +171,8 @@ def main():
     else:
         template_type = sys.argv[1]
         template_execution = sys.argv[2]
-        info_name, service_schedule, tool_dict = read_template_types(template_type)
-        execute_template(template_type, template_execution, info_name, service_schedule, tool_dict)
+        info_name, service_schedule, tool_collectors, tool_dict = read_template_types(template_type)
+        execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict)
 
 if __name__ == "__main__":
     main()

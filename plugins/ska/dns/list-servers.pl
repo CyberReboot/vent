@@ -121,13 +121,11 @@ sub commit {
   @file_parts = split /\//, $file;
 
   # keep internal
-  $cmd = "cd /dns; git init;";
+  $cmd = "cd /dns-data; git init;";
   $out = `$cmd`;
-  $cmd = "cd /dns; git config user.name \"automated agent\"; git config user.email \"cyberreboot\@iqt.org\";";
+  $cmd = "cd /dns-data; git config user.name \"automated agent\"; git config user.email \"cyberreboot\@iqt.org\";";
   $out = `$cmd`;
-  $cmd = "cd /dns; mkdir -p dyn_data; cp $file dyn_data/; git add dyn_data/$file_parts[$#file_parts]; git commit -a -m \"update dns records\";";
-  $out = `$cmd`;
-  $cmd = "zip -r dns.zip /dns && mv dns.zip /data/;";
+  $cmd = "cd /dns-data; mkdir -p dyn_data; cp $file dyn_data/; git add dyn_data/$file_parts[$#file_parts]; git commit -a -m \"update dns records\";";
   $out = `$cmd`;
 }
 

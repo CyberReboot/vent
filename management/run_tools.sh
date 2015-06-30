@@ -26,9 +26,12 @@ start_containers() {
     first=${line%%"$sep"*}
     rest=${line#*"$sep"}
     second=${rest%%"$sep"*}
+    rest=${rest#*"$sep"}
+    third=${rest%%"$sep"*}
     last=${rest#*"$sep"}
     # first is name of mode/profile/type
     # second is schedule for the mode/profile/type
+    # third is the image names and params for collectors
     # last is the image names and params to run them with
     length=$(echo "$last" | jq -c -M '.[]' | wc -l)
     i=0
@@ -36,6 +39,31 @@ start_containers() {
       name="echo '$last' | jq 'keys' | jq -M '.[$i]'"
       name=$(eval $name)
       p="echo '$last' | jq -c -M '.$name'"
+      p=$(eval $p)
+      name=${name:1:${#name}-2}
+      p=${p//\"false\"/false}
+      p=${p//\"true\"/true}
+      p=${p//\"null\"/null}
+      p="${p//\"\{/\{}"
+      p="${p//\}\"/\}}"
+      p="${p//\"\[/\[}"
+      p="${p//\]\"/\]}"
+      p=$(echo "$p" | sed 's/\\//g')
+      echo "$name: $p"
+      one="echo -e 'POST /containers/create?name=$name HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 1023\r\n\r\n$p'"
+      container_id=$(eval $one | nc -U /var/run/docker.sock | tail -1 | jq '.Id')
+      echo "$container_id"
+      two="echo -e \"POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n{}'\" | nc -U /var/run/docker.sock"
+      eval $two
+      : $[i++]
+    done
+
+    length=$(echo "$third" | jq -c -M '.[]' | wc -l)
+    i=0
+    while [ $i -lt $length ]; do
+      name="echo '$third' | jq 'keys' | jq -M '.[$i]'"
+      name=$(eval $name)
+      p="echo '$third' | jq -c -M '.$name'"
       p=$(eval $p)
       name=${name:1:${#name}-2}
       p=${p//\"false\"/false}

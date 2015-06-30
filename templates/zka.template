@@ -1,5 +1,5 @@
 [info]
-name = "zero knowledge, active"
+name = zero knowledge, active
 
 [service]
 schedule = {"all":"hourly"}

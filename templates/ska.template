@@ -1,8 +1,9 @@
 [info]
-name = "some knowledge, active"
+name = some knowledge, active
 
 [service]
 schedule = {"all":"hourly"}
 
-#[dns]
-#Cmd = ["domain", "domain controller", "subnet prefix"]
+[dns]
+data_path = dyn_data/output.csv
+Cmd = ["b.internal", "b.internal", "10"]
