@@ -40,7 +40,7 @@ def read_template_types(template_type):
     viz_instructions['Image'] = 'visualization/honeycomb'
     viz_instructions['Volumes'] = {"/honeycomb-data": {}}
     viz_instructions['HostConfig'] = {"PublishAllPorts": "true"}
-    tool_dict["visualization-honeycomb"] = viz_instructions
+    tool_dict["1visualization-honeycomb"] = viz_instructions
 
     try:
         if template_type != "visualization" and template_type != "collectors":
@@ -111,7 +111,7 @@ def read_template_types(template_type):
                                 if d_path == 1:
                                     collector_instructions['Image'] = "visualization/honeycomb"
                                     collector_instructions['Cmd'] = cmd
-                                    collector_instructions['HostConfig'] = {"VolumesFrom":[plugin+"-"+tool[plugin], 'visualization-honeycomb']}
+                                    collector_instructions['HostConfig'] = {"VolumesFrom":[plugin+"-"+tool[plugin], '1visualization-honeycomb']}
                                     tool_collectors[plugin+"-"+tool[plugin]+"-collector"] = collector_instructions
                                     d_path = 0
                                 if not (plugin+"-"+tool[plugin]) in tool_dict:
@@ -163,7 +163,7 @@ def read_template_types(template_type):
                 if d_path == 1:
                     collector_instructions['Image'] = "visualization/honeycomb"
                     collector_instructions['Cmd'] = cmd
-                    collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, 'visualization-honeycomb']}
+                    collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, '1visualization-honeycomb']}
                     tool_collectors[template_type+"-"+section+"-collector"] = collector_instructions
                     d_path = 0
                 if section != "info" and section != "service":

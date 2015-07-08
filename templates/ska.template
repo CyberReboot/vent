@@ -6,4 +6,7 @@ schedule = {"all":"hourly"}
 
 [dns]
 data_path = dyn_data/output.csv
-#Cmd = ["domain", "domain controller", "subnet prefix"]
+Cmd = ["domain", "domain controller", "subnet prefix"]
+
+[nmap-protocol]
+HostConfig = {"VolumesFrom":["ska-dns", "1visualization-honeycomb"]}
