@@ -34,6 +34,8 @@ done } < $path
 flag=0
 ports=0
 cd /honeycomb-data/nmap-protocol-data
+awk '{print $0","}' $path
+sed -i '1s/$/,protocols/' $path
 for i in *.log; do
   protocols="${i%.*},\"["
   while read line
@@ -58,15 +60,16 @@ for i in *.log; do
   else
     protocols="$protocols]\""
   fi
+  echo "protocols: $protocols"
 
-  awk '{print $0","}' $path
-  sed -i '1s/$/protocols/' $path
   arr_protocol=(${protocols/,/ })
+  echo "array: $arr_protocol"
 
   COUNT=0
   while read -r li; do
       COUNT=$(( $COUNT + 1 ))
       if [[ $li == *"${i%.*}"* ]];then
+          echo "inside: $li"
           cmd="sed -i '$COUNTs/\$/${arr_protocols[1]}/' $path"
           eval $cmd
       fi
