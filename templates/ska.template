@@ -6,7 +6,7 @@ schedule = {"all":"hourly"}
 
 [dns]
 data_path = dyn_data/output.csv
-Cmd = ["domain", "domain controller", "subnet prefix"]
+Cmd = ["b.internal", "dev-vsrv-dc2.b.internal", "10"]
 
 [nmap-protocol]
-HostConfig = {"VolumesFrom":["ska-dns", "1visualization-honeycomb"]}
+HostConfig = {"Binds":["/tmp:/tmp", "/var/run/docker.sock:/var/run/docker.sock"], "VolumesFrom":["ska-dns", "1visualization-honeycomb"]}

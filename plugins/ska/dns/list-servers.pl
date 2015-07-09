@@ -49,7 +49,7 @@ sub gensmokeconfig {
 
   my $filename = '/tmp/output.csv';
   open(my $fh, '>', $filename) or die "Could not open file '$filename' $!";
-  print $fh "hostname,ip,subnet,additional_ips,additional_subnets\n";
+  print $fh "hostname,ip,subnet,additional_ips,additional_subnets,status\n";
 
   @keys = sort(keys(%{$d}));
   for($i = 0; $i <= $#keys; $i++) {
@@ -59,51 +59,53 @@ sub gensmokeconfig {
 
     $status = 1;
 
-    # TODO perhaps make this a flag?
     $status = ping($longname);
 
-    if($status) {
-      @ips = nslookup($longname);
-      print "$longname\n";
-      print $fh "$longname,";
-      $add_ips = "";
-      $add_subnets = "";
-      # what if no ip for the hostname?
-      for($j = 0; $j <= $#ips; $j++) {
-        # add ip andsubnet and additional ips/subnets
-        if($j == 0) {
-          @subnet_ip = split /\./, $ips[$j];
-          print $fh "$ips[$j],$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24,";
-        }
-        else {
-          $flag = 1;
-          if($j == 1) {
-            if($j == $#ips) {
-              @subnet_ip = split /\./, $ips[$j];
-              $add_ips = "\"[$ips[$j]]\"";
-              $add_subnets = "\"[$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24]\"";
-            }
-            else {
-              @subnet_ip = split /\./, $ips[$j];
-              $add_ips = "\"[$ips[$j],";
-              $add_subnets = "\"[$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24,";
-            }
-          }
-          elsif($j == $#ips) {
+    @ips = nslookup($longname);
+    print "$longname\n";
+    print $fh "$longname,";
+    $add_ips = "";
+    $add_subnets = "";
+    # what if no ip for the hostname?
+    for($j = 0; $j <= $#ips; $j++) {
+      # add ip and subnet and additional ips/subnets
+      if($j == 0) {
+        @subnet_ip = split /\./, $ips[$j];
+        print $fh "$ips[$j],$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24,";
+      }
+      else {
+        $flag = 1;
+        if($j == 1) {
+          if($j == $#ips) {
             @subnet_ip = split /\./, $ips[$j];
-            $add_ips .= "$ips[$j]]\"";
-            $add_subnets .= "$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24]\"";
+            $add_ips = "\"[$ips[$j]]\"";
+            $add_subnets = "\"[$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24]\"";
           }
           else {
             @subnet_ip = split /\./, $ips[$j];
-            $add_ips .= "$ips[$j],";
-            $add_subnets .= "$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24,";
+            $add_ips = "\"[$ips[$j],";
+            $add_subnets = "\"[$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24,";
           }
         }
+        elsif($j == $#ips) {
+          @subnet_ip = split /\./, $ips[$j];
+          $add_ips .= "$ips[$j]]\"";
+          $add_subnets .= "$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24]\"";
+        }
+        else {
+          @subnet_ip = split /\./, $ips[$j];
+          $add_ips .= "$ips[$j],";
+          $add_subnets .= "$subnet_ip[0].$subnet_ip[1].$subnet_ip[2].0/24,";
+        }
       }
-      print $fh "$add_ips,$add_subnets";
-      print $fh "\n";
     }
+    if($status) {
+      print $fh "$add_ips,$add_subnets,up";
+    }
+    else {
+      print $fh "$add_ips,$add_subnets,down";
+    }
+    print $fh "\n";
 
   }
   close $fh;

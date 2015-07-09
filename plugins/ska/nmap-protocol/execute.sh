@@ -9,6 +9,7 @@ do
 done
 
 sleep 5
+mkdir -p /honeycomb-data/nmap-protocol-data
 
 { read; while read line
 do
@@ -23,8 +24,8 @@ do
   two="echo -e \"POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n{}'\" | nc -U /var/run/docker.sock"
   eval $two
 
-  if [ "$count" -gt 5 ]; then
-    sleep 15
+  if [ "$count" -gt 10 ]; then
+    sleep 60
     count=0
   fi
   ((count++))
@@ -71,5 +72,8 @@ for i in *.log; do
       fi
   done < $path
 done
+
+cmd="cd /dns-data; git commit -a -m \"update dns records\";";
+eval $cmd;
 
 echo "done"
