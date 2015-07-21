@@ -25,24 +25,24 @@ do
   eval $two
 
   if [ "$count" -gt 10 ]; then
+    exists="echo -e 'GET /containers/json?all=1&filters={%22status%22:[%22exited%22]} HTTP/1.0\r\n\r\n'"
+    container_id=$(eval $exists | nc -U /var/run/docker.sock | tail -1 | jq '.[].Id')
+    echo "$container_id" | while read li; do remove="echo -e 'DELETE /containers/${li:1:${#li}-2} HTTP/1.0\r\n\r\n' | nc -U /var/run/docker.sock"; eval $remove; done
     sleep 60
     count=0
   fi
   ((count++))
 done } < $path
 
-flag=0
 ports=0
 cd /honeycomb-data/nmap-protocol-data
-awk '{print $0","}' $path
-sed -i '1s/$/,protocols/' $path
+sed -i 's/$/,/' $path
+sed -i '1s/$/protocols\n/' $path
+first="yes"
 for i in *.log; do
   protocols="${i%.*},\"["
   while read line
   do
-    if [ "$flag" -eq 6 ]; then
-      ports=1
-    fi
     if [ "$ports" -eq 1 ]; then
       if [ "$line" != "" ]; then
         csv=$(echo "$line"|awk -v OFS="," '$1=$1')
@@ -52,7 +52,9 @@ for i in *.log; do
         ports=0
       fi
     fi
-    ((flag++))
+    if [[ $line == PORT* ]]; then
+      ports=1
+    fi
   done < $i
   j=$((${#protocols}-1))
   if [ "${protocols:$j:1}" == "," ]; then
@@ -60,21 +62,26 @@ for i in *.log; do
   else
     protocols="$protocols]\""
   fi
-  echo "protocols: $protocols"
 
   arr_protocol=(${protocols/,/ })
-  echo "array: $arr_protocol"
+  shift;
+  bar=$(printf ",%s" "${arr_protocol[@]}")
+  bar=${bar:1}
 
-  COUNT=0
   while read -r li; do
-      COUNT=$(( $COUNT + 1 ))
-      if [[ $li == *"${i%.*}"* ]];then
-          echo "inside: $li"
-          cmd="sed -i '$COUNTs/\$/${arr_protocols[1]}/' $path"
-          eval $cmd
-      fi
+    if [ "$first" == "yes" ]; then
+      echo "$li" > $path.new
+      first="no"
+    fi
+    arr_li=(${li//,/ })
+    if [ "${arr_li[1]}" == "${bar[0]}" ]; then
+      echo "$li${bar[1]}" >> $path.new
+      break
+    fi
   done < $path
 done
+
+mv $path.new $path
 
 cmd="cd /dns-data; git commit -a -m \"update dns records\";";
 eval $cmd;
