@@ -37,7 +37,7 @@ done } < $path
 ports=0
 cd /honeycomb-data/nmap-protocol-data
 sed -i 's/$/,/' $path
-sed -i '1s/$/protocols\n/' $path
+sed -i '1s/$/protocol\n/' $path
 first="yes"
 for i in *.log; do
   protocols="${i%.*},\"["
@@ -47,7 +47,7 @@ for i in *.log; do
       if [ "$line" != "" ]; then
         csv=$(echo "$line"|awk -v OFS="," '$1=$1')
         arr_csv=(${csv//,/ })
-        protocols="$protocols{\\\"port\\\":\\\"${arr_csv[0]}\\\",\\\"state\\\":\\\"${arr_csv[1]}\\\",\\\"service\\\":\\\"${arr_csv[2]}\\\"},"
+        protocols="$protocols{port:${arr_csv[0]},state:${arr_csv[1]},service:${arr_csv[2]}},"
       else
         ports=0
       fi
@@ -64,9 +64,6 @@ for i in *.log; do
   fi
 
   arr_protocol=(${protocols/,/ })
-  shift;
-  bar=$(printf ",%s" "${arr_protocol[@]}")
-  bar=${bar:1}
 
   while read -r li; do
     if [ "$first" == "yes" ]; then
@@ -74,8 +71,8 @@ for i in *.log; do
       first="no"
     fi
     arr_li=(${li//,/ })
-    if [ "${arr_li[1]}" == "${bar[0]}" ]; then
-      echo "$li${bar[1]}" >> $path.new
+    if [ "${arr_li[1]}" == "${arr_protocol[0]}" ]; then
+      echo "$li${arr_protocol[1]}" >> $path.new
       break
     fi
   done < $path
@@ -85,5 +82,6 @@ mv $path.new $path
 
 cmd="cd /dns-data; git commit -a -m \"update dns records\";";
 eval $cmd;
+rm -rf /honeycomb-data/nmap-protocol-data
 
 echo "done"
