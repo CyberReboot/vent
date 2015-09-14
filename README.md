@@ -15,6 +15,7 @@ easy ways to build a VM out of the ISO
 ====
 
 XXX TODO - boot2docker cli is deprecated
+
 with boot2docker cli:
 
 ```
