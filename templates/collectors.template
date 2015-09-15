@@ -7,8 +7,8 @@ schedule = {"all":"continuous"}
 [elasticsearch]
 Name = elasticsearch
 
-[pcap_drop]
-Name = pcap_drop
+[pcap-drop]
+Name = pcap-drop
 
 [rabbitmq]
 Name = rabbitmq
