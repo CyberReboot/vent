@@ -3,3 +3,4 @@ domain = all
 hash = all
 ip = all
 mac = all
+collectors = all

@@ -2,8 +2,6 @@ FROM ubuntu:14.04.2
 # TODO consider using alpine instead
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-# should be run with --volumes-from to a container with a volume at /data
-
 RUN apt-get update && apt-get install -y build-essential \
                                          python-dev \
                                          python-setuptools \
@@ -11,13 +9,12 @@ RUN apt-get update && apt-get install -y build-essential \
                                          software-properties-common
 RUN easy_install pip
 ADD . /collector
-RUN pip install -r /collector/requirements.txt
+RUN pip install -r /pcap_drop/requirements.txt
 
-WORKDIR /collector
+WORKDIR /pcap_drop
 
-ENTRYPOINT ["/usr/bin/python", "/collector/collector.py"]
+ENTRYPOINT ["/usr/bin/python", "/pcap_drop/pcap_drop.py"]
 
-# volume to dir to watch
-# # cmd specify dir
+# volume dir to watch
+# cmd specify dir
 # CMD ["/data"]
-#

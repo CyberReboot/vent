@@ -1,15 +1,20 @@
 #!/bin/sh
 
-if [ ! -f "/var/lib/boot2docker/bootlocal.sh" ]; then
+if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
 	sudo /usr/local/etc/init.d/openssh stop
 	pgrep /usr/local/sbin/sshd | sudo xargs kill -9
 	mv /data/bootlocal.sh /var/lib/boot2docker/bootlocal.sh
 	chmod +x /var/lib/boot2docker/bootlocal.sh
 	mv /data/profile /var/lib/boot2docker/profile
-	docker load -i /data/management/vent-management.tar
+	sudo /etc/init.d/docker restart && docker load -i /data/management/vent-management.tar
 	echo $'Match User docker\n\tAllowTCPForwarding no\n\tX11Forwarding no\n\tForceCommand /data/wrapper.sh' >> /usr/local/etc/ssh/sshd_config
+	touch /var/lib/boot2docker/vent.sh
 	reboot
 else
+	image_exists=$(docker images -q vent-management | wc -l)
+	if [ "$image_exists" == "0" ]; then
+		docker load -i /data/management/vent-management.tar
+	fi
 	exists=$(docker ps -aq --filter name=vent-management | wc -l)
 	if [ "$exists" == "1" ]; then
 		docker start vent-management

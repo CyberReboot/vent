@@ -4,5 +4,21 @@ name = "collectors"
 [service]
 schedule = {"all":"continuous"}
 
-[dns]
-Cmd = ""
+[elasticsearch]
+Name = elasticsearch
+
+[pcap_drop]
+Name = pcap_drop
+
+[rabbitmq]
+Name = rabbitmq
+
+[redis]
+Name = redis
+
+[rq-dashboard]
+Name = rq-dashboard
+
+[rq-worker]
+Name = rq-worker
+

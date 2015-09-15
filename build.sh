@@ -17,7 +17,7 @@ cd -
 cd management
 echo "building vent-management..."
 if [ "$1" == "--no-cache" ]; then
-    docker build --no-cache -t vent .
+    docker build --no-cache -t vent-management .
 else
     docker build -t vent-management .
 fi
