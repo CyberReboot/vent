@@ -1,1 +1,0 @@
-zero knowledge, passive

@@ -1,6 +1,5 @@
 [plugins]
-lkw = all
-ska = all
-skp = all
-zka = all
-zkp = all
+domain = all
+hash = all
+ip = all
+mac = all

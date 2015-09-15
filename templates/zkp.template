@@ -1,5 +1,0 @@
-[info]
-name = zero knowledge, passive
-
-[service]
-schedule = {"p0f":"continuous", "nmap":"5-minute"}
