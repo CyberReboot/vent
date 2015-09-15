@@ -9,6 +9,7 @@ Name = elasticsearch
 
 [pcap-drop]
 Name = pcap-drop
+HostConfig = {"Binds": ["/data:/data"]}
 
 [rabbitmq]
 Name = rabbitmq

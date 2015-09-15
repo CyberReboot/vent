@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y build-essential \
                                          python-software-properties \
                                          software-properties-common
 RUN easy_install pip
-ADD . /collector
-RUN pip install -r /pcap_drop/requirements.txt
+ADD . /pcap-drop
+RUN pip install -r /pcap-drop/requirements.txt
 
-WORKDIR /pcap_drop
+WORKDIR /pcap-drop
 
-ENTRYPOINT ["/usr/bin/python", "/pcap_drop/pcap_drop.py"]
+ENTRYPOINT ["/usr/bin/python", "/pcap-drop/pcap_drop.py"]
 
 # volume dir to watch
 # cmd specify dir
