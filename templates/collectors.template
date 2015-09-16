@@ -4,22 +4,17 @@ name = "collectors"
 [service]
 schedule = {"all":"continuous"}
 
-[elasticsearch]
-Name = elasticsearch
-
 [pcap-drop]
-Name = pcap-drop
 HostConfig = {"Binds": ["/data:/data"]}
 
+[elasticsearch]
+
 [rabbitmq]
-Name = rabbitmq
 
 [redis]
-Name = redis
-
-[rq-dashboard]
-Name = rq-dashboard
 
 [rq-worker]
-Name = rq-worker
 
+[rq-dashboard]
+Env = ["REMOTE_REDIS_HOST=redis"]
+HostConfig = {"Links": ["collectors-redis:redis"], "PublishAllPorts": true}
