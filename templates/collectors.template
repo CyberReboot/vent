@@ -5,7 +5,7 @@ name = Collectors
 schedule = {"all":"continuous"}
 
 [pcap-drop]
-HostConfig = {"Binds": ["/data:/data"], "Links": ["collectors-a-redis:redis"]}
+HostConfig = {"Binds": ["/pcaps:/pcaps"], "Links": ["collectors-a-redis:redis"]}
 
 [a-redis]
 

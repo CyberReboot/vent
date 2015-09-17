@@ -1,5 +1,7 @@
 #!/bin/sh
 
+mkdir -p /pcaps
+
 if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
 	sudo /usr/local/etc/init.d/openssh stop
 	pgrep /usr/local/sbin/sshd | sudo xargs kill -9

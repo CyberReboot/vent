@@ -1,6 +1,2 @@
 [plugins]
-domain = none
-hash = none
-ip = none
-mac = none
 collectors = all

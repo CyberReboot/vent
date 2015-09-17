@@ -33,7 +33,7 @@ if __name__ == '__main__':
         args = sys.argv[1:]
 
     observer = Observer()
-    observer.schedule(GZHandler(), path=args[0] if args else '/data')
+    observer.schedule(GZHandler(), path=args[0] if args else '/pcaps')
     observer.start()
 
     try:

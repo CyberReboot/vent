@@ -51,6 +51,13 @@ if using docker-machine cli to provision:
 XXX TODO
 ```
 
+FAQ
+====
+
+Q: I went into the shell and did a `docker ps` but no containers are running, how do I get it working again?
+
+A: execute `/data/custom`, if that doesn't work, restart the VM.
+
 ### The following notes mirror that of [boot2docker](https://github.com/boot2docker/boot2docker)
 
 #### Docker daemon options
