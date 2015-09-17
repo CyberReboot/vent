@@ -1,6 +1,8 @@
 import sys
 import time
 
+from redis import Redis
+from rq import Queue
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
@@ -19,6 +21,8 @@ class GZHandler(PatternMatchingEventHandler):
         """
         if event.event_type == "created":
             print event.src_path
+            q = Queue(connection=Redis(host="redis"))
+            result = q.enqueue('pcap_drop.pcap_queue', event.src_path)
 
     def on_created(self, event):
         self.process(event)

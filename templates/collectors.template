@@ -1,22 +1,22 @@
 [info]
-name = "collectors"
+name = Collectors
 
 [service]
 schedule = {"all":"continuous"}
 
 [pcap-drop]
-HostConfig = {"Binds": ["/data:/data"]}
+HostConfig = {"Binds": ["/data:/data"], "Links": ["collectors-a-redis:redis"]}
+
+[a-redis]
 
 [elasticsearch]
 
 [rabbitmq]
 
-[redis]
-
 [rq-worker]
 Env = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
-HostConfig = {"Links": ["collectors-redis:redis"]}
+HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock"], "Links": ["collectors-a-redis:redis"]}
 
 [rq-dashboard]
 Env = ["REMOTE_REDIS_HOST=redis"]
-HostConfig = {"Links": ["collectors-redis:redis"], "PublishAllPorts": true}
+HostConfig = {"Links": ["collectors-a-redis:redis"], "PublishAllPorts": true}
