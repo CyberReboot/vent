@@ -10,6 +10,11 @@ HostConfig = {"Binds": ["/pcaps:/pcaps"], "Links": ["collectors-a-redis:redis"]}
 [a-redis]
 
 [elasticsearch]
+HostConfig = {"PublishAllPorts": true}
+
+[rmq-es-connector]
+Cmd = #
+HostConfig = {"Links": ["collectors-rabbitmq:rabbitmq", "collectors-elasticsearch:elasticsearch"]}
 
 [rabbitmq]
 
