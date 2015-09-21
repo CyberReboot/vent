@@ -5,6 +5,7 @@ name = Collectors
 schedule = {"all":"continuous"}
 
 [pcap-drop]
+Env = ["PYTHONUNBUFFERED=0"]
 HostConfig = {"Binds": ["/pcaps:/pcaps"], "Links": ["collectors-a-redis:redis"]}
 
 [a-redis]
@@ -14,6 +15,7 @@ HostConfig = {"PublishAllPorts": true}
 
 [rmq-es-connector]
 Cmd = #
+Env = ["PYTHONUNBUFFERED=0"]
 HostConfig = {"Links": ["collectors-rabbitmq:rabbitmq", "collectors-elasticsearch:elasticsearch"]}
 
 [rabbitmq]

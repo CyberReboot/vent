@@ -3,4 +3,3 @@ name = IP Addresses and Ports
 
 [service]
 schedule = {"all":"hourly"}
-

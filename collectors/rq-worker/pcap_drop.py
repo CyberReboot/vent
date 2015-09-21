@@ -4,6 +4,6 @@ def pcap_queue(path):
     c = Client(base_url='unix://var/run/docker.sock')
     # !! TODO check modes for which plugins to enable
     # !! TODO for plugin, create container and start it
-    container = c.create_container(image='ip/tshark', volumes=["/pcaps"], command=path)
+    container = c.create_container(image='ip/tshark', volumes=["/pcaps"], environment=["PYTHONUNBUFFERED=0"], tty=True, stdin_open=True, command=path)
     response = c.start(container=container.get('Id'), binds=["/pcaps:/pcaps:ro"], links={"collectors-rabbitmq":"rabbitmq"})
     return response

@@ -17,14 +17,13 @@ def connections():
 
         channel.exchange_declare(exchange='topic_recs',
                                  type='topic')
-
-        routing_key = "pcap"+sys.argv[1].replace("/", ".")
     except:
         print "unable to connect to rabbitmq, quitting."
         sys.exit()
     return path, channel, connection
 
 def run_tool(path, channel):
+    routing_key = "pcap"+sys.argv[1].replace("/", ".")
     output = subprocess.Popen('tshark -r '+path+' -T fields -e frame.time -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport | sort | uniq',
                               shell=True, stdout=subprocess.PIPE)
     text = output.communicate()[0]
