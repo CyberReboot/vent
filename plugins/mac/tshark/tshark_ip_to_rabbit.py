@@ -4,13 +4,15 @@ import subprocess
 import sys
 import time
 
-def connections():
+def get_path():
     try:
         path = sys.argv[1]
     except:
         print "no path provided, quitting."
         sys.exit()
+    return path
 
+def connections():
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
             host='rabbitmq'))
@@ -21,15 +23,16 @@ def connections():
     except:
         print "unable to connect to rabbitmq, quitting."
         sys.exit()
-    return path, channel, connection
+    return channel, connection
 
-def run_tool(path, channel):
+def run_tool(path):
     routing_key = "mac"+sys.argv[1].replace("/", ".")
     start_time = 0
     get_start_time = subprocess.Popen('tshark -r '+path+' -c 1 -T fields -e frame.time',
                               shell=True, stdout=subprocess.PIPE)
     start_time = get_start_time.communicate()[0]
-    subprocess.Popen('/bin/bash tshark.sh '+path, shell=True, stdout=subprocess.PIPE).wait()
+    subprocess.Popen('/bin/bash tshark.sh src '+path, shell=True, stdout=subprocess.PIPE).wait()
+    subprocess.Popen('/bin/bash tshark.sh dst '+path, shell=True, stdout=subprocess.PIPE).wait()
 
     print "processing frame count..."
     frame_number = -1
@@ -49,7 +52,7 @@ def run_tool(path, channel):
     # parse tshark output by tabs and newline
     #
     # expecting:
-    # packet_count<space>src_ip<tab>dst_ip<tab>src_port<tab>dst_port<newline>
+    # packet_count<space>ip<tab>eth<newline>
     # last line will not have a newline
     #
 
@@ -57,8 +60,9 @@ def run_tool(path, channel):
     while end_time == 0:
         time.sleep(1)
 
+    channel, connection = connections()
     print "sending pcap results..."
-    with open('/tmp/results.out', 'r') as f:
+    with open('/tmp/results_src.out', 'r') as f:
         for rec in f:
             data = {}
             rec = rec.lstrip()
@@ -68,10 +72,8 @@ def run_tool(path, channel):
                 data["packet_count"] = count[0].strip()
                 data["frame_start_range"] = start_time.strip()
                 data["frame_end_range"] = end_time.strip()
-                data["src_ip"] = fields[0].strip()
-                data["dst_ip"] = fields[1].strip()
-                data["src_eth"] = fields[2].strip()
-                data["dst_eth"] = fields[3].strip()
+                data["ip"] = fields[0].strip()
+                data["eth"] = fields[1].strip()
                 message = str(data)
                 channel.basic_publish(exchange='topic_recs',
                                       routing_key=routing_key,
@@ -80,10 +82,30 @@ def run_tool(path, channel):
             except:
                 pass
 
-if __name__ == '__main__':
-    path, channel, connection = connections()
-    run_tool(path, channel)
+    with open('/tmp/results_dst.out', 'r') as f:
+        for rec in f:
+            data = {}
+            rec = rec.lstrip()
+            count = rec.split(" ", 1)
+            fields = count[1].split("\t")
+            try:
+                data["packet_count"] = count[0].strip()
+                data["frame_start_range"] = start_time.strip()
+                data["frame_end_range"] = end_time.strip()
+                data["ip"] = fields[0].strip()
+                data["eth"] = fields[1].strip()
+                message = str(data)
+                channel.basic_publish(exchange='topic_recs',
+                                      routing_key=routing_key,
+                                      body=message)
+                print " [x] Sent %r:%r" % (routing_key, message)
+            except:
+                pass
     try:
         connection.close()
     except:
         pass
+
+if __name__ == '__main__':
+    path = get_path()
+    run_tool(path)

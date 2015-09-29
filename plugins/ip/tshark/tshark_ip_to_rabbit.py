@@ -4,13 +4,15 @@ import subprocess
 import sys
 import time
 
-def connections():
+def get_path():
     try:
         path = sys.argv[1]
     except:
         print "no path provided, quitting."
         sys.exit()
+    return path
 
+def connections():
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters(
             host='rabbitmq'))
@@ -21,9 +23,9 @@ def connections():
     except:
         print "unable to connect to rabbitmq, quitting."
         sys.exit()
-    return path, channel, connection
+    return channel, connection
 
-def run_tool(path, channel):
+def run_tool(path):
     routing_key = "ip"+sys.argv[1].replace("/", ".")
     start_time = 0
     get_start_time = subprocess.Popen('tshark -r '+path+' -c 1 -T fields -e frame.time',
@@ -57,6 +59,7 @@ def run_tool(path, channel):
     while end_time == 0:
         time.sleep(1)
 
+    channel, connection = connections()
     print "sending pcap results..."
     with open('/tmp/results.out', 'r') as f:
         for rec in f:
@@ -79,11 +82,11 @@ def run_tool(path, channel):
                 print " [x] Sent %r:%r" % (routing_key, message)
             except:
                 pass
-
-if __name__ == '__main__':
-    path, channel, connection = connections()
-    run_tool(path, channel)
     try:
         connection.close()
     except:
         pass
+
+if __name__ == '__main__':
+    path = get_path()
+    run_tool(path)
