@@ -61,17 +61,17 @@ def run_tool(path, channel):
     with open('/tmp/results.out', 'r') as f:
         for rec in f:
             data = {}
-            rec = rec.strip()
+            rec = rec.lstrip()
             count = rec.split(" ", 1)
             fields = count[1].split("\t")
             try:
-                data["packet_count"] = count[0]
+                data["packet_count"] = count[0].strip()
                 data["frame_start_range"] = start_time.strip()
                 data["frame_end_range"] = end_time.strip()
-                data["src_ip"] = fields[0]
-                data["dst_ip"] = fields[1]
-                data["src_port"] = fields[2]
-                data["dst_port"] = fields[3]
+                data["src_ip"] = fields[0].strip()
+                data["dst_ip"] = fields[1].strip()
+                data["src_port"] = fields[2].strip()
+                data["dst_port"] = fields[3].strip()
                 message = str(data)
                 channel.basic_publish(exchange='topic_recs',
                                       routing_key=routing_key,
