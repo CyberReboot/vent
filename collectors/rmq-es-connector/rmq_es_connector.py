@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+import ast
 import datetime
 import pika
 import sys
 import time
+import uuid
 
 from elasticsearch import Elasticsearch
 
@@ -17,6 +19,7 @@ while wait:
 
         result = channel.queue_declare(exclusive=True)
         queue_name = result.method.queue
+        es = Elasticsearch(['elasticsearch'])
         wait = False
         print "connected to rabbitmq..."
     except:
@@ -37,7 +40,9 @@ for binding_key in binding_keys:
 print ' [*] Waiting for logs. To exit press CTRL+C'
 
 def callback(ch, method, properties, body):
-    # !! TODO send to elasticsearch index
+    # send to elasticsearch index
+    doc = ast.literal_eval(body)
+    res = es.index(index="pcap", doc_type="ip", id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
     print " [x] "+str(datetime.datetime.utcnow())+" UTC %r:%r" % (method.routing_key, body,)
 
 channel.basic_consume(callback,

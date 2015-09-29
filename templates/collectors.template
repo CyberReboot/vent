@@ -19,6 +19,7 @@ Env = ["PYTHONUNBUFFERED=0"]
 HostConfig = {"Links": ["collectors-rabbitmq:rabbitmq", "collectors-elasticsearch:elasticsearch"]}
 
 [rabbitmq]
+HostConfig = {"PublishAllPorts": true}
 
 [rq-worker]
 Env = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]

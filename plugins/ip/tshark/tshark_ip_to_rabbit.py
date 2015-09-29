@@ -2,6 +2,7 @@ import os
 import pika
 import subprocess
 import sys
+import time
 
 def connections():
     try:
@@ -24,35 +25,60 @@ def connections():
 
 def run_tool(path, channel):
     routing_key = "pcap"+sys.argv[1].replace("/", ".")
-    output = subprocess.Popen('tshark -r '+path+' -T fields -e frame.time -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport | sort | uniq',
+    start_time = 0
+    get_start_time = subprocess.Popen('tshark -r '+path+' -c 1 -T fields -e frame.time',
                               shell=True, stdout=subprocess.PIPE)
-    text = output.communicate()[0]
+    start_time = get_start_time.communicate()[0]
+    subprocess.Popen('/bin/bash tshark.sh '+path, shell=True, stdout=subprocess.PIPE).wait()
+
+    print "processing frame count..."
+    frame_number = -1
+    while frame_number == -1:
+        try:
+            with open('/tmp/count.out', 'r') as f:
+                frame_number = f.readline().strip()
+        except:
+            pass
+        time.sleep(1)
+
+    end_time = 0
+    get_end_time = subprocess.Popen('tshark -r '+path+' -Y frame.number=='+frame_number+' -T fields -e frame.time',
+                                    shell=True, stdout=subprocess.PIPE)
+    end_time = get_end_time.communicate()[0]
 
     # parse tshark output by tabs and newline
     #
     # expecting:
-    # frame_time<tab>src_ip<tab>dst_ip<tab>src_port<tab>dst_port<newline>
+    # packet_count<space>src_ip<tab>dst_ip<tab>src_port<tab>dst_port<newline>
     # last line will not have a newline
     #
 
-    recs = text.split("\n")
-    for rec in recs:
-        data = {}
-        fields = rec.split("\t")
-        try:
-            data["frame_time"] = fields[0]
-            data["src_ip"] = fields[1]
-            data["dst_ip"] = fields[2]
-            data["src_port"] = fields[3]
-            data["dst_port"] = fields[4]
-            message = str(data)
-            channel.basic_publish(exchange='topic_recs',
-                                  routing_key=routing_key,
-                                  body=message)
-            print " [x] Sent %r:%r" % (routing_key, message)
-        except:
-            pass
+    print "processing pcap results..."
+    while end_time == 0:
+        time.sleep(1)
 
+    print "sending pcap results..."
+    with open('/tmp/results.out', 'r') as f:
+        for rec in f:
+            data = {}
+            rec = rec.strip()
+            count = rec.split(" ", 1)
+            fields = count[1].split("\t")
+            try:
+                data["packet_count"] = count[0]
+                data["frame_start_range"] = start_time.strip()
+                data["frame_end_range"] = end_time.strip()
+                data["src_ip"] = fields[0]
+                data["dst_ip"] = fields[1]
+                data["src_port"] = fields[2]
+                data["dst_port"] = fields[3]
+                message = str(data)
+                channel.basic_publish(exchange='topic_recs',
+                                      routing_key=routing_key,
+                                      body=message)
+                print " [x] Sent %r:%r" % (routing_key, message)
+            except:
+                pass
 
 if __name__ == '__main__':
     path, channel, connection = connections()
