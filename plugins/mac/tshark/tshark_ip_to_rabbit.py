@@ -24,7 +24,7 @@ def connections():
     return path, channel, connection
 
 def run_tool(path, channel):
-    routing_key = "ip"+sys.argv[1].replace("/", ".")
+    routing_key = "mac"+sys.argv[1].replace("/", ".")
     start_time = 0
     get_start_time = subprocess.Popen('tshark -r '+path+' -c 1 -T fields -e frame.time',
                               shell=True, stdout=subprocess.PIPE)
@@ -70,8 +70,8 @@ def run_tool(path, channel):
                 data["frame_end_range"] = end_time.strip()
                 data["src_ip"] = fields[0].strip()
                 data["dst_ip"] = fields[1].strip()
-                data["src_port"] = fields[2].strip()
-                data["dst_port"] = fields[3].strip()
+                data["src_eth"] = fields[2].strip()
+                data["dst_eth"] = fields[3].strip()
                 message = str(data)
                 channel.basic_publish(exchange='topic_recs',
                                       routing_key=routing_key,
