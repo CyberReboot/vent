@@ -6,7 +6,7 @@ schedule = {"all":"continuous"}
 
 [pcap-drop]
 Env = ["PYTHONUNBUFFERED=0"]
-HostConfig = {"Binds": ["/pcaps:/pcaps"], "Links": ["collectors-a-redis:redis"]}
+HostConfig = {"Binds": ["/pcaps:/pcaps:ro"], "Links": ["collectors-a-redis:redis"]}
 
 [a-redis]
 
@@ -23,7 +23,7 @@ HostConfig = {"PublishAllPorts": true}
 
 [rq-worker]
 Env = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
-HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock"], "Links": ["collectors-a-redis:redis"]}
+HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock", "/data:/data:ro"], "Links": ["collectors-a-redis:redis"]}
 
 [rq-dashboard]
 Env = ["REMOTE_REDIS_HOST=redis"]
