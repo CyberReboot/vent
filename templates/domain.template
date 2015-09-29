@@ -1,0 +1,5 @@
+[info]
+name = Domains Queried
+
+[service]
+schedule = {"all":"hourly"}

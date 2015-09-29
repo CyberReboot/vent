@@ -1,6 +1,2 @@
 [plugins]
-lkw = all
-ska = all
-skp = all
-zka = all
-zkp = all
+collectors = all

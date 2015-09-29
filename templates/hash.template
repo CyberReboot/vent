@@ -1,0 +1,6 @@
+[info]
+name = Hashes (MD5) of Binary Files
+
+[service]
+schedule = {"all":"hourly"}
+

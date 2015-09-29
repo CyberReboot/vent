@@ -1,4 +1,4 @@
-FROM tatsushid/tinycore:6.2-x86_64
+FROM tatsushid/tinycore:6.3-x86_64
 
 # Instructions are run with 'tc' user
 
@@ -25,7 +25,7 @@ RUN tce-load -wic \
         make \
         linux-3.16.2_api_headers \
         glibc_base-dev \
-        openssl-1.0.0-dev \
+        openssl-dev \
         gdbm-dev \
         ncurses-dev \
         readline-dev \

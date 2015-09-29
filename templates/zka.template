@@ -1,9 +1,0 @@
-[info]
-name = zero knowledge, active
-
-[service]
-schedule = {"all":"hourly"}
-
-[scan]
-Tty = true
-HostConfig = {"NetworkMode":"host"}

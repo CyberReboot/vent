@@ -1,8 +1,30 @@
 [info]
-name = "collectors"
+name = Collectors
 
 [service]
 schedule = {"all":"continuous"}
 
-[dns]
-Cmd = ""
+[pcap-drop]
+Env = ["PYTHONUNBUFFERED=0"]
+HostConfig = {"Binds": ["/pcaps:/pcaps"], "Links": ["collectors-a-redis:redis"]}
+
+[a-redis]
+
+[elasticsearch]
+HostConfig = {"PublishAllPorts": true}
+
+[rmq-es-connector]
+Cmd = #
+Env = ["PYTHONUNBUFFERED=0"]
+HostConfig = {"Links": ["collectors-rabbitmq:rabbitmq", "collectors-elasticsearch:elasticsearch"]}
+
+[rabbitmq]
+HostConfig = {"PublishAllPorts": true}
+
+[rq-worker]
+Env = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
+HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock"], "Links": ["collectors-a-redis:redis"]}
+
+[rq-dashboard]
+Env = ["REMOTE_REDIS_HOST=redis"]
+HostConfig = {"Links": ["collectors-a-redis:redis"], "PublishAllPorts": true}
