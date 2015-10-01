@@ -1,5 +1,5 @@
 [info]
-name = "visualization"
+name = Visualization
 
 [service]
 schedule = {"all":"continuous"}

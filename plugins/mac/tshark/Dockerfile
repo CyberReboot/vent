@@ -5,8 +5,8 @@ RUN apt-get update && apt-get install -y python-pip tshark
 
 ADD requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-ADD tshark_ip_to_rabbit.py tshark_ip_to_rabbit.py
+ADD tshark_mac_to_rabbit.py tshark_mac_to_rabbit.py
 ADD tshark.sh tshark.sh
 
-ENTRYPOINT ["python", "tshark_ip_to_rabbit.py"]
+ENTRYPOINT ["python", "tshark_mac_to_rabbit.py"]
 CMD [""]
