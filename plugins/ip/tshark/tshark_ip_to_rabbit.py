@@ -75,6 +75,7 @@ def run_tool(path):
                 data["dst_ip"] = fields[1].strip()
                 data["src_port"] = fields[2].strip()
                 data["dst_port"] = fields[3].strip()
+                data["tool"] = "tshark"
                 message = str(data)
                 channel.basic_publish(exchange='topic_recs',
                                       routing_key=routing_key,

@@ -27,37 +27,26 @@ def connections():
 
 def run_tool(path):
     routing_key = "domain"+sys.argv[1].replace("/", ".")
+
+    subprocess.Popen('/opt/bro/bin/bro -r '+path, shell=True, stdout=subprocess.PIPE).wait()
+    subprocess.Popen('/bin/bash bro.sh dns.log', shell=True, stdout=subprocess.PIPE).wait()
+
     start_time = 0
-    get_start_time = subprocess.Popen('tshark -r '+path+' -c 1 -T fields -e frame.time',
+    get_start_time = subprocess.Popen("/bin/sed '9q;d' dns.log | /usr/bin/awk '{print $1}'",
                               shell=True, stdout=subprocess.PIPE)
     start_time = get_start_time.communicate()[0]
-    subprocess.Popen('/bin/bash tshark.sh '+path, shell=True, stdout=subprocess.PIPE).wait()
-
-    print "processing frame count..."
-    frame_number = -1
-    while frame_number == -1:
-        try:
-            with open('/tmp/count.out', 'r') as f:
-                frame_number = f.readline().strip()
-        except:
-            pass
-        time.sleep(1)
 
     end_time = 0
-    get_end_time = subprocess.Popen('tshark -r '+path+' -Y frame.number=='+frame_number+' -T fields -e frame.time',
-                                    shell=True, stdout=subprocess.PIPE)
+    get_end_time = subprocess.Popen("/usr/bin/tail -n2 dns.log | /usr/bin/head -n1 | /usr/bin/awk '{print $1}'",
+                              shell=True, stdout=subprocess.PIPE)
     end_time = get_end_time.communicate()[0]
 
-    # parse tshark output by tabs and newline
+    # parse bro output by commas and newline
     #
     # expecting:
-    # query_count<space>ip<tab>domain<newline>
+    # query_count<space>ip<comma>domain<newline>
     # last line will not have a newline
     #
-
-    print "processing pcap results..."
-    while end_time == 0:
-        time.sleep(1)
 
     channel, connection = connections()
     print "sending pcap results..."
@@ -66,14 +55,15 @@ def run_tool(path):
             data = {}
             rec = rec.lstrip()
             count = rec.split(" ", 1)
-            fields = count[1].split("\t")
+            fields = count[1].split(",")
             try:
                 data["query_count"] = count[0].strip()
+                # these are in epoch, probably should be converted
                 data["frame_start_range"] = start_time.strip()
                 data["frame_end_range"] = end_time.strip()
                 data["ip"] = fields[0].strip()
                 data["domain"] = fields[1].strip()
-                data["tool"] = "tshark"
+                data["tool"] = "bro"
                 message = str(data)
                 channel.basic_publish(exchange='topic_recs',
                                       routing_key=routing_key,

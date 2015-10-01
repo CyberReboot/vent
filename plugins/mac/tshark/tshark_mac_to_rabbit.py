@@ -74,6 +74,7 @@ def run_tool(path):
                 data["frame_end_range"] = end_time.strip()
                 data["ip"] = fields[0].strip()
                 data["eth"] = fields[1].strip()
+                data["tool"] = "tshark"
                 message = str(data)
                 channel.basic_publish(exchange='topic_recs',
                                       routing_key=routing_key,
@@ -94,6 +95,7 @@ def run_tool(path):
                 data["frame_end_range"] = end_time.strip()
                 data["ip"] = fields[0].strip()
                 data["eth"] = fields[1].strip()
+                data["tool"] = "tshark"
                 message = str(data)
                 channel.basic_publish(exchange='topic_recs',
                                       routing_key=routing_key,
