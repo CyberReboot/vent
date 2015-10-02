@@ -21,6 +21,7 @@ MENU = "menu"
 COMMAND = "command"
 EXITMENU = "exitmenu"
 INFO = "info"
+INFO2 = "info2"
 SETTING = "setting"
 
 # path that exists on the iso
@@ -144,6 +145,8 @@ def runmenu(menu, parent):
                     else:
                         result = check_output((menu['options'][index]['command']).split())
                     screen.addstr(5+index,4, "%s - %s" % (menu['options'][index]['title'], result), textstyle)
+                elif menu['options'][index]['type'] == INFO2:
+                    screen.addstr(5+index,4, "%s" % (menu['options'][index]['title']), textstyle)
                 else:
                     screen.addstr(5+index,4, "%d - %s" % (index+1, menu['options'][index]['title']), textstyle)
             textstyle = n
@@ -175,7 +178,7 @@ def processmenu(menu, parent=None):
         getin = runmenu(menu, parent)
         if getin == optioncount:
             exitmenu = True
-        elif menu['options'][getin]['type'] == COMMAND:
+        elif menu['options'][getin]['type'] == COMMAND or menu['options'][getin]['type'] == INFO2:
             curses.def_prog_mode()
             os.system('reset')
             screen.clear()
@@ -235,7 +238,12 @@ def main():
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
           'options': [
             { 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /data/visualization/get_url.sh' },
+            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': '/bin/sh /data/collectors/get_rabbitmq_url.sh' },
+            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': '/bin/sh /data/collectors/get_rqdashboard_url.sh' },
+            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': '/bin/sh /data/collectors/get_elasticsearch_head_url.sh' },
+            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': '/bin/sh /data/collectors/get_elasticsearch_marvel_url.sh' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
+            { 'title': "Container Stats", 'type': INFO2, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
           ]
         },
