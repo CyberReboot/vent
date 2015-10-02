@@ -1,7 +1,8 @@
 #!/bin/sh
 
-mkdir -p /pcaps
-chmod -R 777 /pcaps
+mkdir -p /mnt/sda1/pcaps
+chmod -R 777 /mnt/sda1/pcaps
+ln -s /mnt/sda1/pcaps /pcaps
 
 if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
 	sudo /usr/local/etc/init.d/openssh stop

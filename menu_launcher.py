@@ -39,23 +39,24 @@ def run_plugins(action):
             plugins[plug] = config.get("plugins", plug)
 
         for plugin in plugins:
-            p = {}
-            try:
-                config = ConfigParser.RawConfigParser()
-                config.read(template_dir+plugin+'.template')
-                plugin_name = config.get("info", "name")
-                p['title'] = plugin_name
-                p['type'] = COMMAND
-                p['command'] = 'python2.7 /data/template_parser.py '+plugin+' '+action
-                modes.append(p)
-            except:
-                # if no name is provided, it doesn't get listed
-                pass
-        p = {}
-        p['title'] = "all"
-        p['type'] = COMMAND
-        p['command'] = 'python2.7 /data/template_parser.py all '+action
-        modes.append(p)
+            if plugin == "collectors":
+                p = {}
+                try:
+                    config = ConfigParser.RawConfigParser()
+                    config.read(template_dir+plugin+'.template')
+                    plugin_name = config.get("info", "name")
+                    p['title'] = plugin_name
+                    p['type'] = COMMAND
+                    p['command'] = 'python2.7 /data/template_parser.py '+plugin+' '+action
+                    modes.append(p)
+                except:
+                    # if no name is provided, it doesn't get listed
+                    pass
+        #p = {}
+        #p['title'] = "all"
+        #p['type'] = COMMAND
+        #p['command'] = 'python2.7 /data/template_parser.py all '+action
+        #modes.append(p)
     except:
         print "unable to get the configuration of modes from the templates.\n"
 
