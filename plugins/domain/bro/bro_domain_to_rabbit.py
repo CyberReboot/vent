@@ -59,7 +59,7 @@ def run_tool(path):
             try:
                 data["query_count"] = count[0].strip()
                 # these are in epoch, probably should be converted
-                data["frame_start_range"] = start_time.strip()
+                data["frame_begin_range"] = start_time.strip()
                 data["frame_end_range"] = end_time.strip()
                 data["ip"] = fields[0].strip()
                 data["domain"] = fields[1].strip()

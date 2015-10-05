@@ -69,7 +69,7 @@ def run_tool(path):
             fields = count[1].split("\t")
             try:
                 data["query_count"] = count[0].strip()
-                data["frame_start_range"] = start_time.strip()
+                data["frame_begin_range"] = start_time.strip()
                 data["frame_end_range"] = end_time.strip()
                 data["ip"] = fields[0].strip()
                 data["domain"] = fields[1].strip()
