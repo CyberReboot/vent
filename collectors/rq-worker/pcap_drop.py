@@ -33,6 +33,7 @@ def pcap_queue(path):
             # !! TODO read params for create_container from the templates!
             try:
                 container = c.create_container(image=image, volumes=["/pcaps"], environment=["PYTHONUNBUFFERED=0"], tty=True, stdin_open=True, command=path)
+                # !! TODO what if external rabbitmq!
                 response = c.start(container=container.get('Id'), binds=["/pcaps:/pcaps:ro"], links={"collectors-rabbitmq":"rabbitmq"})
                 responses[image] = response
             except:

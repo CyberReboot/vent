@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.7
 
+import ast
 import ConfigParser
 import json
 import os
@@ -84,7 +85,7 @@ def read_template_types(template_type):
                                 for option in options:
                                     if section == "service" and option == "schedule":
                                         service_schedule[plugin] = json.loads(config.get(section, option))
-                                    elif section != "info" and section != "service":
+                                    elif section != "info" and section != "service" and section != "locally-active" and section != "external":
                                         if section == tool[plugin]:
                                             option_val = config.get(section, option)
                                             try:
@@ -131,6 +132,7 @@ def read_template_types(template_type):
             config.optionxform=str
             config.read(template_path)
             sections = config.sections()
+            external_overrides = []
             for section in sections:
                 instructions = {}
                 options = config.options(section)
@@ -140,36 +142,48 @@ def read_template_types(template_type):
                         info_name = config.get(section, option)
                     elif section == "service" and option == "schedule":
                         service_schedule[template_type] = json.loads(config.get(section, option))
-                    elif section != "info" and section != "service":
-                        option_val = config.get(section, option)
-                        try:
-                            option_val = int(option_val)
-                        except:
-                            pass
-                        if option == 'data_path':
-                            if len(cmd) == 4:
-                                cmd.insert(1, option_val)
+                    elif section == "locally-active":
+                        if config.get(section, option) == "off":
+                            external_overrides.append(option)
+                    elif section != "info" and section != "service" and section != "locally-active" and section != "external":
+                        if not section in external_overrides:
+                            option_val = config.get(section, option)
+                            try:
+                                option_val = int(option_val)
+                            except:
+                                pass
+                            if option == 'data_path':
+                                if len(cmd) == 4:
+                                    cmd.insert(1, option_val)
+                                else:
+                                    cmd.append(option_val)
+                                d_path = 1
+                            elif option == 'site_path':
+                                if len(cmd) == 2:
+                                    cmd.append("")
+                                    cmd.append(option_val)
+                                else:
+                                    cmd.append(option_val)
                             else:
-                                cmd.append(option_val)
-                            d_path = 1
-                        elif option == 'site_path':
-                            if len(cmd) == 2:
-                                cmd.append("")
-                                cmd.append(option_val)
-                            else:
-                                cmd.append(option_val)
-                        else:
-                            instructions[option] = option_val
+                                # !! TODO check dependencies like elasticserach and rabbitmq
+                                external_options = config.options("external")
+                                if option == "HostConfig":
+                                    # !! TODO get links, and remove any matching to external_overrides
+                                    # !! TODO add external_overrides to extrahosts
+                                    # !! TODO use ast or remove from imports fro hostconfig
+                                    pass
+                                instructions[option] = option_val
                 if d_path == 1:
                     collector_instructions['Image'] = "visualization/honeycomb"
                     collector_instructions['Cmd'] = cmd
                     collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, '1visualization-honeycomb']}
                     tool_collectors[template_type+"-"+section+"-collector"] = collector_instructions
                     d_path = 0
-                if section != "info" and section != "service":
-                    instructions['Image'] = template_type+'/'+section
-                    instructions['Volumes'] = {"/"+section+"-data": {}}
-                    tool_dict[template_type+"-"+section] = instructions
+                if section != "info" and section != "service" and section != "locally-active" and section != "external":
+                    if not section in external_overrides:
+                        instructions['Image'] = template_type+'/'+section
+                        instructions['Volumes'] = {"/"+section+"-data": {}}
+                        tool_dict[template_type+"-"+section] = instructions
         else:
             info_name = "\"all\""
     except:

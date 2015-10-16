@@ -4,6 +4,15 @@ name = Collectors
 [service]
 schedule = {"all":"continuous"}
 
+[locally-active]
+#elasticsearch = off
+#rabbitmq = off
+#rmq-es-connector = off
+
+[external]
+elasticsearch_host = 0.0.0.0
+#rabbitmq_host = 0.0.0.0
+
 [pcap-drop]
 Env = ["PYTHONUNBUFFERED=0"]
 HostConfig = {"Binds": ["/pcaps:/pcaps:ro"], "Links": ["collectors-a-redis:redis"]}
