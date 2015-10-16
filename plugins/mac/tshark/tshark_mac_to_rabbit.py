@@ -31,6 +31,8 @@ def run_tool(path):
     get_start_time = subprocess.Popen('tshark -r '+path+' -c 1 -T fields -e frame.time',
                               shell=True, stdout=subprocess.PIPE)
     start_time = get_start_time.communicate()[0]
+    start_time = start_time.split(".")
+    start_time = str(time.mktime(time.strptime(start_time[0], "%b %d, %Y %H:%M:%S")))
     subprocess.Popen('/bin/bash tshark.sh src '+path, shell=True, stdout=subprocess.PIPE).wait()
     subprocess.Popen('/bin/bash tshark.sh dst '+path, shell=True, stdout=subprocess.PIPE).wait()
 
@@ -48,6 +50,8 @@ def run_tool(path):
     get_end_time = subprocess.Popen('tshark -r '+path+' -Y frame.number=='+frame_number+' -T fields -e frame.time',
                                     shell=True, stdout=subprocess.PIPE)
     end_time = get_end_time.communicate()[0]
+    end_time = end_time.split(".")
+    end_time = str(time.mktime(time.strptime(end_time[0], "%b %d, %Y %H:%M:%S")))
 
     # parse tshark output by tabs and newline
     #
