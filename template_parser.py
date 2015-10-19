@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 
 import ast
+import copy
 import ConfigParser
 import json
 import os
@@ -85,7 +86,7 @@ def read_template_types(template_type):
                                 for option in options:
                                     if section == "service" and option == "schedule":
                                         service_schedule[plugin] = json.loads(config.get(section, option))
-                                    elif section != "info" and section != "service" and section != "locally-active" and section != "external":
+                                    elif section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances":
                                         if section == tool[plugin]:
                                             option_val = config.get(section, option)
                                             try:
@@ -133,6 +134,8 @@ def read_template_types(template_type):
             config.read(template_path)
             sections = config.sections()
             external_overrides = []
+            external_hosts = {}
+            instances = {}
             for section in sections:
                 instructions = {}
                 options = config.options(section)
@@ -142,10 +145,16 @@ def read_template_types(template_type):
                         info_name = config.get(section, option)
                     elif section == "service" and option == "schedule":
                         service_schedule[template_type] = json.loads(config.get(section, option))
+                    elif section == "instances":
+                        # !! TODO
+                        pass
+                    elif section == "external":
+                        # !! TODO
+                        pass
                     elif section == "locally-active":
                         if config.get(section, option) == "off":
                             external_overrides.append(option)
-                    elif section != "info" and section != "service" and section != "locally-active" and section != "external":
+                    elif section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances":
                         if not section in external_overrides:
                             option_val = config.get(section, option)
                             try:
@@ -165,21 +174,40 @@ def read_template_types(template_type):
                                 else:
                                     cmd.append(option_val)
                             else:
-                                # !! TODO check dependencies like elasticserach and rabbitmq
+                                # check dependencies like elasticsearch and rabbitmq
                                 external_options = config.options("external")
                                 if option == "HostConfig":
-                                    # !! TODO get links, and remove any matching to external_overrides
-                                    # !! TODO add external_overrides to extrahosts
-                                    # !! TODO use ast or remove from imports fro hostconfig
-                                    pass
-                                instructions[option] = option_val
+                                    try:
+                                        option_val = option_val.replace("true", "True")
+                                        option_val = option_val.replace("false", "False")
+                                        host_config = ast.literal_eval(option_val)
+                                        host_config_new = copy.deepcopy(host_config)
+                                        flag = 0
+                                        if "Links" in host_config:
+                                            for rec in host_config["Links"]:
+                                                r = rec.split(":")
+                                                for ext in external_overrides:
+                                                    if r[1] == ext:
+                                                        host_config_new["Links"].remove(rec)
+                                                        flag = 1
+                                                        # !! TODO add external_overrides to extrahosts
+                                        if len(host_config_new["Links"]) == 0:
+                                            del host_config_new["Links"]
+                                        if flag:
+                                            option_val = str(host_config_new)
+                                    except:
+                                        pass
+                                option_val = option_val.replace("True", "true")
+                                option_val = option_val.replace("False", "false")
+                                if option_val != "{}":
+                                    instructions[option] = option_val
                 if d_path == 1:
                     collector_instructions['Image'] = "visualization/honeycomb"
                     collector_instructions['Cmd'] = cmd
                     collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, '1visualization-honeycomb']}
                     tool_collectors[template_type+"-"+section+"-collector"] = collector_instructions
                     d_path = 0
-                if section != "info" and section != "service" and section != "locally-active" and section != "external":
+                if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances":
                     if not section in external_overrides:
                         instructions['Image'] = template_type+'/'+section
                         instructions['Volumes'] = {"/"+section+"-data": {}}
