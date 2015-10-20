@@ -1,4 +1,4 @@
-FROM tatsushid/tinycore:6.3-x86_64
+FROM tatsushid/tinycore:6.4-x86_64
 
 # Instructions are run with 'tc' user
 
@@ -15,7 +15,7 @@ RUN gpg2 --keyserver pool.sks-keyservers.net --recv-keys C01E1CAD5EA2C4F0B8E3571
 ENV PYTHON_VERSION 2.7.10
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 7.0.1
+ENV PYTHON_PIP_VERSION 7.1.2
 
 RUN tce-load -wic \
         bzip2-dev \
@@ -91,7 +91,7 @@ RUN tce-load -wic \
     && sudo /sbin/ldconfig \
     && rm -rf /tmp/tce/optional/* \
     && curl -SL 'https://bootstrap.pypa.io/get-pip.py' | sudo python2 \
-    && sudo pip install --upgrade pip==$PYTHON_PIP_VERSION \
+    && sudo pip install --no-cache-dir --upgrade pip==$PYTHON_PIP_VERSION \
     && sudo find /usr/local \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + \
     && find /usr/local \( -type d -a -name test -o -name tests \) | sudo xargs rm -rf \
     && sudo rm -rf /usr/src/python

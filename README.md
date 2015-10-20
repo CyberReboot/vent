@@ -14,16 +14,6 @@ cd vent
 easy ways to build a VM out of the ISO
 ====
 
-XXX TODO - boot2docker cli is deprecated
-
-with boot2docker cli:
-
-```
-cp vent.iso ~/.boot2docker/boot2docker.iso
-boot2docker init; boot2docker up
-boot2docker ssh
-```
-
 with docker-machine cli:
 
 ```
@@ -36,19 +26,44 @@ docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhos
 docker-machine ssh vent
 ```
 
-copy up new templates and plugins
+with boot2docker cli (DEPRECATED):
+
+```
+cp vent.iso ~/.boot2docker/boot2docker.iso
+boot2docker init; boot2docker up
+boot2docker ssh
+```
+
+copy up new pcaps
 ====
-
-if using boot2docker cli to provision:
-
-```
-scp -r -i ~/.ssh/id_boot2docker -P 2022 modes.template docker@localhost:/data/templates/modes.template
-```
 
 if using docker-machine cli to provision:
 
 ```
-XXX TODO
+# from the directory that contains your pcaps
+# optionally add an argument of the name for vent in
+#     docker-machine if you called it something other than vent
+cd vent
+cp vent /usr/local/bin/
+cd /path/where/pcaps/are/
+vent
+```
+
+otherwise edit the `ssh` and `scp` lines in `vent` specific to docker-machine and change to suit your needs
+
+copy up new templates and plugins
+====
+
+if using docker-machine cli to provision:
+
+```
+docker-machine scp modes.template vent:/data/templates/modes.template
+```
+
+if using boot2docker cli to provision (DEPRECATED):
+
+```
+scp -r -i ~/.ssh/id_boot2docker -P 2022 modes.template docker@localhost:/data/templates/modes.template
 ```
 
 FAQ

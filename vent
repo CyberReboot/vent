@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Assumes you have docker-machine installed and vent is connected to it."
+if [ "$#" -ne 1 ]; then
+    HOST="vent"
+else
+    HOST=$1
+fi
+echo "Note: this does not copy files recursively..."
+for file in `ls *` ; do
+    docker-machine scp $file $HOST:/pcaps/.${file}.tmp
+    docker-machine ssh $HOST "mv /pcaps/.${file}.tmp /pcaps/$file"
+done
