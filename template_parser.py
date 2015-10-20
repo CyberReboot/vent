@@ -148,9 +148,6 @@ def read_template_types(template_type):
                     elif section == "instances":
                         # !! TODO
                         pass
-                    elif section == "external":
-                        # !! TODO
-                        pass
                     elif section == "locally-active":
                         if config.get(section, option) == "off":
                             external_overrides.append(option)
@@ -183,18 +180,24 @@ def read_template_types(template_type):
                                         host_config = ast.literal_eval(option_val)
                                         host_config_new = copy.deepcopy(host_config)
                                         flag = 0
+                                        extra_hosts = []
                                         if "Links" in host_config:
                                             for rec in host_config["Links"]:
                                                 r = rec.split(":")
                                                 for ext in external_overrides:
                                                     if r[1] == ext:
                                                         host_config_new["Links"].remove(rec)
+                                                        # add external_overrides to extrahosts
+                                                        if r[1]+"_host" in external_options:
+                                                            extra_hosts.append(r[1]+":"+config.get("external", r[1]+"_host"))
+                                                            host_config_new["ExtraHosts"] = extra_hosts
+                                                        else:
+                                                            print "no local "+r[1]+" but an external one wasn't specified."
                                                         flag = 1
-                                                        # !! TODO add external_overrides to extrahosts
                                         if len(host_config_new["Links"]) == 0:
                                             del host_config_new["Links"]
                                         if flag:
-                                            option_val = str(host_config_new)
+                                            option_val = str(host_config_new).replace("'", '"')
                                     except:
                                         pass
                                 option_val = option_val.replace("True", "true")

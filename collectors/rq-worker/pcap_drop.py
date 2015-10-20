@@ -33,8 +33,19 @@ def pcap_queue(path):
             # !! TODO read params for create_container from the templates!
             try:
                 container = c.create_container(image=image, volumes=["/pcaps"], environment=["PYTHONUNBUFFERED=0"], tty=True, stdin_open=True, command=path)
-                # !! TODO what if external rabbitmq!
-                response = c.start(container=container.get('Id'), binds=["/pcaps:/pcaps:ro"], links={"collectors-rabbitmq":"rabbitmq"})
+                config.read(template_dir+'collectors.template')
+                locally_active = config.options("locally-active")
+                flag = 0
+                if "rabbitmq" in locally_active:
+                    if config.get("locally-active", "rabbitmq") == "off":
+                        external_array = config.options("external")
+                        if "rabbitmq_host" in external_array:
+                            rabbitmq_host = config.get("external", "rabbitmq_host")
+                            flag = 1
+                if flag:
+                    response = c.start(container=container.get('Id'), binds=["/pcaps:/pcaps:ro"], extra_hosts={"rabbitmq":rabbitmq_host})
+                else:
+                    response = c.start(container=container.get('Id'), binds=["/pcaps:/pcaps:ro"], links={"collectors-rabbitmq":"rabbitmq"})
                 responses[image] = response
             except:
                 pass
