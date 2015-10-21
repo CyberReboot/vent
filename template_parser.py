@@ -135,7 +135,7 @@ def read_template_types(template_type):
             sections = config.sections()
             external_overrides = []
             external_hosts = {}
-            instances = {}
+            instances = []
             for section in sections:
                 instructions = {}
                 options = config.options(section)
@@ -146,8 +146,7 @@ def read_template_types(template_type):
                     elif section == "service" and option == "schedule":
                         service_schedule[template_type] = json.loads(config.get(section, option))
                     elif section == "instances":
-                        # !! TODO
-                        pass
+                        instances = config.options(section)
                     elif section == "locally-active":
                         if config.get(section, option) == "off":
                             external_overrides.append(option)
@@ -212,9 +211,19 @@ def read_template_types(template_type):
                     d_path = 0
                 if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances":
                     if not section in external_overrides:
-                        instructions['Image'] = template_type+'/'+section
-                        instructions['Volumes'] = {"/"+section+"-data": {}}
-                        tool_dict[template_type+"-"+section] = instructions
+                        if section in instances:
+                            try:
+                                instance_count = config.get("instances", section)
+                                for i in range(int(instance_count)):
+                                    instructions['Image'] = template_type+'/'+section
+                                    instructions['Volumes'] = {"/"+section+"-data": {}}
+                                    tool_dict[template_type+"-"+section+str(i)] = instructions
+                            except:
+                                pass
+                        else:
+                            instructions['Image'] = template_type+'/'+section
+                            instructions['Volumes'] = {"/"+section+"-data": {}}
+                            tool_dict[template_type+"-"+section] = instructions
         else:
             info_name = "\"all\""
     except:
