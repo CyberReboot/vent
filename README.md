@@ -89,7 +89,7 @@ XXX TODO bare metal instructions
 FAQ
 ====
 
-**Q**: What are the credentials to login if I don't use certificates?
+**Q**: What are the credentials to login if I don't use certificates/keys?
 
 **A**: docker/tcuser
 
