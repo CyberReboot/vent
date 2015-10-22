@@ -42,6 +42,13 @@ boot2docker ssh
 
 of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running execute `sudo /data/custom`.
 
+getting started
+====
+
+from within the vent interface (once SSH'd in) first `build` the collectors.  it might take a little while to download and compile everything.  once it's built you're ready to start the collectors from the `mode` menu option.
+
+after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to copy up pcaps.  that's it!
+
 copy up new pcaps
 ====
 
