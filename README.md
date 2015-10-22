@@ -40,6 +40,8 @@ boot2docker init; boot2docker up
 boot2docker ssh
 ```
 
+of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running execute `sudo /data/custom`.
+
 copy up new pcaps
 ====
 
@@ -55,9 +57,13 @@ cd /path/where/pcaps/are/
 vent
 ```
 
-otherwise edit the `ssh` and `scp` lines in `vent` specific to docker-machine and change to suit your needs
+if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
 
+```
 XXX TODO bare metal instructions
+```
+
+otherwise edit the `ssh` and `scp` lines in `vent` specific to docker-machine and change to suit your needs
 
 copy up new templates and plugins
 ====
@@ -74,10 +80,18 @@ if using boot2docker cli to provision (DEPRECATED):
 scp -r -i ~/.ssh/id_boot2docker -P 2022 modes.template docker@localhost:/data/templates/modes.template
 ```
 
+if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
+
+```
 XXX TODO bare metal instructions
+```
 
 FAQ
 ====
+
+**Q**: What are the credentials to login if I don't use certificates?
+
+**A**: docker/tcuser
 
 **Q**: I went into the shell and did a `docker ps` but no containers are running, how do I get it working again?
 
