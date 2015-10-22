@@ -21,8 +21,10 @@ class GZHandler(PatternMatchingEventHandler):
         """
         if event.event_type == "created":
             print event.src_path
-            q = Queue(connection=Redis(host="redis"))
-            result = q.enqueue('pcap_drop.pcap_queue', event.src_path)
+            # let jobs run for up to one day
+            q = Queue(connection=Redis(host="redis"), default_timeout=86400)
+            # let jobs be queued for up to 30 days
+            result = q.enqueue('pcap_drop.pcap_queue', event.src_path, ttl=2592000)
 
     def on_created(self, event):
         self.process(event)

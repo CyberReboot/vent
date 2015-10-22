@@ -86,7 +86,7 @@ def read_template_types(template_type):
                                 for option in options:
                                     if section == "service" and option == "schedule":
                                         service_schedule[plugin] = json.loads(config.get(section, option))
-                                    elif section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances":
+                                    elif section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
                                         if section == tool[plugin]:
                                             option_val = config.get(section, option)
                                             try:
@@ -150,7 +150,7 @@ def read_template_types(template_type):
                     elif section == "locally-active":
                         if config.get(section, option) == "off":
                             external_overrides.append(option)
-                    elif section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances":
+                    elif section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
                         if not section in external_overrides:
                             option_val = config.get(section, option)
                             try:
@@ -209,7 +209,7 @@ def read_template_types(template_type):
                     collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, '1visualization-honeycomb']}
                     tool_collectors[template_type+"-"+section+"-collector"] = collector_instructions
                     d_path = 0
-                if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances":
+                if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
                     if not section in external_overrides:
                         if section in instances:
                             try:

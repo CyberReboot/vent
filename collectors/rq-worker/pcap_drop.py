@@ -1,5 +1,6 @@
 def pcap_queue(path):
     import os
+    import time
 
     import ConfigParser
     config = ConfigParser.RawConfigParser()
@@ -28,7 +29,20 @@ def pcap_queue(path):
                 for tool in plugins[plugin].split(","):
                     t.append(plugin+'/'+tool)
 
+        container_count = 0
+        container_max = 50
+        try:
+            config.read(template_dir+'collectors.template')
+            container_max = int(config.get("active-containers", "count"))
+        except:
+            pass
         for image in t:
+            # check resources before creating container
+            # wait until there are resources available
+            container_count = len(c.containers(filters={'status':'running'}))
+            while container_count >= container_max:
+                time.sleep(5)
+                container_count = len(c.containers(filters={'status':'running'}))
             # for plugin, create container and start it
             # !! TODO read params for create_container from the templates!
             try:

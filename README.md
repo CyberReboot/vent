@@ -3,6 +3,12 @@ vent
 
 Network Visibility (an anagram)
 
+download pre-built ISO
+====
+
+[https://github.com/CyberReboot/vent/releases](releases)
+
+
 build the ISO
 ====
 
@@ -51,6 +57,8 @@ vent
 
 otherwise edit the `ssh` and `scp` lines in `vent` specific to docker-machine and change to suit your needs
 
+XXX TODO bare metal instructions
+
 copy up new templates and plugins
 ====
 
@@ -65,6 +73,8 @@ if using boot2docker cli to provision (DEPRECATED):
 ```
 scp -r -i ~/.ssh/id_boot2docker -P 2022 modes.template docker@localhost:/data/templates/modes.template
 ```
+
+XXX TODO bare metal instructions
 
 FAQ
 ====
