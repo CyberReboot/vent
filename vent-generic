@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "You'll need to supply the password 'tcuser' for each file you're uploading."
+if [ "$#" -ne 1 ]; then
+    HOST="vent"
+else
+    HOST=$1
+fi
+echo "Note: this does not copy files recursively..."
+for file in `ls *` ; do
+    scp $file docker@$HOST:/pcaps/.${file}.tmp
+    ssh docker@$HOST "mv /pcaps/.${file}.tmp /pcaps/$file"
+done

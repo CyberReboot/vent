@@ -60,7 +60,12 @@ vent
 if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
 
 ```
-XXX TODO bare metal instructions
+# from the directory that contains your pcaps
+# optionally add an argument of the name/ip for vent on your network
+cd vent
+cp vent-generic /usr/local/bin/vent
+cd /path/where/pcaps/are/
+vent
 ```
 
 otherwise edit the `ssh` and `scp` lines in `vent` specific to docker-machine and change to suit your needs
@@ -83,7 +88,7 @@ scp -r -i ~/.ssh/id_boot2docker -P 2022 modes.template docker@localhost:/data/te
 if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
 
 ```
-XXX TODO bare metal instructions
+scp modes.template docker@vnet:/data/templates/modes.template
 ```
 
 FAQ
