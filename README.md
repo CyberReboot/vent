@@ -6,7 +6,7 @@ Network Visibility (an anagram)
 download pre-built ISO
 ====
 
-[https://github.com/CyberReboot/vent/releases](releases)
+[releases](https://github.com/CyberReboot/vent/releases)
 
 
 build the ISO
