@@ -8,6 +8,7 @@ else
 fi
 echo "Note: this does not copy files recursively..."
 for file in `ls *` ; do
+    # XXX TODO use expect
     scp $file docker@$HOST:/pcaps/.${file}.tmp
     ssh docker@$HOST "mv /pcaps/.${file}.tmp /pcaps/$file"
 done
