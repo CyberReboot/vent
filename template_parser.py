@@ -236,8 +236,12 @@ def main():
     else:
         template_type = sys.argv[1]
         template_execution = sys.argv[2]
-        info_name, service_schedule, tool_collectors, tool_dict = read_template_types(template_type)
-        execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict)
+        if template_execution == "stop":
+            os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
+            os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
+        else:
+            info_name, service_schedule, tool_collectors, tool_dict = read_template_types(template_type)
+            execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict)
 
 if __name__ == "__main__":
     main()
