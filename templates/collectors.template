@@ -25,9 +25,9 @@ count = 20
 
 [pcap-drop]
 Env = ["PYTHONUNBUFFERED=0"]
-HostConfig = {"Binds": ["/pcaps:/pcaps:ro"], "Links": ["collectors-a-redis:redis"]}
+HostConfig = {"Binds": ["/pcaps:/pcaps:ro"], "Links": ["collectors-aaa-redis:redis"]}
 
-[a-redis]
+[aaa-redis]
 
 [elasticsearch]
 HostConfig = {"PublishAllPorts": true}
@@ -42,8 +42,24 @@ HostConfig = {"PublishAllPorts": true}
 
 [rq-worker]
 Env = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
-HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock", "/data:/data:ro"], "Links": ["collectors-a-redis:redis"]}
+HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock", "/data:/data:ro"], "Links": ["collectors-aaa-redis:redis"]}
 
 [rq-dashboard]
 Env = ["REMOTE_REDIS_HOST=redis"]
-HostConfig = {"Links": ["collectors-a-redis:redis"], "PublishAllPorts": true}
+HostConfig = {"Links": ["collectors-aaa-redis:redis"], "PublishAllPorts": true}
+
+[active-dns]
+#Cmd = ["domain", "domain controller", "subnet prefix"]
+
+[active-nmap-protocol]
+HostConfig = {"Binds":["/tmp:/tmp", "/var/run/docker.sock:/var/run/docker.sock"], "VolumesFrom":["active-dns", "1visualization-honeycomb"]}
+
+[active-scan]
+Tty = true
+HostConfig = {"NetworkMode":"host"}
+
+[active-nmap]
+
+[passive-arpwatch]
+
+[passive-p0f]

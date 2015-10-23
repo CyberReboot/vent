@@ -31,6 +31,9 @@ def execute_template(template_type, template_execution, info_name, service_sched
 def read_template_types(template_type):
     # read in templates for plugins, collectors, and visualization
     template_path = template_dir+template_type+'.template'
+    if template_type == "active" or template_type == "passive":
+        template_path = template_dir+'collectors.template'
+
     info_name = ""
     d_path = 0
     service_schedule = {}
@@ -38,14 +41,15 @@ def read_template_types(template_type):
     tool_dict = {}
 
     # special case for visualization
-    viz_instructions = {}
-    viz_instructions['Image'] = 'visualization/honeycomb'
-    viz_instructions['Volumes'] = {"/honeycomb-data": {}}
-    viz_instructions['HostConfig'] = {"PublishAllPorts": "true"}
-    tool_dict["1visualization-honeycomb"] = viz_instructions
+    if template_type == "visualization":
+        viz_instructions = {}
+        viz_instructions['Image'] = 'visualization/honeycomb'
+        viz_instructions['Volumes'] = {"/honeycomb-data": {}}
+        viz_instructions['HostConfig'] = {"PublishAllPorts": "true"}
+        tool_dict["1visualization-honeycomb"] = viz_instructions
 
     try:
-        if template_type != "visualization" and template_type != "collectors":
+        if template_type != "visualization" and template_type != "collectors" and template_type != "active" and template_type != "passive":
             config = ConfigParser.RawConfigParser()
             # needed to preserve case sensitive options
             config.optionxform=str
@@ -211,19 +215,49 @@ def read_template_types(template_type):
                     d_path = 0
                 if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
                     if not section in external_overrides:
-                        if section in instances:
-                            try:
-                                instance_count = config.get("instances", section)
-                                for i in range(int(instance_count)):
-                                    instructions['Image'] = template_type+'/'+section
+                        if "active" in section or "passive" in section:
+                            if template_type == "active" and "active" in section:
+                                if section in instances:
+                                    try:
+                                        instance_count = config.get("instances", section)
+                                        for i in range(int(instance_count)):
+                                            instructions['Image'] = 'collectors/'+section
+                                            instructions['Volumes'] = {"/"+section+"-data": {}}
+                                            tool_dict[section+str(i)] = instructions
+                                    except:
+                                        pass
+                                else:
+                                    instructions['Image'] = 'collectors/'+section
                                     instructions['Volumes'] = {"/"+section+"-data": {}}
-                                    tool_dict[template_type+"-"+section+str(i)] = instructions
-                            except:
-                                pass
+                                    tool_dict[section] = instructions
+                            elif template_type == "passive" and "passive" in section:
+                                if section in instances:
+                                    try:
+                                        instance_count = config.get("instances", section)
+                                        for i in range(int(instance_count)):
+                                            instructions['Image'] = 'collectors/'+section
+                                            instructions['Volumes'] = {"/"+section+"-data": {}}
+                                            tool_dict[section+str(i)] = instructions
+                                    except:
+                                        pass
+                                else:
+                                    instructions['Image'] = 'collectors/'+section
+                                    instructions['Volumes'] = {"/"+section+"-data": {}}
+                                    tool_dict[section] = instructions
                         else:
-                            instructions['Image'] = template_type+'/'+section
-                            instructions['Volumes'] = {"/"+section+"-data": {}}
-                            tool_dict[template_type+"-"+section] = instructions
+                            if section in instances:
+                                try:
+                                    instance_count = config.get("instances", section)
+                                    for i in range(int(instance_count)):
+                                        instructions['Image'] = template_type+'/'+section
+                                        instructions['Volumes'] = {"/"+section+"-data": {}}
+                                        tool_dict[template_type+"-"+section+str(i)] = instructions
+                                except:
+                                    pass
+                            else:
+                                instructions['Image'] = template_type+'/'+section
+                                instructions['Volumes'] = {"/"+section+"-data": {}}
+                                tool_dict[template_type+"-"+section] = instructions
         else:
             info_name = "\"all\""
     except:

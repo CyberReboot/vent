@@ -52,6 +52,38 @@ def run_plugins(action):
                 except:
                     # if no name is provided, it doesn't get listed
                     pass
+        # one off for visualization
+        p = {}
+        p['title'] = "Visualization"
+        p['type'] = COMMAND
+        p['command'] = 'python2.7 /data/template_parser.py visualization '+action
+        modes.append(p)
+
+        try:
+            config = ConfigParser.RawConfigParser()
+            config.read(template_dir+'collectors.template')
+            try:
+                passive = config.get("local-collection", "passive")
+                if passive == "on":
+                    p = {}
+                    p['title'] = "Local Passive Collection"
+                    p['type'] = COMMAND
+                    p['command'] = 'python2.7 /data/template_parser.py passive '+action
+                    modes.append(p)
+            except:
+                pass
+            try:
+                active = config.get("local-collection", "active")
+                if active == "on":
+                    p = {}
+                    p['title'] = "Local Active Collection"
+                    p['type'] = COMMAND
+                    p['command'] = 'python2.7 /data/template_parser.py active '+action
+                    modes.append(p)
+            except:
+                pass
+        except:
+            pass
         #p = {}
         #p['title'] = "all"
         #p['type'] = COMMAND
