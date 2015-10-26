@@ -8,6 +8,6 @@ else
 fi
 echo "Note: this does not copy files recursively..."
 for file in `ls *` ; do
-    docker-machine scp $file $HOST:/pcaps/.${file}.tmp
-    docker-machine ssh $HOST "mv /pcaps/.${file}.tmp /pcaps/$file"
+    docker-machine scp $file $HOST:/tmp/.${file}.tmp
+    docker-machine ssh $HOST "mv /tmp/.${file}.tmp /pcaps/$file"
 done
