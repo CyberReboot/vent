@@ -8,6 +8,15 @@ def pcap_queue(path):
     from docker import Client
     c = Client(base_url='unix://var/run/docker.sock')
 
+    # first some cleanup
+    containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
+    for cont in containers:
+        try:
+            # will only remove containers that aren't running
+            c.remove_container(cont['Id'])
+        except:
+            pass
+
     responses = {}
 
     template_dir = "/data/templates/"

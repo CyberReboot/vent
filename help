@@ -1,1 +1,66 @@
-TODO
+getting started
+====
+
+from within the vent interface (once SSH'd in) first `build` the collectors.  it might take a little while to download and compile everything.  once it's built you're ready to start the collectors from the `mode` menu option.
+
+after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to copy up pcaps.  that's it!
+
+copy up new pcaps
+====
+
+if using docker-machine cli to provision:
+
+```
+# from the directory that contains your pcaps
+# optionally add an argument of the name for vent in
+#     docker-machine if you called it something other than vent
+cd vent
+cp vent /usr/local/bin/
+cd /path/where/pcaps/are/
+vent
+```
+
+if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
+
+```
+# from the directory that contains your pcaps
+# optionally add an argument of the name/ip for vent on your network
+cd vent
+cp vent-generic /usr/local/bin/vent
+cd /path/where/pcaps/are/
+vent
+```
+
+otherwise edit the `ssh` and `scp` lines in `vent` specific to docker-machine and change to suit your needs
+
+copy up new templates and plugins
+====
+
+if using docker-machine cli to provision:
+
+```
+docker-machine scp modes.template vent:/data/templates/modes.template
+```
+
+if using boot2docker cli to provision (DEPRECATED):
+
+```
+scp -r -i ~/.ssh/id_boot2docker -P 2022 modes.template docker@localhost:/data/templates/modes.template
+```
+
+if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
+
+```
+scp modes.template docker@vnet:/data/templates/modes.template
+```
+
+FAQ
+====
+
+**Q**: What are the credentials to login if I don't use certificates/keys?
+
+**A**: docker/tcuser
+
+**Q**: I went into the shell and did a `docker ps` but no containers are running, how do I get it working again?
+
+**A**: execute `docker rm vent-management; sudo /data/custom`, if that doesn't work, restart the VM.
