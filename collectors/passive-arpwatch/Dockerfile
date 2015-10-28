@@ -1,8 +1,12 @@
-FROM ubuntu:14.04.2
+FROM alpine:3.2
 MAINTAINER Charlie Lewis <clewis@iqt.org>
-RUN apt-get update && apt-get install -y arpwatch \
-                                         rsyslog
-RUN sed 's/"-N -p"/"-Q"/' -i /etc/default/arpwatch
+
+RUN apk add --update \
+    arpwatch \
+    rsyslog \
+    && rm -rf /var/cache/apk/*
+
+RUN sed 's/"-N -p"/"-Q"/' -i /etc/conf.d/arpwatch
 
 # runs arpwatch as 'arpwatch' user by default
 CMD /etc/init.d/rsyslog start; \

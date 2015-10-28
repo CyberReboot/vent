@@ -1,11 +1,10 @@
-FROM ubuntu:14.04.2
+FROM alpine:3.2
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-RUN apt-get update && apt-get install -y build-essential \
-                                         python-dev \
-                                         python-setuptools \
-                                         python-software-properties \
-                                         software-properties-common
+RUN apk add --update \
+    bash \
+    python \
+    && rm -rf /var/cache/apk/*
 
 ADD . /scan
 WORKDIR /scan

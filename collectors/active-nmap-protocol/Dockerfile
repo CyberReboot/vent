@@ -1,4 +1,4 @@
-FROM alpine
+FROM alpine:3.2
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 RUN apk add --update bash git jq netcat-openbsd && rm -rf /var/cache/apk/*
 ADD execute.sh /execute.sh

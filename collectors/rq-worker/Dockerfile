@@ -1,7 +1,11 @@
-FROM ubuntu:14.04.2
+FROM alpine:3.2
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-RUN apt-get update && apt-get install -y python-pip
+RUN apk add --update \
+    python \
+    py-pip \
+    && rm -rf /var/cache/apk/*
+
 RUN pip install rq
 ADD requirements.txt requirements.txt
 RUN pip install -r requirements.txt

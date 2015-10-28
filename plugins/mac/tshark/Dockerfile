@@ -1,7 +1,12 @@
-FROM ubuntu:14.04.2
+FROM alpine:3.2
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-RUN apt-get update && apt-get install -y python-pip tshark
+RUN apk add --update \
+    bash \
+    python \
+    py-pip \
+    tshark \
+    && rm -rf /var/cache/apk/*
 
 ADD requirements.txt requirements.txt
 RUN pip install -r requirements.txt

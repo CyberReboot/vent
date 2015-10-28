@@ -1,13 +1,11 @@
-FROM debian:wheezy
-MAINTAINER Mark Redar mredar@gmail.com
+FROM alpine:3.2
+MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-RUN apt-get update
-RUN apt-get upgrade -y
-RUN apt-get clean
-
-RUN apt-get install -y -q python
-RUN apt-get install -y -q python-pip
-RUN apt-get install -y -q git
+RUN apk add --update \
+    git \
+    python \
+    py-pip \
+    && rm -rf /var/cache/apk/*
 
 #get newer for worker list fix
 RUN pip install git+https://github.com/mredar/rq-dashboard.git
