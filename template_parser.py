@@ -80,7 +80,7 @@ def read_template_types(template_type):
                     config.optionxform=str
                     config.read(template_dir+plugin+'.template')
                     sections = config.sections()
-                    cmd = ["get_data.py", "/"+tool[plugin]+"-data"]
+                    cmd = ["get_data.py", "none", "/"+tool[plugin]+"-data"]
                     if template_type == plugin or template_type == "all":
                         if len(sections) > 0:
                             for section in sections:
@@ -143,7 +143,7 @@ def read_template_types(template_type):
             for section in sections:
                 instructions = {}
                 options = config.options(section)
-                cmd = ["get_data.py", "/"+section+"-data"]
+                cmd = ["get_data.py", "none", "/"+section+"-data"]
                 for option in options:
                     if section == "info" and option == "name":
                         info_name = config.get(section, option)
@@ -208,9 +208,13 @@ def read_template_types(template_type):
                                 if option_val != "{}":
                                     instructions[option] = option_val
                 if d_path == 1:
+                    collector_instructions = {}
                     collector_instructions['Image'] = "visualization/honeycomb"
                     collector_instructions['Cmd'] = cmd
-                    collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, '1visualization-honeycomb']}
+                    if "active" in section or "passive" in section:
+                        collector_instructions['HostConfig'] = {"VolumesFrom":[section, '1visualization-honeycomb']}
+                    else:
+                        collector_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, '1visualization-honeycomb']}
                     tool_collectors[template_type+"-"+section+"-collector"] = collector_instructions
                     d_path = 0
                 if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":

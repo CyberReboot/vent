@@ -49,6 +49,7 @@ Env = ["REMOTE_REDIS_HOST=redis"]
 HostConfig = {"Links": ["collectors-aaa-redis:redis"], "PublishAllPorts": true}
 
 [active-dns]
+data_path = dyn_data/output.csv
 #Cmd = ["domain", "domain controller", "subnet prefix"]
 
 [active-nmap-protocol]
@@ -59,7 +60,13 @@ Tty = true
 HostConfig = {"NetworkMode":"host"}
 
 [active-nmap]
+Tty = true
+HostConfig = {"NetworkMode":"host"}
 
 [passive-arpwatch]
+Tty = true
+HostConfig = {"NetworkMode":"host"}
 
 [passive-p0f]
+Tty = true
+HostConfig = {"NetworkMode":"host"}

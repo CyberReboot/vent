@@ -80,7 +80,7 @@ done
 
 mv $path.new $path
 
-cmd="cd /dns-data; git commit -a -m \"update dns records\";";
+cmd="cd /active-dns-data; git commit -a -m \"update dns records\";";
 eval $cmd;
 rm -rf /honeycomb-data/nmap-protocol-data
 
