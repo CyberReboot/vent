@@ -15,7 +15,7 @@ mkdir -p /honeycomb-data/nmap-protocol-data
 do
   array_line=(${line//,/ })
   ip="${array_line[1]}"
-  cmd="{\"Image\":\"collectors/active-nmap\", \"HostConfig\": {\"VolumesFrom\":[\"1visualization-honeycomb\"]}, \"Cmd\":[\"nmap\", \"-F\", \"-oN\", \"/honeycomb-data/nmap-protocol-data/$ip.log\", \"$ip\"]}"
+  cmd="{\"Image\":\"collectors/active-nmap\", \"HostConfig\": {\"NetworkMode\":\"host\", \"VolumesFrom\":[\"1visualization-honeycomb\"]}, \"Cmd\":[\"nmap\", \"-F\", \"-oN\", \"/honeycomb-data/nmap-protocol-data/$ip.log\", \"$ip\"]}"
   echo "$cmd"
 
   one="echo -e 'POST /containers/create HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: 1023\r\n\r\n$cmd'"
