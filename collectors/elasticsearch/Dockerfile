@@ -1,3 +1,3 @@
 FROM elasticsearch:latest
-RUN plugin -i elasticsearch/marvel/latest
-RUN plugin -i mobz/elasticsearch-head
+RUN plugin install marvel-agent
+RUN plugin install mobz/elasticsearch-head
