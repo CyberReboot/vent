@@ -18,10 +18,12 @@ count = 20
 #elasticsearch = off
 #rabbitmq = off
 #rmq-es-connector = off
+#syslog = off
 
 [external]
 #elasticsearch_host = 0.0.0.0
 #rabbitmq_host = 0.0.0.0
+#syslog_host = 0.0.0.0
 
 [pcap-drop]
 Env = ["PYTHONUNBUFFERED=0"]
@@ -49,25 +51,30 @@ HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock", "/data:/dat
 Env = ["REMOTE_REDIS_HOST=redis"]
 HostConfig = {"Links": ["collectors-aaa-redis:redis"], "PublishAllPorts": true}
 
+[syslog]
+delay = 30
+HostConfig = {"PortBindings": { "514/tcp": [{ "HostPort": "514" }]}, "Links": ["collectors-rabbitmq:rabbitmq"], "Binds":["/var/log/syslog-ng:/var/log/syslog-ng"]}
+
 [active-dns]
 data_path = dyn_data/output.csv
 #Cmd = ["domain", "domain controller", "subnet prefix"]
+HostConfig = {"LogConfig":{"Type": "syslog", "Config": {"syslog-address":"tcp://localhost"}}}
 
 [active-nmap-protocol]
-HostConfig = {"Binds":["/tmp:/tmp", "/var/run/docker.sock:/var/run/docker.sock"], "VolumesFrom":["active-dns", "1visualization-honeycomb"]}
+HostConfig = {"Binds":["/tmp:/tmp", "/var/run/docker.sock:/var/run/docker.sock"], "VolumesFrom":["active-dns", "1visualization-honeycomb"], "LogConfig":{"Type": "syslog", "Config": {"syslog-address":"tcp://localhost"}}}
 
 [active-scan]
 Tty = true
-HostConfig = {"NetworkMode":"host"}
+HostConfig = {"NetworkMode":"host", "LogConfig":{"Type": "syslog", "Config": {"syslog-address":"tcp://localhost"}}}
 
 [active-nmap]
 Tty = true
-HostConfig = {"NetworkMode":"host"}
+HostConfig = {"NetworkMode":"host", "LogConfig":{"Type": "syslog", "Config": {"syslog-address":"tcp://localhost"}}}
 
 [passive-arpwatch]
 Tty = true
-HostConfig = {"NetworkMode":"host"}
+HostConfig = {"NetworkMode":"host", "LogConfig":{"Type": "syslog", "Config": {"syslog-address":"tcp://localhost"}}}
 
 [passive-p0f]
 Tty = true
-HostConfig = {"NetworkMode":"host"}
+HostConfig = {"NetworkMode":"host", "LogConfig":{"Type": "syslog", "Config": {"syslog-address":"tcp://localhost"}}}

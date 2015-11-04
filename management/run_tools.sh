@@ -28,17 +28,20 @@ start_containers() {
     second=${rest%%"$sep"*}
     rest=${rest#*"$sep"}
     third=${rest%%"$sep"*}
+    rest=${rest#*"$sep"}
+    forth=${rest%%"$sep"*}
     last=${rest#*"$sep"}
     # first is name of mode/profile/type
     # second is schedule for the mode/profile/type
     # third is the image names and params for collectors
-    # last is the image names and params to run them with
-    length=$(echo "$last" | jq -c -M '.[]' | wc -l)
+    # forth is the image names and params to run them with
+    # last is the delay dict
+    length=$(echo "$forth" | jq -c -M '.[]' | wc -l)
     i=0
     while [ $i -lt $length ]; do
-      name="echo '$last' | jq 'keys' | jq -M '.[$i]'"
+      name="echo '$forth' | jq 'keys' | jq -M '.[$i]'"
       name=$(eval $name)
-      p="echo '$last' | jq -c -M '.$name'"
+      p="echo '$forth' | jq -c -M '.$name'"
       p=$(eval $p)
       name=${name:1:${#name}-2}
       p=${p//\"false\"/false}

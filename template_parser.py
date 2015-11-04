@@ -11,7 +11,7 @@ import time
 template_dir = "/data/templates/"
 plugins_dir = "/data/plugins/"
 
-def execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict):
+def execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict, delay_sections):
     # note for plugin, also run collector
     # for visualization, make aware of where the data is
     try:
@@ -23,6 +23,8 @@ def execute_template(template_type, template_execution, info_name, service_sched
             json.dump(tool_collectors, f)
             f.write("|")
             json.dump(tool_dict, f)
+            f.write("|")
+            json.dump(delay_sections, f)
             f.write("\n")
     except:
         pass
@@ -49,6 +51,7 @@ def read_template_types(template_type):
         tool_dict["1visualization-honeycomb"] = viz_instructions
 
     try:
+        delay_sections = {}
         if template_type != "visualization" and template_type != "collectors" and template_type != "active" and template_type != "passive":
             config = ConfigParser.RawConfigParser()
             # needed to preserve case sensitive options
@@ -109,6 +112,11 @@ def read_template_types(template_type):
                                                     cmd.append(option_val)
                                                 else:
                                                     cmd.append(option_val)
+                                            elif option == 'delay':
+                                                try:
+                                                    delay_sections[section] = option_val
+                                                except:
+                                                    pass
                                             else:
                                                 instructions[option] = option_val
                                             instructions['Image'] = plugin+'/'+tool[plugin]
@@ -173,8 +181,14 @@ def read_template_types(template_type):
                                     cmd.append(option_val)
                                 else:
                                     cmd.append(option_val)
+                            elif option == 'delay':
+                                try:
+                                    delay_sections[section] = option_val
+                                except:
+                                    pass
                             else:
                                 # check dependencies like elasticsearch and rabbitmq
+                                # !! TODO check for syslog in LogConfig
                                 external_options = config.options("external")
                                 if option == "HostConfig":
                                     try:
@@ -220,21 +234,7 @@ def read_template_types(template_type):
                 if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
                     if not section in external_overrides:
                         if "active" in section or "passive" in section:
-                            if template_type == "active" and "active" in section:
-                                if section in instances:
-                                    try:
-                                        instance_count = config.get("instances", section)
-                                        for i in range(int(instance_count)):
-                                            instructions['Image'] = 'collectors/'+section
-                                            instructions['Volumes'] = {"/"+section+"-data": {}}
-                                            tool_dict[section+str(i)] = instructions
-                                    except:
-                                        pass
-                                else:
-                                    instructions['Image'] = 'collectors/'+section
-                                    instructions['Volumes'] = {"/"+section+"-data": {}}
-                                    tool_dict[section] = instructions
-                            elif template_type == "passive" and "passive" in section:
+                            if (template_type == "active" and "active" in section) or (template_type == "passive" and "passive" in section):
                                 if section in instances:
                                     try:
                                         instance_count = config.get("instances", section)
@@ -266,7 +266,7 @@ def read_template_types(template_type):
             info_name = "\"all\""
     except:
         pass
-    return info_name, service_schedule, tool_collectors, tool_dict
+    return info_name, service_schedule, tool_collectors, tool_dict, delay_sections
 
 def main():
     if len(sys.argv) < 3:
@@ -278,8 +278,8 @@ def main():
             os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
             os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
         else:
-            info_name, service_schedule, tool_collectors, tool_dict = read_template_types(template_type)
-            execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict)
+            info_name, service_schedule, tool_collectors, tool_dict, delay_sections = read_template_types(template_type)
+            execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict, delay_sections)
 
 if __name__ == "__main__":
     main()
