@@ -32,7 +32,7 @@ HostConfig = {"Binds": ["/pcaps:/pcaps:ro"], "Links": ["collectors-aaa-redis:red
 [aaa-redis]
 
 [elasticsearch]
-Cmd = -Des.network.host=0.0.0.0
+#Cmd = -Des.network.host=0.0.0.0
 HostConfig = {"PublishAllPorts": true}
 
 [rmq-es-connector]

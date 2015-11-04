@@ -1,2 +1,3 @@
-FROM elasticsearch:latest
-RUN plugin install mobz/elasticsearch-head
+FROM elasticsearch:1.7.3
+RUN plugin -i elasticsearch/marvel/latest
+RUN plugin -i mobz/elasticsearch-head

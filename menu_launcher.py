@@ -274,6 +274,7 @@ def main():
             { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_rabbitmq_url.sh' },
             { 'title': "RQ Dashboard Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_rqdashboard_url.sh' },
             { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_elasticsearch_head_url.sh' },
+            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_elasticsearch_marvel_url.sh' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
             { 'title': "Container Stats", 'type': INFO2, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
