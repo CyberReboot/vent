@@ -4,7 +4,7 @@ ADD . $ROOTFS/data/
 ADD custom $ROOTFS/etc/rc.d/custom
 ADD motd $ROOTFS/etc/motd
 RUN echo "built on $(date)" >> $ROOTFS/data/VERSION
-RUN echo "echo \"vent \$(cat /data/VERSION)\"" >> $ROOTFS/etc/profile.d/boot2docker.sh
+RUN echo "echo \"vent \$(cat /var/lib/docker/data/VERSION)\"" >> $ROOTFS/etc/profile.d/boot2docker.sh
 RUN echo "/etc/rc.d/custom" >> $ROOTFS/opt/bootscript.sh
 
 # install dependencies

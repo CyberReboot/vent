@@ -40,7 +40,7 @@ boot2docker init; boot2docker up
 boot2docker ssh
 ```
 
-of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running execute `sudo /data/custom`.
+of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running execute `sudo /var/lib/docker/data/custom`.
 
 getting started
 ====
@@ -83,19 +83,19 @@ copy up new templates and plugins
 if using docker-machine cli to provision:
 
 ```
-docker-machine scp modes.template vent:/data/templates/modes.template
+docker-machine scp modes.template vent:/var/lib/docker/data/templates/modes.template
 ```
 
 if using boot2docker cli to provision (DEPRECATED):
 
 ```
-scp -r -i ~/.ssh/id_boot2docker -P 2022 modes.template docker@localhost:/data/templates/modes.template
+scp -r -i ~/.ssh/id_boot2docker -P 2022 modes.template docker@localhost:/var/lib/docker/data/templates/modes.template
 ```
 
 if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
 
 ```
-scp modes.template docker@vnet:/data/templates/modes.template
+scp modes.template docker@vnet:/var/lib/docker/data/templates/modes.template
 ```
 
 FAQ
@@ -107,7 +107,7 @@ FAQ
 
 **Q**: I went into the shell and did a `docker ps` but no containers are running, how do I get it working again?
 
-**A**: execute `docker rm vent-management; sudo /data/custom`, if that doesn't work, restart the VM.
+**A**: execute `docker rm vent-management; sudo /var/lib/docker/data/custom`, if that doesn't work, restart the VM.
 
 The following notes mirror that of [boot2docker](https://github.com/boot2docker/boot2docker)
 ====

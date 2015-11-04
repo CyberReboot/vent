@@ -25,8 +25,8 @@ INFO2 = "info2"
 SETTING = "setting"
 
 # path that exists on the iso
-template_dir = "/data/templates/"
-plugins_dir = "/data/plugins/"
+template_dir = "/var/lib/docker/data/templates/"
+plugins_dir = "/var/lib/docker/data/plugins/"
 
 def run_plugins(action):
     modes = []
@@ -47,7 +47,7 @@ def run_plugins(action):
                     plugin_name = config.get("info", "name")
                     p['title'] = plugin_name
                     p['type'] = COMMAND
-                    p['command'] = 'python2.7 /data/template_parser.py '+plugin+' '+action
+                    p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py '+plugin+' '+action
                     modes.append(p)
                 except:
                     # if no name is provided, it doesn't get listed
@@ -56,7 +56,7 @@ def run_plugins(action):
         p = {}
         p['title'] = "Visualization"
         p['type'] = COMMAND
-        p['command'] = 'python2.7 /data/template_parser.py visualization '+action
+        p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py visualization '+action
         modes.append(p)
 
         try:
@@ -68,7 +68,7 @@ def run_plugins(action):
                     p = {}
                     p['title'] = "Local Passive Collection"
                     p['type'] = COMMAND
-                    p['command'] = 'python2.7 /data/template_parser.py passive '+action
+                    p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py passive '+action
                     modes.append(p)
             except:
                 pass
@@ -78,7 +78,7 @@ def run_plugins(action):
                     p = {}
                     p['title'] = "Local Active Collection"
                     p['type'] = COMMAND
-                    p['command'] = 'python2.7 /data/template_parser.py active '+action
+                    p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py active '+action
                     modes.append(p)
             except:
                 pass
@@ -87,7 +87,7 @@ def run_plugins(action):
         #p = {}
         #p['title'] = "all"
         #p['type'] = COMMAND
-        #p['command'] = 'python2.7 /data/template_parser.py all '+action
+        #p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py all '+action
         #modes.append(p)
     except:
         print "unable to get the configuration of modes from the templates.\n"
@@ -270,10 +270,10 @@ def main():
         },
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /data/visualization/get_url.sh' },
-            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': '/bin/sh /data/collectors/get_rabbitmq_url.sh' },
-            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': '/bin/sh /data/collectors/get_rqdashboard_url.sh' },
-            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': '/bin/sh /data/collectors/get_elasticsearch_head_url.sh' },
+            { 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
+            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_rabbitmq_url.sh' },
+            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_rqdashboard_url.sh' },
+            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_elasticsearch_head_url.sh' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
             { 'title': "Container Stats", 'type': INFO2, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
@@ -281,11 +281,11 @@ def main():
         },
         { 'title': "Build", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh' },
-            { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh --no-cache' },
+            { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /var/lib/docker/data/build_images.sh' },
+            { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /var/lib/docker/data/build_images.sh --no-cache' },
           ]
         },
-        { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
+        { 'title': "Help", 'type': COMMAND, 'command': 'less /var/lib/docker/data/help' },
         { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
         { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
       ]

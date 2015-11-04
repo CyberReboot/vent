@@ -8,8 +8,8 @@ import os
 import sys
 import time
 
-template_dir = "/data/templates/"
-plugins_dir = "/data/plugins/"
+template_dir = "/var/lib/docker/data/templates/"
+plugins_dir = "/var/lib/docker/data/plugins/"
 
 def execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict, delay_sections):
     # note for plugin, also run collector
