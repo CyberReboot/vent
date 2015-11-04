@@ -41,9 +41,12 @@ print ' [*] Waiting for logs. To exit press CTRL+C'
 
 def callback(ch, method, properties, body):
     # send to elasticsearch index
-    doc = ast.literal_eval(body)
-    res = es.index(index="pcap", doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
-    print " [x] "+str(datetime.datetime.utcnow())+" UTC %r:%r" % (method.routing_key, body,)
+    try:
+        doc = ast.literal_eval(body)
+        res = es.index(index="pcap", doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
+        print " [x] "+str(datetime.datetime.utcnow())+" UTC %r:%r" % (method.routing_key, body,)
+    except:
+        pass
 
 channel.basic_consume(callback,
                       queue=queue_name,
