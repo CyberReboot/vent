@@ -41,9 +41,14 @@ print ' [*] Waiting for logs. To exit press CTRL+C'
 
 def callback(ch, method, properties, body):
     # send to elasticsearch index
+    index = "pcap"
+    if method.routing_key.split(".")[0] == 'syslog':
+        body = body.replace('"', '\"')
+        body = '{"log":"'+body+'"}'
+        index = "syslog"
     try:
         doc = ast.literal_eval(body)
-        res = es.index(index="pcap", doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
+        res = es.index(index=index, doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
         print " [x] "+str(datetime.datetime.utcnow())+" UTC %r:%r" % (method.routing_key, body,)
     except:
         pass
