@@ -19,7 +19,7 @@ if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
 else
 	image_exists=$(docker images -q vent-management | wc -l)
 	if [ "$image_exists" == "0" ]; then
-		sudo /etc/init.d/docker restart && sleep 10
+		sudo /etc/init.d/docker start && sleep 10
 		docker load -i /var/lib/docker/data/management/vent-management.tar
 	fi
 	exists=$(docker ps -aq --filter name=vent-management | wc -l)
