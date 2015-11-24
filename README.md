@@ -40,7 +40,7 @@ boot2docker init; boot2docker up
 boot2docker ssh
 ```
 
-of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running execute `sudo /var/lib/docker/data/custom`.
+of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running execute `sudo /data/custom`.
 
 getting started
 ====
@@ -107,7 +107,7 @@ FAQ
 
 **Q**: I went into the shell and did a `docker ps` but no containers are running, how do I get it working again?
 
-**A**: execute `docker rm vent-management; sudo /var/lib/docker/data/custom`, if that doesn't work, restart the VM.
+**A**: execute `docker rm vent-management; sudo /data/custom`, if that doesn't work, restart the VM.
 
 The following notes mirror that of [boot2docker](https://github.com/boot2docker/boot2docker)
 ====

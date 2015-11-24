@@ -47,7 +47,7 @@ def run_plugins(action):
                     plugin_name = config.get("info", "name")
                     p['title'] = plugin_name
                     p['type'] = COMMAND
-                    p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py '+plugin+' '+action
+                    p['command'] = 'python2.7 /data/template_parser.py '+plugin+' '+action
                     modes.append(p)
                 except:
                     # if no name is provided, it doesn't get listed
@@ -56,7 +56,7 @@ def run_plugins(action):
         p = {}
         p['title'] = "Visualization"
         p['type'] = COMMAND
-        p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py visualization '+action
+        p['command'] = 'python2.7 /data/template_parser.py visualization '+action
         modes.append(p)
 
         try:
@@ -68,7 +68,7 @@ def run_plugins(action):
                     p = {}
                     p['title'] = "Local Passive Collection"
                     p['type'] = COMMAND
-                    p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py passive '+action
+                    p['command'] = 'python2.7 /data/template_parser.py passive '+action
                     modes.append(p)
             except:
                 pass
@@ -78,7 +78,7 @@ def run_plugins(action):
                     p = {}
                     p['title'] = "Local Active Collection"
                     p['type'] = COMMAND
-                    p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py active '+action
+                    p['command'] = 'python2.7 /data/template_parser.py active '+action
                     modes.append(p)
             except:
                 pass
@@ -87,7 +87,7 @@ def run_plugins(action):
         #p = {}
         #p['title'] = "all"
         #p['type'] = COMMAND
-        #p['command'] = 'python2.7 /var/lib/docker/data/template_parser.py all '+action
+        #p['command'] = 'python2.7 /data/template_parser.py all '+action
         #modes.append(p)
     except:
         print "unable to get the configuration of modes from the templates.\n"
@@ -282,11 +282,11 @@ def main():
         },
         { 'title': "Build", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /var/lib/docker/data/build_images.sh' },
-            { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /var/lib/docker/data/build_images.sh --no-cache' },
+            { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh' },
+            { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh --no-cache' },
           ]
         },
-        { 'title': "Help", 'type': COMMAND, 'command': 'less /var/lib/docker/data/help' },
+        { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
         { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
         { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
       ]

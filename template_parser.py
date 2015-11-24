@@ -278,7 +278,6 @@ def main():
             os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
             os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
         else:
-            os.system("docker rm vent-management; sudo /var/lib/docker/data/custom")
             info_name, service_schedule, tool_collectors, tool_dict, delay_sections = read_template_types(template_type)
             execute_template(template_type, template_execution, info_name, service_schedule, tool_collectors, tool_dict, delay_sections)
 

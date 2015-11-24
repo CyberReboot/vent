@@ -1,31 +1,8 @@
 #!/bin/sh
-
-# TODO probably should ensure that's actually always the mount point
-mv /data /var/lib/docker/data
-mkdir -p /mnt/sda1/pcaps
-chmod -R 777 /mnt/sda1/pcaps
-ln -s /mnt/sda1/pcaps /pcaps
-
-if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
-	sudo /usr/local/etc/init.d/openssh stop
-	pgrep /usr/local/sbin/sshd | sudo xargs kill -9
-	mv /var/lib/docker/data/bootlocal.sh /var/lib/boot2docker/bootlocal.sh
-	chmod +x /var/lib/boot2docker/bootlocal.sh
-	mv /var/lib/docker/data/profile /var/lib/boot2docker/profile
-	docker load -i /var/lib/docker/data/management/vent-management.tar
-	echo $'Match User docker\n\tAllowTCPForwarding no\n\tX11Forwarding no\n\tForceCommand /var/lib/docker/data/wrapper.sh' >> /usr/local/etc/ssh/sshd_config
-	sudo /usr/local/etc/init.d/openssh restart
-	touch /var/lib/boot2docker/vent.sh
-else
-	image_exists=$(docker images -q vent-management | wc -l)
-	if [ "$image_exists" == "0" ]; then
-		sudo /etc/init.d/docker start && sleep 10
-		docker load -i /var/lib/docker/data/management/vent-management.tar
-	fi
-	exists=$(docker ps -aq --filter name=vent-management | wc -l)
-	if [ "$exists" == "1" ]; then
-		docker start vent-management
-	else
-		docker run --name vent-management -d -v /mnt/sda1/var/lib/boot2docker/tls:/certs -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp vent-management
-	fi
-fi
+/data/bootsync.sh
+/data/bootlocal.sh
+mkdir -p /var/lib/docker/data
+mv /data/templates/ /var/lib/docker/data/templates 2>/dev/null
+mv /data/collectors/ /var/lib/docker/data/collectors 2>/dev/null
+mv /data/plugins/ /var/lib/docker/data/plugins 2>/dev/null
+mv /data/visualization/ /var/lib/docker/data/visualization 2>/dev/null
