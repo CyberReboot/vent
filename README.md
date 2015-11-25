@@ -3,7 +3,7 @@ vent
 
 Network Visibility (an anagram)
 
-download pre-built ISO
+download pre-compiled ISO
 ====
 
 [releases](https://github.com/CyberReboot/vent/releases)
@@ -12,10 +12,48 @@ download pre-built ISO
 build the ISO
 ====
 
+### build dependencies
+
 ```
+docker
+```
+
+### getting the bits
+
+```
+git clone https://github.com/CyberReboot/vent.git
 cd vent
-./build.sh
 ```
+
+### `Makefile` targets
+
+#### Disclaimer, the `prebuilt` version is currently kernel panicking and not included in `all`
+
+There are two different variants of the build.  One that already has all of the needed containers prebuilt and included in the ISO, and one that does not.  Note the one with the containers built will take quite a while (~1 hour) to build and will be approximately 1.3GB, while the one without will be much quicker and only 40MB.
+
+#### `make all`
+
+This target (the default target if none is supplied) will build both the `minimal` and the `prebuilt` ISOs.
+
+#### `make all-no-cache.iso`
+
+This will build both ISOs, but it won't use cache.
+
+#### `make vent-minimal.iso`
+
+This target will build the minimal image without building the containers and build/extract the ISO from the final result.
+
+#### `make vent-prebuilt.iso`
+
+This target will build the prebuilt image including building all the containers and build/extract the ISO from the final result.
+
+#### `make vent-<variant>-no-cache.iso`
+
+This will build the same target for whichever variant, but it won't use cache.
+
+#### `make clean`
+
+This will remove all of the tarballs and ISOs created from any of the build processes.
 
 easy ways to build a VM out of the ISO
 ====
@@ -24,7 +62,7 @@ with docker-machine cli:
 
 ```
 python -m SimpleHTTPServer
-docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhost:8000/vent.iso vent
+docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhost:8000/vent-<variant>.iso vent
 # other options to customize the size of the vm are available as well:
 # --virtualbox-cpu-count "1"
 # --virtualbox-disk-size "20000"
@@ -32,20 +70,16 @@ docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhos
 docker-machine ssh vent
 ```
 
-with boot2docker cli (DEPRECATED):
-
-```
-cp vent.iso ~/.boot2docker/boot2docker.iso
-boot2docker init; boot2docker up
-boot2docker ssh
-```
-
-of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running execute `sudo /data/custom`.
+of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  vent runs in RAM, so changes need to be made under `/var/lib/docker` or `/var/lib/boot2docker` as those are persistent (see boot2docker [documentation](https://github.com/boot2docker/boot2docker/blob/master/README.md) for more information).  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running execute `sudo /data/custom`.
 
 getting started
 ====
 
-from within the vent interface (once SSH'd in) first `build` the collectors.  it might take a little while to download and compile everything.  once it's built you're ready to start the collectors from the `mode` menu option.
+from within the vent interface (once SSH'd in) first `build` the collectors (if you chose the `prebuilt` ISO this is already done for you, so you can skip this step).  it might take a little while to download and compile everything.
+
+alternatively, if you want to access the vent interface from the console instead of SSHing in, you can run `vent` from the commandline.
+
+once it's built you're ready to start the `collectors` from the `mode` menu option.
 
 after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to copy up pcaps.  that's it!
 

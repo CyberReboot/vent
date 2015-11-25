@@ -11,8 +11,8 @@ rq-worker = 2
 count = 20
 
 [local-collection]
-#passive = on
-#active = on
+passive = on
+active = on
 
 [locally-active]
 #elasticsearch = off

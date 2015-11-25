@@ -21,6 +21,8 @@ RUN tar xf python.tar \
     && mv python2.7 $ROOTFS/usr/local/lib/python2.7
 RUN tar xf python-include.tar \
     && mv python2.7 $ROOTFS/usr/local/include/python2.7
+RUN echo "TERM=xterm LANG=C.UTF-8 /usr/local/bin/python2.7 /data/menu_launcher.py" >> $ROOTFS/usr/local/bin/vent
+RUN chmod +x $ROOTFS/usr/local/bin/vent
 RUN rm -rf $ROOTFS/data/dependencies
 RUN rm -rf $ROOTFS/data/.git
 RUN rm -rf $ROOTFS/data/.gitignore
