@@ -6,8 +6,17 @@ if [ "$#" -ne 1 ]; then
 else
     HOST=$1
 fi
+
 echo "Note: this does not copy files recursively..."
 for file in `ls *` ; do
-    docker-machine scp $file $HOST:/tmp/.${file}.tmp
-    docker-machine ssh $HOST "mv /tmp/.${file}.tmp /pcaps/$file"
+    if [ "$2" = "tar" ]; then
+        docker-machine ssh $HOST "mkdir -p /var/lib/docker/data/images"
+        docker-machine scp $file $HOST:/var/lib/docker/data/images/${file}
+    else
+        docker-machine scp $file $HOST:/tmp/.${file}.tmp
+        docker-machine ssh $HOST "mv /tmp/.${file}.tmp /pcaps/$file"
+    fi
 done
+if [ "$2" = "tar" ]; then
+    docker-machine ssh $HOST "/data/bootlocal.sh"
+fi

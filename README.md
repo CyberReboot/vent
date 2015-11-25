@@ -27,29 +27,39 @@ cd vent
 
 ### `Makefile` targets
 
-#### Disclaimer, the `prebuilt` version is currently kernel panicking and not included in `all`
-
-There are two different variants of the build.  One that already has all of the needed containers prebuilt and included in the ISO, and one that does not.  Note the one with the containers built will take quite a while (~1 hour) to build and will be approximately 1.3GB, while the one without will be much quicker and only 40MB.
+There main target builds the vent ISO without any of the containers that will need to be built after the fact. This allows the ISO to be a mere 40MB.  If you use one of the `prebuilt` options it will also build all of the necessary containers and tarball them up.  You can then use the `vent` utility after the vent instance is created inside the local `images` directory specifying `tar` as an argument, and it will add the tarballs as docker images on the instance.
 
 #### `make all`
 
-This target (the default target if none is supplied) will build both the `minimal` and the `prebuilt` ISOs.
+This target (the default target if none is supplied) will build the ISO.
 
-#### `make all-no-cache.iso`
+#### `make all-no-cache`
 
-This will build both ISOs, but it won't use cache.
+This will build the ISO, but it won't use cache.
 
-#### `make vent-minimal.iso`
+#### `make vent`
 
 This target will build the minimal image without building the containers and build/extract the ISO from the final result.
 
-#### `make vent-prebuilt.iso`
+#### `make vent-prebuilt`
 
-This target will build the prebuilt image including building all the containers and build/extract the ISO from the final result.
+This target will build the minimal image as well as tarballs of all of the images after building all the containers and build/extract the ISO from the final result.
 
-#### `make vent-<variant>-no-cache.iso`
+#### `make vent-no-cache`
 
-This will build the same target for whichever variant, but it won't use cache.
+This will build the same target, but it won't use cache.
+
+#### `make vent-prebuilt-no-cache`
+
+This will build the same target and the tarballs, but it won't use cache.
+
+#### `make images`
+
+This will build the containers and export them as tarballs into the images directory and then make a gzip of those tarballs.
+
+#### `make install`
+
+This will install `vent` and `vent-generic` into the path and can be used for loading in tarball images or copying up PCAPs or other files to a vent instance.
 
 #### `make clean`
 
@@ -62,7 +72,7 @@ with docker-machine cli:
 
 ```
 python -m SimpleHTTPServer
-docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhost:8000/vent-<variant>.iso vent
+docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhost:8000/vent.iso vent
 # other options to customize the size of the vm are available as well:
 # --virtualbox-cpu-count "1"
 # --virtualbox-disk-size "20000"
