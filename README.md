@@ -55,7 +55,7 @@ This will build the same target and the tarballs, but it won't use cache.
 
 #### `make images`
 
-This will build the containers and export them as tarballs into the images directory and then make a gzip of those tarballs.
+This will build the containers and export them as tarballs into the images directory and then make a zip of those tarballs.
 
 #### `make install`
 
