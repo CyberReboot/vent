@@ -56,7 +56,7 @@ install:
 .PHONY: install
 
 images: depends-prebuilt
-	tar cfz images.tar.gz images/
+	zip -r images images/
 
 clean:
 	rm -rf images
