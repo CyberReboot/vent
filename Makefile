@@ -60,7 +60,7 @@ images: depends-prebuilt
 
 clean:
 	rm -rf images
-	rm -rf images.tar.gz
+	rm -rf images.zip
 	rm -rf dependencies/tinycore-python2/python2.tar
 	rm -rf management/vent-management.tar
 	rm -vf vent.iso
