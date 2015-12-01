@@ -34,15 +34,31 @@ vent-prebuilt-no-cache: depends-prebuilt-no-cache
 	rm -rf management/vent-management.tar
 
 depends: install
+	@echo
+	@echo "checking dependencies"
+	@echo
+	docker -v
 	./build.sh
 
 depends-no-cache: install
+	@echo
+	@echo "checking dependencies"
+	@echo
+	docker -v
 	./build.sh --no-cache
 
 depends-prebuilt: install
+	@echo
+	@echo "checking dependencies"
+	@echo
+	docker -v
 	./build.sh --build-plugins
 
 depends-prebuilt-no-cache: install
+	@echo
+	@echo "checking dependencies"
+	@echo
+	docker -v
 	./build.sh --build-plugins --no-cache
 
 install:
@@ -56,6 +72,10 @@ install:
 .PHONY: install
 
 images: depends-prebuilt
+	@echo
+	@echo "checking dependencies"
+	@echo
+	zip -v
 	zip -r images images/
 
 clean:
