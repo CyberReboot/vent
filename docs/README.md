@@ -6,7 +6,7 @@ Summary of stuff.
 Install instructions
 ====
 
-For a pre-compiled ISO, skip down to the next [section](#Download the release).
+For a pre-compiled ISO, skip down to the next [section](#download-the-release).
 
 Download the release
 ----
