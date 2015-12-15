@@ -46,12 +46,12 @@ docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhos
 docker-machine ssh vent
 ```
 
-Makefile options
+Download the release
 ----
 
 Summary of stuff.
 
-Download the release
+Makefile options
 ----
 
 Summary of stuff.
