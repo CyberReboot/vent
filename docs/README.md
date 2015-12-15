@@ -50,7 +50,7 @@ Now you're ready to [get started](#getting-started) using `vent`.
 Download the release
 ----
 
-Summary of stuff.
+The latest versioned releases are available for download [here](https://github.com/CyberReboot/vent/releases).  If you'd rather try out vent from the latest in master, it can be downloaded [here](https://github.com/CyberReboot/vent/releases).
 
 Makefile options
 ----
