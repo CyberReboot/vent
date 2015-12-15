@@ -85,7 +85,7 @@ Summary of stuff.
 Advanced Usage
 ====
 
-Summary of stuff.
+Vent is based off of [boot2docker](https://github.com/boot2docker/boot2docker).  There are a few notable differences in the way this VM runs than a typical one might.  Vent will automatically install and provision the disk on boot and then restart when done.  Vent runs in RAM, so changes need to be made under `/var/lib/docker` or `/var/lib/boot2docker` as those are persistent (see boot2docker [documentation](https://github.com/boot2docker/boot2docker/blob/master/README.md) for more information).  it's possible that the `vent-management` container won't automatically get added and run, in order to remedy you can go to the shell from the vent CLI and run `docker ps` and if it's not running execute `sudo /data/custom`.
 
 Commands
 ----
