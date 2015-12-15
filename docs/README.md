@@ -45,6 +45,7 @@ docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhos
 # SSH into the vent CLI
 docker-machine ssh vent
 ```
+Now you're ready to [get started](#getting-started) using `vent`.
 
 Download the release
 ----
