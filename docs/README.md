@@ -6,7 +6,7 @@ Summary of stuff.
 Install instructions
 ====
 
-Summary of stuff.
+For a pre-compiled ISO, skip down to the next [section](#Download the release).
 
 Download the release
 ----
