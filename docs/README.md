@@ -25,7 +25,7 @@ The easiest way to get started quickly is to just execute:
 ```
 make
 ```
-which will build the Vent ISO that can be deployed as VM or on a bare metal server.
+which will build the Vent ISO that can be deployed as a VM or on a bare metal server.
 #### Step 3 - Deploy:
 
 This is just a standard ISO that can be deployed like any other ISO, but here is a simple way using [docker-machine](https://docs.docker.com/machine/) with a local virtualbox (`docker-machine` can also be used to deploy `vent` on cloud providers and data centers):
