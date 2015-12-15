@@ -6,7 +6,7 @@ Summary of stuff.
 Install instructions
 ====
 
-For a pre-compiled ISO, skip down to the next [section](#download-the-release).
+For a pre-compiled ISO, skip down to the next [section](#install-instructions-download-the-release).
 
 #### Build dependencies:
 ```
@@ -20,7 +20,7 @@ cd vent
 ```
 #### Step 2 - Make:
 
-There are [several options](#makefile-options) of how to build `vent` from the Makefile.  
+There are [several options](#install-instructions-makefile-options) of how to build `vent` from the Makefile.  
 The easiest way to get started quickly is to just execute:
 ```
 make
@@ -46,17 +46,12 @@ docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhos
 docker-machine ssh vent
 ```
 
-Download the release
-----
-
-Summary of stuff.
-
-Dependencies
-----
-
-Summary of stuff.
-
 Makefile options
+----
+
+Summary of stuff.
+
+Download the release
 ----
 
 Summary of stuff.
