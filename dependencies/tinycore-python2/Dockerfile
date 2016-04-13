@@ -1,4 +1,4 @@
-FROM tatsushid/tinycore:6.4-x86_64
+FROM tatsushid/tinycore:7.0-x86_64
 
 # Instructions are run with 'tc' user
 
@@ -12,7 +12,7 @@ RUN tce-load -wic gnupg curl \
 # gpg: key 18ADD4FF: public key "Benjamin Peterson <benjamin@python.org>" imported
 RUN gpg2 --keyserver pool.sks-keyservers.net --recv-keys C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF
 
-ENV PYTHON_VERSION 2.7.10
+ENV PYTHON_VERSION 2.7.11
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
 ENV PYTHON_PIP_VERSION 7.1.2
@@ -23,7 +23,8 @@ RUN tce-load -wic \
         file \
         gcc \
         make \
-        linux-3.16.2_api_headers \
+        linux-4.2.1_api_headers \
+        glibc_add_lib \
         glibc_base-dev \
         openssl-dev \
         gdbm-dev \
@@ -35,7 +36,6 @@ RUN tce-load -wic \
         libX11-dev \
         libXss \
         xorg-proto \
-    && sudo ln -s /usr/local/bin/file /usr/bin/file \
     && cd /tmp \
     && curl -SL "https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz" -o python.tar.xz \
     && curl -SL "https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz.asc" -o python.tar.xz.asc \
@@ -76,7 +76,7 @@ RUN tce-load -wic \
                 flex.tcz \
                 gcc.tcz \
                 gcc_libs.tcz \
-                linux-3.16.2_api_headers.tcz \
+                linux-4.2.1_api_headers.tcz \
                 make.tcz \
                 sqlite3-bin.tcz \
                 xorg-proto.tcz; do \
@@ -90,8 +90,6 @@ RUN tce-load -wic \
     && sudo rm -f /usr/bin/file \
     && sudo /sbin/ldconfig \
     && rm -rf /tmp/tce/optional/* \
-    && curl -SL 'https://bootstrap.pypa.io/get-pip.py' | sudo python2 \
-    && sudo pip install --no-cache-dir --upgrade pip==$PYTHON_PIP_VERSION \
     && sudo find /usr/local \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + \
     && find /usr/local \( -type d -a -name test -o -name tests \) | sudo xargs rm -rf \
     && sudo rm -rf /usr/src/python
