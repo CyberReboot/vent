@@ -85,11 +85,11 @@ of course traditional ways of deploying an ISO work as well, including VMWare, O
 getting started
 ====
 
-from within the vent interface (once SSH'd in) first `build` the collectors (if you chose the `prebuilt` ISO this is already done for you, so you can skip this step).  it might take a little while to download and compile everything.
+from within the vent interface (once SSH'd in) first `build` the core (if you chose the `prebuilt` ISO this is already done for you, so you can skip this step).  it might take a little while to download and compile everything.
 
 alternatively, if you want to access the vent interface from the console instead of SSHing in, you can run `vent` from the commandline.
 
-once it's built you're ready to start the `collectors` from the `mode` menu option.
+once it's built you're ready to start the `core` from the `mode` menu option.
 
 after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to copy up pcaps.  that's it!
 

@@ -23,6 +23,7 @@ EXITMENU = "exitmenu"
 INFO = "info"
 INFO2 = "info2"
 SETTING = "setting"
+INPUT = "input"
 
 # path that exists on the iso
 template_dir = "/var/lib/docker/data/templates/"
@@ -39,7 +40,7 @@ def run_plugins(action):
             plugins[plug] = config.get("plugins", plug)
 
         for plugin in plugins:
-            if plugin == "collectors":
+            if plugin == "core":
                 p = {}
                 try:
                     config = ConfigParser.RawConfigParser()
@@ -53,15 +54,16 @@ def run_plugins(action):
                     # if no name is provided, it doesn't get listed
                     pass
         # one off for visualization
-        p = {}
-        p['title'] = "Visualization"
-        p['type'] = COMMAND
-        p['command'] = 'python2.7 /data/template_parser.py visualization '+action
-        modes.append(p)
+        # TODO make an option from templates
+        #p = {}
+        #p['title'] = "Visualization"
+        #p['type'] = COMMAND
+        #p['command'] = 'python2.7 /data/template_parser.py visualization '+action
+        #modes.append(p)
 
         try:
             config = ConfigParser.RawConfigParser()
-            config.read(template_dir+'collectors.template')
+            config.read(template_dir+'core.template')
             try:
                 passive = config.get("local-collection", "passive")
                 if passive == "on":
@@ -137,6 +139,16 @@ def update_plugins():
         print "unable to get the configuration of modes from the templates.\n"
     return modes
 
+def get_param(prompt_string):
+     curses.echo()
+     screen.clear()
+     screen.border(0)
+     screen.addstr(2, 2, prompt_string)
+     screen.refresh()
+     input = screen.getstr(10, 10, 60)
+     curses.noecho()
+     return input
+
 def runmenu(menu, parent):
     if parent is None:
         lastoption = "Exit"
@@ -149,7 +161,7 @@ def runmenu(menu, parent):
     oldpos=None
     x = None
 
-    while x !=ord('\n'):
+    while x != ord('\n'):
         if pos != oldpos:
             oldpos = pos
             screen.border(0)
@@ -204,6 +216,20 @@ def runmenu(menu, parent):
                 pos = optioncount
     return pos
 
+def add_plugins(plugin_url):
+    try:
+        # !! TODO right path, also parse out directories, and cleanup after
+        os.system("cd /tmp && git clone "+plugin_url)
+    except:
+        pass
+
+def remove_plugins(plugin_url):
+    try:
+        # !! TODO
+        os.system("ls")
+    except:
+        pass
+
 def processmenu(menu, parent=None):
     optioncount = len(menu['options'])
     exitmenu = False
@@ -233,6 +259,27 @@ def processmenu(menu, parent=None):
             curses.reset_prog_mode()
             curses.curs_set(1)
             curses.curs_set(0)
+        elif menu['options'][getin]['type'] == INPUT:
+            if menu['options'][getin]['title'] == "Add Plugins":
+                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-network-plugins.git")
+                curses.def_prog_mode()
+                os.system('reset')
+                screen.clear()
+                add_plugins(plugin_url)
+                screen.clear()
+                curses.reset_prog_mode()
+                curses.curs_set(1)
+                curses.curs_set(0)
+            elif menu['options'][getin]['title'] == "Remove Plugins":
+                plugin_url = get_param("Enter the HTTPS Git URL that contains the plugins you'd like to remove, e.g. https://github.com/CyberReboot/vent-network-plugins.git")
+                curses.def_prog_mode()
+                os.system('reset')
+                screen.clear()
+                remove_plugins(plugin_url)
+                screen.clear()
+                curses.reset_prog_mode()
+                curses.curs_set(1)
+                curses.curs_set(0)
         elif menu['options'][getin]['type'] == MENU:
             screen.clear()
             processmenu(menu['options'][getin], menu)
@@ -266,15 +313,17 @@ def main():
             { 'title': "Hostname", 'type': SETTING, 'command': '' },
             { 'title': "IP Address", 'type': SETTING, 'command': '' },
             { 'title': "SSH Keys", 'type': SETTING, 'command': '' },
+            { 'title': "Add Plugins", 'type': INPUT, 'command': '' },
+            { 'title': "Remove Plugins", 'type': INPUT, 'command': '' },
           ]
         },
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
-            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_rabbitmq_url.sh' },
-            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_rqdashboard_url.sh' },
-            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_elasticsearch_head_url.sh' },
-            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/collectors/get_elasticsearch_marvel_url.sh' },
+            #{ 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
+            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/core/get_rabbitmq_url.sh' },
+            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/core/get_rqdashboard_url.sh' },
+            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/core/get_elasticsearch_head_url.sh' },
+            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/core/get_elasticsearch_marvel_url.sh' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
             { 'title': "Container Stats", 'type': INFO2, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
@@ -282,8 +331,8 @@ def main():
         },
         { 'title': "Build", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Build new plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh' },
-            { 'title': "Force rebuild all plugins and collectors", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh --no-cache' },
+            { 'title': "Build new plugins and core", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh' },
+            { 'title': "Force rebuild all plugins and core", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh --no-cache' },
           ]
         },
         { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },

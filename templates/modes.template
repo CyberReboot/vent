@@ -1,8 +1,2 @@
 [plugins]
-collectors = all
-domain = all
-hash = all
-ip = all
-mac = all
-stats = all
-visualization = all
+core = all

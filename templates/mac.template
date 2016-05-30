@@ -1,6 +1,0 @@
-[info]
-name = MAC Addresses
-
-[service]
-schedule = {"all":"hourly"}
-

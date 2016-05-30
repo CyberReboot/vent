@@ -12,7 +12,7 @@ zka = all
 zkp = all
 ```
 
-### Collectors, Visualization, and Specific Plugin Templates
+### Core, Collectors, Visualization, and Specific Plugin Templates
 
 Specify a name and schedule to run tools at.  A schedule is a dictionary of
 tools that can specify either all at a frequency or each tool at specific

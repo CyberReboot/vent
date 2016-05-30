@@ -3,8 +3,10 @@ sudo /data/bootsync.sh
 sudo /data/bootlocal.sh
 sudo mkdir -p /var/lib/docker/data
 sudo mkdir -p /var/lib/docker/data/images
+sudo mkdir -p /var/lib/docker/data/plugins
+sudo mkdir -p /var/lib/docker/data/collectors
+sudo chmod -R 777 /var/lib/docker/data/collectors
+sudo chmod -R 777 /var/lib/docker/data/plugins
 sudo chmod -R 777 /var/lib/docker/data/images
 sudo mv /data/templates/ /var/lib/docker/data/templates 2>/dev/null
-sudo mv /data/collectors/ /var/lib/docker/data/collectors 2>/dev/null
-sudo mv /data/plugins/ /var/lib/docker/data/plugins 2>/dev/null
-sudo mv /data/visualization/ /var/lib/docker/data/visualization 2>/dev/null
+sudo mv /data/core/ /var/lib/docker/data/core 2>/dev/null

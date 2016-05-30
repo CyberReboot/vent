@@ -33,7 +33,7 @@ start_containers() {
     last=${rest#*"$sep"}
     # first is name of mode/profile/type
     # second is schedule for the mode/profile/type
-    # third is the image names and params for collectors
+    # third is the image names and params for core
     # forth is the image names and params to run them with
     # last is the delay dict
     length=$(echo "$forth" | jq -c -M '.[]' | wc -l)

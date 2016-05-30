@@ -1,3 +1,3 @@
 #!/bin/sh
 # TODO
-echo "collector"
+echo "core"

@@ -1,8 +1,0 @@
-[info]
-name = Visualization
-
-[service]
-schedule = {"all":"continuous"}
-
-[honeycomb]
-Cmd = ""

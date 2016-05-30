@@ -1,3 +1,0 @@
-[submodule "visualization/honeycomb"]
-	path = visualization/honeycomb
-	url = https://github.com/CyberReboot/honeycomb.git

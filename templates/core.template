@@ -1,0 +1,56 @@
+[info]
+name = Core
+
+[service]
+schedule = {"all":"continuous"}
+
+[instances]
+rq-worker = 2
+
+[active-containers]
+count = 20
+
+[local-collection]
+#passive = off
+#active = off
+
+[locally-active]
+#elasticsearch = off
+#rabbitmq = off
+#rmq-es-connector = off
+#syslog = off
+
+[external]
+#elasticsearch_host = 0.0.0.0
+#rabbitmq_host = 0.0.0.0
+#syslog_host = 0.0.0.0
+
+[pcap-drop]
+Env = ["PYTHONUNBUFFERED=0"]
+HostConfig = {"Binds": ["/pcaps:/pcaps:ro"], "Links": ["core-aaa-redis:redis"]}
+
+[aaa-redis]
+
+[elasticsearch]
+#Cmd = -Des.network.host=0.0.0.0
+HostConfig = {"PublishAllPorts": true}
+
+[rmq-es-connector]
+Cmd = #
+Env = ["PYTHONUNBUFFERED=0"]
+HostConfig = {"Links": ["core-rabbitmq:rabbitmq", "core-elasticsearch:elasticsearch"]}
+
+[rabbitmq]
+HostConfig = {"PublishAllPorts": true}
+
+[rq-worker]
+Env = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
+HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock", "/var/lib/docker/data:/data:ro"], "Links": ["core-aaa-redis:redis"]}
+
+[rq-dashboard]
+Env = ["REMOTE_REDIS_HOST=redis"]
+HostConfig = {"Links": ["core-aaa-redis:redis"], "PublishAllPorts": true}
+
+[syslog]
+delay = 30
+HostConfig = {"PortBindings": { "514/tcp": [{ "HostPort": "514" }]}, "Links": ["core-rabbitmq:rabbitmq"], "Binds":["/var/log/syslog-ng:/var/log/syslog-ng"]}
