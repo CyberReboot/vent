@@ -216,20 +216,6 @@ def runmenu(menu, parent):
                 pos = optioncount
     return pos
 
-def add_plugins(plugin_url):
-    try:
-        # !! TODO right path, also parse out directories, and cleanup after
-        os.system("cd /tmp && git clone "+plugin_url)
-    except:
-        pass
-
-def remove_plugins(plugin_url):
-    try:
-        # !! TODO
-        os.system("ls")
-    except:
-        pass
-
 def processmenu(menu, parent=None):
     optioncount = len(menu['options'])
     exitmenu = False
@@ -265,7 +251,7 @@ def processmenu(menu, parent=None):
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
-                add_plugins(plugin_url)
+                os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
                 screen.clear()
                 curses.reset_prog_mode()
                 curses.curs_set(1)
@@ -275,7 +261,7 @@ def processmenu(menu, parent=None):
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
-                remove_plugins(plugin_url)
+                os.system("python2.7 /data/plugin_parser.py remove_plugins "+plugin_url)
                 screen.clear()
                 curses.reset_prog_mode()
                 curses.curs_set(1)

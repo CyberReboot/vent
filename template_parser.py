@@ -34,7 +34,7 @@ def read_template_types(template_type):
     # read in templates for plugins, core, and visualization
     template_path = template_dir+template_type+'.template'
     if template_type == "active" or template_type == "passive":
-        template_path = template_dir+'core.template'
+        template_path = template_dir+'collectors.template'
 
     info_name = ""
     d_path = 0
