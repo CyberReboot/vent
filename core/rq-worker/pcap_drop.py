@@ -26,7 +26,7 @@ def pcap_queue(path):
         plugin_array = config.options("plugins")
         plugins = {}
         for plug in plugin_array:
-            if plug != "core" and plug != "visualization":
+            if plug != "core" and plug != "visualization" and plug != "collectors":
                 plugins[plug] = config.get("plugins", plug)
         t = []
         for plugin in plugins:

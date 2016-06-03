@@ -66,7 +66,7 @@ def add_plugins(plugin_url):
             plugins = {}
             for f in files:
                 f_name = f.split(".template")[0]
-                if f_name != "README.md" and not f_name in plugin_array:
+                if f_name != "README.md" and not f_name in plugin_array and f_name != "modes":
                     config.set("plugins", f_name, "all")
             with open('/var/lib/docker/data/templates/modes.template', 'w') as configfile:
                 config.write(configfile)
