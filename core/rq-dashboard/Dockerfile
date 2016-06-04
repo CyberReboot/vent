@@ -1,4 +1,4 @@
-FROM alpine:3.3
+FROM alpine:3.4
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
@@ -7,7 +7,7 @@ RUN apk add --update \
     py-pip \
     && rm -rf /var/cache/apk/*
 
-#get newer for worker list fix
+# get newer for worker list fix
 RUN pip install git+https://github.com/mredar/rq-dashboard.git
 
 ADD rq-dash-settings.py /rq-dash-settings.py
