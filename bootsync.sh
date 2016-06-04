@@ -2,7 +2,6 @@
 if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
 	sudo /usr/local/etc/init.d/openssh stop
 	pgrep /usr/local/sbin/sshd | sudo xargs kill -9
-	# TODO probably should ensure that's actually always the mount point
 	mkdir -p /var/lib/docker/data/pcaps
 	chmod -R 777 /var/lib/docker/data/pcaps
 	ln -s /var/lib/docker/data/pcaps /pcaps
