@@ -2,6 +2,11 @@ all: vent
 
 all-no-cache: vent-no-cache
 
+latest: pull vent
+
+pull:
+	docker pull boot2docker/boot2docker
+
 vent: depends
 	docker build -t vent .
 	docker run --rm vent > vent.iso
