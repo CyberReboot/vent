@@ -38,9 +38,9 @@ HostConfig = {"PublishAllPorts": true}
 [rmq-es-connector]
 Cmd = #
 Env = ["PYTHONUNBUFFERED=0"]
-HostConfig = {"Links": ["core-rabbitmq:rabbitmq", "core-elasticsearch:elasticsearch"]}
+HostConfig = {"Links": ["core-aaa-rabbitmq:rabbitmq", "core-elasticsearch:elasticsearch"]}
 
-[rabbitmq]
+[aaa-rabbitmq]
 HostConfig = {"PublishAllPorts": true}
 
 [rq-worker]
@@ -49,8 +49,7 @@ HostConfig = {"Binds": ["/var/run/docker.sock:/var/run/docker.sock", "/var/lib/d
 
 [rq-dashboard]
 Env = ["REMOTE_REDIS_HOST=redis"]
-HostConfig = {"Links": ["core-aaa-redis:redis"], "PublishAllPorts": true}
+HostConfig = {"Links": ["core-aaa-redis:redis"], "PublishAllPorts": true, "LogConfig": { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://localhost"} }}
 
-[syslog]
-delay = 30
-HostConfig = {"PortBindings": { "514/tcp": [{ "HostPort": "514" }]}, "Links": ["core-rabbitmq:rabbitmq"], "Binds":["/var/log/syslog-ng:/var/log/syslog-ng"]}
+[aaa-syslog]
+HostConfig = {"PortBindings": { "514/tcp": [{ "HostPort": "514" }]}, "Links": ["core-aaa-rabbitmq:rabbitmq"], "Binds":["/var/log/syslog-ng:/var/log/syslog-ng"]}
