@@ -6,6 +6,7 @@ def pcap_queue(path):
     config = ConfigParser.RawConfigParser()
 
     from docker import Client
+    from docker.utils.types import LogConfig
     c = Client(base_url='unix://var/run/docker.sock')
 
     # first some cleanup
@@ -55,20 +56,28 @@ def pcap_queue(path):
             # for plugin, create container and start it
             # !! TODO read params for create_container from the templates!
             try:
-                container = c.create_container(image=image, volumes=["/pcaps"], environment=["PYTHONUNBUFFERED=0"], tty=True, stdin_open=True, command=path)
                 config.read(template_dir+'core.template')
                 locally_active = config.options("locally-active")
-                flag = 0
-                if "rabbitmq" in locally_active:
-                    if config.get("locally-active", "rabbitmq") == "off":
+                syslog_host = "localhost"
+                if "aaa-syslog" in locally_active:
+                    if config.get("locally-active", "aaa-syslog") == "off":
                         external_array = config.options("external")
-                        if "rabbitmq_host" in external_array:
-                            rabbitmq_host = config.get("external", "rabbitmq_host")
+                        if "aaa-syslog_host" in external_array:
+                            syslog_host = config.get("external", "aaa-syslog_host")
+                flag = 0
+                if "aaa-rabbitmq" in locally_active:
+                    if config.get("locally-active", "aaa-rabbitmq") == "off":
+                        external_array = config.options("external")
+                        if "aaa-rabbitmq_host" in external_array:
+                            rabbitmq_host = config.get("external", "aaa-rabbitmq_host")
                             flag = 1
+                hc = None
                 if flag:
-                    response = c.start(container=container.get('Id'), binds=["/pcaps:/pcaps:ro"], extra_hosts={"rabbitmq":rabbitmq_host})
+                    hc = c.create_host_config(extra_hosts={"rabbitmq":rabbitmq_host}, binds=["/pcaps:/pcaps:ro"], log_config={'type': LogConfig.types.SYSLOG, 'config': {"tag":"{{.ImageName}}/{{.Name}}/{{.ID}}","syslog-address":"tcp://"+syslog_host}})
                 else:
-                    response = c.start(container=container.get('Id'), binds=["/pcaps:/pcaps:ro"], links={"core-rabbitmq":"rabbitmq"})
+                    hc = c.create_host_config(links={"core-aaa-rabbitmq":"rabbitmq"}, binds=["/pcaps:/pcaps:ro"], log_config={'type': LogConfig.types.SYSLOG, 'config': {"tag":"{{.ImageName}}/{{.Name}}/{{.ID}}","syslog-address":"tcp://"+syslog_host}})
+                container = c.create_container(image=image, host_config=hc, volumes=["/pcaps"], environment=["PYTHONUNBUFFERED=0"], tty=True, stdin_open=True, command=path)
+                response = c.start(container=container.get('Id'))
                 responses[image] = response
             except:
                 pass

@@ -188,7 +188,6 @@ def read_template_types(template_type):
                                     pass
                             else:
                                 # check dependencies like elasticsearch and rabbitmq
-                                # !! TODO check for syslog in LogConfig
                                 external_options = config.options("external")
                                 if option == "HostConfig":
                                     try:
@@ -196,8 +195,8 @@ def read_template_types(template_type):
                                         option_val = option_val.replace("false", "False")
                                         host_config = ast.literal_eval(option_val)
                                         host_config_new = copy.deepcopy(host_config)
-                                        flag = 0
                                         extra_hosts = []
+                                        host_config_new["RestartPolicy"] = { "Name": "always" }
                                         if "Links" in host_config:
                                             for rec in host_config["Links"]:
                                                 r = rec.split(":")
@@ -210,11 +209,23 @@ def read_template_types(template_type):
                                                             host_config_new["ExtraHosts"] = extra_hosts
                                                         else:
                                                             print "no local "+r[1]+" but an external one wasn't specified."
-                                                        flag = 1
-                                        if len(host_config_new["Links"]) == 0:
-                                            del host_config_new["Links"]
-                                        if flag:
                                             option_val = str(host_config_new).replace("'", '"')
+                                            if len(host_config_new["Links"]) == 0:
+                                                del host_config_new["Links"]
+                                        # add syslog, don't log rmq-es-connector as it will loop itself
+                                        if section != "rmq-es-connector" and section != "aaa-syslog" and section != "aaa-redis" and section != "aaa-rabbitmq":
+                                            try:
+                                                syslog_host = "localhost"
+                                                for ext in external_overrides:
+                                                    if "aaa_syslog" == ext:
+                                                        if "aaa_syslog_host" in external_options:
+                                                            syslog_host = config.get("external", "aaa_syslog_host")
+                                                        else:
+                                                            print "no local syslog but an external one wasn't specified."
+                                                host_config_new["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
+                                                option_val = str(host_config_new).replace("'", '"')
+                                            except:
+                                                pass
                                     except:
                                         pass
                                 option_val = option_val.replace("True", "true")
