@@ -116,7 +116,15 @@ def update_plugins():
                 p['type'] = MENU
                 p['subtitle'] = 'Please select a tool to configure...'
                 p['options'] = []
-                if plugins[plugin] == 'all':
+                if plugin == 'core':
+                    tools = [ name for name in os.listdir("/var/lib/docker/data/"+plugin) if os.path.isdir(os.path.join('/var/lib/docker/data/'+plugin, name)) ]
+                    for tool in tools:
+                        t = {}
+                        t['title'] = tool
+                        t['type'] = SETTING
+                        t['command'] = ''
+                        p['options'].append(t)
+                elif plugins[plugin] == 'all':
                     tools = [ name for name in os.listdir(plugins_dir+plugin) if os.path.isdir(os.path.join(plugins_dir+plugin, name)) ]
                     for tool in tools:
                         t = {}
@@ -293,12 +301,10 @@ def main():
             }
           ]
         },
-        { 'title': "Settings", 'type': MENU, 'subtitle': 'Please select a setting to change...',
+        { 'title': "Plugins", 'type': MENU, 'subtitle': 'Please select an option...',
           'options': [
-            { 'title': "Data", 'type': SETTING, 'command': '' },
-            { 'title': "Hostname", 'type': SETTING, 'command': '' },
-            { 'title': "IP Address", 'type': SETTING, 'command': '' },
-            { 'title': "SSH Keys", 'type': SETTING, 'command': '' },
+            { 'title': "Show Installed Plugins", 'type': INPUT, 'command': '' },
+            { 'title': "Update Plugins", 'type': INPUT, 'command': '' },
             { 'title': "Add Plugins", 'type': INPUT, 'command': '' },
             { 'title': "Remove Plugins", 'type': INPUT, 'command': '' },
           ]
@@ -324,6 +330,7 @@ def main():
         { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
         { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
         { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
+        { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
       ]
     }
 
