@@ -5,6 +5,7 @@ import copy
 import ConfigParser
 import json
 import os
+import subprocess
 import sys
 import time
 
@@ -35,6 +36,30 @@ def read_template_types(template_type):
     template_path = template_dir+template_type+'.template'
     if template_type == "active" or template_type == "passive":
         template_path = template_dir+'collectors.template'
+
+    # search for eval string and replace with sh evaluation
+    # note only checks for first occurance per line
+    try:
+        orig_str = None
+        repl_str = None
+        with open(template_path, 'r') as f:
+            for line in f:
+                if "`" in line:
+                    a = line.split('`', 1)[1]
+                    if "`" in a:
+                        cmd = a.split('`', 1)[0]
+                        cmd_output = subprocess.check_output(cmd.split())
+                        repl_str = cmd_output.strip()
+                        orig_str = "`"+cmd+"`"
+        if orig_str != None and repl_str != None:
+            filedata = None
+            with open(template_path, 'r') as f:
+                filedata = f.read()
+            filedata = filedata.replace(orig_str, repl_str)
+            with open(template_path, 'w') as f:
+                f.write(filedata)
+    except:
+        pass
 
     info_name = ""
     d_path = 0
