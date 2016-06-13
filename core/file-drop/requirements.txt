@@ -1,3 +1,4 @@
+python-magic
 redis
 rq
 watchdog

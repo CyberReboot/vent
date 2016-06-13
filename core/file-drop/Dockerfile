@@ -2,16 +2,17 @@ FROM alpine:3.4
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
+    libmagic \
     python \
     py-pip \
     && rm -rf /var/cache/apk/*
 
-ADD . /pcap-drop
-RUN pip install -r /pcap-drop/requirements.txt
+ADD . /file-drop
+RUN pip install -r /file-drop/requirements.txt
 
-WORKDIR /pcap-drop
+WORKDIR /file-drop
 
-ENTRYPOINT ["python", "/pcap-drop/pcap_drop.py"]
+ENTRYPOINT ["python", "/file-drop/file_drop.py"]
 
 # volume dir to watch
 # cmd specify dir

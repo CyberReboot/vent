@@ -14,7 +14,7 @@ for file in `ls *` ; do
         docker-machine scp $file $HOST:/var/lib/docker/data/images/${file}
     else
         docker-machine scp $file $HOST:/tmp/.${file}.tmp
-        docker-machine ssh $HOST "mv /tmp/.${file}.tmp /pcaps/$file"
+        docker-machine ssh $HOST "mv /tmp/.${file}.tmp /files/$file"
     fi
 done
 if [ "$2" = "tar" ]; then

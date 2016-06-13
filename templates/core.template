@@ -25,9 +25,9 @@ count = 20
 #aaa-rabbitmq_host = 0.0.0.0
 #aaa-syslog_host = 0.0.0.0
 
-[pcap-drop]
+[file-drop]
 Env = ["PYTHONUNBUFFERED=0"]
-HostConfig = {"Binds": ["/pcaps:/pcaps:ro"], "Links": ["core-aaa-redis:redis"]}
+HostConfig = {"Binds": ["/files:/files:ro"], "Links": ["core-aaa-redis:redis"]}
 
 [aaa-redis]
 

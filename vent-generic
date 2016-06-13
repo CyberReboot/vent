@@ -14,7 +14,7 @@ for file in `ls *` ; do
     else
         # XXX TODO use expect
         scp $file docker@$HOST:/tmp/.${file}.tmp
-        ssh docker@$HOST "mv /tmp/.${file}.tmp /pcaps/$file"
+        ssh docker@$HOST "mv /tmp/.${file}.tmp /files/$file"
     fi
 done
 if [ "$2" = "tar" ]; then

@@ -73,10 +73,10 @@ def pcap_queue(path):
                             flag = 1
                 hc = None
                 if flag:
-                    hc = c.create_host_config(extra_hosts={"rabbitmq":rabbitmq_host}, binds=["/pcaps:/pcaps:ro"], log_config={'type': LogConfig.types.SYSLOG, 'config': {"tag":"{{.ImageName}}/{{.Name}}/{{.ID}}","syslog-address":"tcp://"+syslog_host}})
+                    hc = c.create_host_config(extra_hosts={"rabbitmq":rabbitmq_host}, binds=["/files:/files:ro"], log_config={'type': LogConfig.types.SYSLOG, 'config': {"tag":"{{.ImageName}}/{{.Name}}/{{.ID}}","syslog-address":"tcp://"+syslog_host}})
                 else:
-                    hc = c.create_host_config(links={"core-aaa-rabbitmq":"rabbitmq"}, binds=["/pcaps:/pcaps:ro"], log_config={'type': LogConfig.types.SYSLOG, 'config': {"tag":"{{.ImageName}}/{{.Name}}/{{.ID}}","syslog-address":"tcp://"+syslog_host}})
-                container = c.create_container(image=image, host_config=hc, volumes=["/pcaps"], environment=["PYTHONUNBUFFERED=0"], tty=True, stdin_open=True, command=path)
+                    hc = c.create_host_config(links={"core-aaa-rabbitmq":"rabbitmq"}, binds=["/files:/files:ro"], log_config={'type': LogConfig.types.SYSLOG, 'config': {"tag":"{{.ImageName}}/{{.Name}}/{{.ID}}","syslog-address":"tcp://"+syslog_host}})
+                container = c.create_container(image=image, host_config=hc, volumes=["/files"], environment=["PYTHONUNBUFFERED=0"], tty=True, stdin_open=True, command=path)
                 response = c.start(container=container.get('Id'))
                 responses[image] = response
             except:
