@@ -15,8 +15,8 @@ count = 20
 #active = off
 
 [locally-active]
-#aaa-elasticsearch = off
-#rabbitmq = off
+#elasticsearch = off
+#aaa-rabbitmq = off
 #rmq-es-connector = off
 #aaa-syslog = off
 
