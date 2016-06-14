@@ -311,6 +311,8 @@ def main():
         template_type = sys.argv[1]
         template_execution = sys.argv[2]
         if template_execution == "stop":
+            os.system("docker ps | grep "+template_type+" | awk '{print $1}' | xargs docker stop")
+        elif template_execution == "clean":
             os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
             os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
         else:

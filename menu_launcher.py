@@ -293,6 +293,9 @@ def main():
             { 'title': "Stop", 'type': MENU, 'subtitle': '',
               'options': run_plugins("stop")
             },
+            { 'title': "Clean (Stop and Remove Containers)", 'type': MENU, 'subtitle': '',
+              'options': run_plugins("clean")
+            },
             { 'title': "Status", 'type': MENU, 'subtitle': '',
               'options': run_plugins("status")
             },
