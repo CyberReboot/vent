@@ -94,6 +94,10 @@ def run_plugins(action):
     except:
         print "unable to get the configuration of modes from the templates.\n"
 
+    # make sure that vent-management is running
+    result = check_output('/bin/sh /data/bootlocal.sh'.split())
+    print result
+
     return modes
 
 def update_plugins():

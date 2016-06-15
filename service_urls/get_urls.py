@@ -27,7 +27,7 @@ def url(service, service_type):
                 elif service_type == "marvel":
                     url_str = "http://"+external_host+":9200/_plugin/marvel"
             elif service == "aaa-rabbitmq":
-                url_str = "http://"+external_host+":15671 login: guest/guest"
+                url_str = "http://"+external_host+":15672 login: guest/guest"
             elif service == "aaa-syslog":
                 # !! TODO
                 url_str = "external"
