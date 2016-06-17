@@ -73,7 +73,7 @@ def add_plugins(plugin_url):
                                 with open('/var/lib/docker/data/templates/core.template', 'w') as configfile:
                 					read_config.write(configfile)
             except:
-                print sys.exc_info()
+                pass
         # update modes.template if it wasn't copied up to include new plugins
         if check_modes:
             files = [x[2] for x in os.walk("/var/lib/docker/data/templates")][0]
@@ -89,7 +89,7 @@ def add_plugins(plugin_url):
                 config.write(configfile)
         shutil.rmtree("/tmp/"+plugin_name)
     except:
-        print sys.exc_info()
+        pass
 
 def remove_plugins(plugin_url):
     try:
