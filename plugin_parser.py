@@ -52,11 +52,33 @@ def add_plugins(plugin_url):
                     dest = "/var/lib/docker/data/templates/"
                     for (dirpath, dirnames, filenames) in os.walk(subdir):
                         for filename in filenames:
-                            shutil.copyfile(subdir+"/"+filename, dest+filename)
                             if filename == "modes.template":
                                 check_modes = False
+                                shutil.copyfile(subdir+"/"+filename, dest+filename)
+                            if filename == "core.template":
+                                read_config = ConfigParser.RawConfigParser()
+                                read_config.read('/var/lib/docker/data/templates/core.template')
+                                write_config = ConfigParser.RawConfigParser()
+                                write_config.read(subdir+"/"+filename)
+                                write_sections = write_config.sections()
+                                for section in write_sections:
+                                    if read_config.has_section(section):
+                                		read_config.remove_section(section)
+                                    read_config.add_section(section)
+                                    recdir = "/tmp/"+plugin_name+"/core/"+section
+                                    dest1 = "/var/lib/docker/data/core/"+section
+                                    print recdir
+                                    print dest1
+                                    if os.path.exists(dest1):
+                                        shutil.rmtree(dest1)
+                                    print section
+                                    shutil.copytree(recdir, dest1)
+                                with open('/var/lib/docker/data/templates/core.template', 'w') as configfile:
+                					read_config.write(configfile)
+                                print subdir
+                                
             except:
-                pass
+                print sys.exc_info()
         # update modes.template if it wasn't copied up to include new plugins
         if check_modes:
             files = [x[2] for x in os.walk("/var/lib/docker/data/templates")][0]
