@@ -67,16 +67,11 @@ def add_plugins(plugin_url):
                                     read_config.add_section(section)
                                     recdir = "/tmp/"+plugin_name+"/core/"+section
                                     dest1 = "/var/lib/docker/data/core/"+section
-                                    print recdir
-                                    print dest1
                                     if os.path.exists(dest1):
                                         shutil.rmtree(dest1)
-                                    print section
                                     shutil.copytree(recdir, dest1)
                                 with open('/var/lib/docker/data/templates/core.template', 'w') as configfile:
                 					read_config.write(configfile)
-                                print subdir
-                                
             except:
                 print sys.exc_info()
         # update modes.template if it wasn't copied up to include new plugins
@@ -94,7 +89,7 @@ def add_plugins(plugin_url):
                 config.write(configfile)
         shutil.rmtree("/tmp/"+plugin_name)
     except:
-        pass
+        print sys.exc_info()
 
 def remove_plugins(plugin_url):
     try:
