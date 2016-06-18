@@ -155,7 +155,7 @@ def get_param(prompt_string):
      screen.border(0)
      screen.addstr(2, 2, prompt_string)
      screen.refresh()
-     input = screen.getstr(10, 10, 70)
+     input = screen.getstr(10, 10, 150)
      curses.noecho()
      return input
 
@@ -212,9 +212,7 @@ def runmenu(menu, parent):
 
         x = screen.getch()
 
-        if x >= ord('1') and x <= ord(str(optioncount+1)):
-            pos = x - ord('0') - 1
-        elif x == 258: # down arrow
+        if x == 258: # down arrow
             if pos < optioncount:
                 pos += 1
             else:
@@ -224,6 +222,8 @@ def runmenu(menu, parent):
                 pos += -1
             else:
                 pos = optioncount
+        elif x >= ord('1') and x <= ord(str(optioncount+1)):
+            pos = x - ord('0') - 1
     return pos
 
 def processmenu(menu, parent=None):
@@ -343,4 +343,7 @@ def main():
     os.system('clear')
 
 if __name__ == "__main__":
+    # make sure that vent-management is running
+    result = check_output('/bin/sh /data/bootlocal.sh'.split())
+    print result
     main()
