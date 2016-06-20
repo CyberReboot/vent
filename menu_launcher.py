@@ -40,7 +40,7 @@ def run_plugins(action):
             plugins[plug] = config.get("plugins", plug)
 
         for plugin in plugins:
-            if plugin == "core":
+            if plugin == "core" or plugin == "visualization":
                 p = {}
                 try:
                     config = ConfigParser.RawConfigParser()
@@ -53,14 +53,6 @@ def run_plugins(action):
                 except:
                     # if no name is provided, it doesn't get listed
                     pass
-        # one off for visualization
-        # TODO make an option from templates
-        #p = {}
-        #p['title'] = "Visualization"
-        #p['type'] = COMMAND
-        #p['command'] = 'python2.7 /data/template_parser.py visualization '+action
-        #modes.append(p)
-
         try:
             config = ConfigParser.RawConfigParser()
             config.read(template_dir+'core.template')
@@ -86,11 +78,12 @@ def run_plugins(action):
                 pass
         except:
             pass
-        #p = {}
-        #p['title'] = "all"
-        #p['type'] = COMMAND
-        #p['command'] = 'python2.7 /data/template_parser.py all '+action
-        #modes.append(p)
+        if len(modes) > 1:
+            p = {}
+            p['title'] = "All"
+            p['type'] = COMMAND
+            p['command'] = 'python2.7 /data/template_parser.py all '+action
+            modes.append(p)
     except:
         print "unable to get the configuration of modes from the templates.\n"
 
@@ -150,6 +143,11 @@ def update_plugins():
     except:
         print "unable to get the configuration of modes from the templates.\n"
     return modes
+
+def build_menu():
+    modes = []
+    # TODO
+    return
 
 def get_param(prompt_string):
      curses.echo()
@@ -265,9 +263,7 @@ def processmenu(menu, parent=None):
                 screen.clear()
                 os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
                 screen.clear()
-                curses.reset_prog_mode()
-                curses.curs_set(1)
-                curses.curs_set(0)
+                os.execl(sys.executable, sys.executable, *sys.argv)
             elif menu['options'][getin]['title'] == "Remove Plugins":
                 plugin_url = get_param("Enter the HTTPS Git URL that contains the plugins you'd like to remove, e.g. https://github.com/CyberReboot/vent-network-plugins.git")
                 curses.def_prog_mode()
@@ -275,9 +271,7 @@ def processmenu(menu, parent=None):
                 screen.clear()
                 os.system("python2.7 /data/plugin_parser.py remove_plugins "+plugin_url)
                 screen.clear()
-                curses.reset_prog_mode()
-                curses.curs_set(1)
-                curses.curs_set(0)
+                os.execl(sys.executable, sys.executable, *sys.argv)
         elif menu['options'][getin]['type'] == MENU:
             screen.clear()
             processmenu(menu['options'][getin], menu)
@@ -285,7 +279,7 @@ def processmenu(menu, parent=None):
         elif menu['options'][getin]['type'] == EXITMENU:
             exitmenu = True
 
-def main():
+def build_menu_dict():
     menu_data = {
       'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
       'options':[
@@ -310,10 +304,10 @@ def main():
         },
         { 'title': "Plugins", 'type': MENU, 'subtitle': 'Please select an option...',
           'options': [
-            { 'title': "Show Installed Plugins", 'type': INPUT, 'command': '' },
-            { 'title': "Update Plugins", 'type': INPUT, 'command': '' },
             { 'title': "Add Plugins", 'type': INPUT, 'command': '' },
             { 'title': "Remove Plugins", 'type': INPUT, 'command': '' },
+            { 'title': "Show Installed Plugins", 'type': INPUT, 'command': '' },
+            { 'title': "Update Plugins", 'type': INPUT, 'command': '' },
           ]
         },
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
@@ -340,7 +334,10 @@ def main():
         { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
       ]
     }
+    return menu_data
 
+def main():
+    menu_data = build_menu_dict()
     processmenu(menu_data)
     curses.endwin()
     os.system('clear')
