@@ -257,7 +257,7 @@ def processmenu(menu, parent=None):
             curses.curs_set(0)
         elif menu['options'][getin]['type'] == INPUT:
             if menu['options'][getin]['title'] == "Add Plugins":
-                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-network-plugins.git")
+                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git")
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
@@ -265,7 +265,7 @@ def processmenu(menu, parent=None):
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
             elif menu['options'][getin]['title'] == "Remove Plugins":
-                plugin_url = get_param("Enter the HTTPS Git URL that contains the plugins you'd like to remove, e.g. https://github.com/CyberReboot/vent-network-plugins.git")
+                plugin_url = get_param("Enter the HTTPS Git URL that contains the plugins you'd like to remove, e.g. https://github.com/CyberReboot/vent-plugins.git")
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
