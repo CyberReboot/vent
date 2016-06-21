@@ -103,6 +103,19 @@ def update_plugins():
         for plug in plugin_array:
             plugins[plug] = config.get("plugins", plug)
 
+        p = {}
+        p['title'] = 'Vent Settings'
+        p['type'] = MENU
+        p['subtitle'] = 'Please select a section to configure...'
+        p['options'] = [
+            { 'title': "Service", 'type': INPUT, 'command': '' },
+            { 'title': "Instances", 'type': INPUT, 'command': '' },
+            { 'title': "Active Containers", 'type': INPUT, 'command': '' },
+            { 'title': "Local Collection", 'type': INPUT, 'command': '' },
+            { 'title': "Locally Active", 'type': INPUT, 'command': '' },
+            { 'title': "External", 'type': INPUT, 'command': '' },
+        ]
+        modes.append(p)
         for plugin in plugins:
             p = {}
             try:
