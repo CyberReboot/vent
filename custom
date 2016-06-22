@@ -6,10 +6,12 @@ sudo mkdir -p /var/lib/docker/data/images
 sudo mkdir -p /var/lib/docker/data/plugins
 sudo mkdir -p /var/lib/docker/data/collectors
 sudo mkdir -p /var/lib/docker/data/visualization
+sudo mkdir -p /var/lib/docker/data/plugin_repos
 sudo chmod -R 777 /var/lib/docker/data/visualization
 sudo chmod -R 777 /var/lib/docker/data/collectors
 sudo chmod -R 777 /var/lib/docker/data/plugins
 sudo chmod -R 777 /var/lib/docker/data/images
+sudo chmod -R 777 /var/lib/docker/data/plugin_repos
 sudo mv /data/templates/ /var/lib/docker/data/templates 2>/dev/null
 sudo mv /data/core/ /var/lib/docker/data/core 2>/dev/null
 sudo chmod -R 777 /var/lib/docker/data/core
