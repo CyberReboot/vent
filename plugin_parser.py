@@ -62,8 +62,7 @@ def add_plugins(plugin_url):
                                 write_config.read(subdir+"/"+filename)
                                 write_sections = write_config.sections()
                                 for section in write_sections:
-                                    if read_config.has_section(section):
-                                        read_config.remove_section(section)
+                                    read_config.remove_section(section)
                                     read_config.add_section(section)
                                     recdir = "/var/lib/docker/data/plugin_repos/"+plugin_name+"/core/"+section
                                     dest1 = "/var/lib/docker/data/core/"+section
@@ -98,6 +97,9 @@ def remove_plugins(plugin_url):
         if ".git" in plugin_url:
             plugin_url = plugin_url.split(".git")[0]
         plugin_name = plugin_url.split("/")[-1]
+        if not os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name):
+            print "Plugin is not installed. Not removing "+plugin_name
+            return
         repo_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/plugin_repos/"+plugin_name, topdown=False)]
         sys_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/")]
         repo_dir = ""
@@ -181,7 +183,6 @@ def remove_plugins(plugin_url):
 
   
     except:
-        print sys.exc_info()
         pass
         
     #remove git repo once done    
