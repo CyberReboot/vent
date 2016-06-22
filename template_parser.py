@@ -26,12 +26,17 @@ def execute_template(template_type, template_execution, info_name, service_sched
             json.dump(tool_dict, f)
             f.write("|")
             json.dump(delay_sections, f)
+            f.write("|")
+            if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+                f.write("1")
+            else:
+                f.write("0")
             f.write("\n")
     except:
         pass
     return
 
-def read_template_types(template_type):
+def read_template_types(template_type, container_cmd):
     # read in templates for plugins, core, and visualization
     template_path = template_dir+template_type+'.template'
     if template_type == "active" or template_type == "passive":
@@ -77,92 +82,6 @@ def read_template_types(template_type):
 
     try:
         delay_sections = {}
-        if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
-            config = ConfigParser.RawConfigParser()
-            # needed to preserve case sensitive options
-            config.optionxform=str
-            config.read(template_dir+'modes.template')
-            plugin_array = config.options("plugins")
-            plugins = {}
-            if template_type == "all":
-                for plug in plugin_array:
-                    plugins[plug] = config.get("plugins", plug)
-            else:
-                plugins[template_type] = config.get("plugins", template_type)
-
-            t = []
-            for plugin in plugins:
-                if plugins[plugin] == 'all':
-                    tools = [ name for name in os.listdir(plugins_dir+plugin) if os.path.isdir(os.path.join(plugins_dir+plugin, name)) ]
-                    for tool in tools:
-                        t.append({plugin:tool})
-                else:
-                    for tool in plugins[plugin].split(","):
-                        t.append({plugin:tool})
-
-            for tool in t:
-                keys = list(set(tool.keys()))
-                for plugin in keys:
-                    config = ConfigParser.RawConfigParser()
-                    # needed to preserve case sensitive options
-                    config.optionxform=str
-                    config.read(template_dir+plugin+'.template')
-                    sections = config.sections()
-                    cmd = ["get_data.py", "none", "/"+tool[plugin]+"-data"]
-                    if template_type == plugin or template_type == "all":
-                        if len(sections) > 0:
-                            for section in sections:
-                                instructions = {}
-                                core_instructions = {}
-                                options = config.options(section)
-                                for option in options:
-                                    if section == "service" and option == "schedule":
-                                        service_schedule[plugin] = json.loads(config.get(section, option))
-                                    elif section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
-                                        if section == tool[plugin]:
-                                            option_val = config.get(section, option)
-                                            try:
-                                                option_val = int(option_val)
-                                            except:
-                                                pass
-                                            if option == 'data_path':
-                                                if len(cmd) == 4:
-                                                    cmd.insert(1, option_val)
-                                                else:
-                                                    cmd.append(option_val)
-                                                d_path = 1
-                                            elif option == 'site_path':
-                                                if len(cmd) == 2:
-                                                    cmd.append("")
-                                                    cmd.append(option_val)
-                                                else:
-                                                    cmd.append(option_val)
-                                            elif option == 'delay':
-                                                try:
-                                                    delay_sections[section] = option_val
-                                                except:
-                                                    pass
-                                            else:
-                                                instructions[option] = option_val
-                                            instructions['Image'] = plugin+'/'+tool[plugin]
-                                            instructions['Volumes'] = {"/"+tool[plugin]+"-data": {}}
-                                            tool_dict[plugin+"-"+tool[plugin]] = instructions
-                                if d_path == 1:
-                                    core_instructions['Image'] = "visualization/honeycomb"
-                                    core_instructions['Cmd'] = cmd
-                                    core_instructions['HostConfig'] = {"VolumesFrom":[plugin+"-"+tool[plugin], '1visualization-honeycomb']}
-                                    tool_core[plugin+"-"+tool[plugin]+"-core"] = core_instructions
-                                    d_path = 0
-                                if not (plugin+"-"+tool[plugin]) in tool_dict:
-                                    instructions['Image'] = plugin+'/'+tool[plugin]
-                                    instructions['Volumes'] = {"/"+tool[plugin]+"-data": {}}
-                                    tool_dict[plugin+"-"+tool[plugin]] = instructions
-                        else:
-                            instructions = {}
-                            instructions['Image'] = plugin+'/'+tool[plugin]
-                            instructions['Volumes'] = {"/"+tool[plugin]+"-data": {}}
-                            tool_dict[plugin+"-"+tool[plugin]] = instructions
-
         if template_type != "all":
             with open(template_path): pass
             config = ConfigParser.RawConfigParser()
@@ -173,9 +92,47 @@ def read_template_types(template_type):
             external_overrides = []
             external_hosts = {}
             instances = []
+            try:
+                core_config = ConfigParser.RawConfigParser()
+                # needed to preserve case sensitive options
+                core_config.optionxform=str
+                core_config.read(template_dir+'core.template')
+                # check dependencies like elasticsearch and rabbitmq
+                external_options = core_config.options("external")
+            except:
+                external_options = []
+            host_config_exists = False
+
+            if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+                try:
+                    # add tools that don't have sections
+                    modes_config = ConfigParser.RawConfigParser()
+                    # needed to preserve case sensitive options
+                    modes_config.optionxform=str
+                    modes_config.read(template_dir+'modes.template')
+                    plugins = modes_config.get("plugins", template_type)
+
+                    t = []
+                    if plugins == 'all':
+                        tools = [ name for name in os.listdir(plugins_dir+template_type) if os.path.isdir(os.path.join(plugins_dir+template_type, name)) ]
+                        for tool in tools:
+                            t.append(tool)
+                    else:
+                        for tool in plugins.split(","):
+                            t.append(tool)
+
+                    for tool in t:
+                        if not tool in sections:
+                            sections.append(tool)
+                except:
+                    pass
+
             for section in sections:
                 instructions = {}
-                options = config.options(section)
+                try:
+                    options = config.options(section)
+                except:
+                    options = []
                 cmd = ["get_data.py", "none", "/"+section+"-data"]
                 for option in options:
                     if section == "info" and option == "name":
@@ -212,9 +169,8 @@ def read_template_types(template_type):
                                 except:
                                     pass
                             else:
-                                # check dependencies like elasticsearch and rabbitmq
-                                external_options = config.options("external")
                                 if option == "HostConfig":
+                                    host_config_exists = True
                                     try:
                                         option_val = option_val.replace("true", "True")
                                         option_val = option_val.replace("false", "False")
@@ -222,6 +178,17 @@ def read_template_types(template_type):
                                         host_config_new = copy.deepcopy(host_config)
                                         extra_hosts = []
                                         host_config_new["RestartPolicy"] = { "Name": "always" }
+                                        if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+                                            # add link to rabbitmq
+                                            if "Links" in host_config:
+                                                host_config_new["Links"].append("core-aaa-rabbitmq:rabbitmq")
+                                            else:
+                                                host_config_new["Links"] = ["core-aaa-rabbitmq:rabbitmq"]
+                                            # add files volume
+                                            if "Binds" in host_config:
+                                                host_config_new["Binds"].append("/files:/files:ro")
+                                            else:
+                                                host_config_new["Binds"] = ["/files:/files:ro"]
                                         if "Links" in host_config:
                                             for rec in host_config["Links"]:
                                                 r = rec.split(":")
@@ -230,8 +197,11 @@ def read_template_types(template_type):
                                                         host_config_new["Links"].remove(rec)
                                                         # add external_overrides to extrahosts
                                                         if r[1]+"_host" in external_options:
-                                                            extra_hosts.append(r[1]+":"+config.get("external", r[1]+"_host"))
-                                                            host_config_new["ExtraHosts"] = extra_hosts
+                                                            try:
+                                                                extra_hosts.append(r[1]+":"+core_config.get("external", r[1]+"_host"))
+                                                                host_config_new["ExtraHosts"] = extra_hosts
+                                                            except:
+                                                                pass
                                                         else:
                                                             print "no local "+r[1]+" but an external one wasn't specified."
                                             option_val = str(host_config_new).replace("'", '"')
@@ -244,7 +214,10 @@ def read_template_types(template_type):
                                                 for ext in external_overrides:
                                                     if "aaa_syslog" == ext:
                                                         if "aaa_syslog_host" in external_options:
-                                                            syslog_host = config.get("external", "aaa_syslog_host")
+                                                            try:
+                                                                syslog_host = core_config.get("external", "aaa_syslog_host")
+                                                            except:
+                                                                pass
                                                         else:
                                                             print "no local syslog but an external one wasn't specified."
                                                 host_config_new["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
@@ -257,17 +230,71 @@ def read_template_types(template_type):
                                 option_val = option_val.replace("False", "false")
                                 if option_val != "{}":
                                     instructions[option] = option_val
-                if d_path == 1:
-                    core_instructions = {}
-                    core_instructions['Image'] = "visualization/honeycomb"
-                    core_instructions['Cmd'] = cmd
-                    if "active" in section or "passive" in section:
-                        core_instructions['HostConfig'] = {"VolumesFrom":[section, '1visualization-honeycomb']}
-                    else:
-                        core_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, '1visualization-honeycomb']}
-                    tool_core[template_type+"-"+section+"-core"] = core_instructions
-                    d_path = 0
                 if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
+                    if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+                        # add tty/interactive
+                        if not "Tty" in instructions:
+                            instructions["Tty"] = "true"
+                        if not "OpenStdin" in instructions:
+                            instructions["OpenStdin"] = "true"
+                        # add pythonunbuffered env
+                        if not "Env" in instructions:
+                            instructions["Env"] = ["PYTHONUNBUFFERED=0"]
+                    if not host_config_exists:
+                        host_config = {}
+                        if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+                            host_config["Binds"] = ["/files:/files:ro"]
+                            try:
+                                rabbitmq_host = "rabbitmq"
+                                external_rabbit = False
+                                for ext in external_overrides:
+                                    if "aaa_rabbitmq" == ext:
+                                        external_rabbit = True
+                                        if "aaa_rabbitmq_host" in external_options:
+                                            try:
+                                                rabbitmq_host = core_config.get("external", "aaa_rabbitmq_host")
+                                                extra_hosts.append("rabbitmq:"+rabbitmq_host)
+                                                host_config["ExtraHosts"] = extra_hosts
+                                            except:
+                                                pass
+                                        else:
+                                            print "no local rabbitmq but an external one wasn't specified."
+                                if not external_rabbit:
+                                    host_config["Links"] = ["core-aaa-rabbitmq:rabbitmq"]
+                            except:
+                                pass
+                        # add syslog
+                        try:
+                            syslog_host = "localhost"
+                            for ext in external_overrides:
+                                if "aaa_syslog" == ext:
+                                    if "aaa_syslog_host" in external_options:
+                                        try:
+                                            syslog_host = core_config.get("external", "aaa_syslog_host")
+                                        except:
+                                            pass
+                                    else:
+                                        print "no local syslog but an external one wasn't specified."
+                            host_config["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
+                        except:
+                            pass
+                        option_val = str(host_config).replace("'", '"')
+                        option_val = option_val.replace("True", "true")
+                        option_val = option_val.replace("False", "false")
+                        if option_val != "{}":
+                            instructions["HostConfig"] = option_val
+                    if d_path == 1:
+                        core_instructions = {}
+                        core_instructions['Image'] = "visualization/honeycomb"
+                        core_instructions['Cmd'] = cmd
+                        if "active" in section or "passive" in section:
+                            core_instructions['HostConfig'] = {"VolumesFrom":[section, '1visualization-honeycomb']}
+                        else:
+                            core_instructions['HostConfig'] = {"VolumesFrom":[template_type+"-"+section, '1visualization-honeycomb']}
+                        tool_core[template_type+"-"+section+"-core"] = core_instructions
+                        d_path = 0
+                    if container_cmd:
+                        instructions['Cmd'] = container_cmd.replace("'", '"')
                     if not section in external_overrides:
                         if "active" in section or "passive" in section:
                             if (template_type == "active" and "active" in section) or (template_type == "passive" and "passive" in section):
@@ -316,7 +343,10 @@ def main():
             os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
             os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
         else:
-            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type)
+            container_cmd = None
+            if len(sys.argv) == 4:
+                container_cmd = sys.argv[3]
+            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd)
             execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections)
 
 if __name__ == "__main__":

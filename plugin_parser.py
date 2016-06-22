@@ -63,7 +63,7 @@ def add_plugins(plugin_url):
                                 write_sections = write_config.sections()
                                 for section in write_sections:
                                     if read_config.has_section(section):
-                                		read_config.remove_section(section)
+                                        read_config.remove_section(section)
                                     read_config.add_section(section)
                                     recdir = "/var/lib/docker/data/plugin_repos/"+plugin_name+"/core/"+section
                                     dest1 = "/var/lib/docker/data/core/"+section
@@ -72,7 +72,7 @@ def add_plugins(plugin_url):
                                         shutil.rmtree(dest1)
                                     shutil.copytree(recdir, dest1)
                                 with open('/var/lib/docker/data/templates/core.template', 'w') as configfile:
-                					read_config.write(configfile)
+                                    read_config.write(configfile)
                             else:
                                 shutil.copyfile(subdir+"/"+filename, dest+filename)
             except:

@@ -18,7 +18,9 @@ start_containers() {
     third=${rest%%"$sep"*}
     rest=${rest#*"$sep"}
     forth=${rest%%"$sep"*}
-    last=${rest#*"$sep"}
+    rest=${rest#*"$sep"}
+    last=${rest%%"$sep"*}
+    rand=${rest#*"$sep"}
     # first is name of mode/profile/type
     # second is schedule for the mode/profile/type
     # third is the image names and params for core
@@ -32,6 +34,9 @@ start_containers() {
       p="echo '$forth' | jq -c -M '.$name'"
       p=$(eval $p)
       name=${name:1:${#name}-2}
+      if [ $rand = "1" ]; then
+        name=$name$RANDOM
+      fi
       p=${p//\"false\"/false}
       p=${p//\"true\"/true}
       p=${p//\"null\"/null}

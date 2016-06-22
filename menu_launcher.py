@@ -103,6 +103,19 @@ def update_plugins():
         for plug in plugin_array:
             plugins[plug] = config.get("plugins", plug)
 
+        p = {}
+        p['title'] = 'Vent Settings'
+        p['type'] = MENU
+        p['subtitle'] = 'Please select a section to configure...'
+        p['options'] = [
+            { 'title': "Service", 'type': INPUT, 'command': '' },
+            { 'title': "Instances", 'type': INPUT, 'command': '' },
+            { 'title': "Active Containers", 'type': INPUT, 'command': '' },
+            { 'title': "Local Collection", 'type': INPUT, 'command': '' },
+            { 'title': "Locally Active", 'type': INPUT, 'command': '' },
+            { 'title': "External", 'type': INPUT, 'command': '' },
+        ]
+        modes.append(p)
         for plugin in plugins:
             p = {}
             try:
@@ -257,7 +270,7 @@ def processmenu(menu, parent=None):
             curses.curs_set(0)
         elif menu['options'][getin]['type'] == INPUT:
             if menu['options'][getin]['title'] == "Add Plugins":
-                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-network-plugins.git")
+                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git")
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
@@ -265,7 +278,7 @@ def processmenu(menu, parent=None):
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
             elif menu['options'][getin]['title'] == "Remove Plugins":
-                plugin_url = get_param("Enter the HTTPS Git URL that contains the plugins you'd like to remove, e.g. https://github.com/CyberReboot/vent-network-plugins.git")
+                plugin_url = get_param("Enter the HTTPS Git URL that contains the plugins you'd like to remove, e.g. https://github.com/CyberReboot/vent-plugins.git")
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
