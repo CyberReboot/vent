@@ -104,7 +104,6 @@ def remove_plugins(plugin_url):
         sys_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/")]
         repo_dir = ""
         namespace = ""
-
         #looks for installed items in repo, deletes them. Updates templates to reflect changes
         for r_sub in repo_subdirs:
             if plugin_name+"/core/" in r_sub:
@@ -170,7 +169,6 @@ def remove_plugins(plugin_url):
                 namespace = "collectors"
             else:
                 continue
-
             #handles case if item removed is not in plugins/
             for s_sub in sys_subdirs:
                 if repo_dir in s_sub:
@@ -180,13 +178,13 @@ def remove_plugins(plugin_url):
                     config.remove_section(repo_dir.split("/")[0])
                     with open("/var/lib/docker/data/templates/"+namespace+".template", 'w') as configfile:
                         config.write(configfile)  
-
+        #remove git repo once done    
+        shutil.rmtree("/var/lib/docker/data/plugin_repos/"+plugin_name)
   
     except:
         pass
         
-    #remove git repo once done    
-    shutil.rmtree("/var/lib/docker/data/plugin_repos/"+plugin_name)
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:
