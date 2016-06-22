@@ -24,10 +24,30 @@ INFO = "info"
 INFO2 = "info2"
 SETTING = "setting"
 INPUT = "input"
+DISPLAY = "display"
 
 # path that exists on the iso
 template_dir = "/var/lib/docker/data/templates/"
 plugins_dir = "/var/lib/docker/data/plugins/"
+
+def get_installed_plugins(m_type, command):
+    import os
+    try:
+
+        plugins = os.listdir("/var/lib/docker/data/plugin_repos")
+        p = {}
+        p['title'] = 'Installed Plugins'
+        p['type'] = MENU
+        p['subtitle'] = 'Installed Plugins:'
+        for plugin in plugins:
+            if command == "update":
+                if os.isdir("/var/lib/docker/data/plugin_repos/"+plugin):
+                    command =  "python2.7 /data/plugin_parser.py remove_plugin "+plugin+" && python2.7 /data/plugin_parser.py add_plugin "+plugin
+        p['options'] = [ {'title': name, 'type': m_type, 'command': command } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+        return p
+
+    except:
+        pass
 
 def run_plugins(action):
     modes = []
@@ -258,6 +278,8 @@ def processmenu(menu, parent=None):
         # !! TODO
         elif menu['options'][getin]['type'] == INFO:
             pass
+        elif menu['options'][getin]['type'] == DISPLAY:
+            pass
         # !! TODO
         elif menu['options'][getin]['type'] == SETTING:
             curses.def_prog_mode()
@@ -286,9 +308,20 @@ def processmenu(menu, parent=None):
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
         elif menu['options'][getin]['type'] == MENU:
-            screen.clear()
-            processmenu(menu['options'][getin], menu)
-            screen.clear()
+            if menu['options'][getin]['title'] == "Show Installed Plugins":
+                screen.clear()
+                installed_plugins = get_installed_plugins(DISPLAY, "")
+                processmenu(installed_plugins, menu)
+                screen.clear()
+            elif menu['options'][getin]['title'] == "Update Plugins":
+                screen.clear()
+                installed_plugins = get_installed_plugins(COMMAND, "update")
+                processmenu(installed_plugins, menu)
+                screen.clear()
+            else:
+                screen.clear()
+                processmenu(menu['options'][getin], menu)
+                screen.clear()
         elif menu['options'][getin]['type'] == EXITMENU:
             exitmenu = True
 
@@ -319,8 +352,8 @@ def build_menu_dict():
           'options': [
             { 'title': "Add Plugins", 'type': INPUT, 'command': '' },
             { 'title': "Remove Plugins", 'type': INPUT, 'command': '' },
-            { 'title': "Show Installed Plugins", 'type': INPUT, 'command': '' },
-            { 'title': "Update Plugins", 'type': INPUT, 'command': '' },
+            { 'title': "Show Installed Plugins", 'type': MENU, 'command': '' },
+            { 'title': "Update Plugins", 'type': MENU, 'command': '' },
           ]
         },
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
