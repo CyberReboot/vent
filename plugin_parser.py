@@ -117,11 +117,14 @@ def remove_plugins(plugin_url):
                 if len(element) == 1:
                     #no subdirectories - no plugins to be deleted in namespace. -> Delete namespace
                     namespace = element[0]
-                    read_config = ConfigParser.RawConfigParser()
-                    read_config.read("/var/lib/docker/data/templates/"+namespace+".template")
+                    config = ConfigParser.RawConfigParser()
                     for dirpath, dirnames, files in os.walk("/var/lib/docker/data/plugins/"+namespace):
                         if not dirnames:
                             os.remove("/var/lib/docker/data/templates/"+namespace+".template")
+                            config.read("/var/lib/docker/data/templates/modes.template")
+                            config.remove_option("plugins", namespace)
+                            with open("/var/lib/docker/data/templates/modes.template", 'w') as configfile:
+                                config.write(configfile)
                             shutil.rmtree(dirpath)
                 else:
                     #there are plugins to be removed
@@ -178,6 +181,10 @@ def remove_plugins(plugin_url):
                     config.remove_section(repo_dir.split("/")[0])
                     with open("/var/lib/docker/data/templates/"+namespace+".template", 'w') as configfile:
                         config.write(configfile)  
+                    config.read("/var/lib/docker/data/templates/modes.template")
+                    config.remove_option("plugins", namespace)
+                    with open("/var/lib/docker/data/templates/modes.template", 'w') as configfile:
+                        config.write(configfile)
         #remove git repo once done    
         shutil.rmtree("/var/lib/docker/data/plugin_repos/"+plugin_name)
   
