@@ -35,7 +35,19 @@ def get_installed_plugins(m_type, command):
     try:
         p = {}
         p['type'] = MENU
-        if command=="update":
+        if command=="remove":
+            command1 = "python2.7 /data/plugin_parser.py remove_plugins "
+            p['title'] = 'Remove Plugins'
+            p['subtitle'] = 'Please select a plugin to remove...'
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+            for d in p['options']:
+                with open("/var/lib/docker/data/plugin_repos/"+d['title']+"/.git/config", "r") as myfile:
+                    repo_name = ""
+                    while not "url" in repo_name:
+                        repo_name = myfile.readline()
+                    repo_name = repo_name.split("url = ")[-1]
+                    d['command'] = command1+repo_name
+        elif command=="update":
             command1 = "python2.7 /data/plugin_parser.py remove_plugins "
             command2 = " && python2.7 /data/plugin_parser.py add_plugins "
             p['title'] = 'Update Plugins'
@@ -284,6 +296,8 @@ def processmenu(menu, parent=None):
                         break
             else:
                 os.system(menu['options'][getin]['command'])
+            if menu['title'] == "Remove Plugins":
+                exitmenu = True
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
@@ -312,16 +326,13 @@ def processmenu(menu, parent=None):
                 os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
-            elif menu['options'][getin]['title'] == "Remove Plugins":
-                plugin_url = get_param("Enter the HTTPS Git URL that contains the plugins you'd like to remove, e.g. https://github.com/CyberReboot/vent-plugins.git")
-                curses.def_prog_mode()
-                os.system('reset')
-                screen.clear()
-                os.system("python2.7 /data/plugin_parser.py remove_plugins "+plugin_url)
-                screen.clear()
-                os.execl(sys.executable, sys.executable, *sys.argv)
         elif menu['options'][getin]['type'] == MENU:
-            if menu['options'][getin]['title'] == "Show Installed Plugins":
+            if menu['options'][getin]['title'] == "Remove Plugins":
+                screen.clear()
+                installed_plugins = get_installed_plugins(COMMAND, "remove")
+                processmenu(installed_plugins, menu)
+                screen.clear()
+            elif menu['options'][getin]['title'] == "Show Installed Plugins":
                 screen.clear()
                 installed_plugins = get_installed_plugins(DISPLAY, "")
                 processmenu(installed_plugins, menu)
@@ -364,7 +375,7 @@ def build_menu_dict():
         { 'title': "Plugins", 'type': MENU, 'subtitle': 'Please select an option...',
           'options': [
             { 'title': "Add Plugins", 'type': INPUT, 'command': '' },
-            { 'title': "Remove Plugins", 'type': INPUT, 'command': '' },
+            { 'title': "Remove Plugins", 'type': MENU, 'command': '' },
             { 'title': "Show Installed Plugins", 'type': MENU, 'command': '' },
             { 'title': "Update Plugins", 'type': MENU, 'command': '' },
           ]
