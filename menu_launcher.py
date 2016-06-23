@@ -283,7 +283,6 @@ def processmenu(menu, parent=None):
             os.system('reset')
             screen.clear()
             os.system(menu['options'][getin]['command'])
-            confirm()
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
