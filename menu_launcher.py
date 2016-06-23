@@ -278,12 +278,21 @@ def processmenu(menu, parent=None):
         getin = runmenu(menu, parent)
         if getin == optioncount:
             exitmenu = True
-        elif menu['options'][getin]['type'] == COMMAND or menu['options'][getin]['type'] == INFO2:
+        elif menu['options'][getin]['type'] == COMMAND:
             curses.def_prog_mode()
             os.system('reset')
             screen.clear()
             os.system(menu['options'][getin]['command'])
             confirm()
+            screen.clear()
+            curses.reset_prog_mode()
+            curses.curs_set(1)
+            curses.curs_set(0)
+        elif menu['options'][getin]['type'] == INFO2:
+            curses.def_prog_mode()
+            os.system('reset')
+            screen.clear()
+            os.system(menu['options'][getin]['command'])
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
