@@ -185,11 +185,6 @@ def update_plugins():
         print "unable to get the configuration of modes from the templates.\n"
     return modes
 
-def build_menu():
-    modes = []
-    # TODO
-    return
-
 def get_param(prompt_string):
      curses.echo()
      screen.clear()
