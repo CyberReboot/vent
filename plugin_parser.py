@@ -145,11 +145,13 @@ def remove_plugins(plugin_url):
                 names = os.listdir("/var/lib/docker/data/visualization")
                 has_subdir = False
                 for name in names:
-                    has_subdir = os.path.isdir("/var/lib/docker/data/visualization/"+name)
+                    has_subdir = os.path.isdir(os.path.join("/var/lib/docker/data/visualization/",name))
+                    if has_subdir:
+                        break
                 #there are no visualizations, cleans up extra files e.g. README.md
                 if not has_subdir:
+                    os.remove("/var/lib/docker/data/templates/visualization.template")
                     for dirpath, dirnames, files in os.walk("/var/lib/docker/data/visualization/"):
-                        os.remove("/var/lib/docker/data/templates/visualization.template")
                         for file in files:
                             os.remove("/var/lib/docker/data/visualization/"+file)
                     continue
@@ -161,6 +163,8 @@ def remove_plugins(plugin_url):
                 has_subdir = False
                 for name in names:
                     has_subdir = os.path.isdir("/var/lib/docker/data/collectors/"+name)
+                    if has_subdir:
+                        break
                 #there are not collectors, cleans up extra files e.g. README.md
                 if not has_subdir:
                     for dirpath, dirnames, files in os.walk("/var/lib/docker/data/collectors/"):
@@ -177,10 +181,11 @@ def remove_plugins(plugin_url):
                 if repo_dir in s_sub:
                     shutil.rmtree(s_sub)
                     config = ConfigParser.RawConfigParser()
-                    config.read("/var/lib/docker/data/templates/"+namespace+".template")
-                    config.remove_section(repo_dir.split("/")[0])
-                    with open("/var/lib/docker/data/templates/"+namespace+".template", 'w') as configfile:
-                        config.write(configfile)  
+                    if os.path.exists("/var/lib/docker/data/templates/"+namespace+".template"):
+                        config.read("/var/lib/docker/data/templates/"+namespace+".template")
+                        config.remove_section(repo_dir.split("/")[0])
+                        with open("/var/lib/docker/data/templates/"+namespace+".template", 'w') as configfile:
+                            config.write(configfile)  
                     config.read("/var/lib/docker/data/templates/modes.template")
                     config.remove_option("plugins", namespace)
                     with open("/var/lib/docker/data/templates/modes.template", 'w') as configfile:
