@@ -33,17 +33,25 @@ plugins_dir = "/var/lib/docker/data/plugins/"
 def get_installed_plugins(m_type, command):
     import os
     try:
-
-        plugins = os.listdir("/var/lib/docker/data/plugin_repos")
         p = {}
-        p['title'] = 'Installed Plugins'
         p['type'] = MENU
-        p['subtitle'] = 'Installed Plugins:'
-        for plugin in plugins:
-            if command == "update":
-                if os.isdir("/var/lib/docker/data/plugin_repos/"+plugin):
-                    command =  "python2.7 /data/plugin_parser.py remove_plugin "+plugin+" && python2.7 /data/plugin_parser.py add_plugin "+plugin
-        p['options'] = [ {'title': name, 'type': m_type, 'command': command } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+        if command=="update":
+            command1 = "python2.7 /data/plugin_parser.py remove_plugins "
+            command2 = " && python2.7 /data/plugin_parser.py add_plugins "
+            p['title'] = 'Update Plugins'
+            p['subtitle'] = 'Please select a plugin to update...'
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+            for d in p['options']:
+                with open("/var/lib/docker/data/plugin_repos/"+d['title']+"/.git/config", "r") as myfile:
+                    repo_name = ""
+                    while not "url" in repo_name:
+                        repo_name = myfile.readline()
+                    repo_name = repo_name.split("url = ")[-1]
+                    d['command'] = command1+repo_name+command2+repo_name
+        else:
+            p['title'] = 'Installed Plugins'
+            p['subtitle'] = 'Installed Plugins:'
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
         return p
 
     except:
@@ -270,7 +278,17 @@ def processmenu(menu, parent=None):
             curses.def_prog_mode()
             os.system('reset')
             screen.clear()
-            os.system(menu['options'][getin]['command'])
+            if "&&" in menu['options'][getin]['command']:
+                commands = menu['options'][getin]['command'].split("&&")
+                for c in commands:
+                    success = os.system(c)
+                    if success == 0:
+                        continue
+                    else:
+                        print "FAILED command: " + c
+                        break
+            else:
+                os.system(menu['options'][getin]['command'])
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
