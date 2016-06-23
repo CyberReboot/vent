@@ -4,6 +4,9 @@ import ConfigParser
 import curses
 import os
 import sys
+import termios
+import time
+import tty
 
 from subprocess import call, check_output, PIPE, Popen
 
@@ -29,6 +32,20 @@ DISPLAY = "display"
 # path that exists on the iso
 template_dir = "/var/lib/docker/data/templates/"
 plugins_dir = "/var/lib/docker/data/plugins/"
+
+def getch():
+    fd = sys.stdin.fileno()
+    settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, settings)
+    return ch
+
+def confirm():
+    while getch():
+        break
 
 def get_installed_plugins(m_type, command):
     import os
@@ -178,14 +195,14 @@ def update_plugins():
     return modes
 
 def get_param(prompt_string):
-     curses.echo()
-     screen.clear()
-     screen.border(0)
-     screen.addstr(2, 2, prompt_string)
-     screen.refresh()
-     input = screen.getstr(10, 10, 150)
-     curses.noecho()
-     return input
+    curses.echo()
+    screen.clear()
+    screen.border(0)
+    screen.addstr(2, 2, prompt_string)
+    screen.refresh()
+    input = screen.getstr(10, 10, 150)
+    curses.noecho()
+    return input
 
 def runmenu(menu, parent):
     if parent is None:
@@ -266,6 +283,7 @@ def processmenu(menu, parent=None):
             os.system('reset')
             screen.clear()
             os.system(menu['options'][getin]['command'])
+            confirm()
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
@@ -281,6 +299,7 @@ def processmenu(menu, parent=None):
             os.system('reset')
             screen.clear()
             os.system(menu['options'][getin]['command'])
+            confirm()
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
@@ -292,6 +311,7 @@ def processmenu(menu, parent=None):
                 os.system('reset')
                 screen.clear()
                 os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
+                confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
             elif menu['options'][getin]['title'] == "Remove Plugins":
@@ -300,6 +320,7 @@ def processmenu(menu, parent=None):
                 os.system('reset')
                 screen.clear()
                 os.system("python2.7 /data/plugin_parser.py remove_plugins "+plugin_url)
+                confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
         elif menu['options'][getin]['type'] == MENU:
@@ -307,11 +328,13 @@ def processmenu(menu, parent=None):
                 screen.clear()
                 installed_plugins = get_installed_plugins(DISPLAY, "")
                 processmenu(installed_plugins, menu)
+                confirm()
                 screen.clear()
             elif menu['options'][getin]['title'] == "Update Plugins":
                 screen.clear()
                 installed_plugins = get_installed_plugins(COMMAND, "update")
                 processmenu(installed_plugins, menu)
+                confirm()
                 screen.clear()
             else:
                 screen.clear()
