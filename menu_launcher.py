@@ -103,7 +103,7 @@ def run_plugins(action):
                     config.read(template_dir+plugin+'.template')
                     plugin_name = config.get("info", "name")
                     p['title'] = plugin_name
-                    p['type'] = COMMAND
+                    p['type'] = INFO2
                     p['command'] = 'python2.7 /data/template_parser.py '+plugin+' '+action
                     modes.append(p)
                 except:
@@ -117,7 +117,7 @@ def run_plugins(action):
                 if passive == "on":
                     p = {}
                     p['title'] = "Local Passive Collection"
-                    p['type'] = COMMAND
+                    p['type'] = INFO2
                     p['command'] = 'python2.7 /data/template_parser.py passive '+action
                     modes.append(p)
             except:
@@ -127,7 +127,7 @@ def run_plugins(action):
                 if active == "on":
                     p = {}
                     p['title'] = "Local Active Collection"
-                    p['type'] = COMMAND
+                    p['type'] = INFO2
                     p['command'] = 'python2.7 /data/template_parser.py active '+action
                     modes.append(p)
             except:
@@ -137,7 +137,7 @@ def run_plugins(action):
         if len(modes) > 1:
             p = {}
             p['title'] = "All"
-            p['type'] = COMMAND
+            p['type'] = INFO2
             p['command'] = 'python2.7 /data/template_parser.py all '+action
             modes.append(p)
     except:
