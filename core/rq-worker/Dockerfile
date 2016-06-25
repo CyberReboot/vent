@@ -9,7 +9,6 @@ RUN apk add --update \
 RUN pip install rq
 ADD requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-ADD settings.py settings.py
-ADD pcap_drop.py pcap_drop.py
+ADD *.py /
 
 ENTRYPOINT ["rqworker", "-c", "settings"]
