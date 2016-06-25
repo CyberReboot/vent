@@ -4,6 +4,8 @@ import ConfigParser
 import curses
 import os
 import sys
+import termios
+import tty
 
 from subprocess import call, check_output, PIPE, Popen
 
@@ -24,10 +26,64 @@ INFO = "info"
 INFO2 = "info2"
 SETTING = "setting"
 INPUT = "input"
+DISPLAY = "display"
 
 # path that exists on the iso
 template_dir = "/var/lib/docker/data/templates/"
 plugins_dir = "/var/lib/docker/data/plugins/"
+
+def getch():
+    fd = sys.stdin.fileno()
+    settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, settings)
+    return ch
+
+def confirm():
+    while getch():
+        break
+
+def get_installed_plugins(m_type, command):
+    import os
+    try:
+        p = {}
+        p['type'] = MENU
+        if command=="remove":
+            command1 = "python2.7 /data/plugin_parser.py remove_plugins "
+            p['title'] = 'Remove Plugins'
+            p['subtitle'] = 'Please select a plugin to remove...'
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+            for d in p['options']:
+                with open("/var/lib/docker/data/plugin_repos/"+d['title']+"/.git/config", "r") as myfile:
+                    repo_name = ""
+                    while not "url" in repo_name:
+                        repo_name = myfile.readline()
+                    repo_name = repo_name.split("url = ")[-1]
+                    d['command'] = command1+repo_name
+        elif command=="update":
+            command1 = "python2.7 /data/plugin_parser.py remove_plugins "
+            command2 = " && python2.7 /data/plugin_parser.py add_plugins "
+            p['title'] = 'Update Plugins'
+            p['subtitle'] = 'Please select a plugin to update...'
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+            for d in p['options']:
+                with open("/var/lib/docker/data/plugin_repos/"+d['title']+"/.git/config", "r") as myfile:
+                    repo_name = ""
+                    while not "url" in repo_name:
+                        repo_name = myfile.readline()
+                    repo_name = repo_name.split("url = ")[-1]
+                    d['command'] = command1+repo_name+command2+repo_name
+        else:
+            p['title'] = 'Installed Plugins'
+            p['subtitle'] = 'Installed Plugins:'
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+        return p
+
+    except:
+        pass
 
 def run_plugins(action):
     modes = []
@@ -158,14 +214,14 @@ def update_plugins():
     return modes
 
 def get_param(prompt_string):
-     curses.echo()
-     screen.clear()
-     screen.border(0)
-     screen.addstr(2, 2, prompt_string)
-     screen.refresh()
-     input = screen.getstr(10, 10, 150)
-     curses.noecho()
-     return input
+    curses.echo()
+    screen.clear()
+    screen.border(0)
+    screen.addstr(2, 2, prompt_string)
+    screen.refresh()
+    input = screen.getstr(10, 10, 150)
+    curses.noecho()
+    return input
 
 def runmenu(menu, parent):
     if parent is None:
@@ -241,11 +297,43 @@ def processmenu(menu, parent=None):
         getin = runmenu(menu, parent)
         if getin == optioncount:
             exitmenu = True
-        elif menu['options'][getin]['type'] == COMMAND or menu['options'][getin]['type'] == INFO2:
+        elif menu['options'][getin]['type'] == COMMAND:
             curses.def_prog_mode()
             os.system('reset')
             screen.clear()
-            os.system(menu['options'][getin]['command'])
+            if "&&" in menu['options'][getin]['command']:
+                commands = menu['options'][getin]['command'].split("&&")
+                for c in commands:
+                    success = os.system(c)
+                    if success == 0:
+                        continue
+                    else:
+                        print "FAILED command: " + c
+                        break
+            else:
+                os.system(menu['options'][getin]['command'])
+            screen.clear()
+            curses.reset_prog_mode()
+            curses.curs_set(1)
+            curses.curs_set(0)
+        elif menu['options'][getin]['type'] == INFO2:
+            curses.def_prog_mode()
+            os.system('reset')
+            screen.clear()
+            if "&&" in menu['options'][getin]['command']:
+                commands = menu['options'][getin]['command'].split("&&")
+                for c in commands:
+                    success = os.system(c)
+                    if success == 0:
+                        continue
+                    else:
+                        print "FAILED command: " + c
+                        break
+            else:
+                os.system(menu['options'][getin]['command'])
+            confirm()
+            if menu['title'] == "Remove Plugins":
+                exitmenu = True
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
@@ -253,12 +341,15 @@ def processmenu(menu, parent=None):
         # !! TODO
         elif menu['options'][getin]['type'] == INFO:
             pass
+        elif menu['options'][getin]['type'] == DISPLAY:
+            pass
         # !! TODO
         elif menu['options'][getin]['type'] == SETTING:
             curses.def_prog_mode()
             os.system('reset')
             screen.clear()
             os.system(menu['options'][getin]['command'])
+            confirm()
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
@@ -270,20 +361,29 @@ def processmenu(menu, parent=None):
                 os.system('reset')
                 screen.clear()
                 os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
-                screen.clear()
-                os.execl(sys.executable, sys.executable, *sys.argv)
-            elif menu['options'][getin]['title'] == "Remove Plugins":
-                plugin_url = get_param("Enter the HTTPS Git URL that contains the plugins you'd like to remove, e.g. https://github.com/CyberReboot/vent-plugins.git")
-                curses.def_prog_mode()
-                os.system('reset')
-                screen.clear()
-                os.system("python2.7 /data/plugin_parser.py remove_plugins "+plugin_url)
+                confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
         elif menu['options'][getin]['type'] == MENU:
-            screen.clear()
-            processmenu(menu['options'][getin], menu)
-            screen.clear()
+            if menu['options'][getin]['title'] == "Remove Plugins":
+                screen.clear()
+                installed_plugins = get_installed_plugins(INFO2, "remove")
+                processmenu(installed_plugins, menu)
+                screen.clear()
+            elif menu['options'][getin]['title'] == "Show Installed Plugins":
+                screen.clear()
+                installed_plugins = get_installed_plugins(DISPLAY, "")
+                processmenu(installed_plugins, menu)
+                screen.clear()
+            elif menu['options'][getin]['title'] == "Update Plugins":
+                screen.clear()
+                installed_plugins = get_installed_plugins(INFO2, "update")
+                processmenu(installed_plugins, menu)
+                screen.clear()
+            else:
+                screen.clear()
+                processmenu(menu['options'][getin], menu)
+                screen.clear()
         elif menu['options'][getin]['type'] == EXITMENU:
             exitmenu = True
 
@@ -313,9 +413,9 @@ def build_menu_dict():
         { 'title': "Plugins", 'type': MENU, 'subtitle': 'Please select an option...',
           'options': [
             { 'title': "Add Plugins", 'type': INPUT, 'command': '' },
-            { 'title': "Remove Plugins", 'type': INPUT, 'command': '' },
-            { 'title': "Show Installed Plugins", 'type': INPUT, 'command': '' },
-            { 'title': "Update Plugins", 'type': INPUT, 'command': '' },
+            { 'title': "Remove Plugins", 'type': MENU, 'command': '' },
+            { 'title': "Show Installed Plugins", 'type': MENU, 'command': '' },
+            { 'title': "Update Plugins", 'type': MENU, 'command': '' },
           ]
         },
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
@@ -326,14 +426,14 @@ def build_menu_dict():
             { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py elasticsearch head' },
             { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py elasticsearch marvel' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
-            { 'title': "Container Stats", 'type': INFO2, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
+            { 'title': "Container Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
           ]
         },
         { 'title': "Build", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Build new plugins and core", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh' },
-            { 'title': "Force rebuild all plugins and core", 'type': COMMAND, 'command': '/bin/sh /data/build_images.sh --no-cache' },
+            { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh /data/build_images.sh' },
+            { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh /data/build_images.sh --no-cache' },
           ]
         },
         { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
