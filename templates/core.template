@@ -54,3 +54,8 @@ HostConfig = {"Links": ["core-aaa-redis:redis"], "PublishAllPorts": true}
 [aaa-syslog]
 Env = ["VENT_HOST=`hostname`"]
 HostConfig = {"PortBindings": { "514/tcp": [{ "HostPort": "514" }]}, "Links": ["core-aaa-rabbitmq:rabbitmq"], "Binds":["/var/log/syslog-ng:/var/log/syslog-ng"]}
+
+[template-change]
+Cmd = /templates
+Env = ["PYTHONUNBUFFERED=0"]
+HostConfig = {"Binds": ["/var/lib/docker/data/templates:/templates:ro"], "Links": ["core-aaa-redis:redis"]}
