@@ -192,18 +192,24 @@ def read_template_types(template_type, container_cmd):
                                         if "Links" in host_config:
                                             for rec in host_config["Links"]:
                                                 r = rec.split(":")
+                                                r_name = r[1]
+                                                r_name_full = r[0].split("core-")
+                                                if len(r_name_full) > 1:
+                                                    r_name_full = r_name_full[1]
+                                                else:
+                                                    r_name_full = r_name_full[0]
                                                 for ext in external_overrides:
-                                                    if r[1] == ext:
+                                                    if r_name_full == ext:
                                                         host_config_new["Links"].remove(rec)
                                                         # add external_overrides to extrahosts
-                                                        if r[1]+"_host" in external_options:
+                                                        if r_name_full+"_host" in external_options:
                                                             try:
-                                                                extra_hosts.append(r[1]+":"+core_config.get("external", r[1]+"_host"))
+                                                                extra_hosts.append(r_name+":"+core_config.get("external", r_name_full+"_host"))
                                                                 host_config_new["ExtraHosts"] = extra_hosts
                                                             except:
                                                                 pass
                                                         else:
-                                                            print "no local "+r[1]+" but an external one wasn't specified."
+                                                            print "no local "+r_name+" but an external one wasn't specified."
                                             option_val = str(host_config_new).replace("'", '"')
                                             if len(host_config_new["Links"]) == 0:
                                                 del host_config_new["Links"]
