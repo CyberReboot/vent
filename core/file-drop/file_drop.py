@@ -20,10 +20,10 @@ class GZHandler(PatternMatchingEventHandler):
         event.src_path
             path/to/observed/file
         """
-        if event.event_type == "created":
+        q = Queue(connection=Redis(host="redis"), default_timeout=86400)
+        if event.event_type == "created" and event.is_directory == False:
             print event.src_path
             # let jobs run for up to one day
-            q = Queue(connection=Redis(host="redis"), default_timeout=86400)
             # let jobs be queued for up to 30 days
             file_mime = magic.from_file(event.src_path, mime=True)
             if "pcap" in file_mime:
