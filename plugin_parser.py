@@ -193,10 +193,10 @@ def remove_plugins(plugin_url):
         #remove git repo once done    
         shutil.rmtree("/var/lib/docker/data/plugin_repos/"+plugin_name)
         print "Successfully removed Plugin: "+plugin_name
-  
+
     except:
         pass
-        
+
 
 
 if __name__ == "__main__":

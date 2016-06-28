@@ -7,6 +7,7 @@ import sys
 import termios
 import tty
 
+
 from subprocess import call, check_output, PIPE, Popen
 
 screen = curses.initscr()
@@ -32,6 +33,18 @@ DISPLAY = "display"
 template_dir = "/var/lib/docker/data/templates/"
 plugins_dir = "/var/lib/docker/data/plugins/"
 
+
+def update_images():
+    images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
+    for image in images:
+        image = image.split("  ")[0]
+        if "core/" in image or "visualization/" in image or "collectors/" in image:
+            if not os.path.isdir("/var/lib/docker/data/"+image):
+                os.system("docker rmi "+image)
+        else:
+            if not os.path.isdir("/var/lib/docker/data/plugins/"+image):
+                os.system("docker rmi "+image)
+
 # Allows for acceptance of single char before terminating
 def getch():
     fd = sys.stdin.fileno()
@@ -47,7 +60,6 @@ def getch():
 def confirm():
     while getch():
         break
-
 
 # Displays status of all running, not running/built, not built, and disabled plugins
 def get_plugin_status():
@@ -380,9 +392,14 @@ def processmenu(menu, parent=None):
                         break
             else:
                 os.system(menu['options'][getin]['command'])
-            confirm()
             if menu['title'] == "Remove Plugins":
+                update_images()
+                confirm()
                 exitmenu = True
+            elif menu['title'] == "Update Plugins":
+                update_images()
+                os.system("/bin/sh /data/build_images.sh")
+                confirm()
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
@@ -410,6 +427,7 @@ def processmenu(menu, parent=None):
                 os.system('reset')
                 screen.clear()
                 os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
+                os.system("/bin/sh /data/build_images.sh")
                 confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
