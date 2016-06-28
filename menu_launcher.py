@@ -59,7 +59,6 @@ def confirm():
         break
 
 def get_installed_plugins(m_type, command):
-    import os
     try:
         p = {}
         p['type'] = MENU
