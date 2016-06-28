@@ -32,6 +32,7 @@ DISPLAY = "display"
 template_dir = "/var/lib/docker/data/templates/"
 plugins_dir = "/var/lib/docker/data/plugins/"
 
+# Allows for acceptance of single char before terminating
 def getch():
     fd = sys.stdin.fileno()
     settings = termios.tcgetattr(fd)
@@ -42,12 +43,41 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, settings)
     return ch
 
+# Will wait for user input before clearing stdout
 def confirm():
     while getch():
         break
 
+
+# Displays status of all running, not running/built, not built, and disabled plugins
+def get_plugin_status():
+    running = []
+    nrbuilt = []
+    notbuilt = []
+    disabled = []
+    p = {}
+
+    try:
+        # Retrieves running docker containers and returns a list of "containeridimagename"
+        running = check_output(" { docker ps -a -f status=running & docker ps -a -f status=restarting; } | grep '/' | awk \"{print \$2\$1}\" ", shell=True).split("\n")
+        nrbuilt = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=paused & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$2\$1}\" ", shell=True).split("\n")
+        # !! TODO - Enabled/Disabled Plugins
+        # !! TODO - Added plugins through filewalk
+        # !! TODO - Not built plugins
+        enabled = get_enabled_plugins()
+        p['title'] = 'Plugin Status'
+        p['subtitle'] = 'Choose a category...'
+        p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running if x != ""]
+        p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt if x != ""]
+        p['options'] = [ { 'title': "Running", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
+                         { 'title': "Not Running/Built", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt }
+                        ]
+    except:
+        pass
+
+    return p
+
 def get_installed_plugins(m_type, command):
-    import os
     try:
         p = {}
         p['type'] = MENU
@@ -84,6 +114,25 @@ def get_installed_plugins(m_type, command):
 
     except:
         pass
+
+# !! TODO
+# Retrieves plugins that have been enabled in config
+def get_enabled_plugins():
+    modes = []
+    try:
+        config = ConfigParser.RawConfigParser()
+        config.read(template_dir+'modes.template')
+        plugin_array = config.options("plugins")
+        plugins = {}
+        for plug in plugin_array:
+            plugins[plug] = config.get("plugins", plug)
+            with open("/tmp/test.log", "w+") as myfile:
+                myfile.write(plugins[plug])
+    except:
+        with open("/tmp/error.log", "w+") as myfile:
+            myfile.write("Exception in get_enabled_plugins")
+
+    return modes
 
 def run_plugins(action):
     modes = []
@@ -380,6 +429,11 @@ def processmenu(menu, parent=None):
                 installed_plugins = get_installed_plugins(INFO2, "update")
                 processmenu(installed_plugins, menu)
                 screen.clear()
+            elif menu['options'][getin]['title'] == "Status":
+                screen.clear()
+                plugins = get_plugin_status()
+                processmenu(plugins, menu)
+                screen.clear()
             else:
                 screen.clear()
                 processmenu(menu['options'][getin], menu)
@@ -403,7 +457,7 @@ def build_menu_dict():
               'options': run_plugins("clean")
             },
             { 'title': "Status", 'type': MENU, 'subtitle': '',
-              'options': run_plugins("status")
+              'command': ''
             },
             { 'title': "Configure", 'type': MENU, 'subtitle': '',
               'options': update_plugins()
