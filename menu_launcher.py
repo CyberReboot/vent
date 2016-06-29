@@ -30,9 +30,11 @@ INPUT = "input"
 DISPLAY = "display"
 
 # path that exists on the iso
-template_dir = "/var/lib/docker/data/templates/"
+collectors_dir = "/var/lib/docker/data/collectors"
+core_dir = "/var/lib/docker/data/core"
 plugins_dir = "/var/lib/docker/data/plugins/"
-
+template_dir = "/var/lib/docker/data/templates/"
+vis_dir = "/var/lib/docker/data/visualization"
 
 def update_images():
     images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
@@ -61,22 +63,101 @@ def confirm():
     while getch():
         break
 
+"""
+Retrieves all plugins by namespace; e.g. - features/tcpdump || features/hexparser
+Note returns a dict of format: {'namespace': [p1, p2, p3, ...], 'namespace2': [p1, p2, p3, ...]}
+!! TODO - Namespace conflicts are possible and might result in some issues here.
+"""
+def get_installed_plugins():
+    p = {}
+    try:
+        # Get all namespaces
+        namespaces = [ namespace for namespace in os.listdir(plugins_dir) if os.path.isdir(os.path.join(plugins_dir, namespace)) ]
+
+        # For each namespace, retrieve all plugins and index by namespace
+        for namespace in namespaces:
+            p[namespace] = [ plugin for plugin in os.listdir(plugins_dir+namespace) if os.path.isdir(os.path.join(plugins_dir+namespace, plugin)) ]
+    except:
+        with open("/tmp/error.log", "a+") as myfile:
+            myfile.write("Error in get_installed_plugins: ", sys.exc_info())
+        myfile.close()
+        pass
+
+    return p
+
+# Retrieves installed collectors by category: active, passive, or both for all
+def get_installed_collectors(c_type):
+    c = []
+    try:
+        # Get all collectors
+        collectors = [ collector for collector in os.listdir(collectors_dir) if os.path.isdir(os.path.join(collectors_dir, collector)) ]
+
+        # Filter by passive/active/all
+        if c_type == "passive":
+            c = [ collector for collector in collectors if "passive-" in collector ]
+        elif c_type == "active":
+            c = [ collector for collector in collectors if "active-" in collector ]
+        elif c_type == "all":
+            c = collectors
+        else:
+            with open("/tmp/error.log", "a+") as myfile:
+                myfile.write("Error in get_installed_collectors: ", "Invalid collector parameter: ", c_type)
+            myfile.close()
+    except:
+        with open("/tmp/error.log", "a+") as myfile:
+            myfile.write("Error in get_installed_collectors: ", sys.exc_info())
+        myfile.close()
+        pass
+
+# Retrieves plugins that have been enabled in config
+def get_enabled_plugins():
+    mode_enabled = {}
+    core_enabled = {}
+    collector_enabled = {}
+    vis_enabled = {}
+    template_enabled = {}
+    p = {}
+
+    return p
+
+"""
+Takes in a dict of all installed plugins (see get_installed_plugins())
+and a dict of all enabled_plugins (see get_enabled_plugins()).
+Returns a MENU dict of plugins that have not been built.
+"""
+def get_unbuilt_plugins(installed_plugins, enabled_plugins):
+    # TODO
+    return
+
 # Displays status of all running, not running/built, not built, and disabled plugins
 def get_plugin_status():
     running = []
     nrbuilt = []
     notbuilt = []
     disabled = []
+    installed = {}
     p = {}
 
     try:
-        # Retrieves running docker containers and returns a list of "containeridimagename"
+        # Retrieves running or restarting docker containers and returns a list of "containeridimagename"; i.e. - running
         running = check_output(" { docker ps -a -f status=running & docker ps -a -f status=restarting; } | grep '/' | awk \"{print \$2\$1}\" ", shell=True).split("\n")
+
+        # Retrieves docker containers with status exited, paused, dead, created as "containeridimagename"; i.e. - not running
         nrbuilt = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=paused & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$2\$1}\" ", shell=True).split("\n")
-        # !! TODO - Enabled/Disabled Plugins
-        # !! TODO - Added plugins through filewalk
-        # !! TODO - Not built plugins
+        # !! TODO - Append get_installed_plugins("all"), convert to dict first?
+        installed = get_installed_plugins()
         enabled = get_enabled_plugins()
+
+        # with open("/tmp/installed.log", "a+") as myfile:
+        #     for namespace in installed:
+        #         myfile.write("Namespace: "+namespace+" = [")
+        #         for plugin in installed[namespace]:
+        #             myfile.write(plugin+", ")
+        #         myfile.write("]")
+        # myfile.close()
+
+        # !! TODO - Enabled/Disabled Plugins
+        # !! TODO - Not built plugins
         p['title'] = 'Plugin Status'
         p['subtitle'] = 'Choose a category...'
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running if x != ""]
@@ -89,7 +170,8 @@ def get_plugin_status():
 
     return p
 
-def get_installed_plugins(m_type, command):
+# Retrieves all installed plugin repos; e.g - vent-network
+def get_installed_plugin_repos(m_type, command):
     try:
         p = {}
         p['type'] = MENU
@@ -126,25 +208,6 @@ def get_installed_plugins(m_type, command):
 
     except:
         pass
-
-# !! TODO
-# Retrieves plugins that have been enabled in config
-def get_enabled_plugins():
-    modes = []
-    try:
-        config = ConfigParser.RawConfigParser()
-        config.read(template_dir+'modes.template')
-        plugin_array = config.options("plugins")
-        plugins = {}
-        for plug in plugin_array:
-            plugins[plug] = config.get("plugins", plug)
-            with open("/tmp/test.log", "w+") as myfile:
-                myfile.write(plugins[plug])
-    except:
-        with open("/tmp/error.log", "w+") as myfile:
-            myfile.write("Exception in get_enabled_plugins")
-
-    return modes
 
 def run_plugins(action):
     modes = []
@@ -434,17 +497,17 @@ def processmenu(menu, parent=None):
         elif menu['options'][getin]['type'] == MENU:
             if menu['options'][getin]['title'] == "Remove Plugins":
                 screen.clear()
-                installed_plugins = get_installed_plugins(INFO2, "remove")
+                installed_plugins = get_installed_plugin_repos(INFO2, "remove")
                 processmenu(installed_plugins, menu)
                 screen.clear()
             elif menu['options'][getin]['title'] == "Show Installed Plugins":
                 screen.clear()
-                installed_plugins = get_installed_plugins(DISPLAY, "")
+                installed_plugins = get_installed_plugin_repos(DISPLAY, "")
                 processmenu(installed_plugins, menu)
                 screen.clear()
             elif menu['options'][getin]['title'] == "Update Plugins":
                 screen.clear()
-                installed_plugins = get_installed_plugins(INFO2, "update")
+                installed_plugins = get_installed_plugin_repos(INFO2, "update")
                 processmenu(installed_plugins, menu)
                 screen.clear()
             elif menu['options'][getin]['title'] == "Status":
