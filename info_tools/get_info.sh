@@ -25,7 +25,7 @@ echo;
 
 #number of images
 echo -n "Number of ";
-docker info | grep Images:;
+docker images | grep -v -c CONTAINERS;
 echo;
 
 #number of running containers
