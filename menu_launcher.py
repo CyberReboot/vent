@@ -376,8 +376,11 @@ def processmenu(menu, parent=None):
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
-                os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
-                os.system("/bin/sh /data/build_images.sh")
+                if not "https://" in plugin_url:
+                    os.system("echo No plugins added, url is not formatted correctly.")
+                    os.system("echo Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
+                else:
+                    os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)                    
                 confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
