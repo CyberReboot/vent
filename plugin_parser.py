@@ -17,11 +17,24 @@ after copying files, update templates
 
 def add_plugins(plugin_url):
     try:
+        if not ".git" in plugin_url:
+            plugin_url = plugin_url + ".git"
+        plugin_name = plugin_url.split("/")[-1].split(".git")[0]
+        if plugin_name == "":
+            print "No plugins added, url is not formatted correctly"
+            print "Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git"
+            return
+        #check to see if plugin already exists in filesystem
+        if os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name):
+            print plugin_name+" already exists. Not installing."
+            return
         os.system("git config --global http.sslVerify false")
         os.system("cd /var/lib/docker/data/plugin_repos/ && git clone "+plugin_url)
-        if ".git" in plugin_url:
-            plugin_url = plugin_url.split(".git")[0]
-        plugin_name = plugin_url.split("/")[-1]
+        #check to see if repo was cloned correctly
+        if not os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name):
+            print plugin_name+" did not install. Is this a git repository?"
+            return
+
         subdirs = [x[0] for x in os.walk("/var/lib/docker/data/plugin_repos/"+plugin_name)]
         check_modes = True
         for subdir in subdirs:
@@ -98,6 +111,19 @@ def add_plugins(plugin_url):
                     config.set("plugins", f_name, "all")
             with open('/var/lib/docker/data/templates/modes.template', 'w') as configfile:
                 config.write(configfile)
+        # check if files copied over correctly
+        for subdir in subdirs:
+            if os.path.isdir(subdir):
+                directory = subdir.split("/var/lib/docker/data/plugin_repos/"+plugin_name+"/")[0]
+                if subdir == "/var/lib/docker/data/plugin_repos/"+plugin_name:
+                    continue
+                if not os.path.isdir("/var/lib/docker/data/"+directory):
+                    print "Failed to install "+plugin_name+" resource: "+directory
+                    os.system("sudo rm -rf /var/lib/docker/data/plugin_repos/"+plugin_name)
+                    return
+        #resources installed correctly. Building...
+        os.system("/bin/sh /data/build_images.sh")
+        return  
     except:
         pass
 
