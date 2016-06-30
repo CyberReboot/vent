@@ -5,8 +5,17 @@ import os
 import shutil
 import sys
 
+"""
+add_plugins(plugin_url)
+
+PARAMETERS: plugin_url - a https link to a git repository as a string
+
+DESCRIPTION: download plugins from plugin_url into a plugin_repos directory, 
+copying files from plugin_repos to the correct location in local Vent filesystem.
+after copying files, update templates
+"""
+
 def add_plugins(plugin_url):
-    # !! TODO keep track of changes so that they can be removed later on
     try:
         os.system("git config --global http.sslVerify false")
         os.system("cd /var/lib/docker/data/plugin_repos/ && git clone "+plugin_url)
@@ -92,6 +101,15 @@ def add_plugins(plugin_url):
     except:
         pass
 
+"""
+Name: remove_plugins(plugin_url)
+
+Parameters: plugin_url - a https link to a git repository as a string
+
+Description: Find plugin repo in plugin_repos directory based on name in plugin_url.
+Delete all elements of the plugin in local Vent filesystem, update templates to reflect changes,
+then delete the plugin from plugin_repos.
+"""
 def remove_plugins(plugin_url):
     try:
         if ".git" in plugin_url:
