@@ -21,7 +21,7 @@ docker
 ### getting the bits
 
 ```
-git clone https://github.com/CyberReboot/vent.git
+git clone --recursive https://github.com/CyberReboot/vent.git
 cd vent
 ```
 
