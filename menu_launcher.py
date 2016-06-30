@@ -43,7 +43,7 @@ def update_images():
         else:
             if not os.path.isdir("/var/lib/docker/data/plugins/"+image):
                 os.system("docker rmi "+image)
-    
+
 def getch():
     fd = sys.stdin.fileno()
     settings = termios.tcgetattr(fd)
@@ -163,65 +163,15 @@ def run_plugins(action):
 def update_plugins():
     modes = []
     try:
-        config = ConfigParser.RawConfigParser()
-        config.read(template_dir+'modes.template')
-        plugin_array = config.options("plugins")
-        plugins = {}
-        for plug in plugin_array:
-            plugins[plug] = config.get("plugins", plug)
-
-        p = {}
-        p['title'] = 'Vent Settings'
-        p['type'] = MENU
-        p['subtitle'] = 'Please select a section to configure...'
-        p['options'] = [
-            { 'title': "Service", 'type': INPUT, 'command': '' },
-            { 'title': "Instances", 'type': INPUT, 'command': '' },
-            { 'title': "Active Containers", 'type': INPUT, 'command': '' },
-            { 'title': "Local Collection", 'type': INPUT, 'command': '' },
-            { 'title': "Locally Active", 'type': INPUT, 'command': '' },
-            { 'title': "External", 'type': INPUT, 'command': '' },
-        ]
-        modes.append(p)
-        for plugin in plugins:
-            p = {}
-            try:
-                config = ConfigParser.RawConfigParser()
-                config.read(template_dir+plugin+'.template')
-                plugin_name = config.get("info", "name")
-                p['title'] = plugin_name
-                p['type'] = MENU
-                p['subtitle'] = 'Please select a tool to configure...'
-                p['options'] = []
-                if plugin == 'core':
-                    tools = [ name for name in os.listdir("/var/lib/docker/data/"+plugin) if os.path.isdir(os.path.join('/var/lib/docker/data/'+plugin, name)) ]
-                    for tool in tools:
-                        t = {}
-                        t['title'] = tool
-                        t['type'] = SETTING
-                        t['command'] = ''
-                        p['options'].append(t)
-                elif plugins[plugin] == 'all':
-                    tools = [ name for name in os.listdir(plugins_dir+plugin) if os.path.isdir(os.path.join(plugins_dir+plugin, name)) ]
-                    for tool in tools:
-                        t = {}
-                        t['title'] = tool
-                        t['type'] = SETTING
-                        t['command'] = ''
-                        p['options'].append(t)
-                else:
-                    for tool in plugins[plugin].split(","):
-                        t = {}
-                        t['title'] = tool
-                        t['type'] = SETTING
-                        t['command'] = ''
-                        p['options'].append(t)
+        for f in os.listdir(template_dir):
+            if f.endswith(".template"):
+                p = {}
+                p['title'] = f
+                p['type'] = SETTING
+                p['command'] = 'python2.7 /data/suplemon/suplemon.py '+template_dir+f
                 modes.append(p)
-            except:
-                # if no name is provided, it doesn't get listed
-                pass
     except:
-        print "unable to get the configuration of modes from the templates.\n"
+        print "unable to get the configuration templates.\n"
     return modes
 
 def get_param(prompt_string):
@@ -287,6 +237,11 @@ def runmenu(menu, parent):
 
         x = screen.getch()
 
+        # !! TODO hack for now, long term should probably take multiple character numbers and update on return
+        num_options = optioncount
+        if optioncount > 8:
+            num_options = 8
+
         if x == 258: # down arrow
             if pos < optioncount:
                 pos += 1
@@ -297,7 +252,7 @@ def runmenu(menu, parent):
                 pos += -1
             else:
                 pos = optioncount
-        elif x >= ord('1') and x <= ord(str(optioncount+1)):
+        elif x >= ord('1') and x <= ord(str(num_options+1)):
             pos = x - ord('0') - 1
     return pos
 
@@ -365,7 +320,6 @@ def processmenu(menu, parent=None):
             os.system('reset')
             screen.clear()
             os.system(menu['options'][getin]['command'])
-            confirm()
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
@@ -438,12 +392,13 @@ def build_menu_dict():
         { 'title': "System Info", 'type': MENU, 'subtitle': '',
           'options': [
             #{ 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
+            { 'title': "Container Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
+            { 'title': "", 'type': INFO, 'command': 'echo'},
             { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py aaa-rabbitmq mgmt' },
             { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py rq-dashboard mgmt' },
             { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py elasticsearch head' },
             { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py elasticsearch marvel' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
-            { 'title': "Container Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
           ]
         },
