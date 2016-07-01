@@ -82,6 +82,8 @@ def add_plugins(plugin_url):
                             if filename == "modes.template":
                                 check_modes = False
                                 shutil.copyfile(subdir+"/"+filename, dest+filename)
+                            elif filename == "collectors.template":
+                                shutil.copyfile(subdir+"/"+filename, dest+filename)
                             elif filename == "core.template":
                                 read_config = ConfigParser.RawConfigParser()
                                 read_config.read('/var/lib/docker/data/templates/core.template')
