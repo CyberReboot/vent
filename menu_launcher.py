@@ -232,9 +232,9 @@ def get_all_installed():
         # Note - Dictionary
         all_plugins = get_installed_plugins()
 
-        all_installed['cores'] = all_cores
+        all_installed['core'] = all_cores
         all_installed['collectors'] = all_colls
-        all_installed['visualizations'] = all_vis
+        all_installed['visualization'] = all_vis
 
         with open("/tmp/installed.log", "a+") as myfile:
             myfile.write("Cores: ")
@@ -366,9 +366,9 @@ def get_mode_enabled(mode_config):
                 if namespace not in mode_enabled.keys():
                     mode_enabled[namespace] = all_plugins[namespace]
 
-            mode_enabled['cores'] = core_enabled
+            mode_enabled['core'] = core_enabled
             mode_enabled['collectors'] = coll_enabled
-            mode_enabled['visualizations'] = vis_enabled
+            mode_enabled['visualization'] = vis_enabled
     except:
         log_error("get_mode_enabled")
         pass
@@ -584,36 +584,87 @@ def get_plugin_status():
     running = []
     nrbuilt = []
     notbuilt = []
-    disabled = []
     installed = {}
     p = {}
 
     try:
-        # Retrieves running or restarting docker containers and returns a list of "containeridimagename"; i.e. - running
-        running = check_output(" { docker ps -a -f status=running & docker ps -a -f status=restarting; } | grep '/' | awk \"{print \$10}\" ", shell=True).split("\n")
-
-        # Retrieves docker containers with status exited, paused, dead, created as "containeridimagename"; i.e. - not running
-        nrbuilt = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=paused & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$10}\" ", shell=True).split("\n")
-        
         # Retrieves all installed containers
-        installed_cores = get_installed_cores()
-        installed_colls = get_installed_collectors("all")
-        installed_plugins = get_installed_plugins()
-        installed_vis = get_installed_vis()
-        # Put into one dict - installed
+        all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed()
 
-        # Retrieves all enabled containers
+        # Retrieves all enabled images
         enabled, disabled = get_enabled()
 
-        
+        # Need to cross reference with all installed containers to determine all disabled containers
+        containers = check_output(" docker ps -a | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+        containers = [ container for container in containers if container != "" ]
+        for container in containers:
+            with open("/tmp/pruning.log", "a+") as myfile:
+                myfile.write(container+"\n")
+            myfile.close()
 
-        # !! TODO - Not built plugins
+        disabled_containers = []
+
+        for namespace in disabled:
+            for container in disabled[namespace]:
+                with open("/tmp/pruning.log", "a+") as myfile:
+                    myfile.write("Disabled: "+container+"\n")
+                myfile.close()
+
+        # Intersect the set of all containers with the set of all disabled images
+        # Images form the basis for a container (in name especially), but there can be multiple containers per image
+        for container in containers:
+            for namespace in disabled:
+                for image in disabled[namespace]:
+                    if image in container:
+                        disabled_containers.append(container)
+                        with open("/tmp/pruning.log", "a+") as myfile:
+                            myfile.write(image + ": " + container + "...disabled!\n")
+                        myfile.close()
+
+        # Retrieves running or restarting docker containers and returns a list of container names
+        running = check_output(" { docker ps -a -f status=running & docker ps -a -f status=restarting; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+
+        # Retrieves docker containers with status exited, paused, dead, created; returns as a list of container names
+        nrcontainers = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=dead & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+        nrcontainers = [ container for container in nrcontainers if container != "" ]
+        nrbuilt = [ container for container in nrcontainers if container not in disabled_containers ]
+
+        # Retrieve all built docker images
+        built = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
+        built = [ image for image in built if image != "" ]
+
+        for namespace in all_installed:
+            for image in all_installed[namespace]:
+                if image not in disabled[namespace] and namespace+'/'+image not in built:
+                    notbuilt.append(namespace+'/'+image)
+
+        for container in nrcontainers:
+            with open("/tmp/nrbuilt.log", "a+") as myfile:
+                myfile.write("NR: "+container+"\n")
+            myfile.close()
+        for container in disabled_containers:
+            with open("/tmp/nrbuilt.log", "a+") as myfile:
+                myfile.write("DIS: "+container+"\n")
+            myfile.close()
+        for container in nrbuilt:
+            with open("/tmp/nrbuilt.log", "a+") as myfile:
+                myfile.write("NRB: "+container+"\n")
+            myfile.close()
+        for container in notbuilt:
+            with open("/tmp/built.log", "a+") as myfile:
+                myfile.write("NB: "+container+"\n")
+            myfile.close()
+
         p['title'] = 'Plugin Status'
         p['subtitle'] = 'Choose a category...'
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running if x != "" ]
-        p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt if x != "" ]
+        p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt ]
+        p_disabled = [ {'title': x, 'type': 'INFO', 'command': ''} for x in disabled_containers ]
+        p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
         p['options'] = [ { 'title': "Running", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
-                         { 'title': "Not Running/Built", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt }
+                         { 'title': "Not Running/Built", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
+                         { 'title': "Disabled", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled },
+                         { 'title': "Not Built", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt }
                         ]
     except:
         pass
