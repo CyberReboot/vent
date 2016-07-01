@@ -628,16 +628,24 @@ def get_plugin_status():
                 myfile.write("NB: "+container+"\n")
             myfile.close()
 
+        # Format disabled dict for menu processing
+        p_disabled = []
+        for namespace in disabled:
+            for image in disabled[namespace]:
+                p_disabled.append(namespace+'/'+image)
+
         p['title'] = 'Plugin Status'
         p['subtitle'] = 'Choose a category...'
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running if x != "" ]
         p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt ]
-        p_disabled = [ {'title': x, 'type': 'INFO', 'command': ''} for x in disabled_containers ]
+        p_disabled_cont = [ {'title': x, 'type': 'INFO', 'command': '' } for x in disabled_containers ]
+        p_disabled_images = [ {'title': x, 'type': 'INFO', 'command': '' } for x in p_disabled ]
         p_built = [ {'title': x, 'type': 'INFO', 'command': '' } for x in built ]
         p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
         p['options'] = [ { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
                          { 'title': "Not Running Containers", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
-                         { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled },
+                         { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled_cont },
+                         { 'title': "Disabled Images", 'subtitle': "Currently disabled images...", 'type': MENU, 'options': p_disabled_images },
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt }
                         ]
