@@ -613,10 +613,10 @@ def get_plugin_status():
                         myfile.close()
 
         # Retrieves running or restarting docker containers and returns a list of container names
-        running = check_output(" { docker ps -a -f status=running & docker ps -a -f status=restarting; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+        running = check_output(" { docker ps -af status=running & docker ps -af status=restarting; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
 
         # Retrieves docker containers with status exited, paused, dead, created; returns as a list of container names
-        nrcontainers = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=paused & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+        nrcontainers = check_output(" { docker ps -af status=created & docker ps -af status=exited & docker ps -af status=paused & docker ps -af status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         nrcontainers = [ container for container in nrcontainers if container != "" ]
         nrbuilt = [ container for container in nrcontainers if container not in disabled_containers ]
 
