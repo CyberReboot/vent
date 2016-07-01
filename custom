@@ -1,18 +1,20 @@
 #!/bin/sh
+sudo mkdir -p /var/lib/docker/data/images
+sudo chmod -R 777 /var/lib/docker/data/images
+sudo mv /data/images/ /var/lib/docker/data/images 2>/dev/null
 sudo /data/bootsync.sh
 sudo /data/bootlocal.sh
 sudo mkdir -p /var/lib/docker/data
-sudo mkdir -p /var/lib/docker/data/images
 sudo mkdir -p /var/lib/docker/data/plugins
 sudo mkdir -p /var/lib/docker/data/collectors
 sudo mkdir -p /var/lib/docker/data/visualization
 sudo mkdir -p /var/lib/docker/data/plugin_repos
+sudo mkdir -p /var/lib/docker/data/images
+sudo chmod -R 777 /var/lib/docker/data/images
 sudo chmod -R 777 /var/lib/docker/data/visualization
 sudo chmod -R 777 /var/lib/docker/data/collectors
 sudo chmod -R 777 /var/lib/docker/data/plugins
-sudo chmod -R 777 /var/lib/docker/data/images
 sudo chmod -R 777 /var/lib/docker/data/plugin_repos
 sudo mv /data/templates/ /var/lib/docker/data/templates 2>/dev/null
 sudo mv /data/core/ /var/lib/docker/data/core 2>/dev/null
 sudo chmod -R 777 /var/lib/docker/data/core
-
