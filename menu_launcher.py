@@ -572,10 +572,7 @@ def get_enabled():
 
 # Displays status of all running, not running/built, not built, and disabled plugins
 def get_plugin_status():
-    running = []
-    nrbuilt = []
     notbuilt = []
-    installed = {}
     p = {}
 
     try:
@@ -624,6 +621,8 @@ def get_plugin_status():
         built = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
         built = [ image for image in built if image != "" ]
 
+        # If image hasn't been disabled and isn't present in docker images then add
+        notbuilt = []
         for namespace in all_installed:
             for image in all_installed[namespace]:
                 if image not in disabled[namespace] and namespace+'/'+image not in built:
@@ -651,11 +650,13 @@ def get_plugin_status():
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running if x != "" ]
         p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt ]
         p_disabled = [ {'title': x, 'type': 'INFO', 'command': ''} for x in disabled_containers ]
+        p_built = [ {'title': x, 'type': 'INFO', 'command': '' } for x in built ]
         p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
-        p['options'] = [ { 'title': "Running", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
-                         { 'title': "Not Running/Built", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
-                         { 'title': "Disabled", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled },
-                         { 'title': "Not Built", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt }
+        p['options'] = [ { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
+                         { 'title': "Not Running Containers", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
+                         { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled },
+                         { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
+                         { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt }
                         ]
     except:
         pass
