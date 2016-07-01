@@ -14,8 +14,6 @@ if using docker-machine cli to provision:
 # from the directory that contains your pcaps
 # optionally add an argument of the name for vent in
 #     docker-machine if you called it something other than vent
-cd vent
-cp vent /usr/local/bin/
 cd /path/where/pcaps/are/
 vent
 ```
