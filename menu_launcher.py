@@ -36,13 +36,6 @@ plugins_dir = "/var/lib/docker/data/plugins/"
 template_dir = "/var/lib/docker/data/templates/"
 vis_dir = "/var/lib/docker/data/visualization"
 
-# Basic Manual Logging
-# !! TODO - Needs improvement
-def log_error(function):
-    with open("/tmp/error.log", "a+") as myfile:
-        myfile.write("Exception in "+function+": ", sys.exc_info())
-    myfile.close()
-
 # Update images for removed plugins
 def update_images():
     images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
@@ -67,7 +60,7 @@ def getch():
             termios.tcsetattr(fd, termios.TCSADRAIN, settings)
         return ch
     except:
-        log_error("getch")
+        pass
 
 # Will wait for user input before clearing stdout
 def confirm():
@@ -96,7 +89,6 @@ def get_mode_config():
                 myfile.close()
         # If not then there are no special runtime configurations and modes is empty
     except:
-        log_error("get_mode_config")
         pass
 
     return modes
@@ -143,7 +135,6 @@ def get_core_config():
                 myfile.close()
         # If not then everything is enabled and cores is empty
     except:
-        log_error("get_core_config")
         pass
 
     return cores
@@ -156,7 +147,6 @@ def get_installed_cores():
         # Get all cores
         cores = [ core for core in os.listdir(core_dir) if os.path.isdir(os.path.join(core_dir, core)) ]
     except:
-        log_error("get_installed_cores")
         pass
 
     return cores
@@ -181,7 +171,6 @@ def get_installed_collectors(c_type):
                 myfile.write("Error in get_installed_collectors: ", "Invalid collector parameter: ", c_type)
             myfile.close()
     except:
-        log_error("get_installed_collectors")
         pass
 
     return colls
@@ -194,7 +183,6 @@ def get_installed_vis():
         # Get all visualizations
         vis = [ visualization for visualization in os.listdir(vis_dir) if os.path.isdir(os.path.join(vis_dir, visualization)) ]
     except:
-        log_error("get_installed_vis")
         pass
 
     return vis
@@ -211,7 +199,6 @@ def get_installed_plugins():
         for namespace in namespaces:
             p[namespace] = [ plugin for plugin in os.listdir(plugins_dir+namespace) if os.path.isdir(os.path.join(plugins_dir+namespace, plugin)) ]
     except:
-        log_error("get_installed_plugins")
         pass
 
     return p
@@ -260,7 +247,6 @@ def get_all_installed():
         if all_plugins:
             all_installed.update(all_plugins)
     except:
-        log_error("get_all_installed")
         pass
 
     return all_installed, all_cores, all_colls, all_vis, all_plugins
@@ -370,7 +356,6 @@ def get_mode_enabled(mode_config):
             mode_enabled['collectors'] = coll_enabled
             mode_enabled['visualization'] = vis_enabled
     except:
-        log_error("get_mode_enabled")
         pass
 
     return mode_enabled
@@ -448,7 +433,6 @@ def get_core_enabled(core_config):
             core_disabled['collectors'] = coll_disabled
             core_disabled['core'] = locally_disabled
     except:
-        log_error("get_core_enabled")
         pass
 
     return core_enabled, core_disabled
@@ -565,7 +549,6 @@ def get_enabled():
         enabled = all_enabled
         disabled = all_disabled
     except:
-        log_error()
         pass
 
     return enabled, disabled
