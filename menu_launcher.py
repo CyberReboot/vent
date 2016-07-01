@@ -36,6 +36,14 @@ plugins_dir = "/var/lib/docker/data/plugins/"
 template_dir = "/var/lib/docker/data/templates/"
 vis_dir = "/var/lib/docker/data/visualization"
 
+# Basic Manual Logging
+# !! TODO - Needs improvement
+def log_error(function):
+    with open("/tmp/error.log", "a+") as myfile:
+        myfile.write("Exception in "+function+": ", sys.exc_info())
+    myfile.close()
+
+# Update images for removed plugins
 def update_images():
     images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
     for image in images:
@@ -49,25 +57,150 @@ def update_images():
 
 # Allows for acceptance of single char before terminating
 def getch():
-    fd = sys.stdin.fileno()
-    settings = termios.tcgetattr(fd)
     try:
-        tty.setraw(fd)
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, settings)
-    return ch
+        fd = sys.stdin.fileno()
+        settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, settings)
+        return ch
+    except:
+        log_error("getch")
 
 # Will wait for user input before clearing stdout
 def confirm():
     while getch():
         break
 
-"""
-Retrieves all plugins by namespace; e.g. - features/tcpdump || features/hexparser
-Note returns a dict of format: {'namespace': [p1, p2, p3, ...], 'namespace2': [p1, p2, p3, ...]}
-!! TODO - Namespace conflicts are possible and might result in some issues here.
-"""
+# Parses modes.template and returns a dict containing all specifically enabled containers
+# Returns dict along the format of: {'namespace': ["all"], 'namespace2': [""], 'namespace3': ["plug1", "plug2"]}
+def get_mode_config():
+    # Parsing modes.template
+    modes = {}
+    try:
+        config = ConfigParser.RawConfigParser()
+        config.read(template_dir+'modes.template')
+        # Check if any runtime configurations
+        if config.has_section("plugins"):
+            plugin_array = config.options("plugins")
+            # Check if there are any options
+            if plugin_array:
+                with open("/tmp/enabled-modes.log", "a+") as myfile:
+                    myfile.write("modes.template\n")
+                    for plug in plugin_array:
+                        modes[plug] = config.get("plugins", plug).replace(" ", "").split(",")
+                        for pl in modes[plug]:
+                            myfile.write("'"+plug+"': "+pl+'\n')
+                myfile.close()
+        # If not then there are no special runtime configurations and modes is empty
+    except:
+        log_error("get_mode_config")
+        pass
+
+    return modes
+
+# Parses core.template to get all runtime configurations for enabling/disabling cores
+# Returns dict along the format of: {'passive': "on", 'active': "on", 'aaa-redis': "off"}
+def get_core_config():
+    # Parsing core.template
+    cores = {}
+    try:
+        config = ConfigParser.RawConfigParser()
+        config.read(template_dir+'core.template')
+        passive = None
+        active = None
+        # Check if any run-time configurations for core-collectors
+        if config.has_section("local-collection"):
+            # Check for passive collector configs
+            if config.has_option("local-collection", "passive"):
+                passive = config.get("local-collection", "passive").replace(" ", "")
+            # Check for active collector configs
+            if config.has_option("local-collection", "active"):
+                active = config.get("local-collection", "active").replace(" ", "")
+            if passive == "on" or passive == "off":
+                cores['passive'] = passive
+                with open("/tmp/enabled-core.log", "a+") as myfile:
+                    myfile.write("'passive': "+cores['passive']+"\n")
+                myfile.close()
+            if active == "on" or active == "off":
+                cores['active'] = active
+                with open("/tmp/enabled-core.log", "a+") as myfile:
+                    myfile.write("'active': "+cores['active']+"\n")
+                myfile.close()
+        # If not then everything is enabled and cores is empty
+
+        # Check if any run-time configurations for core
+        if config.has_section("locally-active"):
+            active_array = config.options("locally-active")
+            # Check if there are any options
+            if active_array:
+                with open("/tmp/enabled-core.log", "a+") as myfile:
+                    for option in active_array:
+                        cores[option] = config.get("locally-active", option).replace(" ", "")
+                        myfile.write("'"+option+"': "+cores[option]+"\n")
+                myfile.close()
+        # If not then everything is enabled and cores is empty
+    except:
+        log_error("get_core_config")
+        pass
+
+    return cores
+
+# Retrieves installed cores
+# Returns list: ["core1", "core2", "core3"]
+def get_installed_cores():
+    cores = []
+    try:
+        # Get all cores
+        cores = [ core for core in os.listdir(core_dir) if os.path.isdir(os.path.join(core_dir, core)) ]
+    except:
+        log_error("get_installed_cores")
+        pass
+
+    return cores
+
+# Retrieves installed collectors by category: active, passive, or both (all)
+# Returns list: ["coll1", "coll2", "coll3"]
+def get_installed_collectors(c_type):
+    colls = []
+    try:
+        # Get all collectors
+        collectors = [ collector for collector in os.listdir(collectors_dir) if os.path.isdir(os.path.join(collectors_dir, collector)) ]
+
+        # Filter by passive/active/all
+        if c_type == "passive":
+            colls = [ collector for collector in collectors if "passive-" in collector ]
+        elif c_type == "active":
+            colls = [ collector for collector in collectors if "active-" in collector ]
+        elif c_type == "all":
+            colls = collectors
+        else:
+            with open("/tmp/error.log", "a+") as myfile:
+                myfile.write("Error in get_installed_collectors: ", "Invalid collector parameter: ", c_type)
+            myfile.close()
+    except:
+        log_error("get_installed_collectors")
+        pass
+
+    return colls
+
+# Retrieves installed visualizations
+# Returns list: ["vis1", "vis2", "vis3"]
+def get_installed_vis():
+    vis = []
+    try:
+        # Get all visualizations
+        vis = [ visualization for visualization in os.listdir(vis_dir) if os.path.isdir(os.path.join(vis_dir, visualization)) ]
+    except:
+        log_error("get_installed_vis")
+        pass
+
+    return vis
+
+# Retrieves all plugins by namespace; e.g. - features/tcpdump || features/hexparser
+# Note returns a dict of format: {'namespace': [p1, p2, p3, ...], 'namespace2': [p1, p2, p3, ...]}
 def get_installed_plugins():
     p = {}
     try:
@@ -78,47 +211,364 @@ def get_installed_plugins():
         for namespace in namespaces:
             p[namespace] = [ plugin for plugin in os.listdir(plugins_dir+namespace) if os.path.isdir(os.path.join(plugins_dir+namespace, plugin)) ]
     except:
-        with open("/tmp/error.log", "a+") as myfile:
-            myfile.write("Error in get_installed_plugins: ", sys.exc_info())
-        myfile.close()
+        log_error("get_installed_plugins")
         pass
 
     return p
 
-# Retrieves installed collectors by category: active, passive, or both for all
-def get_installed_collectors(c_type):
-    c = []
+# Retrieves all installed containers
+# Returns a dict indexed by container type: 
+# {'cores':["core1", "core2"], 'collectors':["coll1", "coll2"]}
+# Also returns a list of all containers, and list by category
+def get_all_installed():
+    all_installed = {}
+    list_installed = {}
     try:
-        # Get all collectors
-        collectors = [ collector for collector in os.listdir(collectors_dir) if os.path.isdir(os.path.join(collectors_dir, collector)) ]
+        # Get each set of containers by type
+        all_cores = get_installed_cores()
+        all_colls = get_installed_collectors("all")
+        all_vis = get_installed_vis()
 
-        # Filter by passive/active/all
-        if c_type == "passive":
-            c = [ collector for collector in collectors if "passive-" in collector ]
-        elif c_type == "active":
-            c = [ collector for collector in collectors if "active-" in collector ]
-        elif c_type == "all":
-            c = collectors
-        else:
-            with open("/tmp/error.log", "a+") as myfile:
-                myfile.write("Error in get_installed_collectors: ", "Invalid collector parameter: ", c_type)
-            myfile.close()
-    except:
-        with open("/tmp/error.log", "a+") as myfile:
-            myfile.write("Error in get_installed_collectors: ", sys.exc_info())
+        # Note - Dictionary
+        all_plugins = get_installed_plugins()
+
+        all_installed['core'] = all_cores
+        all_installed['collectors'] = all_colls
+        all_installed['visualization'] = all_vis
+
+        with open("/tmp/installed.log", "a+") as myfile:
+            myfile.write("Cores: ")
+            for val in all_cores:
+                myfile.write(val+" ")
+            myfile.write("\n")
+            myfile.write("Colls: ")
+            for val in all_colls:
+                myfile.write(val+" ")
+            myfile.write("\n")
+            myfile.write("Vis: ")
+            for val in all_vis:
+                myfile.write(val+" ")
+            myfile.write("\n")
+            for key in all_plugins.keys():
+                myfile.write(key+": ")
+                for val in all_plugins[key]:
+                    myfile.write(val+" ")
+                myfile.write("\n")
         myfile.close()
+
+        # Check if all_plugins is empty
+        if all_plugins:
+            all_installed.update(all_plugins)
+    except:
+        log_error("get_all_installed")
         pass
 
-# Retrieves plugins that have been enabled in config
-def get_enabled_plugins():
-    mode_enabled = {}
-    core_enabled = {}
-    collector_enabled = {}
-    vis_enabled = {}
-    template_enabled = {}
-    p = {}
+    return all_installed, all_cores, all_colls, all_vis, all_plugins
 
-    return p
+def get_mode_enabled(mode_config):
+    mode_enabled = {}
+    try:
+        all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed()
+        with open("/tmp/installed.log", "a+") as myfile:
+            myfile.write("====ALL_INSTALLED====\n")
+            for key in all_installed.keys():
+                myfile.write(key+": ")
+                for val in all_installed[key]:
+                    myfile.write(val+" ")
+                myfile.write("\n")
+        myfile.close()
+
+        # if mode_config is empty, no special runtime configuration
+        if not mode_config:
+            mode_enabled = all_installed
+        # mode_config has special runtime configs
+        else:
+            # Containers by Category
+            core_enabled = []
+            coll_enabled = []
+            vis_enabled = []
+
+            # check if core has a specification in mode_config
+            if "core" in mode_config.keys():
+                val = mode_config['core']
+                # val is either: ["all"] or ["none"]/[""] or ["core1", "core2", etc...]
+                if val == ["all"]:
+                    core_enabled = all_cores
+                elif val == ["none"] or val == [""]:
+                    core_enabled = []
+                else:
+                    core_enabled = val
+                with open("/tmp/mode-core-enable.log", "a+") as myfile:
+                    for core in val:
+                        myfile.write("MODE_CONFIG VAL FOR CORE IS: "+core+"\n")
+                myfile.close()
+            # if not, then no runtime config for core, use all
+            else:
+                core_enabled = all_cores
+
+            # check if collectors has a specification in mode_config
+            if "collectors" in mode_config.keys():
+                val = mode_config['collectors']
+                # val is either: ["all"] or ["none"]/[""] or ["coll1", "coll2", etc...]
+                if val == ["all"]:
+                    coll_enabled = all_colls
+                elif val == ["none"] or val == [""]:
+                    coll_enabled = []
+                else:
+                    coll_enabled = val
+                with open("/tmp/mode-coll-enable.log", "a+") as myfile:
+                    for coll in val:
+                        myfile.write("MODE_CONFIG VAL FOR COLL IS: "+coll+"\n")
+                myfile.close()
+            # if not, then no runtime config for coll, use all
+            else:
+                coll_enabled = all_colls
+
+            # check if visualizations has a specification in mode_config
+            if "visualization" in mode_config.keys():
+                val = mode_config['visualization']
+                # val is either: ["all"] or ["none"]/[""] or ["coll1", "coll2", etc...]
+                if val == ["all"]:
+                    vis_enabled = all_vis
+                elif val == ["none"] or val == [""]:
+                    vis_enabled = []
+                else:
+                    vis_enabled = val
+                with open("/tmp/mode-vis-enable.log", "a+") as myfile:
+                    for vis in val:
+                        myfile.write("MODE_CONFIG VAL FOR VIS IS: "+vis+"\n")
+                myfile.close()
+            # if not, then no runtime config for vis, use all
+            else:
+                vis_enabled = all_vis
+
+            # plugins
+            for namespace in mode_config.keys():
+                if namespace != "visualization" and namespace != "collectors" and namespace != "core":
+                    val = mode_config[namespace]
+                    # val is either: ["all"] or ["none"]/[""] or ["some", "some2", etc...]
+                    if val == ["all"]:
+                        mode_enabled[namespace] = all_plugins[namespace]
+                    elif val == ["none"] or val == [""]:
+                        mode_enabled[namespace] = []
+                    else:
+                        mode_enabled[namespace] = val
+                    with open("/tmp/mode-plugin-enable.log", "a+") as myfile:
+                        myfile.write("MODE_CONFIG VAL FOR "+namespace+" IS: ")
+                        for plug in val:
+                            myfile.write(plug)
+                        myfile.write("\n")
+                    myfile.close()
+
+            # if certain plugin namespaces have been omitted from the modes.template file
+            # then no special runtime config and use all
+            for namespace in all_plugins.keys():
+                if namespace not in mode_enabled.keys():
+                    mode_enabled[namespace] = all_plugins[namespace]
+
+            mode_enabled['core'] = core_enabled
+            mode_enabled['collectors'] = coll_enabled
+            mode_enabled['visualization'] = vis_enabled
+    except:
+        log_error("get_mode_enabled")
+        pass
+
+    return mode_enabled
+
+def get_core_enabled(core_config):
+    core_enabled = {}
+    core_disabled = {}
+    try:
+        passive_colls = get_installed_collectors("passive")
+        active_colls = get_installed_collectors("active")
+        coll_enabled = []
+        coll_disabled = []
+        # only if not empty
+        if core_config:
+            ### Local-Collection ###
+            # Check passive/active settings
+            # Default all on
+            p_colls = passive_colls
+            a_colls = active_colls
+
+            if 'passive' in core_config.keys():
+                if core_config['passive'] == "off":
+                    p_colls = []
+            if 'active' in core_config.keys():
+                if core_config['active'] == "off":
+                    a_colls = []
+
+            # Add all passively enabled collectors
+            if p_colls:
+                coll_enabled = coll_enabled + p_colls
+            else:
+                coll_disabled = coll_disabled + passive_colls
+            # Add all actively enabled collectors
+            if a_colls:
+                coll_enabled = coll_enabled + a_colls
+            else:
+                coll_disabled = coll_disabled + active_colls
+
+            with open("/tmp/core-enable.log", "a+") as myfile:
+                for x in p_colls:
+                    myfile.write(x)
+                myfile.write("\n")
+                for x in a_colls:
+                    myfile.write(x)
+                myfile.write("\n")
+                myfile.write("ENABLED: ")
+                for x in coll_enabled:
+                    myfile.write(x)
+                myfile.write("\n")
+                myfile.write("DISABLED: ")
+                for x in coll_disabled:
+                    myfile.write(x)
+                myfile.write("\n")
+            myfile.close()
+            ### Locally-Active ###
+            # Check locally-active settings
+            # Get all keys (containers) that are turned off
+            locally_disabled = [ key for key in core_config if key != 'passive' and key != 'active' and core_config[key] == "off" ]
+            # Get all keys (containers) that are turned on
+            locally_enabled = [ key for key in core_config if key != 'passive' and key != 'active' and core_config[key] == "on" ]
+
+            with open("/tmp/core-enable.log", "a+") as myfile:
+                myfile.write("LOCALLY-DISABLED: ")
+                for x in locally_disabled:
+                    myfile.write(x)
+                myfile.write("\n")
+                myfile.write("LOCALLY-ENABLED: ")
+                for x in locally_enabled:
+                    myfile.write(x)
+                myfile.write("\n")
+            myfile.close()
+
+            core_enabled['collectors'] = coll_enabled
+            core_enabled['core'] = locally_enabled
+            core_disabled['collectors'] = coll_disabled
+            core_disabled['core'] = locally_disabled
+    except:
+        log_error("get_core_enabled")
+        pass
+
+    return core_enabled, core_disabled
+
+# Retrieves containers that have been enabled in config
+# Priority is namespace.template, then modes.template
+def get_enabled():
+    enabled = {}
+    disabled = []
+    try:
+        # Retrieve configuration enablings/disablings for all containers
+        mode_config = get_mode_config()
+        core_config = get_core_config()
+
+        # Retrieve containers enabled by mode
+        # Note - mode_enabled and its complement form the complete set of containers
+        mode_enabled = get_mode_enabled(mode_config)
+
+        # Retrieve containers enabled/disabled by core
+        # Note - the union of core_enabled and core_disabled DO NOT form the complete set of containers
+        core_enabled, core_disabled = get_core_enabled(core_config)
+
+        # The complete set of containers
+        all_installed = get_all_installed()[0]
+        with open("/tmp/all_installed.log", "a+") as myfile:
+            for key in all_installed:
+                myfile.write(key+": ")
+                for val in all_installed[key]:
+                    myfile.write("val = "+val+", ")
+                myfile.write("\n")
+        myfile.close()
+
+        ### Intersection Logic by Case: ###
+        # Case 1: container is in mode_enabled and in core_enabled -> enabled
+        # Case 2: container is in mode_enabled and in core_disabled-> disabled
+        # Case 3: container is not in mode_enabled and in core_enabled -> disabled
+        # Case 4: container is not in mode_enabled and not in core_enabled -> disabled
+        # Case 5: container is in mode_enabled and not in core_enabled or disabled -> enabled
+        # Case 6: container is not in mode_enabled and not in core_enabled or disabled -> disabled
+        # Case 7: None of the other cases -> Something went grievously wrong...
+
+        # Get keys from all_installed, and initialize values to empty list
+        all_enabled = {}
+        all_disabled = {}
+        for namespace in all_installed:
+            all_enabled[namespace] = []
+            all_disabled[namespace] = []
+
+        for namespace in all_installed.keys():
+            # For 'cores' & 'collectors'
+            with open("/tmp/statusout.log", "a+") as myfile:
+                myfile.write(namespace+": ")
+                if namespace in mode_enabled.keys() and namespace in core_enabled.keys():
+                    for container in all_installed[namespace]:
+                            myfile.write(container+", ")
+                            # Case 1
+                            if container in mode_enabled[namespace] and container in core_enabled[namespace]:
+                                all_enabled[namespace].append(container)
+                            # Case 2
+                            elif container in mode_enabled[namespace] and container in core_disabled[namespace]:
+                                all_disabled[namespace].append(container)
+                            # Case 3
+                            elif container not in mode_enabled[namespace] and container in core_enabled[namespace]:
+                                all_disabled[namespace].append(container)
+                            # Case 4
+                            elif container not in mode_enabled[namespace] and container in core_disabled[namespace]:
+                                all_disabled[namespace].append(container)
+                            # Case 5
+                            elif container in mode_enabled[namespace]:
+                                all_enabled[namespace].append(container)
+                            # Case 6
+                            elif container not in mode_enabled[namespace]:
+                                all_disabled[namespace].append(container)
+                            # Case 7
+                            else:
+                                with open("/tmp/error.log", "a+") as file:
+                                    file.write("get_enabled error: Case 7 reached!\n")
+                                file.close()
+                    myfile.write("\n")
+                else:
+                # For 'visualizations' & all plugin namespaces
+                    for container in all_installed[namespace]:
+                        myfile.write(container+", ")
+                        # Case 5
+                        if container in mode_enabled[namespace]:
+                            all_enabled[namespace].append(container)
+                        # Case 6
+                        elif container not in mode_enabled[namespace]:
+                            all_disabled[namespace].append(container)
+                        # Case 7
+                        else:
+                            with open("/tmp/error.log", "a+") as file:
+                                file.write("get_enabled error: Case 7 reached!\n")
+                            file.close()            
+                    myfile.write("\n")
+            myfile.close()
+
+        for key in all_enabled:
+            with open("/tmp/final.log", "a+") as myfile:
+                myfile.write("ENABLED "+key+": ")
+                for val in all_enabled[key]:
+                    myfile.write(val+" ")
+                myfile.write("\n")
+            myfile.close()
+
+        for key in all_disabled:
+            with open("/tmp/final.log", "a+") as myfile:
+                myfile.write("DISABLED "+key+": ")
+                for val in all_disabled[key]:
+                    myfile.write(val+" ")
+                myfile.write("\n")
+            myfile.close()
+
+        enabled = all_enabled
+        disabled = all_disabled
+    except:
+        log_error()
+        pass
+
+    return enabled, disabled
 
 """
 Takes in a dict of all installed plugins (see get_installed_plugins())
@@ -134,36 +584,87 @@ def get_plugin_status():
     running = []
     nrbuilt = []
     notbuilt = []
-    disabled = []
     installed = {}
     p = {}
 
     try:
-        # Retrieves running or restarting docker containers and returns a list of "containeridimagename"; i.e. - running
-        running = check_output(" { docker ps -a -f status=running & docker ps -a -f status=restarting; } | grep '/' | awk \"{print \$2\$1}\" ", shell=True).split("\n")
+        # Retrieves all installed containers
+        all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed()
 
-        # Retrieves docker containers with status exited, paused, dead, created as "containeridimagename"; i.e. - not running
-        nrbuilt = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=paused & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$2\$1}\" ", shell=True).split("\n")
-        # !! TODO - Append get_installed_plugins("all"), convert to dict first?
-        installed = get_installed_plugins()
-        enabled = get_enabled_plugins()
+        # Retrieves all enabled images
+        enabled, disabled = get_enabled()
 
-        # with open("/tmp/installed.log", "a+") as myfile:
-        #     for namespace in installed:
-        #         myfile.write("Namespace: "+namespace+" = [")
-        #         for plugin in installed[namespace]:
-        #             myfile.write(plugin+", ")
-        #         myfile.write("]")
-        # myfile.close()
+        # Need to cross reference with all installed containers to determine all disabled containers
+        containers = check_output(" docker ps -a | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+        containers = [ container for container in containers if container != "" ]
+        for container in containers:
+            with open("/tmp/pruning.log", "a+") as myfile:
+                myfile.write(container+"\n")
+            myfile.close()
 
-        # !! TODO - Enabled/Disabled Plugins
-        # !! TODO - Not built plugins
+        disabled_containers = []
+
+        for namespace in disabled:
+            for container in disabled[namespace]:
+                with open("/tmp/pruning.log", "a+") as myfile:
+                    myfile.write("Disabled: "+container+"\n")
+                myfile.close()
+
+        # Intersect the set of all containers with the set of all disabled images
+        # Images form the basis for a container (in name especially), but there can be multiple containers per image
+        for container in containers:
+            for namespace in disabled:
+                for image in disabled[namespace]:
+                    if image in container:
+                        disabled_containers.append(container)
+                        with open("/tmp/pruning.log", "a+") as myfile:
+                            myfile.write(image + ": " + container + "...disabled!\n")
+                        myfile.close()
+
+        # Retrieves running or restarting docker containers and returns a list of container names
+        running = check_output(" { docker ps -a -f status=running & docker ps -a -f status=restarting; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+
+        # Retrieves docker containers with status exited, paused, dead, created; returns as a list of container names
+        nrcontainers = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=dead & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+        nrcontainers = [ container for container in nrcontainers if container != "" ]
+        nrbuilt = [ container for container in nrcontainers if container not in disabled_containers ]
+
+        # Retrieve all built docker images
+        built = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
+        built = [ image for image in built if image != "" ]
+
+        for namespace in all_installed:
+            for image in all_installed[namespace]:
+                if image not in disabled[namespace] and namespace+'/'+image not in built:
+                    notbuilt.append(namespace+'/'+image)
+
+        for container in nrcontainers:
+            with open("/tmp/nrbuilt.log", "a+") as myfile:
+                myfile.write("NR: "+container+"\n")
+            myfile.close()
+        for container in disabled_containers:
+            with open("/tmp/nrbuilt.log", "a+") as myfile:
+                myfile.write("DIS: "+container+"\n")
+            myfile.close()
+        for container in nrbuilt:
+            with open("/tmp/nrbuilt.log", "a+") as myfile:
+                myfile.write("NRB: "+container+"\n")
+            myfile.close()
+        for container in notbuilt:
+            with open("/tmp/built.log", "a+") as myfile:
+                myfile.write("NB: "+container+"\n")
+            myfile.close()
+
         p['title'] = 'Plugin Status'
         p['subtitle'] = 'Choose a category...'
-        p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running if x != ""]
-        p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt if x != ""]
+        p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running if x != "" ]
+        p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt ]
+        p_disabled = [ {'title': x, 'type': 'INFO', 'command': ''} for x in disabled_containers ]
+        p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
         p['options'] = [ { 'title': "Running", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
-                         { 'title': "Not Running/Built", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt }
+                         { 'title': "Not Running/Built", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
+                         { 'title': "Disabled", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled },
+                         { 'title': "Not Built", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt }
                         ]
     except:
         pass
