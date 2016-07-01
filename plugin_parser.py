@@ -55,6 +55,11 @@ def add_plugins(plugin_url):
                         if os.path.exists(dest):
                             shutil.rmtree(dest)
                         shutil.copytree(subdir, dest)
+                    else:
+                        namespace = recdir.split("/")[0]
+                        if not os.path.isfile("/var/lib/docker/data/plugin_repos/"+plugin_name+"/templates/"+namespace+".template"):
+                            shutil.rmtree("/var/lib/docker/data/plugins/"+namespace)
+                            print "Warning! Plugin namespace has no template. Not installing "+namespace
                 elif subdir.startswith("/var/lib/docker/data/plugin_repos/"+plugin_name+"/visualization/"):
                     recdir = subdir.split("/var/lib/docker/data/plugin_repos/"+plugin_name+"/visualization/")[1]
                     # only go one level deep, and copy recursively below that
@@ -88,14 +93,18 @@ def add_plugins(plugin_url):
                                     read_config.add_section(section)
                                     recdir = "/var/lib/docker/data/plugin_repos/"+plugin_name+"/core/"+section
                                     dest1 = "/var/lib/docker/data/core/"+section
-
                                     if os.path.exists(dest1):
                                         shutil.rmtree(dest1)
                                     shutil.copytree(recdir, dest1)
                                 with open('/var/lib/docker/data/templates/core.template', 'w') as configfile:
                                     read_config.write(configfile)
                             else:
-                                shutil.copyfile(subdir+"/"+filename, dest+filename)
+                                namespace = filename.split(".")[0]
+                                if os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name+"/plugins/"+namespace):
+                                    shutil.copyfile(subdir+"/"+filename, dest+filename)
+                                else:
+                                    print "Warning! Plugin template with no corresponding plugins to install. Not installing "+namespace+".template"
+                                    os.remove("var/lib/docker/data/templates/"+filename)
             except:
                 pass
         # update modes.template if it wasn't copied up to include new plugins
