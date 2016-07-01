@@ -269,4 +269,4 @@ if __name__ == "__main__":
         else:
             print "invalid plugin type to parse"
     else:
-        print "not enough arguments"
+        print "Invalid number of arguments"
