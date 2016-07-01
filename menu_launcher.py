@@ -570,15 +570,6 @@ def get_enabled():
 
     return enabled, disabled
 
-"""
-Takes in a dict of all installed plugins (see get_installed_plugins())
-and a dict of all enabled_plugins (see get_enabled_plugins()).
-Returns a MENU dict of plugins that have not been built.
-"""
-def get_unbuilt_plugins(installed_plugins, enabled_plugins):
-    # TODO
-    return
-
 # Displays status of all running, not running/built, not built, and disabled plugins
 def get_plugin_status():
     running = []
@@ -625,7 +616,7 @@ def get_plugin_status():
         running = check_output(" { docker ps -a -f status=running & docker ps -a -f status=restarting; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
 
         # Retrieves docker containers with status exited, paused, dead, created; returns as a list of container names
-        nrcontainers = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=dead & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+        nrcontainers = check_output(" { docker ps -a -f status=created & docker ps -a -f status=exited & docker ps -a -f status=paused & docker ps -a -f status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         nrcontainers = [ container for container in nrcontainers if container != "" ]
         nrbuilt = [ container for container in nrcontainers if container not in disabled_containers ]
 
@@ -913,12 +904,11 @@ def processmenu(menu, parent=None):
                 os.system(menu['options'][getin]['command'])
             if menu['title'] == "Remove Plugins":
                 update_images()
-                confirm()
                 exitmenu = True
             elif menu['title'] == "Update Plugins":
                 update_images()
                 os.system("/bin/sh /data/build_images.sh")
-                confirm()
+            confirm()
             screen.clear()
             curses.reset_prog_mode()
             curses.curs_set(1)
