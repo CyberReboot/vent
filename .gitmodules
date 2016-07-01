@@ -1,0 +1,3 @@
+[submodule "suplemon"]
+	path = suplemon
+	url = https://github.com/richrd/suplemon.git

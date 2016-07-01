@@ -5,14 +5,36 @@ import os
 import shutil
 import sys
 
+"""
+add_plugins(plugin_url)
+
+PARAMETERS: plugin_url - a https link to a git repository as a string
+
+DESCRIPTION: download plugins from plugin_url into a plugin_repos directory, 
+copying files from plugin_repos to the correct location in local Vent filesystem.
+after copying files, update templates
+"""
+
 def add_plugins(plugin_url):
-    # !! TODO keep track of changes so that they can be removed later on
     try:
+        if not ".git" in plugin_url:
+            plugin_url = plugin_url + ".git"
+        plugin_name = plugin_url.split("/")[-1].split(".git")[0]
+        if plugin_name == "":
+            print "No plugins added, url is not formatted correctly"
+            print "Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git"
+            return
+        # check to see if plugin already exists in filesystem
+        if os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name):
+            print plugin_name+" already exists. Not installing."
+            return
         os.system("git config --global http.sslVerify false")
         os.system("cd /var/lib/docker/data/plugin_repos/ && git clone "+plugin_url)
-        if ".git" in plugin_url:
-            plugin_url = plugin_url.split(".git")[0]
-        plugin_name = plugin_url.split("/")[-1]
+        # check to see if repo was cloned correctly
+        if not os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name):
+            print plugin_name+" did not install. Is this a git repository?"
+            return
+
         subdirs = [x[0] for x in os.walk("/var/lib/docker/data/plugin_repos/"+plugin_name)]
         check_modes = True
         for subdir in subdirs:
@@ -33,6 +55,13 @@ def add_plugins(plugin_url):
                         if os.path.exists(dest):
                             shutil.rmtree(dest)
                         shutil.copytree(subdir, dest)
+                    else:
+                        # makes sure that every namespace has a corresponding template file
+                        namespace = recdir.split("/")[0]
+                        if not os.path.isfile("/var/lib/docker/data/plugin_repos/"+plugin_name+"/templates/"+namespace+".template"):
+                            shutil.rmtree("/var/lib/docker/data/plugins/"+namespace)
+                            shutil.rmtree("/var/lib/docker/data/plugin_repos/plugins/"+namespace)
+                            print "Warning! Plugin namespace has no template. Not installing "+namespace
                 elif subdir.startswith("/var/lib/docker/data/plugin_repos/"+plugin_name+"/visualization/"):
                     recdir = subdir.split("/var/lib/docker/data/plugin_repos/"+plugin_name+"/visualization/")[1]
                     # only go one level deep, and copy recursively below that
@@ -55,6 +84,10 @@ def add_plugins(plugin_url):
                             if filename == "modes.template":
                                 check_modes = False
                                 shutil.copyfile(subdir+"/"+filename, dest+filename)
+                            elif filename == "collectors.template":
+                                shutil.copyfile(subdir+"/"+filename, dest+filename)
+                            elif filename == "visualization.template":
+                                shutil.copyfile(subdir+"/"+filename, dest+filename)
                             elif filename == "core.template":
                                 read_config = ConfigParser.RawConfigParser()
                                 read_config.read('/var/lib/docker/data/templates/core.template')
@@ -66,14 +99,20 @@ def add_plugins(plugin_url):
                                     read_config.add_section(section)
                                     recdir = "/var/lib/docker/data/plugin_repos/"+plugin_name+"/core/"+section
                                     dest1 = "/var/lib/docker/data/core/"+section
-
                                     if os.path.exists(dest1):
                                         shutil.rmtree(dest1)
                                     shutil.copytree(recdir, dest1)
                                 with open('/var/lib/docker/data/templates/core.template', 'w') as configfile:
                                     read_config.write(configfile)
                             else:
-                                shutil.copyfile(subdir+"/"+filename, dest+filename)
+                                # makes sure that every template file has a corresponding namespace in filesystem
+                                namespace = filename.split(".")[0]
+                                if os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name+"/plugins/"+namespace):
+                                    shutil.copyfile(subdir+"/"+filename, dest+filename)
+                                else:
+                                    print "Warning! Plugin template with no corresponding plugins to install. Not installing "+namespace+".template"
+                                    os.remove("/var/lib/docker/data/plugin_repos/"+plugin_name+"templates/"+filename)
+                                    os.remove("/var/lib/docker/data/templates/"+filename)
             except:
                 pass
         # update modes.template if it wasn't copied up to include new plugins
@@ -89,9 +128,31 @@ def add_plugins(plugin_url):
                     config.set("plugins", f_name, "all")
             with open('/var/lib/docker/data/templates/modes.template', 'w') as configfile:
                 config.write(configfile)
+        # check if files copied over correctly
+        for subdir in subdirs:
+            if os.path.isdir(subdir):
+                directory = subdir.split("/var/lib/docker/data/plugin_repos/"+plugin_name+"/")[0]
+                if subdir == "/var/lib/docker/data/plugin_repos/"+plugin_name:
+                    continue
+                if not os.path.isdir("/var/lib/docker/data/"+directory):
+                    print "Failed to install "+plugin_name+" resource: "+directory
+                    os.system("sudo rm -rf /var/lib/docker/data/plugin_repos/"+plugin_name)
+                    return
+        #resources installed correctly. Building...
+        os.system("/bin/sh /data/build_images.sh")
+        return  
     except:
         pass
 
+"""
+Name: remove_plugins(plugin_url)
+
+Parameters: plugin_url - a https link to a git repository as a string
+
+Description: Find plugin repo in plugin_repos directory based on name in plugin_url.
+Delete all elements of the plugin in local Vent filesystem, update templates to reflect changes,
+then delete the plugin from plugin_repos.
+"""
 def remove_plugins(plugin_url):
     try:
         if ".git" in plugin_url:
