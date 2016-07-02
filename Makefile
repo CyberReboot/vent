@@ -67,8 +67,8 @@ install:
 	@echo
 	@echo "installing vent and vent-generic to /usr/local/bin/"
 	@echo "------"
-	cp vent /usr/local/bin/vent
-	cp vent /usr/local/bin/vent-generic
+	cp vent /usr/local/bin/vent 2>/dev/null
+	cp vent /usr/local/bin/vent-generic 2>/dev/null
 	@echo "------"
 	@echo
 .PHONY: install
