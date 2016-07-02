@@ -16,6 +16,8 @@ build the ISO
 
 ```
 docker
+make
+zip
 ```
 
 ### getting the bits
