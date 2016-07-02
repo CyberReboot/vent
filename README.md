@@ -16,6 +16,8 @@ build the ISO
 
 ```
 docker
+make
+zip
 ```
 
 ### getting the bits
@@ -51,9 +53,7 @@ of course traditional ways of deploying an ISO work as well, including VMWare, O
 getting started
 ====
 
-from within the vent interface (once SSH'd in) first `build` the core (if you chose the `prebuilt` ISO this is already done for you, so you can skip this step).  it might take a little while to download and compile everything.
-
-alternatively, if you want to access the vent interface from the console instead of SSHing in, you can run `vent` from the commandline.
+from within the vent interface (once SSH'd in) first `build` the core.  it might take a little while to download and compile everything.
 
 once it's built you're ready to start the `core` from the `mode` menu option.
 
@@ -105,6 +105,17 @@ if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
 ```
 scp modes.template docker@vent:/var/lib/docker/data/templates/modes.template
 ```
+
+documentation
+====
+
+- [Docs](https://github.com/CyberReboot/vent/tree/master/docs)
+- [Diagrams](https://github.com/CyberReboot/vent/tree/master/docs/images)
+
+contributing to vent
+====
+
+Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/CyberReboot/vent/blob/master/CONTRIBUTING.md).
 
 FAQ
 ====
