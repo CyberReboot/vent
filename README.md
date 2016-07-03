@@ -3,6 +3,10 @@ vent
 
 > Network Visibility (an anagram)
 
+[![CircleCI](https://circleci.com/gh/CyberReboot/vent.svg?style=shield)](https://circleci.com/gh/CyberReboot/vent)
+[![codecov](https://codecov.io/gh/CyberReboot/vent/branch/master/graph/badge.svg)](https://codecov.io/gh/CyberReboot/vent)
+[![Code Issues](https://www.quantifiedcode.com/api/v1/project/ffe3b2d6a9254b98a12de6b3273676b3/badge.svg)](https://www.quantifiedcode.com/app/project/ffe3b2d6a9254b98a12de6b3273676b3)
+
 download pre-compiled ISO
 ====
 
