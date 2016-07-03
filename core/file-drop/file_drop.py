@@ -11,7 +11,8 @@ class GZHandler(PatternMatchingEventHandler):
 
     patterns = ["*"]
 
-    def process(self, event):
+    @staticmethod
+    def process(event):
         """
         event.event_type
             'modified' | 'created' | 'moved' | 'deleted'
