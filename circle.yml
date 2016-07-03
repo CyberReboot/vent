@@ -4,4 +4,6 @@ machine:
 test:
   override:
     - make test
-    - make
+    #- make
+  post:
+    - bash <(curl -s https://codecov.io/bash)
