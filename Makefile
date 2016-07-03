@@ -35,28 +35,28 @@ prebuilt-no-cache: depends-prebuilt-no-cache
 	rm -rf management/vent-management.tar
 	rm -rf images/*.tar
 
-depends: install
+depends:
 	@echo
 	@echo "checking dependencies"
 	@echo
 	docker -v
 	./build.sh
 
-depends-no-cache: install
+depends-no-cache:
 	@echo
 	@echo "checking dependencies"
 	@echo
 	docker -v
 	./build.sh --no-cache
 
-depends-prebuilt: install
+depends-prebuilt:
 	@echo
 	@echo "checking dependencies"
 	@echo
 	docker -v
 	./build.sh --build-plugins
 
-depends-prebuilt-no-cache: install
+depends-prebuilt-no-cache:
 	@echo
 	@echo "checking dependencies"
 	@echo
