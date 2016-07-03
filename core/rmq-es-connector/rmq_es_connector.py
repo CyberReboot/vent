@@ -29,7 +29,7 @@ while wait:
 
 binding_keys = sys.argv[1:]
 if not binding_keys:
-    print >> sys.stderr, "Usage: %s [binding_key]..." % (sys.argv[0],)
+    print >> sys.stderr, "Usage: {0!s} [binding_key]...".format(sys.argv[0])
     sys.exit(1)
 
 for binding_key in binding_keys:
@@ -53,7 +53,7 @@ def callback(ch, method, properties, body):
     try:
         doc = ast.literal_eval(body)
         res = es.index(index=index, doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
-        print " [x] "+str(datetime.datetime.utcnow())+" UTC %r:%r" % (method.routing_key, body,)
+        print " [x] "+str(datetime.datetime.utcnow())+" UTC {0!r}:{1!r}".format(method.routing_key, body)
     except:
         pass
 

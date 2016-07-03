@@ -638,7 +638,7 @@ def runmenu(menu, parent):
     if parent is None:
         lastoption = "Exit"
     else:
-        lastoption = "Return to %s menu" % parent['title']
+        lastoption = "Return to {0!s} menu".format(parent['title'])
 
     optioncount = len(menu['options'])
 
@@ -674,15 +674,15 @@ def runmenu(menu, parent):
                             i += 1
                     else:
                         result = check_output((menu['options'][index]['command']).split())
-                    screen.addstr(5+index,4, "%s - %s" % (menu['options'][index]['title'], result), textstyle)
+                    screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
                 elif menu['options'][index]['type'] == INFO2:
-                    screen.addstr(5+index,4, "%s" % (menu['options'][index]['title']), textstyle)
+                    screen.addstr(5+index,4, "{0!s}".format((menu['options'][index]['title'])), textstyle)
                 else:
-                    screen.addstr(5+index,4, "%d - %s" % (index+1, menu['options'][index]['title']), textstyle)
+                    screen.addstr(5+index,4, "{0:d} - {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
             textstyle = n
             if pos==optioncount:
                 textstyle = h
-            screen.addstr(6+optioncount,4, "%d - %s" % (optioncount+1, lastoption), textstyle)
+            screen.addstr(6+optioncount,4, "{0:d} - {1!s}".format(optioncount+1, lastoption), textstyle)
             screen.refresh()
 
         x = screen.getch()
