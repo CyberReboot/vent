@@ -31,6 +31,12 @@ git clone --recursive https://github.com/CyberReboot/vent.git
 cd vent
 ```
 
+### building
+
+```
+make
+```
+
 easy ways to build a VM out of the ISO
 ====
 
