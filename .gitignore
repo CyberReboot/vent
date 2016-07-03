@@ -5,3 +5,4 @@
 *.gz
 *.zip
 .DS_Store
+.coverage
