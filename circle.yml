@@ -3,4 +3,5 @@ machine:
     - docker
 test:
   override:
+    - make test
     - make
