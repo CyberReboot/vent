@@ -56,7 +56,7 @@ def read_template_types(template_type, container_cmd):
                         cmd_output = subprocess.check_output(cmd.split())
                         repl_str = cmd_output.strip()
                         orig_str = "`"+cmd+"`"
-        if orig_str != None and repl_str != None:
+        if orig_str is not None and repl_str is not None:
             filedata = None
             with open(template_path, 'r') as f:
                 filedata = f.read()
