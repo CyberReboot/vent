@@ -62,6 +62,11 @@ after starting, you should be able to go into `system info` and see that everyth
 copy up new pcaps
 ====
 
+install the `vent` script locally first:
+```
+sudo make install
+```
+
 if using docker-machine cli to provision:
 
 ```
