@@ -27,7 +27,7 @@ def execute_template(template_type, template_execution, info_name, service_sched
             f.write("|")
             json.dump(delay_sections, f)
             f.write("|")
-            if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+            if template_type not in ["visualization", "core", "active", "passive"]:
                 f.write("1")
             else:
                 f.write("0")
@@ -39,7 +39,7 @@ def execute_template(template_type, template_execution, info_name, service_sched
 def read_template_types(template_type, container_cmd):
     # read in templates for plugins, core, and visualization
     template_path = template_dir+template_type+'.template'
-    if template_type == "active" or template_type == "passive":
+    if template_type in ["active", "passive"]:
         template_path = template_dir+'collectors.template'
 
     # search for eval string and replace with sh evaluation
@@ -103,7 +103,7 @@ def read_template_types(template_type, container_cmd):
                 external_options = []
             host_config_exists = False
 
-            if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+            if template_type not in ["visualization", "core", "active", "passive"]:
                 try:
                     # add tools that don't have sections
                     modes_config = ConfigParser.RawConfigParser()
@@ -144,7 +144,7 @@ def read_template_types(template_type, container_cmd):
                     elif section == "locally-active":
                         if config.get(section, option) == "off":
                             external_overrides.append(option)
-                    elif section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
+                    elif section not in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"]:
                         if not section in external_overrides:
                             option_val = config.get(section, option)
                             try:
@@ -178,7 +178,7 @@ def read_template_types(template_type, container_cmd):
                                         host_config_new = copy.deepcopy(host_config)
                                         extra_hosts = []
                                         host_config_new["RestartPolicy"] = { "Name": "always" }
-                                        if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+                                        if template_type not in ["visualization", "core", "active", "passive"]:
                                             # add link to rabbitmq
                                             if "Links" in host_config:
                                                 host_config_new["Links"].append("core-aaa-rabbitmq:rabbitmq")
@@ -214,7 +214,7 @@ def read_template_types(template_type, container_cmd):
                                             if len(host_config_new["Links"]) == 0:
                                                 del host_config_new["Links"]
                                         # add syslog, don't log rmq-es-connector as it will loop itself
-                                        if section != "rmq-es-connector" and section != "aaa-syslog" and section != "aaa-redis" and section != "aaa-rabbitmq":
+                                        if section not in ["rmq-es-connector", "aaa-syslog", "aaa-redis", "aaa-rabbitmq"]:
                                             try:
                                                 syslog_host = "localhost"
                                                 for ext in external_overrides:
@@ -236,8 +236,8 @@ def read_template_types(template_type, container_cmd):
                                 option_val = option_val.replace("False", "false")
                                 if option_val != "{}":
                                     instructions[option] = option_val
-                if section != "info" and section != "service" and section != "locally-active" and section != "external" and section != "instances" and section != "active-containers" and section != "local-collection":
-                    if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+                if section not in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"]:
+                    if template_type not in ["visualization", "core", "active", "passive"]:
                         # add tty/interactive
                         if not "Tty" in instructions:
                             instructions["Tty"] = "true"
@@ -248,7 +248,7 @@ def read_template_types(template_type, container_cmd):
                             instructions["Env"] = ["PYTHONUNBUFFERED=0"]
                     if not host_config_exists:
                         host_config = {}
-                        if template_type != "visualization" and template_type != "core" and template_type != "active" and template_type != "passive":
+                        if template_type not in ["visualization", "core", "active", "passive"]:
                             host_config["Binds"] = ["/files:/files:ro"]
                             try:
                                 rabbitmq_host = "rabbitmq"

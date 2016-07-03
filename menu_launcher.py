@@ -106,9 +106,9 @@ def get_core_config():
             # Check for active collector configs
             if config.has_option("local-collection", "active"):
                 active = config.get("local-collection", "active").replace(" ", "")
-            if passive == "on" or passive == "off":
+            if passive in ["on", "off"]:
                 cores['passive'] = passive
-            if active == "on" or active == "off":
+            if active in ["on", "off"]:
                 cores['active'] = active
         # If not then everything is enabled and cores is empty
 
@@ -238,7 +238,7 @@ def get_mode_enabled(mode_config):
                 # val is either: ["all"] or ["none"]/[""] or ["core1", "core2", etc...]
                 if val == ["all"]:
                     core_enabled = all_cores
-                elif val == ["none"] or val == [""]:
+                elif val in [["none"], [""]]:
                     core_enabled = []
                 else:
                     core_enabled = val
@@ -252,7 +252,7 @@ def get_mode_enabled(mode_config):
                 # val is either: ["all"] or ["none"]/[""] or ["coll1", "coll2", etc...]
                 if val == ["all"]:
                     coll_enabled = all_colls
-                elif val == ["none"] or val == [""]:
+                elif val in [["none"], [""]]:
                     coll_enabled = []
                 else:
                     coll_enabled = val
@@ -266,7 +266,7 @@ def get_mode_enabled(mode_config):
                 # val is either: ["all"] or ["none"]/[""] or ["coll1", "coll2", etc...]
                 if val == ["all"]:
                     vis_enabled = all_vis
-                elif val == ["none"] or val == [""]:
+                elif val in [["none"], [""]]:
                     vis_enabled = []
                 else:
                     vis_enabled = val
@@ -276,12 +276,12 @@ def get_mode_enabled(mode_config):
 
             # plugins
             for namespace in mode_config.keys():
-                if namespace != "visualization" and namespace != "collectors" and namespace != "core":
+                if namespace not in ["visualization", "collectors", "core"]:
                     val = mode_config[namespace]
                     # val is either: ["all"] or ["none"]/[""] or ["some", "some2", etc...]
                     if val == ["all"]:
                         mode_enabled[namespace] = all_plugins[namespace]
-                    elif val == ["none"] or val == [""]:
+                    elif val in [["none"], [""]]:
                         mode_enabled[namespace] = []
                     else:
                         mode_enabled[namespace] = val
@@ -337,9 +337,9 @@ def get_core_enabled(core_config):
             ### Locally-Active ###
             # Check locally-active settings
             # Get all keys (containers) that are turned off
-            locally_disabled = [ key for key in core_config if key != 'passive' and key != 'active' and core_config[key] == "off" ]
+            locally_disabled = [ key for key in core_config if key not in ['passive', 'active'] and core_config[key] == "off" ]
             # Get all keys (containers) that are turned on
-            locally_enabled = [ key for key in core_config if key != 'passive' and key != 'active' and core_config[key] == "on" ]
+            locally_enabled = [ key for key in core_config if key not in ['passive', 'active'] and core_config[key] == "on" ]
 
             core_enabled['collectors'] = coll_enabled
             core_enabled['core'] = locally_enabled
@@ -557,7 +557,7 @@ def run_plugins(action):
             plugins[plug] = config.get("plugins", plug)
 
         for plugin in plugins:
-            if plugin == "core" or plugin == "visualization":
+            if plugin in ["core", "visualization"]:
                 p = {}
                 try:
                     config = ConfigParser.RawConfigParser()
