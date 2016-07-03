@@ -4,6 +4,9 @@ all-no-cache: no-cache
 
 latest: pull vent
 
+test:
+	py.test -v --cov=. --cov=service_urls --cov=core/file-drop --cov=core/rmq-es-connector --cov=core/rq-dashboard --cov=core/rq-worker --cov=core/template-change --cov-report term-missing
+
 pull:
 	docker pull boot2docker/boot2docker
 
