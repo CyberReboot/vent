@@ -12,9 +12,9 @@ from subprocess import call, check_output, PIPE, Popen
 
 screen = curses.initscr()
 curses.noecho()
-curses.cbreak()
 # !! TODO tmeporary fix for tests
 try:
+    curses.cbreak()
     curses.start_color()
     screen.keypad(1)
 except Exception as e:
