@@ -1,6 +1,12 @@
 machine:
   services:
     - docker
+dependencies:
+  pre:
+    # necessary to fix curses import
+    - sudo apt-get install -y libncurses5 libncurses5-dev libncursesw5
+    - pyenv uninstall -f 2.7.11
+    - pyenv install 2.7.11
 test:
   override:
     - make test
