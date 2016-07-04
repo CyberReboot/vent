@@ -5,7 +5,7 @@ from .. import plugin_parser
 
 class PathDirs:
     def __init__(self,
-                 base_dir="../",
+                 base_dir=os.getcwd()+"/",
                  collectors_dir="collectors",
                  core_dir="core",
                  plugins_dir="plugins/",
@@ -13,8 +13,6 @@ class PathDirs:
                  template_dir="templates/",
                  vis_dir="visualization"):
         self.base_dir = base_dir
-        if not os.path.exists(self.base_dir):
-            os.makedirs(self.base_dir)
         self.collectors_dir = base_dir + collectors_dir
         if not os.path.exists(self.collectors_dir):
             os.makedirs(self.collectors_dir)
@@ -33,6 +31,9 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
         if not os.path.exists(self.vis_dir):
             os.makedirs(self.vis_dir)
+
+def test_pathdirs():
+    path_dirs = plugin_parser.PathDirs()
 
 def test_add_plugins():
     path_dirs = PathDirs()
