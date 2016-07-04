@@ -15,14 +15,14 @@ curses.noecho()
 # !! TODO tmeporary fix for tests
 try:
     curses.cbreak()
-except Exception as e:
-    pass
     curses.start_color()
     screen.keypad(1)
-
-curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
-h = curses.color_pair(1)
-n = curses.A_NORMAL
+    curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
+    h = curses.color_pair(1)
+    n = curses.A_NORMAL
+except Exception as e:
+    h = curses.A_NORMAL
+    n = curses.A_NORMAL
 
 MENU = "menu"
 COMMAND = "command"
@@ -721,7 +721,10 @@ def processmenu(menu, parent=None):
     optioncount = len(menu['options'])
     exitmenu = False
     while not exitmenu:
-        getin = runmenu(menu, parent)
+        try:
+            getin = runmenu(menu, parent)
+        except Exception as e:
+            getin = 0
         if getin == optioncount:
             exitmenu = True
         elif menu['options'][getin]['type'] == COMMAND:
