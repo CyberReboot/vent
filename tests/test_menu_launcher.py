@@ -41,3 +41,17 @@ def test_get_enabled():
 
 def test_get_plugin_status():
     menu_launcher.get_plugin_status()
+
+def test_run_plugins():
+    menu_launcher.run_plugins("start")
+
+def test_get_installed_plugin_repos():
+    menu_launcher.get_installed_plugin_repos("INFO", "remove")
+    menu_launcher.get_installed_plugin_repos("INFO", "update")
+    menu_launcher.get_installed_plugin_repos("INFO", "")
+
+def test_update_plugins():
+    menu_launcher.update_plugins()
+
+def test_build_menu_dict():
+    menu_launcher.build_menu_dict()

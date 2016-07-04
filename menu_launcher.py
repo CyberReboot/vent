@@ -22,7 +22,9 @@ try:
     h = curses.color_pair(1)
     n = curses.A_NORMAL
 except Exception as e:
-    pass
+    screen = None
+    h = None
+    n = None
 
 MENU = "menu"
 COMMAND = "command"
@@ -613,8 +615,11 @@ def run_plugins(action):
         print "unable to get the configuration of modes from the templates.\n"
 
     # make sure that vent-management is running
-    result = check_output('/bin/sh /data/bootlocal.sh'.split())
-    print result
+    try:
+        result = check_output('/bin/sh /data/bootlocal.sh'.split())
+        print result
+    except Exception as e:
+        pass
 
     return modes
 
@@ -889,6 +894,9 @@ def main():
 
 if __name__ == "__main__":
     # make sure that vent-management is running
-    result = check_output('/bin/sh /data/bootlocal.sh'.split())
-    print result
+    try:
+        result = check_output('/bin/sh /data/bootlocal.sh'.split())
+        print result
+    except Exception as e:
+        pass
     main()
