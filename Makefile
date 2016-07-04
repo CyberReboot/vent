@@ -10,7 +10,7 @@ test:
 	@echo
 	pip -V
 	pip install -r tests/requirements.txt
-	py.test -v --cov=. --cov=service_urls --cov=core/file-drop --cov=core/rmq-es-connector --cov=core/rq-dashboard --cov=core/rq-worker --cov=core/template-change --cov-report term-missing
+	py.test -v --cov=. --cov=service_urls --cov=core --cov-report term-missing
 
 pull:
 	docker pull boot2docker/boot2docker
