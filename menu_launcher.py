@@ -10,15 +10,19 @@ import tty
 
 from subprocess import call, check_output, PIPE, Popen
 
-screen = curses.initscr()
-curses.noecho()
-curses.cbreak()
-curses.start_color()
-screen.keypad(1)
+# !! TODO tmeporary fix for tests
+try:
+    screen = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
+    curses.start_color()
+    screen.keypad(1)
 
-curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
-h = curses.color_pair(1)
-n = curses.A_NORMAL
+    curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
+    h = curses.color_pair(1)
+    n = curses.A_NORMAL
+except:
+    pass
 
 MENU = "menu"
 COMMAND = "command"
