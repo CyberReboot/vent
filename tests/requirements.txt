@@ -1,2 +1,4 @@
+magic
 pytest
 pytest-cov
+redis
