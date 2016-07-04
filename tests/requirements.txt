@@ -1,4 +1,4 @@
-docker-py
+docker-py==1.7.2
 pytest
 pytest-cov
 python-magic
