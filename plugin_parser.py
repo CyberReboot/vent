@@ -55,7 +55,7 @@ def add_plugins(path_dirs, plugin_url):
             print "Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git"
             return
         # check to see if plugin already exists in filesystem
-        if os.path.isdir(path_dirs.plugins_repos+"/"+plugin_name):
+        if os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name):
             print plugin_name+" already exists. Not installing."
             return
         os.system("git config --global http.sslVerify false")
