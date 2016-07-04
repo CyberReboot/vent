@@ -22,7 +22,9 @@ try:
     h = curses.color_pair(1)
     n = curses.A_NORMAL
 except Exception as e:
-    pass
+    screen = None
+    h = None
+    n = None
 
 MENU = "menu"
 COMMAND = "command"
