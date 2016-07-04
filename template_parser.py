@@ -9,10 +9,7 @@ import subprocess
 import sys
 import time
 
-template_dir = "/var/lib/docker/data/templates/"
-plugins_dir = "/var/lib/docker/data/plugins/"
-
-def execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections):
+def execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir):
     # note for plugin, also run core
     # for visualization, make aware of where the data is
     try:
@@ -36,7 +33,7 @@ def execute_template(template_type, template_execution, info_name, service_sched
         pass
     return
 
-def read_template_types(template_type, container_cmd):
+def read_template_types(template_type, container_cmd, template_dir, plugins_dir):
     # read in templates for plugins, core, and visualization
     template_path = template_dir+template_type+'.template'
     if template_type in ["active", "passive"]:
@@ -338,6 +335,9 @@ def read_template_types(template_type, container_cmd):
     return info_name, service_schedule, tool_core, tool_dict, delay_sections
 
 def main():
+    template_dir = "/var/lib/docker/data/templates/"
+    plugins_dir = "/var/lib/docker/data/plugins/"
+
     if len(sys.argv) < 3:
         sys.exit()
     else:
@@ -352,8 +352,8 @@ def main():
             container_cmd = None
             if len(sys.argv) == 4:
                 container_cmd = sys.argv[3]
-            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd)
-            execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections)
+            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd, template_dir, plugins_dir)
+            execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
 
 if __name__ == "__main__":
     main()

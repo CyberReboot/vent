@@ -10,7 +10,7 @@ add_plugins(plugin_url)
 
 PARAMETERS: plugin_url - a https link to a git repository as a string
 
-DESCRIPTION: download plugins from plugin_url into a plugin_repos directory, 
+DESCRIPTION: download plugins from plugin_url into a plugin_repos directory,
 copying files from plugin_repos to the correct location in local Vent filesystem.
 after copying files, update templates
 """
