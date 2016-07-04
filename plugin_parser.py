@@ -5,6 +5,23 @@ import os
 import shutil
 import sys
 
+class PathDirs:
+    def __init__(self,
+                 base_dir="/var/lib/docker/data/",
+                 collectors_dir="collectors",
+                 core_dir="core",
+                 plugins_dir="plugins/",
+                 plugin_repos="plugin_repos",
+                 template_dir="templates/",
+                 vis_dir="visualization"):
+        self.base_dir = base_dir
+        self.collectors_dir = base_dir + collectors_dir
+        self.core_dir = base_dir + core_dir
+        self.plugins_dir = base_dir + plugins_dir
+        self.plugin_repos = base_dir + plugin_repos
+        self.template_dir = base_dir + template_dir
+        self.vis_dir = base_dir + vis_dir
+
 """
 add_plugins(plugin_url)
 
@@ -15,7 +32,7 @@ copying files from plugin_repos to the correct location in local Vent filesystem
 after copying files, update templates
 """
 
-def add_plugins(plugin_url):
+def add_plugins(path_dirs, plugin_url):
     try:
         if not ".git" in plugin_url:
             plugin_url = plugin_url + ".git"
@@ -25,60 +42,60 @@ def add_plugins(plugin_url):
             print "Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git"
             return
         # check to see if plugin already exists in filesystem
-        if os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name):
+        if os.path.isdir(path_dirs.plugins_repos+"/"+plugin_name):
             print plugin_name+" already exists. Not installing."
             return
         os.system("git config --global http.sslVerify false")
-        os.system("cd /var/lib/docker/data/plugin_repos/ && git clone "+plugin_url)
+        os.system("cd "+path_dirs.plugin_repos+"/ && git clone "+plugin_url)
         # check to see if repo was cloned correctly
-        if not os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name):
+        if not os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name):
             print plugin_name+" did not install. Is this a git repository?"
             return
 
-        subdirs = [x[0] for x in os.walk("/var/lib/docker/data/plugin_repos/"+plugin_name)]
+        subdirs = [x[0] for x in os.walk(path_dirs.plugin_repos+"/"+plugin_name)]
         check_modes = True
         for subdir in subdirs:
             try:
-                if subdir.startswith("/var/lib/docker/data/plugin_repos/"+plugin_name+"/collectors/"):
-                    recdir = subdir.split("/var/lib/docker/data/plugin_repos/"+plugin_name+"/collectors/")[1]
+                if subdir.startswith(path_dirs.plugin_repos+"/"+plugin_name+"/collectors/"):
+                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/collectors/")[1]
                     # only go one level deep, and copy recursively below that
                     if not "/" in recdir:
-                        dest = "/var/lib/docker/data/collectors/"+recdir
+                        dest = path_dirs.collectors_dir+"/"+recdir
                         if os.path.exists(dest):
                             shutil.rmtree(dest)
                         shutil.copytree(subdir, dest)
-                elif subdir.startswith("/var/lib/docker/data/plugin_repos/"+plugin_name+"/plugins/"):
-                    recdir = subdir.split("/var/lib/docker/data/plugin_repos/"+plugin_name+"/plugins/")[1]
+                elif subdir.startswith(path_dirs.plugin_repos+"/"+plugin_name+"/plugins/"):
+                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/plugins/")[1]
                     # only go one level deep, and copy recursively below that
                     if not "/" in recdir:
-                        dest = "/var/lib/docker/data/plugins/"+recdir
+                        dest = path_dirs.plugins_dir+recdir
                         if os.path.exists(dest):
                             shutil.rmtree(dest)
                         shutil.copytree(subdir, dest)
                     else:
                         # makes sure that every namespace has a corresponding template file
                         namespace = recdir.split("/")[0]
-                        if not os.path.isfile("/var/lib/docker/data/plugin_repos/"+plugin_name+"/templates/"+namespace+".template"):
-                            shutil.rmtree("/var/lib/docker/data/plugins/"+namespace)
-                            shutil.rmtree("/var/lib/docker/data/plugin_repos/plugins/"+namespace)
+                        if not os.path.isfile(path_dirs.plugin_repos+"/"+plugin_name+"/templates/"+namespace+".template"):
+                            shutil.rmtree(path_dirs.plugins_dir+namespace)
+                            shutil.rmtree(path_dirs.plugin_repos+"/plugins/"+namespace)
                             print "Warning! Plugin namespace has no template. Not installing "+namespace
-                elif subdir.startswith("/var/lib/docker/data/plugin_repos/"+plugin_name+"/visualization/"):
-                    recdir = subdir.split("/var/lib/docker/data/plugin_repos/"+plugin_name+"/visualization/")[1]
+                elif subdir.startswith(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/"):
+                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/")[1]
                     # only go one level deep, and copy recursively below that
                     if not "/" in recdir:
-                        dest = "/var/lib/docker/data/visualization/"+recdir
+                        dest = path_dirs.vis_dir+"/"+recdir
                         if os.path.exists(dest):
                             shutil.rmtree(dest)
                         shutil.copytree(subdir, dest)
-                elif subdir == "/var/lib/docker/data/plugin_repos/"+plugin_name+"/visualization":
+                elif subdir == path_dirs.plugin_repos+"/"+plugin_name+"/visualization":
                     # only files, not dirs
-                    dest = "/var/lib/docker/data/visualization/"
+                    dest = path_dirs.vis_dir+"/"
                     for (dirpath, dirnames, filenames) in os.walk(subdir):
                         for filename in filenames:
                             shutil.copyfile(subdir+"/"+filename, dest+filename)
-                elif subdir == "/var/lib/docker/data/plugin_repos/"+plugin_name+"/templates":
+                elif subdir == path_dirs.plugin_repos+"/"+plugin_name+"/templates":
                     # only files, not dirs
-                    dest = "/var/lib/docker/data/templates/"
+                    dest = path_dirs.template_dir
                     for (dirpath, dirnames, filenames) in os.walk(subdir):
                         for filename in filenames:
                             if filename == "modes.template":
@@ -90,53 +107,53 @@ def add_plugins(plugin_url):
                                 shutil.copyfile(subdir+"/"+filename, dest+filename)
                             elif filename == "core.template":
                                 read_config = ConfigParser.RawConfigParser()
-                                read_config.read('/var/lib/docker/data/templates/core.template')
+                                read_config.read(path_dirs.template_dir + 'core.template')
                                 write_config = ConfigParser.RawConfigParser()
                                 write_config.read(subdir+"/"+filename)
                                 write_sections = write_config.sections()
                                 for section in write_sections:
                                     read_config.remove_section(section)
                                     read_config.add_section(section)
-                                    recdir = "/var/lib/docker/data/plugin_repos/"+plugin_name+"/core/"+section
-                                    dest1 = "/var/lib/docker/data/core/"+section
+                                    recdir = path_dirs.plugin_repos+"/"+plugin_name+"/core/"+section
+                                    dest1 = path_dirs.core_dir+"/"+section
                                     if os.path.exists(dest1):
                                         shutil.rmtree(dest1)
                                     shutil.copytree(recdir, dest1)
-                                with open('/var/lib/docker/data/templates/core.template', 'w') as configfile:
+                                with open(path_dirs.template_dir + 'core.template', 'w') as configfile:
                                     read_config.write(configfile)
                             else:
                                 # makes sure that every template file has a corresponding namespace in filesystem
                                 namespace = filename.split(".")[0]
-                                if os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name+"/plugins/"+namespace):
+                                if os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name+"/plugins/"+namespace):
                                     shutil.copyfile(subdir+"/"+filename, dest+filename)
                                 else:
                                     print "Warning! Plugin template with no corresponding plugins to install. Not installing "+namespace+".template"
-                                    os.remove("/var/lib/docker/data/plugin_repos/"+plugin_name+"templates/"+filename)
-                                    os.remove("/var/lib/docker/data/templates/"+filename)
+                                    os.remove(path_dirs.plugin_repos+"/"+plugin_name+"templates/"+filename)
+                                    os.remove(path_dirs.template_dir+filename)
             except Exception as e:
                 pass
         # update modes.template if it wasn't copied up to include new plugins
         if check_modes:
-            files = [x[2] for x in os.walk("/var/lib/docker/data/templates")][0]
+            files = [x[2] for x in os.walk(path_dirs.base_dir + "templates")][0]
             config = ConfigParser.RawConfigParser()
-            config.read('/var/lib/docker/data/templates/modes.template')
+            config.read(path_dirs.template_dir + 'modes.template')
             plugin_array = config.options("plugins")
             plugins = {}
             for f in files:
                 f_name = f.split(".template")[0]
                 if f_name != "README.md" and not f_name in plugin_array and f_name != "modes":
                     config.set("plugins", f_name, "all")
-            with open('/var/lib/docker/data/templates/modes.template', 'w') as configfile:
+            with open(path_dirs.template_dir + 'modes.template', 'w') as configfile:
                 config.write(configfile)
         # check if files copied over correctly
         for subdir in subdirs:
             if os.path.isdir(subdir):
-                directory = subdir.split("/var/lib/docker/data/plugin_repos/"+plugin_name+"/")[0]
-                if subdir == "/var/lib/docker/data/plugin_repos/"+plugin_name:
+                directory = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/")[0]
+                if subdir == path_dirs.plugin_repos+"/"+plugin_name:
                     continue
-                if not os.path.isdir("/var/lib/docker/data/"+directory):
+                if not os.path.isdir(path_dirs.base_dir + directory):
                     print "Failed to install "+plugin_name+" resource: "+directory
-                    os.system("sudo rm -rf /var/lib/docker/data/plugin_repos/"+plugin_name)
+                    os.system("sudo rm -rf "+path_dirs.plugin_repos+"/"+plugin_name)
                     return
         #resources installed correctly. Building...
         os.system("/bin/sh /data/build_images.sh")
@@ -153,38 +170,38 @@ Description: Find plugin repo in plugin_repos directory based on name in plugin_
 Delete all elements of the plugin in local Vent filesystem, update templates to reflect changes,
 then delete the plugin from plugin_repos.
 """
-def remove_plugins(plugin_url):
+def remove_plugins(path_dirs, plugin_url):
     try:
         if ".git" in plugin_url:
             plugin_url = plugin_url.split(".git")[0]
         plugin_name = plugin_url.split("/")[-1]
-        if not os.path.isdir("/var/lib/docker/data/plugin_repos/"+plugin_name):
+        if not os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name):
             print "Plugin is not installed. Not removing "+plugin_name
             return
-        repo_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/plugin_repos/"+plugin_name, topdown=False)]
-        sys_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/")]
+        repo_subdirs = [x[0] for x in os.walk(path_dirs.plugin_repos+"/"+plugin_name, topdown=False)]
+        sys_subdirs = [x[0] for x in os.walk(path_dirs.base_dir)]
         repo_dir = ""
         namespace = ""
         #looks for installed items in repo, deletes them. Updates templates to reflect changes
         for r_sub in repo_subdirs:
             if plugin_name+"/core/" in r_sub:
-                sys_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/core")]
+                sys_subdirs = [x[0] for x in os.walk(path_dirs.core_dir)]
                 repo_dir = r_sub.split(plugin_name+"/core/")[1]
                 namespace = "core"
             elif plugin_name+"/plugins/" in r_sub:
-                sys_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/plugins")]
+                sys_subdirs = [x[0] for x in os.walk(path_dirs.base_dir + "plugins")]
                 repo_dir = r_sub.split(plugin_name+"/plugins/")[1]
                 element = repo_dir.split("/")
                 if len(element) == 1:
                     #no subdirectories - no plugins to be deleted in namespace. -> Delete namespace
                     namespace = element[0]
                     config = ConfigParser.RawConfigParser()
-                    for dirpath, dirnames, files in os.walk("/var/lib/docker/data/plugins/"+namespace):
+                    for dirpath, dirnames, files in os.walk(path_dirs.plugins_dir + namespace):
                         if not dirnames:
-                            os.remove("/var/lib/docker/data/templates/"+namespace+".template")
-                            config.read("/var/lib/docker/data/templates/modes.template")
+                            os.remove(path_dirs.template_dir + namespace + ".template")
+                            config.read(path_dirs.template_dir + "modes.template")
                             config.remove_option("plugins", namespace)
-                            with open("/var/lib/docker/data/templates/modes.template", 'w') as configfile:
+                            with open(path_dirs.template_dir + "modes.template", 'w') as configfile:
                                 config.write(configfile)
                             shutil.rmtree(dirpath)
                 else:
@@ -196,43 +213,43 @@ def remove_plugins(plugin_url):
                         for s_sub in sys_subdirs:
                             if element in s_sub:
                                 config = ConfigParser.RawConfigParser()
-                                config.read("/var/lib/docker/data/templates/"+namespace+".template")
+                                config.read(path_dirs.template_dir + namespace + ".template")
                                 config.remove_section(plugin)
-                                with open("/var/lib/docker/data/templates/"+namespace+".template", 'w') as configfile:
+                                with open(path_dirs.template_dir + namespace + ".template", 'w') as configfile:
                                     config.write(configfile)
-                                shutil.rmtree(s_sub)   
+                                shutil.rmtree(s_sub)
                 continue
             elif plugin_name+"/visualization" in r_sub:
-                names = os.listdir("/var/lib/docker/data/visualization")
+                names = os.listdir(path_dirs.vis_dir)
                 has_subdir = False
                 for name in names:
-                    has_subdir = os.path.isdir(os.path.join("/var/lib/docker/data/visualization/",name))
+                    has_subdir = os.path.isdir(os.path.join(path_dirs.vis_dir + "/",name))
                     if has_subdir:
                         break
                 #there are no visualizations, cleans up extra files e.g. README.md
                 if not has_subdir:
-                    os.remove("/var/lib/docker/data/templates/visualization.template")
-                    for dirpath, dirnames, files in os.walk("/var/lib/docker/data/visualization/"):
+                    os.remove(path_dirs.template_dir + "visualization.template")
+                    for dirpath, dirnames, files in os.walk(path_dirs.vis_dir+"/"):
                         for file in files:
-                            os.remove("/var/lib/docker/data/visualization/"+file)
+                            os.remove(path_dirs.vis_dir+"/"+file)
                     continue
-                sys_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/visualization/")]
+                sys_subdirs = [x[0] for x in os.walk(path_dirs.vis_dir + "/")]
                 repo_dir = r_sub.split(plugin_name+"/visualization/")[1]
                 namespace = "visualization"
             elif plugin_name+"/collectors/" in r_sub:
-                names = os.listdir("/var/lib/docker/data/collectors")
+                names = os.listdir(path_dirs.collectors_dir)
                 has_subdir = False
                 for name in names:
-                    has_subdir = os.path.isdir("/var/lib/docker/data/collectors/"+name)
+                    has_subdir = os.path.isdir(path_dirs.collectors_dir + "/"+name)
                     if has_subdir:
                         break
                 #there are not collectors, cleans up extra files e.g. README.md
                 if not has_subdir:
-                    for dirpath, dirnames, files in os.walk("/var/lib/docker/data/collectors/"):
+                    for dirpath, dirnames, files in os.walk(path_dirs.collectors_dir + "/"):
                         for file in files:
-                            os.remove("/var/lib/docker/data/collectors/"+file)
+                            os.remove(path_dirs.collectors_dir+"/"+file)
                     continue
-                sys_subdirs = [x[0] for x in os.walk("/var/lib/docker/data/collectors/")]
+                sys_subdirs = [x[0] for x in os.walk(path_dirs.collectors_dir + "/")]
                 repo_dir = r_sub.split(plugin_name+"/collectors/")[1]
                 namespace = "collectors"
             else:
@@ -242,28 +259,29 @@ def remove_plugins(plugin_url):
                 if repo_dir in s_sub:
                     shutil.rmtree(s_sub)
                     config = ConfigParser.RawConfigParser()
-                    if os.path.exists("/var/lib/docker/data/templates/"+namespace+".template"):
-                        config.read("/var/lib/docker/data/templates/"+namespace+".template")
+                    if os.path.exists(path_dirs.template_dir + namespace + ".template"):
+                        config.read(path_dirs.template_dir + namespace + ".template")
                         config.remove_section(repo_dir.split("/")[0])
-                        with open("/var/lib/docker/data/templates/"+namespace+".template", 'w') as configfile:
+                        with open(path_dirs.template_dir + namespace + ".template", 'w') as configfile:
                             config.write(configfile)  
-                    config.read("/var/lib/docker/data/templates/modes.template")
+                    config.read(path_dirs.template_dir + "modes.template")
                     config.remove_option("plugins", namespace)
-                    with open("/var/lib/docker/data/templates/modes.template", 'w') as configfile:
+                    with open(path_dirs.template_dir + "modes.template", 'w') as configfile:
                         config.write(configfile)
         #remove git repo once done    
-        shutil.rmtree("/var/lib/docker/data/plugin_repos/"+plugin_name)
+        shutil.rmtree(path_dirs.plugin_repos+"/"+plugin_name)
         print "Successfully removed Plugin: "+plugin_name
 
     except Exception as e:
         pass
 
 if __name__ == "__main__":
+    path_dirs = PathDirs()
     if len(sys.argv) == 3:
         if sys.argv[1] == "add_plugins":
-            add_plugins(sys.argv[2])
+            add_plugins(path_dirs, sys.argv[2])
         elif sys.argv[1] == "remove_plugins":
-            remove_plugins(sys.argv[2])
+            remove_plugins(path_dirs, sys.argv[2])
         else:
             print "invalid plugin type to parse"
     else:
