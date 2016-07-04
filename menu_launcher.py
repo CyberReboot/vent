@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 
 import ConfigParser
+import curses
 import os
 import sys
 import termios
@@ -11,20 +12,16 @@ from subprocess import call, check_output, PIPE, Popen
 
 # !! TODO tmeporary fix for tests
 try:
-    import curses
     screen = curses.initscr()
     curses.noecho()
     curses.cbreak()
     curses.start_color()
     screen.keypad(1)
-
     curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
     h = curses.color_pair(1)
     n = curses.A_NORMAL
 except Exception as e:
-    screen = None
-    h = None
-    n = None
+    pass
 
 MENU = "menu"
 COMMAND = "command"
@@ -35,15 +32,25 @@ SETTING = "setting"
 INPUT = "input"
 DISPLAY = "display"
 
-# path that exists on the iso
-collectors_dir = "/var/lib/docker/data/collectors"
-core_dir = "/var/lib/docker/data/core"
-plugins_dir = "/var/lib/docker/data/plugins/"
-template_dir = "/var/lib/docker/data/templates/"
-vis_dir = "/var/lib/docker/data/visualization"
+class PathDirs:
+    def __init__(self,
+                 base_dir="/var/lib/docker/data/",
+                 collectors_dir="collectors",
+                 core_dir="core",
+                 plugins_dir="plugins/",
+                 plugin_repos="plugin_repos",
+                 template_dir="templates/",
+                 vis_dir="visualization"):
+        self.base_dir = base_dir
+        self.collectors_dir = base_dir + collectors_dir
+        self.core_dir = base_dir + core_dir
+        self.plugins_dir = base_dir + plugins_dir
+        self.plugin_repos = base_dir + plugin_repos
+        self.template_dir = base_dir + template_dir
+        self.vis_dir = base_dir + vis_dir
 
 # Update images for removed plugins
-def update_images():
+def update_images(path_dirs):
     images = []
     try:
         images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
@@ -52,10 +59,10 @@ def update_images():
     for image in images:
         image = image.split("  ")[0]
         if "core/" in image or "visualization/" in image or "collectors/" in image:
-            if not os.path.isdir("/var/lib/docker/data/"+image):
+            if not os.path.isdir(path_dirs.base_dir + image):
                 os.system("docker rmi "+image)
         else:
-            if not os.path.isdir("/var/lib/docker/data/plugins/"+image):
+            if not os.path.isdir(path_dirs.plugins_dir + image):
                 os.system("docker rmi "+image)
 
 # Allows for acceptance of single char before terminating
@@ -79,12 +86,12 @@ def confirm():
 
 # Parses modes.template and returns a dict containing all specifically enabled containers
 # Returns dict along the format of: {'namespace': ["all"], 'namespace2': [""], 'namespace3': ["plug1", "plug2"]}
-def get_mode_config():
+def get_mode_config(path_dirs):
     # Parsing modes.template
     modes = {}
     try:
         config = ConfigParser.RawConfigParser()
-        config.read(template_dir+'modes.template')
+        config.read(path_dirs.template_dir+'modes.template')
         # Check if any runtime configurations
         if config.has_section("plugins"):
             plugin_array = config.options("plugins")
@@ -100,12 +107,12 @@ def get_mode_config():
 
 # Parses core.template to get all runtime configurations for enabling/disabling cores
 # Returns dict along the format of: {'passive': "on", 'active': "on", 'aaa-redis': "off"}
-def get_core_config():
+def get_core_config(path_dirs):
     # Parsing core.template
     cores = {}
     try:
         config = ConfigParser.RawConfigParser()
-        config.read(template_dir+'core.template')
+        config.read(path_dirs.template_dir+'core.template')
         passive = None
         active = None
         # Check if any run-time configurations for core-collectors
@@ -137,11 +144,11 @@ def get_core_config():
 
 # Retrieves installed cores
 # Returns list: ["core1", "core2", "core3"]
-def get_installed_cores():
+def get_installed_cores(path_dirs):
     cores = []
     try:
         # Get all cores
-        cores = [ core for core in os.listdir(core_dir) if os.path.isdir(os.path.join(core_dir, core)) ]
+        cores = [ core for core in os.listdir(path_dirs.core_dir) if os.path.isdir(os.path.join(path_dirs.core_dir, core)) ]
     except Exception as e:
         pass
 
@@ -149,11 +156,11 @@ def get_installed_cores():
 
 # Retrieves installed collectors by category: active, passive, or both (all)
 # Returns list: ["coll1", "coll2", "coll3"]
-def get_installed_collectors(c_type):
+def get_installed_collectors(path_dirs, c_type):
     colls = []
     try:
         # Get all collectors
-        collectors = [ collector for collector in os.listdir(collectors_dir) if os.path.isdir(os.path.join(collectors_dir, collector)) ]
+        collectors = [ collector for collector in os.listdir(path_dirs.collectors_dir) if os.path.isdir(os.path.join(path_dirs.collectors_dir, collector)) ]
 
         # Filter by passive/active/all
         if c_type == "passive":
@@ -173,11 +180,11 @@ def get_installed_collectors(c_type):
 
 # Retrieves installed visualizations
 # Returns list: ["vis1", "vis2", "vis3"]
-def get_installed_vis():
+def get_installed_vis(path_dirs):
     vis = []
     try:
         # Get all visualizations
-        vis = [ visualization for visualization in os.listdir(vis_dir) if os.path.isdir(os.path.join(vis_dir, visualization)) ]
+        vis = [ visualization for visualization in os.listdir(path_dirs.vis_dir) if os.path.isdir(os.path.join(path_dirs.vis_dir, visualization)) ]
     except Exception as e:
         pass
 
@@ -185,15 +192,15 @@ def get_installed_vis():
 
 # Retrieves all plugins by namespace; e.g. - features/tcpdump || features/hexparser
 # Note returns a dict of format: {'namespace': [p1, p2, p3, ...], 'namespace2': [p1, p2, p3, ...]}
-def get_installed_plugins():
+def get_installed_plugins(path_dirs):
     p = {}
     try:
         # Get all namespaces
-        namespaces = [ namespace for namespace in os.listdir(plugins_dir) if os.path.isdir(os.path.join(plugins_dir, namespace)) ]
+        namespaces = [ namespace for namespace in os.listdir(path_dirs.plugins_dir) if os.path.isdir(os.path.join(path_dirs.plugins_dir, namespace)) ]
 
         # For each namespace, retrieve all plugins and index by namespace
         for namespace in namespaces:
-            p[namespace] = [ plugin for plugin in os.listdir(plugins_dir+namespace) if os.path.isdir(os.path.join(plugins_dir+namespace, plugin)) ]
+            p[namespace] = [ plugin for plugin in os.listdir(path_dirs.plugins_dir+namespace) if os.path.isdir(os.path.join(path_dirs.plugins_dir+namespace, plugin)) ]
     except Exception as e:
         pass
 
@@ -203,17 +210,17 @@ def get_installed_plugins():
 # Returns a dict indexed by container type: 
 # {'cores':["core1", "core2"], 'collectors':["coll1", "coll2"]}
 # Also returns a list of all containers, and list by category
-def get_all_installed():
+def get_all_installed(path_dirs):
     all_installed = {}
     list_installed = {}
     try:
         # Get each set of containers by type
-        all_cores = get_installed_cores()
-        all_colls = get_installed_collectors("all")
-        all_vis = get_installed_vis()
+        all_cores = get_installed_cores(path_dirs)
+        all_colls = get_installed_collectors(path_dirs, "all")
+        all_vis = get_installed_vis(path_dirs)
 
         # Note - Dictionary
-        all_plugins = get_installed_plugins()
+        all_plugins = get_installed_plugins(path_dirs)
 
         all_installed['core'] = all_cores
         all_installed['collectors'] = all_colls
@@ -227,10 +234,10 @@ def get_all_installed():
 
     return all_installed, all_cores, all_colls, all_vis, all_plugins
 
-def get_mode_enabled(mode_config):
+def get_mode_enabled(path_dirs, mode_config):
     mode_enabled = {}
     try:
-        all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed()
+        all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed(path_dirs)
 
         # if mode_config is empty, no special runtime configuration
         if not mode_config:
@@ -310,12 +317,12 @@ def get_mode_enabled(mode_config):
 
     return mode_enabled
 
-def get_core_enabled(core_config):
+def get_core_enabled(path_dirs, core_config):
     core_enabled = {}
     core_disabled = {}
     try:
-        passive_colls = get_installed_collectors("passive")
-        active_colls = get_installed_collectors("active")
+        passive_colls = get_installed_collectors(path_dirs, "passive")
+        active_colls = get_installed_collectors(path_dirs, "active")
         coll_enabled = []
         coll_disabled = []
         # only if not empty
@@ -362,24 +369,24 @@ def get_core_enabled(core_config):
 
 # Retrieves containers that have been enabled in config
 # Priority is namespace.template, then modes.template
-def get_enabled():
+def get_enabled(path_dirs):
     enabled = {}
     disabled = []
     try:
         # Retrieve configuration enablings/disablings for all containers
-        mode_config = get_mode_config()
-        core_config = get_core_config()
+        mode_config = get_mode_config(path_dirs)
+        core_config = get_core_config(path_dirs)
 
         # Retrieve containers enabled by mode
         # Note - mode_enabled and its complement form the complete set of containers
-        mode_enabled = get_mode_enabled(mode_config)
+        mode_enabled = get_mode_enabled(path_dirs, mode_config)
 
         # Retrieve containers enabled/disabled by core
         # Note - the union of core_enabled and core_disabled DO NOT form the complete set of containers
-        core_enabled, core_disabled = get_core_enabled(core_config)
+        core_enabled, core_disabled = get_core_enabled(path_dirs, core_config)
 
         # The complete set of containers
-        all_installed = get_all_installed()[0]
+        all_installed = get_all_installed(path_dirs)[0]
 
         ### Intersection Logic by Case: ###
         # Case 1: container is in mode_enabled and in core_enabled -> enabled
@@ -447,16 +454,16 @@ def get_enabled():
     return enabled, disabled
 
 # Displays status of all running, not running/built, not built, and disabled plugins
-def get_plugin_status():
+def get_plugin_status(path_dirs):
     notbuilt = []
     p = {}
 
     try:
         # Retrieves all installed containers
-        all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed()
+        all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed(path_dirs)
 
         # Retrieves all enabled images
-        enabled, disabled = get_enabled()
+        enabled, disabled = get_enabled(path_dirs)
 
         # Need to cross reference with all installed containers to determine all disabled containers
         containers = check_output(" docker ps -a | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
@@ -518,7 +525,7 @@ def get_plugin_status():
     return p
 
 # Retrieves all installed plugin repos; e.g - vent-network
-def get_installed_plugin_repos(m_type, command):
+def get_installed_plugin_repos(path_dirs, m_type, command):
     try:
         p = {}
         p['type'] = MENU
@@ -526,9 +533,9 @@ def get_installed_plugin_repos(m_type, command):
             command1 = "python2.7 /data/plugin_parser.py remove_plugins "
             p['title'] = 'Remove Plugins'
             p['subtitle'] = 'Please select a plugin to remove...'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
             for d in p['options']:
-                with open("/var/lib/docker/data/plugin_repos/"+d['title']+"/.git/config", "r") as myfile:
+                with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
                     repo_name = ""
                     while not "url" in repo_name:
                         repo_name = myfile.readline()
@@ -539,9 +546,9 @@ def get_installed_plugin_repos(m_type, command):
             command2 = " && python2.7 /data/plugin_parser.py add_plugins "
             p['title'] = 'Update Plugins'
             p['subtitle'] = 'Please select a plugin to update...'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
             for d in p['options']:
-                with open("/var/lib/docker/data/plugin_repos/"+d['title']+"/.git/config", "r") as myfile:
+                with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
                     repo_name = ""
                     while not "url" in repo_name:
                         repo_name = myfile.readline()
@@ -550,17 +557,17 @@ def get_installed_plugin_repos(m_type, command):
         else:
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins:'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
+            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
         return p
 
     except Exception as e:
         pass
 
-def run_plugins(action):
+def run_plugins(path_dirs, action):
     modes = []
     try:
         config = ConfigParser.RawConfigParser()
-        config.read(template_dir+'modes.template')
+        config.read(path_dirs.template_dir+'modes.template')
         plugin_array = config.options("plugins")
         plugins = {}
         for plug in plugin_array:
@@ -571,7 +578,7 @@ def run_plugins(action):
                 p = {}
                 try:
                     config = ConfigParser.RawConfigParser()
-                    config.read(template_dir+plugin+'.template')
+                    config.read(path_dirs.template_dir+plugin+'.template')
                     plugin_name = config.get("info", "name")
                     p['title'] = plugin_name
                     p['type'] = INFO2
@@ -582,7 +589,7 @@ def run_plugins(action):
                     pass
         try:
             config = ConfigParser.RawConfigParser()
-            config.read(template_dir+'core.template')
+            config.read(path_dirs.template_dir+'core.template')
             try:
                 passive = config.get("local-collection", "passive")
                 if passive == "on":
@@ -623,15 +630,15 @@ def run_plugins(action):
 
     return modes
 
-def update_plugins():
+def update_plugins(path_dirs):
     modes = []
     try:
-        for f in os.listdir(template_dir):
+        for f in os.listdir(path_dirs.template_dir):
             if f.endswith(".template"):
                 p = {}
                 p['title'] = f
                 p['type'] = SETTING
-                p['command'] = 'python2.7 /data/suplemon/suplemon.py '+template_dir+f
+                p['command'] = 'python2.7 /data/suplemon/suplemon.py '+path_dirs.template_dir+f
                 modes.append(p)
     except Exception as e:
         print "unable to get the configuration templates.\n"
@@ -719,7 +726,7 @@ def runmenu(menu, parent):
             pos = x - ord('0') - 1
     return pos
 
-def processmenu(menu, parent=None):
+def processmenu(path_dirs, menu, parent=None):
     optioncount = len(menu['options'])
     exitmenu = False
     while not exitmenu:
@@ -761,10 +768,10 @@ def processmenu(menu, parent=None):
             else:
                 os.system(menu['options'][getin]['command'])
             if menu['title'] == "Remove Plugins":
-                update_images()
+                update_images(path_dirs)
                 exitmenu = True
             elif menu['title'] == "Update Plugins":
-                update_images()
+                update_images(path_dirs)
                 os.system("/bin/sh /data/build_images.sh")
             confirm()
             screen.clear()
@@ -796,58 +803,58 @@ def processmenu(menu, parent=None):
                     os.system("echo No plugins added, url is not formatted correctly.")
                     os.system("echo Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
                 else:
-                    os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)                    
+                    os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
                 confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
         elif menu['options'][getin]['type'] == MENU:
             if menu['options'][getin]['title'] == "Remove Plugins":
                 screen.clear()
-                installed_plugins = get_installed_plugin_repos(INFO2, "remove")
-                processmenu(installed_plugins, menu)
+                installed_plugins = get_installed_plugin_repos(path_dirs, INFO2, "remove")
+                processmenu(path_dirs, installed_plugins, menu)
                 screen.clear()
             elif menu['options'][getin]['title'] == "Show Installed Plugins":
                 screen.clear()
-                installed_plugins = get_installed_plugin_repos(DISPLAY, "")
-                processmenu(installed_plugins, menu)
+                installed_plugins = get_installed_plugin_repos(path_dirs, DISPLAY, "")
+                processmenu(path_dirs, installed_plugins, menu)
                 screen.clear()
             elif menu['options'][getin]['title'] == "Update Plugins":
                 screen.clear()
-                installed_plugins = get_installed_plugin_repos(INFO2, "update")
-                processmenu(installed_plugins, menu)
+                installed_plugins = get_installed_plugin_repos(path_dirs, INFO2, "update")
+                processmenu(path_dirs, installed_plugins, menu)
                 screen.clear()
             elif menu['options'][getin]['title'] == "Status":
                 screen.clear()
-                plugins = get_plugin_status()
-                processmenu(plugins, menu)
+                plugins = get_plugin_status(path_dirs)
+                processmenu(path_dirs, plugins, menu)
                 screen.clear()
             else:
                 screen.clear()
-                processmenu(menu['options'][getin], menu)
+                processmenu(path_dirs, menu['options'][getin], menu)
                 screen.clear()
         elif menu['options'][getin]['type'] == EXITMENU:
             exitmenu = True
 
-def build_menu_dict():
+def build_menu_dict(path_dirs):
     menu_data = {
       'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
       'options':[
         { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option...',
           'options': [
             { 'title': "Start", 'type': MENU, 'subtitle': '',
-              'options': run_plugins("start")
+              'options': run_plugins(path_dirs, "start")
             },
             { 'title': "Stop", 'type': MENU, 'subtitle': '',
-              'options': run_plugins("stop")
+              'options': run_plugins(path_dirs, "stop")
             },
             { 'title': "Clean (Stop and Remove Containers)", 'type': MENU, 'subtitle': '',
-              'options': run_plugins("clean")
+              'options': run_plugins(path_dirs, "clean")
             },
             { 'title': "Status", 'type': MENU, 'subtitle': '',
               'command': ''
             },
             { 'title': "Configure", 'type': MENU, 'subtitle': '',
-              'options': update_plugins()
+              'options': update_plugins(path_dirs)
             }
           ]
         },
@@ -887,8 +894,9 @@ def build_menu_dict():
     return menu_data
 
 def main():
-    menu_data = build_menu_dict()
-    processmenu(menu_data)
+    path_dirs = PathDirs()
+    menu_data = build_menu_dict(path_dirs)
+    processmenu(path_dirs, menu_data)
     curses.endwin()
     os.system('clear')
 
