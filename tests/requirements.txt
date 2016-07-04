@@ -1,4 +1,4 @@
-magic
 pytest
 pytest-cov
+python-magic
 redis
