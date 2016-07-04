@@ -1,7 +1,6 @@
 #!/usr/bin/env python2.7
 
 import ConfigParser
-import curses
 import os
 import sys
 import termios
@@ -10,15 +9,20 @@ import tty
 
 from subprocess import call, check_output, PIPE, Popen
 
-screen = curses.initscr()
-curses.noecho()
-curses.cbreak()
-curses.start_color()
-screen.keypad(1)
+# !! TODO tmeporary fix for tests
+try:
+    import curses
+    screen = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
+    curses.start_color()
+    screen.keypad(1)
 
-curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
-h = curses.color_pair(1)
-n = curses.A_NORMAL
+    curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
+    h = curses.color_pair(1)
+    n = curses.A_NORMAL
+except Exception as e:
+    pass
 
 MENU = "menu"
 COMMAND = "command"
@@ -38,7 +42,11 @@ vis_dir = "/var/lib/docker/data/visualization"
 
 # Update images for removed plugins
 def update_images():
-    images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
+    images = []
+    try:
+        images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
+    except Exception as e:
+        pass
     for image in images:
         image = image.split("  ")[0]
         if "core/" in image or "visualization/" in image or "collectors/" in image:
