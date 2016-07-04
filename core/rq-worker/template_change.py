@@ -16,7 +16,7 @@ def template_queue(path):
         try:
             # will only remove containers that aren't running
             c.remove_container(cont['Id'])
-        except:
+        except Exception as e:
             pass
 
     # check for template type
@@ -37,7 +37,7 @@ def template_queue(path):
                     try:
                         c.kill(cont['Id'])
                         c.remove_container(cont['Id'])
-                    except:
+                    except Exception as e:
                         pass
             if len(core_containers) > 0:
                 os.system('python2.7 /vent/template_parser.py core start')
@@ -49,7 +49,7 @@ def template_queue(path):
                 try:
                     c.kill(cont['Id'])
                     c.remove_container(cont['Id'])
-                except:
+                except Exception as e:
                     pass
             if len(active_containers) > 0:
                 os.system('python2.7 /vent/template_parser.py active start')
@@ -58,7 +58,7 @@ def template_queue(path):
                 try:
                     c.kill(cont['Id'])
                     c.remove_container(cont['Id'])
-                except:
+                except Exception as e:
                     pass
             if len(passive_containers) > 0:
                 os.system('python2.7 /vent/template_parser.py passive start')
@@ -68,13 +68,13 @@ def template_queue(path):
                 try:
                     c.kill(cont['Id'])
                     c.remove_container(cont['Id'])
-                except:
+                except Exception as e:
                     pass
             if len(viz_containers) > 0:
                 os.system('python2.7 /vent/template_parser.py visualization start')
         else:
             pass
             # plugin
-    except:
+    except Exception as e:
         pass
     return

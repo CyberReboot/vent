@@ -21,7 +21,7 @@ try:
     curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
     h = curses.color_pair(1)
     n = curses.A_NORMAL
-except Exception as e:
+except Exception as e Exception as e:
     pass
 
 MENU = "menu"
@@ -45,7 +45,7 @@ def update_images():
     images = []
     try:
         images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
-    except Exception as e:
+    except Exception as e Exception as e:
         pass
     for image in images:
         image = image.split("  ")[0]
@@ -67,7 +67,7 @@ def getch():
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, settings)
         return ch
-    except:
+    except Exception as e:
         pass
 
 # Will wait for user input before clearing stdout
@@ -91,7 +91,7 @@ def get_mode_config():
                 for plug in plugin_array:
                     modes[plug] = config.get("plugins", plug).replace(" ", "").split(",")
         # If not then there are no special runtime configurations and modes is empty
-    except:
+    except Exception as e:
         pass
 
     return modes
@@ -128,7 +128,7 @@ def get_core_config():
                 for option in active_array:
                     cores[option] = config.get("locally-active", option).replace(" ", "")
         # If not then everything is enabled and cores is empty
-    except:
+    except Exception as e:
         pass
 
     return cores
@@ -140,7 +140,7 @@ def get_installed_cores():
     try:
         # Get all cores
         cores = [ core for core in os.listdir(core_dir) if os.path.isdir(os.path.join(core_dir, core)) ]
-    except:
+    except Exception as e:
         pass
 
     return cores
@@ -164,7 +164,7 @@ def get_installed_collectors(c_type):
             with open("/tmp/error.log", "a+") as myfile:
                 myfile.write("Error in get_installed_collectors: ", "Invalid collector parameter: ", c_type)
             myfile.close()
-    except:
+    except Exception as e:
         pass
 
     return colls
@@ -176,7 +176,7 @@ def get_installed_vis():
     try:
         # Get all visualizations
         vis = [ visualization for visualization in os.listdir(vis_dir) if os.path.isdir(os.path.join(vis_dir, visualization)) ]
-    except:
+    except Exception as e:
         pass
 
     return vis
@@ -192,7 +192,7 @@ def get_installed_plugins():
         # For each namespace, retrieve all plugins and index by namespace
         for namespace in namespaces:
             p[namespace] = [ plugin for plugin in os.listdir(plugins_dir+namespace) if os.path.isdir(os.path.join(plugins_dir+namespace, plugin)) ]
-    except:
+    except Exception as e:
         pass
 
     return p
@@ -220,7 +220,7 @@ def get_all_installed():
         # Check if all_plugins is empty
         if all_plugins:
             all_installed.update(all_plugins)
-    except:
+    except Exception as e:
         pass
 
     return all_installed, all_cores, all_colls, all_vis, all_plugins
@@ -303,7 +303,7 @@ def get_mode_enabled(mode_config):
             mode_enabled['core'] = core_enabled
             mode_enabled['collectors'] = coll_enabled
             mode_enabled['visualization'] = vis_enabled
-    except:
+    except Exception as e:
         pass
 
     return mode_enabled
@@ -353,7 +353,7 @@ def get_core_enabled(core_config):
             core_enabled['core'] = locally_enabled
             core_disabled['collectors'] = coll_disabled
             core_disabled['core'] = locally_disabled
-    except:
+    except Exception as e:
         pass
 
     return core_enabled, core_disabled
@@ -439,7 +439,7 @@ def get_enabled():
 
         enabled = all_enabled
         disabled = all_disabled
-    except:
+    except Exception as e:
         pass
 
     return enabled, disabled
@@ -510,7 +510,7 @@ def get_plugin_status():
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt }
                         ]
-    except:
+    except Exception as e:
         pass
 
     return p
@@ -551,7 +551,7 @@ def get_installed_plugin_repos(m_type, command):
             p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir("/var/lib/docker/data/plugin_repos") if os.path.isdir(os.path.join('/var/lib/docker/data/plugin_repos', name)) ]
         return p
 
-    except:
+    except Exception as e:
         pass
 
 def run_plugins(action):
@@ -575,7 +575,7 @@ def run_plugins(action):
                     p['type'] = INFO2
                     p['command'] = 'python2.7 /data/template_parser.py '+plugin+' '+action
                     modes.append(p)
-                except:
+                except Exception as e:
                     # if no name is provided, it doesn't get listed
                     pass
         try:
@@ -589,7 +589,7 @@ def run_plugins(action):
                     p['type'] = INFO2
                     p['command'] = 'python2.7 /data/template_parser.py passive '+action
                     modes.append(p)
-            except:
+            except Exception as e:
                 pass
             try:
                 active = config.get("local-collection", "active")
@@ -599,9 +599,9 @@ def run_plugins(action):
                     p['type'] = INFO2
                     p['command'] = 'python2.7 /data/template_parser.py active '+action
                     modes.append(p)
-            except:
+            except Exception as e:
                 pass
-        except:
+        except Exception as e:
             pass
         if len(modes) > 1:
             p = {}
@@ -609,7 +609,7 @@ def run_plugins(action):
             p['type'] = INFO2
             p['command'] = 'python2.7 /data/template_parser.py all '+action
             modes.append(p)
-    except:
+    except Exception as e:
         print "unable to get the configuration of modes from the templates.\n"
 
     # make sure that vent-management is running
@@ -628,7 +628,7 @@ def update_plugins():
                 p['type'] = SETTING
                 p['command'] = 'python2.7 /data/suplemon/suplemon.py '+template_dir+f
                 modes.append(p)
-    except:
+    except Exception as e:
         print "unable to get the configuration templates.\n"
     return modes
 

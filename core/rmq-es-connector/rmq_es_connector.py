@@ -22,7 +22,7 @@ while wait:
         es = Elasticsearch(['elasticsearch'])
         wait = False
         print "connected to rabbitmq..."
-    except:
+    except Exception as e:
         print "waiting for connection to rabbitmq..."
         time.sleep(2)
         wait = True
@@ -54,7 +54,7 @@ def callback(ch, method, properties, body):
         doc = ast.literal_eval(body)
         res = es.index(index=index, doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
         print " [x] "+str(datetime.datetime.utcnow())+" UTC {0!r}:{1!r}".format(method.routing_key, body)
-    except:
+    except Exception as e:
         pass
 
 channel.basic_consume(callback,

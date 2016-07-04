@@ -15,7 +15,7 @@ def pcap_queue(path):
         try:
             # will only remove containers that aren't running
             c.remove_container(cont['Id'])
-        except:
+        except Exception as e:
             pass
 
     template_dir = "/var/lib/docker/data/templates/"
@@ -33,7 +33,7 @@ def pcap_queue(path):
         try:
             config.read(template_dir+'core.template')
             container_max = int(config.get("active-containers", "count"))
-        except:
+        except Exception as e:
             pass
         for plugin in plugins:
             # check resources before creating container
@@ -45,6 +45,6 @@ def pcap_queue(path):
 
             cmd = "python2.7 /vent/template_parser.py "+plugin+" start "+path
             os.system(cmd)
-    except:
+    except Exception as e:
         pass
     return
