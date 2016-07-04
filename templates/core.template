@@ -52,7 +52,7 @@ Env = ["REMOTE_REDIS_HOST=redis"]
 HostConfig = {"Links": ["core-aaa-redis:redis"], "PublishAllPorts": true}
 
 [aaa-syslog]
-Env = ["VENT_HOST=`hostname`"]
+Env = ["VENT_HOST=MP-LT.local"]
 HostConfig = {"PortBindings": { "514/tcp": [{ "HostPort": "514" }]}, "Links": ["core-aaa-rabbitmq:rabbitmq"], "Binds":["/var/log/syslog-ng:/var/log/syslog-ng"]}
 
 [template-change]
