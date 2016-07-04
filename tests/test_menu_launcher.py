@@ -53,5 +53,9 @@ def test_get_installed_plugin_repos():
 def test_update_plugins():
     menu_launcher.update_plugins()
 
+def test_processmenu():
+    menu_data = menu_launcher.build_menu_dict()
+    menu_launcher.processmenu(menu_data)
+
 def test_build_menu_dict():
     menu_launcher.build_menu_dict()
