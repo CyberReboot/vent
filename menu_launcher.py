@@ -15,10 +15,10 @@ curses.noecho()
 # !! TODO tmeporary fix for tests
 try:
     curses.cbreak()
-    curses.start_color()
-    screen.keypad(1)
 except Exception as e:
     pass
+    curses.start_color()
+    screen.keypad(1)
 
 curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
 h = curses.color_pair(1)
