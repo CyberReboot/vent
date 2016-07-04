@@ -20,7 +20,7 @@ if [[ -z "$DASH_PREFIX" ]]; then  #should i fail if not set?
     export DASH_PREFIX="/rq"
 fi
 
-export RQ_DASHBOARD_SETTINGS="/rq-dash-settings.py"
+export RQ_DASHBOARD_SETTINGS="/rq_dash_settings.py"
 
 echo "REMOTE_REDIS_HOST=${REMOTE_REDIS_HOST} REMOTE_REDIS_PORT=${REMOTE_REDIS_PORT}"
 
