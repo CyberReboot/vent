@@ -21,7 +21,7 @@ try:
     curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
     h = curses.color_pair(1)
     n = curses.A_NORMAL
-except Exception as e Exception as e:
+except Exception as e:
     pass
 
 MENU = "menu"
@@ -45,7 +45,7 @@ def update_images():
     images = []
     try:
         images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
-    except Exception as e Exception as e:
+    except Exception as e:
         pass
     for image in images:
         image = image.split("  ")[0]
