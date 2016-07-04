@@ -113,7 +113,7 @@ def add_plugins(plugin_url):
                                     print "Warning! Plugin template with no corresponding plugins to install. Not installing "+namespace+".template"
                                     os.remove("/var/lib/docker/data/plugin_repos/"+plugin_name+"templates/"+filename)
                                     os.remove("/var/lib/docker/data/templates/"+filename)
-            except:
+            except Exception as e:
                 pass
         # update modes.template if it wasn't copied up to include new plugins
         if check_modes:
@@ -141,7 +141,7 @@ def add_plugins(plugin_url):
         #resources installed correctly. Building...
         os.system("/bin/sh /data/build_images.sh")
         return  
-    except:
+    except Exception as e:
         pass
 
 """
@@ -255,10 +255,8 @@ def remove_plugins(plugin_url):
         shutil.rmtree("/var/lib/docker/data/plugin_repos/"+plugin_name)
         print "Successfully removed Plugin: "+plugin_name
 
-    except:
+    except Exception as e:
         pass
-
-
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:

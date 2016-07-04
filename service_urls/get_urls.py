@@ -45,7 +45,7 @@ def url(service, service_type):
                 pass
             elif service == "rq-dashboard":
                 url_str = check_output("/data/service_urls/get_rqdashboard_url.sh")
-    except:
+    except Exception as e:
         pass
     return url_str
 
@@ -53,5 +53,5 @@ if __name__ == "__main__":
     try:
         url_str = url(sys.argv[1], sys.argv[2])
         print url_str
-    except:
+    except Exception as e:
         pass

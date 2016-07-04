@@ -32,7 +32,7 @@ def execute_template(template_type, template_execution, info_name, service_sched
             else:
                 f.write("0")
             f.write("\n")
-    except:
+    except Exception as e:
         pass
     return
 
@@ -63,7 +63,7 @@ def read_template_types(template_type, container_cmd):
             filedata = filedata.replace(orig_str, repl_str)
             with open(template_path, 'w') as f:
                 f.write(filedata)
-    except:
+    except Exception as e:
         pass
 
     info_name = ""
@@ -99,7 +99,7 @@ def read_template_types(template_type, container_cmd):
                 core_config.read(template_dir+'core.template')
                 # check dependencies like elasticsearch and rabbitmq
                 external_options = core_config.options("external")
-            except:
+            except Exception as e:
                 external_options = []
             host_config_exists = False
 
@@ -124,14 +124,14 @@ def read_template_types(template_type, container_cmd):
                     for tool in t:
                         if not tool in sections:
                             sections.append(tool)
-                except:
+                except Exception as e:
                     pass
 
             for section in sections:
                 instructions = {}
                 try:
                     options = config.options(section)
-                except:
+                except Exception as e:
                     options = []
                 cmd = ["get_data.py", "none", "/"+section+"-data"]
                 for option in options:
@@ -149,7 +149,7 @@ def read_template_types(template_type, container_cmd):
                             option_val = config.get(section, option)
                             try:
                                 option_val = int(option_val)
-                            except:
+                            except Exception as e:
                                 pass
                             if option == 'data_path':
                                 if len(cmd) == 4:
@@ -166,7 +166,7 @@ def read_template_types(template_type, container_cmd):
                             elif option == 'delay':
                                 try:
                                     delay_sections[section] = option_val
-                                except:
+                                except Exception as e:
                                     pass
                             else:
                                 if option == "HostConfig":
@@ -206,7 +206,7 @@ def read_template_types(template_type, container_cmd):
                                                             try:
                                                                 extra_hosts.append(r_name+":"+core_config.get("external", r_name_full+"_host"))
                                                                 host_config_new["ExtraHosts"] = extra_hosts
-                                                            except:
+                                                            except Exception as e:
                                                                 pass
                                                         else:
                                                             print "no local "+r_name+" but an external one wasn't specified."
@@ -222,15 +222,15 @@ def read_template_types(template_type, container_cmd):
                                                         if "aaa_syslog_host" in external_options:
                                                             try:
                                                                 syslog_host = core_config.get("external", "aaa_syslog_host")
-                                                            except:
+                                                            except Exception as e:
                                                                 pass
                                                         else:
                                                             print "no local syslog but an external one wasn't specified."
                                                 host_config_new["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
                                                 option_val = str(host_config_new).replace("'", '"')
-                                            except:
+                                            except Exception as e:
                                                 pass
-                                    except:
+                                    except Exception as e:
                                         pass
                                 option_val = option_val.replace("True", "true")
                                 option_val = option_val.replace("False", "false")
@@ -261,13 +261,13 @@ def read_template_types(template_type, container_cmd):
                                                 rabbitmq_host = core_config.get("external", "aaa_rabbitmq_host")
                                                 extra_hosts.append("rabbitmq:"+rabbitmq_host)
                                                 host_config["ExtraHosts"] = extra_hosts
-                                            except:
+                                            except Exception as e:
                                                 pass
                                         else:
                                             print "no local rabbitmq but an external one wasn't specified."
                                 if not external_rabbit:
                                     host_config["Links"] = ["core-aaa-rabbitmq:rabbitmq"]
-                            except:
+                            except Exception as e:
                                 pass
                         # add syslog
                         try:
@@ -277,12 +277,12 @@ def read_template_types(template_type, container_cmd):
                                     if "aaa_syslog_host" in external_options:
                                         try:
                                             syslog_host = core_config.get("external", "aaa_syslog_host")
-                                        except:
+                                        except Exception as e:
                                             pass
                                     else:
                                         print "no local syslog but an external one wasn't specified."
                             host_config["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
-                        except:
+                        except Exception as e:
                             pass
                         option_val = str(host_config).replace("'", '"')
                         option_val = option_val.replace("True", "true")
@@ -311,7 +311,7 @@ def read_template_types(template_type, container_cmd):
                                             instructions['Image'] = 'core/'+section
                                             instructions['Volumes'] = {"/"+section+"-data": {}}
                                             tool_dict[section+str(i)] = instructions
-                                    except:
+                                    except Exception as e:
                                         pass
                                 else:
                                     instructions['Image'] = 'core/'+section
@@ -325,7 +325,7 @@ def read_template_types(template_type, container_cmd):
                                         instructions['Image'] = template_type+'/'+section
                                         instructions['Volumes'] = {"/"+section+"-data": {}}
                                         tool_dict[template_type+"-"+section+str(i)] = instructions
-                                except:
+                                except Exception as e:
                                     pass
                             else:
                                 instructions['Image'] = template_type+'/'+section
@@ -333,7 +333,7 @@ def read_template_types(template_type, container_cmd):
                                 tool_dict[template_type+"-"+section] = instructions
         else:
             info_name = "\"all\""
-    except:
+    except Exception as e:
         pass
     return info_name, service_schedule, tool_core, tool_dict, delay_sections
 
