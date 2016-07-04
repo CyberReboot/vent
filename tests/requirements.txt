@@ -2,3 +2,4 @@ pytest
 pytest-cov
 python-magic
 redis
+rq
