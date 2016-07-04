@@ -1,7 +1,6 @@
 #!/usr/bin/env python2.7
 
 import ConfigParser
-import curses
 import os
 import sys
 import termios
@@ -12,6 +11,7 @@ from subprocess import call, check_output, PIPE, Popen
 
 # !! TODO tmeporary fix for tests
 try:
+    import curses
     screen = curses.initscr()
     curses.noecho()
     curses.cbreak()
