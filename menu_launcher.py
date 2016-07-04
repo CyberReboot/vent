@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 
 import ConfigParser
+import curses
 import os
 import sys
 import termios
@@ -9,19 +10,19 @@ import tty
 
 from subprocess import call, check_output, PIPE, Popen
 
+screen = curses.initscr()
+curses.noecho()
+curses.cbreak()
 # !! TODO tmeporary fix for tests
 try:
-    import curses
-    screen = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
     curses.start_color()
     screen.keypad(1)
-    curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
-    h = curses.color_pair(1)
-    n = curses.A_NORMAL
 except Exception as e:
     pass
+
+curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
+h = curses.color_pair(1)
+n = curses.A_NORMAL
 
 MENU = "menu"
 COMMAND = "command"
