@@ -1,7 +1,7 @@
 ### Modes Template
 
 Specify which templates to include, and for each of those either run `all` of
-the tools in the plugin, or just specific ones in a comma delimited list.
+the tools in the plugin, `none` or `` to run none of them, or just specific ones in a comma delimited list.
 
 ```
 [plugins]
@@ -10,6 +10,8 @@ ska = all
 skp = all
 zka = all
 zkp = all
+zdp = 
+znp = none
 ```
 
 ### Core, Collectors, Visualization, and Specific Plugin Templates
