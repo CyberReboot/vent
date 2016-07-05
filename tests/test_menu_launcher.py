@@ -39,28 +39,28 @@ def test_update_images():
 def test_get_mode_config():
     """ Test get_mode_config function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_config(invalid_dirs)
 
 def test_get_core_config():
     """ Test get_core_config function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_core_config(path_dirs)
     menu_launcher.get_core_config(invalid_dirs)
 
 def test_get_installed_cores():
     """ Test get_installed_cores function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_installed_cores(path_dirs)
     menu_launcher.get_installed_cores(invalid_dirs)
 
 def test_get_installed_collectors():
     """ Test get_installed_collectors function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_installed_collectors(path_dirs, "all")
     menu_launcher.get_installed_collectors(path_dirs, "passive")
     menu_launcher.get_installed_collectors(path_dirs, "active")
@@ -71,28 +71,28 @@ def test_get_installed_collectors():
 def test_get_installed_vis():
     """ Test get_installed_vis function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_installed_vis(path_dirs)
     menu_launcher.get_installed_vis(invalid_dirs)
 
 def test_get_installed_plugins():
     """ Test get_installed_plugins function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_installed_plugins(path_dirs)
     menu_launcher.get_installed_plugins(invalid_dirs)
 
 def test_get_all_installed():
     """ Test get_all_installed function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_all_installed(path_dirs)
     menu_launcher.get_all_installed(invalid_dirs)
 
 def test_get_mode_enabled():
     """ Test get_mode_enabled function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
     empty_config = menu_launcher.get_mode_config(invalid_dirs)
@@ -101,7 +101,7 @@ def test_get_mode_enabled():
 def test_get_core_enabled():
     """ Test get_core_enabled function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     core_config = menu_launcher.get_core_config(path_dirs)
     menu_launcher.get_core_enabled(path_dirs, core_config)
     empty_config = menu_launcher.get_core_config(invalid_dirs)
@@ -110,28 +110,28 @@ def test_get_core_enabled():
 def test_get_enabled():
     """ Test get_enabled function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_enabled(path_dirs)
     menu_launcher.get_enabled(invalid_dirs)
 
 def test_get_plugin_status():
     """ Test get_plugin_status function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_plugin_status(path_dirs)
     menu_launcher.get_plugin_status(invalid_dirs)
 
 def test_run_plugins():
     """ Test get_run_plugins function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.run_plugins(path_dirs, "start")
     menu_launcher.run_plugins(invalid_dirs, "start")
 
 def test_get_installed_plugin_repos():
     """ Test get_installed_plugin_repos function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "remove")
     menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "update")
     menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "")
@@ -142,7 +142,7 @@ def test_get_installed_plugin_repos():
 def test_update_plugins():
     """ Test update_plugins function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/foo")
+    invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.update_plugins(path_dirs)
     menu_launcher.update_plugins(invalid_dirs)
 
