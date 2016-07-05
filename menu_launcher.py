@@ -207,11 +207,12 @@ def get_installed_plugins(path_dirs):
 
     return p
 
-# Retrieves all installed containers
-# Returns a dict indexed by container type: 
-# {'cores':["core1", "core2"], 'collectors':["coll1", "coll2"]}
-# Also returns a list of all containers, and list by category
+
 def get_all_installed(path_dirs):
+    """
+    Returns all installed containers as a dict, and each subset separately.
+    {'cores':["core1", "core2"], 'collectors':["coll1", "coll2"]}
+    """
     all_installed = {}
     list_installed = {}
     try:
@@ -236,6 +237,7 @@ def get_all_installed(path_dirs):
     return all_installed, all_cores, all_colls, all_vis, all_plugins
 
 def get_mode_enabled(path_dirs, mode_config):
+    """ Returns all images enabled from modes.template """
     mode_enabled = {}
     try:
         all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed(path_dirs)
@@ -319,6 +321,7 @@ def get_mode_enabled(path_dirs, mode_config):
     return mode_enabled
 
 def get_core_enabled(path_dirs, core_config):
+    """ Returns all enabled and disabled images from core.template """
     core_enabled = {}
     core_disabled = {}
     try:
@@ -368,9 +371,8 @@ def get_core_enabled(path_dirs, core_config):
 
     return core_enabled, core_disabled
 
-# Retrieves containers that have been enabled in config
-# Priority is namespace.template, then modes.template
 def get_enabled(path_dirs):
+    """ Returns containers that have been enabled/disabled by config """
     enabled = {}
     disabled = []
     try:
@@ -454,8 +456,8 @@ def get_enabled(path_dirs):
 
     return enabled, disabled
 
-# Displays status of all running, not running/built, not built, and disabled plugins
 def get_plugin_status(path_dirs):
+    """ Displays status of all running, not running/built, not built, and disabled plugins """
     notbuilt = []
     p = {}
 
@@ -525,8 +527,8 @@ def get_plugin_status(path_dirs):
 
     return p
 
-# Retrieves all installed plugin repos; e.g - vent-network
 def get_installed_plugin_repos(path_dirs, m_type, command):
+    """ Returns a dictionary of all installed plugin repos; e.g - vent-network """
     try:
         p = {}
         p['type'] = MENU
