@@ -4,6 +4,7 @@ import pytest
 from .. import menu_launcher
 
 class PathDirs:
+    """ Global path directories for parsing templates """
     def __init__(self,
                  base_dir=os.getcwd()+"/",
                  collectors_dir="collectors",
