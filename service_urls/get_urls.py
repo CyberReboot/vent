@@ -49,7 +49,7 @@ def url(service, service_type):
         pass
     return url_str
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     try:
         url_str = url(sys.argv[1], sys.argv[2])
         print url_str

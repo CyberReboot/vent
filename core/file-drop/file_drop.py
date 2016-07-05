@@ -33,7 +33,7 @@ class GZHandler(PatternMatchingEventHandler):
     def on_created(self, event):
         self.process(event)
 
-if __name__ == '__main__':
+if __name__ == '__main__': # pragma: no cover
     args = None
     if len(sys.argv) > 1:
         args = sys.argv[1:]
