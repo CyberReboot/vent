@@ -431,20 +431,20 @@ def get_enabled(path_dirs):
                             with open("/tmp/error.log", "a+") as file:
                                 file.write("get_enabled error: Case 7 reached!\n")
                             file.close()
-                else:
-                # For 'visualizations' & all plugin namespaces
-                    for container in all_installed[namespace]:
-                        # Case 5
-                        if container in mode_enabled[namespace]:
-                            all_enabled[namespace].append(container)
-                        # Case 6
-                        elif container not in mode_enabled[namespace]:
-                            all_disabled[namespace].append(container)
-                        # Case 7
-                        else:
-                            with open("/tmp/error.log", "a+") as file:
-                                file.write("get_enabled error: Case 7 reached!\n")
-                            file.close()
+            else:
+            # For 'visualizations' & all plugin namespaces
+                for container in all_installed[namespace]:
+                    # Case 5
+                    if container in mode_enabled[namespace]:
+                        all_enabled[namespace].append(container)
+                    # Case 6
+                    elif container not in mode_enabled[namespace]:
+                        all_disabled[namespace].append(container)
+                    # Case 7
+                    else:
+                        with open("/tmp/error.log", "a+") as file:
+                            file.write("get_enabled error: Case 7 reached!\n")
+                        file.close()
 
         enabled = all_enabled
         disabled = all_disabled
