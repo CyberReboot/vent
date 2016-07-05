@@ -33,6 +33,7 @@ INPUT = "input"
 DISPLAY = "display"
 
 class PathDirs:
+    """ Global path directories for parsing templates """
     def __init__(self,
                  base_dir="/var/lib/docker/data/",
                  collectors_dir="collectors",
