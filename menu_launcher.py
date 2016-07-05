@@ -48,19 +48,6 @@ class PathDirs:
         self.plugin_repos = base_dir + plugin_repos
         self.template_dir = base_dir + template_dir
         self.vis_dir = base_dir + vis_dir
-        if os.path.exists(self.base_dir):
-            if not os.path.exists(self.collectors_dir):
-                os.makedirs(self.collectors_dir)
-            if not os.path.exists(self.core_dir):
-                os.makedirs(self.core_dir)
-            if not os.path.exists(self.plugins_dir):
-                os.makedirs(self.plugins_dir)
-            if not os.path.exists(self.plugin_repos):
-                os.makedirs(self.plugin_repos)
-            if not os.path.exists(self.template_dir):
-                os.makedirs(self.template_dir)
-            if not os.path.exists(self.vis_dir):
-                os.makedirs(self.vis_dir)
 
 # Update images for removed plugins
 def update_images(path_dirs):
@@ -913,7 +900,7 @@ def main():
     curses.endwin()
     os.system('clear')
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     # make sure that vent-management is running
     try:
         result = check_output('/bin/sh /data/bootlocal.sh'.split())

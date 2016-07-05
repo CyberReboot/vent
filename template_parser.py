@@ -355,5 +355,5 @@ def main():
             info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd, template_dir, plugins_dir)
             execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     main()

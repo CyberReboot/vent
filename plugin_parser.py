@@ -21,19 +21,6 @@ class PathDirs:
         self.plugin_repos = base_dir + plugin_repos
         self.template_dir = base_dir + template_dir
         self.vis_dir = base_dir + vis_dir
-        if os.path.exists(self.base_dir):
-            if not os.path.exists(self.collectors_dir):
-                os.makedirs(self.collectors_dir)
-            if not os.path.exists(self.core_dir):
-                os.makedirs(self.core_dir)
-            if not os.path.exists(self.plugins_dir):
-                os.makedirs(self.plugins_dir)
-            if not os.path.exists(self.plugin_repos):
-                os.makedirs(self.plugin_repos)
-            if not os.path.exists(self.template_dir):
-                os.makedirs(self.template_dir)
-            if not os.path.exists(self.vis_dir):
-                os.makedirs(self.vis_dir)
 
 """
 add_plugins(plugin_url)
@@ -288,7 +275,7 @@ def remove_plugins(path_dirs, plugin_url):
     except Exception as e:
         pass
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     path_dirs = PathDirs()
     if len(sys.argv) == 3:
         if sys.argv[1] == "add_plugins":
