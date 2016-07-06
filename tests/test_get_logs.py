@@ -1,0 +1,47 @@
+import os
+import pytest
+
+from vent.info_tools import get_logs
+
+def test_msg():
+	"""tests custom output"""
+	get_logs.msg()
+
+def test_init():
+	"""tests argparse initialization"""
+	get_logs.set_parser()
+
+def test_no_args():
+	"""tests get_logs with no arguments"""
+	parser = get_logs.set_parser()
+	get_logs.parse_args(parser.parse_args([]), parser)
+
+def test_all_flag():
+	"""tests get_logs using -a flag, and combinations that start with -a"""
+	parser = get_logs.set_parser()
+	get_logs.parse_args(parser.parse_args(['-a']), parser)
+	get_logs.parse_args(parser.parse_args(['-a', '-c', 'test']), parser)
+	get_logs.parse_args(parser.parse_args(['-a', '-n']), parser)
+	#invalid args
+	get_logs.parse_args(parser.parse_args(['-a', '-f']), parser)
+
+def test_container_flag():
+	"""tests get_logs using -c flag, and combinations that start with -c"""
+	parser = get_logs.set_parser()
+	get_logs.parse_args(parser.parse_args(['-c', 'example-container']), parser)
+	get_logs.parse_args(parser.parse_args(['-c', 'example-container', '-f', 'example-file']), parser)
+
+def test_namespace_flag():
+	"""tests get_logs using -n flag, and combinations that start with -n"""
+	parser = get_logs.set_parser()
+	get_logs.parse_args(parser.parse_args(['-n', 'example-namespace']), parser)
+	get_logs.parse_args(parser.parse_args(['-n', 'example-namespace', '-f', 'example-file']), parser)
+	#invalid args
+	get_logs.parse_args(parser.parse_args(['-n']), parser)
+
+def test_file_flag():
+	"""tests get_logs using -f flag, and combinations that start with -f"""
+	parser = get_logs.set_parser()
+	get_logs.parse_args(parser.parse_args(['-f', 'example-file']), parser)
+	#invalid args
+	get_logs.parse_args(parser.parse_args(['-f']), parser)
