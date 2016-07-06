@@ -28,13 +28,14 @@ def set_parser():
 
 def parse_args(args, parser):
     """parse arguments, calls correct print functions based on arguments"""
-
     #checks if each container with logs exist. Removes from list if it doesn't
     cores = ["core-aaa-syslog", "core-aaa-redis", "core-aaa-rabbitmq", "core-rmq-es-connector"]
+    updated_cores = []
     for core in cores:
-        exists = check_output("docker ps -a | grep core-aaa-syslog", shell=True)
-        if not exists:
-            cores.remove(core)
+        exists = check_output("docker ps -a | grep "+core+" || True", shell=True)
+        if core in exists:
+            updated_cores.apped(core)
+    cores = updated_cores
     if args.all:
         #-a -c IMAGE
         if args.container:
@@ -45,7 +46,6 @@ def parse_args(args, parser):
             #get all namespaces
             namespaces = check_output("docker images | grep -v REPOSITORY | awk \"{print \$1}\" | grep / | cut -f1 -d\"/\" | uniq;", shell=True).split("\n")
             del(namespaces[-1])
-            print namespaces
             for namespace in namespaces:
                 print_namespace(namespace, cores)
         #-a
@@ -54,7 +54,7 @@ def parse_args(args, parser):
         else:
             parser.print_help()
             print "get_logs: error: argument -a/--all: expected no arguments, -n/--namespace, or -c/--container IMAGE"
-            sys.exit(1)
+            return
     elif args.container != None:
         #-c CONTAINER -f FILE
         if args.file != [] and args.file != None:
@@ -69,7 +69,7 @@ def parse_args(args, parser):
         if args.namespace == []:
             parser.print_help()
             print "get_logs: error: argument -n/--namespace: expected at least one argument"
-            sys.exit(1)
+            return
         #-n NAMESPACE -f FILE
         if args.file != [] and args.file != None:
             for namespace in args.namespace:
@@ -83,7 +83,7 @@ def parse_args(args, parser):
         if args.file == []:
             parser.print_help()
             print "get_logs: error: argument -f/--file: expected at least one argument"
-            sys.exit(1)
+            return
         #-f FILE
         for file in args.file:
             print_file_log(file, cores)
@@ -91,32 +91,32 @@ def parse_args(args, parser):
 def print_file_per_container(filename, container, cores):
     """print logs for each container that processed each file"""
     for core in cores:
-        os.system("docker logs"+core+" | grep "+filename+" | grep "+container)
+        os.system("docker logs"+core+" | grep "+filename+" | grep "+container+" || True")
 
 def print_file_per_namespace(filename, namespace, cores):
     """proint logs for all containers in each namespace that processed each file"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+filename+" | grep "+namespace)
+        os.system("docker logs "+core+" | grep "+filename+" | grep "+namespace+" || True")
 
 def print_container(container, cores):
     """print logs for each container"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+container+"/")
+        os.system("docker logs "+core+" | grep "+container+"/ || True")
 
 def print_image_containers(image, cores):
     """print logs for all container built from each container"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+image+"/")
+        os.system("docker logs "+core+" | grep "+image+"/ || True")
 
 def print_namespace(namespace, cores):
     """print logs for all containers in each namespace"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+namespace+"/")
+        os.system("docker logs "+core+" | grep "+namespace+"/ || True")
 
 def print_file_log(filename, cores):
     """print logs for each file"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+filename)
+        os.system("docker logs "+core+" | grep "+filename+" || True")
 
 def print_all_logs(cores):
     """print all logs"""
