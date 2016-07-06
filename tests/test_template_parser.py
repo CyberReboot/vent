@@ -14,7 +14,7 @@ def test_read_template_types():
     # Negative Test Cases
     invalid_dir = "tmp/"
     template_parser.read_template_types("all", "", template_dir, plugins_dir)
-    template_parser.read_template_types("all", "", template_dir, plugins_dir)
+    template_parser.read_template_types("all", "", invalid_dir, plugins_dir)
     template_parser.read_template_types("plugs", "", template_dir, plugins_dir)
     template_parser.read_template_types("plugs", "", invalid_dir, plugins_dir)
 
