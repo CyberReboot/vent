@@ -26,7 +26,10 @@ def pcap_queue(path):
     plugins_dir = "/var/lib/docker/data/plugins/"
     try:
         config.read(template_dir+'modes.template')
-        plugin_array = config.options("plugins")
+        plugin_array = []
+        # Check section exists and has options
+        if config.has_section("plugins") and config.options("plugins"):
+            plugin_array = config.options("plugins")
         plugins = {}
         for plug in plugin_array:
             if plug not in ["core", "visualization", "collectors"]:
