@@ -7,7 +7,7 @@ from subprocess import check_output
 
 def url(service, service_type):
     url_str = "not running"
-    locally-active = []
+    locally_active = []
     try:
         config = ConfigParser.RawConfigParser()
         config.read("/var/lib/docker/data/templates/core.template")
