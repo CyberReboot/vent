@@ -3,21 +3,27 @@ import pytest
 import rmq_es_connector
 
 class Method():
+    """ create mock method object """
     routing_key = None
     def __init__(self, routing_key=None):
         self.routing_key = routing_key
 
 def test_rmq_es_connector_connections():
-    """ tests the connections functions """
-    rmq_es_connector.connections(False)
+    """ tests the connections function """
+    rmq_es = rmq_es_connector.RmqEs()
+    rmq_es.connections(False)
 
 def test_rmq_es_connector_callback():
-    """ tests the callback functions """
-    rmq_es_connector.callback(None, None, None, None)
-    rmq_es_connector.callback(None, None, None, [])
+    """ tests the callback function """
+    rmq_es = rmq_es_connector.RmqEs()
+    rmq_es.callback(None, None, None, None)
+    rmq_es.callback(None, None, None, [])
     method = Method(routing_key="syslog.foo")
-    rmq_es_connector.callback(None, method, None, None)
+    rmq_es.callback(None, method, None, None)
     method = Method(routing_key="dshell_netflow.foo")
-    rmq_es_connector.callback(None, method, None, None)
+    rmq_es.callback(None, method, None, None)
     method = Method(routing_key="hex_flow.foo")
-    rmq_es_connector.callback(None, method, None, None)
+    rmq_es.callback(None, method, None, None)
+
+# TODO
+# not testing `start` since it will be an infinite loop
