@@ -28,7 +28,7 @@ class GZHandler(PatternMatchingEventHandler):
             # let jobs be queued for up to 30 days
             file_mime = magic.from_file(event.src_path, mime=True)
             if "pcap" in file_mime:
-                result = q.enqueue('pcap_drop.pcap_queue', event.src_path, ttl=2592000)
+                result = q.enqueue('file_watch.pcap_queue', event.src_path, ttl=2592000)
 
     def on_created(self, event):
         self.process(event)
