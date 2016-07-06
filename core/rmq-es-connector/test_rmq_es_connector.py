@@ -5,7 +5,7 @@ import rmq_es_connector
 class Method():
     """ create mock method object """
     routing_key = None
-    def __init__(self, routing_key=None):
+    def __init__(self, routing_key=""):
         self.routing_key = routing_key
 
 def test_rmq_es_connector_connections():
@@ -16,8 +16,9 @@ def test_rmq_es_connector_connections():
 def test_rmq_es_connector_callback():
     """ tests the callback function """
     rmq_es = rmq_es_connector.RmqEs()
-    rmq_es.callback(None, None, None, None)
-    rmq_es.callback(None, None, None, [])
+    method = Method()
+    rmq_es.callback(None, method, None, None)
+    rmq_es.callback(None, method, None, [])
     method = Method(routing_key="syslog.foo")
     rmq_es.callback(None, method, None, None)
     method = Method(routing_key="dshell_netflow.foo")
