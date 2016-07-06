@@ -20,6 +20,8 @@ class RmqEs():
         before binding a routing key to a channel and sending messages to
         elasticsearch
         """
+        channel = None
+        queue_name = None
         while wait:
             try:
                 connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
