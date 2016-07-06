@@ -17,14 +17,14 @@ def test_rmq_es_connector_callback():
     """ tests the callback function """
     rmq_es = rmq_es_connector.RmqEs()
     method = Method()
-    rmq_es.callback(None, method, None, None)
-    rmq_es.callback(None, method, None, [])
+    rmq_es.callback(None, method, None, "[]")
+    rmq_es.callback(None, method, None, "[]")
     method = Method(routing_key="syslog.foo")
-    rmq_es.callback(None, method, None, None)
+    rmq_es.callback(None, method, None, "[]")
     method = Method(routing_key="dshell_netflow.foo")
-    rmq_es.callback(None, method, None, None)
+    rmq_es.callback(None, method, None, "[]")
     method = Method(routing_key="hex_flow.foo")
-    rmq_es.callback(None, method, None, None)
+    rmq_es.callback(None, method, None, "[]")
 
 # TODO
 # not testing `start` since it will be an infinite loop
