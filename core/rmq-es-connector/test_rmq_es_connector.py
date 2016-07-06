@@ -1,7 +1,19 @@
 import pytest
 
-# TODO need to rework the infinite while loop
-#import rmq_es_connector
+import rmq_es_connector
 
-#def test_rmq_es_connector():
-#    rmq_es_connector.callback(None, None, None, None)
+class Method():
+    routing_key = None
+    def __init__(self, routing_key=None):
+        self.routing_key = routing_key
+
+def test_rmq_es_connector():
+    rmq_es_connector.connections(False)
+    rmq_es_connector.callback(None, None, None, None)
+    rmq_es_connector.callback(None, None, None, [])
+    method = Method(routing_key="syslog.foo")
+    rmq_es_connector.callback(None, method, None, None)
+    method = Method(routing_key="dshell_netflow.foo")
+    rmq_es_connector.callback(None, method, None, None)
+    method = Method(routing_key="hex_flow.foo")
+    rmq_es_connector.callback(None, method, None, None)

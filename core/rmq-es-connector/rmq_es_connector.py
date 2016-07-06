@@ -8,36 +8,26 @@ import uuid
 
 from elasticsearch import Elasticsearch
 
-wait = True
-while wait:
-    try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(
-                host='rabbitmq'))
-        channel = connection.channel()
-        channel.exchange_declare(exchange='topic_recs',
-                                 type='topic')
+es = None
 
-        result = channel.queue_declare(exclusive=True)
-        queue_name = result.method.queue
-        es = Elasticsearch(['elasticsearch'])
-        wait = False
-        print "connected to rabbitmq..."
-    except Exception as e:
-        print "waiting for connection to rabbitmq..."
-        time.sleep(2)
-        wait = True
+def connections(wait):
+    global es
+    while wait:
+        try:
+            connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
+            channel = connection.channel()
+            channel.exchange_declare(exchange='topic_recs', type='topic')
 
-binding_keys = sys.argv[1:]
-if not binding_keys:
-    print >> sys.stderr, "Usage: {0!s} [binding_key]...".format(sys.argv[0])
-    sys.exit(1)
-
-for binding_key in binding_keys:
-    channel.queue_bind(exchange='topic_recs',
-                       queue=queue_name,
-                       routing_key=binding_key)
-
-print ' [*] Waiting for logs. To exit press CTRL+C'
+            result = channel.queue_declare(exclusive=True)
+            queue_name = result.method.queue
+            es = Elasticsearch(['elasticsearch'])
+            wait = False
+            print "connected to rabbitmq..."
+        except Exception as e:
+            print "waiting for connection to rabbitmq..."
+            time.sleep(2)
+            wait = True
+    return channel, queue_name
 
 def callback(ch, method, properties, body):
     # send to elasticsearch index
@@ -57,8 +47,21 @@ def callback(ch, method, properties, body):
     except Exception as e:
         pass
 
-channel.basic_consume(callback,
-                      queue=queue_name,
-                      no_ack=True)
+if __name__ == "__main__": # pragma: no cover
+    channel, queue_name = connections(True)
 
-channel.start_consuming()
+    binding_keys = sys.argv[1:]
+    if not binding_keys:
+        print >> sys.stderr, "Usage: {0!s} [binding_key]...".format(sys.argv[0])
+        sys.exit(1)
+
+    for binding_key in binding_keys:
+        channel.queue_bind(exchange='topic_recs',
+                           queue=queue_name,
+                           routing_key=binding_key)
+
+    print ' [*] Waiting for logs. To exit press CTRL+C'
+    channel.basic_consume(callback,
+                          queue=queue_name,
+                          no_ack=True)
+    channel.start_consuming()
