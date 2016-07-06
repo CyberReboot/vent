@@ -22,9 +22,11 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
 
 def test_pathdirs():
+    """ Test path directories """
     path_dirs = plugin_parser.PathDirs()
 
 def test_add_plugins():
+    """ Test with valid dirs, invalid dirs, emtpy dirs, non-extistent plugins, duplicate plugins """
     path_dirs = PathDirs()
     invalid_dirs = PathDirs(base_dir="/tmp/")
     invalid2_dirs = PathDirs(plugin_repos="core/")
@@ -35,6 +37,7 @@ def test_add_plugins():
     plugin_parser.add_plugins(invalid2_dirs, "https://github.com/template-change")
 
 def test_remove_plugins():
+    """ Remove with valid dirs, invalid dirs """
     path_dirs = PathDirs()
     invalid_dirs = PathDirs(base_dir="/tmp/")
     plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
