@@ -25,19 +25,25 @@ def set_parser():
     return parser
 
 def parse_args(args, parser):
+    cores = ["core-aaa-syslog", "core-aaa-redis", "core-aaa-rabbitmq", "core-rmq-es-connector"]
+    for core in cores:
+        exists = check_output("docker ps -a | grep core-aaa-syslog", shell=True)
+        if not exists:
+            cores.remove(core)
+
     if args.all:
         if args.container:
             for image in args.container:
-                print_image_containers(image)
+                print_image_containers(image, cores)
         elif args.namespace == []:
             #get all namespaces
             namespaces = check_output("docker images | grep -v REPOSITORY | awk \"{print \$1}\" | grep / | cut -f1 -d\"/\" | uniq;", shell=True).split("\n")
             del(namespaces[-1])
             print namespaces
             for namespace in namespaces:
-                print_namespace(namespace)
+                print_namespace(namespace, cores)
         elif args.namespace == args.container == args.file == None:
-            print_all_logs()
+            print_all_logs(cores)
         else:
             parser.print_help()
             print "get_logs: error: argument -a/--all: expected no arguments, -n/--namespace, or -c/--container IMAGE"
@@ -46,12 +52,11 @@ def parse_args(args, parser):
         if args.file != [] and args.file != None:
             for container in args.container:
                 for file in args.file:
-                    print_file_per_container(file, container)
+                    print_file_per_container(file, container, cores)
         else:
             for container in args.container:
-                print_container(container)
+                print_container(container, cores)
     elif args.namespace != None:
-        print "asd"
         if args.namespace == []:
             parser.print_help()
             print "get_logs: error: argument -n/--namespace: expected at least one argument"
@@ -59,59 +64,45 @@ def parse_args(args, parser):
         if args.file != [] and args.file != None:
             for namespace in args.namespace:
                 for file in args.file:
-                    print_file_per_namespace(file, namespace)
+                    print_file_per_namespace(file, namespace, cores)
         else:
             for name in args.namespace:
-                print_namespace(name)
+                print_namespace(name, cores)
     elif args.file != None:
         if args.file == []:
             parser.print_help()
             print "get_logs: error: argument -f/--file: expected at least one argument"
             sys.exit(1)
         for file in args.file:
-            print_file_log(file)
+            print_file_log(file, cores)
 
-def print_file_per_container(filename, container):
-    os.system("docker logs core-aaa-syslog | grep "+filename+" | grep "+container)
-    os.system("docker logs core-aaa-redis | grep "+filename+" | grep "+container)
-    os.system("docker logs core-aaa-rabbitmq | grep "+filename+" | grep "+container)
-    os.system("docker logs core-rmq-es-connector | grep "+filename+" | grep "+container)
+def print_file_per_container(filename, container, cores):
+    for core in cores:
+        os.system("docker logs"+core+" | grep "+filename+" | grep "+container)
 
-def print_file_per_namespace(filename, namespace):
-    os.system("docker logs core-aaa-syslog | grep "+filename+" | grep "+namespace)
-    os.system("docker logs core-aaa-redis | grep "+filename+" | grep "+namespace)
-    os.system("docker logs core-aaa-rabbitmq | grep "+filename+" | grep "+namespace)
-    os.system("docker logs core-rmq-es-connector | grep "+filename+" | grep "+namespace)
+def print_file_per_namespace(filename, namespace, cores):
+    for core in cores:
+        os.system("docker logs "+core+" | grep "+filename+" | grep "+namespace)
 
-def print_container(container):
-    os.system("docker logs core-aaa-syslog | grep "+container+"/")
-    os.system("docker logs core-aaa-redis | grep "+container+"/")
-    os.system("docker logs core-aaa-rabbitmq | grep "+container+"/")
-    os.system("docker logs core-rmq-es-connector | grep "+container+"/")
+def print_container(container, cores):
+    for core in cores:
+        os.system("docker logs "+core+" | grep "+container+"/")
 
-def print_image_containers(image):
-    os.system("docker logs core-aaa-syslog | grep "+image+"/")
-    os.system("docker logs core-aaa-redis | grep "+image+"/")
-    os.system("docker logs core-aaa-rabbitmq | grep "+image+"/")
-    os.system("docker logs core-rmq-es-connector | grep "+image+"/")
+def print_image_containers(image, cores):
+    for core in cores:
+        os.system("docker logs "+core+" | grep "+image+"/")
 
-def print_namespace(namespace):
-    os.system("docker logs core-aaa-syslog | grep "+namespace+"/")
-    os.system("docker logs core-aaa-redis | grep "+namespace+"/")
-    os.system("docker logs core-aaa-rabbitmq | grep "+namespace+"/")
-    os.system("docker logs core-rmq-es-connector | grep "+namespace+"/")
+def print_namespace(namespace, cores):
+    for core in cores:
+        os.system("docker logs "+core+" | grep "+namespace+"/")
 
-def print_file_log(filename):
-    os.system("docker logs core-aaa-syslog | grep "+filename)
-    os.system("docker logs core-aaa-redis | grep "+filename)
-    os.system("docker logs core-aaa-rabbitmq | grep "+filename)
-    os.system("docker logs core-rmq-es-connector | grep "+filename)
+def print_file_log(filename, cores):
+    for core in cores:
+        os.system("docker logs "+core+" | grep "+filename)
 
-def print_all_logs():
-    os.system("docker logs core-aaa-syslog")
-    os.system("docker logs core-aaa-redis")
-    os.system("docker logs core-aaa-rabbitmq")
-    os.system("docker logs core-rmq-es-connector")
+def print_all_logs(cores):
+    for core in cores:
+        os.system("docker logs "+core)
 
 def main():
     parser = set_parser()
