@@ -6,12 +6,15 @@ import sys
 from subprocess import check_output
 
 def url(service, service_type):
+    """ Retrieves urls for external configurations of core services """
     url_str = "not running"
+    locally_active = []
     try:
         config = ConfigParser.RawConfigParser()
         config.read("/var/lib/docker/data/templates/core.template")
-        # !! TODO check this before assuming it exists
-        locally_active = config.options("locally-active")
+        # Check if section exists in config, and if there are any options
+        if config.has_section("locally-active") and config.options("locally-active"):
+            locally_active = config.options("locally-active")
         local_off_set = False
         for s in locally_active:
             if s == service:
