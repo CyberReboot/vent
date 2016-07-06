@@ -9,7 +9,12 @@ import uuid
 from elasticsearch import Elasticsearch
 
 class RmqEs():
-    es = None
+    """
+    opens a connection to rabbitmq and receives messages based on the provided
+    binding keys and then takes those messages and sends them to an
+    elasticsearch index
+    """
+    es_conn = None
 
     def __init__(self):
         pass
@@ -30,7 +35,7 @@ class RmqEs():
 
                 result = channel.queue_declare(exclusive=True)
                 queue_name = result.method.queue
-                self.es = Elasticsearch(['elasticsearch'])
+                self.es_conn = Elasticsearch(['elasticsearch'])
                 wait = False
                 print "connected to rabbitmq..."
             except Exception as e:
@@ -55,7 +60,7 @@ class RmqEs():
             index = "hex_flow"
         try:
             doc = ast.literal_eval(body)
-            res = self.es.index(index=index, doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
+            res = self.es_conn.index(index=index, doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
             print " [x] "+str(datetime.datetime.utcnow())+" UTC {0!r}:{1!r}".format(method.routing_key, body)
         except Exception as e:
             pass
