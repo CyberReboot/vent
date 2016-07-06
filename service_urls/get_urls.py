@@ -6,6 +6,7 @@ import sys
 from subprocess import check_output
 
 def url(service, service_type):
+    """ Retrieves urls for external configurations of core services """
     url_str = "not running"
     locally_active = []
     try:
