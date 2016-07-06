@@ -89,30 +89,37 @@ def parse_args(args, parser):
             print_file_log(file, cores)
 
 def print_file_per_container(filename, container, cores):
+    """print logs for each container that processed each file"""
     for core in cores:
         os.system("docker logs"+core+" | grep "+filename+" | grep "+container)
 
 def print_file_per_namespace(filename, namespace, cores):
+    """proint logs for all containers in each namespace that processed each file"""
     for core in cores:
         os.system("docker logs "+core+" | grep "+filename+" | grep "+namespace)
 
 def print_container(container, cores):
+    """print logs for each container"""
     for core in cores:
         os.system("docker logs "+core+" | grep "+container+"/")
 
 def print_image_containers(image, cores):
+    """print logs for all container built from each container"""
     for core in cores:
         os.system("docker logs "+core+" | grep "+image+"/")
 
 def print_namespace(namespace, cores):
+    """print logs for all containers in each namespace"""
     for core in cores:
         os.system("docker logs "+core+" | grep "+namespace+"/")
 
 def print_file_log(filename, cores):
+    """print logs for each file"""
     for core in cores:
         os.system("docker logs "+core+" | grep "+filename)
 
 def print_all_logs(cores):
+    """print all logs"""
     for core in cores:
         os.system("docker logs "+core)
 
