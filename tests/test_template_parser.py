@@ -3,6 +3,7 @@ import pytest
 from .. import template_parser
 
 def test_read_template_types():
+    """ Testing reading from all templates """
     template_dir = "templates/"
     plugins_dir = "plugins/"
     template_parser.read_template_types("core", "", template_dir, plugins_dir)
@@ -12,6 +13,7 @@ def test_read_template_types():
     template_parser.read_template_types("all", "", template_dir, plugins_dir)
 
 def test_execute_template():
+    """ Testing executing template configurations """
     template_dir = "templates/"
     plugins_dir = "plugins/"
     info_name, service_schedule, tool_core, tool_dict, delay_sections = template_parser.read_template_types("core", "", template_dir, plugins_dir)
