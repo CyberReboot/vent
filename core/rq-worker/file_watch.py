@@ -1,4 +1,8 @@
 def pcap_queue(path):
+    """
+    Processes PCAP files that have been added from the rq-worker, and tells
+    vent-management to start plugins for the new file.
+    """
     import os
     import time
 
@@ -25,7 +29,7 @@ def pcap_queue(path):
         plugin_array = config.options("plugins")
         plugins = {}
         for plug in plugin_array:
-            if plug != "core" and plug != "visualization" and plug != "collectors":
+            if plug not in ["core", "visualization", "collectors"]:
                 plugins[plug] = config.get("plugins", plug)
 
         container_count = 0
@@ -50,6 +54,11 @@ def pcap_queue(path):
     return
 
 def template_queue(path):
+    """
+    Processes template files that have been added or changed or deleted from
+    the rq-worker, and tells vent-management to restart containers based on
+    changes made to the templates.
+    """
     import os
     import sys
     import time
