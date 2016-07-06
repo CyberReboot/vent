@@ -10,10 +10,10 @@ def test_read_template_types():
     template_parser.read_template_types("active", "", template_dir, plugins_dir)
     template_parser.read_template_types("passive", "", template_dir, plugins_dir)
     template_parser.read_template_types("visualization", "", template_dir, plugins_dir)
-
+    template_parser.read_template_types("all", "", template_dir, plugins_dir)
+    
     # Negative Test Cases
     invalid_dir = "tmp/"
-    template_parser.read_template_types("all", "", template_dir, plugins_dir)
     template_parser.read_template_types("all", "", invalid_dir, plugins_dir)
     template_parser.read_template_types("plugs", "", template_dir, plugins_dir)
     template_parser.read_template_types("plugs", "", invalid_dir, plugins_dir)
@@ -24,4 +24,4 @@ def test_execute_template():
     plugins_dir = "plugins/"
     info_name, service_schedule, tool_core, tool_dict, delay_sections = template_parser.read_template_types("core", "", template_dir, plugins_dir)
     template_parser.execute_template("core", "start", info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
-    template_parser.execute_template("invalid-template", info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
+    template_parser.execute_template("invalid-template", "start", info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
