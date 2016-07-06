@@ -26,19 +26,19 @@ class GZHandler(PatternMatchingEventHandler):
             # let jobs run for up to one day
             # let jobs be queued for up to 30 days
             if event.src_path.endswith(".template"):
-                result = q.enqueue('template_change.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
+                result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
         elif event.event_type == "modified":
             print event.event_type, event.src_path
             # let jobs run for up to one day
             # let jobs be queued for up to 30 days
             if event.src_path.endswith(".template"):
-                result = q.enqueue('template_change.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
+                result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
         elif event.event_type == "deleted":
             print event.event_type, event.src_path
             # let jobs run for up to one day
             # let jobs be queued for up to 30 days
             if event.src_path.endswith(".template"):
-                result = q.enqueue('template_change.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
+                result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
 
     def on_created(self, event):
         self.process(event)
