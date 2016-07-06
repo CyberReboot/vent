@@ -7,8 +7,12 @@ class Method():
     def __init__(self, routing_key=None):
         self.routing_key = routing_key
 
-def test_rmq_es_connector():
+def test_rmq_es_connector_connections():
+    """ tests the connections functions """
     rmq_es_connector.connections(False)
+
+def test_rmq_es_connector_callback():
+    """ tests the callback functions """
     rmq_es_connector.callback(None, None, None, None)
     rmq_es_connector.callback(None, None, None, [])
     method = Method(routing_key="syslog.foo")

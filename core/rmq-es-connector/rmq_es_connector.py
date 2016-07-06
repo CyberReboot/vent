@@ -11,6 +11,10 @@ from elasticsearch import Elasticsearch
 es = None
 
 def connections(wait):
+    """
+    wait for connections to both rabbitmq and elasticsearch to be made before
+    binding a routing key to a channel and sending messages to elasticsearch
+    """
     global es
     while wait:
         try:
@@ -30,7 +34,10 @@ def connections(wait):
     return channel, queue_name
 
 def callback(ch, method, properties, body):
-    # send to elasticsearch index
+    """
+    callback triggered on rabiitmq message received and sends it to
+    an elasticsearch index
+    """
     index = "pcap"
     if method.routing_key.split(".")[0] == 'syslog':
         body = body.strip().replace('"', '\"')
