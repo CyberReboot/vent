@@ -10,7 +10,6 @@ import tty
 
 from subprocess import call, check_output, PIPE, Popen
 
-# !! TODO temporary fix for tests
 try:
     screen = curses.initscr()
     screen.keypad(1)
