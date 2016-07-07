@@ -10,16 +10,17 @@ import tty
 
 from subprocess import call, check_output, PIPE, Popen
 
-# !! TODO tmeporary fix for tests
+# !! TODO temporary fix for tests
 try:
     screen = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
-    curses.start_color()
     screen.keypad(1)
-    curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
-    h = curses.color_pair(1)
-    n = curses.A_NORMAL
+    curses.noecho()
+    # Check if terminal can support color
+    if curses.has_colors():
+        curses.start_color()
+        curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
+        h = curses.color_pair(1)
+        n = curses.A_NORMAL
 except Exception as e:
     pass
 
@@ -54,7 +55,8 @@ class PathDirs:
 def update_images(path_dirs):
     images = []
     try:
-        images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
+        # Note - If grep finds nothing it returns exit status 1 (error). So, using grep first, awk second.
+        images = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
     except Exception as e:
         pass
     for image in images:
