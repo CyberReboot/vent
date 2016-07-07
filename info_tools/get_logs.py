@@ -29,7 +29,7 @@ def set_parser():
 def parse_args(args, parser):
     """parse arguments, calls correct print functions based on arguments"""
     #checks if each container with logs exist. Removes from list if it doesn't
-    cores = ["core-aaa-syslog", "core-aaa-redis", "core-aaa-rabbitmq", "core-rmq-es-connector"]
+    cores = ["core-aaa-syslog", "core-aaa-redis", "core-aaa-rabbitmq", "core-rmq-es-connector", "vent-management"]
     updated_cores = []
     for core in cores:
         exists = check_output("docker ps | grep "+core+" | tee", shell=True)
@@ -44,7 +44,7 @@ def parse_args(args, parser):
         #-a -n
         elif args.namespace == []:
             #get all namespaces
-            namespaces = check_output("docker images | grep -v REPOSITORY | awk \"{print \$1}\" | grep / | cut -f1 -d\"/\" | uniq;", shell=True).split("\n")
+            namespaces = check_output("docker images | grep -v REPOSITORY | awk \"{print \$1}\" | grep / | cut -f1 -d\"/\" | sort | uniq;", shell=True).split("\n")
             del(namespaces[-1])
             for namespace in namespaces:
                 print_namespace(namespace, cores)
@@ -73,8 +73,8 @@ def parse_args(args, parser):
         #-n NAMESPACE -f FILE
         if args.file != [] and args.file != None:
             for namespace in args.namespace:
-                for file in args.file:
-                    print_file_per_namespace(file, namespace, cores)
+                for f in args.file:
+                    print_file_per_namespace(f, namespace, cores)
         #-n NAMESPACE
         else:
             for name in args.namespace:
@@ -85,13 +85,13 @@ def parse_args(args, parser):
             print "get_logs: error: argument -f/--file: expected at least one argument"
             return
         #-f FILE
-        for file in args.file:
-            print_file_log(file, cores)
+        for f in args.file:
+            print_file_log(f, cores)
 
 def print_file_per_container(filename, container, cores):
     """print logs for each container that processed each file"""
     for core in cores:
-        os.system("docker logs"+core+" | grep "+filename+" | grep "+container+" | tee")
+        os.system("docker logs "+core+" | grep "+filename+" | grep "+container+" | tee")
 
 def print_file_per_namespace(filename, namespace, cores):
     """proint logs for all containers in each namespace that processed each file"""
@@ -101,6 +101,9 @@ def print_file_per_namespace(filename, namespace, cores):
 def print_container(container, cores):
     """print logs for each container"""
     for core in cores:
+        if container == core:
+            print container
+            os.system("docker logs "+container)
         os.system("docker logs "+core+" | grep "+container+"/ | tee")
 
 def print_image_containers(image, cores):
@@ -111,6 +114,8 @@ def print_image_containers(image, cores):
 def print_namespace(namespace, cores):
     """print logs for all containers in each namespace"""
     for core in cores:
+        if namespace == "core" and core != "vent-management":
+            os.system("docker logs "+core)
         os.system("docker logs "+core+" | grep "+namespace+"/ | tee")
 
 def print_file_log(filename, cores):

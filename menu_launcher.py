@@ -946,7 +946,7 @@ def build_menu_dict(path_dirs):
             { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh /data/build_images.sh --no-cache' },
           ]
         },
-        { 'title': "System Processes", 'type': MENU, 'subtitle': '',
+        { 'title': "System Commands", 'type': MENU, 'subtitle': '',
             'options': [
                 { 'title': "Logs", 'type': MENU, 'subtitle': '', 'command': '',
                     'options': [
