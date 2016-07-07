@@ -21,6 +21,7 @@ class RmqEs():
     queue_name = None
 
     def __init__(self, es_host="elasticsearch", rmq_host="rabbitmq"):
+        """ initialize host information """
         self.es_host = es_host
         self.rmq_host = rmq_host
 
@@ -82,6 +83,7 @@ class RmqEs():
                                     routing_key=binding_key)
 
     def consume(self): # pragma: no cover
+        """ start consuming rabbitmq messages """
         print ' [*] Waiting for logs. To exit press CTRL+C'
         self.channel.basic_consume(self.callback,
                               queue=self.queue_name,
