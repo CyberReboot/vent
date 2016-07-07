@@ -39,9 +39,9 @@ def test_update_images():
 
     # Add then Remove plugin & call update_images
     url = "https://github.com/CyberReboot/vent-plugins.git"
-    Env = test_env.TestEnv()
-    Env.add_plugin(path_dirs, url)
-    Env.remove_plugin(path_dirs, url)
+    env = test_env.TestEnv()
+    env.add_plugin(path_dirs, url)
+    env.remove_plugin(path_dirs, url)
     menu_launcher.update_images(path_dirs)
 
 

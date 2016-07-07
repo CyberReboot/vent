@@ -41,6 +41,10 @@ class TestEnv():
         plugin_parser.remove_plugins(path_dirs, url)
 
     def initconfigs(path_dirs, empty):
+        """
+        Initializes configs: either keeps existing configs & creates blanks if they don't exist or
+        creates dummy configs with populated values
+        """
         open(path_dirs.template_dir+"modes.template", "a+").close()
         open(path_dirs.template_dir+"core.template", "a+").close()
         open(path_dirs.template_dir+"visualization.template", "a+").close()
