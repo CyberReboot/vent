@@ -64,9 +64,9 @@ def get_container_menu(path_dirs):
     p['subtitle'] = 'Please select a container...'
     containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | awk \"{print \$1}\"", shell=True).split("\n")
     containers = filter(None, containers)
-    p['options'] = [ {'title': name, 'type': INFO2, 'command': '' } for name in containers ]
+    p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
     for d in p['options']:
-        d['command'] = command1+command2+d['title']+command3+d['title']+".log"
+        d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
     return p
 
 def get_namespace_menu(path_dirs):
@@ -80,9 +80,9 @@ def get_namespace_menu(path_dirs):
     p['subtitle'] = 'Please select a namespace...'
     namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | uniq", shell=True).split("\n")
     namespaces = filter(None, namespaces)
-    p['options'] = [ {'title': name, 'type': INFO2, 'command': '' } for name in namespaces ]
+    p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
     for d in p['options']:
-        d['command'] = command1+command2+d['title']+command3+d['title']+".log"
+        d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
     return p
 
 # Update images for removed plugins
@@ -849,11 +849,13 @@ def processmenu(path_dirs, menu, parent=None):
                 filename = get_param("Enter the name of the file to print logs")
                 curses.def_prog_mode()
                 os.system('reset')
+                os.system("clear")
                 screen.clear()
-                os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename)
-                confirm()
+                os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | tee /tmp/vent_logs/vent_file_"+filename+" | less")
                 screen.clear()
-                os.execl(sys.executable, sys.executable, *sys.argv)
+                curses.reset_prog_mode()
+                curses.curs_set(1)
+                curses.curs_set(0)
         elif menu['options'][getin]['type'] == MENU:
             if menu['options'][getin]['title'] == "Remove Plugins":
                 screen.clear()
@@ -949,7 +951,7 @@ def build_menu_dict(path_dirs):
                         {'title': "Containers", 'type': MENU, 'subtitle': 'Please select a container...', 'command': ''},
                         {'title': "Namespaces", 'type': MENU, 'subtitle': 'Please select a namespace...', 'command': ''},
                         {'title': "Files", 'type': INPUT, 'command': ''},
-                        {'title': "All", 'type': INFO2, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a'},
+                        {'title': "All", 'type': COMMAND, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
                     ]
                 },
                 { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
