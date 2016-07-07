@@ -14,12 +14,13 @@ try:
     screen = curses.initscr()
     screen.keypad(1)
     curses.noecho()
+    h = curses.A_BOLD
+    n = curses.A_NORMAL
     # Check if terminal can support color
     if curses.has_colors():
         curses.start_color()
         curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
         h = curses.color_pair(1)
-        n = curses.A_NORMAL
 except Exception as e:
     pass
 
