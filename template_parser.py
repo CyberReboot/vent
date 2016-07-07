@@ -138,101 +138,99 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                         service_schedule[template_type] = json.loads(config.get(section, option))
                     elif section == "instances":
                         instances = config.options(section)
-                    elif section == "locally-active":
-                        if config.get(section, option) == "off":
-                            external_overrides.append(option)
-                    elif section not in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"]:
-                        if not section in external_overrides:
-                            option_val = config.get(section, option)
+                    elif section == "locally-active" and config.get(section, option) == "off":
+                        external_overrides.append(option)
+                    elif section not in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"] and section not in external_overrides:
+                        option_val = config.get(section, option)
+                        try:
+                            option_val = int(option_val)
+                        except Exception as e:
+                            pass
+                        if option == 'data_path':
+                            if len(cmd) == 4:
+                                cmd.insert(1, option_val)
+                            else:
+                                cmd.append(option_val)
+                            d_path = 1
+                        elif option == 'site_path':
+                            if len(cmd) == 2:
+                                cmd.append("")
+                                cmd.append(option_val)
+                            else:
+                                cmd.append(option_val)
+                        elif option == 'delay':
                             try:
-                                option_val = int(option_val)
+                                delay_sections[section] = option_val
                             except Exception as e:
                                 pass
-                            if option == 'data_path':
-                                if len(cmd) == 4:
-                                    cmd.insert(1, option_val)
-                                else:
-                                    cmd.append(option_val)
-                                d_path = 1
-                            elif option == 'site_path':
-                                if len(cmd) == 2:
-                                    cmd.append("")
-                                    cmd.append(option_val)
-                                else:
-                                    cmd.append(option_val)
-                            elif option == 'delay':
+                        else:
+                            if option == "HostConfig":
+                                host_config_exists = True
                                 try:
-                                    delay_sections[section] = option_val
+                                    option_val = option_val.replace("true", "True")
+                                    option_val = option_val.replace("false", "False")
+                                    host_config = ast.literal_eval(option_val)
+                                    host_config_new = copy.deepcopy(host_config)
+                                    extra_hosts = []
+                                    host_config_new["RestartPolicy"] = { "Name": "always" }
+                                    if template_type not in ["visualization", "core", "active", "passive"]:
+                                        # add link to rabbitmq
+                                        if "Links" in host_config:
+                                            host_config_new["Links"].append("core-aaa-rabbitmq:rabbitmq")
+                                        else:
+                                            host_config_new["Links"] = ["core-aaa-rabbitmq:rabbitmq"]
+                                        # add files volume
+                                        if "Binds" in host_config:
+                                            host_config_new["Binds"].append("/files:/files:ro")
+                                        else:
+                                            host_config_new["Binds"] = ["/files:/files:ro"]
+                                    if "Links" in host_config:
+                                        for rec in host_config["Links"]:
+                                            r = rec.split(":")
+                                            r_name = r[1]
+                                            r_name_full = r[0].split("core-")
+                                            if len(r_name_full) > 1:
+                                                r_name_full = r_name_full[1]
+                                            else:
+                                                r_name_full = r_name_full[0]
+                                            for ext in external_overrides:
+                                                if r_name_full == ext:
+                                                    host_config_new["Links"].remove(rec)
+                                                    # add external_overrides to extrahosts
+                                                    if r_name_full+"_host" in external_options:
+                                                        try:
+                                                            extra_hosts.append(r_name+":"+core_config.get("external", r_name_full+"_host"))
+                                                            host_config_new["ExtraHosts"] = extra_hosts
+                                                        except Exception as e:
+                                                            pass
+                                                    else:
+                                                        print "no local "+r_name+" but an external one wasn't specified."
+                                        option_val = str(host_config_new).replace("'", '"')
+                                        if len(host_config_new["Links"]) == 0:
+                                            del host_config_new["Links"]
+                                    # add syslog, don't log rmq-es-connector as it will loop itself
+                                    if section not in ["rmq-es-connector", "aaa-syslog", "aaa-redis", "aaa-rabbitmq"]:
+                                        try:
+                                            syslog_host = "localhost"
+                                            for ext in external_overrides:
+                                                if "aaa_syslog" == ext:
+                                                    if "aaa_syslog_host" in external_options:
+                                                        try:
+                                                            syslog_host = core_config.get("external", "aaa_syslog_host")
+                                                        except Exception as e:
+                                                            pass
+                                                    else:
+                                                        print "no local syslog but an external one wasn't specified."
+                                            host_config_new["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
+                                            option_val = str(host_config_new).replace("'", '"')
+                                        except Exception as e:
+                                            pass
                                 except Exception as e:
                                     pass
-                            else:
-                                if option == "HostConfig":
-                                    host_config_exists = True
-                                    try:
-                                        option_val = option_val.replace("true", "True")
-                                        option_val = option_val.replace("false", "False")
-                                        host_config = ast.literal_eval(option_val)
-                                        host_config_new = copy.deepcopy(host_config)
-                                        extra_hosts = []
-                                        host_config_new["RestartPolicy"] = { "Name": "always" }
-                                        if template_type not in ["visualization", "core", "active", "passive"]:
-                                            # add link to rabbitmq
-                                            if "Links" in host_config:
-                                                host_config_new["Links"].append("core-aaa-rabbitmq:rabbitmq")
-                                            else:
-                                                host_config_new["Links"] = ["core-aaa-rabbitmq:rabbitmq"]
-                                            # add files volume
-                                            if "Binds" in host_config:
-                                                host_config_new["Binds"].append("/files:/files:ro")
-                                            else:
-                                                host_config_new["Binds"] = ["/files:/files:ro"]
-                                        if "Links" in host_config:
-                                            for rec in host_config["Links"]:
-                                                r = rec.split(":")
-                                                r_name = r[1]
-                                                r_name_full = r[0].split("core-")
-                                                if len(r_name_full) > 1:
-                                                    r_name_full = r_name_full[1]
-                                                else:
-                                                    r_name_full = r_name_full[0]
-                                                for ext in external_overrides:
-                                                    if r_name_full == ext:
-                                                        host_config_new["Links"].remove(rec)
-                                                        # add external_overrides to extrahosts
-                                                        if r_name_full+"_host" in external_options:
-                                                            try:
-                                                                extra_hosts.append(r_name+":"+core_config.get("external", r_name_full+"_host"))
-                                                                host_config_new["ExtraHosts"] = extra_hosts
-                                                            except Exception as e:
-                                                                pass
-                                                        else:
-                                                            print "no local "+r_name+" but an external one wasn't specified."
-                                            option_val = str(host_config_new).replace("'", '"')
-                                            if len(host_config_new["Links"]) == 0:
-                                                del host_config_new["Links"]
-                                        # add syslog, don't log rmq-es-connector as it will loop itself
-                                        if section not in ["rmq-es-connector", "aaa-syslog", "aaa-redis", "aaa-rabbitmq"]:
-                                            try:
-                                                syslog_host = "localhost"
-                                                for ext in external_overrides:
-                                                    if "aaa_syslog" == ext:
-                                                        if "aaa_syslog_host" in external_options:
-                                                            try:
-                                                                syslog_host = core_config.get("external", "aaa_syslog_host")
-                                                            except Exception as e:
-                                                                pass
-                                                        else:
-                                                            print "no local syslog but an external one wasn't specified."
-                                                host_config_new["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
-                                                option_val = str(host_config_new).replace("'", '"')
-                                            except Exception as e:
-                                                pass
-                                    except Exception as e:
-                                        pass
-                                option_val = option_val.replace("True", "true")
-                                option_val = option_val.replace("False", "false")
-                                if option_val != "{}":
-                                    instructions[option] = option_val
+                            option_val = option_val.replace("True", "true")
+                            option_val = option_val.replace("False", "false")
+                            if option_val != "{}":
+                                instructions[option] = option_val
                 if section not in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"]:
                     if template_type not in ["visualization", "core", "active", "passive"]:
                         # add tty/interactive
