@@ -25,8 +25,13 @@ def pcap_queue(path):
     template_dir = "/var/lib/docker/data/templates/"
     plugins_dir = "/var/lib/docker/data/plugins/"
     try:
-        config.read(template_dir+'modes.template')
-        plugin_array = config.options("plugins")
+        # Check file exists
+        if os.path.isfile(template_dir+'modes.template'):
+            config.read(template_dir+'modes.template')
+        plugin_array = []
+        # Check section exists and has options
+        if config.has_section("plugins") and config.options("plugins"):
+            plugin_array = config.options("plugins")
         plugins = {}
         for plug in plugin_array:
             if plug not in ["core", "visualization", "collectors"]:
@@ -35,8 +40,10 @@ def pcap_queue(path):
         container_count = 0
         container_max = 50
         try:
-            config.read(template_dir+'core.template')
-            container_max = int(config.get("active-containers", "count"))
+            if os.path.isfile(template_dir+'core.template'):
+                config.read(template_dir+'core.template')
+            if config.has_section("active-containers") and config.has_option("active-containers", "count"):
+                container_max = int(config.get("active-containers", "count"))
         except Exception as e:
             pass
         for plugin in plugins:

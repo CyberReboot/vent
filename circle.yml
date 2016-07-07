@@ -1,6 +1,9 @@
 machine:
   services:
     - docker
+    - elasticsearch
+    - rabbitmq-server
+    - redis
 dependencies:
   pre:
     # necessary to fix curses import
