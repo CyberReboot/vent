@@ -845,7 +845,7 @@ def processmenu(path_dirs, menu, parent=None):
                 confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
-            if menu['options'][getin]['title'] == "Files":
+            elif menu['options'][getin]['title'] == "Files":
                 filename = get_param("Enter the name of the file to print logs")
                 curses.def_prog_mode()
                 os.system('reset')
