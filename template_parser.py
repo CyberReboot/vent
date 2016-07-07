@@ -34,7 +34,7 @@ def execute_template(template_type, template_execution, info_name, service_sched
     return
 
 def read_template_types(template_type, container_cmd, template_dir, plugins_dir):
-    # read in templates for plugins, core, and visualization
+    """ read in templates for plugins, core, and visualization """
     template_path = template_dir+template_type+'.template'
     if template_type in ["active", "passive"]:
         template_path = template_dir+'collectors.template'
