@@ -2,6 +2,7 @@ import os
 import pytest
 
 from .. import menu_launcher
+import test_env
 
 class PathDirs:
     """ Global path directories for parsing templates """
@@ -36,6 +37,14 @@ def test_update_images():
     path_dirs = PathDirs()
     menu_launcher.update_images(path_dirs)
 
+    # Add then Remove plugin & call update_images
+    url = "https://github.com/CyberReboot/vent-plugins.git"
+    Env = test_env.TestEnv()
+    Env.add_plugin(path_dirs, url)
+    Env.remove_plugin(path_dirs, url)
+    menu_launcher.update_images(path_dirs)
+
+
 def test_get_mode_config():
     """ Test get_mode_config function with valid and invalid directories """
     path_dirs = PathDirs()
@@ -46,7 +55,7 @@ def test_get_mode_config():
 def test_get_core_config():
     """ Test get_core_config function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/tmp/")
+    invalid_dirs = PathDirs(base_dir="/tmp/", template_dir="foo")
     menu_launcher.get_core_config(path_dirs)
     menu_launcher.get_core_config(invalid_dirs)
 
@@ -67,6 +76,7 @@ def test_get_installed_collectors():
     menu_launcher.get_installed_collectors(invalid_dirs, "all")
     menu_launcher.get_installed_collectors(invalid_dirs, "passive")
     menu_launcher.get_installed_collectors(invalid_dirs, "active")
+    menu_launcher.get_installed_collectors(path_dirs, "invalidtype")
 
 def test_get_installed_vis():
     """ Test get_installed_vis function with valid and invalid directories """
