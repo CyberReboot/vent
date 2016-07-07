@@ -42,7 +42,6 @@ def pcap_queue(path):
         try:
             if os.path.isfile(template_dir+'core.template'):
                 config.read(template_dir+'core.template')
-            container_max = None
             if config.has_section("active-containers") and config.has_option("active-containers", "count"):
                 container_max = int(config.get("active-containers", "count"))
         except Exception as e:
