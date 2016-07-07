@@ -32,7 +32,7 @@ def parse_args(args, parser):
     cores = ["core-aaa-syslog", "core-aaa-redis", "core-aaa-rabbitmq", "core-rmq-es-connector"]
     updated_cores = []
     for core in cores:
-        exists = check_output("docker ps | grep "+core+" || /bin/true", shell=True)
+        exists = check_output("docker ps | grep "+core+" | tee", shell=True)
         if core in exists:
             updated_cores.append(core)
     cores = updated_cores
@@ -91,32 +91,32 @@ def parse_args(args, parser):
 def print_file_per_container(filename, container, cores):
     """print logs for each container that processed each file"""
     for core in cores:
-        os.system("docker logs"+core+" | grep "+filename+" | grep "+container+" || /bin/true")
+        os.system("docker logs"+core+" | grep "+filename+" | grep "+container+" | tee")
 
 def print_file_per_namespace(filename, namespace, cores):
     """proint logs for all containers in each namespace that processed each file"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+filename+" | grep "+namespace+" || /bin/true")
+        os.system("docker logs "+core+" | grep "+filename+" | grep "+namespace+" | tee")
 
 def print_container(container, cores):
     """print logs for each container"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+container+"/ || /bin/true")
+        os.system("docker logs "+core+" | grep "+container+"/ | tee")
 
 def print_image_containers(image, cores):
     """print logs for all container built from each container"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+image+"/ || /bin/true")
+        os.system("docker logs "+core+" | grep "+image+"/ | tee")
 
 def print_namespace(namespace, cores):
     """print logs for all containers in each namespace"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+namespace+"/ || /bin/true")
+        os.system("docker logs "+core+" | grep "+namespace+"/ | tee")
 
 def print_file_log(filename, cores):
     """print logs for each file"""
     for core in cores:
-        os.system("docker logs "+core+" | grep "+filename+" || /bin/true")
+        os.system("docker logs "+core+" | grep "+filename+" | tee")
 
 def print_all_logs(cores):
     """print all logs"""

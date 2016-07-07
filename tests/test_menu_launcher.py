@@ -12,7 +12,8 @@ class PathDirs:
                  plugins_dir="plugins/",
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
-                 vis_dir="visualization"):
+                 vis_dir="visualization",
+                 info_dir="info_tools/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         if not os.path.exists(self.collectors_dir):
@@ -26,6 +27,7 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
         if not os.path.exists(self.vis_dir):
             os.makedirs(self.vis_dir)
+        self.info_dir=info_dir
 
 def test_pathdirs():
     """ Gets path directory class from menu_launcher """
@@ -150,3 +152,13 @@ def test_build_menu_dict():
     """ Test build_menu_dict """
     path_dirs = PathDirs()
     menu_launcher.build_menu_dict(path_dirs)
+
+def test_get_container_menu():
+    """test get_container_menu"""
+    path_dirs = PathDirs()
+    menu_launcher.get_container_menu(path_dirs)
+
+def test_get_namespace_menu():
+    """test get_namespace_menu"""
+    path_dirs = PathDirs()
+    menu_launcher.get_namespace_menu(path_dirs)
