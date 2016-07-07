@@ -15,9 +15,14 @@ class RmqEs():
     elasticsearch index
     """
     es_conn = None
+    es_host = None
+    rmq_host = None
+    channel = None
+    queue_name = None
 
-    def __init__(self):
-        pass
+    def __init__(self, es_host="elasticsearch", rmq_host="rabbitmq"):
+        self.es_host = es_host
+        self.rmq_host = rmq_host
 
     def connections(self, wait):
         """
@@ -25,24 +30,21 @@ class RmqEs():
         before binding a routing key to a channel and sending messages to
         elasticsearch
         """
-        channel = None
-        queue_name = None
         while wait:
             try:
-                connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq'))
-                channel = connection.channel()
-                channel.exchange_declare(exchange='topic_recs', type='topic')
+                connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.rmq_host))
+                self.channel = connection.channel()
+                self.channel.exchange_declare(exchange='topic_recs', type='topic')
 
-                result = channel.queue_declare(exclusive=True)
-                queue_name = result.method.queue
-                self.es_conn = Elasticsearch(['elasticsearch'])
+                result = self.channel.queue_declare(exclusive=True)
+                self.queue_name = result.method.queue
+                self.es_conn = Elasticsearch([self.es_host])
                 wait = False
                 print "connected to rabbitmq..."
             except Exception as e:
                 print "waiting for connection to rabbitmq..."
                 time.sleep(2)
                 wait = True
-        return channel, queue_name
 
     def callback(self, ch, method, properties, body):
         """
@@ -67,7 +69,7 @@ class RmqEs():
 
     def start(self):
         """ start the channel listener and start consuming messages """
-        channel, queue_name = self.connections(True)
+        self.connections(True)
 
         binding_keys = sys.argv[1:]
         if not binding_keys:
@@ -75,16 +77,18 @@ class RmqEs():
             sys.exit(1)
 
         for binding_key in binding_keys:
-            channel.queue_bind(exchange='topic_recs',
-                               queue=queue_name,
-                               routing_key=binding_key)
+            self.channel.queue_bind(exchange='topic_recs',
+                                    queue=self.queue_name,
+                                    routing_key=binding_key)
 
+    def consume(self): # pragma: no cover
         print ' [*] Waiting for logs. To exit press CTRL+C'
-        channel.basic_consume(self.callback,
-                              queue=queue_name,
+        self.channel.basic_consume(self.callback,
+                              queue=self.queue_name,
                               no_ack=True)
-        channel.start_consuming()
+        self.channel.start_consuming()
 
 if __name__ == "__main__": # pragma: no cover
     rmq_es = RmqEs()
     rmq_es.start()
+    rmq_es.consume()
