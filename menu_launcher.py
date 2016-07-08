@@ -117,8 +117,8 @@ def getch():
     except Exception as e:
         pass
 
-# Will wait for user input before clearing stdout
 def confirm():
+    """wait for user input before clearing stdout"""
     os.system("echo")
     os.system("echo")
     os.system("echo ----------------------------")
