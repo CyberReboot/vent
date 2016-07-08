@@ -24,9 +24,10 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
 
 """
-add_plugins(plugin_url)
+add_plugins(path_dirs, plugin_url)
 
-PARAMETERS: plugin_url - a https link to a git repository as a string
+PARAMETERS: path_dirs - a PathDirs object which stores info about filesystem for plugin addition/removal
+            plugin_url - a https link to a git repository as a string
 
 DESCRIPTION: download plugins from plugin_url into a plugin_repos directory,
 copying files from plugin_repos to the correct location in local Vent filesystem.
@@ -77,9 +78,9 @@ def add_plugins(path_dirs, plugin_url):
                         # makes sure that every namespace has a corresponding template file
                         namespace = recdir.split("/")[0]
                         if not os.path.isfile(path_dirs.plugin_repos+"/"+plugin_name+"/templates/"+namespace+".template"):
+                            print "Warning! Plugin namespace has no template. Not installing "+namespace
                             shutil.rmtree(path_dirs.plugins_dir+namespace)
                             shutil.rmtree(path_dirs.plugin_repos+"/plugins/"+namespace)
-                            print "Warning! Plugin namespace has no template. Not installing "+namespace
                 elif subdir.startswith(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/"):
                     recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/")[1]
                     # only go one level deep, and copy recursively below that
@@ -158,14 +159,15 @@ def add_plugins(path_dirs, plugin_url):
                     return
         #resources installed correctly. Building...
         os.system("/bin/sh /data/build_images.sh")
-        return  
+        return
     except Exception as e:
         pass
 
 """
 Name: remove_plugins(plugin_url)
 
-Parameters: plugin_url - a https link to a git repository as a string
+Parameters: path_dirs - a PathDirs object which stores info about filesystem for plugin addition/removal
+            plugin_url - a https link to a git repository as a string
 
 Description: Find plugin repo in plugin_repos directory based on name in plugin_url.
 Delete all elements of the plugin in local Vent filesystem, update templates to reflect changes,
@@ -187,11 +189,11 @@ def remove_plugins(path_dirs, plugin_url):
         for r_sub in repo_subdirs:
             if plugin_name+"/core/" in r_sub:
                 sys_subdirs = [x[0] for x in os.walk(path_dirs.core_dir)]
-                repo_dir = r_sub.split(plugin_name+"/core/")[1]
+                repo_dir = r_sub.split(plugin_name+"/core/")[-1]
                 namespace = "core"
             elif plugin_name+"/plugins/" in r_sub:
                 sys_subdirs = [x[0] for x in os.walk(path_dirs.base_dir + "plugins")]
-                repo_dir = r_sub.split(plugin_name+"/plugins/")[1]
+                repo_dir = r_sub.split(plugin_name+"/plugins/")[-1]
                 element = repo_dir.split("/")
                 if len(element) == 1:
                     #no subdirectories - no plugins to be deleted in namespace. -> Delete namespace
@@ -235,7 +237,7 @@ def remove_plugins(path_dirs, plugin_url):
                             os.remove(path_dirs.vis_dir+"/"+file)
                     continue
                 sys_subdirs = [x[0] for x in os.walk(path_dirs.vis_dir + "/")]
-                repo_dir = r_sub.split(plugin_name+"/visualization/")[1]
+                repo_dir = r_sub.split(plugin_name+"/visualization/")[-1]
                 namespace = "visualization"
             elif plugin_name+"/collectors/" in r_sub:
                 names = os.listdir(path_dirs.collectors_dir)
@@ -251,7 +253,7 @@ def remove_plugins(path_dirs, plugin_url):
                             os.remove(path_dirs.collectors_dir+"/"+file)
                     continue
                 sys_subdirs = [x[0] for x in os.walk(path_dirs.collectors_dir + "/")]
-                repo_dir = r_sub.split(plugin_name+"/collectors/")[1]
+                repo_dir = r_sub.split(plugin_name+"/collectors/")[-1]
                 namespace = "collectors"
             else:
                 continue
@@ -265,10 +267,11 @@ def remove_plugins(path_dirs, plugin_url):
                         config.remove_section(repo_dir.split("/")[0])
                         with open(path_dirs.template_dir + namespace + ".template", 'w') as configfile:
                             config.write(configfile)  
-                    config.read(path_dirs.template_dir + "modes.template")
-                    config.remove_option("plugins", namespace)
-                    with open(path_dirs.template_dir + "modes.template", 'w') as configfile:
-                        config.write(configfile)
+                        config.read(path_dirs.template_dir + "modes.template")
+                        config.remove_option("plugins", namespace)
+                        with open(path_dirs.template_dir + "modes.template", 'w') as configfile:
+                            config.write(configfile)
+                        break
         #remove git repo once done    
         shutil.rmtree(path_dirs.plugin_repos+"/"+plugin_name)
         print "Successfully removed Plugin: "+plugin_name

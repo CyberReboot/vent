@@ -136,5 +136,5 @@ def main():
         sys.exit(1)
     parse_args(parser.parse_args(), parser)
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     main()
