@@ -11,7 +11,7 @@ def test_read_template_types():
     template_parser.read_template_types("passive", "", template_dir, plugins_dir)
     template_parser.read_template_types("visualization", "", template_dir, plugins_dir)
     template_parser.read_template_types("all", "", template_dir, plugins_dir)
-    template_parser.read_template_types("namespace", "", template_dir, plugins_dir)
+    template_parser.read_template_types("foo", "", template_dir, plugins_dir)
 
     # Negative Test Cases
     invalid_dir = "tmp/"
