@@ -5,11 +5,11 @@ from ..service_urls import get_urls
 
 def test_url():
     """ Tests get_urls """
-    get_urls.url(get_url.PathDirs(), "elasticsearch", "head")
-    get_urls.url(get_url.PathDirs(), "elasticsearch", "marvel")
-    get_urls.url(get_url.PathDirs(), "aaa-rabbitmq", "")
-    get_urls.url(get_url.PathDirs(), "rq-dashboard","")
-    get_urls.url(get_url.PathDirs(), "aaa-syslog", "")
+    get_urls.url(get_urls.PathDirs(), "elasticsearch", "head")
+    get_urls.url(get_urls.PathDirs(), "elasticsearch", "marvel")
+    get_urls.url(get_urls.PathDirs(), "aaa-rabbitmq", "")
+    get_urls.url(get_urls.PathDirs(), "rq-dashboard","")
+    get_urls.url(get_urls.PathDirs(), "aaa-syslog", "")
     path_dirs = get_urls.PathDirs(base_dir=os.getcwd()+"/")
 
     filedata = None
