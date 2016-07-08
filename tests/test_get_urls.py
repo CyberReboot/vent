@@ -15,6 +15,20 @@ def test_url():
     filedata = None
     with open(path_dirs.template_dir + 'core.template', 'r') as f:
         filedata = f.read()
+    filedata = filedata.replace('#elasticsearch', 'elasticsearch')
+    filedata = filedata.replace('#aaa-rabbitmq', 'aaa-rabbitmq')
+    filedata = filedata.replace('#aaa-syslog', 'aaa-syslog')
+    with open(path_dirs.template_dir + 'core.template', 'w') as f:
+        f.write(filedata)
+    get_urls.url(path_dirs, "elasticsearch", "head")
+    get_urls.url(path_dirs, "elasticsearch", "marvel")
+    get_urls.url(path_dirs, "aaa-rabbitmq", "")
+    get_urls.url(path_dirs, "rq-dashboard","")
+    get_urls.url(path_dirs, "aaa-syslog", "")
+
+    filedata = None
+    with open(path_dirs.template_dir + 'core.template', 'r') as f:
+        filedata = f.read()
     filedata = filedata.replace('off', 'on')
     filedata = filedata.replace('#elasticsearch', 'elasticsearch')
     filedata = filedata.replace('#aaa-rabbitmq', 'aaa-rabbitmq')
