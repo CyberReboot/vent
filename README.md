@@ -5,10 +5,10 @@ vent
 
 [![CircleCI](https://circleci.com/gh/CyberReboot/vent.svg?style=shield)](https://circleci.com/gh/CyberReboot/vent)
 [![Documentation Status](https://readthedocs.org/projects/vent/badge/?version=latest)](http://vent.readthedocs.io/en/latest/?badge=latest)
-[![GitHub release](https://img.shields.io/github/release/cyberreboot/vent.svg?maxAge=2592000)]()
+[![GitHub release](https://img.shields.io/github/release/cyberreboot/vent.svg?maxAge=2592000)](https://github.com/CyberReboot/vent/releases)
 [![codecov](https://codecov.io/gh/CyberReboot/vent/branch/master/graph/badge.svg)](https://codecov.io/gh/CyberReboot/vent)
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/ffe3b2d6a9254b98a12de6b3273676b3/badge.svg)](https://www.quantifiedcode.com/app/project/ffe3b2d6a9254b98a12de6b3273676b3)
-[![Github Releases](https://img.shields.io/github/downloads/cyberreboot/vent/latest/total.svg?maxAge=2592000)]()
+[![Github Releases](https://img.shields.io/github/downloads/cyberreboot/vent/latest/total.svg?maxAge=2592000)](https://github.com/CyberReboot/vent/releases)
 
 
 download pre-compiled ISO
