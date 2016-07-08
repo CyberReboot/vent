@@ -277,7 +277,6 @@ def remove_plugins(path_dirs, plugin_url):
         print "Successfully removed Plugin: "+plugin_name
 
     except Exception as e:
-        print sys.exc_info()
         pass
 
 if __name__ == "__main__": # pragma: no cover
