@@ -10,16 +10,17 @@ import tty
 
 from subprocess import call, check_output, PIPE, Popen
 
-# !! TODO tmeporary fix for tests
 try:
     screen = curses.initscr()
-    curses.noecho()
-    curses.cbreak()
-    curses.start_color()
     screen.keypad(1)
-    curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
-    h = curses.color_pair(1)
+    curses.noecho()
+    h = curses.A_BOLD
     n = curses.A_NORMAL
+    # Check if terminal can support color
+    if curses.has_colors():
+        curses.start_color()
+        curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
+        h = curses.color_pair(1)
 except Exception as e:
     pass
 
@@ -41,7 +42,9 @@ class PathDirs:
                  plugins_dir="plugins/",
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
-                 vis_dir="visualization"):
+                 vis_dir="visualization",
+                 info_dir="/data/info_tools/"
+                 ):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         self.core_dir = base_dir + core_dir
@@ -49,12 +52,46 @@ class PathDirs:
         self.plugin_repos = base_dir + plugin_repos
         self.template_dir = base_dir + template_dir
         self.vis_dir = base_dir + vis_dir
+        self.info_dir = info_dir
+
+def get_container_menu(path_dirs):
+    """get a list of containers, returns a menu with containers as options"""
+    p = {}
+    p['type'] = MENU
+    command1 = "if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi; "
+    command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -c "
+    command3 = " | tee /tmp/vent_logs/vent_container_"
+    p['title'] = 'Container Logs'
+    p['subtitle'] = 'Please select a container...'
+    containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | awk \"{print \$1}\"", shell=True).split("\n")
+    containers = filter(None, containers)
+    p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
+    for d in p['options']:
+        d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+    return p
+
+def get_namespace_menu(path_dirs):
+    """get a list of namespaces, returns a menu with namespaces as options"""
+    p = {}
+    p['type'] = MENU
+    command1 = "if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs;fi; "
+    command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -n "
+    command3 = " | tee /tmp/vent_logs/vent_namespace_"
+    p['title'] = 'Namespace Logs'
+    p['subtitle'] = 'Please select a namespace...'
+    namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | uniq", shell=True).split("\n")
+    namespaces = filter(None, namespaces)
+    p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
+    for d in p['options']:
+        d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+    return p
 
 # Update images for removed plugins
 def update_images(path_dirs):
     images = []
     try:
-        images = check_output(" docker images | awk \"{print \$1}\" | grep / ", shell=True).split("\n")
+        # Note - If grep finds nothing it returns exit status 1 (error). So, using grep first, awk second.
+        images = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
     except Exception as e:
         pass
     for image in images:
@@ -810,6 +847,17 @@ def processmenu(path_dirs, menu, parent=None):
                 confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
+            elif menu['options'][getin]['title'] == "Files":
+                filename = get_param("Enter the name of the file to print logs")
+                curses.def_prog_mode()
+                os.system('reset')
+                os.system("clear")
+                screen.clear()
+                os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | tee /tmp/vent_logs/vent_file_"+filename+" | less")
+                screen.clear()
+                curses.reset_prog_mode()
+                curses.curs_set(1)
+                curses.curs_set(0)
         elif menu['options'][getin]['type'] == MENU:
             if menu['options'][getin]['title'] == "Remove Plugins":
                 screen.clear()
@@ -830,6 +878,16 @@ def processmenu(path_dirs, menu, parent=None):
                 screen.clear()
                 plugins = get_plugin_status(path_dirs)
                 processmenu(path_dirs, plugins, menu)
+                screen.clear()
+            elif menu['options'][getin]['title'] == "Containers":
+                screen.clear()
+                containers = get_container_menu(path_dirs)
+                processmenu(path_dirs, containers, menu)
+                screen.clear()
+            elif menu['options'][getin]['title'] == "Namespaces":
+                screen.clear()
+                namespaces = get_namespace_menu(path_dirs)
+                processmenu(path_dirs, namespaces, menu)
                 screen.clear()
             else:
                 screen.clear()
@@ -888,10 +946,22 @@ def build_menu_dict(path_dirs):
             { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh /data/build_images.sh --no-cache' },
           ]
         },
+        { 'title': "System Commands", 'type': MENU, 'subtitle': '',
+            'options': [
+                { 'title': "Logs", 'type': MENU, 'subtitle': '', 'command': '',
+                    'options': [
+                        {'title': "Containers", 'type': MENU, 'subtitle': 'Please select a container...', 'command': ''},
+                        {'title': "Namespaces", 'type': MENU, 'subtitle': 'Please select a namespace...', 'command': ''},
+                        {'title': "Files", 'type': INPUT, 'command': ''},
+                        {'title': "All", 'type': COMMAND, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
+                    ]
+                },
+                { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
+                { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
+                { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
+            ]
+        },
         { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
-        { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
-        { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
-        { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
       ]
     }
     return menu_data
