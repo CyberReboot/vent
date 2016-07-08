@@ -119,6 +119,9 @@ def getch():
 
 # Will wait for user input before clearing stdout
 def confirm():
+    os.system("echo")
+    os.system("echo")
+    os.system("echo ----------------------------")
     os.system("echo Operation complete. Press any key to continue...")
     while getch():
         break
