@@ -1,6 +1,7 @@
 import os
 import pytest
 import subprocess
+import time
 
 import file_watch
 
@@ -13,6 +14,9 @@ def test_settings():
 def test_pcap_queue():
     """ Tests simulation of new pcap """
     os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
+    os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
+    os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
+    time.sleep(5)
     file_watch.pcap_queue("/tmp")
     file_watch.pcap_queue("/dev/null")
 
