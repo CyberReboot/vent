@@ -133,6 +133,8 @@ def get_mode_config(path_dirs):
     modes = {}
     try:
         config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        config.optionxform=str
         config.read(path_dirs.template_dir+'modes.template')
         # Check if any runtime configurations
         if config.has_section("plugins"):
@@ -154,6 +156,8 @@ def get_core_config(path_dirs):
     cores = {}
     try:
         config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        config.optionxform=str
         config.read(path_dirs.template_dir+'core.template')
         passive = None
         active = None
@@ -612,6 +616,8 @@ def run_plugins(path_dirs, action):
     modes = []
     try:
         config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        config.optionxform=str
         config.read(path_dirs.template_dir+'modes.template')
         plugin_array = config.options("plugins")
         plugins = {}
@@ -623,6 +629,8 @@ def run_plugins(path_dirs, action):
                 p = {}
                 try:
                     config = ConfigParser.RawConfigParser()
+                    # needed to preserve case sensitive options
+                    config.optionxform=str
                     config.read(path_dirs.template_dir+plugin+'.template')
                     plugin_name = config.get("info", "name")
                     p['title'] = plugin_name
@@ -634,6 +642,8 @@ def run_plugins(path_dirs, action):
                     pass
         try:
             config = ConfigParser.RawConfigParser()
+            # needed to preserve case sensitive options
+            config.optionxform=str
             config.read(path_dirs.template_dir+'core.template')
             try:
                 passive = config.get("local-collection", "passive")

@@ -109,8 +109,12 @@ def add_plugins(path_dirs, plugin_url):
                                 shutil.copyfile(subdir+"/"+filename, dest+filename)
                             elif filename == "core.template":
                                 read_config = ConfigParser.RawConfigParser()
+                                # needed to preserve case sensitive options
+                                read_config.optionxform=str
                                 read_config.read(path_dirs.template_dir + 'core.template')
                                 write_config = ConfigParser.RawConfigParser()
+                                # needed to preserve case sensitive options
+                                write_config.optionxform=str
                                 write_config.read(subdir+"/"+filename)
                                 write_sections = write_config.sections()
                                 for section in write_sections:
@@ -138,6 +142,8 @@ def add_plugins(path_dirs, plugin_url):
         if check_modes:
             files = [x[2] for x in os.walk(path_dirs.base_dir + "templates")][0]
             config = ConfigParser.RawConfigParser()
+            # needed to preserve case sensitive options
+            config.optionxform=str
             config.read(path_dirs.template_dir + 'modes.template')
             plugin_array = config.options("plugins")
             plugins = {}
@@ -199,6 +205,8 @@ def remove_plugins(path_dirs, plugin_url):
                     #no subdirectories - no plugins to be deleted in namespace. -> Delete namespace
                     namespace = element[0]
                     config = ConfigParser.RawConfigParser()
+                    # needed to preserve case sensitive options
+                    config.optionxform=str
                     for dirpath, dirnames, files in os.walk(path_dirs.plugins_dir + namespace):
                         if not dirnames:
                             os.remove(path_dirs.template_dir + namespace + ".template")
@@ -216,6 +224,8 @@ def remove_plugins(path_dirs, plugin_url):
                         for s_sub in sys_subdirs:
                             if element in s_sub:
                                 config = ConfigParser.RawConfigParser()
+                                # needed to preserve case sensitive options
+                                config.optionxform=str
                                 config.read(path_dirs.template_dir + namespace + ".template")
                                 config.remove_section(plugin)
                                 with open(path_dirs.template_dir + namespace + ".template", 'w') as configfile:
@@ -262,6 +272,8 @@ def remove_plugins(path_dirs, plugin_url):
                 if repo_dir in s_sub:
                     shutil.rmtree(s_sub)
                     config = ConfigParser.RawConfigParser()
+                    # needed to preserve case sensitive options
+                    config.optionxform=str
                     if os.path.exists(path_dirs.template_dir + namespace + ".template"):
                         config.read(path_dirs.template_dir + namespace + ".template")
                         config.remove_section(repo_dir.split("/")[0])

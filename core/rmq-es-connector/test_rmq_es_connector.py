@@ -2,6 +2,7 @@ import pytest
 
 import rmq_es_connector
 
+"""
 class Method():
     """ create mock method object """
     routing_key = None
@@ -35,3 +36,4 @@ def test_rmq_es_connector_start():
     """ tests the start function """
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
     rmq_es.start()
+"""
