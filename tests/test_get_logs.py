@@ -15,7 +15,7 @@ def test_no_args():
     """ tests get_logs with no arguments """
     parser = get_logs.set_parser()
     os.system('docker run --name core-aaa-syslog -d alpine:latest /bin/sh -c "while true; do echo hello world; sleep 1; done"')
-    os.sysmte('docker commit core-aaa-syslog core/aaa-syslog')
+    os.system('docker commit core-aaa-syslog core/aaa-syslog')
     get_logs.parse_args(parser.parse_args([]), parser)
 
 def test_all_flag():
