@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from .. import template_parser
@@ -11,6 +12,19 @@ def test_read_template_types():
     template_parser.read_template_types("passive", "", template_dir, plugins_dir)
     template_parser.read_template_types("visualization", "", template_dir, plugins_dir)
     template_parser.read_template_types("all", "", template_dir, plugins_dir)
+
+    os.system("touch templates/foo.template")
+    os.system('echo "[bar]" >> templates/foo.template"')
+    os.system('echo "HostConfig = {\"PublishAllPorts\": true}" >> templates/foo.template"')
+    os.system("mkdir plugins/foo")
+    os.system("mkdir plugins/foo/bar")
+    os.system("mkdir plugins/foo/baz")
+    template_parser.read_template_types("foo", "", template_dir, plugins_dir)
+    os.system("cp templates/modes.template modes.backup")
+    os.system('echo "foo = all" >> templates/modes.template')
+    template_parser.read_template_types("foo", "", template_dir, plugins_dir)
+    os.system("cp modes.backup templates/modes.template")
+    os.system('echo "foo = bar,baz" >> templates/modes.template')
     template_parser.read_template_types("foo", "", template_dir, plugins_dir)
 
     # Negative Test Cases

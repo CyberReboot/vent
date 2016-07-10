@@ -80,12 +80,15 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
     try:
         delay_sections = {}
         if template_type != "all":
-            with open(template_path): pass
-            config = ConfigParser.RawConfigParser()
-            # needed to preserve case sensitive options
-            config.optionxform=str
-            config.read(template_path)
-            sections = config.sections()
+            try:
+                with open(template_path): pass
+                config = ConfigParser.RawConfigParser()
+                # needed to preserve case sensitive options
+                config.optionxform=str
+                config.read(template_path)
+                sections = config.sections()
+            except Exception as e:
+                sections = []
             external_overrides = []
             external_hosts = {}
             instances = []
