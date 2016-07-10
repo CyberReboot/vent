@@ -132,12 +132,10 @@ def main(args):
     parser = set_parser()
     #no args provided, display help text
     if len(args) == 1:
-        try:
-            parser.print_help()
-        except SystemExit:
-            pass
+        parser.print_help()
     else:
         parse_args(parser.parse_args(), parser)
+    return
 
 if __name__ == "__main__": # pragma: no cover
     args = sys.argv
