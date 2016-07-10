@@ -54,5 +54,7 @@ def test_file_flag():
 def test_main():
     """ tests the main function """
     get_logs.main(['get_logs.py'])
+    tmp = sys.argv
     sys.argv = ['get_logs.py', '-a']
     get_logs.main(['get_logs.py', '-a'])
+    sys.argv = tmp
