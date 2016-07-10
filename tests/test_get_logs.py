@@ -32,7 +32,7 @@ def test_container_flag():
     """ tests get_logs using -c flag, and combinations that start with -c """
     parser = get_logs.set_parser()
     get_logs.parse_args(parser.parse_args(['-c', 'example-container']), parser)
-    get_logs.parse_args(parser.parse_args(['-n', 'core-aaa-syslog']), parser)
+    get_logs.parse_args(parser.parse_args(['-c', 'core-aaa-syslog']), parser)
     get_logs.parse_args(parser.parse_args(['-c', 'example-container', '-f', 'example-file']), parser)
 
 def test_namespace_flag():
