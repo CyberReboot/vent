@@ -1,5 +1,6 @@
 import os
 import pytest
+import sys
 
 from vent.info_tools import get_logs
 
@@ -53,4 +54,5 @@ def test_file_flag():
 def test_main():
     """ tests the main function """
     get_logs.main(['get_logs.py'])
+    sys.argv = ['get_logs.py', '-a']
     get_logs.main(['get_logs.py', '-a'])
