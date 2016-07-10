@@ -117,8 +117,12 @@ def getch():
     except Exception as e:
         pass
 
-# Will wait for user input before clearing stdout
 def confirm():
+    """wait for user input before clearing stdout"""
+    os.system("echo")
+    os.system("echo")
+    os.system("echo ----------------------------")
+    os.system("echo Operation complete. Press any key to continue...")
     while getch():
         break
 
@@ -604,6 +608,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
         pass
 
 def run_plugins(path_dirs, action):
+    """creates menu to start plugin containers"""
     modes = []
     try:
         config = ConfigParser.RawConfigParser()
@@ -685,6 +690,7 @@ def update_plugins(path_dirs):
     return modes
 
 def get_param(prompt_string):
+    """prompts user for input from keyboard, returns that input"""
     curses.echo()
     screen.clear()
     screen.border(0)
@@ -695,6 +701,7 @@ def get_param(prompt_string):
     return input
 
 def runmenu(menu, parent):
+    """process menu options"""
     if parent is None:
         lastoption = "Exit"
     else:
@@ -762,7 +769,7 @@ def runmenu(menu, parent):
                 pos += -1
             else:
                 pos = optioncount
-        elif x >= ord('1') and x <= ord(str(num_options+1)):
+        elif ord('1') <= x <= ord(str(num_options+1)):
             pos = x - ord('0') - 1
     return pos
 
@@ -967,6 +974,7 @@ def build_menu_dict(path_dirs):
     return menu_data
 
 def main():
+    """start menu, clears terminal after exiting menu"""
     path_dirs = PathDirs()
     menu_data = build_menu_dict(path_dirs)
     processmenu(path_dirs, menu_data)

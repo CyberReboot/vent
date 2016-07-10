@@ -35,6 +35,7 @@ def test_add_plugins():
     plugin_parser.add_plugins(path_dirs, "test")
     plugin_parser.add_plugins(path_dirs, "")
     plugin_parser.add_plugins(invalid2_dirs, "https://github.com/template-change")
+    plugin_parser.add_plugins(path_dirs, "https://github.com/Joecakes4u/test_template_file_ignore")
 
 def test_remove_plugins():
     """ Remove with valid dirs, invalid dirs """
@@ -42,3 +43,4 @@ def test_remove_plugins():
     invalid_dirs = PathDirs(base_dir="/tmp/")
     plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
     plugin_parser.remove_plugins(invalid_dirs, "vent-plugins")
+    plugin_parser.remove_plugins(path_dirs, "https://github.com/Joecakes4u/test_template_file_ignore")
