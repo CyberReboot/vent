@@ -12,6 +12,7 @@ def test_settings():
 
 def test_pcap_queue():
     """ Tests simulation of new pcap """
+    os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
     file_watch.pcap_queue("/tmp")
     file_watch.pcap_queue("/dev/null")
 
