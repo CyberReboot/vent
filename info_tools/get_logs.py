@@ -128,13 +128,15 @@ def print_all_logs(cores):
     for core in cores:
         os.system("docker logs "+core)
 
-def main():
+def main(args):
     parser = set_parser()
     #no args provided, display help text
-    if len(sys.argv)==1:
+    if len(args) == 1:
         parser.print_help()
-        sys.exit(1)
-    parse_args(parser.parse_args(), parser)
+    else:
+        parse_args(parser.parse_args(), parser)
+    return
 
 if __name__ == "__main__": # pragma: no cover
-    main()
+    args = sys.argv
+    main(args)
