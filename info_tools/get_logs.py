@@ -133,7 +133,7 @@ def main():
     #no args provided, display help text
     if len(sys.argv)==1:
         parser.print_help()
-        sys.exit(0)
+        sys.exit(1)
     parse_args(parser.parse_args(), parser)
 
 if __name__ == "__main__": # pragma: no cover

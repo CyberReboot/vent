@@ -46,7 +46,3 @@ def test_file_flag():
     get_logs.parse_args(parser.parse_args(['-f', 'example-file']), parser)
     #invalid args
     get_logs.parse_args(parser.parse_args(['-f']), parser)
-
-def test_main():
-    """ tests the amin function """
-    get_logs.main()
