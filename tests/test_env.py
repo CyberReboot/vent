@@ -34,13 +34,16 @@ class TestEnv():
         # Create stubs if they don't already exist
         self.initconfigs(PathDirs(), True)
 
-    def add_plugin(self, path_dirs, url):
+    @staticmethod
+    def add_plugin(path_dirs, url):
         plugin_parser.add_plugins(path_dirs, url)
 
-    def remove_plugin(self, path_dirs, url):
+    @staticmethod
+    def remove_plugin(path_dirs, url):
         plugin_parser.remove_plugins(path_dirs, url)
 
-    def initconfigs(self, path_dirs, empty):
+    @staticmethod
+    def initconfigs(path_dirs, empty):
         """
         Initializes configs: either keeps existing configs & creates blanks if they don't exist or
         creates dummy configs with populated values
@@ -88,3 +91,17 @@ class TestEnv():
             config.set('service', 'schedule', '{"all":"continuous"}')
             config.add_section('honeycomb')
             config.set('honeycomb', 'Cmd', '""')
+
+    @staticmethod
+    def modifyconfigs(path_dirs, template, new_conf):
+        """
+        Takes in paths to templates, specific template to modify, and
+        a dict of options and what they should be set to: '#elasticsearch': 'elasticsearch'
+        """
+        filedata = None
+        with open(path_dirs.template_dir + template, 'r') as f:
+            filedata = f.read()
+        for option in new_conf:
+            filedata = filedata.replace(option, new_conf[option])
+        with open(path_dirs.template_dir + template, 'w') as f:
+            f.write(filedata)
