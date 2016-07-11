@@ -1,6 +1,11 @@
+import os
 import pytest
 
 import file_drop
+
+def test_first_setup():
+    os.system("cp templates/core.template core.backup")
+    os.system("cp templates/modes.template modes.backup")
 
 def test_file_drop_GZHandler():
     """ Tests the GZZHandler for file drop """

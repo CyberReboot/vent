@@ -204,12 +204,12 @@ def remove_plugins(path_dirs, plugin_url):
                 if len(element) == 1:
                     #no subdirectories - no plugins to be deleted in namespace. -> Delete namespace
                     namespace = element[0]
-                    config = ConfigParser.RawConfigParser()
-                    # needed to preserve case sensitive options
-                    config.optionxform=str
                     for dirpath, dirnames, files in os.walk(path_dirs.plugins_dir + namespace):
                         if not dirnames:
                             os.remove(path_dirs.template_dir + namespace + ".template")
+                            config = ConfigParser.RawConfigParser()
+                            # needed to preserve case sensitive options
+                            config.optionxform=str
                             config.read(path_dirs.template_dir + "modes.template")
                             config.remove_option("plugins", namespace)
                             with open(path_dirs.template_dir + "modes.template", 'w') as configfile:
@@ -271,14 +271,17 @@ def remove_plugins(path_dirs, plugin_url):
             for s_sub in sys_subdirs:
                 if repo_dir in s_sub:
                     shutil.rmtree(s_sub)
-                    config = ConfigParser.RawConfigParser()
-                    # needed to preserve case sensitive options
-                    config.optionxform=str
                     if os.path.exists(path_dirs.template_dir + namespace + ".template"):
+                        config = ConfigParser.RawConfigParser()
+                        # needed to preserve case sensitive options
+                        config.optionxform=str
                         config.read(path_dirs.template_dir + namespace + ".template")
                         config.remove_section(repo_dir.split("/")[0])
                         with open(path_dirs.template_dir + namespace + ".template", 'w') as configfile:
                             config.write(configfile)  
+                        config = ConfigParser.RawConfigParser()
+                        # needed to preserve case sensitive options
+                        config.optionxform=str
                         config.read(path_dirs.template_dir + "modes.template")
                         config.remove_option("plugins", namespace)
                         with open(path_dirs.template_dir + "modes.template", 'w') as configfile:

@@ -12,6 +12,7 @@ def test_url():
     get_urls.url(get_urls.PathDirs(), "aaa-syslog", "")
     path_dirs = get_urls.PathDirs(base_dir=os.getcwd()+"/")
 
+    os.system("cp core.backup templates/core.template")
     filedata = None
     with open(path_dirs.template_dir + 'core.template', 'r') as f:
         filedata = f.read()
@@ -30,9 +31,6 @@ def test_url():
     with open(path_dirs.template_dir + 'core.template', 'r') as f:
         filedata = f.read()
     filedata = filedata.replace('off', 'on')
-    filedata = filedata.replace('#elasticsearch', 'elasticsearch')
-    filedata = filedata.replace('#aaa-rabbitmq', 'aaa-rabbitmq')
-    filedata = filedata.replace('#aaa-syslog', 'aaa-syslog')
     with open(path_dirs.template_dir + 'core.template', 'w') as f:
         f.write(filedata)
     get_urls.url(path_dirs, "elasticsearch", "head")
@@ -40,3 +38,4 @@ def test_url():
     get_urls.url(path_dirs, "aaa-rabbitmq", "")
     get_urls.url(path_dirs, "rq-dashboard","")
     get_urls.url(path_dirs, "aaa-syslog", "")
+    os.system("cp core.backup templates/core.template")
