@@ -5,13 +5,36 @@ import sys
 
 from subprocess import check_output
 
-def url(service, service_type):
+class PathDirs:
+    """ Global path directories for parsing templates """
+    def __init__(self,
+                 base_dir="/var/lib/docker/data/",
+                 collectors_dir="collectors",
+                 core_dir="core",
+                 plugins_dir="plugins/",
+                 plugin_repos="plugin_repos",
+                 template_dir="templates/",
+                 vis_dir="visualization",
+                 info_dir="/data/info_tools/"
+                 ):
+        self.base_dir = base_dir
+        self.collectors_dir = base_dir + collectors_dir
+        self.core_dir = base_dir + core_dir
+        self.plugins_dir = base_dir + plugins_dir
+        self.plugin_repos = base_dir + plugin_repos
+        self.template_dir = base_dir + template_dir
+        self.vis_dir = base_dir + vis_dir
+        self.info_dir = info_dir
+
+def url(path_dirs, service, service_type):
     """ Retrieves urls for external configurations of core services """
     url_str = "not running"
     locally_active = []
     try:
         config = ConfigParser.RawConfigParser()
-        config.read("/var/lib/docker/data/templates/core.template")
+        # needed to preserve case sensitive options
+        config.optionxform=str
+        config.read(path_dirs.template_dir + "core.template")
         # Check if section exists in config, and if there are any options
         if config.has_section("locally-active") and config.options("locally-active"):
             locally_active = config.options("locally-active")
@@ -53,8 +76,9 @@ def url(service, service_type):
     return url_str
 
 if __name__ == "__main__": # pragma: no cover
+    path_dirs = PathDirs()
     try:
-        url_str = url(sys.argv[1], sys.argv[2])
+        url_str = url(path_dirs, sys.argv[1], sys.argv[2])
         print url_str
     except Exception as e:
         pass

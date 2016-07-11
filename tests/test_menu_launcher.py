@@ -13,7 +13,8 @@ class PathDirs:
                  plugins_dir="plugins/",
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
-                 vis_dir="visualization"):
+                 vis_dir="visualization",
+                 info_dir="info_tools/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         if not os.path.exists(self.collectors_dir):
@@ -27,6 +28,7 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
         if not os.path.exists(self.vis_dir):
             os.makedirs(self.vis_dir)
+        self.info_dir=info_dir
 
 def test_pathdirs():
     """ Gets path directory class from menu_launcher """
@@ -127,10 +129,22 @@ def test_get_core_enabled():
     """ Test get_core_enabled function with valid and invalid directories """
     path_dirs = PathDirs()
     invalid_dirs = PathDirs(base_dir="/tmp/")
+
+    os.system("cp core.backup templates/core.template")
+
+    filedata = None
+    with open(path_dirs.template_dir + 'core.template', 'r') as f:
+        filedata = f.read()
+    filedata = filedata.replace('#passive', 'passive')
+    filedata = filedata.replace('#active', 'active')
+    with open(path_dirs.template_dir + 'core.template', 'w') as f:
+        f.write(filedata)
+
     core_config = menu_launcher.get_core_config(path_dirs)
     menu_launcher.get_core_enabled(path_dirs, core_config)
     empty_config = menu_launcher.get_core_config(invalid_dirs)
     menu_launcher.get_core_enabled(invalid_dirs, empty_config)
+    os.system("cp core.backup templates/core.template")
 
 def test_get_enabled():
     """ Test get_enabled function with valid and invalid directories """
@@ -175,3 +189,13 @@ def test_build_menu_dict():
     """ Test build_menu_dict """
     path_dirs = PathDirs()
     menu_launcher.build_menu_dict(path_dirs)
+
+def test_get_container_menu():
+    """test get_container_menu"""
+    path_dirs = PathDirs()
+    menu_launcher.get_container_menu(path_dirs)
+
+def test_get_namespace_menu():
+    """test get_namespace_menu"""
+    path_dirs = PathDirs()
+    menu_launcher.get_namespace_menu(path_dirs)

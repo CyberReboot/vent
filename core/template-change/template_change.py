@@ -7,6 +7,9 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 class GZHandler(PatternMatchingEventHandler):
+    """
+    Handles when an event on the dictory being watched happens that matches the values in patterns
+    """
 
     patterns = ["*"]
 
