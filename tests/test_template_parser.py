@@ -3,7 +3,6 @@ import pytest
 
 from .. import template_parser
 
-"""
 def test_read_template_types():
     """ Testing reading from all templates """
     template_dir = "templates/"
@@ -68,4 +67,3 @@ def test_execute_template():
 def test_main():
     """ Testing main function """
     template_parser.main()
-"""
