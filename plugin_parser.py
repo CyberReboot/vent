@@ -256,7 +256,7 @@ def remove_plugins(path_dirs, plugin_url):
                     has_subdir = os.path.isdir(path_dirs.collectors_dir + "/"+name)
                     if has_subdir:
                         break
-                #there are not collectors, cleans up extra files e.g. README.md
+                #there are no collectors, cleans up extra files e.g. README.md
                 if not has_subdir:
                     for dirpath, dirnames, files in os.walk(path_dirs.collectors_dir + "/"):
                         for file in files:
