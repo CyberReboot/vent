@@ -8,13 +8,6 @@ def test_read_template_types():
     template_dir = "templates/"
     plugins_dir = "plugins/"
 
-    template_parser.read_template_types("core", "", template_dir, plugins_dir)
-    template_parser.read_template_types("active", "", template_dir, plugins_dir)
-    template_parser.read_template_types("passive", "", template_dir, plugins_dir)
-    template_parser.read_template_types("visualization", "", template_dir, plugins_dir)
-    template_parser.read_template_types("all", "", template_dir, plugins_dir)
-    template_parser.read_template_types("foo", "", template_dir, plugins_dir)
-
     filedata = None
     with open(template_dir + 'core.template', 'r') as f:
         filedata = f.read()
@@ -23,6 +16,13 @@ def test_read_template_types():
     filedata = filedata.replace('#aaa-syslog', 'aaa-syslog')
     with open(template_dir + 'core.template', 'w') as f:
         f.write(filedata)
+
+    template_parser.read_template_types("core", "", template_dir, plugins_dir)
+    template_parser.read_template_types("active", "", template_dir, plugins_dir)
+    template_parser.read_template_types("passive", "", template_dir, plugins_dir)
+    template_parser.read_template_types("visualization", "", template_dir, plugins_dir)
+    template_parser.read_template_types("all", "", template_dir, plugins_dir)
+    template_parser.read_template_types("foo", "", template_dir, plugins_dir)
 
     os.system("touch templates/foo.template")
     os.system("mkdir plugins/foo")
