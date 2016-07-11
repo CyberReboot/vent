@@ -28,7 +28,7 @@ def test_read_template_types():
     template_parser.read_template_types("foo", "", template_dir, plugins_dir)
     os.system("cp modes.backup templates/modes.template")
     os.system('echo "foo = bar,baz" >> templates/modes.template')
-    template_parser.read_template_types("foo", "", template_dir, plugins_dir)
+    template_parser.read_template_types("foo", "foo", template_dir, plugins_dir)
     os.system("cp modes.backup templates/modes.template")
 
     os.system("touch templates/zzz.template")
@@ -39,7 +39,8 @@ def test_read_template_types():
     os.system('echo "delay = 30" >> templates/zzz.template')
     os.system('echo "" >> templates/zzz.template')
     os.system('echo "[baz]" >> templates/zzz.template')
-    os.system('echo "HostConfig = {\"PublishAllPorts\": true}" >> templates/zzz.template')
+    os.system('echo "data_path = foo" >> templates/zzz.template')
+    os.system('echo "site_path = foo" >> templates/zzz.template')
     os.system("mkdir plugins/zzz")
     os.system("mkdir plugins/zzz/bar")
     os.system("mkdir plugins/zzz/baz")
