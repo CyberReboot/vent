@@ -16,6 +16,7 @@ def test_read_template_types():
     filedata = filedata.replace('#elasticsearch', 'elasticsearch')
     filedata = filedata.replace('#aaa-rabbitmq', 'aaa-rabbitmq')
     filedata = filedata.replace('#aaa-syslog', 'aaa-syslog')
+    filedata = filedata.replace('on', 'off')
     with open(template_dir + 'core.template', 'w') as f:
         f.write(filedata)
 
