@@ -8,7 +8,7 @@ def test_read_template_types():
     template_dir = "templates/"
     plugins_dir = "plugins/"
 
-    os.system("cp templates/core.template core.backup")
+    os.system("cp core.backup templates/core.template")
 
     filedata = None
     with open(template_dir + 'core.template', 'r') as f:
@@ -16,7 +16,6 @@ def test_read_template_types():
     filedata = filedata.replace('#elasticsearch', 'elasticsearch')
     filedata = filedata.replace('#aaa-rabbitmq', 'aaa-rabbitmq')
     filedata = filedata.replace('#aaa-syslog', 'aaa-syslog')
-    filedata = filedata.replace('on', 'off')
     with open(template_dir + 'core.template', 'w') as f:
         f.write(filedata)
 
@@ -27,7 +26,7 @@ def test_read_template_types():
     template_parser.read_template_types("all", "", template_dir, plugins_dir)
     template_parser.read_template_types("foo", "", template_dir, plugins_dir)
 
-    os.system("cp templates/modes.template modes.backup")
+    os.system("cp modes.backup templates/modes.template")
     os.system('echo "core = all" >> templates/modes.template')
     template_parser.read_template_types("core", "", template_dir, plugins_dir)
 
@@ -74,7 +73,7 @@ def test_read_template_types():
     template_parser.read_template_types("plugs", "", template_dir, plugins_dir)
     template_parser.read_template_types("plugs", "", invalid_dir, plugins_dir)
 
-    #os.system("cp core.backup templates/core.template")
+    os.system("cp core.backup templates/core.template")
 
 def test_execute_template():
     """ Testing executing template configurations """

@@ -12,7 +12,7 @@ def test_url():
     get_urls.url(get_urls.PathDirs(), "aaa-syslog", "")
     path_dirs = get_urls.PathDirs(base_dir=os.getcwd()+"/")
 
-    os.system("cp templates/core.template core.backup")
+    os.system("cp core.backup templates/core.template")
     filedata = None
     with open(path_dirs.template_dir + 'core.template', 'r') as f:
         filedata = f.read()
