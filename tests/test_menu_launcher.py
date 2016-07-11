@@ -104,10 +104,22 @@ def test_get_core_enabled():
     """ Test get_core_enabled function with valid and invalid directories """
     path_dirs = PathDirs()
     invalid_dirs = PathDirs(base_dir="/tmp/")
+
+    os.system("cp core.backup templates/core.template")
+
+    filedata = None
+    with open(path_dirs.template_dir + 'core.template', 'r') as f:
+        filedata = f.read()
+    filedata = filedata.replace('#passive', 'passive')
+    filedata = filedata.replace('#active', 'active')
+    with open(path_dirs.template_dir + 'core.template', 'w') as f:
+        f.write(filedata)
+
     core_config = menu_launcher.get_core_config(path_dirs)
     menu_launcher.get_core_enabled(path_dirs, core_config)
     empty_config = menu_launcher.get_core_config(invalid_dirs)
     menu_launcher.get_core_enabled(invalid_dirs, empty_config)
+    os.system("cp core.backup templates/core.template")
 
 def test_get_enabled():
     """ Test get_enabled function with valid and invalid directories """
