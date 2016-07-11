@@ -8,6 +8,13 @@ def test_read_template_types():
     template_dir = "templates/"
     plugins_dir = "plugins/"
 
+    template_parser.read_template_types("core", "", template_dir, plugins_dir)
+    template_parser.read_template_types("active", "", template_dir, plugins_dir)
+    template_parser.read_template_types("passive", "", template_dir, plugins_dir)
+    template_parser.read_template_types("visualization", "", template_dir, plugins_dir)
+    template_parser.read_template_types("all", "", template_dir, plugins_dir)
+    template_parser.read_template_types("foo", "", template_dir, plugins_dir)
+
     os.system("touch templates/foo.template")
     os.system('echo "[bar]" >> templates/foo.template')
     os.system('echo "HostConfig = {\"PublishAllPorts\": true}" >> templates/foo.template')
@@ -43,11 +50,6 @@ def test_read_template_types():
     template_parser.read_template_types("zzz", "", template_dir, plugins_dir)
     os.system("cp modes.backup templates/modes.template")
 
-    template_parser.read_template_types("core", "", template_dir, plugins_dir)
-    template_parser.read_template_types("active", "", template_dir, plugins_dir)
-    template_parser.read_template_types("passive", "", template_dir, plugins_dir)
-    template_parser.read_template_types("visualization", "", template_dir, plugins_dir)
-    template_parser.read_template_types("all", "", template_dir, plugins_dir)
 
     # Negative Test Cases
     invalid_dir = "tmp/"
@@ -59,6 +61,9 @@ def test_execute_template():
     """ Testing executing template configurations """
     template_dir = "templates/"
     plugins_dir = "plugins/"
+
+    os.system('echo "foo = bar,baz" >> templates/modes.template')
+
     info_name, service_schedule, tool_core, tool_dict, delay_sections = template_parser.read_template_types("core", "", template_dir, plugins_dir)
     template_parser.execute_template("core", "start", info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
     template_parser.execute_template("invalid-template", "start", info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
