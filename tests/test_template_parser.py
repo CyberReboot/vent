@@ -15,6 +15,15 @@ def test_read_template_types():
     template_parser.read_template_types("all", "", template_dir, plugins_dir)
     template_parser.read_template_types("foo", "", template_dir, plugins_dir)
 
+    filedata = None
+    with open(path_dirs.template_dir + 'core.template', 'r') as f:
+        filedata = f.read()
+    filedata = filedata.replace('#elasticsearch', 'elasticsearch')
+    filedata = filedata.replace('#aaa-rabbitmq', 'aaa-rabbitmq')
+    filedata = filedata.replace('#aaa-syslog', 'aaa-syslog')
+    with open(path_dirs.template_dir + 'core.template', 'w') as f:
+        f.write(filedata)
+
     os.system("touch templates/foo.template")
     os.system("mkdir plugins/foo")
     os.system("mkdir plugins/foo/bar")
