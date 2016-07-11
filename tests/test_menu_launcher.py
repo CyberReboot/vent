@@ -48,54 +48,69 @@ def test_update_images():
 def test_get_mode_config():
     """ Test get_mode_config function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/tmp/")
+    invalid_dirs = PathDirs(template_dir="/tmp/foo")
     menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_config(invalid_dirs)
+
+    # Mode_Config after init
+    env = test_env.TestEnv()
+    env.initconfigs(path_dirs, False)
+    menu_launcher.get_mode_config(path_dirs)
 
 def test_get_core_config():
     """ Test get_core_config function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/tmp/", template_dir="foo")
+    invalid_dirs = PathDirs(template_dir="/tmp/foo")
     menu_launcher.get_core_config(path_dirs)
     menu_launcher.get_core_config(invalid_dirs)
+
+    # Mode_Config after init
+    env = test_env.TestEnv()
+    env.initconfigs(path_dirs, False)
+    menu_launcher.get_core_config(path_dirs)
 
 def test_get_installed_cores():
     """ Test get_installed_cores function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/tmp/")
+    invalid_dirs = PathDirs(core_dir="/tmp/foo")
     menu_launcher.get_installed_cores(path_dirs)
     menu_launcher.get_installed_cores(invalid_dirs)
 
 def test_get_installed_collectors():
     """ Test get_installed_collectors function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/tmp/")
+    invalid_dirs = PathDirs(collectors_dir="/tmp/foo")
     menu_launcher.get_installed_collectors(path_dirs, "all")
     menu_launcher.get_installed_collectors(path_dirs, "passive")
     menu_launcher.get_installed_collectors(path_dirs, "active")
     menu_launcher.get_installed_collectors(invalid_dirs, "all")
     menu_launcher.get_installed_collectors(invalid_dirs, "passive")
     menu_launcher.get_installed_collectors(invalid_dirs, "active")
-    menu_launcher.get_installed_collectors(path_dirs, "invalidtype")
+    menu_launcher.get_installed_collectors(path_dirs, "foobar")
 
 def test_get_installed_vis():
     """ Test get_installed_vis function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/tmp/")
+    invalid_dirs = PathDirs(vis_dir="/tmp/foo")
     menu_launcher.get_installed_vis(path_dirs)
     menu_launcher.get_installed_vis(invalid_dirs)
 
 def test_get_installed_plugins():
     """ Test get_installed_plugins function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/tmp/")
+    invalid_dirs = PathDirs(plugins_dir="/tmp/foo")
     menu_launcher.get_installed_plugins(path_dirs)
     menu_launcher.get_installed_plugins(invalid_dirs)
+
+    # Test with installed plugins
+    url = "https://github.com/CyberReboot/vent-plugins.git"
+    env = test_env.TestEnv()
+    env.add_plugin(path_dirs, url)
 
 def test_get_all_installed():
     """ Test get_all_installed function with valid and invalid directories """
     path_dirs = PathDirs()
-    invalid_dirs = PathDirs(base_dir="/tmp/")
+    invalid_dirs = PathDirs(vis_dir="/tmp/doesntexist")
     menu_launcher.get_all_installed(path_dirs)
     menu_launcher.get_all_installed(invalid_dirs)
 

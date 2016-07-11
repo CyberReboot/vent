@@ -31,16 +31,16 @@ class PathDirs:
 class TestEnv():
     """ Class to create the right env for testing - installing plugins, modifying modes.template/core.template, etc... """
     def __init__(self):
-        # Creat stubs if they don't already exist
-        initconfigs(PathDirs(), True)
+        # Create stubs if they don't already exist
+        self.initconfigs(PathDirs(), True)
 
-    def add_plugin(path_dirs, url):
+    def add_plugin(self, path_dirs, url):
         plugin_parser.add_plugins(path_dirs, url)
 
-    def remove_plugin(path_dirs, url):
+    def remove_plugin(self, path_dirs, url):
         plugin_parser.remove_plugins(path_dirs, url)
 
-    def initconfigs(path_dirs, empty):
+    def initconfigs(self, path_dirs, empty):
         """
         Initializes configs: either keeps existing configs & creates blanks if they don't exist or
         creates dummy configs with populated values
