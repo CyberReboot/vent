@@ -8,6 +8,8 @@ def test_read_template_types():
     template_dir = "templates/"
     plugins_dir = "plugins/"
 
+    os.system("cp templates/core.template core.backup")
+
     filedata = None
     with open(template_dir + 'core.template', 'r') as f:
         filedata = f.read()
@@ -24,12 +26,16 @@ def test_read_template_types():
     template_parser.read_template_types("all", "", template_dir, plugins_dir)
     template_parser.read_template_types("foo", "", template_dir, plugins_dir)
 
+    os.system("cp templates/modes.template modes.backup")
+    os.system('echo "core = all" >> templates/modes.template')
+    template_parser.read_template_types("core", "", template_dir, plugins_dir)
+
     os.system("touch templates/foo.template")
     os.system("mkdir plugins/foo")
     os.system("mkdir plugins/foo/bar")
     os.system("mkdir plugins/foo/baz")
     template_parser.read_template_types("foo", "", template_dir, plugins_dir)
-    os.system("cp templates/modes.template modes.backup")
+    os.system("cp modes.backup templates/modes.template")
     os.system('echo "foo = all" >> templates/modes.template')
     template_parser.read_template_types("foo", "", template_dir, plugins_dir)
     os.system('echo "[bar]" >> templates/foo.template')
@@ -61,12 +67,13 @@ def test_read_template_types():
     template_parser.read_template_types("zzz", "", template_dir, plugins_dir)
     os.system("cp modes.backup templates/modes.template")
 
-
     # Negative Test Cases
     invalid_dir = "tmp/"
     template_parser.read_template_types("all", "", invalid_dir, plugins_dir)
     template_parser.read_template_types("plugs", "", template_dir, plugins_dir)
     template_parser.read_template_types("plugs", "", invalid_dir, plugins_dir)
+
+    os.system("cp core.backup templates/core.template")
 
 def test_execute_template():
     """ Testing executing template configurations """
