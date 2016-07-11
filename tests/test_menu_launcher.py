@@ -29,9 +29,6 @@ class PathDirs:
             os.makedirs(self.vis_dir)
         self.info_dir=info_dir
 
-def test_set_term():
-    os.environ['TERM'] = "xterm-256color"
-
 def test_pathdirs():
     """ Gets path directory class from menu_launcher """
     path_dirs = menu_launcher.PathDirs()
