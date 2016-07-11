@@ -74,7 +74,7 @@ def test_read_template_types():
     template_parser.read_template_types("plugs", "", template_dir, plugins_dir)
     template_parser.read_template_types("plugs", "", invalid_dir, plugins_dir)
 
-    os.system("cp core.backup templates/core.template")
+    #os.system("cp core.backup templates/core.template")
 
 def test_execute_template():
     """ Testing executing template configurations """
