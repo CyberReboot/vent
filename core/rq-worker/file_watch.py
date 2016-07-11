@@ -8,6 +8,8 @@ def pcap_queue(path):
 
     import ConfigParser
     config = ConfigParser.RawConfigParser()
+    # needed to preserve case sensitive options
+    config.optionxform=str
 
     from docker import Client
     from docker.utils.types import LogConfig
@@ -72,6 +74,8 @@ def template_queue(path):
 
     import ConfigParser
     config = ConfigParser.RawConfigParser()
+    # needed to preserve case sensitive options
+    config.optionxform=str
 
     from docker import Client
     from docker.utils.types import LogConfig

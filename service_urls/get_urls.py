@@ -32,6 +32,8 @@ def url(path_dirs, service, service_type):
     locally_active = []
     try:
         config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        config.optionxform=str
         config.read(path_dirs.template_dir + "core.template")
         # Check if section exists in config, and if there are any options
         if config.has_section("locally-active") and config.options("locally-active"):
