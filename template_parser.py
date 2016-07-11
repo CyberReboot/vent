@@ -9,6 +9,28 @@ import subprocess
 import sys
 import time
 
+import menu_launcher
+class PathDirs:
+    """ Global path directories for parsing templates """
+    def __init__(self,
+                 base_dir="/var/lib/docker/data/",
+                 collectors_dir="collectors",
+                 core_dir="core",
+                 plugins_dir="plugins/",
+                 plugin_repos="plugin_repos",
+                 template_dir="templates/",
+                 vis_dir="visualization",
+                 info_dir="/data/info_tools/"
+                 ):
+        self.base_dir = base_dir
+        self.collectors_dir = base_dir + collectors_dir
+        self.core_dir = base_dir + core_dir
+        self.plugins_dir = base_dir + plugins_dir
+        self.plugin_repos = base_dir + plugin_repos
+        self.template_dir = base_dir + template_dir
+        self.vis_dir = base_dir + vis_dir
+        self.info_dir = info_dir
+
 def execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir):
     # note for plugin, also run core
     # for visualization, make aware of where the data is
@@ -89,6 +111,15 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                 sections = config.sections()
             except Exception as e:
                 sections = []
+            running_containers = subprocess.check_output("docker ps | awk \"{print \$NF}\"", shell=True).split("\n")
+            t_sections = []
+            # remove sections that represent running containers
+            for section in sections:
+                for container in running_containers:
+                    if section in container and template_type in container:
+                        t_sections.append(section)
+                        print section
+            sections = [x for x in sections if x not in t_sections]
             external_overrides = []
             external_hosts = {}
             instances = []
@@ -330,14 +361,16 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                                 instructions['Volumes'] = {"/"+section+"-data": {}}
                                 tool_dict[template_type+"-"+section] = instructions
         else:
-            info_name = "\"all\""
+            pass
     except Exception as e:
+        print e
         pass
     return info_name, service_schedule, tool_core, tool_dict, delay_sections
 
 def main():
-    template_dir = "/var/lib/docker/data/templates/"
-    plugins_dir = "/var/lib/docker/data/plugins/"
+    path_dirs = PathDirs()
+    template_dir = path_dirs.template_dir
+    plugins_dir = path_dirs.plugins_dir
 
     if len(sys.argv) < 3:
         sys.exit()
@@ -345,10 +378,26 @@ def main():
         template_type = sys.argv[1]
         template_execution = sys.argv[2]
         if template_execution == "stop":
-            os.system("docker ps | grep "+template_type+" | awk '{print $1}' | xargs docker stop")
+            if template_type == "all":
+                for x in ["visualization", "core", "active", "passive"]:
+                    os.system("docker ps | grep "+x+" | awk '{print $1}' | xargs docker stop")                
+            else:
+                os.system("docker ps | grep "+template_type+" | awk '{print $1}' | xargs docker stop")
         elif template_execution == "clean":
-            os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
-            os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
+            if template_type == "all":
+                for x in ["visualization", "core", "active", "passive"]:
+                    os.system("docker ps -a | grep "+x+" | awk '{print $1}' | xargs docker kill")
+                    os.system("docker ps -a | grep "+x+" | awk '{print $1}' | xargs docker rm")
+            else:
+                os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
+                os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
+        elif template_execution == "start" and template_type == "all":
+            container_cmd = None
+            if len(sys.argv) == 4:
+                container_cmd = sys.argv[3]
+            for x in ["visualization", "core", "active", "passive"]:
+                info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(x, container_cmd, template_dir, plugins_dir)
+                execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
         else:
             container_cmd = None
             if len(sys.argv) == 4:
