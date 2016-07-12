@@ -373,6 +373,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
     return info_name, service_schedule, tool_core, tool_dict, delay_sections
 
 def main():
+    """main method for template_parser. Based on the action argument given, performs the actions on the correct template files"""
     path_dirs = PathDirs()
     template_dir = path_dirs.template_dir
     plugins_dir = path_dirs.plugins_dir
