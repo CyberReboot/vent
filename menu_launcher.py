@@ -641,7 +641,7 @@ def run_plugins(path_dirs, action):
 
         for plugin in plugins:
             # check if plugin is core or vis and the corresponding size is greater than 0
-            if (plugin, cores > 0) in [("core", True)] or (plugin, vis > 0) in [("visualization", True)]:
+            if (plugin, cores > 0) == ("core", True) or (plugin, vis > 0) == ("visualization", True):
                 p = {}
                 try:
                     config = ConfigParser.RawConfigParser()
