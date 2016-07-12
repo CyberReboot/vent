@@ -217,7 +217,7 @@ def get_installed_collectors(path_dirs, c_type):
             colls = collectors
         else:
             with open("/tmp/error.log", "a+") as myfile:
-                myfile.write("Error in get_installed_collectors: ", "Invalid collector parameter: ", c_type)
+                myfile.write("Error in get_installed_collectors\n" + "Invalid collector parameter: " + c_type)
             myfile.close()
     except Exception as e:
         pass
@@ -501,74 +501,166 @@ def get_enabled(path_dirs):
 
 def get_plugin_status(path_dirs):
     """ Displays status of all running, not running/built, not built, and disabled plugins """
-    notbuilt = []
     p = {}
 
     try:
-        # Retrieves all installed containers
+        ### Get All Installed Images (By Filewalk) ###
         all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed(path_dirs)
 
+        with open("/tmp/installed.log", "a+") as myfile:
+            for x in all_installed:
+                myfile.write("Namespace "+x)
+                for y in all_installed[x]:
+                    myfile.write(" | "+y)
+                myfile.write("\n")
+
+        ### Get Enabled/Disabled Images ###
         # Retrieves all enabled images
         enabled, disabled = get_enabled(path_dirs)
 
+        with open("/tmp/enabled.log", "a+") as myfile:
+            for x in enabled:
+                myfile.write("Namespace "+x)
+                for y in enabled[x]:
+                    myfile.write(" | "+y)
+                myfile.write("\n")
+
+        with open("/tmp/disabled.log", "a+") as myfile:
+            for x in disabled:
+                myfile.write("Namespace "+x)
+                for y in disabled[x]:
+                    myfile.write(" | "+y)
+                myfile.write("\n")
+
+        # Make a list of disabled images of format: namespace/image
+        disabled_images = []
+
+        for namespace in disabled:
+            for image in disabled[namespace]:
+                disabled_images.append(namespace+'/'+image)
+
+        with open("/tmp/images_disabled.log", "a+") as myfile:
+            for x in disabled_images:
+                myfile.write(x+"\n")
+            
+        ### Get Disabled Containers ###
         # Need to cross reference with all installed containers to determine all disabled containers
+        disabled_containers = []
+
         containers = check_output(" docker ps -a | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         containers = [ container for container in containers if container != "" ]
 
-        disabled_containers = []
+        with open("/tmp/containers_installed.log", "a+") as myfile:
+            for x in containers:
+                myfile.write(x+"\n")
 
         # Intersect the set of all containers with the set of all disabled images
         # Images form the basis for a container (in name especially), but there can be multiple containers per image
+        # !! TODO - Simplify using disabled_images
         for container in containers:
             for namespace in disabled:
                 for image in disabled[namespace]:
                     if image in container:
                         disabled_containers.append(container)
 
+        with open("/tmp/disabled_containers.log", "a+") as myfile:
+            for x in disabled_containers:
+                myfile.write(x+"\n")
+
+        ### Get all Running Containers, not including disabled containers ###
         # Retrieves running or restarting docker containers and returns a list of container names
         running = check_output(" { docker ps -af status=running & docker ps -af status=restarting; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         running = [ container for container in running if container != "" ]
 
         # Running containers should not intersect with disabled containers/images.
+        # Containers should not exist/be running if disabled
+        running_errors = [ container for container in running if container in disabled_containers ]
         running = [ container for container in running if container not in disabled_containers ]
 
+        with open("/tmp/running.log", "a+") as myfile:
+            for x in running:
+                myfile.write(x+"\n")
+        with open("/tmp/running_errors.log", "a+") as myfile:
+            for x in running_errors:
+                myfile.write(x+"\n")
+
+        ### Get all NR Containers, not including disabled containers ###
         # Retrieves docker containers with status exited, paused, dead, created; returns as a list of container names
         nrcontainers = check_output(" { docker ps -af status=created & docker ps -af status=exited & docker ps -af status=paused & docker ps -af status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         nrcontainers = [ container for container in nrcontainers if container != "" ]
+        # Containers should not exist if disabled
+        nr_errors = [ container for container in nrcontainers if container in disabled_containers ]
         nrbuilt = [ container for container in nrcontainers if container not in disabled_containers ]
 
+        with open("/tmp/nrbuilt.log", "a+") as myfile:
+            for x in nrbuilt:
+                myfile.write(x+"\n")
+        with open("/tmp/nr_errors.log", "a+") as myfile:
+            for x in nr_errors:
+                myfile.write(x+"\n")
+
+        ### Get all Built Images, not including disabled images ###
         # Retrieve all built docker images
         built = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
         built = [ image for image in built if image != "" ]
+        # Image *should* be removed if disabled
+        built_errors = [ image for image in built if image in disabled_images ]
 
+        with open("/tmp/built.log", "a+") as myfile:
+            for x in built:
+                myfile.write(x+"\n")
+        with open("/tmp/built_errors.log", "a+") as myfile:
+            for x in built_errors:
+                myfile.write(x+"\n")
+
+        ### Get all Not Built Images, not including disabled images ###
         # If image hasn't been disabled and isn't present in docker images then add
+        # !! TODO - Simplify using disabled_images
         notbuilt = []
         for namespace in all_installed:
             for image in all_installed[namespace]:
                 if image not in disabled[namespace] and namespace+'/'+image not in built:
                     notbuilt.append(namespace+'/'+image)
 
-        # Format disabled dict for menu processing
-        p_disabled = []
-        for namespace in disabled:
-            for image in disabled[namespace]:
-                p_disabled.append(namespace+'/'+image)
+        with open("/tmp/notbuilt.log", "a+") as myfile:
+            for x in notbuilt:
+                myfile.write(x+"\n")
 
-        p['title'] = 'Plugin Status'
-        p['subtitle'] = 'Choose a category...'
+        ### Prepare Statuses for MENU ###
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running ]
         p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt ]
         p_disabled_cont = [ {'title': x, 'type': 'INFO', 'command': '' } for x in disabled_containers ]
-        p_disabled_images = [ {'title': x, 'type': 'INFO', 'command': '' } for x in p_disabled ]
+        p_disabled_images = [ {'title': x, 'type': 'INFO', 'command': '' } for x in disabled_images ]
         p_built = [ {'title': x, 'type': 'INFO', 'command': '' } for x in built ]
         p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
-        p['options'] = [ { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
+
+        with open("/tmp/errors.log", "a+") as myfile:
+            myfile.write("Made it! - 1\n")
+        ### Prepare Errors for MENU ###
+        p_running_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in running_errors ]
+        p_nr_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in nr_errors ]
+        p_built_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in built_errors ]
+        p_error_menu = [
+                         {'title': "Running Errors", 'subtitle': "Containers that should not be running because they are disabled...", 'type': 'MENU', 'options': p_running_errors },
+                         {'title': "Not Running Errors", 'subtitle': "Containers that should be removed because they are disabled...", 'type': 'MENU', 'options': p_nr_errors },
+                         {'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': 'MENU', 'options': p_built_errors }
+                        ]
+        with open("/tmp/errors.log", "a+") as myfile:
+            myfile.write("Made it! - 2\n")
+        ### Returned Menu Dictionary
+        p['title'] = 'Plugin Status'
+        p['subtitle'] = 'Choose a category...'
+        p['options'] = [
+                         { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
                          { 'title': "Not Running Containers", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
                          { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled_cont },
                          { 'title': "Disabled Images", 'subtitle': "Currently disabled images...", 'type': MENU, 'options': p_disabled_images },
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
-                         { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt }
+                         { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
+                         { 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu }
                         ]
+        with open("/tmp/errors.log", "a+") as myfile:
+            myfile.write("Made it! - 3\n")
     except Exception as e:
         pass
 
