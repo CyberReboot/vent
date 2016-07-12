@@ -217,7 +217,7 @@ def get_installed_collectors(path_dirs, c_type):
             colls = collectors
         else:
             with open("/tmp/error.log", "a+") as myfile:
-                myfile.write("Error in get_installed_collectors\n" + "Invalid collector parameter: " + c_type)
+                myfile.write("Error in get_installed_collectors\n" + "Invalid collector parameter: " + str(c_type))
             myfile.close()
     except Exception as e:
         pass
@@ -344,9 +344,8 @@ def get_mode_enabled(path_dirs, mode_config):
                 if namespace not in ["visualization", "collectors", "core"]:
                     val = mode_config[namespace]
                     # val is either: ["all"] or ["none"]/[""] or ["some", "some2", etc...]
-                    if val == ["all"]:
-                        if namespace in all_plugins:
-                            mode_enabled[namespace] = all_plugins[namespace]
+                    if val == ["all"] and namespace in all_plugins:
+                        mode_enabled[namespace] = all_plugins[namespace]
                     elif val in [["none"], [""]]:
                         mode_enabled[namespace] = []
                     else:
@@ -565,9 +564,8 @@ def get_plugin_status(path_dirs):
         notbuilt = []
         for namespace in all_installed:
             for image in all_installed[namespace]:
-                if namespace in disabled:
-                    if image not in disabled[namespace] and namespace+'/'+image not in built:
-                        notbuilt.append(namespace+'/'+image)
+                if namespace in disabled and image not in disabled[namespace] and namespace+'/'+image not in built:
+                    notbuilt.append(namespace+'/'+image)
 
         ### Prepare Statuses for MENU ###
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running ]
