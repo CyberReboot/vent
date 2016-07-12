@@ -205,27 +205,51 @@ def test_running_menu():
     """ test running the actual menu """
     cmd = "python2.7 menu_launcher.py"
     child = pexpect.spawn(cmd)
+    # expect main menu
     child.expect('Exit')
+    # go to mode
     child.sendline('1')
     child.expect('Return to Vent menu')
+    # go to start
     child.sendline('1')
     child.expect('Return to Mode menu')
+    # return to mode
     child.sendline('2')
     child.expect('Return to Vent menu')
+    # go to stop
     child.sendline('2')
     child.expect('Return to Mode menu')
+    # return to mode
     child.sendline('2')
     child.expect('Return to Vent menu')
+    # go to clean
     child.sendline('3')
     child.expect('Return to Mode menu')
+    # return to mode
     child.sendline('2')
     child.expect('Return to Vent menu')
+    # go to status
     child.sendline('4')
     child.expect('Return to Mode menu')
+    # return to mode
     child.sendline('7')
     child.expect('Return to Vent menu')
+    # go to configure
+    child.sendline('5')
+    child.expect('Return to Mode menu')
+    # return to mode
+    child.sendline('3')
+    child.expect('Return to Vent menu')
+    # return to main menu
     child.sendline('6')
     child.expect('Exit')
+    # go to system info
+    child.sendline('3')
+    child.expect('Return to Vent menu')
+    # return to main menu
+    child.sendline('9')
+    child.expect('Exit')
+    # exit
     child.sendline('7')
     child.read()
     # TODO finish going through menu actions
