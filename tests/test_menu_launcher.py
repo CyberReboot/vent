@@ -1,4 +1,5 @@
 import os
+import pexpect
 import pytest
 
 from .. import menu_launcher
@@ -199,3 +200,32 @@ def test_get_namespace_menu():
     """test get_namespace_menu"""
     path_dirs = PathDirs()
     menu_launcher.get_namespace_menu(path_dirs)
+
+def test_running_menu():
+    """ test running the actual menu """
+    cmd = "python2.7 menu_launcher.py"
+    child = pexpect.spawn(cmd)
+    child.expect('Exit')
+    child.sendline('1')
+    child.expect('Return to Vent menu')
+    child.sendline('1')
+    child.expect('Return to Mode menu')
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    child.sendline('2')
+    child.expect('Return to Mode menu')
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    child.sendline('3')
+    child.expect('Return to Mode menu')
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    child.sendline('4')
+    child.expect('Return to Mode menu')
+    child.sendline('7')
+    child.expect('Return to Vent menu')
+    child.sendline('6')
+    child.expect('Exit')
+    child.sendline('7')
+    child.read()
+    # TODO finish going through menu actions
