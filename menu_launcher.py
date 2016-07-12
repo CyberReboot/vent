@@ -354,8 +354,8 @@ def get_mode_enabled(path_dirs, mode_config):
 
             # if certain plugin namespaces have been omitted from the modes.template file
             # then no special runtime config and use all
-            for namespace in all_plugins.keys():
-                if namespace not in mode_enabled.keys() and namespace in all_plugins:
+            for namespace in all_plugins:
+                if namespace not in mode_enabled:
                     mode_enabled[namespace] = all_plugins[namespace]
 
             mode_enabled['core'] = core_enabled
