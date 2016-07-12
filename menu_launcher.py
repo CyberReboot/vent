@@ -382,11 +382,9 @@ def get_core_enabled(path_dirs, core_config):
             p_colls = passive_colls
             a_colls = active_colls
 
-            if 'passive' in core_config.keys():
-                if core_config['passive'] == "off":
+            if 'passive' in core_config.keys() and core_config['passive'] == "off":
                     p_colls = []
-            if 'active' in core_config.keys():
-                if core_config['active'] == "off":
+            if 'active' in core_config.keys() and core_config['active'] == "off":
                     a_colls = []
 
             # Add all passively enabled collectors
