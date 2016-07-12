@@ -344,8 +344,9 @@ def get_mode_enabled(path_dirs, mode_config):
                 if namespace not in ["visualization", "collectors", "core"]:
                     val = mode_config[namespace]
                     # val is either: ["all"] or ["none"]/[""] or ["some", "some2", etc...]
-                    if val == ["all"] and namespace in all_plugins:
-                        mode_enabled[namespace] = all_plugins[namespace]
+                    if val == ["all"]:
+                        if namespace in all_plugins:
+                            mode_enabled[namespace] = all_plugins[namespace]
                     elif val in [["none"], [""]]:
                         mode_enabled[namespace] = []
                     else:
@@ -474,9 +475,8 @@ def get_enabled(path_dirs):
                             all_disabled[namespace].append(container)
                         # Case 7
                         else:
-                            with open("/tmp/error.log", "a+") as file:
-                                file.write("get_enabled error: Case 7 reached!\n")
-                            file.close()
+                            with open("/tmp/error.log", "a+") as myfile:
+                                myfile.write("get_enabled error: Case 7 reached!\n")
             else:
             # For 'visualizations' & all plugin namespaces
                 for container in all_installed[namespace]:
@@ -489,9 +489,8 @@ def get_enabled(path_dirs):
                             all_disabled[namespace].append(container)
                         # Case 7
                         else:
-                            with open("/tmp/error.log", "a+") as file:
-                                file.write("get_enabled error: Case 7 reached!\n")
-                            file.close()
+                            with open("/tmp/error.log", "a+") as myfile:
+                                myfile.write("get_enabled error: Case 7 reached!\n")
 
         enabled = all_enabled
         disabled = all_disabled
