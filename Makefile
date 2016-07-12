@@ -8,10 +8,9 @@ test:
 	@echo
 	@echo "checking dependencies"
 	@echo
-	docker -v
-	find . -name "*.pyc" -type f -delete
-	docker build -t vent-test -f Dockerfile.test .
-	docker run -it --net host vent-test | tee .coverage
+	pip -V
+ 	pip install -r tests/requirements.txt
+ 	py.test -v --cov=. --cov-report term-missing
 
 pull:
 	docker pull boot2docker/boot2docker
