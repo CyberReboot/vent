@@ -312,7 +312,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                                     except Exception as e:
                                         pass
                                 else:
-                                    instructions['Image'] = 'core/'+section
+                                    instructions['Image'] = 'collectors/'+section
                                     instructions['Volumes'] = {"/"+section+"-data": {}}
                                     tool_dict[section] = instructions
                         else:
