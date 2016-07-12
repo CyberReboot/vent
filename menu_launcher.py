@@ -297,15 +297,6 @@ def get_mode_enabled(path_dirs, mode_config):
             coll_enabled = []
             vis_enabled = []
 
-            with open("/tmp/mode_config.log", "a+") as myfile:
-                for namespace in mode_config:
-                    myfile.write(namespace+"\n")
-                    for val in mode_config[namespace]:
-                        myfile.write(val+"\n")
-                    myfile.write("---\n")
-            with open("/tmp/mode_enabled.log", "a+") as myfile:
-                myfile.write("hello???")
-
             # check if core has a specification in mode_config
             if "core" in mode_config.keys():
                 val = mode_config['core']
@@ -319,11 +310,6 @@ def get_mode_enabled(path_dirs, mode_config):
             # if not, then no runtime config for core, use all
             else:
                 core_enabled = all_cores
-
-            with open("/tmp/mode_enabled.log", "a+") as myfile:
-                myfile.write("hello???-1")
-                for x in core_enabled:
-                    myfile.write(x+"\n")
 
             # check if collectors has a specification in mode_config
             if "collectors" in mode_config.keys():
@@ -339,11 +325,6 @@ def get_mode_enabled(path_dirs, mode_config):
             else:
                 coll_enabled = all_colls
 
-            with open("/tmp/mode_enabled.log", "a+") as myfile:
-                myfile.write("hello???-2")
-                for x in coll_enabled:
-                    myfile.write(x+"\n")
-
             # check if visualizations has a specification in mode_config
             if "visualization" in mode_config.keys():
                 val = mode_config['visualization']
@@ -358,10 +339,6 @@ def get_mode_enabled(path_dirs, mode_config):
             else:
                 vis_enabled = all_vis
 
-            with open("/tmp/mode_enabled.log", "a+") as myfile:
-                myfile.write("hello???-3")
-                for x in vis_enabled:
-                    myfile.write(x+"\n")
             # plugins
             for namespace in mode_config.keys():
                 if namespace not in ["visualization", "collectors", "core"]:
@@ -375,14 +352,6 @@ def get_mode_enabled(path_dirs, mode_config):
                     else:
                         mode_enabled[namespace] = val
 
-            with open("/tmp/mode_enabled.log", "a+") as myfile:
-                myfile.write("hello???-4")
-                for x in mode_enabled:
-                    myfile.write(x+"\n")
-                    for y in mode_enabled[x]:
-                        myfile.write(y + "\n")
-                    myfile.write("---\n")
-
             # if certain plugin namespaces have been omitted from the modes.template file
             # then no special runtime config and use all
             for namespace in all_plugins.keys():
@@ -392,13 +361,6 @@ def get_mode_enabled(path_dirs, mode_config):
             mode_enabled['core'] = core_enabled
             mode_enabled['collectors'] = coll_enabled
             mode_enabled['visualization'] = vis_enabled
-            with open("/tmp/mode_enabled.log", "a+") as myfile:
-                myfile.write("hello???")
-                for namespace in mode_enabled:
-                    myfile.write(namespace+"\n")
-                    for val in mode_enabled[namespace]:
-                        myfile.write(val+"\n")
-                myfile.write("---\n")
     except Exception as e:
         pass
 
@@ -489,29 +451,6 @@ def get_enabled(path_dirs):
             all_enabled[namespace] = []
             all_disabled[namespace] = []
 
-        with open("/tmp/traceback.log", "a+") as myfile:
-            for namespace in all_installed:
-                myfile.write(namespace + "\n")
-                for val in all_installed[namespace]:
-                    myfile.write(val+"\n")
-            myfile.write("---\n")
-            for namespace in all_enabled:
-                myfile.write(namespace+"\n")
-                for val in all_enabled[namespace]:
-                    myfile.write(val+"\n")
-            myfile.write("---\n")
-            for namespace in all_disabled:
-                myfile.write(namespace+"\n")
-                for val in all_disabled[namespace]:
-                    myfile.write(val+"\n")
-            myfile.write("---\n")
-            for namespace in mode_enabled:
-                myfile.write("ME "+namespace+"\n")
-            myfile.write("---\n")
-            for namespace in core_enabled:
-                myfile.write("CE "+namespace+"\n")
-            myfile.write("---\n")
-
         for namespace in all_installed.keys():
             # For 'cores' & 'collectors'
             if namespace in mode_enabled.keys() and namespace in core_enabled.keys():
@@ -557,10 +496,6 @@ def get_enabled(path_dirs):
 
         enabled = all_enabled
         disabled = all_disabled
-
-        with open("/tmp/HELLO.log", "a+") as myfile:
-            myfile.write("Hello???")
-
     except Exception as e:
         pass
 
@@ -574,30 +509,9 @@ def get_plugin_status(path_dirs):
         ### Get All Installed Images (By Filewalk) ###
         all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed(path_dirs)
 
-        with open("/tmp/installed.log", "a+") as myfile:
-            for x in all_installed:
-                myfile.write("Namespace "+x)
-                for y in all_installed[x]:
-                    myfile.write(" | "+y)
-                myfile.write("\n")
-
         ### Get Enabled/Disabled Images ###
         # Retrieves all enabled images
         enabled, disabled = get_enabled(path_dirs)
-
-        with open("/tmp/enabled.log", "a+") as myfile:
-            for x in enabled:
-                myfile.write("Namespace "+x)
-                for y in enabled[x]:
-                    myfile.write(" | "+y)
-                myfile.write("\n")
-
-        with open("/tmp/disabled.log", "a+") as myfile:
-            for x in disabled:
-                myfile.write("Namespace "+x)
-                for y in disabled[x]:
-                    myfile.write(" | "+y)
-                myfile.write("\n")
 
         # Make a list of disabled images of format: namespace/image
         disabled_images = []
@@ -605,10 +519,6 @@ def get_plugin_status(path_dirs):
         for namespace in disabled:
             for image in disabled[namespace]:
                 disabled_images.append(namespace+'/'+image)
-
-        with open("/tmp/images_disabled.log", "a+") as myfile:
-            for x in disabled_images:
-                myfile.write(x+"\n")
             
         ### Get Disabled Containers ###
         # Need to cross reference with all installed containers to determine all disabled containers
@@ -617,22 +527,13 @@ def get_plugin_status(path_dirs):
         containers = check_output(" docker ps -a | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         containers = [ container for container in containers if container != "" ]
 
-        with open("/tmp/containers_installed.log", "a+") as myfile:
-            for x in containers:
-                myfile.write(x+"\n")
-
         # Intersect the set of all containers with the set of all disabled images
         # Images form the basis for a container (in name especially), but there can be multiple containers per image
-        # !! TODO - Simplify using disabled_images
         for container in containers:
             for namespace in disabled:
                 for image in disabled[namespace]:
                     if image in container:
                         disabled_containers.append(container)
-
-        with open("/tmp/disabled_containers.log", "a+") as myfile:
-            for x in disabled_containers:
-                myfile.write(x+"\n")
 
         ### Get all Running Containers, not including disabled containers ###
         # Retrieves running or restarting docker containers and returns a list of container names
@@ -644,13 +545,6 @@ def get_plugin_status(path_dirs):
         running_errors = [ container for container in running if container in disabled_containers ]
         running = [ container for container in running if container not in disabled_containers ]
 
-        with open("/tmp/running.log", "a+") as myfile:
-            for x in running:
-                myfile.write(x+"\n")
-        with open("/tmp/running_errors.log", "a+") as myfile:
-            for x in running_errors:
-                myfile.write(x+"\n")
-
         ### Get all NR Containers, not including disabled containers ###
         # Retrieves docker containers with status exited, paused, dead, created; returns as a list of container names
         nrcontainers = check_output(" { docker ps -af status=created & docker ps -af status=exited & docker ps -af status=paused & docker ps -af status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
@@ -659,13 +553,6 @@ def get_plugin_status(path_dirs):
         nr_errors = [ container for container in nrcontainers if container in disabled_containers ]
         nrbuilt = [ container for container in nrcontainers if container not in disabled_containers ]
 
-        with open("/tmp/nrbuilt.log", "a+") as myfile:
-            for x in nrbuilt:
-                myfile.write(x+"\n")
-        with open("/tmp/nr_errors.log", "a+") as myfile:
-            for x in nr_errors:
-                myfile.write(x+"\n")
-
         ### Get all Built Images, not including disabled images ###
         # Retrieve all built docker images
         built = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
@@ -673,26 +560,14 @@ def get_plugin_status(path_dirs):
         # Image *should* be removed if disabled
         built_errors = [ image for image in built if image in disabled_images ]
 
-        with open("/tmp/built.log", "a+") as myfile:
-            for x in built:
-                myfile.write(x+"\n")
-        with open("/tmp/built_errors.log", "a+") as myfile:
-            for x in built_errors:
-                myfile.write(x+"\n")
-
         ### Get all Not Built Images, not including disabled images ###
         # If image hasn't been disabled and isn't present in docker images then add
-        # !! TODO - Simplify using disabled_images
         notbuilt = []
         for namespace in all_installed:
             for image in all_installed[namespace]:
                 if namespace in disabled:
                     if image not in disabled[namespace] and namespace+'/'+image not in built:
                         notbuilt.append(namespace+'/'+image)
-
-        with open("/tmp/notbuilt.log", "a+") as myfile:
-            for x in notbuilt:
-                myfile.write(x+"\n")
 
         ### Prepare Statuses for MENU ###
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running ]
@@ -702,8 +577,6 @@ def get_plugin_status(path_dirs):
         p_built = [ {'title': x, 'type': 'INFO', 'command': '' } for x in built ]
         p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
 
-        with open("/tmp/errors.log", "a+") as myfile:
-            myfile.write("Made it! - 1\n")
         ### Prepare Errors for MENU ###
         p_running_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in running_errors ]
         p_nr_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in nr_errors ]
@@ -713,8 +586,7 @@ def get_plugin_status(path_dirs):
                          {'title': "Not Running Errors", 'subtitle': "Containers that should be removed because they are disabled...", 'type': 'MENU', 'options': p_nr_errors },
                          {'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': 'MENU', 'options': p_built_errors }
                         ]
-        with open("/tmp/errors.log", "a+") as myfile:
-            myfile.write("Made it! - 2\n")
+
         ### Returned Menu Dictionary
         p['title'] = 'Plugin Status'
         p['subtitle'] = 'Choose a category...'
@@ -727,8 +599,6 @@ def get_plugin_status(path_dirs):
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
                          { 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu }
                         ]
-        with open("/tmp/errors.log", "a+") as myfile:
-            myfile.write("Made it! - 3\n")
     except Exception as e:
         pass
 
