@@ -527,6 +527,10 @@ def get_plugin_status(path_dirs):
 
         # Retrieves running or restarting docker containers and returns a list of container names
         running = check_output(" { docker ps -af status=running & docker ps -af status=restarting; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
+        running = [ container for container in running if container != "" ]
+
+        # Running containers should not intersect with disabled containers/images.
+        running = [ container for container in running if container not in disabled_containers ]
 
         # Retrieves docker containers with status exited, paused, dead, created; returns as a list of container names
         nrcontainers = check_output(" { docker ps -af status=created & docker ps -af status=exited & docker ps -af status=paused & docker ps -af status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
@@ -552,7 +556,7 @@ def get_plugin_status(path_dirs):
 
         p['title'] = 'Plugin Status'
         p['subtitle'] = 'Choose a category...'
-        p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running if x != "" ]
+        p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running ]
         p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt ]
         p_disabled_cont = [ {'title': x, 'type': 'INFO', 'command': '' } for x in disabled_containers ]
         p_disabled_images = [ {'title': x, 'type': 'INFO', 'command': '' } for x in p_disabled ]
@@ -622,8 +626,20 @@ def run_plugins(path_dirs, action):
         for plug in plugin_array:
             plugins[plug] = config.get("plugins", plug)
 
+        # get number of installed cores
+        cores = len(get_installed_cores(path_dirs))
+
+        # get number of installed collectors
+        all_colls = len(get_installed_collectors(path_dirs, "all"))
+        passive_colls = len(get_installed_collectors(path_dirs, "passive"))
+        active_colls = len(get_installed_collectors(path_dirs, "active"))
+
+        # get number of installed visualizations
+        vis = len(get_installed_vis(path_dirs))
+
         for plugin in plugins:
-            if plugin in ["core", "visualization"]:
+            # check if plugin is core or vis and the corresponding size is greater than 0
+            if (plugin, cores > 0) == ("core", True) or (plugin, vis > 0) == ("visualization", True):
                 p = {}
                 try:
                     config = ConfigParser.RawConfigParser()
@@ -643,26 +659,30 @@ def run_plugins(path_dirs, action):
             # needed to preserve case sensitive options
             config.optionxform=str
             config.read(path_dirs.template_dir+'core.template')
-            try:
-                passive = config.get("local-collection", "passive")
-                if passive == "on":
-                    p = {}
-                    p['title'] = "Local Passive Collection"
-                    p['type'] = INFO2
-                    p['command'] = 'python2.7 /data/template_parser.py passive '+action
-                    modes.append(p)
-            except Exception as e:
-                pass
-            try:
-                active = config.get("local-collection", "active")
-                if active == "on":
-                    p = {}
-                    p['title'] = "Local Active Collection"
-                    p['type'] = INFO2
-                    p['command'] = 'python2.7 /data/template_parser.py active '+action
-                    modes.append(p)
-            except Exception as e:
-                pass
+            # check if we have any passive collectors to handle
+            if passive_colls > 0:
+                try:
+                    passive = config.get("local-collection", "passive")
+                    if passive == "on":
+                        p = {}
+                        p['title'] = "Local Passive Collection"
+                        p['type'] = INFO2
+                        p['command'] = 'python2.7 /data/template_parser.py passive '+action
+                        modes.append(p)
+                except Exception as e:
+                    pass
+            # check if we have any active collectors to handle
+            if active_colls > 0:
+                try:
+                    active = config.get("local-collection", "active")
+                    if active == "on":
+                        p = {}
+                        p['title'] = "Local Active Collection"
+                        p['type'] = INFO2
+                        p['command'] = 'python2.7 /data/template_parser.py active '+action
+                        modes.append(p)
+                except Exception as e:
+                    pass
         except Exception as e:
             pass
         if len(modes) > 1:
