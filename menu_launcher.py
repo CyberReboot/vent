@@ -297,6 +297,15 @@ def get_mode_enabled(path_dirs, mode_config):
             coll_enabled = []
             vis_enabled = []
 
+            with open("/tmp/mode_config.log", "a+") as myfile:
+                for namespace in mode_config:
+                    myfile.write(namespace+"\n")
+                    for val in mode_config[namespace]:
+                        myfile.write(val+"\n")
+                    myfile.write("---\n")
+            with open("/tmp/mode_enabled.log", "a+") as myfile:
+                myfile.write("hello???")
+
             # check if core has a specification in mode_config
             if "core" in mode_config.keys():
                 val = mode_config['core']
@@ -310,6 +319,11 @@ def get_mode_enabled(path_dirs, mode_config):
             # if not, then no runtime config for core, use all
             else:
                 core_enabled = all_cores
+
+            with open("/tmp/mode_enabled.log", "a+") as myfile:
+                myfile.write("hello???-1")
+                for x in core_enabled:
+                    myfile.write(x+"\n")
 
             # check if collectors has a specification in mode_config
             if "collectors" in mode_config.keys():
@@ -325,6 +339,11 @@ def get_mode_enabled(path_dirs, mode_config):
             else:
                 coll_enabled = all_colls
 
+            with open("/tmp/mode_enabled.log", "a+") as myfile:
+                myfile.write("hello???-2")
+                for x in coll_enabled:
+                    myfile.write(x+"\n")
+
             # check if visualizations has a specification in mode_config
             if "visualization" in mode_config.keys():
                 val = mode_config['visualization']
@@ -339,27 +358,47 @@ def get_mode_enabled(path_dirs, mode_config):
             else:
                 vis_enabled = all_vis
 
+            with open("/tmp/mode_enabled.log", "a+") as myfile:
+                myfile.write("hello???-3")
+                for x in vis_enabled:
+                    myfile.write(x+"\n")
             # plugins
             for namespace in mode_config.keys():
                 if namespace not in ["visualization", "collectors", "core"]:
                     val = mode_config[namespace]
                     # val is either: ["all"] or ["none"]/[""] or ["some", "some2", etc...]
                     if val == ["all"]:
-                        mode_enabled[namespace] = all_plugins[namespace]
+                        if namespace in all_plugins:
+                            mode_enabled[namespace] = all_plugins[namespace]
                     elif val in [["none"], [""]]:
                         mode_enabled[namespace] = []
                     else:
                         mode_enabled[namespace] = val
 
+            with open("/tmp/mode_enabled.log", "a+") as myfile:
+                myfile.write("hello???-4")
+                for x in mode_enabled:
+                    myfile.write(x+"\n")
+                    for y in mode_enabled[x]:
+                        myfile.write(y + "\n")
+                    myfile.write("---\n")
+
             # if certain plugin namespaces have been omitted from the modes.template file
             # then no special runtime config and use all
             for namespace in all_plugins.keys():
-                if namespace not in mode_enabled.keys():
+                if namespace not in mode_enabled.keys() and namespace in all_plugins:
                     mode_enabled[namespace] = all_plugins[namespace]
 
             mode_enabled['core'] = core_enabled
             mode_enabled['collectors'] = coll_enabled
             mode_enabled['visualization'] = vis_enabled
+            with open("/tmp/mode_enabled.log", "a+") as myfile:
+                myfile.write("hello???")
+                for namespace in mode_enabled:
+                    myfile.write(namespace+"\n")
+                    for val in mode_enabled[namespace]:
+                        myfile.write(val+"\n")
+                myfile.write("---\n")
     except Exception as e:
         pass
 
@@ -450,6 +489,29 @@ def get_enabled(path_dirs):
             all_enabled[namespace] = []
             all_disabled[namespace] = []
 
+        with open("/tmp/traceback.log", "a+") as myfile:
+            for namespace in all_installed:
+                myfile.write(namespace + "\n")
+                for val in all_installed[namespace]:
+                    myfile.write(val+"\n")
+            myfile.write("---\n")
+            for namespace in all_enabled:
+                myfile.write(namespace+"\n")
+                for val in all_enabled[namespace]:
+                    myfile.write(val+"\n")
+            myfile.write("---\n")
+            for namespace in all_disabled:
+                myfile.write(namespace+"\n")
+                for val in all_disabled[namespace]:
+                    myfile.write(val+"\n")
+            myfile.write("---\n")
+            for namespace in mode_enabled:
+                myfile.write("ME "+namespace+"\n")
+            myfile.write("---\n")
+            for namespace in core_enabled:
+                myfile.write("CE "+namespace+"\n")
+            myfile.write("---\n")
+
         for namespace in all_installed.keys():
             # For 'cores' & 'collectors'
             if namespace in mode_enabled.keys() and namespace in core_enabled.keys():
@@ -480,20 +542,25 @@ def get_enabled(path_dirs):
             else:
             # For 'visualizations' & all plugin namespaces
                 for container in all_installed[namespace]:
-                    # Case 5
-                    if container in mode_enabled[namespace]:
-                        all_enabled[namespace].append(container)
-                    # Case 6
-                    elif container not in mode_enabled[namespace]:
-                        all_disabled[namespace].append(container)
-                    # Case 7
-                    else:
-                        with open("/tmp/error.log", "a+") as file:
-                            file.write("get_enabled error: Case 7 reached!\n")
-                        file.close()
+                    if namespace in mode_enabled:
+                        # Case 5
+                        if container in mode_enabled[namespace]:
+                            all_enabled[namespace].append(container)
+                        # Case 6
+                        elif container not in mode_enabled[namespace]:
+                            all_disabled[namespace].append(container)
+                        # Case 7
+                        else:
+                            with open("/tmp/error.log", "a+") as file:
+                                file.write("get_enabled error: Case 7 reached!\n")
+                            file.close()
 
         enabled = all_enabled
         disabled = all_disabled
+
+        with open("/tmp/HELLO.log", "a+") as myfile:
+            myfile.write("Hello???")
+
     except Exception as e:
         pass
 
@@ -619,8 +686,9 @@ def get_plugin_status(path_dirs):
         notbuilt = []
         for namespace in all_installed:
             for image in all_installed[namespace]:
-                if image not in disabled[namespace] and namespace+'/'+image not in built:
-                    notbuilt.append(namespace+'/'+image)
+                if namespace in disabled:
+                    if image not in disabled[namespace] and namespace+'/'+image not in built:
+                        notbuilt.append(namespace+'/'+image)
 
         with open("/tmp/notbuilt.log", "a+") as myfile:
             for x in notbuilt:
