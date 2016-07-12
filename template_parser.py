@@ -386,17 +386,17 @@ def main():
         if template_execution == "stop":
             if template_type == "all":
                 for x in ["visualization", "core", "active", "passive"]:
-                    os.system("docker ps | grep "+x+" | awk '{print $1}' | xargs docker stop")                
+                    os.system("docker ps -aqf name=\""+x+"\" | xargs docker stop")
             else:
-                os.system("docker ps | grep "+template_type+" | awk '{print $1}' | xargs docker stop")
+                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker stop")
         elif template_execution == "clean":
             if template_type == "all":
                 for x in ["visualization", "core", "active", "passive"]:
                     os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill")
                     os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm")
             else:
-                os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
-                os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
+                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker kill")
+                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker rm")
         elif template_execution == "start" and template_type == "all":
             container_cmd = None
             if len(sys.argv) == 4:
