@@ -118,7 +118,6 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                 for container in running_containers:
                     if section in container and template_type in container:
                         t_sections.append(section)
-                        print section
             sections = [x for x in sections if x not in t_sections]
             external_overrides = []
             external_hosts = {}
@@ -368,12 +367,11 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
         else:
             pass
     except Exception as e:
-        print e
         pass
     return info_name, service_schedule, tool_core, tool_dict, delay_sections
 
-def main():
-    path_dirs = PathDirs()
+def main(path_dirs):
+    """main method for template_parser. Based on the action argument given, performs the actions on the correct template files"""
     template_dir = path_dirs.template_dir
     plugins_dir = path_dirs.plugins_dir
 
@@ -385,17 +383,17 @@ def main():
         if template_execution == "stop":
             if template_type == "all":
                 for x in ["visualization", "core", "active", "passive"]:
-                    os.system("docker ps | grep "+x+" | awk '{print $1}' | xargs docker stop")                
+                    os.system("docker ps -aqf name=\""+x+"\" | xargs docker stop")
             else:
-                os.system("docker ps | grep "+template_type+" | awk '{print $1}' | xargs docker stop")
+                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker stop")
         elif template_execution == "clean":
             if template_type == "all":
                 for x in ["visualization", "core", "active", "passive"]:
                     os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill")
                     os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm")
             else:
-                os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
-                os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
+                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker kill")
+                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker rm")
         elif template_execution == "start" and template_type == "all":
             container_cmd = None
             if len(sys.argv) == 4:
@@ -411,4 +409,5 @@ def main():
             execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
 
 if __name__ == "__main__": # pragma: no cover
-    main()
+    path_dirs = PathDirs()
+    main(path_dirs)
