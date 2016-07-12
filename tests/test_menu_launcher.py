@@ -227,4 +227,5 @@ def test_running_menu():
     child.sendline('6')
     child.expect('Exit')
     child.sendline('7')
+    child.read()
     # TODO finish going through menu actions
