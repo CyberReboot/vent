@@ -4,13 +4,9 @@ all-no-cache: no-cache
 
 latest: pull vent
 
-test:
-	@echo
-	@echo "checking dependencies"
-	@echo
-	pip -V
-	pip install -r tests/requirements.txt
-	py.test -v --cov=. --cov-report term-missing
+test: depends
+	docker build -t vent-test -f Dockerfile.test .
+	docker run -it vent-test > .coverage
 
 pull:
 	docker pull boot2docker/boot2docker
