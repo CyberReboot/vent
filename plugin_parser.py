@@ -59,7 +59,7 @@ def add_plugins(path_dirs, plugin_url):
         for subdir in subdirs:
             try:
                 if subdir.startswith(path_dirs.plugin_repos+"/"+plugin_name+"/collectors/"):
-                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/collectors/")[1]
+                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/collectors/")[-1]
                     # only go one level deep, and copy recursively below that
                     if not "/" in recdir:
                         dest = path_dirs.collectors_dir+"/"+recdir
@@ -67,10 +67,10 @@ def add_plugins(path_dirs, plugin_url):
                             shutil.rmtree(dest)
                         shutil.copytree(subdir, dest)
                 elif subdir.startswith(path_dirs.plugin_repos+"/"+plugin_name+"/plugins/"):
-                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/plugins/")[1]
+                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/plugins/")[-1]
                     # only go one level deep, and copy recursively below that
                     if not "/" in recdir:
-                        dest = path_dirs.plugins_dir+recdir
+                        dest = path_dirs.plugins_dir+"/"+recdir
                         if os.path.exists(dest):
                             shutil.rmtree(dest)
                         shutil.copytree(subdir, dest)
@@ -80,21 +80,20 @@ def add_plugins(path_dirs, plugin_url):
                         if not os.path.isfile(path_dirs.plugin_repos+"/"+plugin_name+"/templates/"+namespace+".template"):
                             print "Warning! Plugin namespace has no template. Not installing "+namespace
                             shutil.rmtree(path_dirs.plugins_dir+namespace)
-                            shutil.rmtree(path_dirs.plugin_repos+"/plugins/"+namespace)
                 elif subdir.startswith(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/"):
-                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/")[1]
+                    recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/")[-1]
                     # only go one level deep, and copy recursively below that
                     if not "/" in recdir:
                         dest = path_dirs.vis_dir+"/"+recdir
                         if os.path.exists(dest):
                             shutil.rmtree(dest)
                         shutil.copytree(subdir, dest)
-                elif subdir == path_dirs.plugin_repos+"/"+plugin_name+"/visualization":
-                    # only files, not dirs
-                    dest = path_dirs.vis_dir+"/"
-                    for (dirpath, dirnames, filenames) in os.walk(subdir):
-                        for filename in filenames:
-                            shutil.copyfile(subdir+"/"+filename, dest+filename)
+                # elif subdir == path_dirs.plugin_repos+"/"+plugin_name+"/visualization":
+                #     # only files, not dirs
+                #     dest = path_dirs.vis_dir+"/"
+                #     for (dirpath, dirnames, filenames) in os.walk(subdir):
+                #         for filename in filenames:
+                #             shutil.copyfile(subdir+"/"+filename, dest+filename)
                 elif subdir == path_dirs.plugin_repos+"/"+plugin_name+"/templates":
                     # only files, not dirs
                     dest = path_dirs.template_dir
@@ -134,8 +133,7 @@ def add_plugins(path_dirs, plugin_url):
                                     shutil.copyfile(subdir+"/"+filename, dest+filename)
                                 else:
                                     print "Warning! Plugin template with no corresponding plugins to install. Not installing "+namespace+".template"
-                                    os.remove(path_dirs.plugin_repos+"/"+plugin_name+"templates/"+filename)
-                                    os.remove(path_dirs.template_dir+filename)
+                                    os.remove(path_dirs.plugin_repos+"/"+plugin_name+"/templates/"+filename)
             except Exception as e:
                 pass
         # update modes.template if it wasn't copied up to include new plugins
@@ -149,7 +147,7 @@ def add_plugins(path_dirs, plugin_url):
             plugins = {}
             for f in files:
                 f_name = f.split(".template")[0]
-                if f_name != "README.md" and not f_name in plugin_array and f_name != "modes":
+                if f_name != "README.md" and not f_name in plugin_array and f_name != "modes" and os.path.isdir(path_dirs.plugins_dir+f_name):
                     config.set("plugins", f_name, "all")
             with open(path_dirs.template_dir + 'modes.template', 'w') as configfile:
                 config.write(configfile)
@@ -167,6 +165,7 @@ def add_plugins(path_dirs, plugin_url):
         os.system("/bin/sh /data/build_images.sh")
         return
     except Exception as e:
+        print e
         pass
 
 """

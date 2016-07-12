@@ -210,7 +210,8 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                                     host_config = ast.literal_eval(option_val)
                                     host_config_new = copy.deepcopy(host_config)
                                     extra_hosts = []
-                                    host_config_new["RestartPolicy"] = { "Name": "always" }
+                                    if template_type == "core":
+                                        host_config_new["RestartPolicy"] = { "Name": "always" }
                                     if template_type not in ["visualization", "core", "active", "passive"]:
                                         # add link to rabbitmq
                                         if "Links" in host_config:
@@ -382,13 +383,13 @@ def main(path_dirs):
         template_execution = sys.argv[2]
         if template_execution == "stop":
             if template_type == "all":
-                for x in ["visualization", "core", "active", "passive"]:
+                for x in ["visualization", "active", "passive", "core"]:
                     os.system("docker ps -aqf name=\""+x+"\" | xargs docker stop")
             else:
                 os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker stop")
         elif template_execution == "clean":
             if template_type == "all":
-                for x in ["visualization", "core", "active", "passive"]:
+                for x in ["visualization", "active", "passive", "core"]:
                     os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill")
                     os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm")
             else:
@@ -398,7 +399,7 @@ def main(path_dirs):
             container_cmd = None
             if len(sys.argv) == 4:
                 container_cmd = sys.argv[3]
-            for x in ["visualization", "core", "active", "passive"]:
+            for x in ["core", "visualization", "active", "passive"]:
                 info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(x, container_cmd, template_dir, plugins_dir)
                 execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
         else:
