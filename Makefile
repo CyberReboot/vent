@@ -9,8 +9,8 @@ test:
 	@echo "checking dependencies"
 	@echo
 	pip -V
- 	pip install -r tests/requirements.txt
- 	py.test -v --cov=. --cov-report term-missing
+	pip install -r tests/requirements.txt
+	py.test -v --cov=. --cov-report term-missing
 
 pull:
 	docker pull boot2docker/boot2docker
