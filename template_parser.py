@@ -9,7 +9,6 @@ import subprocess
 import sys
 import time
 
-import menu_launcher
 class PathDirs:
     """ Global path directories for parsing templates """
     def __init__(self,
@@ -103,6 +102,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
         delay_sections = {}
         if template_type != "all":
             try:
+                # get list of sections per template file
                 with open(template_path): pass
                 config = ConfigParser.RawConfigParser()
                 # needed to preserve case sensitive options
@@ -134,6 +134,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                 external_options = []
             host_config_exists = False
 
+            # plugin template file
             if template_type not in ["visualization", "core", "active", "passive"]:
                 try:
                     # add tools that don't have sections
@@ -158,6 +159,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                 except Exception as e:
                     pass
 
+            # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
             for section in sections:
                 instructions = {}
                 try:
@@ -180,18 +182,21 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                             option_val = int(option_val)
                         except Exception as e:
                             pass
+                        # legacy
                         if option == 'data_path':
                             if len(cmd) == 4:
                                 cmd.insert(1, option_val)
                             else:
                                 cmd.append(option_val)
                             d_path = 1
+                        # legacy
                         elif option == 'site_path':
                             if len(cmd) == 2:
                                 cmd.append("")
                                 cmd.append(option_val)
                             else:
                                 cmd.append(option_val)
+                        # unimplemented as of 7-12-16
                         elif option == 'delay':
                             try:
                                 delay_sections[section] = option_val
@@ -386,8 +391,8 @@ def main():
         elif template_execution == "clean":
             if template_type == "all":
                 for x in ["visualization", "core", "active", "passive"]:
-                    os.system("docker ps -a | grep "+x+" | awk '{print $1}' | xargs docker kill")
-                    os.system("docker ps -a | grep "+x+" | awk '{print $1}' | xargs docker rm")
+                    os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill")
+                    os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm")
             else:
                 os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
                 os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
