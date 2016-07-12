@@ -5,8 +5,9 @@ all-no-cache: no-cache
 latest: pull vent
 
 test: depends
+	find . -name "*.pyc" -type f -delete
 	docker build -t vent-test -f Dockerfile.test .
-	docker run -it vent-test | tee .coverage
+	docker run -it --net host vent-test | tee .coverage
 
 pull:
 	docker pull boot2docker/boot2docker
