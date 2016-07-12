@@ -4,7 +4,11 @@ all-no-cache: no-cache
 
 latest: pull vent
 
-test: depends
+test:
+	@echo
+	@echo "checking dependencies"
+	@echo
+	docker -v
 	find . -name "*.pyc" -type f -delete
 	docker build -t vent-test -f Dockerfile.test .
 	docker run -it --net host vent-test | tee .coverage
