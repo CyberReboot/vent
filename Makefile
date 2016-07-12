@@ -6,7 +6,7 @@ latest: pull vent
 
 test: depends
 	docker build -t vent-test -f Dockerfile.test .
-	docker run -it vent-test > .coverage
+	docker run -it vent-test | tee .coverage
 
 pull:
 	docker pull boot2docker/boot2docker
