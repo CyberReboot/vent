@@ -896,8 +896,11 @@ def processmenu(path_dirs, menu, parent=None):
             os.system(menu['options'][getin]['command'])
             screen.clear()
             curses.reset_prog_mode()
-            curses.curs_set(1)
-            curses.curs_set(0)
+            try:
+                curses.curs_set(1)
+                curses.curs_set(0)
+            except Exception as e:
+                pass
         elif menu['options'][getin]['type'] == INPUT:
             if menu['options'][getin]['title'] == "Add Plugins":
                 plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git")
