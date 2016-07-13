@@ -259,9 +259,6 @@ def test_running_menu():
     child = pexpect.spawnu(cmd)
     # expect main menu
     # go to mode
-    child.interact(ord('7'))
-    child.interact(ord('\n'))
-    """
     child.readline()
     child.sendline('1')
     # go to start
@@ -309,7 +306,6 @@ def test_running_menu():
     child.sendline('7')
     child.readline()
     # TODO finish going through menu actions
-    """
 
 def test_running_menu_plugins():
     """ test running plugins through the menu """
