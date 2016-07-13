@@ -1031,9 +1031,11 @@ def build_menu_dict(path_dirs):
     }
     return menu_data
 
-def main():
+def main(base_dir=None):
     """start menu, clears terminal after exiting menu"""
     path_dirs = PathDirs()
+    if base_dir:
+        path_dirs = PathDirs(base_dir=base_dir)
     menu_data = build_menu_dict(path_dirs)
     processmenu(path_dirs, menu_data)
     curses.endwin()
@@ -1046,4 +1048,7 @@ if __name__ == "__main__": # pragma: no cover
         print result
     except Exception as e:
         pass
-    main()
+    if len(sys.argv) == 3:
+        main(sys.argv[2])
+    else:
+        main()
