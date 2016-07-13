@@ -147,7 +147,7 @@ def add_plugins(path_dirs, plugin_url):
             plugins = {}
             for f in files:
                 f_name = f.split(".template")[0]
-                if f_name != "README.md" and not f_name in plugin_array and f_name != "modes" and os.path.isdir(path_dirs.plugins_dir+f_name):
+                if f_name != "README.md" and not f_name in plugin_array and f_name != "modes" and (os.path.isdir(path_dirs.plugins_dir+f_name) or os.path.isdir(path_dirs.base_dir+f_name)):
                     config.set("plugins", f_name, "all")
             with open(path_dirs.template_dir + 'modes.template', 'w') as configfile:
                 config.write(configfile)
