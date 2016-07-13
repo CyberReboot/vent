@@ -327,13 +327,13 @@ def test_running_menu():
     child.sendline('3')
     child.expect('Return to Plugins menu')
     # go to plugins menu
-    child.sendline('1')
+    child.sendline('2')
     child.expect('Return to Vent menu')
     # go to update plugins
     child.sendline('4')
     child.expect('Return to Plugins menu')
     # go to plugins menu
-    child.sendline('1')
+    child.sendline('2')
     child.expect('Return to Vent menu')
     # go to main menu
     child.sendline('5')
