@@ -262,7 +262,6 @@ def test_running_menu():
     # go to mode
     child.sendline('1')
     child.expect('Return to Vent menu')
-    child.read()
     # go to start
     child.sendline('1')
     child.expect('Return to Mode menu')
@@ -304,6 +303,14 @@ def test_running_menu():
     #child.sendline('9')
     #child.expect('Exit')
     # exit
+    child.sendline('7')
+    child.read()
+    # TODO finish going through menu actions
+
+def test_running_menu_plugins():
+    """ test running plugins through the menu """
+    cmd = "pytho2.7 menu_launcher.py"
+    child = pexpect.spawn(cmd)
     # go to plugins menu
     child.sendline('2')
     child.expect('Return to Vent menu')
@@ -332,7 +339,6 @@ def test_running_menu():
     # return to main menu
     #child.sendline('5')
     #child.expect('Exit')
-    # exit menu
+    # exit
     child.sendline('7')
     child.read()
-    # TODO finish going through menu actions
