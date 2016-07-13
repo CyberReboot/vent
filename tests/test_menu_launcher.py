@@ -261,51 +261,40 @@ def test_running_menu():
     child.expect('Exit')
     # go to mode
     child.sendline('1')
-    child.read()
     child.expect('Return to Vent menu')
+    child.read()
     # go to start
     child.sendline('1')
-    child.read()
     child.expect('Return to Mode menu')
     # return to mode
     child.sendline('2')
-    child.read()
     child.expect('Return to Vent menu')
     # go to stop
     child.sendline('2')
-    child.read()
     child.expect('Return to Mode menu')
     # return to mode
     child.sendline('2')
-    child.read()
     child.expect('Return to Vent menu')
     # go to clean
     child.sendline('3')
-    child.read()
     child.expect('Return to Mode menu')
     # return to mode
     child.sendline('2')
-    child.read()
     child.expect('Return to Vent menu')
     # go to status
     child.sendline('4')
-    child.read()
     child.expect('Return to Mode menu')
     # return to mode
     child.sendline('8')
-    child.read()
     child.expect('Return to Vent menu')
     # go to configure
     child.sendline('5')
-    child.read()
     child.expect('Return to Mode menu')
     # return to mode
     child.sendline('3')
-    child.read()
     child.expect('Return to Vent menu')
     # return to main menu
     child.sendline('6')
-    child.read()
     child.expect('Exit')
     # !! TODO need to pull out hardcoded paths for this to work
     # go to system info
@@ -317,20 +306,16 @@ def test_running_menu():
     # exit
     # go to plugins menu
     child.sendline('2')
-    child.read()
     child.expect('Return to Vent menu')
     # go to add plugin
     child.sendline('1')
-    child.read()
     child.expect('vent-plugins.git')
     child.sendline('https://github.com/CyberReboot/vent-plugins.git')
-    child.read()
     time.sleep(2)
     child.timeout=600
     # go to main menu
     child.expect('Press any key to continue...')
     child.sendline('q')
-    child.read()
     child.expect('Exit')
     # !! TODO doesn't actually successfully add plugin, so can't be removed
     # go to plugins menu
