@@ -302,6 +302,33 @@ def test_running_menu():
     #child.sendline('9')
     #child.expect('Exit')
     # exit
+    # go to plugins menu
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    # go to add plugin
+    child.sendline('1')
+    child.expect('https://github.com/CyberReboot/vent-plugins.git')
+    child.sendline('https://github.com/CyberReboot/vent-plugins.git')
+    child.timeout=600
+    # go to main menu
+    child.expect('Press any key to continue...')
+    child.sendline('q')
+    child.expect('Exit')
+    # go to plugins menu
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    # go to remove plugin
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    # remove plugin
+    child.sendline('1')
+    child.expect('Press any key to continue...')
+    child.sendline('q')
+    child.expect('Return to Vent menu')
+    # return to main menu
+    child.sendline('5')
+    child.expect('Exit')
+    # exit menu
     child.sendline('7')
     child.read()
     # TODO finish going through menu actions
