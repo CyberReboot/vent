@@ -427,7 +427,7 @@ def test_running_menu():
     child.sendline('1')
     # child.expect('Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git')
     # send url
-    child.sendline(url)
+    child.sendline(invalid_url)
     child.expect('Operation complete. Press any key to continue...')
     # press a key
     # go to plugins menu
