@@ -2,6 +2,7 @@ import ConfigParser
 import os
 import pexpect
 import pytest
+import time
 
 from .. import menu_launcher
 import test_env
@@ -255,45 +256,44 @@ def test_get_namespace_menu():
 def test_running_menu():
     """ test running the actual menu """
     cmd = "python2.7 menu_launcher.py"
-    child = pexpect.spawn(cmd)
+    child = pexpect.spawnu(cmd)
     # expect main menu
-    child.expect('Exit')
     # go to mode
+    child.readline()
     child.sendline('1')
-    child.expect('Return to Vent menu')
     # go to start
+    child.readline()
     child.sendline('1')
-    child.expect('Return to Mode menu')
     # return to mode
+    child.readline()
     child.sendline('2')
-    child.expect('Return to Vent menu')
     # go to stop
+    child.readline()
     child.sendline('2')
-    child.expect('Return to Mode menu')
     # return to mode
+    child.readline()
     child.sendline('2')
-    child.expect('Return to Vent menu')
     # go to clean
+    child.readline()
     child.sendline('3')
-    child.expect('Return to Mode menu')
     # return to mode
+    child.readline()
     child.sendline('2')
-    child.expect('Return to Vent menu')
     # go to status
+    child.readline()
     child.sendline('4')
-    child.expect('Return to Mode menu')
     # return to mode
+    child.readline()
     child.sendline('8')
-    child.expect('Return to Vent menu')
     # go to configure
+    child.readline()
     child.sendline('5')
-    child.expect('Return to Mode menu')
     # return to mode
+    child.readline()
     child.sendline('3')
-    child.expect('Return to Vent menu')
     # return to main menu
+    child.readline()
     child.sendline('6')
-    child.expect('Exit')
     # !! TODO need to pull out hardcoded paths for this to work
     # go to system info
     #child.sendline('3')
@@ -302,6 +302,43 @@ def test_running_menu():
     #child.sendline('9')
     #child.expect('Exit')
     # exit
+    child.readline()
+    child.sendline('7')
+    child.readline()
+    # TODO finish going through menu actions
+
+def test_running_menu_plugins():
+    """ test running plugins through the menu """
+    cmd = "python2.7 menu_launcher.py"
+    child = pexpect.spawn(cmd)
+    # go to plugins menu
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    # go to add plugin
+    child.sendline('1')
+    child.expect('vent-plugins.git')
+    child.sendline('https://github.com/CyberReboot/vent-plugins.git')
+    time.sleep(2)
+    child.timeout=600
+    # go to main menu
+    child.expect('Press any key to continue...')
+    child.sendline('q')
+    child.expect('Exit')
+    # !! TODO doesn't actually successfully add plugin, so can't be removed
+    # go to plugins menu
+    #child.sendline('2')
+    #child.expect('Return to Vent menu')
+    # go to remove plugin
+    #child.sendline('2')
+    #child.expect('Return to Vent menu')
+    # remove plugin
+    #child.sendline('1')
+    #child.expect('Press any key to continue...')
+    #child.sendline('q')
+    #child.expect('Return to Vent menu')
+    # return to main menu
+    #child.sendline('5')
+    #child.expect('Exit')
+    # exit
     child.sendline('7')
     child.read()
-    # TODO finish going through menu actions
