@@ -316,6 +316,12 @@ def test_running_menu():
     # go to remove plugin
     child.sendline('2')
     child.expect('Return to Plugins menu')
+    # remove plugin
+    child.sendline('1')
+    child.expect('Press any key to continue...')
+    # press a key
+    child.sendline('q')
+    child.expect('Return to Plugins menu')
     # go to plugins menu
     child.sendline('1')
     child.expect('Return to Vent menu')
