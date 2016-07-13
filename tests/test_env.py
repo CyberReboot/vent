@@ -3,13 +3,38 @@ import os
 import pytest
 
 from .. import plugin_parser
-import test_menu_launcher
+
+class PathDirs:
+    """ Global path directories for parsing templates """
+    def __init__(self,
+                 base_dir=os.getcwd()+"/",
+                 collectors_dir="collectors",
+                 core_dir="core",
+                 plugins_dir="plugins/",
+                 plugin_repos="plugin_repos",
+                 template_dir="templates/",
+                 vis_dir="visualization",
+                 info_dir="info_tools/"):
+        self.base_dir = base_dir
+        self.collectors_dir = base_dir + collectors_dir
+        if not os.path.exists(self.collectors_dir):
+            os.makedirs(self.collectors_dir)
+        self.core_dir = base_dir + core_dir
+        self.plugins_dir = base_dir + plugins_dir
+        self.plugin_repos = base_dir + plugin_repos
+        if not os.path.exists(self.plugin_repos):
+            os.makedirs(self.plugin_repos)
+        self.template_dir = base_dir + template_dir
+        self.vis_dir = base_dir + vis_dir
+        if not os.path.exists(self.vis_dir):
+            os.makedirs(self.vis_dir)
+        self.info_dir=info_dir
 
 class TestEnv():
     """ Class to create the right env for testing - installing plugins, modifying modes.template/core.template, etc... """
     def __init__(self):
         # Create stubs if they don't already exist
-        self.initconfigs(test_menu_launcher.PathDirs(), True)
+        self.initconfigs(PathDirs(), True)
 
     @staticmethod
     def add_plugin(path_dirs, url):
