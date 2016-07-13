@@ -2,6 +2,7 @@ import ConfigParser
 import os
 import pexpect
 import pytest
+import time
 
 from .. import menu_launcher
 import test_env
@@ -259,87 +260,115 @@ def test_running_menu():
     # expect main menu
     child.expect('Exit')
     # go to mode
+    time.sleep(1)
     child.sendline('1')
     child.expect('Return to Vent menu')
     # go to start
+    time.sleep(1)
     child.sendline('1')
     child.expect('Return to Mode menu')
     # return to mode
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to Vent menu')
     # go to stop
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to Mode menu')
     # return to mode
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to Vent menu')
     # go to clean
+    time.sleep(1)
     child.sendline('3')
     child.expect('Return to Mode menu')
     # return to mode
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to Vent menu')
     # go to status
+    time.sleep(1)
     child.sendline('4')
     child.expect('Return to Mode menu')
     # return to mode
+    time.sleep(1)
     child.sendline('8')
     child.expect('Return to Vent menu')
     # go to configure
+    time.sleep(1)
     child.sendline('5')
     child.expect('Return to Mode menu')
     # return to mode
+    time.sleep(1)
     child.sendline('3')
     child.expect('Return to Vent menu')
     # return to main menu
+    time.sleep(1)
     child.sendline('6')
     child.expect('Exit')
     # go to plugins menu
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to Vent menu')
     # go to remove plugin
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to Plugins menu')
     # go to plugins menu
+    time.sleep(1)
     child.sendline('1')
     child.expect('Return to Vent menu')
     # go to install plugins
+    time.sleep(1)
     child.sendline('3')
     child.expect('Return to Plugins menu')
     # go to plugins menu
+    time.sleep(1)
     child.sendline('1')
     child.expect('Return to Vent menu')
     # go to update plugins
+    time.sleep(1)
     child.sendline('4')
     child.expect('Return to Plugins menu')
     # go to plugins menu
+    time.sleep(1)
     child.sendline('1')
     child.expect('Return to Vent menu')
     # go to main menu
+    time.sleep(1)
     child.sendline('5')
     child.expect('Exit')
     # go to system commands
+    time.sleep(1)
     child.sendline('5')
     child.expect('Return to Vent menu')
     # go to logs menu
+    time.sleep(1)
     child.sendline('1')
     child.expect('Return to System Commands menu')
     # go to containers menu
+    time.sleep(1)
     child.sendline('1')
     child.expect('Return to Logs menu')
     # return to logs menu
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to System Commands menu')
     # go to namespaces menu
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to Logs menu')
     # return to logs menu
+    time.sleep(1)
     child.sendline('2')
     child.expect('Return to System Commands menu')
     # return to system commands menu
+    time.sleep(1)
     child.sendline('5')
     child.expect('Return to Vent menu')
     # go to main menu
+    time.sleep(1)
     child.sendline('5')
     child.expect('Exit')
 
@@ -351,6 +380,8 @@ def test_running_menu():
     #child.sendline('9')
     #child.expect('Exit')
     # exit
+    time.sleep(1)
     child.sendline('7')
+    time.sleep(1)
     child.read()
     # TODO finish going through menu actions

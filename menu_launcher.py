@@ -762,10 +762,7 @@ def runmenu(menu, parent):
     else:
         lastoption = "Return to {0!s} menu".format(parent['title'])
 
-    try:
-        optioncount = len(menu['options'])
-    except Exception as e:
-        optioncount = 0
+    optioncount = len(menu['options'])
 
     pos = 0
     oldpos = None
@@ -833,10 +830,7 @@ def runmenu(menu, parent):
 
 def processmenu(path_dirs, menu, parent=None):
     """ processes the execution of the interaction sent to the menu """
-    try:
-        optioncount = len(menu['options'])
-    except Exception as e:
-        optioncount = 0
+    optioncount = len(menu['options'])
     exitmenu = False
     while not exitmenu:
         getin = runmenu(menu, parent)
