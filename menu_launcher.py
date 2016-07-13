@@ -517,7 +517,7 @@ def get_plugin_status(path_dirs):
         for namespace in disabled:
             for image in disabled[namespace]:
                 disabled_images.append(namespace+'/'+image)
-            
+
         ### Get Disabled Containers ###
         # Need to cross reference with all installed containers to determine all disabled containers
         disabled_containers = []
@@ -603,8 +603,9 @@ def get_plugin_status(path_dirs):
 
 def get_installed_plugin_repos(path_dirs, m_type, command):
     """ Returns a dictionary of all installed plugin repos; e.g - vent-network """
+    p = {}
+
     try:
-        p = {}
         p['type'] = MENU
         if command=="remove":
             command1 = "python2.7 /data/plugin_parser.py remove_plugins "
@@ -635,10 +636,11 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins:'
             p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-        return p
 
     except Exception as e:
         pass
+
+    return p
 
 def run_plugins(path_dirs, action):
     """creates menu to start plugin containers"""
@@ -764,8 +766,8 @@ def runmenu(menu, parent):
 
     optioncount = len(menu['options'])
 
-    pos=0
-    oldpos=None
+    pos = 0
+    oldpos = None
     x = None
 
     while x != ord('\n'):
@@ -829,6 +831,7 @@ def runmenu(menu, parent):
     return pos
 
 def processmenu(path_dirs, menu, parent=None):
+    """ processes the execution of the interaction sent to the menu """
     optioncount = len(menu['options'])
     exitmenu = False
     while not exitmenu:
@@ -852,8 +855,11 @@ def processmenu(path_dirs, menu, parent=None):
                 os.system(menu['options'][getin]['command'])
             screen.clear()
             curses.reset_prog_mode()
-            curses.curs_set(1)
-            curses.curs_set(0)
+            try:
+                curses.curs_set(1)
+                curses.curs_set(0)
+            except Exception as e:
+                pass
         elif menu['options'][getin]['type'] == INFO2:
             curses.def_prog_mode()
             os.system('reset')
@@ -878,8 +884,11 @@ def processmenu(path_dirs, menu, parent=None):
             confirm()
             screen.clear()
             curses.reset_prog_mode()
-            curses.curs_set(1)
-            curses.curs_set(0)
+            try:
+                curses.curs_set(1)
+                curses.curs_set(0)
+            except Exception as e:
+                pass
         # !! TODO
         elif menu['options'][getin]['type'] == INFO:
             pass
@@ -893,8 +902,11 @@ def processmenu(path_dirs, menu, parent=None):
             os.system(menu['options'][getin]['command'])
             screen.clear()
             curses.reset_prog_mode()
-            curses.curs_set(1)
-            curses.curs_set(0)
+            try:
+                curses.curs_set(1)
+                curses.curs_set(0)
+            except Exception as e:
+                pass
         elif menu['options'][getin]['type'] == INPUT:
             if menu['options'][getin]['title'] == "Add Plugins":
                 plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git")
@@ -918,8 +930,11 @@ def processmenu(path_dirs, menu, parent=None):
                 os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | tee /tmp/vent_logs/vent_file_"+filename+" | less")
                 screen.clear()
                 curses.reset_prog_mode()
-                curses.curs_set(1)
-                curses.curs_set(0)
+                try:
+                    curses.curs_set(1)
+                    curses.curs_set(0)
+                except Exception as e:
+                    pass
         elif menu['options'][getin]['type'] == MENU:
             if menu['options'][getin]['title'] == "Remove Plugins":
                 screen.clear()
@@ -1028,9 +1043,11 @@ def build_menu_dict(path_dirs):
     }
     return menu_data
 
-def main():
+def main(base_dir=None):
     """start menu, clears terminal after exiting menu"""
     path_dirs = PathDirs()
+    if base_dir:
+        path_dirs = PathDirs(base_dir=base_dir)
     menu_data = build_menu_dict(path_dirs)
     processmenu(path_dirs, menu_data)
     curses.endwin()
@@ -1043,4 +1060,7 @@ if __name__ == "__main__": # pragma: no cover
         print result
     except Exception as e:
         pass
-    main()
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main()
