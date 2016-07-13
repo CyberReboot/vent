@@ -9,6 +9,27 @@ import subprocess
 import sys
 import time
 
+class PathDirs:
+    """ Global path directories for parsing templates """
+    def __init__(self,
+                 base_dir="/var/lib/docker/data/",
+                 collectors_dir="collectors",
+                 core_dir="core",
+                 plugins_dir="plugins/",
+                 plugin_repos="plugin_repos",
+                 template_dir="templates/",
+                 vis_dir="visualization",
+                 info_dir="/data/info_tools/"
+                 ):
+        self.base_dir = base_dir
+        self.collectors_dir = base_dir + collectors_dir
+        self.core_dir = base_dir + core_dir
+        self.plugins_dir = base_dir + plugins_dir
+        self.plugin_repos = base_dir + plugin_repos
+        self.template_dir = base_dir + template_dir
+        self.vis_dir = base_dir + vis_dir
+        self.info_dir = info_dir
+
 def execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir):
     # note for plugin, also run core
     # for visualization, make aware of where the data is
@@ -81,6 +102,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
         delay_sections = {}
         if template_type != "all":
             try:
+                # get list of sections per template file
                 with open(template_path): pass
                 config = ConfigParser.RawConfigParser()
                 # needed to preserve case sensitive options
@@ -89,6 +111,14 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                 sections = config.sections()
             except Exception as e:
                 sections = []
+            running_containers = subprocess.check_output("docker ps | awk \"{print \$NF}\"", shell=True).split("\n")
+            t_sections = []
+            # remove sections that represent running containers
+            for section in sections:
+                for container in running_containers:
+                    if section in container and template_type in container:
+                        t_sections.append(section)
+            sections = [x for x in sections if x not in t_sections]
             external_overrides = []
             external_hosts = {}
             instances = []
@@ -103,6 +133,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                 external_options = []
             host_config_exists = False
 
+            # plugin template file
             if template_type not in ["visualization", "core", "active", "passive"]:
                 try:
                     # add tools that don't have sections
@@ -127,6 +158,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                 except Exception as e:
                     pass
 
+            # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
             for section in sections:
                 instructions = {}
                 try:
@@ -149,18 +181,21 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                             option_val = int(option_val)
                         except Exception as e:
                             pass
+                        # legacy
                         if option == 'data_path':
                             if len(cmd) == 4:
                                 cmd.insert(1, option_val)
                             else:
                                 cmd.append(option_val)
                             d_path = 1
+                        # legacy
                         elif option == 'site_path':
                             if len(cmd) == 2:
                                 cmd.append("")
                                 cmd.append(option_val)
                             else:
                                 cmd.append(option_val)
+                        # unimplemented as of 7-12-16
                         elif option == 'delay':
                             try:
                                 delay_sections[section] = option_val
@@ -175,7 +210,8 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                                     host_config = ast.literal_eval(option_val)
                                     host_config_new = copy.deepcopy(host_config)
                                     extra_hosts = []
-                                    host_config_new["RestartPolicy"] = { "Name": "always" }
+                                    if template_type == "core":
+                                        host_config_new["RestartPolicy"] = { "Name": "always" }
                                     if template_type not in ["visualization", "core", "active", "passive"]:
                                         # add link to rabbitmq
                                         if "Links" in host_config:
@@ -330,31 +366,48 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                                 instructions['Volumes'] = {"/"+section+"-data": {}}
                                 tool_dict[template_type+"-"+section] = instructions
         else:
-            info_name = "\"all\""
+            pass
     except Exception as e:
         pass
     return info_name, service_schedule, tool_core, tool_dict, delay_sections
 
-def main():
-    template_dir = "/var/lib/docker/data/templates/"
-    plugins_dir = "/var/lib/docker/data/plugins/"
+def main(path_dirs, template_type, template_execution, container_cmd):
+    """main method for template_parser. Based on the action argument given, performs the actions on the correct template files"""
+    template_dir = path_dirs.template_dir
+    plugins_dir = path_dirs.plugins_dir
+        
+    if template_execution == "stop":
+        if template_type == "all":
+            for x in ["visualization", "active", "passive", "core"]:
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker stop")
+        else:
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker stop")
+    elif template_execution == "clean":
+        if template_type == "all":
+            for x in ["visualization", "active", "passive", "core"]:
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill")
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm")
+        else:
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker kill")
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker rm")
+    elif template_execution == "start" and template_type == "all":
+        
+        for x in ["core", "visualization", "active", "passive"]:
+            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(x, container_cmd, template_dir, plugins_dir)
+            execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
+    else:
+        info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd, template_dir, plugins_dir)
+        execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
 
+if __name__ == "__main__": # pragma: no cover
+    path_dirs = PathDirs()
     if len(sys.argv) < 3:
         sys.exit()
     else:
         template_type = sys.argv[1]
         template_execution = sys.argv[2]
-        if template_execution == "stop":
-            os.system("docker ps | grep "+template_type+" | awk '{print $1}' | xargs docker stop")
-        elif template_execution == "clean":
-            os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker kill")
-            os.system("docker ps -a | grep "+template_type+" | awk '{print $1}' | xargs docker rm")
-        else:
-            container_cmd = None
-            if len(sys.argv) == 4:
-                container_cmd = sys.argv[3]
-            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd, template_dir, plugins_dir)
-            execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
+        container_cmd = None
+        if len(sys.argv) == 4:
+            container_cmd = sys.argv[3]
 
-if __name__ == "__main__": # pragma: no cover
-    main()
+    main(path_dirs, template_type, template_execution, container_cmd)
