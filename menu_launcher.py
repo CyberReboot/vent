@@ -1048,7 +1048,7 @@ if __name__ == "__main__": # pragma: no cover
         print result
     except Exception as e:
         pass
-    if len(sys.argv) == 3:
-        main(sys.argv[2])
+    if len(sys.argv) == 2:
+        main(sys.argv[1])
     else:
         main()
