@@ -67,7 +67,7 @@ of course traditional ways of deploying an ISO work as well, including VMWare, O
 getting started
 ====
 
-from within the vent interface (once SSH'd in) first `build` the core.  it might take a little while to download and compile everything.
+from within the vent interface (once SSH'd in) first `build` the core.  it might take a little while to download and compile everything. `note` - you must build core before building any `plugins`, `collectors`, or `visualization`. core provides essential services needed to build/start other services.
 
 once it's built you're ready to start the `core` from the `mode` menu option.
 
