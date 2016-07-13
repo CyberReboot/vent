@@ -309,7 +309,7 @@ def test_running_menu():
 
 def test_running_menu_plugins():
     """ test running plugins through the menu """
-    cmd = "pytho2.7 menu_launcher.py"
+    cmd = "python2.7 menu_launcher.py"
     child = pexpect.spawn(cmd)
     # go to plugins menu
     child.sendline('2')
