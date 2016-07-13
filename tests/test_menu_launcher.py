@@ -294,6 +294,55 @@ def test_running_menu():
     # return to main menu
     child.sendline('6')
     child.expect('Exit')
+    # go to plugins menu
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    # go to remove plugin
+    child.sendline('2')
+    child.expect('Return to Plugins menu')
+    # go to plugins menu
+    child.sendline('1')
+    child.expect('Return to Vent menu')
+    # go to install plugins
+    child.sendline('3')
+    child.expect('Return to Plugins menu')
+    # go to plugins menu
+    child.sendline('1')
+    child.expect('Return to Vent menu')
+    # go to update plugins
+    child.sendline('4')
+    child.expect('Return to Plugins menu')
+    # go to plugins menu
+    child.sendline('1')
+    child.expect('Return to Vent menu')
+    # go to main menu
+    child.sendline('5')
+    child.expect('Exit')
+    # go to system commands
+    child.sendline('5')
+    child.expect('Return to Vent menu')
+    # go to logs menu
+    child.sendline('1')
+    child.expect('Return to System Commands menu')
+    # go to containers menu
+    child.sendline('1')
+    child.expect('Return to Logs menu')
+    # return to logs menu
+    child.sendline('2')
+    child.expect('Return to System Commands menu')
+    # go to namespaces menu
+    child.sendline('2')
+    child.expect('Return to Logs menu')
+    # return to logs menu
+    child.sendline('2')
+    child.expect('Return to System Commands menu')
+    # return to system commands menu
+    child.sendline('5')
+    child.expect('Return to Vent menu')
+    # go to main menu
+    child.sendline('5')
+    child.expect('Exit')
+
     # !! TODO need to pull out hardcoded paths for this to work
     # go to system info
     #child.sendline('3')
