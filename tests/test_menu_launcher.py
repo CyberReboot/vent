@@ -254,6 +254,20 @@ def test_get_namespace_menu():
 
 def test_running_menu():
     """ test running the actual menu """
+    cmd_invalid_path = "python2.7 menu_launcher.py "
+    child0 = pexpect.spawn(cmd_invalid_path)
+    # expect main menu
+    child0.expect('Exit')
+    # go to mode
+    child0.sendline('1')
+    child0.expect('Return to Vent menu')
+    # go to main menu
+    child0.sendline('5')
+    child0.expect('Exit')
+    # exit
+    child0.sendline('7')
+    child0.read()
+
     path_dirs = PathDirs()
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir
     child = pexpect.spawn(cmd)
