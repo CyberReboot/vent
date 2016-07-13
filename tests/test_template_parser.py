@@ -3,6 +3,28 @@ import pytest
 
 from .. import template_parser
 
+class PathDirs:
+    """ Global path directories for parsing templates """
+    def __init__(self,
+                 base_dir=os.getcwd()+"/",
+                 collectors_dir="collectors",
+                 core_dir="core",
+                 plugins_dir="plugins/",
+                 plugin_repos="plugin_repos",
+                 template_dir="templates/",
+                 vis_dir="visualization"):
+        self.base_dir = base_dir
+        self.collectors_dir = base_dir + collectors_dir
+        self.core_dir = base_dir + core_dir
+        self.plugins_dir = base_dir + plugins_dir
+        self.plugin_repos = base_dir + plugin_repos
+        self.template_dir = base_dir + template_dir
+        self.vis_dir = base_dir + vis_dir
+
+def test_path_dirs():
+    """testing PathDirs implementation in template_parser.py"""
+    p_dirs = template_parser.PathDirs()    
+
 def test_read_template_types():
     """ Testing reading from all templates """
     template_dir = "templates/"
@@ -87,4 +109,27 @@ def test_execute_template():
 
 def test_main():
     """ Testing main function """
-    template_parser.main()
+    path_dirs = PathDirs()
+    # Test starting all
+    template_type = "all"
+    template_execution = "start"
+    container_cmd = ""
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test stopping all
+    template_execution = "stop"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test removing all
+    template_execution = "clean"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test starting cores
+    template_type = "core"
+    template_execution = "start"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test stopping cores
+    template_execution = "stop"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test removing cores
+    template_execution = "clean"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+
+
