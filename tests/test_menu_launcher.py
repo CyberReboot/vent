@@ -2,6 +2,7 @@ import ConfigParser
 import os
 import pexpect
 import pytest
+import time
 
 from .. import menu_launcher
 import test_env
@@ -307,8 +308,9 @@ def test_running_menu():
     child.expect('Return to Vent menu')
     # go to add plugin
     child.sendline('1')
-    child.expect('https://github.com/CyberReboot/vent-plugins.git')
+    child.expect('vent-plugins.git')
     child.sendline('https://github.com/CyberReboot/vent-plugins.git')
+    time.sleep(2)
     child.timeout=600
     # go to main menu
     child.expect('Press any key to continue...')
