@@ -117,6 +117,15 @@ def test_main():
     # Test removing all
     template_execution = "clean"
     template_parser.main(path_dirs, template_type, template_execution, container_cmd)
-
+    # Test starting cores
+    template_type = "core"
+    template_execution = "start"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test stopping cores
+    template_execution = "stop"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test removing cores
+    template_execution = "clean"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
 
 
