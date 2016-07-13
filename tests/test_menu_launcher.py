@@ -262,11 +262,12 @@ def test_running_menu():
     child0.sendline('1')
     child0.expect('Return to Vent menu')
     # go to main menu
-    child0.sendline('5')
+    child0.sendline('6')
     child0.expect('Exit')
     # exit
     child0.sendline('7')
     child0.read()
+    child0.close()
 
     path_dirs = PathDirs()
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir
