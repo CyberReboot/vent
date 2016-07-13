@@ -38,9 +38,11 @@ def test_add_plugins():
     plugin_parser.add_plugins(path_dirs, "https://github.com/Joecakes4u/test_template_file_ignore")
 
 def test_remove_plugins():
-    """ Remove with valid dirs, invalid dirs """
+    """ Remove plugins with valid dirs, invalid dirs """
     path_dirs = PathDirs()
     invalid_dirs = PathDirs(base_dir="/tmp/")
     plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
     plugin_parser.remove_plugins(invalid_dirs, "vent-plugins")
+    plugin_parser.remove_plugins(path_dirs, "https://github.com/Joecakes4u/test_template_file_ignore")
+    #removing a git repo that isn't installed
     plugin_parser.remove_plugins(path_dirs, "https://github.com/Joecakes4u/test_template_file_ignore")
