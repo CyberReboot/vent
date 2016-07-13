@@ -252,6 +252,8 @@ def test_get_enabled():
     env.add_plugin(path_dirs, url)
     env.add_plugin(path_dirs, url2)
     menu_launcher.get_enabled(path_dirs)
+    env.remove_plugin(path_dirs, url)
+    env.remove_plugin(path_dirs, url2)
 
 def test_get_plugin_status():
     """ Test get_plugin_status function with valid and invalid directories """
