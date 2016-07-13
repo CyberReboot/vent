@@ -131,64 +131,77 @@ def test_get_mode_enabled():
 
     # Set modes.template to have an option = "none"
     env = test_env.TestEnv()
-    new_conf = [ ('plugins', 'core', 'none') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'core', 'none')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Set modes.template to have an option with a value not "all"/"none"
-    new_conf = [ ('plugins', 'core', 'rmq-es-connector') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'core', 'rmq-es-connector')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Set modes.template to have collectors = "all"
-    new_conf = new_conf = [ ('plugins', 'collectors', 'all') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'collectors', 'all')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Set modes.template to have collectors = "none"
-    new_conf = new_conf = [ ('plugins', 'collectors', 'none') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'collectors', 'none')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Set modes.template to have collectors = not "all"/"none"
-    new_conf = new_conf = [ ('plugins', 'collectors', 'active-dns') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'collectors', 'active-dns')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Set modes.template to have visualization = "none"
-    new_conf = new_conf = [ ('plugins', 'visualization', 'none') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'visualization', 'none')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Set modes.template to have visualization = not "all"/"none"
-    new_conf = new_conf = [ ('plugins', 'visualization', 'test') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'visualization', 'test')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Set modes.template to have zzz = "none"
-    new_conf = new_conf = [ ('plugins', 'zzz', 'none') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'zzz', 'none')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Set modes.template to have zzz = not "all"/none"
-    new_conf = new_conf = [ ('plugins', 'zzz', 'test') ]
-    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    new_conf = {'modes.template': [('plugins', 'zzz', 'test')]}
+    env.modifyconfigs(path_dirs, new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have a section it didn't have
+    new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
     # Delete template and call get_mode_config
     os.system("rm "+path_dirs.template_dir+'modes.template')
     mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)  
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
 
+    # Create template without 'core' section
+    os.system("touch "+path_dirs.template_dir+'modes.template')
+    new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Cleanup
     os.system("cp modes.backup templates/modes.template")
 
 
@@ -212,6 +225,19 @@ def test_get_core_enabled():
     menu_launcher.get_core_enabled(path_dirs, core_config)
     empty_config = menu_launcher.get_core_config(invalid_dirs)
     menu_launcher.get_core_enabled(invalid_dirs, empty_config)
+
+    env = test_env.TestEnv()
+    # Set core.template to have passive = on
+    new_conf = {'core.template': [('local-collection', 'passive', 'on')]}
+    env.modifyconfigs(path_dirs, new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+    # Set core.template to have active = on
+    new_conf = {'core.template': [('local-collection', 'active', 'on')]}
+    env.modifyconfigs(path_dirs, new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
     os.system("cp core.backup templates/core.template")
 
 def test_get_enabled():
@@ -230,6 +256,10 @@ def test_get_plugin_status():
 
 def test_run_plugins():
     """ Test get_run_plugins function with valid and invalid directories """
+    # Prep
+    os.system("cp modes.backup templates/modes.template")
+    os.system("cp core.backup templates/core.template")
+
     path_dirs = PathDirs()
     invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.run_plugins(path_dirs, "start")
@@ -251,12 +281,14 @@ def test_run_plugins():
 
     # Test with one visualization plugin (filewalk)
     vis_test = "/vis_test"
-    if not os.path.exists(path_dirs.vis_dir):
-        os.system("mkdir "+path_dirs.vis_dir)
     if not os.path.exists(path_dirs.vis_dir+vis_test):
         os.system("mkdir "+path_dirs.vis_dir+vis_test)
 
     menu_launcher.run_plugins(path_dirs, "start")
+
+    # Cleanup
+    os.system("rm -rf "+path_dirs.vis_dir+vis_test)
+    os.system("cp modes.backup templates/modes.template")
 
     ### Collectors: Passive/Active Test ###
     # Find core.template
@@ -265,8 +297,6 @@ def test_run_plugins():
     config.read(path_dirs.template_dir+'core.template')
 
     # Check for valid sections/options
-    if not config.has_section("local-collection"):
-        config.add_section("local-collection")
     config.set("local-collection", "passive", "on")
     config.set("local-collection", "active", "on")
 
@@ -276,12 +306,16 @@ def test_run_plugins():
     # Test with one passive/active collector.
     active = "/active-test-collector"
     passive = "/passive-test-collector"
-    if not os.path.exists(path_dirs.collectors_dir):
-        os.system("mkdir "+path_dirs.collectors_dir)
+
     if not os.path.exists(path_dirs.collectors_dir+active):
         os.system("mkdir "+path_dirs.collectors_dir+active)
     if not os.path.exists(path_dirs.collectors_dir+passive):
         os.system("mkdir "+path_dirs.collectors_dir+passive)
+
+    # Cleanup
+    os.system("rm -rf "+path_dirs.collectors_dir+active)
+    os.system("rm -rf "+path_dirs.collectors_dir+active)
+    os.system("cp core.backup templates/core.template")
 
     menu_launcher.run_plugins(path_dirs, "start")
 

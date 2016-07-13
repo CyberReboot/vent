@@ -3,12 +3,13 @@ import os
 import pytest
 
 from .. import plugin_parser
+import test_menu_launcher
 
 class TestEnv():
     """ Class to create the right env for testing - installing plugins, modifying modes.template/core.template, etc... """
     def __init__(self):
         # Create stubs if they don't already exist
-        self.initconfigs(menu_launcher.PathDirs(), True)
+        self.initconfigs(test_menu_launcher.PathDirs(), True)
 
     @staticmethod
     def add_plugin(path_dirs, url):
@@ -69,17 +70,19 @@ class TestEnv():
             config.set('honeycomb', 'Cmd', '""')
 
     @staticmethod
-    def modifyconfigs(path_dirs, template, new_conf):
+    def modifyconfigs(path_dirs, new_conf):
         """
-        Takes in paths to templates, specific template to modify, and
-        a list of tuples that describe the section name, option, and value.
-        FORMAT: [ (section, option, value), (section, option2, value)...]
+        Takes in paths to templates, and a dictionary indexed (by config name)
+        list of tuples that describe the section name, option, and value.
+        FORMAT: {'modes.template': [ (section, option, value), (section, option2, value)...] },
+                {'core.template': [ (section, option, value), (section2, option, value)...] }
         """
-        config = ConfigParser.RawConfigParser()
-        config.read(path_dirs.template_dir+template)   
-        for (section, option, value) in new_conf:
-            if not config.has_section(section):
-                config.add_section(section)
-            config.set(section, option, value)
-        with open(path_dirs.template_dir+template, 'w') as configfile:
-            config.write(configfile)
+        for template in new_conf:
+            config = ConfigParser.RawConfigParser()
+            config.read(path_dirs.template_dir+template)
+            for (section, option, value) in new_conf[template]:
+                if not config.has_section(section):
+                    config.add_section(section)
+                config.set(section, option, value)
+            with open(path_dirs.template_dir+template, 'w') as configfile:
+                config.write(configfile)
