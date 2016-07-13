@@ -1,3 +1,4 @@
+import ConfigParser
 import os
 import pexpect
 import pytest
@@ -168,6 +169,56 @@ def test_run_plugins():
     menu_launcher.run_plugins(path_dirs, "start")
     menu_launcher.run_plugins(invalid_dirs, "start")
 
+    ### Visualization Test ###
+    # Find modes.template
+    os.system("touch "+path_dirs.template_dir+'modes.template')
+    config = ConfigParser.RawConfigParser()
+    config.read(path_dirs.template_dir+'modes.template')
+
+    # Check for valid sections/options
+    if not config.has_section("plugins"):
+        config.add_section("plugins")
+    config.set("plugins", "vis_test", "all")
+
+    with open(path_dirs.template_dir+'modes.template', 'w') as f:
+        config.write(f)
+
+    # Test with one visualization plugin (filewalk)
+    vis_test = "/vis_test"
+    if not os.path.exists(path_dirs.vis_dir):
+        os.system("mkdir "+path_dirs.vis_dir)
+    if not os.path.exists(path_dirs.vis_dir+vis_test):
+        os.system("mkdir "+path_dirs.vis_dir+vis_test)
+
+    menu_launcher.run_plugins(path_dirs, "start")
+
+    ### Collectors: Passive/Active Test ###
+    # Find core.template
+    os.system("touch "+path_dirs.template_dir+'core.template')
+    config = ConfigParser.RawConfigParser()
+    config.read(path_dirs.template_dir+'core.template')
+
+    # Check for valid sections/options
+    if not config.has_section("local-collection"):
+        config.add_section("local-collection")
+    config.set("local-collection", "passive", "on")
+    config.set("local-collection", "active", "on")
+
+    with open(path_dirs.template_dir+'core.template', 'w') as f:
+        config.write(f)
+
+    # Test with one passive/active collector.
+    active = "/active-test-collector"
+    passive = "/passive-test-collector"
+    if not os.path.exists(path_dirs.collectors_dir):
+        os.system("mkdir "+path_dirs.collectors_dir)
+    if not os.path.exists(path_dirs.collectors_dir+active):
+        os.system("mkdir "+path_dirs.collectors_dir+active)
+    if not os.path.exists(path_dirs.collectors_dir+passive):
+        os.system("mkdir "+path_dirs.collectors_dir+passive)
+
+    menu_launcher.run_plugins(path_dirs, "start")
+
 def test_get_installed_plugin_repos():
     """ Test get_installed_plugin_repos function with valid and invalid directories """
     path_dirs = PathDirs()
@@ -232,7 +283,7 @@ def test_running_menu():
     child.sendline('4')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('7')
+    child.sendline('8')
     child.expect('Return to Vent menu')
     # go to configure
     child.sendline('5')
