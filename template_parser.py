@@ -358,13 +358,19 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                                     for i in range(int(instance_count)):
                                         instructions['Image'] = template_type+'/'+section
                                         instructions['Volumes'] = {"/"+section+"-data": {}}
-                                        tool_dict[template_type+"-"+section+str(i)] = instructions
+                                        if template_type == "core":
+                                            tool_core[template_type+"-"+section+str(i)] = instructions
+                                        else:
+                                            tool_dict[template_type+"-"+section+str(i)] = instructions
                                 except Exception as e:
                                     pass
                             else:
                                 instructions['Image'] = template_type+'/'+section
                                 instructions['Volumes'] = {"/"+section+"-data": {}}
-                                tool_dict[template_type+"-"+section] = instructions
+                                if template_type == "core":
+                                    tool_core[template_type+"-"+section] = instructions
+                                else:
+                                    tool_dict[template_type+"-"+section] = instructions
         else:
             pass
     except Exception as e:
