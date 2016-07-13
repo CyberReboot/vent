@@ -144,19 +144,37 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                     plugins = modes_config.get("plugins", template_type)
 
                     t = []
+                    intermediate_t = []
                     if plugins == 'all':
                         tools = [ name for name in os.listdir(plugins_dir+template_type) if os.path.isdir(os.path.join(plugins_dir+template_type, name)) ]
                         for tool in tools:
                             t.append(tool)
                     else:
                         for tool in plugins.split(","):
-                            t.append(tool)
+                            intermediate_t.append(tool)
+                        sections = intermediate_t
 
                     for tool in t:
                         if not tool in sections:
                             sections.append(tool)
                 except Exception as e:
                     pass
+
+            # check if active or pass are disabled
+            if template_type in ["active", "passive"]:
+                try:
+                    core_config = ConfigParser.RawConfigParser()
+                    # needed to preserve case sensitive options
+                    core_config.optionxform=str
+                    core_config.read(template_dir+'core.template')
+                    # check dependencies like elasticsearch and rabbitmq
+                    local_collection = core_config.options("local-collection")
+                    check = core_config.get("local-collection", template_type)
+                    if check != "on":
+                        sections = []
+                except Exception as e:
+                    # default to disabled
+                    sections = []
 
             # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
             for section in sections:
@@ -381,23 +399,22 @@ def main(path_dirs, template_type, template_execution, container_cmd):
     """main method for template_parser. Based on the action argument given, performs the actions on the correct template files"""
     template_dir = path_dirs.template_dir
     plugins_dir = path_dirs.plugins_dir
-        
+
     if template_execution == "stop":
         if template_type == "all":
             for x in ["visualization", "active", "passive", "core"]:
-                os.system("docker ps -aqf name=\""+x+"\" | xargs docker stop")
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker stop 2> /dev/null")
         else:
-            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker stop")
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker stop 2> /dev/null")
     elif template_execution == "clean":
         if template_type == "all":
             for x in ["visualization", "active", "passive", "core"]:
-                os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill")
-                os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm")
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill 2> /dev/null")
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm 2> /dev/null")
         else:
-            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker kill")
-            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker rm")
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker kill 2> /dev/null")
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker rm 2> /dev/null")
     elif template_execution == "start" and template_type == "all":
-        
         for x in ["core", "visualization", "active", "passive"]:
             info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(x, container_cmd, template_dir, plugins_dir)
             execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
