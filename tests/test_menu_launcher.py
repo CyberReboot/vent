@@ -423,9 +423,6 @@ def test_running_menu():
     # go to plugins menu
     child.sendline('2')
     child.expect('Return to Vent menu')
-    # go to add plugin
-    child.sendline('1')
-    child.expect('Return to Plugins menu')
     # add plugin
     child.sendline('1')
     child.expect('Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git')
