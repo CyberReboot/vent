@@ -120,12 +120,78 @@ def test_get_all_installed():
 
 def test_get_mode_enabled():
     """ Test get_mode_enabled function with valid and invalid directories """
+    os.system("cp modes.backup templates/modes.template")
+
     path_dirs = PathDirs()
     invalid_dirs = PathDirs(base_dir="/tmp/")
     mode_config = menu_launcher.get_mode_config(path_dirs)
     menu_launcher.get_mode_enabled(path_dirs, mode_config)
     empty_config = menu_launcher.get_mode_config(invalid_dirs)
     menu_launcher.get_mode_enabled(invalid_dirs, empty_config)
+
+    # Set modes.template to have an option = "none"
+    env = test_env.TestEnv()
+    new_conf = [ ('plugins', 'core', 'none') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have an option with a value not "all"/"none"
+    new_conf = [ ('plugins', 'core', 'rmq-es-connector') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have collectors = "all"
+    new_conf = new_conf = [ ('plugins', 'collectors', 'all') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have collectors = "none"
+    new_conf = new_conf = [ ('plugins', 'collectors', 'none') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have collectors = not "all"/"none"
+    new_conf = new_conf = [ ('plugins', 'collectors', 'active-dns') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have visualization = "none"
+    new_conf = new_conf = [ ('plugins', 'visualization', 'none') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have visualization = not "all"/"none"
+    new_conf = new_conf = [ ('plugins', 'visualization', 'test') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have zzz = "none"
+    new_conf = new_conf = [ ('plugins', 'zzz', 'none') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Set modes.template to have zzz = not "all"/none"
+    new_conf = new_conf = [ ('plugins', 'zzz', 'test') ]
+    env.modifyconfigs(path_dirs, 'modes.template', new_conf)
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)
+
+    # Delete template and call get_mode_config
+    os.system("rm "+path_dirs.template_dir+'modes.template')
+    mode_config = menu_launcher.get_mode_config(path_dirs)
+    menu_launcher.get_mode_enabled(path_dirs, mode_config)  
+
+    os.system("cp modes.backup templates/modes.template")
+
+
 
 def test_get_core_enabled():
     """ Test get_core_enabled function with valid and invalid directories """

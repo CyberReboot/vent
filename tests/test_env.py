@@ -4,35 +4,11 @@ import pytest
 
 from .. import plugin_parser
 
-class PathDirs:
-    """ Global path directories for parsing templates """
-    def __init__(self,
-                 base_dir=os.getcwd()+"/",
-                 collectors_dir="collectors",
-                 core_dir="core",
-                 plugins_dir="plugins/",
-                 plugin_repos="plugin_repos",
-                 template_dir="templates/",
-                 vis_dir="visualization"):
-        self.base_dir = base_dir
-        self.collectors_dir = base_dir + collectors_dir
-        if not os.path.exists(self.collectors_dir):
-            os.makedirs(self.collectors_dir)
-        self.core_dir = base_dir + core_dir
-        self.plugins_dir = base_dir + plugins_dir
-        self.plugin_repos = base_dir + plugin_repos
-        if not os.path.exists(self.plugin_repos):
-            os.makedirs(self.plugin_repos)
-        self.template_dir = base_dir + template_dir
-        self.vis_dir = base_dir + vis_dir
-        if not os.path.exists(self.vis_dir):
-            os.makedirs(self.vis_dir)
-
 class TestEnv():
     """ Class to create the right env for testing - installing plugins, modifying modes.template/core.template, etc... """
     def __init__(self):
         # Create stubs if they don't already exist
-        self.initconfigs(PathDirs(), True)
+        self.initconfigs(menu_launcher.PathDirs(), True)
 
     @staticmethod
     def add_plugin(path_dirs, url):
@@ -96,12 +72,14 @@ class TestEnv():
     def modifyconfigs(path_dirs, template, new_conf):
         """
         Takes in paths to templates, specific template to modify, and
-        a dict of options and what they should be set to: '#elasticsearch': 'elasticsearch'
+        a list of tuples that describe the section name, option, and value.
+        FORMAT: [ (section, option, value), (section, option2, value)...]
         """
-        filedata = None
-        with open(path_dirs.template_dir + template, 'r') as f:
-            filedata = f.read()
-        for option in new_conf:
-            filedata = filedata.replace(option, new_conf[option])
-        with open(path_dirs.template_dir + template, 'w') as f:
-            f.write(filedata)
+        config = ConfigParser.RawConfigParser()
+        config.read(path_dirs.template_dir+template)   
+        for (section, option, value) in new_conf:
+            if not config.has_section(section):
+                config.add_section(section)
+            config.set(section, option, value)
+        with open(path_dirs.template_dir+template, 'w') as configfile:
+            config.write(configfile)
