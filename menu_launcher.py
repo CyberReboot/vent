@@ -217,7 +217,7 @@ def get_installed_collectors(path_dirs, c_type):
             colls = collectors
         else:
             with open("/tmp/error.log", "a+") as myfile:
-                myfile.write("Error in get_installed_collectors: ", "Invalid collector parameter: ", c_type)
+                myfile.write("Error in get_installed_collectors\n" + "Invalid collector parameter: " + str(c_type))
             myfile.close()
     except Exception as e:
         pass
@@ -345,7 +345,8 @@ def get_mode_enabled(path_dirs, mode_config):
                     val = mode_config[namespace]
                     # val is either: ["all"] or ["none"]/[""] or ["some", "some2", etc...]
                     if val == ["all"]:
-                        mode_enabled[namespace] = all_plugins[namespace]
+                        if namespace in all_plugins:
+                            mode_enabled[namespace] = all_plugins[namespace]
                     elif val in [["none"], [""]]:
                         mode_enabled[namespace] = []
                     else:
@@ -353,8 +354,8 @@ def get_mode_enabled(path_dirs, mode_config):
 
             # if certain plugin namespaces have been omitted from the modes.template file
             # then no special runtime config and use all
-            for namespace in all_plugins.keys():
-                if namespace not in mode_enabled.keys():
+            for namespace in all_plugins:
+                if namespace not in mode_enabled:
                     mode_enabled[namespace] = all_plugins[namespace]
 
             mode_enabled['core'] = core_enabled
@@ -474,23 +475,22 @@ def get_enabled(path_dirs):
                             all_disabled[namespace].append(container)
                         # Case 7
                         else:
-                            with open("/tmp/error.log", "a+") as file:
-                                file.write("get_enabled error: Case 7 reached!\n")
-                            file.close()
+                            with open("/tmp/error.log", "a+") as myfile:
+                                myfile.write("get_enabled error: Case 7 reached!\n")
             else:
             # For 'visualizations' & all plugin namespaces
                 for container in all_installed[namespace]:
-                    # Case 5
-                    if container in mode_enabled[namespace]:
-                        all_enabled[namespace].append(container)
-                    # Case 6
-                    elif container not in mode_enabled[namespace]:
-                        all_disabled[namespace].append(container)
-                    # Case 7
-                    else:
-                        with open("/tmp/error.log", "a+") as file:
-                            file.write("get_enabled error: Case 7 reached!\n")
-                        file.close()
+                    if namespace in mode_enabled:
+                        # Case 5
+                        if container in mode_enabled[namespace]:
+                            all_enabled[namespace].append(container)
+                        # Case 6
+                        elif container not in mode_enabled[namespace]:
+                            all_disabled[namespace].append(container)
+                        # Case 7
+                        else:
+                            with open("/tmp/error.log", "a+") as myfile:
+                                myfile.write("get_enabled error: Case 7 reached!\n")
 
         enabled = all_enabled
         disabled = all_disabled
@@ -501,21 +501,29 @@ def get_enabled(path_dirs):
 
 def get_plugin_status(path_dirs):
     """ Displays status of all running, not running/built, not built, and disabled plugins """
-    notbuilt = []
     p = {}
 
     try:
-        # Retrieves all installed containers
+        ### Get All Installed Images (By Filewalk) ###
         all_installed, all_cores, all_colls, all_vis, all_plugins = get_all_installed(path_dirs)
 
+        ### Get Enabled/Disabled Images ###
         # Retrieves all enabled images
         enabled, disabled = get_enabled(path_dirs)
 
+        # Make a list of disabled images of format: namespace/image
+        disabled_images = []
+
+        for namespace in disabled:
+            for image in disabled[namespace]:
+                disabled_images.append(namespace+'/'+image)
+            
+        ### Get Disabled Containers ###
         # Need to cross reference with all installed containers to determine all disabled containers
+        disabled_containers = []
+
         containers = check_output(" docker ps -a | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         containers = [ container for container in containers if container != "" ]
-
-        disabled_containers = []
 
         # Intersect the set of all containers with the set of all disabled images
         # Images form the basis for a container (in name especially), but there can be multiple containers per image
@@ -525,49 +533,68 @@ def get_plugin_status(path_dirs):
                     if image in container:
                         disabled_containers.append(container)
 
+        ### Get all Running Containers, not including disabled containers ###
         # Retrieves running or restarting docker containers and returns a list of container names
         running = check_output(" { docker ps -af status=running & docker ps -af status=restarting; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         running = [ container for container in running if container != "" ]
 
         # Running containers should not intersect with disabled containers/images.
+        # Containers should not exist/be running if disabled
+        running_errors = [ container for container in running if container in disabled_containers ]
         running = [ container for container in running if container not in disabled_containers ]
 
+        ### Get all NR Containers, not including disabled containers ###
         # Retrieves docker containers with status exited, paused, dead, created; returns as a list of container names
         nrcontainers = check_output(" { docker ps -af status=created & docker ps -af status=exited & docker ps -af status=paused & docker ps -af status=dead; } | grep '/' | awk \"{print \$NF}\" ", shell=True).split("\n")
         nrcontainers = [ container for container in nrcontainers if container != "" ]
+        # Containers should not exist if disabled
+        nr_errors = [ container for container in nrcontainers if container in disabled_containers ]
         nrbuilt = [ container for container in nrcontainers if container not in disabled_containers ]
 
+        ### Get all Built Images, not including disabled images ###
         # Retrieve all built docker images
         built = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
         built = [ image for image in built if image != "" ]
+        # Image *should* be removed if disabled
+        built_errors = [ image for image in built if image in disabled_images ]
 
+        ### Get all Not Built Images, not including disabled images ###
         # If image hasn't been disabled and isn't present in docker images then add
         notbuilt = []
         for namespace in all_installed:
             for image in all_installed[namespace]:
-                if image not in disabled[namespace] and namespace+'/'+image not in built:
+                if namespace in disabled and image not in disabled[namespace] and namespace+'/'+image not in built:
                     notbuilt.append(namespace+'/'+image)
 
-        # Format disabled dict for menu processing
-        p_disabled = []
-        for namespace in disabled:
-            for image in disabled[namespace]:
-                p_disabled.append(namespace+'/'+image)
-
-        p['title'] = 'Plugin Status'
-        p['subtitle'] = 'Choose a category...'
+        ### Prepare Statuses for MENU ###
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running ]
         p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt ]
         p_disabled_cont = [ {'title': x, 'type': 'INFO', 'command': '' } for x in disabled_containers ]
-        p_disabled_images = [ {'title': x, 'type': 'INFO', 'command': '' } for x in p_disabled ]
+        p_disabled_images = [ {'title': x, 'type': 'INFO', 'command': '' } for x in disabled_images ]
         p_built = [ {'title': x, 'type': 'INFO', 'command': '' } for x in built ]
         p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
-        p['options'] = [ { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
+
+        ### Prepare Errors for MENU ###
+        p_running_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in running_errors ]
+        p_nr_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in nr_errors ]
+        p_built_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in built_errors ]
+        p_error_menu = [
+                         {'title': "Running Errors", 'subtitle': "Containers that should not be running because they are disabled...", 'type': 'MENU', 'options': p_running_errors },
+                         {'title': "Not Running Errors", 'subtitle': "Containers that should be removed because they are disabled...", 'type': 'MENU', 'options': p_nr_errors },
+                         {'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': 'MENU', 'options': p_built_errors }
+                        ]
+
+        ### Returned Menu Dictionary
+        p['title'] = 'Plugin Status'
+        p['subtitle'] = 'Choose a category...'
+        p['options'] = [
+                         { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
                          { 'title': "Not Running Containers", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
                          { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled_cont },
                          { 'title': "Disabled Images", 'subtitle': "Currently disabled images...", 'type': MENU, 'options': p_disabled_images },
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
-                         { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt }
+                         { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
+                         { 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu }
                         ]
     except Exception as e:
         pass
