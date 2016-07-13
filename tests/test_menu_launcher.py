@@ -320,7 +320,7 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Press any key to continue...')
     # press a key
-    child.sendline('q')
+    child.send('q')
     child.expect('Return to Plugins menu')
     # go to plugins menu
     child.sendline('1')
