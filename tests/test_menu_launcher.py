@@ -204,8 +204,6 @@ def test_get_mode_enabled():
     # Cleanup
     os.system("cp modes.backup templates/modes.template")
 
-
-
 def test_get_core_enabled():
     """ Test get_core_enabled function with valid and invalid directories """
     path_dirs = PathDirs()
@@ -246,6 +244,14 @@ def test_get_enabled():
     invalid_dirs = PathDirs(base_dir="/tmp/")
     menu_launcher.get_enabled(path_dirs)
     menu_launcher.get_enabled(invalid_dirs)
+
+    # Modify modes.template to create some disabled images
+    url = "https://github.com/CyberReboot/vent-plugins.git"
+    url2 = "https://github.com/Joecakes4u/test_template_file_ignore.git"
+    env = test_env.TestEnv()
+    env.add_plugin(path_dirs, url)
+    env.add_plugin(path_dirs, url)
+    menu_launcher.get_enabled(path_dirs)
 
 def test_get_plugin_status():
     """ Test get_plugin_status function with valid and invalid directories """
@@ -371,9 +377,11 @@ def test_running_menu():
 
     path_dirs = PathDirs()
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir
+    invalid_url = "https://thisisinvalid-.git"
     child = pexpect.spawn(cmd)
     # expect main menu
     child.expect('Exit')
+    ### Mode Menu ###
     # go to mode
     child.sendline('1')
     child.expect('Return to Vent menu')
@@ -381,19 +389,19 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('5')
+    child.sendline('2')
     child.expect('Return to Vent menu')
     # go to stop
     child.sendline('2')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('5')
+    child.sendline('2')
     child.expect('Return to Vent menu')
     # go to clean
     child.sendline('3')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('5')
+    child.sendline('2')
     child.expect('Return to Vent menu')
     # go to status
     child.sendline('4')
@@ -405,10 +413,28 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('5')
+    child.sendline('6')
     child.expect('Return to Vent menu')
     # return to main menu
     child.sendline('6')
+    child.expect('Exit')
+
+    ### Plugins Menu ###
+    # go to plugins menu
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    # go to add plugin
+    child.sendline('1')
+    child.expect('Return to Plugins menu')
+    # add plugin
+    child.sendline('1')
+    child.expect('Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git')
+    # send url
+    child.sendline(url)
+    child.expect('Operation complete. Press any key to continue...')
+    # press a key
+    # go to plugins menu
+    child.sendline('q')
     child.expect('Exit')
     # go to plugins menu
     child.sendline('2')
@@ -437,6 +463,8 @@ def test_running_menu():
     child.expect('Return to Vent menu')
     # go to main menu
     child.sendline('5')
+
+    ### System Commands Menu ###
     child.expect('Exit')
     # go to system commands
     child.sendline('5')
