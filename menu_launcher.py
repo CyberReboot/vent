@@ -855,8 +855,11 @@ def processmenu(path_dirs, menu, parent=None):
                 os.system(menu['options'][getin]['command'])
             screen.clear()
             curses.reset_prog_mode()
-            curses.curs_set(1)
-            curses.curs_set(0)
+            try:
+                curses.curs_set(1)
+                curses.curs_set(0)
+            except Exception as e:
+                pass
         elif menu['options'][getin]['type'] == INFO2:
             curses.def_prog_mode()
             os.system('reset')
@@ -881,8 +884,11 @@ def processmenu(path_dirs, menu, parent=None):
             confirm()
             screen.clear()
             curses.reset_prog_mode()
-            curses.curs_set(1)
-            curses.curs_set(0)
+            try:
+                curses.curs_set(1)
+                curses.curs_set(0)
+            except Exception as e:
+                pass
         # !! TODO
         elif menu['options'][getin]['type'] == INFO:
             pass
@@ -924,8 +930,11 @@ def processmenu(path_dirs, menu, parent=None):
                 os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | tee /tmp/vent_logs/vent_file_"+filename+" | less")
                 screen.clear()
                 curses.reset_prog_mode()
-                curses.curs_set(1)
-                curses.curs_set(0)
+                try:
+                    curses.curs_set(1)
+                    curses.curs_set(0)
+                except Exception as e:
+                    pass
         elif menu['options'][getin]['type'] == MENU:
             if menu['options'][getin]['title'] == "Remove Plugins":
                 screen.clear()
