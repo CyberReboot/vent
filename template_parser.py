@@ -371,44 +371,44 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
         pass
     return info_name, service_schedule, tool_core, tool_dict, delay_sections
 
-def main(path_dirs):
+def main(path_dirs, template_type, template_execution, container_cmd):
     """main method for template_parser. Based on the action argument given, performs the actions on the correct template files"""
     template_dir = path_dirs.template_dir
     plugins_dir = path_dirs.plugins_dir
+        
+    if template_execution == "stop":
+        if template_type == "all":
+            for x in ["visualization", "active", "passive", "core"]:
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker stop")
+        else:
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker stop")
+    elif template_execution == "clean":
+        if template_type == "all":
+            for x in ["visualization", "active", "passive", "core"]:
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill")
+                os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm")
+        else:
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker kill")
+            os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker rm")
+    elif template_execution == "start" and template_type == "all":
+        
+        for x in ["core", "visualization", "active", "passive"]:
+            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(x, container_cmd, template_dir, plugins_dir)
+            execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
+    else:
 
+        info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd, template_dir, plugins_dir)
+        execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
+
+if __name__ == "__main__": # pragma: no cover
+    path_dirs = PathDirs()
     if len(sys.argv) < 3:
         sys.exit()
     else:
         template_type = sys.argv[1]
         template_execution = sys.argv[2]
-        if template_execution == "stop":
-            if template_type == "all":
-                for x in ["visualization", "active", "passive", "core"]:
-                    os.system("docker ps -aqf name=\""+x+"\" | xargs docker stop")
-            else:
-                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker stop")
-        elif template_execution == "clean":
-            if template_type == "all":
-                for x in ["visualization", "active", "passive", "core"]:
-                    os.system("docker ps -aqf name=\""+x+"\" | xargs docker kill")
-                    os.system("docker ps -aqf name=\""+x+"\" | xargs docker rm")
-            else:
-                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker kill")
-                os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker rm")
-        elif template_execution == "start" and template_type == "all":
-            container_cmd = None
-            if len(sys.argv) == 4:
-                container_cmd = sys.argv[3]
-            for x in ["core", "visualization", "active", "passive"]:
-                info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(x, container_cmd, template_dir, plugins_dir)
-                execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
-        else:
-            container_cmd = None
-            if len(sys.argv) == 4:
-                container_cmd = sys.argv[3]
-            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd, template_dir, plugins_dir)
-            execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
+        container_cmd = None
+        if len(sys.argv) == 4:
+            container_cmd = sys.argv[3]
 
-if __name__ == "__main__": # pragma: no cover
-    path_dirs = PathDirs()
-    main(path_dirs)
+    main(path_dirs, template_type, template_execution, container_cmd)

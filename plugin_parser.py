@@ -165,7 +165,6 @@ def add_plugins(path_dirs, plugin_url):
         os.system("/bin/sh /data/build_images.sh")
         return
     except Exception as e:
-        print e
         pass
 
 """

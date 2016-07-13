@@ -106,4 +106,17 @@ def test_execute_template():
 def test_main():
     """ Testing main function """
     path_dirs = PathDirs()
-    template_parser.main(path_dirs)
+    # Test starting all
+    template_type = "all"
+    template_execution = "start"
+    container_cmd = ""
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test stopping all
+    template_execution = "stop"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Test removing all
+    template_execution = "clean"
+    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+
+
+
