@@ -21,6 +21,10 @@ class PathDirs:
         self.template_dir = base_dir + template_dir
         self.vis_dir = base_dir + vis_dir
 
+def test_path_dirs():
+    """testing PathDirs implementation in template_parser.py"""
+    p_dirs = template_parser.PathDirs()    
+
 def test_read_template_types():
     """ Testing reading from all templates """
     template_dir = "templates/"
