@@ -250,7 +250,7 @@ def test_get_enabled():
     url2 = "https://github.com/Joecakes4u/test_template_file_ignore.git"
     env = test_env.TestEnv()
     env.add_plugin(path_dirs, url)
-    env.add_plugin(path_dirs, url)
+    env.add_plugin(path_dirs, url2)
     menu_launcher.get_enabled(path_dirs)
 
 def test_get_plugin_status():
@@ -425,7 +425,6 @@ def test_running_menu():
     child.expect('Return to Vent menu')
     # add plugin
     child.sendline('1')
-    # child.expect('Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git')
     # send url
     child.sendline(invalid_url)
     child.expect('Operation complete. Press any key to continue...')
@@ -460,9 +459,9 @@ def test_running_menu():
     child.expect('Return to Vent menu')
     # go to main menu
     child.sendline('5')
+    child.expect('Exit')
 
     ### System Commands Menu ###
-    child.expect('Exit')
     # go to system commands
     child.sendline('5')
     child.expect('Return to Vent menu')
