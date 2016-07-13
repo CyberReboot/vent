@@ -517,7 +517,7 @@ def get_plugin_status(path_dirs):
         for namespace in disabled:
             for image in disabled[namespace]:
                 disabled_images.append(namespace+'/'+image)
-            
+
         ### Get Disabled Containers ###
         # Need to cross reference with all installed containers to determine all disabled containers
         disabled_containers = []
@@ -603,8 +603,9 @@ def get_plugin_status(path_dirs):
 
 def get_installed_plugin_repos(path_dirs, m_type, command):
     """ Returns a dictionary of all installed plugin repos; e.g - vent-network """
+    p = {}
+
     try:
-        p = {}
         p['type'] = MENU
         if command=="remove":
             command1 = "python2.7 /data/plugin_parser.py remove_plugins "
@@ -635,10 +636,11 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins:'
             p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-        return p
 
     except Exception as e:
         pass
+
+    return p
 
 def run_plugins(path_dirs, action):
     """creates menu to start plugin containers"""
