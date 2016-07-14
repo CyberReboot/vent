@@ -366,13 +366,13 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline(UP_KEY)
+    child.sendline(KEY_UP)
     child.expect('Return to Vent menu')
     # go to stop
     child.sendline('2')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline(UP_KEY)
+    child.sendline(KEY_UP)
     child.expect('Return to Vent menu')
     # go to clean
     child.sendline('3')
