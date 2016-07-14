@@ -587,8 +587,8 @@ def get_plugin_status(path_dirs):
             p_error_menu.append({'title': "Running Errors", 'subtitle': "Containers that should not be running because they are disabled...", 'type': MENU, 'options': p_running_errors })
         if len(nr_errors) > 0:
             p_error_menu.append({'title': "Not Running Errors", 'subtitle': "Containers that should be removed because they are disabled...", 'type': MENU, 'options': p_nr_errors })
-        # if len(built_errors) > 0:
-        p_error_menu.append({'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': MENU, 'options': p_built_errors })
+        if len(built_errors) > 0:
+            p_error_menu.append({'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': MENU, 'options': p_built_errors })
 
         ### Returned Menu Dictionary
         p['title'] = 'Plugin Status'
