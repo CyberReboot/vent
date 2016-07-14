@@ -575,6 +575,8 @@ def get_plugin_status(path_dirs):
         p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
 
         ### Prepare Errors for MENU ###
+        # True if 0 errors
+        hide_errors = len(running_errors)+len(nr_errors)+len(built_errors) == 0
         p_running_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in running_errors ]
         p_nr_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in nr_errors ]
         p_built_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in built_errors ]
@@ -594,8 +596,11 @@ def get_plugin_status(path_dirs):
                          { 'title': "Disabled Images", 'subtitle': "Currently disabled images...", 'type': MENU, 'options': p_disabled_images },
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
-                         { 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu }
                         ]
+        # Only show errors if they exist
+        if not hide_errors:
+            p['options'].append({ 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu })
+
     except Exception as e:
         pass
 
