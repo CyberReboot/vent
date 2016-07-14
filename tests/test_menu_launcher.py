@@ -346,7 +346,7 @@ def test_running_menu():
     child0.sendline('1')
     child0.expect('Return to Vent menu')
     # go to main menu
-    child0.send(curses.UP_KEY)
+    child0.send(UP_KEY)
     child0.sendline('')
     child0.expect('Exit')
     # exit
