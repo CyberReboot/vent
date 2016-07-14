@@ -337,7 +337,7 @@ def test_get_namespace_menu():
 def test_running_menu():
     """ test running the actual menu """
     cmd_invalid_path = "python2.7 menu_launcher.py "
-    UP_KEY = "^[\[A"
+    UP_KEY = "\033\[A"
     child0 = pexpect.spawn(cmd_invalid_path)
     # expect main menu
     child0.expect('Exit')
