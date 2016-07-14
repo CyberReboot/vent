@@ -13,7 +13,8 @@ class PathDirs:
                  plugins_dir="plugins/",
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
-                 vis_dir="visualization"):
+                 vis_dir="visualization",
+                 info_dir="info_tools/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         if not os.path.exists(self.collectors_dir):
@@ -27,6 +28,7 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
         if not os.path.exists(self.vis_dir):
             os.makedirs(self.vis_dir)
+        self.info_dir=info_dir
 
 class TestEnv():
     """ Class to create the right env for testing - installing plugins, modifying modes.template/core.template, etc... """
@@ -93,15 +95,19 @@ class TestEnv():
             config.set('honeycomb', 'Cmd', '""')
 
     @staticmethod
-    def modifyconfigs(path_dirs, template, new_conf):
+    def modifyconfigs(path_dirs, new_conf):
         """
-        Takes in paths to templates, specific template to modify, and
-        a dict of options and what they should be set to: '#elasticsearch': 'elasticsearch'
+        Takes in paths to templates, and a dictionary indexed (by config name)
+        list of tuples that describe the section name, option, and value.
+        FORMAT: {'modes.template': [ (section, option, value), (section, option2, value)...] },
+                {'core.template': [ (section, option, value), (section2, option, value)...] }
         """
-        filedata = None
-        with open(path_dirs.template_dir + template, 'r') as f:
-            filedata = f.read()
-        for option in new_conf:
-            filedata = filedata.replace(option, new_conf[option])
-        with open(path_dirs.template_dir + template, 'w') as f:
-            f.write(filedata)
+        for template in new_conf:
+            config = ConfigParser.RawConfigParser()
+            config.read(path_dirs.template_dir+template)
+            for (section, option, value) in new_conf[template]:
+                if not config.has_section(section):
+                    config.add_section(section)
+                config.set(section, option, value)
+            with open(path_dirs.template_dir+template, 'w') as configfile:
+                config.write(configfile)
