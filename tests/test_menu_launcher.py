@@ -337,6 +337,7 @@ def test_get_namespace_menu():
 def test_running_menu():
     """ test running the actual menu """
     cmd_invalid_path = "python2.7 menu_launcher.py "
+    UP_KEY = "\033[A"
     child0 = pexpect.spawn(cmd_invalid_path)
     # expect main menu
     child0.expect('Exit')
@@ -344,10 +345,10 @@ def test_running_menu():
     child0.sendline('1')
     child0.expect('Return to Vent menu')
     # go to main menu
-    child0.sendline('6')
+    child0.sendline(UP_KEY)
     child0.expect('Exit')
     # exit
-    child0.sendline('7')
+    child0.sendline(UP_KEY)
     child0.read()
     child0.close()
 
@@ -365,34 +366,34 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
     # go to stop
     child.sendline('2')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
     # go to clean
     child.sendline('3')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
     # go to status
     child.sendline('4')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('8')
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
     # go to configure
     child.sendline('5')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('4')
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
     # return to main menu
-    child.sendline('6')
+    child.sendline(UP_KEY)
     child.expect('Exit')
 
     ### Plugins Menu ###
@@ -405,32 +406,32 @@ def test_running_menu():
     child.sendline(invalid_url)
     child.expect('Operation complete. Press any key to continue...')
     # press a key
-    # go to plugins menu
+    # return to main menu
     child.sendline('q')
     child.expect('Exit')
-    # go to plugins menu
+    # return to plugins menu
     child.sendline('2')
     child.expect('Return to Vent menu')
     # go to remove plugin
     child.sendline('2')
     child.expect('Return to Plugins menu')
-    # remove plugin
-    child.sendline('1')
+    # return to plugins menu
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
     # go to install plugins
     child.sendline('3')
     child.expect('Return to Plugins menu')
-    # go to plugins menu
-    child.sendline('2')
+    # return to plugins menu
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
     # go to update plugins
     child.sendline('4')
     child.expect('Return to Plugins menu')
-    # go to plugins menu
-    child.sendline('2')
+    # return to plugins menu
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
-    # go to main menu
-    child.sendline('5')
+    # return to main menu
+    child.sendline(UP_KEY)
     child.expect('Exit')
 
     ### System Commands Menu ###
@@ -444,19 +445,19 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Logs menu')
     # return to logs menu
-    child.sendline('2')
+    child.sendline(UP_KEY)
     child.expect('Return to System Commands menu')
     # go to namespaces menu
     child.sendline('2')
     child.expect('Return to Logs menu')
     # return to logs menu
-    child.sendline('2')
+    child.sendline(UP_KEY)
     child.expect('Return to System Commands menu')
     # return to system commands menu
-    child.sendline('5')
+    child.sendline(UP_KEY)
     child.expect('Return to Vent menu')
     # go to main menu
-    child.sendline('5')
+    child.sendline(UP_KEY)
     child.expect('Exit')
 
     # !! TODO need to pull out hardcoded paths for this to work
@@ -467,7 +468,7 @@ def test_running_menu():
     #child.sendline('9')
     #child.expect('Exit')
     # exit
-    child.sendline('7')
+    child.sendline(UP_KEY)
     child.read()
     child.close()
     # TODO finish going through menu actions
