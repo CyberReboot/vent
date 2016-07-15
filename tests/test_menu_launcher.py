@@ -490,6 +490,7 @@ def test_running_add_plugin():
     path_dirs = test_env.PathDirs()
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
+    child1.timeout = 600
     ### Plugins Menu ###
     # go to plugins menu
     child1.sendline('2')
@@ -525,6 +526,9 @@ def test_running_remove_plugin():
     # press a key
     # go to plugins menu
     child1.send('q')
+    child1.expect('Return to Vent menu')
+    # go to main menu
+    child1.sendline('5')
     child1.expect('Exit')
     child1.sendline('7')
     child1.read()
