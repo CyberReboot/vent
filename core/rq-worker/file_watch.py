@@ -90,17 +90,67 @@ def template_queue(path):
         except Exception as e:
             pass
 
+    template_dir = "/var/lib/docker/data/templates/"
     # check for template type
     try:
         template = path.split("/")[-1]
         if template == "modes.template":
-            # !! TODO
-            pass
+            # kill all running containers, just in case, then start the core
+            # !! TODO perhaps also start collectors and viz if they were previously running?
+            # check if the container is this one and kill it last!
+            hostname = os.environ.get('HOSTNAME')
+            current_container = hostname
+            core_containers = c.containers(all=True)
+            for cont in core_containers:
+                if cont['Id'].startswith(current_container):
+                    current_container = cont['Id']
+                else:
+                    try:
+                        c.kill(cont['Id'])
+                        c.remove_container(cont['Id'])
+                    except Exception as e:
+                        pass
+            if len(core_containers) > 0:
+                os.system('python2.7 /vent/template_parser.py core start')
+            # !! TODO failing, so commenting out for now
+            #c.restart(current_container)
         elif template == "core.template":
             # check if the container is this one and kill it last!
             hostname = os.environ.get('HOSTNAME')
             current_container = hostname
-            core_containers = c.containers(all=True, filters={'name':"core"})
+            # check if active/passive are disabled, and kill/remove containers
+            if os.path.isfile(template_dir+'core.template'):
+                config.read(template_dir+'core.template')
+            local_collection = []
+            passive = False
+            active = False
+            if config.has_section("local-collection") and config.options("local-collection"):
+                local_collection = config.options("local-collection")
+            for collector in local_collection:
+                val = config.get("local-collection", collector)
+                if collector == "passive" and val == "on":
+                    passive = True
+                if collector == "active" and val == "on":
+                    active = True
+            if not passive:
+                passive_containers = c.containers(all=True, filters={'name':"passive"})
+                for cont in passive_containers:
+                    try:
+                        c.kill(cont['Id'])
+                        c.remove_container(cont['Id'])
+                    except Exception as e:
+                        pass
+            if not active:
+                active_containers = c.containers(all=True, filters={'name':"active"})
+                for cont in active_containers:
+                    try:
+                        c.kill(cont['Id'])
+                        c.remove_container(cont['Id'])
+                    except Exception as e:
+                        pass
+
+            # kill and remove core containers
+            core_containers = c.containers(quiet=True, all=True, filters={'name':"core"})
             for cont in core_containers:
                 if cont['Id'].startswith(current_container):
                     current_container = cont['Id']

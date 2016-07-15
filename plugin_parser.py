@@ -48,7 +48,7 @@ def add_plugins(path_dirs, plugin_url):
             print plugin_name+" already exists. Not installing."
             return
         os.system("git config --global http.sslVerify false")
-        os.system("cd "+path_dirs.plugin_repos+"/ && git clone "+plugin_url)
+        os.system("cd "+path_dirs.plugin_repos+"/ && git clone --recursive "+plugin_url)
         # check to see if repo was cloned correctly
         if not os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name):
             print plugin_name+" did not install. Is this a git repository?"
