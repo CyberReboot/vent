@@ -773,7 +773,10 @@ def runmenu(menu, parent):
     if parent is None:
         lastoption = "Exit"
     else:
-        lastoption = "Return to {0!s} menu".format(parent['title'])
+        menu_name = parent['title']
+        if "-" in menu_name:
+            menu_name = menu_name.split("-")[0].strip()
+        lastoption = "Return to {0!s} menu".format(menu_name)
 
     optioncount = len(menu['options'])
 
@@ -985,8 +988,11 @@ def processmenu(path_dirs, menu, parent=None):
             exitmenu = True
 
 def build_menu_dict(path_dirs):
+    v_version = ""
+    with open(path_dirs.data_dir+"VERSION", 'r') as f:
+        v_version = f.readline()
     menu_data = {
-      'title': "Vent", 'type': MENU, 'subtitle': "Please select an option...",
+      'title': "Vent - "+v_version, 'type': MENU, 'subtitle': "Please select an option...",
       'options':[
         { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option...',
           'options': [
