@@ -9,9 +9,12 @@ num_plugins=false
 num_images=false
 num_run_containers=false
 num_stop_containers=false
+num_repos=false
 active_ssh=false
 installed_images=false
 installed_containers=false
+installed_repos=false
+verbose=false
 
 # help flag
 help_text(){
@@ -38,19 +41,24 @@ Commands:
     installed   Installed plugins, images, and containers 
 
 Options:
-    COMMAND     OPTION      Description
-    count       plugins     Number of installed plugins
-    count       images      Number of installed images
-    count       containers  Number of built containers
-    installed   plugins     List installed plugins
-    installed   images      List installed images
-    installed   containers  List build containers and their status"
+    COMMAND     OPTION          Description
+    count       plugins         Number of installed plugins
+    count       images          Number of installed images
+    count       containers      Number of built containers
+    count       repositories    Number of installed plugin repositories
+    installed   plugins         List installed plugins
+    installed   images          List installed images
+    installed   containers      List build containers and their status
+    installed   repositories    List installed plugin repositories"
 }
 
 for i in "$@"; do
     if [ "$i" == "-h" ] || [ "$i" == "--help" ]; then
         help_text
         exit 0
+    fi
+    if [ "$i" == "-v" ]; then
+        verbose=true
     fi
 done
 
@@ -72,11 +80,9 @@ elif [ "$1" == "all" ]; then
     num_run_containers=true
     num_stop_containers=true
     active_ssh=true
-    if [ "$#" == 2 ]; then
-        if [ "$2" == "-v" ]; then
-            installed_images=true
-            installed_containers=true
-        fi
+    if [ "$verbose" == true ]; then
+        installed_images=true
+        installed_containers=true
     fi
 elif [ "$1" == "name" ]; then
     name=true
@@ -89,12 +95,15 @@ elif [ "$1" == "count" ]; then
         elif [ "$2" == "containers" ]; then
             num_run_containers=true
             num_stop_containers=true
+        elif [ "$2" == "repositories" ]; then
+            num_repos=true
         fi
     else
         num_plugins=true
         num_images=true
         num_run_containers=true
         num_stop_containers=true
+        num_repos=true
     fi
 elif [ "$1" == "ssh" ]; then
     active_ssh=true
@@ -106,11 +115,14 @@ elif [ "$1" == "installed" ]; then
             installed_containers=true
         elif [ "$2" == "plugins" ]; then
             installed_plugins=true
+        elif [ "$2" == "repositories" ]; then
+            installed_repos=true
         fi
     else
         installed_plugins=true
         installed_images=true
         installed_containers=true
+        installed_repos=true
     fi
 else
     echo "Wrong arguments!"
@@ -137,7 +149,6 @@ fi
 if [ "$upt" = true ]; then
     echo -n "Uptime: ";
     uptime | awk "{print \$1}"
-    echo;
 fi
 
 # number of installed plugins
@@ -163,33 +174,48 @@ fi
 if [ "$num_stop_containers" = true ]; then
     echo -n "Number of Containers";
     docker info | grep Stopped:;
-    echo;
+fi
+
+# number of installed plugin repositories
+if [ "$installed_repos" = true ]; then
+    if [ "$verbose" = true ]; then
+        echo "Number of Plugin Repositories:";
+    fi
+    ls /var/lib/docker/data/plugin_repos | wc -w
 fi
 
 # list of active SSH sessions into this vent instance
 if [ "$active_ssh" = true ]; then
     echo "Active SSH Sessions into this Vent instance: ";
     who;
-    echo;
 fi
 
 # list installed plugins
 if [ "$installed_plugins" = true ]; then
     echo "Installed Plugins: ";
     docker images | grep / | grep -v core | grep -v collectors | grep -v visualization | awk "{print \$1}";
-    echo;
 fi
 
 # list installed images
 if [ "$installed_images" = true ]; then
     echo "Installed Images: ";
     docker images | grep -v REPOSITORY | awk "{print \$1}";
-    echo;
 fi
 
 # list all built containers (running and stopped)
 if [ "$installed_containers" = true ]; then
     echo "Built Containers: ";
     docker ps -a --format 'table {{.Names}} \t {{.Status}}';
-    echo;
+fi
+
+# list installed plugin repositories
+if [ "$installed_repos" = true ]; then
+    if [ "$verbose" = true ]; then
+        echo "Installed Plugin Repositories:";
+    fi
+    sentence=$(ls /var/lib/docker/data/plugin_repos)
+    for word in $sentence
+    do
+        echo $word;
+    done
 fi
