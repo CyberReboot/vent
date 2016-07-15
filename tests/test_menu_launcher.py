@@ -471,22 +471,6 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Exit')
 
-    valid_url = "https://github.com/CyberReboot/vent-plugins.git"
-    child.timeout=600
-    ### Plugins Menu ###
-    # go to plugins menu
-    child.sendline('2')
-    child.expect('Return to Vent menu')
-    # add plugin
-    child.sendline('1')
-    # send url
-    child.sendline(valid_url)
-    child.expect('Operation complete. Press any key to continue...')
-    # press a key
-    # go to plugins menu
-    child.sendline('q')
-    child.expect('Exit')
-
     # !! TODO need to pull out hardcoded paths for this to work
     # go to system info
     #child.sendline('3')
@@ -499,3 +483,25 @@ def test_running_menu():
     child.read()
     child.close()
     # TODO finish going through menu actions
+
+    path_dirs = test_env.PathDirs()
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir
+    child1 = pexpect.spawn(cmd)
+    valid_url = "https://github.com/CyberReboot/vent-plugins.git"
+    child1.timeout=600
+    ### Plugins Menu ###
+    # go to plugins menu
+    child1.sendline('2')
+    child1.expect('Return to Vent menu')
+    # add plugin
+    child1.sendline('1')
+    # send url
+    child1.sendline(valid_url)
+    child1.expect('Operation complete. Press any key to continue...')
+    # press a key
+    # go to plugins menu
+    child1.sendline('q')
+    child1.expect('Exit')
+    child1.sendline('7')
+    child1.read()
+    child1.close()
