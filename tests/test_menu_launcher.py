@@ -489,7 +489,6 @@ def test_running_add_plugin():
     path_dirs = test_env.PathDirs()
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
-    child1.timeout=600
     ### Plugins Menu ###
     # go to plugins menu
     child1.sendline('2')
