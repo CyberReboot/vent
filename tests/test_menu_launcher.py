@@ -295,6 +295,8 @@ def test_run_plugins():
     if not os.path.exists(path_dirs.collectors_dir+passive):
         os.system("mkdir "+path_dirs.collectors_dir+passive)
 
+    menu_launcher.run_plugins(path_dirs, "start")
+
     # Cleanup
     os.system("rm -rf "+path_dirs.collectors_dir+active)
     os.system("rm -rf "+path_dirs.collectors_dir+active)
