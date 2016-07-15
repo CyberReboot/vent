@@ -312,6 +312,14 @@ def test_get_installed_plugin_repos():
     menu_launcher.get_installed_plugin_repos(invalid_dirs, "INFO", "update")
     menu_launcher.get_installed_plugin_repos(invalid_dirs, "INFO", "")
 
+    # Test with installed plugins
+    url = "https://github.com/CyberReboot/vent-plugins.git"
+    env = test_env.TestEnv()
+    env.add_plugin(path_dirs, url)
+    menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "remove")
+    menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "update")
+    menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "")
+
 def test_update_plugins():
     """ Test update_plugins function with valid and invalid directories """
     path_dirs = test_env.PathDirs()
