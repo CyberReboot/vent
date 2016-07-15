@@ -1060,7 +1060,7 @@ def main(base_dir=None, data_dir=None):
     if base_dir:
         path_dirs = PathDirs(base_dir=base_dir)
     if data_dir:
-        path_dir.data_dir = data_dir
+        path_dirs.data_dir = data_dir
     menu_data = build_menu_dict(path_dirs)
     processmenu(path_dirs, menu_data)
     curses.endwin()
