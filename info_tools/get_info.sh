@@ -79,6 +79,7 @@ elif [ "$1" == "all" ]; then
     num_images=true
     num_run_containers=true
     num_stop_containers=true
+    num_repos=true
     active_ssh=true
     if [ "$verbose" == true ]; then
         installed_images=true
@@ -149,6 +150,7 @@ fi
 if [ "$upt" = true ]; then
     echo -n "Uptime: ";
     uptime | awk "{print \$1}"
+    echo;
 fi
 
 # number of installed plugins
@@ -177,35 +179,40 @@ if [ "$num_stop_containers" = true ]; then
 fi
 
 # number of installed plugin repositories
-if [ "$installed_repos" = true ]; then
+if [ "$num_repos" = true ]; then
     if [ "$verbose" = true ]; then
-        echo "Number of Plugin Repositories:";
+        echo -n "Number of Plugin Repositories:";
     fi
     ls /var/lib/docker/data/plugin_repos | wc -w
+    echo;
 fi
 
 # list of active SSH sessions into this vent instance
 if [ "$active_ssh" = true ]; then
     echo "Active SSH Sessions into this Vent instance: ";
     who;
+    echo;
 fi
 
 # list installed plugins
 if [ "$installed_plugins" = true ]; then
     echo "Installed Plugins: ";
     docker images | grep / | grep -v core | grep -v collectors | grep -v visualization | awk "{print \$1}";
+    echo;
 fi
 
 # list installed images
 if [ "$installed_images" = true ]; then
     echo "Installed Images: ";
     docker images | grep -v REPOSITORY | awk "{print \$1}";
+    echo;
 fi
 
 # list all built containers (running and stopped)
 if [ "$installed_containers" = true ]; then
     echo "Built Containers: ";
     docker ps -a --format 'table {{.Names}} \t {{.Status}}';
+    echo;
 fi
 
 # list installed plugin repositories
