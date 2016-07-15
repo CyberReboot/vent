@@ -471,6 +471,22 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Exit')
 
+    valid_url = "https://github.com/CyberReboot/vent-plugins.git"
+    child.timeout=600
+    ### Plugins Menu ###
+    # go to plugins menu
+    child.sendline('2')
+    child.expect('Return to Vent menu')
+    # add plugin
+    child.sendline('1')
+    # send url
+    child.sendline(valid_url)
+    child.expect('Operation complete. Press any key to continue...')
+    # press a key
+    # go to plugins menu
+    child.sendline('q')
+    child.expect('Exit')
+
     # !! TODO need to pull out hardcoded paths for this to work
     # go to system info
     #child.sendline('3')
