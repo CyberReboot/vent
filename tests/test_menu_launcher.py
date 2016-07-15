@@ -434,6 +434,20 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Exit')
 
+    ### System Info Menu ###
+    # go to System Info Menu
+    child.sendline('3')
+    child.expect('Return to Vent menu')
+    # go to Container Stats
+    child.sendline('1')
+    child.expect('CONTAINER')
+    # return to System Info Menu
+    child.sendcontrol('c')
+    child.expect('Return to Vent menu')
+    # return to Main Menu
+    child.sendline('9')
+    child.expect('Exit')
+
     ### System Commands Menu ###
     # go to system commands
     child.sendline('5')
