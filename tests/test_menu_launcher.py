@@ -295,6 +295,8 @@ def test_run_plugins():
     if not os.path.exists(path_dirs.collectors_dir+passive):
         os.system("mkdir "+path_dirs.collectors_dir+passive)
 
+    menu_launcher.run_plugins(path_dirs, "start")
+
     # Cleanup
     os.system("rm -rf "+path_dirs.collectors_dir+active)
     os.system("rm -rf "+path_dirs.collectors_dir+active)
@@ -312,6 +314,15 @@ def test_get_installed_plugin_repos():
     menu_launcher.get_installed_plugin_repos(invalid_dirs, "INFO", "remove")
     menu_launcher.get_installed_plugin_repos(invalid_dirs, "INFO", "update")
     menu_launcher.get_installed_plugin_repos(invalid_dirs, "INFO", "")
+
+    # Test with installed plugins
+    url = "https://github.com/CyberReboot/vent-plugins.git"
+    env = test_env.TestEnv()
+    env.add_plugin(path_dirs, url)
+    menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "remove")
+    menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "update")
+    menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "")
+    env.remove_plugin(path_dirs, url)
 
 def test_update_plugins():
     """ Test update_plugins function with valid and invalid directories """
@@ -390,7 +401,7 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('4')
+    child.sendline('5')
     child.expect('Return to Vent menu')
     # return to main menu
     child.sendline('6')
@@ -472,3 +483,25 @@ def test_running_menu():
     child.read()
     child.close()
     # TODO finish going through menu actions
+
+    path_dirs = test_env.PathDirs()
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir
+    child1 = pexpect.spawn(cmd)
+    valid_url = "https://github.com/CyberReboot/vent-plugins.git"
+    child1.timeout=600
+    ### Plugins Menu ###
+    # go to plugins menu
+    child1.sendline('2')
+    child1.expect('Return to Vent menu')
+    # add plugin
+    child1.sendline('1')
+    # send url
+    child1.sendline(valid_url)
+    child1.expect('Operation complete. Press any key to continue...')
+    # press a key
+    # go to plugins menu
+    child1.sendline('q')
+    child1.expect('Exit')
+    child1.sendline('7')
+    child1.read()
+    child1.close()
