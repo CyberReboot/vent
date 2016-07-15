@@ -3,7 +3,6 @@ import curses
 import os
 import pexpect
 import pytest
-import subprocess
 
 from .. import menu_launcher
 import test_env
@@ -400,9 +399,7 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Return to Mode menu')
     # return to mode
-    a = subprocess.check_output("ls -lah "+path_dirs.template_dir, shell=True)
-    assert a == "foo"
-    child.sendline('6')
+    child.sendline('5')
     child.expect('Return to Vent menu')
     # return to main menu
     child.sendline('6')
