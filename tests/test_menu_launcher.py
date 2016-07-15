@@ -85,6 +85,7 @@ def test_get_installed_plugins():
     url = "https://github.com/CyberReboot/vent-plugins.git"
     env = test_env.TestEnv()
     env.add_plugin(path_dirs, url)
+    env.remove_plugin(path_dirs, url)
 
 def test_get_all_installed():
     """ Test get_all_installed function with valid and invalid directories """
@@ -497,6 +498,29 @@ def test_running_add_plugin():
     child1.sendline('1')
     # send url
     child1.sendline("https://github.com/CyberReboot/vent-plugins.git")
+    child1.expect('Press any key to continue...')
+    # press a key
+    # go to plugins menu
+    child1.send('q')
+    child1.expect('Exit')
+    child1.sendline('7')
+    child1.read()
+    child1.close()
+
+def test_running_remove_plugin():
+    """ testing running the menu and removing a plugin """
+    path_dirs = test_env.PathDirs()
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
+    child1 = pexpect.spawn(cmd)
+    ### Plugins Menu ###
+    # go to plugins menu
+    child1.sendline('2')
+    child1.expect('Return to Vent menu')
+    # remove plugin menu
+    child1.sendline('2')
+    child1.expect('Return to Plugins menu')
+    # remove plugin
+    child1.sendline('1')
     child1.expect('Press any key to continue...')
     # press a key
     # go to plugins menu
