@@ -989,8 +989,11 @@ def processmenu(path_dirs, menu, parent=None):
 
 def build_menu_dict(path_dirs):
     v_version = ""
-    with open(path_dirs.data_dir+"VERSION", 'r') as f:
-        v_version = f.readline()
+    try:
+        with open(path_dirs.data_dir+"VERSION", 'r') as f:
+            v_version = f.readline()
+    except Exception as e:
+        pass
     menu_data = {
       'title': "Vent - "+v_version, 'type': MENU, 'subtitle': "Please select an option...",
       'options':[
