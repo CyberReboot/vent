@@ -3,6 +3,7 @@ import curses
 import os
 import pexpect
 import pytest
+import subprocess
 
 from .. import menu_launcher
 import test_env
