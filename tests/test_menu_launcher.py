@@ -364,7 +364,7 @@ def test_running_menu():
     child0.close()
 
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
     invalid_url = "https://thisisinvalid-.git"
     child = pexpect.spawn(cmd)
     # expect main menu
@@ -484,10 +484,11 @@ def test_running_menu():
     child.close()
     # TODO finish going through menu actions
 
+def test_running_add_plugin():
+    """ testing running the menu and adding a plugin """
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
-    valid_url = "https://github.com/CyberReboot/vent-plugins.git"
     child1.timeout=600
     ### Plugins Menu ###
     # go to plugins menu
@@ -496,8 +497,8 @@ def test_running_menu():
     # add plugin
     child1.sendline('1')
     # send url
-    child1.sendline(valid_url)
-    child1.expect('Operation complete. Press any key to continue...')
+    child1.sendline("https://github.com/CyberReboot/vent-plugins.git")
+    child1.expect('Press any key to continue...')
     # press a key
     # go to plugins menu
     child1.send('q')
