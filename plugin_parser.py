@@ -292,8 +292,14 @@ def remove_plugins(path_dirs, plugin_url):
     except Exception as e:
         pass
 
-if __name__ == "__main__": # pragma: no cover
+if __name__ == "__main__":
     path_dirs = PathDirs()
+
+    # change base dir for tests
+    if len(sys.argv) == 4:
+        path_dirs = PathDirs(base_dir=sys.argv[4])
+        sys.argv = sys.argv[:-1]
+
     if len(sys.argv) == 3:
         if sys.argv[1] == "add_plugins":
             add_plugins(path_dirs, sys.argv[2])

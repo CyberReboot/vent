@@ -629,7 +629,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
                     while not "url" in repo_name:
                         repo_name = myfile.readline()
                     repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name
+                    d['command'] = command1+repo_name+" "+path_dirs.base_dir
         elif command=="update":
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py remove_plugins "
             command2 = " && python2.7 "+path_dirs.data_dir+"plugin_parser.py add_plugins "
@@ -642,7 +642,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
                     while not "url" in repo_name:
                         repo_name = myfile.readline()
                     repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+command2+repo_name
+                    d['command'] = command1+repo_name+" "+path_dirs.base_dir+command2+repo_name+" "+path_dirs.base_dir
         else:
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins:'
@@ -928,7 +928,7 @@ def processmenu(path_dirs, menu, parent=None):
                     os.system("echo No plugins added, url is not formatted correctly.")
                     os.system("echo Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
                 else:
-                    os.system("python2.7 "+path_dirs.data_dir+"plugin_parser.py add_plugins "+plugin_url)
+                    os.system("python2.7 "+path_dirs.data_dir+"plugin_parser.py add_plugins "+plugin_url+" "+path_dirs.base_dir)
                 confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
