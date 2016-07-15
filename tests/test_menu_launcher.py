@@ -418,7 +418,7 @@ def test_running_menu():
     child.expect('Operation complete. Press any key to continue...')
     # press a key
     # go to plugins menu
-    child.sendline('q')
+    child.send('q')
     child.expect('Exit')
     # go to plugins menu
     child.sendline('2')
@@ -500,7 +500,7 @@ def test_running_menu():
     child1.expect('Operation complete. Press any key to continue...')
     # press a key
     # go to plugins menu
-    child1.sendline('q')
+    child1.send('q')
     child1.expect('Exit')
     child1.sendline('7')
     child1.read()
