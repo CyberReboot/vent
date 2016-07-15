@@ -319,6 +319,7 @@ def test_get_installed_plugin_repos():
     menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "remove")
     menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "update")
     menu_launcher.get_installed_plugin_repos(path_dirs, "INFO", "")
+    env.remove_plugin(path_dirs, url)
 
 def test_update_plugins():
     """ Test update_plugins function with valid and invalid directories """
