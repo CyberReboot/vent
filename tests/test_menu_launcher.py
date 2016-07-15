@@ -1,4 +1,5 @@
 import ConfigParser
+import curses
 import os
 import pexpect
 import pytest
@@ -391,7 +392,7 @@ def test_running_menu():
     child.sendline('4')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('8')
+    child.sendline('7')
     child.expect('Return to Vent menu')
     # go to configure
     child.sendline('5')
