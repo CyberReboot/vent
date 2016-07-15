@@ -14,7 +14,8 @@ class PathDirs:
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
                  vis_dir="visualization",
-                 info_dir="info_tools/"):
+                 info_dir="info_tools/",
+                 data_dir=os.getcwd()+"/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         if not os.path.exists(self.collectors_dir):
@@ -28,7 +29,8 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
         if not os.path.exists(self.vis_dir):
             os.makedirs(self.vis_dir)
-        self.info_dir=info_dir
+        self.info_dir = info_dir
+        self.data_dir = data_dir
 
 class TestEnv():
     """ Class to create the right env for testing - installing plugins, modifying modes.template/core.template, etc... """

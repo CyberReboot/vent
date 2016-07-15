@@ -43,7 +43,8 @@ class PathDirs:
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
                  vis_dir="visualization",
-                 info_dir="/data/info_tools/"
+                 info_dir="/data/info_tools/",
+                 data_dir="/data/"
                  ):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
@@ -53,6 +54,7 @@ class PathDirs:
         self.template_dir = base_dir + template_dir
         self.vis_dir = base_dir + vis_dir
         self.info_dir = info_dir
+        self.data_dir = data_dir
 
 def get_container_menu(path_dirs):
     """get a list of containers, returns a menu with containers as options"""
@@ -617,7 +619,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
     try:
         p['type'] = MENU
         if command=="remove":
-            command1 = "python2.7 /data/plugin_parser.py remove_plugins "
+            command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py remove_plugins "
             p['title'] = 'Remove Plugins'
             p['subtitle'] = 'Please select a plugin to remove...'
             p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
@@ -627,10 +629,10 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
                     while not "url" in repo_name:
                         repo_name = myfile.readline()
                     repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name
+                    d['command'] = command1+repo_name+" "+path_dirs.base_dir
         elif command=="update":
-            command1 = "python2.7 /data/plugin_parser.py remove_plugins "
-            command2 = " && python2.7 /data/plugin_parser.py add_plugins "
+            command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py remove_plugins "
+            command2 = " && python2.7 "+path_dirs.data_dir+"plugin_parser.py add_plugins "
             p['title'] = 'Update Plugins'
             p['subtitle'] = 'Please select a plugin to update...'
             p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
@@ -640,7 +642,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
                     while not "url" in repo_name:
                         repo_name = myfile.readline()
                     repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+command2+repo_name
+                    d['command'] = command1+repo_name+" "+path_dirs.base_dir+command2+repo_name+" "+path_dirs.base_dir
         else:
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins:'
@@ -687,7 +689,7 @@ def run_plugins(path_dirs, action):
                     plugin_name = config.get("info", "name")
                     p['title'] = plugin_name
                     p['type'] = INFO2
-                    p['command'] = 'python2.7 /data/template_parser.py '+plugin+' '+action
+                    p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py '+plugin+' '+action
                     modes.append(p)
                 except Exception as e:
                     # if no name is provided, it doesn't get listed
@@ -705,7 +707,7 @@ def run_plugins(path_dirs, action):
                         p = {}
                         p['title'] = "Local Passive Collection"
                         p['type'] = INFO2
-                        p['command'] = 'python2.7 /data/template_parser.py passive '+action
+                        p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py passive '+action
                         modes.append(p)
                 except Exception as e:
                     pass
@@ -717,7 +719,7 @@ def run_plugins(path_dirs, action):
                         p = {}
                         p['title'] = "Local Active Collection"
                         p['type'] = INFO2
-                        p['command'] = 'python2.7 /data/template_parser.py active '+action
+                        p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py active '+action
                         modes.append(p)
                 except Exception as e:
                     pass
@@ -727,14 +729,14 @@ def run_plugins(path_dirs, action):
             p = {}
             p['title'] = "All"
             p['type'] = INFO2
-            p['command'] = 'python2.7 /data/template_parser.py all '+action
+            p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py all '+action
             modes.append(p)
     except Exception as e:
         print "unable to get the configuration of modes from the templates.\n"
 
     # make sure that vent-management is running
     try:
-        result = check_output('/bin/sh /data/bootlocal.sh'.split())
+        result = check_output('/bin/sh '+path_dirs.data_dir+'bootlocal.sh'.split())
         print result
     except Exception as e:
         pass
@@ -749,7 +751,7 @@ def update_plugins(path_dirs):
                 p = {}
                 p['title'] = f
                 p['type'] = SETTING
-                p['command'] = 'python2.7 /data/suplemon/suplemon.py '+path_dirs.template_dir+f
+                p['command'] = 'python2.7 '+path_dirs.data_dir+'suplemon/suplemon.py '+path_dirs.template_dir+f
                 modes.append(p)
     except Exception as e:
         print "unable to get the configuration templates.\n"
@@ -889,7 +891,7 @@ def processmenu(path_dirs, menu, parent=None):
                 exitmenu = True
             elif menu['title'] == "Update Plugins":
                 update_images(path_dirs)
-                os.system("/bin/sh /data/build_images.sh")
+                os.system("/bin/sh "+path_dirs.data_dir+"build_images.sh")
             confirm()
             screen.clear()
             curses.reset_prog_mode()
@@ -926,7 +928,7 @@ def processmenu(path_dirs, menu, parent=None):
                     os.system("echo No plugins added, url is not formatted correctly.")
                     os.system("echo Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
                 else:
-                    os.system("python2.7 /data/plugin_parser.py add_plugins "+plugin_url)
+                    os.system("python2.7 "+path_dirs.data_dir+"plugin_parser.py add_plugins "+plugin_url+" "+path_dirs.base_dir)
                 confirm()
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
@@ -1018,18 +1020,18 @@ def build_menu_dict(path_dirs):
             #{ 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
             { 'title': "Container Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
             { 'title': "", 'type': INFO, 'command': 'echo'},
-            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py aaa-rabbitmq mgmt' },
-            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py rq-dashboard mgmt' },
-            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py elasticsearch head' },
-            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 /data/service_urls/get_urls.py elasticsearch marvel' },
+            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py aaa-rabbitmq mgmt' },
+            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py rq-dashboard mgmt' },
+            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch head' },
+            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch marvel' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
           ]
         },
         { 'title': "Build", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh /data/build_images.sh' },
-            { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh /data/build_images.sh --no-cache' },
+            { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh' },
+            { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --no-cache' },
           ]
         },
         { 'title': "System Commands", 'type': MENU, 'subtitle': '',
@@ -1047,16 +1049,18 @@ def build_menu_dict(path_dirs):
                 { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
             ]
         },
-        { 'title': "Help", 'type': COMMAND, 'command': 'less /data/help' },
+        { 'title': "Help", 'type': COMMAND, 'command': 'less '+path_dirs.data_dir+'help' },
       ]
     }
     return menu_data
 
-def main(base_dir=None):
+def main(base_dir=None, data_dir=None):
     """start menu, clears terminal after exiting menu"""
     path_dirs = PathDirs()
     if base_dir:
         path_dirs = PathDirs(base_dir=base_dir)
+    if data_dir:
+        path_dirs.data_dir = data_dir
     menu_data = build_menu_dict(path_dirs)
     processmenu(path_dirs, menu_data)
     curses.endwin()
@@ -1069,7 +1073,7 @@ if __name__ == "__main__": # pragma: no cover
         print result
     except Exception as e:
         pass
-    if len(sys.argv) == 2:
-        main(sys.argv[1])
+    if len(sys.argv) == 3:
+        main(base_dir=sys.argv[1], data_dir=sys.argv[2])
     else:
         main()
