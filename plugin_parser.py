@@ -297,7 +297,7 @@ if __name__ == "__main__":
 
     # change base dir for tests
     if len(sys.argv) == 4:
-        path_dirs = PathDirs(base_dir=sys.argv[4])
+        path_dirs = PathDirs(base_dir=sys.argv[3])
         sys.argv = sys.argv[:-1]
 
     if len(sys.argv) == 3:
