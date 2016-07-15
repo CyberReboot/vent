@@ -988,6 +988,7 @@ def processmenu(path_dirs, menu, parent=None):
             exitmenu = True
 
 def build_menu_dict(path_dirs):
+    """ builds the menu dictionary that gets populated in curses """
     v_version = ""
     try:
         with open(path_dirs.data_dir+"VERSION", 'r') as f:
