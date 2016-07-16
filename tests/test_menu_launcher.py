@@ -547,3 +547,30 @@ def test_running_remove_plugin():
     child1.sendline('7')
     child1.read()
     child1.close()
+
+def test_running_configure_template():
+    """ testing running the menu and configuring a template file """
+    path_dirs = test_env.PathDirs()
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
+    child1 = pexpect.spawn(cmd)
+    # go to modes menu
+    child1.sendline('1')
+    child1.expect('Return to Vent menu')
+    # go to configure menu
+    child1.sendline('5')
+    child1.expect('Return to Mode menu')
+    # configure a template
+    child1.sendline('1')
+    child1.expect('Exit')
+    # quit out of editing the template
+    child.sendcontrol('q')
+    child.expect('Return to Mode menu')
+    # return to modes menu
+    child1.sendline('5')
+    child1.expect('Return to Vent menu')
+    # go to main menu
+    child1.sendline('5')
+    child1.expect('Exit')
+    child1.sendline('7')
+    child1.read()
+    child1.close()
