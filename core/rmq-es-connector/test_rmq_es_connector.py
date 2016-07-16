@@ -1,4 +1,6 @@
+import os
 import pytest
+import sys
 
 import rmq_es_connector
 
@@ -13,6 +15,7 @@ def test_rmq_es_connector_connections():
     rmq_es = rmq_es_connector.RmqEs()
     rmq_es.connections(False)
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
+    os.system("(service elasticsearch stop; sleep 15; service elasticsearch start) &"
     rmq_es.connections(True)
 
 def test_rmq_es_connector_callback():
@@ -35,3 +38,7 @@ def test_rmq_es_connector_start():
     """ tests the start function """
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
     rmq_es.start()
+    argv = sys.argv
+    sys.argv = ["foo"]
+    rmq_es.start()
+    sys.argv = argv
