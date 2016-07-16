@@ -566,7 +566,7 @@ def test_running_configure_template():
     child1.sendcontrol('q')
     child1.expect('Return to Mode menu')
     # return to modes menu
-    child1.sendline('5')
+    child1.sendline('3')
     child1.expect('Return to Vent menu')
     # go to main menu
     child1.sendline('5')
