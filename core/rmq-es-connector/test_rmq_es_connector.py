@@ -15,7 +15,7 @@ def test_rmq_es_connector_connections():
     rmq_es = rmq_es_connector.RmqEs()
     rmq_es.connections(False)
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
-    os.system("(service elasticsearch stop; sleep 15; service elasticsearch start) &"
+    os.system("(service elasticsearch stop; sleep 15; service elasticsearch start) &")
     rmq_es.connections(True)
 
 def test_rmq_es_connector_callback():
