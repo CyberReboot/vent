@@ -40,5 +40,6 @@ def test_rmq_es_connector_start():
     rmq_es.start()
     argv = sys.argv
     sys.argv = ["foo"]
-    rmq_es.start()
+    with pytest.raises(SystemExit):
+        rmq_es.start()
     sys.argv = argv
