@@ -1,4 +1,4 @@
-def pcap_queue(path):
+def pcap_queue(path, base_dir="/var/lib/docker/data/"):
     """
     Processes PCAP files that have been added from the rq-worker, and tells
     vent-management to start plugins for the new file.
@@ -24,8 +24,11 @@ def pcap_queue(path):
         except Exception as e:
             pass
 
-    template_dir = "/var/lib/docker/data/templates/"
-    plugins_dir = "/var/lib/docker/data/plugins/"
+    template_dir = base_dir+"templates/"
+    plugins_dir = base_dir+"plugins/"
+    vent_dir = "/vent/"
+    if base_dir != "/var/lib/docker/data/":
+        vent_dir = base_dir
     try:
         # Check file exists
         if os.path.isfile(template_dir+'modes.template'):
@@ -56,13 +59,13 @@ def pcap_queue(path):
                 time.sleep(5)
                 container_count = len(c.containers(filters={'status':'running'}))
 
-            cmd = "python2.7 /vent/template_parser.py "+plugin+" start "+path
+            cmd = "python2.7 "+vent_dir+"template_parser.py "+plugin+" start "+path
             os.system(cmd)
     except Exception as e:
         pass
     return
 
-def template_queue(path):
+def template_queue(path, base_dir="/var/lib/docker/data/"):
     """
     Processes template files that have been added or changed or deleted from
     the rq-worker, and tells vent-management to restart containers based on
@@ -90,7 +93,10 @@ def template_queue(path):
         except Exception as e:
             pass
 
-    template_dir = "/var/lib/docker/data/templates/"
+    template_dir = base_dir+"templates/"
+    vent_dir = "/vent/"
+    if base_dir != "/var/lib/docker/data/":
+        vent_dir = base_dir
     # check for template type
     try:
         template = path.split("/")[-1]
@@ -111,7 +117,7 @@ def template_queue(path):
                     except Exception as e:
                         pass
             if len(core_containers) > 0:
-                os.system('python2.7 /vent/template_parser.py core start')
+                os.system('python2.7 '+vent_dir+'template_parser.py core start')
             # !! TODO failing, so commenting out for now
             #c.restart(current_container)
         elif template == "core.template":
@@ -161,7 +167,7 @@ def template_queue(path):
                     except Exception as e:
                         pass
             if len(core_containers) > 0:
-                os.system('python2.7 /vent/template_parser.py core start')
+                os.system('python2.7 '+vent_dir+'template_parser.py core start')
             # !! TODO failing, so commenting out for now
             #c.restart(current_container)
         elif template == "collectors.template":
@@ -173,7 +179,7 @@ def template_queue(path):
                 except Exception as e:
                     pass
             if len(active_containers) > 0:
-                os.system('python2.7 /vent/template_parser.py active start')
+                os.system('python2.7 '+vent_dir+'template_parser.py active start')
             passive_containers = c.containers(quiet=True, all=True, filters={'name':"passive"})
             for cont in passive_containers:
                 try:
@@ -182,7 +188,7 @@ def template_queue(path):
                 except Exception as e:
                     pass
             if len(passive_containers) > 0:
-                os.system('python2.7 /vent/template_parser.py passive start')
+                os.system('python2.7 '+vent_dir+'template_parser.py passive start')
         elif template == "visualization.template":
             viz_containers = c.containers(quiet=True, all=True, filters={'name':"visualization"})
             for cont in viz_containers:
@@ -192,7 +198,7 @@ def template_queue(path):
                 except Exception as e:
                     pass
             if len(viz_containers) > 0:
-                os.system('python2.7 /vent/template_parser.py visualization start')
+                os.system('python2.7 '+vent_dir+'template_parser.py visualization start')
         else:
             pass
             # plugin
