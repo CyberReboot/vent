@@ -19,6 +19,7 @@ def test_pcap_queue():
     time.sleep(5)
     file_watch.pcap_queue("/tmp")
     file_watch.pcap_queue("/dev/null")
+    file_watch.pcap_queue("/dev/null", base_dir=os.cwd()+"/")
 
 
 def test_template_queue():
@@ -43,3 +44,8 @@ def test_template_queue():
     file_watch.template_queue("/collectors.template")
     os.environ['HOSTNAME'] = subprocess.check_output('docker run --name visualization-template-queue2 -d alpine:latest /bin/sh -c "while true; do echo hello world; sleep 1; done"', shell=True)[:4]
     file_watch.template_queue("/visualization.template")
+
+    file_watch.template_queue("/modes.template", base_dir=os.cwd()+"/")
+    file_watch.template_queue("/core.template", base_dir=os.cwd()+"/")
+    file_watch.template_queue("/collectors.template", base_dir=os.cwd()+"/")
+    file_watch.template_queue("/visualization.template", base_dir=os.cwd()+"/")
