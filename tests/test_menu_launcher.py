@@ -501,13 +501,14 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Exit')
 
-    # !! TODO need to pull out hardcoded paths for this to work
-    # go to system info
-    #child.sendline('3')
-    #child.expect('Return to Vent menu')
-    # return to main menu
-    #child.sendline('9')
-    #child.expect('Exit')
+    ### Help ###
+    # go to Help
+    child.sendline('6')
+    child.expect('getting started')
+    # return to Main Menu
+    child.send('q')
+    child.expect('Exit')
+
     # exit
     child.sendline('7')
     child.read()
