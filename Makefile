@@ -10,7 +10,7 @@ test:
 	@echo
 	pip -V
 	pip install -r tests/requirements.txt
-	py.test -v --ignore=suplemon --cov=. --cov-report term-missing
+	py.test -v --cov=. --ignore=suplemon/* --cov-report term-missing
 
 pull:
 	docker pull boot2docker/boot2docker
