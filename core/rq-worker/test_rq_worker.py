@@ -19,7 +19,7 @@ def test_pcap_queue():
     time.sleep(5)
     file_watch.pcap_queue("/tmp")
     file_watch.pcap_queue("/dev/null")
-    file_watch.pcap_queue("/dev/null", base_dir=os.cwd()+"/")
+    file_watch.pcap_queue("/dev/null", base_dir=os.getcwd()+"/")
 
 
 def test_template_queue():
