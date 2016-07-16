@@ -563,8 +563,8 @@ def test_running_configure_template():
     child1.sendline('1')
     child1.expect('Suplemon')
     # quit out of editing the template
-    child.sendcontrol('q')
-    child.expect('Return to Mode menu')
+    child1.sendcontrol('q')
+    child1.expect('Return to Mode menu')
     # return to modes menu
     child1.sendline('5')
     child1.expect('Return to Vent menu')
