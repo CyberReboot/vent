@@ -460,6 +460,21 @@ def test_running_menu():
     child.sendline('9')
     child.expect('Exit')
 
+    ### Build Menu ###
+    # go to Build menu
+    child.sendline('4')
+    child.expect('Return to Vent menu')
+    # Build new plugins and core
+    child.sendline('1')
+    child.expect('Operation complete. Press any key to continue...')
+    # Send confirmation
+    child.send('q')
+    child.expect('Return to Vent menu')
+    # !! TODO - Test Force Rebuild
+    # return to Main Menu
+    child.sendline('3')
+    child.expect('Exit')
+
     ### System Commands Menu ###
     # go to system commands
     child.sendline('5')
@@ -486,13 +501,14 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Exit')
 
-    # !! TODO need to pull out hardcoded paths for this to work
-    # go to system info
-    #child.sendline('3')
-    #child.expect('Return to Vent menu')
-    # return to main menu
-    #child.sendline('9')
-    #child.expect('Exit')
+    ### Help ###
+    # go to Help
+    child.sendline('6')
+    child.expect('getting started')
+    # return to Main Menu
+    child.send('q')
+    child.expect('Exit')
+
     # exit
     child.sendline('7')
     child.read()
