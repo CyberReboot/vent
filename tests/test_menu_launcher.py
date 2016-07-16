@@ -569,7 +569,7 @@ def test_running_configure_template():
     child1.sendline('6')
     child1.expect('Return to Vent menu')
     # go to main menu
-    child1.sendline('5')
+    child1.sendline('6')
     child1.expect('Exit')
     child1.sendline('7')
     child1.read()
