@@ -161,9 +161,8 @@ def add_plugins(path_dirs, plugin_url):
                     print "Failed to install "+plugin_name+" resource: "+directory
                     os.system("sudo rm -rf "+path_dirs.plugin_repos+"/"+plugin_name)
                     return
-        #resources installed correctly. Building...
+        # resources installed correctly. Building...
         os.system("/bin/sh /data/build_images.sh")
-        return
     except Exception as e:
         pass
 
@@ -292,6 +291,23 @@ def remove_plugins(path_dirs, plugin_url):
     except Exception as e:
         pass
 
+# Update images for removed plugins
+def update_images(path_dirs):
+    images = []
+    try:
+        # Note - If grep finds nothing it returns exit status 1 (error). So, using grep first, awk second.
+        images = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
+    except Exception as e:
+        pass
+    for image in images:
+        image = image.split("  ")[0]
+        if "core/" in image or "visualization/" in image or "collectors/" in image:
+            if not os.path.isdir(path_dirs.base_dir + image):
+                os.system("docker rmi "+image)
+        else:
+            if not os.path.isdir(path_dirs.plugins_dir + image):
+                os.system("docker rmi "+image)
+
 if __name__ == "__main__":
     path_dirs = PathDirs()
 
@@ -301,10 +317,15 @@ if __name__ == "__main__":
         sys.argv = sys.argv[:-1]
 
     if len(sys.argv) == 3:
-        if sys.argv[1] == "add_plugins":
+        if sys.argv[1] == "update_plugins":
+            remove_plugins(path_dirs, sys.argv[2])
+            add_plugins(path_dirs, sys.argv[2])
+            update_images(path_dirs)
+        elif sys.argv[1] == "add_plugins":
             add_plugins(path_dirs, sys.argv[2])
         elif sys.argv[1] == "remove_plugins":
             remove_plugins(path_dirs, sys.argv[2])
+            update_images(path_dirs)
         else:
             print "invalid plugin type to parse"
     else:
