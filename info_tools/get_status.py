@@ -1,16 +1,4 @@
-### TODOs & Things to Think About ###
-# Argparse?
-# Refactor menu_launcher to import this file
-# plugin status needs to be moved here
-# This needs to be called with some x args and needs to redirect to get status
-# Everything that depends on plugin status or some function involved will need to me moved here -> will break other calls -> need to find and figure out how to redirect here
-# How do those calls go to the specific subfunction that was going to be used???
-# What other imports do I need to make sure none of the functions break: os, subprocess, check_output, ConfigParser
-# How to deal with PathDirs()?
-# Tests will break
-
-# Step 1 - Bring the plugins status stuff into this file (might have to rework plugin status to separate menu dict from regular lists/dicts for API)
-
+# !! TODO - Argparse
 import ConfigParser
 
 import os
@@ -433,7 +421,7 @@ def get_enabled(path_dirs):
 
     return enabled, disabled
 
-def get_plugin_status(path_dirs):
+def get_status(path_dirs):
     """ Displays status of all running, not running/built, not built, and disabled plugins """
     plugins = {}
 
@@ -512,13 +500,14 @@ def get_plugin_status(path_dirs):
 
     except Exception as e:
         with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_plugin_status")
+            myfile.write("Error - get_status")
         pass
 
     return plugins
 
-def main(base_dir=None, info_dir=None, data_dir=None):
+def main(cmd, base_dir=None, info_dir=None, data_dir=None):
     path_dirs = PathDirs()
+    status = None
     if base_dir:
         path_dirs = PathDirs(base_dir=base_dir)
     if info_dir:
@@ -526,14 +515,40 @@ def main(base_dir=None, info_dir=None, data_dir=None):
     if data_dir:
         path_dirs.data_dir = data_dir
 
-    plugins = get_plugin_status(path_dirs)
-    print plugins
+    if cmd == "mode_config":
+        status = get_mode_config(path_dirs)
+    if cmd == "core_config":
+        status = get_core_config(path_dirs)
+    if cmd == "cores":
+        status = get_installed_cores(path_dirs)
+    if cmd == "collectors":
+        status = get_installed_collectors(path_dirs, "all")
+    if cmd == "passive":
+        status = get_installed_collectors(path_dirs, "passive")
+    if cmd == "active":
+        status = get_installed_collectors(path_dirs, "active")
+    if cmd == "visualizations":
+        status = get_installed_vis(path_dirs)
+    if cmd == "plugins":
+        status = get_installed_plugins(path_dirs)
+    if cmd == "all":
+        status = get_all_installed(path_dirs)
+    if cmd == "enabled":
+        status = get_enabled(path_dirs)[0]
+    if cmd == "disabled":
+        status = get_enabled(path_dirs)[1]
+    if cmd == "status":
+        status = get_status(path_dirs)
+
+    print status
 
 if __name__ == "__main__":
     try:
-        if len(sys.argv) == 4:
-            main(base_dir=sys.argv[1], info_dir=sys.argv[2], data_dir=sys.argv[3])
+        if len(sys.argv) == 2:
+            main(cmd=sys.argv[1])
+        elif len(sys.argv) == 5:
+            main(cmd=sys.argv[1], base_dir=sys.argv[2], info_dir=sys.argv[3], data_dir=sys.argv[4])
         else:
-            main()
+            sys.exit()
     except Exception as e:
         pass
