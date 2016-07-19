@@ -26,7 +26,7 @@ def test_pathdirs():
     path_dirs = plugin_parser.PathDirs()
 
 def test_add_plugins():
-    """ Test with valid dirs, invalid dirs, emtpy dirs, non-extistent plugins, duplicate plugins """
+    """ Test with valid dirs, invalid dirs, empty dirs, non-extistent plugins, duplicate plugins """
     path_dirs = PathDirs()
     invalid_dirs = PathDirs(base_dir="/tmp/")
     invalid2_dirs = PathDirs(plugin_repos="core/")
@@ -46,3 +46,13 @@ def test_remove_plugins():
     plugin_parser.remove_plugins(path_dirs, "https://github.com/Joecakes4u/test_template_file_ignore")
     #removing a git repo that isn't installed
     plugin_parser.remove_plugins(path_dirs, "https://github.com/Joecakes4u/test_template_file_ignore")
+
+def test_update_images():
+    """ Test update_images function """
+    path_dirs = PathDirs()
+    plugin_parser.update_images(path_dirs)
+
+    # Add then Remove plugin & call update_images
+    plugin_parser.add_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
+    plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
+    plugin_parser.update_images(path_dirs)

@@ -89,22 +89,6 @@ def get_namespace_menu(path_dirs):
         d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
     return p
 
-# Update images for removed plugins
-def update_images(path_dirs):
-    images = []
-    try:
-        # Note - If grep finds nothing it returns exit status 1 (error). So, using grep first, awk second.
-        images = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
-    except Exception as e:
-        pass
-    for image in images:
-        image = image.split("  ")[0]
-        if "core/" in image or "visualization/" in image or "collectors/" in image:
-            if not os.path.isdir(path_dirs.base_dir + image):
-                os.system("docker rmi "+image)
-        else:
-            if not os.path.isdir(path_dirs.plugins_dir + image):
-                os.system("docker rmi "+image)
 
 # Allows for acceptance of single char before terminating
 def getch():
@@ -207,10 +191,9 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
                     while not "url" in repo_name:
                         repo_name = myfile.readline()
                     repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+" "+path_dirs.base_dir
+                    d['command'] = command1+repo_name
         elif command=="update":
-            command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py remove_plugins "
-            command2 = " && python2.7 "+path_dirs.data_dir+"plugin_parser.py add_plugins "
+            command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py update_plugins "
             p['title'] = 'Update Plugins'
             p['subtitle'] = 'Please select a plugin to update...'
             p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
@@ -220,7 +203,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
                     while not "url" in repo_name:
                         repo_name = myfile.readline()
                     repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+" "+path_dirs.base_dir+command2+repo_name+" "+path_dirs.base_dir
+                    d['command'] = command1+repo_name
         else:
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins:'
@@ -468,11 +451,7 @@ def processmenu(path_dirs, menu, parent=None):
             else:
                 os.system(menu['options'][getin]['command'])
             if menu['title'] == "Remove Plugins":
-                update_images(path_dirs)
                 exitmenu = True
-            elif menu['title'] == "Update Plugins":
-                update_images(path_dirs)
-                os.system("/bin/sh "+path_dirs.data_dir+"build_images.sh")
             confirm()
             screen.clear()
             curses.reset_prog_mode()
