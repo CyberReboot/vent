@@ -64,7 +64,7 @@ for i in "$@"; do
 done
 
 # parse args to print desired information
-if [ "$#" == 0 ];then
+if [ "$#" -eq 0 ]; then
     name=true
     version=true
     build_date=true
@@ -136,7 +136,7 @@ else
 fi
 
 # vent instance name
-if [ "$name" == true ]; then
+if [ "$name" = true ]; then
     docker info | grep "Name: "
 fi
 
