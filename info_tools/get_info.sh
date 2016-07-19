@@ -15,7 +15,7 @@ installed_images=false
 installed_containers=false
 installed_repos=false
 verbose=false
-
+nics=false
 # help flag
 help_text(){
 echo "Usage:    $(basename "$0")
@@ -26,7 +26,7 @@ echo "Usage:    $(basename "$0")
 
 Print information about Vent
 
-$(basename "$0") (no args) - Instance name, version, 
+$(basename "$0") (no args) - Instance name, version,
 build date, uptime, and list installed plugins
 
 Flags:
@@ -38,7 +38,8 @@ Commands:
     name        Name of vent instance
     count       Number of installed plugins, images, and containers
     ssh         Active ssh sessions
-    installed   Installed plugins, images, and containers 
+    installed   Installed plugins, images, and containers
+    nics        Network interfaces and ip addresses
 
 Options:
     COMMAND     OPTION          Description
@@ -69,6 +70,7 @@ if [ "$#" == 0 ];then
     build_date=true
     upt=true
     installed_plugins=true
+    nics=true
 elif [ "$1" == "all" ]; then
     name=true
     version=true
@@ -81,6 +83,7 @@ elif [ "$1" == "all" ]; then
     num_stop_containers=true
     num_repos=true
     active_ssh=true
+    nics=true
     if [ "$verbose" == true ]; then
         installed_images=true
         installed_containers=true
@@ -125,6 +128,8 @@ elif [ "$1" == "installed" ]; then
         installed_containers=true
         installed_repos=true
     fi
+elif [ "$1" == "nics" ]; then
+    nics=true
 else
     echo "Wrong arguments!"
     help_text
@@ -225,4 +230,11 @@ if [ "$installed_repos" = true ]; then
     do
         echo $word;
     done
+fi
+
+# list global network interfaces and their ip addresses
+if [ "$nics" = true ]; then
+    echo "Active Netowrk Interfaces: ";
+    ip -o addr show up scope global | while read -r num dev fam addr rest; do echo ${dev}:${addr%/*}; done;
+    echo;
 fi
