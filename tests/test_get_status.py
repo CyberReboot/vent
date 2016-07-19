@@ -2,6 +2,7 @@ import os
 import pytest
 
 from vent.info_tools import get_status
+import test_env
 
 def test_get_mode_config():
     """ Test get_mode_config function with valid and invalid directories """
