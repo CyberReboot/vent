@@ -25,8 +25,6 @@ class GZHandler(PatternMatchingEventHandler):
         event.src_path
             path/to/observed/file
         """
-        # get environ VENT_HOST
-        # !! TODO
         hostname = os.environ.get("VENT_HOST")
         if not hostname:
             hostname = ""
