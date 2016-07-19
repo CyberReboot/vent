@@ -506,6 +506,7 @@ def get_status(path_dirs):
     return plugins
 
 def main(cmd, base_dir=None, info_dir=None, data_dir=None):
+    """ Calls the appropriate function and prints to stdout """
     path_dirs = PathDirs()
     status = None
     if base_dir:
