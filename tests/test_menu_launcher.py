@@ -11,18 +11,6 @@ def test_pathdirs():
     """ Gets path directory class from menu_launcher """
     path_dirs = menu_launcher.PathDirs()
 
-def test_update_images():
-    """ Test update_images function """
-    path_dirs = test_env.PathDirs()
-    menu_launcher.update_images(path_dirs)
-
-    # Add then Remove plugin & call update_images
-    url = "https://github.com/CyberReboot/vent-plugins.git"
-    env = test_env.TestEnv()
-    env.add_plugin(path_dirs, url)
-    env.remove_plugin(path_dirs, url)
-    menu_launcher.update_images(path_dirs)
-
 
 def test_get_mode_config():
     """ Test get_mode_config function with valid and invalid directories """
