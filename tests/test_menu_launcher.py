@@ -448,6 +448,21 @@ def test_running_menu():
     child.sendline('9')
     child.expect('Exit')
 
+    ### Build Menu ###
+    # go to Build menu
+    child.sendline('4')
+    child.expect('Return to Vent menu')
+    # Build new plugins and core
+    child.sendline('1')
+    child.expect('Operation complete. Press any key to continue...')
+    # Send confirmation
+    child.send('q')
+    child.expect('Return to Vent menu')
+    # !! TODO - Test Force Rebuild
+    # return to Main Menu
+    child.sendline('3')
+    child.expect('Exit')
+
     ### System Commands Menu ###
     # go to system commands
     child.sendline('5')
@@ -474,13 +489,14 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Exit')
 
-    # !! TODO need to pull out hardcoded paths for this to work
-    # go to system info
-    #child.sendline('3')
-    #child.expect('Return to Vent menu')
-    # return to main menu
-    #child.sendline('9')
-    #child.expect('Exit')
+    ### Help ###
+    # go to Help
+    child.sendline('6')
+    child.expect('getting started')
+    # return to Main Menu
+    child.send('q')
+    child.expect('Exit')
+
     # exit
     child.sendline('7')
     child.read()
@@ -531,6 +547,33 @@ def test_running_remove_plugin():
     child1.expect('Return to Vent menu')
     # go to main menu
     child1.sendline('5')
+    child1.expect('Exit')
+    child1.sendline('7')
+    child1.read()
+    child1.close()
+
+def test_running_configure_template():
+    """ testing running the menu and configuring a template file """
+    path_dirs = test_env.PathDirs()
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
+    child1 = pexpect.spawn(cmd)
+    # go to modes menu
+    child1.sendline('1')
+    child1.expect('Return to Vent menu')
+    # go to configure menu
+    child1.sendline('5')
+    child1.expect('Return to Mode menu')
+    # configure a template
+    child1.sendline('1')
+    child1.expect('Suplemon')
+    # quit out of editing the template
+    child1.sendcontrol('q')
+    child1.expect('Return to Mode menu')
+    # return to modes menu
+    child1.sendline('6')
+    child1.expect('Return to Vent menu')
+    # go to main menu
+    child1.sendline('6')
     child1.expect('Exit')
     child1.sendline('7')
     child1.read()

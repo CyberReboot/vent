@@ -1,0 +1,3 @@
+[report]
+omit = */conftest.py
+omit = */suplemon/*

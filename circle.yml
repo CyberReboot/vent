@@ -4,6 +4,10 @@ machine:
     - elasticsearch
     - rabbitmq-server
     - redis
+checkout:
+  post:
+    - git submodule sync --recursive
+    - git submodule update --recursive --init
 dependencies:
   pre:
     # necessary to fix curses import
