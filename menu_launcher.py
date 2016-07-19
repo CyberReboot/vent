@@ -621,11 +621,13 @@ def build_menu_dict(path_dirs):
     }
     return menu_data
 
-def main(base_dir=None, data_dir=None):
+def main(base_dir=None, info_dir=None, data_dir=None):
     """start menu, clears terminal after exiting menu"""
     path_dirs = PathDirs()
     if base_dir:
         path_dirs = PathDirs(base_dir=base_dir)
+    if info_dir:
+        path_dirs.info_dir = info_dir
     if data_dir:
         path_dirs.data_dir = data_dir
     menu_data = build_menu_dict(path_dirs)
@@ -640,7 +642,7 @@ if __name__ == "__main__": # pragma: no cover
         print result
     except Exception as e:
         pass
-    if len(sys.argv) == 3:
-        main(base_dir=sys.argv[1], data_dir=sys.argv[2])
+    if len(sys.argv) == 4:
+        main(base_dir=sys.argv[1], info_dir=sys.argv[2], data_dir=sys.argv[3])
     else:
         main()
