@@ -435,7 +435,7 @@ def get_enabled(path_dirs):
 
 def get_plugin_status(path_dirs):
     """ Displays status of all running, not running/built, not built, and disabled plugins """
-    plugins = ()
+    plugins = {}
 
     try:
         ### Get All Installed Images (By Filewalk) ###
@@ -500,7 +500,15 @@ def get_plugin_status(path_dirs):
                 if namespace in disabled and image not in disabled[namespace] and namespace+'/'+image not in built:
                     notbuilt.append(namespace+'/'+image)
 
-        plugins = (running, nrbuilt, built, disabled_containers, disabled_images, notbuilt, running_errors, nr_errors, built_errors)
+        plugins['Running'] = running
+        plugins['Not Running'] = nrbuilt
+        plugins['Built'] = built
+        plugins['Disabled Containers'] = disabled_containers
+        plugins['Disabled Images'] = disabled_images
+        plugins['Not Built'] = notbuilt
+        plugins['Running Errors'] = running_errors
+        plugins['Not Running Errors'] = nr_errors
+        plugins['Built Errors'] = built_errors
 
     except Exception as e:
         with open('/tmp/refactor.log', 'a+') as myfile:
