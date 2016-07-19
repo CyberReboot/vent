@@ -352,7 +352,12 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                         tool_core[template_type+"-"+section+"-core"] = core_instructions
                         d_path = 0
                     if container_cmd:
-                        instructions['Cmd'] = container_cmd.replace("'", '"')
+                        hostname = container_cmd.split("_", 1)[0]
+                        if "Env" in instructions:
+                            instructions['Env'].append("VENT_HOST="+hostname)
+                        else:
+                            instructions['Env'] = ["VENT_HOST="+hostname]
+                        instructions['Cmd'] = container_cmd.split("_", 1)[1].replace("'", '"')
                     if not section in external_overrides:
                         if "active" in section or "passive" in section:
                             if (template_type == "active" and "active" in section) or (template_type == "passive" and "passive" in section):

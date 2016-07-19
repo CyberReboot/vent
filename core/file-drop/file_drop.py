@@ -1,4 +1,5 @@
 import magic
+import os
 import sys
 import time
 
@@ -24,6 +25,11 @@ class GZHandler(PatternMatchingEventHandler):
         event.src_path
             path/to/observed/file
         """
+        # get environ VENT_HOST
+        # !! TODO
+        hostname = os.environ.get("VENT_HOST")
+        if not hostname:
+            hostname = ""
         q = Queue(connection=Redis(host="redis"), default_timeout=86400)
         if event.event_type == "created" and event.is_directory == False:
             print event.src_path
@@ -31,7 +37,7 @@ class GZHandler(PatternMatchingEventHandler):
             # let jobs be queued for up to 30 days
             file_mime = magic.from_file(event.src_path, mime=True)
             if "pcap" in file_mime:
-                result = q.enqueue('file_watch.pcap_queue', event.src_path, ttl=2592000)
+                result = q.enqueue('file_watch.pcap_queue', hostname+"_"+event.src_path, ttl=2592000)
 
     def on_created(self, event):
         self.process(event)
