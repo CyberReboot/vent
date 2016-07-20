@@ -265,35 +265,43 @@ def test_running_menu():
     # go to containers menu
     child.sendline('1')
     child.expect('Return to Logs menu')
-    # return to logs menu
-    child.send('\x1b[A')
-    child.sendline()
-    child.expect('Return to System Commands menu')
+    # close
+    child.read()
+    child.close()
+    # spawn child
+    child1 = pexpect.spawn(cmd)
+    child1.expect('Exit')
+    # go to system commands
+    child1.sendline('5')
+    child1.expect('Return to Vent menu')
+    # go to logs menu
+    child1.sendline('1')
+    child1.expect('Return to System Commands menu')
     # go to namespaces menu
-    child.sendline('2')
-    child.expect('Return to Logs menu')
+    child1.sendline('2')
+    child1.expect('Return to Logs menu')
     # return to logs menu
-    child.sendline('3')
-    child.expect('Return to System Commands menu')
+    child1.sendline('3')
+    child1.expect('Return to System Commands menu')
     # return to system commands menu
-    child.sendline('5')
-    child.expect('Return to Vent menu')
+    child1.sendline('5')
+    child1.expect('Return to Vent menu')
     # go to main menu
-    child.sendline('5')
-    child.expect('Exit')
+    child1.sendline('5')
+    child1.expect('Exit')
 
     ### Help ###
     # go to Help
-    child.sendline('6')
-    child.expect('getting started')
+    child1.sendline('6')
+    child1.expect('getting started')
     # return to Main Menu
-    child.send('q')
-    child.expect('Exit')
+    child1.send('q')
+    child1.expect('Exit')
 
     # exit
-    child.sendline('7')
-    child.read()
-    child.close()
+    child1.sendline('7')
+    child1.read()
+    child1.close()
     # TODO finish going through menu actions
 
 def test_running_add_plugin():
