@@ -266,7 +266,6 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Logs menu')
     # close
-    child.read()
     child.close()
     # spawn child
     child1 = pexpect.spawn(cmd)
