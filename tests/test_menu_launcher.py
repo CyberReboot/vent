@@ -272,7 +272,7 @@ def test_running_menu():
     child.sendline('2')
     child.expect('Return to Logs menu')
     # return to logs menu
-    child.sendline('2')
+    child.sendline('3')
     child.expect('Return to System Commands menu')
     # return to system commands menu
     child.sendline('5')
