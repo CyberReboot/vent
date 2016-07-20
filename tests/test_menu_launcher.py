@@ -266,7 +266,7 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Logs menu')
     # return to logs menu
-    child.sendline('2')
+    child.sendline('1')
     child.expect('Return to System Commands menu')
     # go to namespaces menu
     child.sendline('2')
