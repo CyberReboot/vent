@@ -54,11 +54,11 @@ Options:
 }
 
 for i in "$@"; do
-    if [ "$i" == "-h" ] || [ "$i" == "--help" ]; then
+    if [ "$i" = "-h" ] || [ "$i" = "--help" ]; then
         help_text
         exit 0
     fi
-    if [ "$i" == "-v" ]; then
+    if [ "$i" = "-v" ]; then
         verbose=true
     fi
 done
@@ -71,7 +71,7 @@ if [ "$#" -eq 0 ]; then
     upt=true
     installed_plugins=true
     nics=true
-elif [ "$1" == "all" ]; then
+elif [ "$1" = "all" ]; then
     name=true
     version=true
     build_date=true
@@ -84,22 +84,22 @@ elif [ "$1" == "all" ]; then
     num_repos=true
     active_ssh=true
     nics=true
-    if [ "$verbose" == true ]; then
+    if [ "$verbose" = true ]; then
         installed_images=true
         installed_containers=true
     fi
-elif [ "$1" == "name" ]; then
+elif [ "$1" = "name" ]; then
     name=true
-elif [ "$1" == "count" ]; then
-    if [ "$#" == 2 ]; then
-        if [ "$2" == "plugins" ]; then
+elif [ "$1" = "count" ]; then
+    if [ "$#" -eq 2 ]; then
+        if [ "$2" = "plugins" ]; then
             num_plugins=true
-        elif [ "$2" == "images" ]; then
+        elif [ "$2" = "images" ]; then
             num_images=true
-        elif [ "$2" == "containers" ]; then
+        elif [ "$2" = "containers" ]; then
             num_run_containers=true
             num_stop_containers=true
-        elif [ "$2" == "repositories" ]; then
+        elif [ "$2" = "repositories" ]; then
             num_repos=true
         fi
     else
@@ -109,17 +109,17 @@ elif [ "$1" == "count" ]; then
         num_stop_containers=true
         num_repos=true
     fi
-elif [ "$1" == "ssh" ]; then
+elif [ "$1" = "ssh" ]; then
     active_ssh=true
-elif [ "$1" == "installed" ]; then
-    if [ "$#" == 2 ]; then
-        if [ "$2" == "images" ]; then
+elif [ "$1" = "installed" ]; then
+    if [ "$#" -eq 2 ]; then
+        if [ "$2" = "images" ]; then
             installed_images=true
-        elif [ "$2" == "containers" ]; then
+        elif [ "$2" = "containers" ]; then
             installed_containers=true
-        elif [ "$2" == "plugins" ]; then
+        elif [ "$2" = "plugins" ]; then
             installed_plugins=true
-        elif [ "$2" == "repositories" ]; then
+        elif [ "$2" = "repositories" ]; then
             installed_repos=true
         fi
     else
@@ -128,7 +128,7 @@ elif [ "$1" == "installed" ]; then
         installed_containers=true
         installed_repos=true
     fi
-elif [ "$1" == "nics" ]; then
+elif [ "$1" = "nics" ]; then
     nics=true
 else
     echo "Wrong arguments!"
