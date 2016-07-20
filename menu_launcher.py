@@ -66,7 +66,7 @@ def get_container_menu(path_dirs):
     command3 = " | tee /tmp/vent_logs/vent_container_"
     p['title'] = 'Container Logs'
     p['subtitle'] = 'Please select a container...'
-    containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | awk \"{print \$1}\"", shell=True).split("\n")
+    containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | grep -v Dead | awk \"{print \$1}\"", shell=True).split("\n")
     containers = filter(None, containers)
     p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
     for d in p['options']:
