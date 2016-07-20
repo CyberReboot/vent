@@ -227,16 +227,26 @@ def run_plugins(path_dirs, action):
         for plug in plugin_array:
             plugins[plug] = config.get("plugins", plug)
 
-        # get number of installed cores
-        cores = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py cores', shell=True)))
+        # Set Defaults
+        cores = 0
+        all_colls = 0
+        passive_colls = 0
+        active_colls = 0
+        vis = 0
+        try:
+            # get number of installed cores
+            cores = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py cores', shell=True)))
 
-        # get number of installed collectors
-        all_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py collectors', shell=True)))
-        passive_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py passive', shell=True)))
-        active_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py active', shell=True)))
+            # get number of installed collectors
+            all_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py collectors', shell=True)))
+            passive_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py passive', shell=True)))
+            active_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py active', shell=True)))
 
-        # get number of installed visualizations
-        vis = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py visualizations', shell=True)))
+            # get number of installed visualizations
+            vis = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py visualizations', shell=True)))
+        except Exception as e:
+            with open('/tmp/errors.log', 'a+') as myfile:
+                myfile.write("Unable to get installed cores/collectors/vis.")
 
         for plugin in plugins:
             # check if plugin is core or vis and the corresponding size is greater than 0
