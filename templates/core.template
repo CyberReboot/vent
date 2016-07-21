@@ -3,6 +3,7 @@ name = Core
 
 [service]
 schedule = {"all":"continuous"}
+#public_nic = eth1
 
 [instances]
 rq-worker = 2
