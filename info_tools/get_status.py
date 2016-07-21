@@ -50,8 +50,8 @@ def get_mode_config(path_dirs):
                     modes[plug] = config.get("plugins", plug).replace(" ", "").split(",")
         # If not then there are no special runtime configurations and modes is empty
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_mode_config")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_mode_config")
         pass
 
     return modes
@@ -91,8 +91,8 @@ def get_core_config(path_dirs):
                     cores[option] = config.get("locally-active", option).replace(" ", "")
         # If not then everything is enabled and cores is empty
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_core_config")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_core_config")
         pass
 
     return cores
@@ -105,8 +105,8 @@ def get_installed_cores(path_dirs):
         # Get all cores
         cores = [ core for core in os.listdir(path_dirs.core_dir) if os.path.isdir(os.path.join(path_dirs.core_dir, core)) ]
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_installed_cores")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_installed_cores")
         pass
 
     return cores
@@ -131,8 +131,8 @@ def get_installed_collectors(path_dirs, c_type):
                 myfile.write("Error in get_installed_collectors\n" + "Invalid collector parameter: " + str(c_type))
             myfile.close()
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_installed_collectors")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_installed_collectors")
         pass
 
     return colls
@@ -145,8 +145,8 @@ def get_installed_vis(path_dirs):
         # Get all visualizations
         vis = [ visualization for visualization in os.listdir(path_dirs.vis_dir) if os.path.isdir(os.path.join(path_dirs.vis_dir, visualization)) ]
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_installed_vis")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_installed_vis")
         pass
 
     return vis
@@ -163,8 +163,8 @@ def get_installed_plugins(path_dirs):
         for namespace in namespaces:
             p[namespace] = [ plugin for plugin in os.listdir(path_dirs.plugins_dir+namespace) if os.path.isdir(os.path.join(path_dirs.plugins_dir+namespace, plugin)) ]
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_installed_plugins")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_installed_plugins")
         pass
 
     return p
@@ -193,8 +193,8 @@ def get_all_installed(path_dirs):
         if all_plugins:
             all_installed.update(all_plugins)
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_all_installed")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_all_installed")
         pass
 
     return all_installed, all_cores, all_colls, all_vis, all_plugins
@@ -280,8 +280,8 @@ def get_mode_enabled(path_dirs, mode_config):
             mode_enabled['collectors'] = coll_enabled
             mode_enabled['visualization'] = vis_enabled
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_mode_enabled")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_mode_enabled")
         pass
 
     return mode_enabled
@@ -331,8 +331,8 @@ def get_core_enabled(path_dirs, core_config):
             core_disabled['collectors'] = coll_disabled
             core_disabled['core'] = locally_disabled
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_core_enabled")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_core_enabled")
         pass
 
     return core_enabled, core_disabled
@@ -417,8 +417,8 @@ def get_enabled(path_dirs):
         enabled = all_enabled
         disabled = all_disabled
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_enabled")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_enabled")
         pass
 
     return enabled, disabled
@@ -501,8 +501,8 @@ def get_status(path_dirs):
         plugins['Built Errors'] = built_errors
 
     except Exception as e:
-        with open('/tmp/refactor.log', 'a+') as myfile:
-            myfile.write("Error - get_status")
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_status")
         pass
 
     return plugins
