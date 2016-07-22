@@ -54,7 +54,7 @@ def execute_template(template_type, template_execution, info_name, service_sched
         pass
     return
 
-def read_template_types(template_type, container_cmd, plugins_dir):
+def read_template_types(template_type, container_cmd, path_dirs):
     """ read in templates for plugins, core, and visualization """
     template_dir = path_dirs.template_dir
     plugins_dir = path_dirs.plugins_dir
