@@ -140,6 +140,11 @@ def test_get_mode_enabled():
     mode_config = get_status.get_mode_config(path_dirs)
     get_status.get_mode_enabled(path_dirs, mode_config)
 
+    # modes.template doesn't have the namespace for an installed plugin
+    os.system("mkdir "+path_dirs.plugins_dir+"namespacetest")
+    os.system("mkdir "+path_dirs.plugins_dir+"namespacetest/plugintest")
+    get_status.get_mode_enabled(path_dirs, mode_config)
+
     # Set modes.template to have a section it didn't have
     new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
     env.modifyconfigs(path_dirs, new_conf)
@@ -150,10 +155,11 @@ def test_get_mode_enabled():
     os.system("rm "+path_dirs.template_dir+'modes.template')
     mode_config = get_status.get_mode_config(path_dirs)
     get_status.get_mode_enabled(path_dirs, mode_config)
+    os.system("cp modes.backup templates/modes.template")
 
     # Create template without 'core' section
-    os.system("touch "+path_dirs.template_dir+'modes.template')
     new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = get_status.get_mode_config(path_dirs)
     get_status.get_mode_enabled(path_dirs, mode_config)
 
