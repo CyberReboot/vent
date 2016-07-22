@@ -60,33 +60,39 @@ class PathDirs:
 def get_container_menu(path_dirs):
     """get a list of containers, returns a menu with containers as options"""
     p = {}
-    p['type'] = MENU
-    command1 = "if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi; "
-    command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -c "
-    command3 = " | tee /tmp/vent_logs/vent_container_"
-    p['title'] = 'Container Logs'
-    p['subtitle'] = 'Please select a container...'
-    containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | grep -v Dead | awk \"{print \$1}\"", shell=True).split("\n")
-    containers = filter(None, containers)
-    p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
-    for d in p['options']:
-        d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+    try:
+        p['type'] = MENU
+        command1 = "if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi; "
+        command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -c "
+        command3 = " | tee /tmp/vent_logs/vent_container_"
+        p['title'] = 'Container Logs'
+        p['subtitle'] = 'Please select a container...'
+        containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | grep -v Dead | awk \"{print \$1}\"", shell=True).split("\n")
+        containers = filter(None, containers)
+        p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
+        for d in p['options']:
+            d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+    except Exception as e:
+        pass
     return p
 
 def get_namespace_menu(path_dirs):
     """get a list of namespaces, returns a menu with namespaces as options"""
     p = {}
-    p['type'] = MENU
-    command1 = "if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs;fi; "
-    command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -n "
-    command3 = " | tee /tmp/vent_logs/vent_namespace_"
-    p['title'] = 'Namespace Logs'
-    p['subtitle'] = 'Please select a namespace...'
-    namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | uniq", shell=True).split("\n")
-    namespaces = filter(None, namespaces)
-    p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
-    for d in p['options']:
-        d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+    try:
+        p['type'] = MENU
+        command1 = "if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs;fi; "
+        command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -n "
+        command3 = " | tee /tmp/vent_logs/vent_namespace_"
+        p['title'] = 'Namespace Logs'
+        p['subtitle'] = 'Please select a namespace...'
+        namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | uniq", shell=True).split("\n")
+        namespaces = filter(None, namespaces)
+        p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
+        for d in p['options']:
+            d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+    except Exception as e:
+        pass
     return p
 
 
@@ -116,19 +122,33 @@ def confirm():
 def get_plugin_status(path_dirs):
     """ Displays status of all running, not running/built, not built, and disabled plugins """
     p = {}
-
     try:
         ### Get Plugin Statuses ###
-        status = ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py status', shell=True))
-        running = status['Running']
-        nrbuilt = status['Not Running']
-        built = status['Built']
-        disabled_containers = status['Disabled Containers']
-        disabled_images = status['Disabled Images']
-        notbuilt = status['Not Built']
-        running_errors = status['Running Errors']
-        nr_errors = status['Not Running Errors']
-        built_errors = status['Built Errors']
+        status = {}
+        running = []
+        nrbuilt = []
+        built = []
+        disabled_containers = []
+        disabled_images = []
+        notbuilt = []
+        running_errors = []
+        nr_errors = []
+        built_errors = []
+
+        try:
+            status = ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py status', shell=True))
+            running = status['Running']
+            nrbuilt = status['Not Running']
+            built = status['Built']
+            disabled_containers = status['Disabled Containers']
+            disabled_images = status['Disabled Images']
+            notbuilt = status['Not Built']
+            running_errors = status['Running Errors']
+            nr_errors = status['Not Running Errors']
+            built_errors = status['Built Errors']
+        except Exception as e:
+            with open('/tmp/error.log', 'a+') as myfile:
+                myfile.write("Error - menu_launcher.py: Unable to get plugin status")
 
         ### Prepare Statuses for MENU ###
         p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running ]
@@ -168,7 +188,6 @@ def get_plugin_status(path_dirs):
         # Only show errors if they exist
         if not hide_errors:
             p['options'].append({ 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu })
-
     except Exception as e:
         pass
 
@@ -177,7 +196,6 @@ def get_plugin_status(path_dirs):
 def get_installed_plugin_repos(path_dirs, m_type, command):
     """ Returns a dictionary of all installed plugin repos; e.g - vent-network """
     p = {}
-
     try:
         p['type'] = MENU
         if command=="remove":
@@ -208,7 +226,6 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins:'
             p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-
     except Exception as e:
         pass
 
@@ -245,7 +262,7 @@ def run_plugins(path_dirs, action):
             # get number of installed visualizations
             vis = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py visualizations', shell=True)))
         except Exception as e:
-            with open('/tmp/errors.log', 'a+') as myfile:
+            with open('/tmp/error.log', 'a+') as myfile:
                 myfile.write("Unable to get installed cores/collectors/vis.")
 
         for plugin in plugins:
