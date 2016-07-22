@@ -26,11 +26,11 @@ def test_run_plugins():
     os.system("rm templates/core.template")
     os.system("rm templates/modes.template")
 
+    test_env.TestEnv()
     path_dirs = test_env.PathDirs()
     invalid_dirs = test_env.PathDirs(base_dir="/tmp/")
     menu_launcher.run_plugins(path_dirs, "start")
     menu_launcher.run_plugins(invalid_dirs, "start")
-    test_env.initconfigs(path_dirs, False)
 
     ### Visualization Test ###
     # Find modes.template
