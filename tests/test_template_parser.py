@@ -101,7 +101,8 @@ def test_read_template_types():
 
 def test_execute_template():
     """ Testing executing template configurations """
-    info_name, service_schedule, tool_core, tool_dict, delay_sections = template_parser.read_template_types("core", "")
+    path_dirs = PathDirs()
+    info_name, service_schedule, tool_core, tool_dict, delay_sections = template_parser.read_template_types("core", "", path_dirs)
     template_parser.execute_template("core", "start", info_name, service_schedule, tool_core, tool_dict, delay_sections)
     template_parser.execute_template("invalid-template", "start", info_name, service_schedule, tool_core, tool_dict, delay_sections)
     template_parser.execute_template("invalid-template", [], info_name, "foo", tool_core, tool_dict, delay_sections)
