@@ -30,7 +30,7 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
         self.info_dir = info_dir
 
-def execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir):
+def execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections):
     # note for plugin, also run core
     # for visualization, make aware of where the data is
     try:
@@ -54,8 +54,12 @@ def execute_template(template_type, template_execution, info_name, service_sched
         pass
     return
 
-def read_template_types(template_type, container_cmd, template_dir, plugins_dir):
+def read_template_types(template_type, container_cmd, path_dirs):
     """ read in templates for plugins, core, and visualization """
+    template_dir = path_dirs.template_dir
+    plugins_dir = path_dirs.plugins_dir
+    info_dir = path_dirs.info_dir
+
     template_path = template_dir+template_type+'.template'
     if template_type in ["active", "passive"]:
         template_path = template_dir+'collectors.template'
@@ -93,16 +97,48 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
     delay_sections = {}
 
     try:
+        # get list of sections per template file
+        with open(template_path): pass
+        config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        config.optionxform=str
+        config.read(template_path)
+        sections = config.sections()
+    except Exception as e:
+        sections = []
+
+    try:
+        core_config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        core_config.optionxform=str
+        core_config.read(template_dir+'core.template')
+        # check dependencies like elasticsearch and rabbitmq
+        external_options = core_config.options("external")
+    except Exception as e:
+        external_options = []
+
+    public_network = "0.0.0.0"
+    public_nic = None
+    # check default route then if public_nic has been overridden
+    try:
+        public_nic = subprocess.check_output("route | grep default | awk '{print $NF}'", shell=True)
+        core_config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        core_config.optionxform=str
+        core_config.read(template_dir+'core.template')
+        # check dependencies like elasticsearch and rabbitmq
+        service = core_config.options("service")
+        public_nic = core_config.get("service", "public_nic")
+    except Exception as e:
+        pass
+    if public_nic:
         try:
-            # get list of sections per template file
-            with open(template_path): pass
-            config = ConfigParser.RawConfigParser()
-            # needed to preserve case sensitive options
-            config.optionxform=str
-            config.read(template_path)
-            sections = config.sections()
+            response = subprocess.check_output(info_dir+"get_info.sh nics | grep "+public_nic, shell=True)
+            public_network = response.split(":")[1].strip()
         except Exception as e:
-            sections = []
+            pass
+
+    try:
         running_containers = subprocess.check_output("docker ps | awk \"{print \$NF}\"", shell=True).split("\n")
         t_sections = []
         # remove sections that represent running containers
@@ -114,15 +150,6 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
         external_overrides = []
         external_hosts = {}
         instances = []
-        try:
-            core_config = ConfigParser.RawConfigParser()
-            # needed to preserve case sensitive options
-            core_config.optionxform=str
-            core_config.read(template_dir+'core.template')
-            # check dependencies like elasticsearch and rabbitmq
-            external_options = core_config.options("external")
-        except Exception as e:
-            external_options = []
         host_config_exists = False
 
         # plugin template file
@@ -152,7 +179,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
             except Exception as e:
                 pass
 
-        # check if active or pass are disabled
+        # check if active or passive are disabled
         if template_type in ["active", "passive"]:
             try:
                 core_config = ConfigParser.RawConfigParser()
@@ -198,6 +225,40 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                             host_config = ast.literal_eval(option_val)
                             host_config_new = copy.deepcopy(host_config)
                             extra_hosts = []
+                            # reconfigure exposing ports to the public_network only
+                            if "PublishAllPorts" in host_config:
+                                if host_config["PublishAllPorts"] in [True, "True"]:
+                                    del host_config_new["PublishAllPorts"]
+                                    if "PortBindings" in host_config:
+                                        # !! TODO
+                                        # not a valid configuration?
+                                        pass
+                                    else:
+                                        ports = []
+                                        # use docker inspect image
+                                        try:
+                                            if template_type in ["active", "passive"]:
+                                                mapping = subprocess.check_output("docker inspect -f '{{.Config.ExposedPorts}}' collectors/"+section, shell=True)
+                                            else:
+                                                mapping = subprocess.check_output("docker inspect -f '{{.Config.ExposedPorts}}' "+template_type+"/"+section, shell=True)
+                                            p = mapping.strip()[4:-1].split(" ")
+                                            for port in p:
+                                                ports.append(port[:-3])
+                                        except Exception as e:
+                                            pass
+                                        port_dict = {}
+                                        for port in ports:
+                                            port_dict[port] = [{"HostPort":"", "HostIp":public_network}]
+                                        host_config_new["PortBindings"] = port_dict
+                            elif "PortBindings" in host_config:
+                                new_port_dict = {}
+                                port_dict = host_config["PortBindings"]
+                                for port in port_dict:
+                                    intermediate = port_dict[port]
+                                    # !! TODO not necessarily always the first object in the array
+                                    intermediate[0]['HostIp'] = public_network
+                                    new_port_dict[port] = intermediate
+                                host_config_new["PortBindings"] = new_port_dict
                             if template_type == "core":
                                 host_config_new["RestartPolicy"] = { "Name": "always" }
                             if template_type not in ["visualization", "core", "active", "passive"]:
@@ -238,7 +299,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                             # add syslog, don't log rmq-es-connector as it will loop itself
                             if section not in ["rmq-es-connector", "aaa-syslog", "aaa-redis", "aaa-rabbitmq"]:
                                 try:
-                                    syslog_host = "localhost"
+                                    syslog_host = public_network
                                     for ext in external_overrides:
                                         if "aaa_syslog" == ext:
                                             if "aaa_syslog_host" in external_options:
@@ -252,6 +313,8 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                                     option_val = str(host_config_new).replace("'", '"')
                                 except Exception as e:
                                     pass
+                            else:
+                                option_val = str(host_config_new).replace("'", '"')
                         except Exception as e:
                             pass
                     option_val = option_val.replace("True", "true")
@@ -293,7 +356,7 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
                             pass
                     # add syslog
                     try:
-                        syslog_host = "localhost"
+                        syslog_host = public_network
                         for ext in external_overrides:
                             if "aaa_syslog" == ext:
                                 if "aaa_syslog_host" in external_options:
@@ -364,9 +427,6 @@ def read_template_types(template_type, container_cmd, template_dir, plugins_dir)
 
 def main(path_dirs, template_type, template_execution, container_cmd):
     """main method for template_parser. Based on the action argument given, performs the actions on the correct template files"""
-    template_dir = path_dirs.template_dir
-    plugins_dir = path_dirs.plugins_dir
-
     if template_execution == "stop":
         if template_type == "all":
             for x in ["visualization", "active", "passive", "core"]:
@@ -383,11 +443,11 @@ def main(path_dirs, template_type, template_execution, container_cmd):
             os.system("docker ps -aqf name=\""+template_type+"\" | xargs docker rm 2> /dev/null")
     elif template_execution == "start" and template_type == "all":
         for x in ["core", "visualization", "active", "passive"]:
-            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(x, container_cmd, template_dir, plugins_dir)
-            execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
+            info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(x, container_cmd, path_dirs)
+            execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections)
     else:
-        info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd, template_dir, plugins_dir)
-        execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections, template_dir, plugins_dir)
+        info_name, service_schedule, tool_core, tool_dict, delay_sections = read_template_types(template_type, container_cmd, path_dirs)
+        execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections)
 
 if __name__ == "__main__": # pragma: no cover
     path_dirs = PathDirs()
