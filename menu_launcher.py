@@ -136,7 +136,7 @@ def get_plugin_status(path_dirs):
         built_errors = []
 
         try:
-            status = ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py status', shell=True))
+            status = ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py all', shell=True))
             running = status['Running']
             nrbuilt = status['Not Running']
             built = status['Built']
@@ -255,12 +255,12 @@ def run_plugins(path_dirs, action):
             cores = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py cores', shell=True)))
 
             # get number of installed collectors
-            all_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py collectors', shell=True)))
-            passive_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py passive', shell=True)))
-            active_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py active', shell=True)))
+            all_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py collectors --all', shell=True)))
+            passive_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py collectors --passive', shell=True)))
+            active_colls = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py collectors --active', shell=True)))
 
             # get number of installed visualizations
-            vis = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py visualizations', shell=True)))
+            vis = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py vis', shell=True)))
         except Exception as e:
             with open('/tmp/error.log', 'a+') as myfile:
                 myfile.write("Unable to get installed cores/collectors/vis.")

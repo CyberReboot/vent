@@ -3,6 +3,7 @@
 # !! TODO - Argparse
 import ConfigParser
 
+import argparse
 import os
 import sys
 
@@ -30,6 +31,70 @@ class PathDirs:
         self.vis_dir = base_dir + vis_dir
         self.info_dir = info_dir
         self.data_dir = data_dir
+
+def add_override_options(parser, path_dirs):
+    """ Get arguments for overriding path_dirs"""
+    parser.add_argument('-b', '--base_dir', default=path_dirs.base_dir, action='store', dest='base_dir', help='base directory to override')
+    parser.add_argument('-i', '--info_dir', default=path_dirs.info_dir, action='store', dest='info_dir', help='info directory to override')
+    parser.add_argument('-d', '--data_dir', default=path_dirs.data_dir, action='store', dest='data_dir', help='data directory to override')
+
+def add_all_installed_options(subparsers, path_dirs):
+    """ Subparser for get_all_installed """
+    installed_parser = subparsers.add_parser('installed', help='all installed')
+    add_override_options(installed_parser, path_dirs)
+
+def add_core_config_options(subparsers, path_dirs):
+    """ Subparser for get_core_config """
+    config_parser = subparsers.add_parser('cconfig', help='configuration of core.template')
+    add_override_options(config_parser, path_dirs)
+
+def add_installed_collectors_options(subparsers, path_dirs):
+    """ Subparser & mutEx group for get_installed_collectors by collector types """
+    collector_parser = subparsers.add_parser('collectors', help='installed collectors')
+    add_override_options(collector_parser, path_dirs)
+    type = collector_parser.add_mutually_exclusive_group(required=False)
+    type.add_argument('-all', '--all', default=False, action='store_true', dest='c_all', help='List all collectors')
+    type.add_argument('-passive', '--passive', default=False, action='store_true', dest='c_passive', help='List passive collectors')
+    type.add_argument('-active', '--active', default=False, action='store_true', dest='c_active', help='List active collectors')
+
+def add_installed_cores_options(subparsers, path_dirs):
+    """ Subparser for get_installed_cores """
+    core_parser = subparsers.add_parser('cores', help='installed cores')
+    add_override_options(core_parser, path_dirs)
+
+def add_core_enabled_options(subparsers, path_dirs):
+    """ Subparser for get_core_enabled """
+    enabled_parser = subparsers.add_parser('cenabled', help='core enabled/disabled images')
+    add_override_options(enabled_parser, path_dirs)
+
+def add_enabled_options(subparsers, path_dirs):
+    """ Subparser for get_enabled """
+    enabled_parser = subparsers.add_parser('enabled', help='all enabled/disabled services')
+    add_override_options(enabled_parser, path_dirs)
+
+def add_mode_config_options(subparsers, path_dirs):
+    config_parser = subparsers.add_parser('mconfig', help='configuration of modes.template')
+    add_override_options(config_parser, path_dirs)
+
+def add_mode_enabled_options(subparsers, path_dirs):
+    """ Subparser for get_mode_enabled """
+    enabled_parser = subparsers.add_parser('menabled', help='mode enabled images')
+    add_override_options(enabled_parser, path_dirs)
+
+def add_installed_plugins_options(subparsers, path_dirs):
+    """ Subparser for get_installed_plugins """
+    plugin_parser = subparsers.add_parser('plugins', help='installed plugins')
+    add_override_options(plugin_parser,path_dirs)
+
+def add_installed_vis_options(subparsers, path_dirs):
+    """ Subparser for get_installed_vis """
+    vis_parser = subparsers.add_parser('vis', help='installed visualizations')
+    add_override_options(vis_parser, path_dirs)
+
+def add_status_options(subparsers, path_dirs):
+    """ Subparser for get_status """
+    status_parser = subparsers.add_parser('all', help='all status information')
+    add_override_options(status_parser, path_dirs)
 
 # Parses modes.template and returns a dict containing all specifically enabled containers
 # Returns dict along the format of: {'namespace': ["all"], 'namespace2': [""], 'namespace3': ["plug1", "plug2"]}
@@ -175,7 +240,6 @@ def get_all_installed(path_dirs):
     {'cores':["core1", "core2"], 'collectors':["coll1", "coll2"]}
     """
     all_installed = {}
-    list_installed = {}
     try:
         # Get each set of containers by type
         all_cores = get_installed_cores(path_dirs)
@@ -507,51 +571,92 @@ def get_status(path_dirs):
 
     return plugins
 
-def main(cmd, base_dir=None, info_dir=None, data_dir=None):
+def main(path_dirs, parser, args):
     """ Calls the appropriate function and prints to stdout """
-    path_dirs = PathDirs()
     status = None
-    if base_dir:
-        path_dirs = PathDirs(base_dir=base_dir)
-    if info_dir:
-        path_dirs.info_dir = info_dir
-    if data_dir:
-        path_dirs.data_dir = data_dir
 
-    if cmd == "mode_config":
-        status = get_mode_config(path_dirs)
-    if cmd == "core_config":
-        status = get_core_config(path_dirs)
-    if cmd == "cores":
-        status = get_installed_cores(path_dirs)
-    if cmd == "collectors":
-        status = get_installed_collectors(path_dirs, "all")
-    if cmd == "passive":
-        status = get_installed_collectors(path_dirs, "passive")
-    if cmd == "active":
-        status = get_installed_collectors(path_dirs, "active")
-    if cmd == "visualizations":
-        status = get_installed_vis(path_dirs)
-    if cmd == "plugins":
-        status = get_installed_plugins(path_dirs)
-    if cmd == "all":
-        status = get_all_installed(path_dirs)
-    if cmd == "enabled":
-        status = get_enabled(path_dirs)[0]
-    if cmd == "disabled":
-        status = get_enabled(path_dirs)[1]
-    if cmd == "status":
-        status = get_status(path_dirs)
+    try:
+        # Set to whatever values are given in args
+        if args.base_dir:
+            path_dirs.base_dir = args.base_dir
+        if args.info_dir:
+            path_dirs.info_dir = args.info_dir
+        if args.data_dir:
+            path_dirs.data_dir = args.data_dir
+
+        if args.cmd == "all":
+            status = get_status(path_dirs)
+        elif args.cmd == "cconfig":
+            status = get_core_config(path_dirs)
+        elif args.cmd == "cenabled":
+            core_config = get_core_config(path_dirs)
+            status = get_core_enabled(path_dirs, core_config)
+        elif args.cmd == "collectors":
+            if args.c_all:
+                status = get_installed_collectors(path_dirs, "all")
+            elif args.c_passive:
+                status = get_installed_collectors(path_dirs, "passive")
+            elif args.c_active:
+                status = get_installed_collectors(path_dirs, "active")
+        elif args.cmd == "cores":
+            status = get_installed_cores(path_dirs)
+        elif args.cmd == "enabled":
+            status = get_enabled(path_dirs)
+        elif args.cmd == "installed":
+            status = get_all_installed(path_dirs)
+        elif args.cmd == "mconfig":
+            status = get_mode_config(path_dirs)
+        elif args.cmd == "menabled":
+            mode_config = get_mode_config(path_dirs)
+            status = get_mode_enabled(path_dirs, mode_config)
+        elif args.cmd == "plugins":
+            status = get_installed_plugins(path_dirs)
+        elif args.cmd == "vis":
+            status = get_installed_vis(path_dirs)
+        else:
+            parser.print_help()
+
+    except Exception as e:
+        pass
 
     print status
 
 if __name__ == "__main__":
     try:
-        if len(sys.argv) == 2:
-            main(cmd=sys.argv[1])
-        elif len(sys.argv) == 5:
-            main(cmd=sys.argv[1], base_dir=sys.argv[2], info_dir=sys.argv[3], data_dir=sys.argv[4])
+        # Initiate default PathDirs
+        path_dirs = PathDirs()
+
+        """
+        Argparse
+        Options: all, cconfig, cenabled, collectors, cores,
+                 enabled, installed, mconfig, menabled, plugins, vis
+        """
+        parser = argparse.ArgumentParser(prog='get_status')
+        subparsers = parser.add_subparsers(help='Get status of: ', dest='cmd')
+        add_status_options(subparsers, path_dirs)
+        add_core_config_options(subparsers, path_dirs)
+        add_core_enabled_options(subparsers, path_dirs)
+        add_installed_collectors_options(subparsers, path_dirs)
+        add_installed_cores_options(subparsers, path_dirs)
+        add_enabled_options(subparsers, path_dirs)
+        add_all_installed_options(subparsers, path_dirs)
+        add_mode_config_options(subparsers, path_dirs)
+        add_mode_enabled_options(subparsers, path_dirs)
+        add_installed_plugins_options(subparsers, path_dirs)
+        add_installed_vis_options(subparsers, path_dirs)
+
+        args = parser.parse_args()
+        # If no values provided, set get_status as default
+        if not args:
+            args.cmd = "all"
         else:
-            sys.exit()
+            # Collectors was called
+            if "c_all" in args:
+                # No args were passed, default to all collectors
+                # Note if invalid flags are passive like --pass, this defaults to all
+                if not args.c_all and not args.c_passive and not args.c_active:
+                    args.c_all = True
+        # After modifying args, call main
+        main(path_dirs, parser, args)
     except Exception as e:
         pass
