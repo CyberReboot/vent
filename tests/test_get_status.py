@@ -210,3 +210,29 @@ def test_get_enabled():
     get_status.get_enabled(path_dirs)
     env.remove_plugin(path_dirs, url)
     env.remove_plugin(path_dirs, url2)
+
+def test_arg_parse():
+    """ Tests arg parse parsing of arguments """
+    path_dirs = test_env.PathDirs()
+    # All is a reserved python keyword
+    # Setting up cmds to call get_status with
+    cmds = [
+        "all",
+        "cconfig",
+        "cenabled",
+        "collectors",
+        "cores",
+        "enabled",
+        "installed",
+        "mconfig",
+        "menabled",
+        "plugins",
+        "vis"
+    ]
+
+    # Test with no commands
+    os.system('python2.7 '+path_dirs.info_dir+'get_status.py')
+
+    # Test with all commands
+    for cmd in cmds:
+        os.system('python2.7 '+path_dirs.info_dir+'get_status.py '+cmd)
