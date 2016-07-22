@@ -139,6 +139,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
             pass
 
     try:
+        running_containers = []
         running_containers = subprocess.check_output("docker ps | awk \"{print \$NF}\"", shell=True).split("\n")
         t_sections = []
         # remove sections that represent running containers
