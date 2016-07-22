@@ -230,12 +230,16 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                     del host_config_new["PublishAllPorts"]
                                     if "PortBindings" in host_config:
                                         # !! TODO
+                                        # not a valid configuration?
                                         pass
                                     else:
                                         ports = []
-                                        # !! TODO use docker inspect image
+                                        # use docker inspect image
                                         try:
-                                            mapping = subprocess.check_output("docker inspect -f '{{.Config.ExposedPorts}}' "+template_type+"/"+section, shell=True)
+                                            if template_type in ["active", "passive"]:
+                                                mapping = subprocess.check_output("docker inspect -f '{{.Config.ExposedPorts}}' collectors/"+section, shell=True)
+                                            else:
+                                                mapping = subprocess.check_output("docker inspect -f '{{.Config.ExposedPorts}}' "+template_type+"/"+section, shell=True)
                                             p = mapping.strip()[4:-1].split(" ")
                                             for port in p:
                                                 ports.append(port[:-3])
