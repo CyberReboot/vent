@@ -225,6 +225,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                             host_config = ast.literal_eval(option_val)
                             host_config_new = copy.deepcopy(host_config)
                             extra_hosts = []
+                            # reconfigure exposing ports to the public_network only
                             if "PublishAllPorts" in host_config:
                                 if host_config["PublishAllPorts"] in [True, "True"]:
                                     del host_config_new["PublishAllPorts"]
@@ -249,9 +250,14 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                         for port in ports:
                                             port_dict[port] = [{"HostPort":"", "HostIp":public_network}]
                                         host_config_new["PortBindings"] = port_dict
-                            if "PortBindings" in host_config:
-                                # !! TODO
-                                pass
+                            elif "PortBindings" in host_config:
+                                new_port_dict = {}
+                                port_dict = host_config["PortBindings"]
+                                for port in port_dict:
+                                    intermediate = port_dict[port]
+                                    intermediate[0]['HostIp'] = public_network
+                                    new_port_dict[port] = intermediate
+                                host_config_new["PortBindings"] = new_port_dict
                             if template_type == "core":
                                 host_config_new["RestartPolicy"] = { "Name": "always" }
                             if template_type not in ["visualization", "core", "active", "passive"]:
