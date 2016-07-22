@@ -255,6 +255,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                 port_dict = host_config["PortBindings"]
                                 for port in port_dict:
                                     intermediate = port_dict[port]
+                                    # !! TODO not necessarily always the first object in the array
                                     intermediate[0]['HostIp'] = public_network
                                     new_port_dict[port] = intermediate
                                 host_config_new["PortBindings"] = new_port_dict
