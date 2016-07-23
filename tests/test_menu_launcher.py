@@ -45,16 +45,12 @@ def test_run_plugins():
 
     menu_launcher.run_plugins(path_dirs, "start")
 
-
-
     ### Visualization Test ###
     # Find modes.template
     config = ConfigParser.RawConfigParser()
     config.read(path_dirs.template_dir+'modes.template')
 
     # Check for valid sections/options
-    if not config.has_section("plugins"):
-        config.add_section("plugins")
     config.set("plugins", "vis_test", "all")
 
     with open(path_dirs.template_dir+'modes.template', 'w') as f:

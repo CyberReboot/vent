@@ -113,7 +113,7 @@ def get_mode_config(path_dirs):
                 for plug in plugin_array:
                     modes[plug] = config.get("plugins", plug).replace(" ", "").split(",")
         # If not then there are no special runtime configurations and modes is empty
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_mode_config")
         pass
@@ -154,7 +154,7 @@ def get_core_config(path_dirs):
                 for option in active_array:
                     cores[option] = config.get("locally-active", option).replace(" ", "")
         # If not then everything is enabled and cores is empty
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_core_config")
         pass
@@ -255,7 +255,7 @@ def get_all_installed(path_dirs):
         # Check if all_plugins is empty
         if all_plugins:
             all_installed.update(all_plugins)
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_all_installed")
         pass

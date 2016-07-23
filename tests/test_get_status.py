@@ -157,10 +157,10 @@ def test_get_mode_enabled():
     get_status.get_mode_enabled(path_dirs, mode_config)
     os.system("cp modes.backup templates/modes.template")
 
-    # Create template without 'core' section
-    new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = get_status.get_mode_config(path_dirs)
+    # Test with config with only one defined namespace
+    get_status.get_mode_enabled(path_dirs, {'core': 'all'})
+    get_status.get_mode_enabled(path_dirs, {'collectors': 'all'})
+    get_status.get_mode_enabled(path_dirs, {'visualization': 'all'})
     get_status.get_mode_enabled(path_dirs, mode_config)
 
     # Cleanup
