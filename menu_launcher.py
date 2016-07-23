@@ -324,7 +324,7 @@ def run_plugins(path_dirs, action):
 
     # make sure that vent-management is running
     try:
-        result = check_output('/bin/sh '+path_dirs.data_dir+'bootlocal.sh'.split())
+        result = check_output('/bin/sh '+path_dirs.data_dir+'bootlocal.sh').split()
         print result
     except Exception as e:
         pass
