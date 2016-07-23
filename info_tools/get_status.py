@@ -577,7 +577,7 @@ def main(path_dirs, parser, args):
     try:
         # Set to whatever values are given in args
         if args.base_dir:
-            path_dirs.base_dir = args.base_dir
+            path_dirs = PathDirs(base_dir=args.base_dir)
         if args.info_dir:
             path_dirs.info_dir = args.info_dir
         if args.data_dir:
