@@ -33,9 +33,22 @@ def test_run_plugins():
     menu_launcher.run_plugins(path_dirs, "start")
     menu_launcher.run_plugins(invalid_dirs, "start")
 
+    ### Core Test ###
+    # Check if modes.template has core as a namespace
+    config = ConfigParser.RawConfigParser()
+    config.read(path_dirs.template_dir+'modes.template')
+    if config.has_section("plugins"):
+        config.set("plugins", "core", "all")
+
+    with open(path_dirs.template_dir+'modes.template', 'w') as f:
+        config.write(f)
+
+    menu_launcher.run_plugins(path_dirs, "start")
+
+
+
     ### Visualization Test ###
     # Find modes.template
-    os.system("touch "+path_dirs.template_dir+'modes.template')
     config = ConfigParser.RawConfigParser()
     config.read(path_dirs.template_dir+'modes.template')
 
