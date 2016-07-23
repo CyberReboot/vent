@@ -26,7 +26,7 @@ def pcap_queue(path, base_dir="/var/lib/docker/data/"):
 
     template_dir = base_dir+"templates/"
     plugins_dir = base_dir+"plugins/"
-    vent_dir = "/vent/"
+    vent_dir = "/data/"
     if base_dir != "/var/lib/docker/data/":
         vent_dir = base_dir
     try:

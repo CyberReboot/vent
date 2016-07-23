@@ -234,7 +234,7 @@ fi
 
 # list global network interfaces and their ip addresses
 if [ "$nics" = true ]; then
-    echo "Active Netowrk Interfaces: ";
+    echo "Active Network Interfaces: ";
     ip -o addr show up scope global | while read -r num dev fam addr rest; do echo ${dev}:${addr%/*}; done;
     echo;
 fi

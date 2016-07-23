@@ -139,6 +139,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
             pass
 
     try:
+        running_containers = []
         running_containers = subprocess.check_output("docker ps | awk \"{print \$NF}\"", shell=True).split("\n")
         t_sections = []
         # remove sections that represent running containers
@@ -251,14 +252,16 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                             port_dict[port] = [{"HostPort":"", "HostIp":public_network}]
                                         host_config_new["PortBindings"] = port_dict
                             elif "PortBindings" in host_config:
-                                new_port_dict = {}
-                                port_dict = host_config["PortBindings"]
-                                for port in port_dict:
-                                    intermediate = port_dict[port]
-                                    # !! TODO not necessarily always the first object in the array
-                                    intermediate[0]['HostIp'] = public_network
-                                    new_port_dict[port] = intermediate
-                                host_config_new["PortBindings"] = new_port_dict
+                                # !! TODO temporary hack
+                                pass
+                                #new_port_dict = {}
+                                #port_dict = host_config["PortBindings"]
+                                #for port in port_dict:
+                                #    intermediate = port_dict[port]
+                                #    # !! TODO not necessarily always the first object in the array
+                                #    intermediate[0]['HostIp'] = public_network
+                                #    new_port_dict[port] = intermediate
+                                #host_config_new["PortBindings"] = new_port_dict
                             if template_type == "core":
                                 host_config_new["RestartPolicy"] = { "Name": "always" }
                             if template_type not in ["visualization", "core", "active", "passive"]:
@@ -299,7 +302,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                             # add syslog, don't log rmq-es-connector as it will loop itself
                             if section not in ["rmq-es-connector", "aaa-syslog", "aaa-redis", "aaa-rabbitmq"]:
                                 try:
-                                    syslog_host = public_network
+                                    # !! TODO temporary hack
+                                    #syslog_host = public_network
+                                    syslog_host = "localhost"
                                     for ext in external_overrides:
                                         if "aaa_syslog" == ext:
                                             if "aaa_syslog_host" in external_options:
@@ -356,7 +361,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                             pass
                     # add syslog
                     try:
-                        syslog_host = public_network
+                        # !! TODO temporary hack
+                        #syslog_host = public_network
+                        syslog_host = "localhost"
                         for ext in external_overrides:
                             if "aaa_syslog" == ext:
                                 if "aaa_syslog_host" in external_options:
