@@ -300,7 +300,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                             # add syslog, don't log rmq-es-connector as it will loop itself
                             if section not in ["rmq-es-connector", "aaa-syslog", "aaa-redis", "aaa-rabbitmq"]:
                                 try:
-                                    syslog_host = public_network
+                                    # !! TODO temporary hack
+                                    #syslog_host = public_network
+                                    syslog_host = "0.0.0.0"
                                     for ext in external_overrides:
                                         if "aaa_syslog" == ext:
                                             if "aaa_syslog_host" in external_options:
@@ -357,7 +359,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                             pass
                     # add syslog
                     try:
-                        syslog_host = public_network
+                        # !! TODO temporary hack
+                        #syslog_host = public_network
+                        syslog_host = "0.0.0.0"
                         for ext in external_overrides:
                             if "aaa_syslog" == ext:
                                 if "aaa_syslog_host" in external_options:
