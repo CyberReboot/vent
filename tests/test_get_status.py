@@ -140,6 +140,11 @@ def test_get_mode_enabled():
     mode_config = get_status.get_mode_config(path_dirs)
     get_status.get_mode_enabled(path_dirs, mode_config)
 
+    # modes.template doesn't have the namespace for an installed plugin
+    os.system("mkdir "+path_dirs.plugins_dir+"namespacetest")
+    os.system("mkdir "+path_dirs.plugins_dir+"namespacetest/plugintest")
+    get_status.get_mode_enabled(path_dirs, mode_config)
+
     # Set modes.template to have a section it didn't have
     new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
     env.modifyconfigs(path_dirs, new_conf)
@@ -150,10 +155,11 @@ def test_get_mode_enabled():
     os.system("rm "+path_dirs.template_dir+'modes.template')
     mode_config = get_status.get_mode_config(path_dirs)
     get_status.get_mode_enabled(path_dirs, mode_config)
+    os.system("cp modes.backup templates/modes.template")
 
     # Create template without 'core' section
-    os.system("touch "+path_dirs.template_dir+'modes.template')
     new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
+    env.modifyconfigs(path_dirs, new_conf)
     mode_config = get_status.get_mode_config(path_dirs)
     get_status.get_mode_enabled(path_dirs, mode_config)
 
@@ -210,3 +216,29 @@ def test_get_enabled():
     get_status.get_enabled(path_dirs)
     env.remove_plugin(path_dirs, url)
     env.remove_plugin(path_dirs, url2)
+
+def test_arg_parse():
+    """ Tests arg parse parsing of arguments """
+    path_dirs = test_env.PathDirs()
+    # All is a reserved python keyword
+    # Setting up cmds to call get_status with
+    cmds = [
+        "all",
+        "cconfig",
+        "cenabled",
+        "collectors",
+        "cores",
+        "enabled",
+        "installed",
+        "mconfig",
+        "menabled",
+        "plugins",
+        "vis"
+    ]
+
+    # Test with no commands
+    os.system('python2.7 '+path_dirs.info_dir+'get_status.py')
+
+    # Test with all commands
+    for cmd in cmds:
+        os.system('python2.7 '+path_dirs.info_dir+'get_status.py '+cmd)

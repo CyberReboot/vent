@@ -23,8 +23,12 @@ def test_run_plugins():
     # Prep
     os.system("cp modes.backup templates/modes.template")
     os.system("cp core.backup templates/core.template")
+    os.system("rm templates/core.template")
+    os.system("rm templates/modes.template")
 
+    env = test_env.TestEnv()
     path_dirs = test_env.PathDirs()
+    env.initconfigs(path_dirs, False)
     invalid_dirs = test_env.PathDirs(base_dir="/tmp/")
     menu_launcher.run_plugins(path_dirs, "start")
     menu_launcher.run_plugins(invalid_dirs, "start")
@@ -53,6 +57,7 @@ def test_run_plugins():
     # Cleanup
     os.system("rm -rf "+path_dirs.vis_dir+vis_test)
     os.system("cp modes.backup templates/modes.template")
+    os.system("cp core.backup templates/core.template")
 
     ### Collectors: Passive/Active Test ###
     # Find core.template
@@ -79,9 +84,10 @@ def test_run_plugins():
     menu_launcher.run_plugins(path_dirs, "start")
 
     # Cleanup
-    os.system("rm -rf "+path_dirs.collectors_dir+active)
-    os.system("rm -rf "+path_dirs.collectors_dir+active)
+    #os.system("rm -rf "+path_dirs.collectors_dir+active)
+    #os.system("rm -rf "+path_dirs.collectors_dir+active)
     os.system("cp core.backup templates/core.template")
+    os.system("cp modes.backup templates/modes.template")
 
     menu_launcher.run_plugins(path_dirs, "start")
 
