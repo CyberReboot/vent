@@ -252,14 +252,16 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                             port_dict[port] = [{"HostPort":"", "HostIp":public_network}]
                                         host_config_new["PortBindings"] = port_dict
                             elif "PortBindings" in host_config:
-                                new_port_dict = {}
-                                port_dict = host_config["PortBindings"]
-                                for port in port_dict:
-                                    intermediate = port_dict[port]
-                                    # !! TODO not necessarily always the first object in the array
-                                    intermediate[0]['HostIp'] = public_network
-                                    new_port_dict[port] = intermediate
-                                host_config_new["PortBindings"] = new_port_dict
+                                # !! TODO temporary hack
+                                if section != "syslog":
+                                    new_port_dict = {}
+                                    port_dict = host_config["PortBindings"]
+                                    for port in port_dict:
+                                        intermediate = port_dict[port]
+                                        # !! TODO not necessarily always the first object in the array
+                                        intermediate[0]['HostIp'] = public_network
+                                        new_port_dict[port] = intermediate
+                                    host_config_new["PortBindings"] = new_port_dict
                             if template_type == "core":
                                 host_config_new["RestartPolicy"] = { "Name": "always" }
                             if template_type not in ["visualization", "core", "active", "passive"]:
