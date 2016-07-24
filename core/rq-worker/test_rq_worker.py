@@ -11,15 +11,15 @@ def test_settings():
     os.environ['REMOTE_REDIS_PORT'] = "test"
     import settings
 
-def test_pcap_queue():
-    """ Tests simulation of new pcap """
+def test_file_queue():
+    """ Tests simulation of new file """
     os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
     os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
     os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
     time.sleep(5)
-    file_watch.pcap_queue("/tmp")
-    file_watch.pcap_queue("/dev/null")
-    file_watch.pcap_queue("/dev/null", base_dir=os.getcwd()+"/")
+    file_watch.file_queue("/tmp")
+    file_watch.file_queue("/dev/null")
+    file_watch.file_queue("/dev/null", base_dir=os.getcwd()+"/")
 
 
 def test_template_queue():
