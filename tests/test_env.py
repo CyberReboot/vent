@@ -2,7 +2,10 @@ import ConfigParser
 import os
 import pytest
 
-from .. import plugin_parser
+try:
+    from .. import plugin_parser
+except Exception as e:
+    from ... import plugin_parser
 
 class PathDirs:
     """ Global path directories for parsing templates """
