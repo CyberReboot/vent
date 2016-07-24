@@ -62,5 +62,6 @@ def test_entrypoint():
     path_dirs = PathDirs()
     plugin_parser.add_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
     os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py update_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs.base_dir)
+    plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
     os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py")
     os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py invalid_type https://github.com/CyberReboot/vent-plugins.git")
