@@ -54,14 +54,14 @@ def test_update_images():
 
     # Add then Remove plugin & call update_images
     plugin_parser.add_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
-    plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
     plugin_parser.update_images(path_dirs)
+    plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
 
 def test_entrypoint():
     """ Tests the entrypoint of plugin_parser """
     path_dirs = PathDirs()
     plugin_parser.add_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
     os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py update_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs.base_dir)
-    plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
+    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py remove_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs.base_dir)
     os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py")
-    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py invalid_type https://github.com/CyberReboot/vent-plugins.git")
+    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py invalid_type https://foo.git")
