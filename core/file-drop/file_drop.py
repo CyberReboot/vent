@@ -16,7 +16,7 @@ class GZHandler(PatternMatchingEventHandler):
     patterns = ["*"]
 
     @staticmethod
-    def process(event):
+    def process(event, r_host):
         """
         event.event_type
             'modified' | 'created' | 'moved' | 'deleted'
@@ -29,14 +29,14 @@ class GZHandler(PatternMatchingEventHandler):
         if not hostname:
             hostname = ""
         # let jobs run for up to one day
-        q = Queue(connection=Redis(host="redis"), default_timeout=86400)
+        q = Queue(connection=Redis(host=r_host), default_timeout=86400)
         if event.event_type == "created" and event.is_directory == False:
             print event.src_path
             # let jobs be queued for up to 30 days
             result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
 
     def on_created(self, event):
-        self.process(event)
+        self.process(event, 'redis')
 
 if __name__ == '__main__': # pragma: no cover
     args = None
