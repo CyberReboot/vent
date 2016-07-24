@@ -7,7 +7,6 @@ import sys
 import termios
 import tty
 
-
 from subprocess import call, check_output, PIPE, Popen
 
 try:
@@ -17,7 +16,7 @@ try:
     h = curses.A_BOLD
     n = curses.A_NORMAL
     # Check if terminal can support color
-    if curses.has_colors():
+    if curses.has_colors(): # pragma: no cover
         curses.start_color()
         curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
         h = curses.color_pair(1)

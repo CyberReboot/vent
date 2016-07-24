@@ -3,6 +3,7 @@
 import ConfigParser
 import os
 import shutil
+import subprocess
 import sys
 
 class PathDirs:
@@ -228,7 +229,6 @@ def remove_plugins(path_dirs, plugin_url):
                                 with open(path_dirs.template_dir + namespace + ".template", 'w') as configfile:
                                     config.write(configfile)
                                 shutil.rmtree(s_sub)
-                continue
             elif plugin_name+"/visualization" in r_sub:
                 names = os.listdir(path_dirs.vis_dir)
                 has_subdir = False
@@ -262,8 +262,6 @@ def remove_plugins(path_dirs, plugin_url):
                 sys_subdirs = [x[0] for x in os.walk(path_dirs.collectors_dir + "/")]
                 repo_dir = r_sub.split(plugin_name+"/collectors/")[-1]
                 namespace = "collectors"
-            else:
-                continue
             #handles case if item removed is not in plugins/
             for s_sub in sys_subdirs:
                 if repo_dir in s_sub:
@@ -296,11 +294,11 @@ def update_images(path_dirs):
     images = []
     try:
         # Note - If grep finds nothing it returns exit status 1 (error). So, using grep first, awk second.
-        images = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
+        images = subprocess.check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
     except Exception as e:
         pass
     for image in images:
-        image = image.split("  ")[0]
+        image = image.split(" ")[0]
         if "core/" in image or "visualization/" in image or "collectors/" in image:
             if not os.path.isdir(path_dirs.base_dir + image):
                 os.system("docker rmi "+image)
