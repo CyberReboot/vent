@@ -3,24 +3,32 @@ import pytest
 import subprocess
 import time
 
+from vent.tests import test_env
 import file_watch
 
 def test_settings():
     """ Tests settings """
-    os.environ['REMOTE_REDIS_HOST'] = "test"
-    os.environ['REMOTE_REDIS_PORT'] = "test"
+    os.environ['REMOTE_REDIS_HOST'] = "localhost"
+    os.environ['REMOTE_REDIS_PORT'] = "6379"
     import settings
 
-def test_pcap_queue():
-    """ Tests simulation of new pcap """
+def test_file_queue():
+    """ Tests simulation of new file """
     os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
     os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
     os.system('docker run -d alpine:latest /bin/sh -c "echo hello world;"')
     time.sleep(5)
-    file_watch.pcap_queue("/tmp")
-    file_watch.pcap_queue("/dev/null")
-    file_watch.pcap_queue("/dev/null", base_dir=os.getcwd()+"/")
+    file_watch.file_queue("/tmp")
+    file_watch.file_queue("/dev/null")
+    file_watch.file_queue("/dev/null", base_dir=os.getcwd()+"/")
 
+    # Test with installed plugins
+    url = "https://github.com/CyberReboot/vent-plugins.git"
+    env = test_env.TestEnv()
+    path_dirs = test_env.PathDirs()
+    env.add_plugin(path_dirs, url)
+    file_watch.file_queue("vent_/dev/null", base_dir=os.getcwd()+"/")
+    env.remove_plugin(path_dirs, url)
 
 def test_template_queue():
     """ Tests simulation of new/modified template """

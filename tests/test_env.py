@@ -2,7 +2,7 @@ import ConfigParser
 import os
 import pytest
 
-from .. import plugin_parser
+from vent import plugin_parser
 
 class PathDirs:
     """ Global path directories for parsing templates """
