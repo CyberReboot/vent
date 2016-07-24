@@ -3,6 +3,7 @@ import pytest
 import sys
 
 from vent.info_tools import get_logs
+from vent.tools import test_env
 
 def test_msg():
     """ tests custom output """
@@ -58,3 +59,8 @@ def test_main():
     sys.argv = ['get_logs.py', '-a']
     get_logs.main(['get_logs.py', '-a'])
     sys.argv = tmp
+
+def test_entrypoint():
+    """ test the entrypoint of get_logs """
+    path_dirs = test_env.PathDirs()
+    os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -a")
