@@ -8,8 +8,8 @@ import file_watch
 
 def test_settings():
     """ Tests settings """
-    os.environ['REMOTE_REDIS_HOST'] = "test"
-    os.environ['REMOTE_REDIS_PORT'] = "test"
+    os.environ['REMOTE_REDIS_HOST'] = "localhost"
+    os.environ['REMOTE_REDIS_PORT'] = "6379"
     import settings
 
 def test_file_queue():

@@ -15,6 +15,7 @@ dependencies:
     - pyenv uninstall -f 2.7.11
     - pyenv install 2.7.11
     - chmod -R 777 /home/ubuntu/vent
+    - PYTHONPATH="${PYTHONPATH}:/home/ubuntu/"; export PYTHONPATH
 test:
   override:
     - make test
