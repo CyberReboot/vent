@@ -22,12 +22,14 @@ def test_mimetypes_flag():
 def test_help_flag():
     """ tests get_namespaces using -h flag """
     parser = get_namespaces.set_parser()
-    get_namespaces.parse_args(parser.parse_args(['-h']), parser)
+    with pytest.raises(SystemExit):
+        get_namespaces.parse_args(parser.parse_args(['-h']), parser)
 
 def test_invalid_flag():
     """ tests get_namespaces using invalid flag """
     parser = get_namespaces.set_parser()
-    get_namespaces.parse_args(parser.parse_args(['-z']), parser)
+    with pytest.raises(SystemExit):
+        get_namespaces.parse_args(parser.parse_args(['-z']), parser)
 
 def test_main():
     """ tests the main function """
