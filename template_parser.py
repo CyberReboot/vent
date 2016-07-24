@@ -151,7 +151,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
         external_overrides = []
         external_hosts = {}
         instances = []
-        host_config_exists = False
 
         # plugin template file
         if template_type not in ["visualization", "core", "active", "passive"]:
@@ -198,6 +197,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
 
         # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
         for section in sections:
+            host_config_exists = False
             instructions = {}
             try:
                 options = config.options(section)
@@ -209,6 +209,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                 elif section == "service" and option == "schedule":
                     service_schedule[template_type] = json.loads(config.get(section, option))
                 elif section == "instances":
+                    # !! TODO this is not correct, should be a dictionary of options and values
                     instances = config.options(section)
                 elif section == "locally-active" and config.get(section, option) == "off":
                     external_overrides.append(option)
