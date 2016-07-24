@@ -24,5 +24,5 @@ def test_file_drop_GZHandler():
             self.is_directory = is_directory
 
     b = Event("created", "/dev/null", False)
-    a.process(b)
+    a.process(b, "localhost")
     a.on_created(b)
