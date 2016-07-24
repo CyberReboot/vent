@@ -367,7 +367,10 @@ def test_running_menu():
     child.expect('Return to Mode menu')
     # return to mode
     child.sendline('2')
-    child.expect('Return to Vent menu')
+    child.expect('Operation complete. Press any key to continue...')
+    # press a key
+    child.send('q')
+    child.expect('Return to Mode menu')
     # go to stop
     child.sendline('2')
     child.expect('Return to Mode menu')
@@ -540,10 +543,6 @@ def test_running_remove_plugin():
     child1.expect('Return to Plugins menu')
     # remove plugin
     child1.sendline('1')
-    child1.expect('Press any key to continue...')
-    # press a key
-    # go to plugins menu
-    child1.send('q')
     child1.expect('Return to Vent menu')
     # go to main menu
     child1.sendline('5')
