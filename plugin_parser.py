@@ -3,6 +3,7 @@
 import ConfigParser
 import os
 import shutil
+import subprocess
 import sys
 
 class PathDirs:
@@ -162,7 +163,7 @@ def add_plugins(path_dirs, plugin_url):
                     os.system("sudo rm -rf "+path_dirs.plugin_repos+"/"+plugin_name)
                     return
         # resources installed correctly. Building...
-        os.system("/bin/sh /data/build_images.sh")
+        os.system("/bin/sh "+path_dirs.base_dir+"build_images.sh")
     except Exception as e:
         pass
 
@@ -296,11 +297,11 @@ def update_images(path_dirs):
     images = []
     try:
         # Note - If grep finds nothing it returns exit status 1 (error). So, using grep first, awk second.
-        images = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
+        images = subprocess.check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
     except Exception as e:
         pass
     for image in images:
-        image = image.split("  ")[0]
+        image = image.split(" ")[0]
         if "core/" in image or "visualization/" in image or "collectors/" in image:
             if not os.path.isdir(path_dirs.base_dir + image):
                 os.system("docker rmi "+image)

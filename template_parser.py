@@ -306,10 +306,10 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                     #syslog_host = public_network
                                     syslog_host = "localhost"
                                     for ext in external_overrides:
-                                        if "aaa_syslog" == ext:
-                                            if "aaa_syslog_host" in external_options:
+                                        if "aaa-syslog" == ext:
+                                            if "aaa-syslog_host" in external_options:
                                                 try:
-                                                    syslog_host = core_config.get("external", "aaa_syslog_host")
+                                                    syslog_host = core_config.get("external", "aaa-syslog_host")
                                                 except Exception as e:
                                                     pass
                                             else:
@@ -344,11 +344,11 @@ def read_template_types(template_type, container_cmd, path_dirs):
                             rabbitmq_host = "rabbitmq"
                             external_rabbit = False
                             for ext in external_overrides:
-                                if "aaa_rabbitmq" == ext:
+                                if "aaa-rabbitmq" == ext:
                                     external_rabbit = True
-                                    if "aaa_rabbitmq_host" in external_options:
+                                    if "aaa-rabbitmq_host" in external_options:
                                         try:
-                                            rabbitmq_host = core_config.get("external", "aaa_rabbitmq_host")
+                                            rabbitmq_host = core_config.get("external", "aaa-rabbitmq_host")
                                             extra_hosts.append("rabbitmq:"+rabbitmq_host)
                                             host_config["ExtraHosts"] = extra_hosts
                                         except Exception as e:
@@ -365,10 +365,10 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         #syslog_host = public_network
                         syslog_host = "localhost"
                         for ext in external_overrides:
-                            if "aaa_syslog" == ext:
-                                if "aaa_syslog_host" in external_options:
+                            if "aaa-syslog" == ext:
+                                if "aaa-syslog_host" in external_options:
                                     try:
-                                        syslog_host = core_config.get("external", "aaa_syslog_host")
+                                        syslog_host = core_config.get("external", "aaa-syslog_host")
                                     except Exception as e:
                                         pass
                                 else:

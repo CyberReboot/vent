@@ -17,7 +17,7 @@ dependencies:
     - chmod -R 777 /home/ubuntu/vent
 test:
   override:
-    - make test
+    - PYTHONPATH="${PYTHONPATH}:/home/ubuntu/" make test
     - make
   post:
     - bash <(curl -s https://codecov.io/bash)

@@ -1,5 +1,9 @@
 #!/bin/sh
 
+
+# !! TODO need to have a section that shows the supported mime types based on
+#         the plugins installed
+
 name=false
 version=false
 build_date=false
