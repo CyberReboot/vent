@@ -3,7 +3,7 @@ import pytest
 import sys
 
 from vent.info_tools import get_logs
-from vent.tools import test_env
+from vent.tests import test_env
 
 def test_msg():
     """ tests custom output """
