@@ -156,8 +156,6 @@ def add_plugins(path_dirs, plugin_url):
         for subdir in subdirs:
             if os.path.isdir(subdir):
                 directory = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/")[0]
-                if subdir == path_dirs.plugin_repos+"/"+plugin_name:
-                    continue
                 if not os.path.isdir(path_dirs.base_dir + directory):
                     print "Failed to install "+plugin_name+" resource: "+directory
                     os.system("sudo rm -rf "+path_dirs.plugin_repos+"/"+plugin_name)
@@ -242,7 +240,6 @@ def remove_plugins(path_dirs, plugin_url):
                     for dirpath, dirnames, files in os.walk(path_dirs.vis_dir+"/"):
                         for file in files:
                             os.remove(path_dirs.vis_dir+"/"+file)
-                    continue
                 sys_subdirs = [x[0] for x in os.walk(path_dirs.vis_dir + "/")]
                 repo_dir = r_sub.split(plugin_name+"/visualization/")[-1]
                 namespace = "visualization"
@@ -258,7 +255,6 @@ def remove_plugins(path_dirs, plugin_url):
                     for dirpath, dirnames, files in os.walk(path_dirs.collectors_dir + "/"):
                         for file in files:
                             os.remove(path_dirs.collectors_dir+"/"+file)
-                    continue
                 sys_subdirs = [x[0] for x in os.walk(path_dirs.collectors_dir + "/")]
                 repo_dir = r_sub.split(plugin_name+"/collectors/")[-1]
                 namespace = "collectors"
