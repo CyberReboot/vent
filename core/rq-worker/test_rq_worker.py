@@ -25,6 +25,7 @@ def test_file_queue():
     # Test with installed plugins
     url = "https://github.com/CyberReboot/vent-plugins.git"
     env = test_env.TestEnv()
+    path_dirs = test_env.PathDirs()
     env.add_plugin(path_dirs, url)
     file_watch.file_queue("vent_/dev/null", base_dir=os.getcwd()+"/")
     env.remove_plugin(path_dirs, url)
