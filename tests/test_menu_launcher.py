@@ -378,7 +378,7 @@ def test_running_menu():
     child.sendline('3')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline('4')
     child.expect('Return to Vent menu')
     # go to status
     child.sendline('4')
