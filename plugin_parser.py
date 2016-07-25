@@ -163,7 +163,7 @@ def add_plugins(path_dirs, plugin_url):
                     os.system("sudo rm -rf "+path_dirs.plugin_repos+"/"+plugin_name)
                     return
         # resources installed correctly. Building...
-        os.system("/bin/sh "+path_dirs.base_dir+"build_images.sh")
+        os.system("/bin/sh "+path_dirs.base_dir+"build_images.sh --basedir "+path_dirs.base_dir[:-1])
     except Exception as e:
         pass
 
