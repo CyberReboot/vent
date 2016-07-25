@@ -44,7 +44,7 @@ def test_entrypoint():
     """ Tests the entrypoint of plugin_parser """
     path_dirs = test_env.PathDirs()
     plugin_parser.add_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
-    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py update_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs.base_dir)
-    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py remove_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs.base_dir)
+    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py update_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs.base_dir+" "+path_dirs.data_dir)
+    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py remove_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs.base_dir+" "+path_dirs.data_dir)
     os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py")
     os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py invalid_type https://foo.git")
