@@ -396,20 +396,21 @@ def read_template_types(template_type, container_cmd, path_dirs):
                     instructions['Cmd'] = container_cmd.split("_", 1)[1].replace("'", '"')
                 if not section in external_overrides:
                     if "active" in section or "passive" in section:
-                        if (template_type == "active" and "active" in section) or (template_type == "passive" and "passive" in section):
-                            if section in instances:
-                                try:
-                                    instance_count = config.get("instances", section)
-                                    for i in range(int(instance_count)):
-                                        instructions['Image'] = 'core/'+section
-                                        instructions['Volumes'] = {"/"+section+"-data": {}}
-                                        tool_dict[section+str(i)] = instructions
-                                except Exception as e:
-                                    pass
-                            else:
-                                instructions['Image'] = 'collectors/'+section
-                                instructions['Volumes'] = {"/"+section+"-data": {}}
-                                tool_dict[section] = instructions
+                        # !! TODO do we ever get here? i don't think so
+                        #if (template_type == "active" and "active" in section) or (template_type == "passive" and "passive" in section):
+                        #    if section in instances:
+                        #        try:
+                        #            instance_count = config.get("instances", section)
+                        #            for i in range(int(instance_count)):
+                        #                instructions['Image'] = 'core/'+section
+                        #                instructions['Volumes'] = {"/"+section+"-data": {}}
+                        #                tool_dict[section+str(i)] = instructions
+                        #        except Exception as e:
+                        #            pass
+                        #    else:
+                        #        instructions['Image'] = 'collectors/'+section
+                        #        instructions['Volumes'] = {"/"+section+"-data": {}}
+                        #        tool_dict[section] = instructions
                     else:
                         if section in instances:
                             try:
