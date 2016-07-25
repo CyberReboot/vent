@@ -3,6 +3,7 @@
 import ConfigParser
 import os
 import shutil
+import subprocess
 import sys
 
 class PathDirs:
@@ -14,7 +15,8 @@ class PathDirs:
                  plugins_dir="plugins/",
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
-                 vis_dir="visualization"):
+                 vis_dir="visualization",
+                 data_dir="/data/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         self.core_dir = base_dir + core_dir
@@ -22,6 +24,7 @@ class PathDirs:
         self.plugin_repos = base_dir + plugin_repos
         self.template_dir = base_dir + template_dir
         self.vis_dir = base_dir + vis_dir
+        self.data_dir = data_dir
 
 """
 add_plugins(path_dirs, plugin_url)
@@ -162,7 +165,7 @@ def add_plugins(path_dirs, plugin_url):
                     os.system("sudo rm -rf "+path_dirs.plugin_repos+"/"+plugin_name)
                     return
         # resources installed correctly. Building...
-        os.system("/bin/sh /data/build_images.sh")
+        os.system("/bin/sh "+path_dirs.data_dir+"build_images.sh --basedir "+path_dirs.base_dir[:-1])
     except Exception as e:
         pass
 
@@ -296,11 +299,11 @@ def update_images(path_dirs):
     images = []
     try:
         # Note - If grep finds nothing it returns exit status 1 (error). So, using grep first, awk second.
-        images = check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
+        images = subprocess.check_output(" docker images | grep '/' | awk \"{print \$1}\" ", shell=True).split("\n")
     except Exception as e:
         pass
     for image in images:
-        image = image.split("  ")[0]
+        image = image.split(" ")[0]
         if "core/" in image or "visualization/" in image or "collectors/" in image:
             if not os.path.isdir(path_dirs.base_dir + image):
                 os.system("docker rmi "+image)
@@ -312,9 +315,9 @@ if __name__ == "__main__":
     path_dirs = PathDirs()
 
     # change base dir for tests
-    if len(sys.argv) == 4:
-        path_dirs = PathDirs(base_dir=sys.argv[3])
-        sys.argv = sys.argv[:-1]
+    if len(sys.argv) == 5:
+        path_dirs = PathDirs(base_dir=sys.argv[3], data_dir=sys.argv[4])
+        sys.argv = sys.argv[:-2]
 
     if len(sys.argv) == 3:
         if sys.argv[1] == "update_plugins":

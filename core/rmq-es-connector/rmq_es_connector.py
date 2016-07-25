@@ -52,6 +52,7 @@ class RmqEs():
         callback triggered on rabiitmq message received and sends it to
         an elasticsearch index
         """
+        # !! TODO index needs to be reworked for multiple file types
         index = "pcap"
         if method.routing_key.split(".")[0] == 'syslog':
             body = body.strip().replace('"', '\"')

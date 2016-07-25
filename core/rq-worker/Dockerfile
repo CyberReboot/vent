@@ -2,6 +2,8 @@ FROM alpine:3.4
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
+    docker \
+    libmagic \
     python \
     py-pip \
     && rm -rf /var/cache/apk/*

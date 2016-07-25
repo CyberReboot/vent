@@ -3,6 +3,7 @@ import pytest
 import sys
 
 from vent.info_tools import get_logs
+from vent.tests import test_env
 
 def test_msg():
     """ tests custom output """
@@ -15,7 +16,7 @@ def test_init():
 def test_no_args():
     """ tests get_logs with no arguments """
     parser = get_logs.set_parser()
-    os.system('docker run --name core-aaa-syslog -d alpine:latest /bin/sh -c "while true; do echo hello world; sleep 1; done"')
+    os.system('docker run --name core-aaa-syslog -d alpine:latest /bin/sh -c "while true; do echo core hello world; sleep 1; done"')
     os.system('docker commit core-aaa-syslog core/aaa-syslog')
     get_logs.parse_args(parser.parse_args([]), parser)
 
@@ -58,3 +59,8 @@ def test_main():
     sys.argv = ['get_logs.py', '-a']
     get_logs.main(['get_logs.py', '-a'])
     sys.argv = tmp
+
+def test_entrypoint():
+    """ test the entrypoint of get_logs """
+    path_dirs = test_env.PathDirs()
+    os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -a")

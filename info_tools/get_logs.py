@@ -139,6 +139,6 @@ def main(args):
         parse_args(parser.parse_args(), parser)
     return
 
-if __name__ == "__main__": # pragma: no cover
+if __name__ == "__main__":
     args = sys.argv
     main(args)

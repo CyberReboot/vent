@@ -3,6 +3,7 @@ name = Core
 
 [service]
 schedule = {"all":"continuous"}
+#public_nic = eth1
 
 [instances]
 rq-worker = 2
@@ -45,7 +46,7 @@ HostConfig = {"PublishAllPorts": true}
 
 [rq-worker]
 Env = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
-HostConfig = {"Binds": ["/tmp:/tmp:rw", "/data:/vent:ro", "/var/run/docker.sock:/var/run/docker.sock", "/var/lib/docker/data:/var/lib/docker/data:ro"], "Links": ["core-aaa-redis:redis"]}
+HostConfig = {"Binds": ["/tmp:/tmp:rw", "/files:/files:ro", "/data:/data:ro", "/var/run/docker.sock:/var/run/docker.sock", "/var/lib/docker/data:/var/lib/docker/data:ro"], "Links": ["core-aaa-redis:redis"]}
 
 [rq-dashboard]
 Env = ["REMOTE_REDIS_HOST=redis"]
