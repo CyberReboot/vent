@@ -1,5 +1,12 @@
 #!/bin/sh
 
+basedir="/var/lib/docker/data"
+if [ "$1" = "--basedir" ]; then
+	basedir="$2";
+	shift;
+	shift;
+fi
+
 if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
 	if [ "$1" = "--save" -o "$2" = "--save" ]; then
 		cd core && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t core/$(echo {} | sed 's%^.\/%%') . && docker save -o /tmp/vent-core-$(echo {} | sed 's%^.\/%%' | sed 's%\/%-%').tar core/$(echo {} | sed 's%^.\/%%'))' ';'
@@ -11,10 +18,10 @@ if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
 		cd visualization && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t visualization/$(echo {} | sed 's%^.\/%%') . && docker save -o /tmp/vent-visualization-$(echo {} | sed 's%^.\/%%' | sed 's%\/%-%').tar visualization/$(echo {} | sed 's%^.\/%%'))' ';'
 		cd ..
 	else
-		cd /var/lib/docker/data/core && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t core/$(echo {} | sed 's%^.\/%%') .)' ';'
-		cd /var/lib/docker/data/plugins && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t $(echo {} | sed 's%^.\/%%') .)' ';'
-		cd /var/lib/docker/data/collectors && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t collectors/$(echo {} | sed 's%^.\/%%') .)' ';'
-		cd /var/lib/docker/data/visualization && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t visualization/$(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/core && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t core/$(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/plugins && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t $(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/collectors && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t collectors/$(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/data/visualization && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t visualization/$(echo {} | sed 's%^.\/%%') .)' ';'
 	fi
 else
 	if [ "$1" = "--save" -o "$2" = "--save" ]; then
@@ -27,9 +34,9 @@ else
 		cd visualization && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t visualization/$(echo {} | sed 's%^.\/%%') . && docker save -o /tmp/vent-visualization-$(echo {} | sed 's%^.\/%%' | sed 's%\/%-%').tar visualization/$(echo {} | sed 's%^.\/%%'))' ';'
 		cd ..
 	else
-		cd /var/lib/docker/data/core && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t core/$(echo {} | sed 's%^.\/%%') .)' ';'
-		cd /var/lib/docker/data/plugins && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t $(echo {} | sed 's%^.\/%%') .)' ';'
-		cd /var/lib/docker/data/collectors && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t collectors/$(echo {} | sed 's%^.\/%%') .)' ';'
-		cd /var/lib/docker/data/visualization && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t visualization/$(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/core && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t core/$(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/plugins && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t $(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/collectors && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t collectors/$(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/visualization && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t visualization/$(echo {} | sed 's%^.\/%%') .)' ';'
 	fi
 fi

@@ -163,6 +163,7 @@ def test_running_menu():
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     invalid_url = "https://thisisinvalid-.git"
     child = pexpect.spawn(cmd)
+    child.timeout = 1200
     # expect main menu
     child.expect('Exit')
     ### Mode Menu ###
@@ -272,16 +273,19 @@ def test_running_menu():
 
     ### System Commands Menu ###
     # go to system commands
-    child.sendline('5')
-    child.expect('Return to Vent menu')
+    #child.sendline('5')
+    #child.expect('Return to Vent menu')
     # go to logs menu
-    child.sendline('1')
-    child.expect('Return to System Commands menu')
+    #child.sendline('1')
+    #child.expect('Return to System Commands menu')
     # go to containers menu
-    child.sendline('1')
-    child.expect('Return to Logs menu')
+    #child.sendline('1')
+    #child.expect('Return to Logs menu')
     # close
+    child.sendline('7')
+    child.read()
     child.close()
+
     # spawn child
     child1 = pexpect.spawn(cmd)
     child1.expect('Exit')
@@ -292,11 +296,17 @@ def test_running_menu():
     child1.sendline('1')
     child1.expect('Return to System Commands menu')
     # go to namespaces menu
-    child1.sendline('2')
-    child1.expect('Return to Logs menu')
+    #child1.sendline('2')
+    #child1.expect('Return to Logs menu')
+    # read some logs
+    #child1.sendline('2')
+    #child1.expect('core')
+    # return to namespaces menu
+    #child1.send('q')
+    #child1.expect('Return to Logs menu')
     # return to logs menu
-    child1.sendline('2')
-    child1.expect('Return to System Commands menu')
+    #child1.sendline('6')
+    #child1.expect('Return to System Commands menu')
     # return to system commands menu
     child1.sendline('5')
     child1.expect('Return to Vent menu')
@@ -316,7 +326,6 @@ def test_running_menu():
     child1.sendline('7')
     child1.read()
     child1.close()
-    # TODO finish going through menu actions
 
 def test_running_add_plugin():
     """ testing running the menu and adding a plugin """

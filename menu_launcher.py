@@ -443,17 +443,7 @@ def processmenu(path_dirs, menu, parent=None):
             curses.def_prog_mode()
             os.system('reset')
             screen.clear()
-            if "&&" in menu['options'][getin]['command']:
-                commands = menu['options'][getin]['command'].split("&&")
-                for c in commands:
-                    success = os.system(c)
-                    if success == 0:
-                        continue
-                    else:
-                        print "FAILED command: " + c
-                        break
-            else:
-                os.system(menu['options'][getin]['command'])
+            os.system(menu['options'][getin]['command'])
             screen.clear()
             curses.reset_prog_mode()
             try:
@@ -465,17 +455,7 @@ def processmenu(path_dirs, menu, parent=None):
             curses.def_prog_mode()
             os.system('reset')
             screen.clear()
-            if "&&" in menu['options'][getin]['command']:
-                commands = menu['options'][getin]['command'].split("&&")
-                for c in commands:
-                    success = os.system(c)
-                    if success == 0:
-                        continue
-                    else:
-                        print "FAILED command: " + c
-                        break
-            else:
-                os.system(menu['options'][getin]['command'])
+            os.system(menu['options'][getin]['command'])
             if menu['title'] == "Remove Plugins":
                 exitmenu = True
             confirm()
@@ -623,8 +603,8 @@ def build_menu_dict(path_dirs):
         },
         { 'title': "Build", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh' },
-            { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --no-cache' },
+            { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1] },
+            { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1]+' --no-cache' },
           ]
         },
         { 'title': "System Commands", 'type': MENU, 'subtitle': '',
