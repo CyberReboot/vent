@@ -197,13 +197,13 @@ def read_template_types(template_type, container_cmd, path_dirs):
 
         # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
         for section in sections:
-            host_config_exists = False
             instructions = {}
             try:
                 options = config.options(section)
             except Exception as e:
                 options = []
             for option in options:
+                host_config_exists = False
                 if section == "info" and option == "name":
                     info_name = config.get(section, option)
                 elif section == "service" and option == "schedule":
@@ -361,22 +361,23 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         except Exception as e:
                             pass
                     # add syslog
-                    try:
-                        # !! TODO temporary hack
-                        #syslog_host = public_network
-                        syslog_host = "localhost"
-                        for ext in external_overrides:
-                            if "aaa-syslog" == ext:
-                                if "aaa-syslog_host" in external_options:
-                                    try:
-                                        syslog_host = core_config.get("external", "aaa-syslog_host")
-                                    except Exception as e:
-                                        pass
-                                else:
-                                    print "no local syslog but an external one wasn't specified."
-                        host_config["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
-                    except Exception as e:
-                        pass
+                    if section not in ["rmq-es-connector", "aaa-syslog", "aaa-redis", "aaa-rabbitmq"]:
+                        try:
+                            # !! TODO temporary hack
+                            #syslog_host = public_network
+                            syslog_host = "localhost"
+                            for ext in external_overrides:
+                                if "aaa-syslog" == ext:
+                                    if "aaa-syslog_host" in external_options:
+                                        try:
+                                            syslog_host = core_config.get("external", "aaa-syslog_host")
+                                        except Exception as e:
+                                            pass
+                                    else:
+                                        print "no local syslog but an external one wasn't specified."
+                            host_config["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
+                        except Exception as e:
+                            pass
                     option_val = str(host_config).replace("'", '"')
                     option_val = option_val.replace("True", "true")
                     option_val = option_val.replace("False", "false")
