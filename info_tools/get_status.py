@@ -51,6 +51,7 @@ def add_installed_collectors_options(subparsers, path_dirs):
     """ Subparser & mutEx group for get_installed_collectors by collector types """
     collector_parser = subparsers.add_parser('collectors', help='installed collectors')
     add_override_options(collector_parser, path_dirs)
+    # Should only be able to pick all, passive, or active
     c_type = collector_parser.add_mutually_exclusive_group(required=False)
     c_type.add_argument('-all', '--all', default=False, action='store_true', dest='c_all', help='List all collectors')
     c_type.add_argument('-passive', '--passive', default=False, action='store_true', dest='c_passive', help='List passive collectors')
