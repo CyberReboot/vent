@@ -20,6 +20,22 @@ vent.tests.test_get_logs module
     :undoc-members:
     :show-inheritance:
 
+vent.tests.test_get_namespaces module
+-------------------------------------
+
+.. automodule:: vent.tests.test_get_namespaces
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+vent.tests.test_get_status module
+---------------------------------
+
+.. automodule:: vent.tests.test_get_status
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 vent.tests.test_get_urls module
 -------------------------------
 
