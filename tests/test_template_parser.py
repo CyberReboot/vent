@@ -33,12 +33,35 @@ def test_read_template_types():
 
     os.system("cp core.backup templates/core.template")
 
+    template_parser.read_template_types("core", "", path_dirs)
+    template_parser.read_template_types("active", "", path_dirs)
+    template_parser.read_template_types("passive", "", path_dirs)
+    template_parser.read_template_types("visualization", "", path_dirs)
+    template_parser.read_template_types("all", "", path_dirs)
+    template_parser.read_template_types("foo", "", path_dirs)
+
     filedata = None
     with open(path_dirs.template_dir + 'core.template', 'r') as f:
         filedata = f.read()
     filedata = filedata.replace('#elasticsearch', 'elasticsearch')
     filedata = filedata.replace('#aaa-rabbitmq', 'aaa-rabbitmq')
     filedata = filedata.replace('#aaa-syslog', 'aaa-syslog')
+    with open(path_dirs.template_dir + 'core.template', 'w') as f:
+        f.write(filedata)
+
+    template_parser.read_template_types("core", "", path_dirs)
+    template_parser.read_template_types("active", "", path_dirs)
+    template_parser.read_template_types("passive", "", path_dirs)
+    template_parser.read_template_types("visualization", "", path_dirs)
+    template_parser.read_template_types("all", "", path_dirs)
+    template_parser.read_template_types("foo", "", path_dirs)
+
+    filedata = None
+    with open(path_dirs.template_dir + 'core.template', 'r') as f:
+        filedata = f.read()
+    filedata = filedata.replace('#rmq-es-connector', 'rmq-es-connector')
+    filedata = filedata.replace('#passive = off', 'passive = on')
+    filedata = filedata.replace('#active', 'active')
     with open(path_dirs.template_dir + 'core.template', 'w') as f:
         f.write(filedata)
 
