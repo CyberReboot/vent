@@ -1,4 +1,27 @@
-# v0.1.1 (current, released)
+# v0.1.2 (current, released)
+
+bug fixes:
+ - fixed some bash issues
+ - fixed a bug where external options didn't work
+ - fixed the following issues: #39, #40, #45, #100, #108, #111, #112
+
+improvements:
+ - increased test coverage
+ - recursively gets submodules for tests
+ - refactored menu launcher
+ - refactored template parser
+
+new features:
+ - added get_namespaces script to get namespace info
+ - added new template option `public_nic` for specifying public interface to run core services on
+ - added new template option `mime_types` for plugin namespaces to specify the mime_types they support
+
+environment:
+ - based on boot2docker 1.11.2
+ - using docker 1.11.2
+ - using python 2.7.11
+
+# v0.1.1 
 
 bug fixes:
  - configparser sometimes wouldn't preserve case sensitivity
