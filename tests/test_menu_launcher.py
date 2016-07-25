@@ -299,7 +299,10 @@ def test_running_menu():
     child1.sendline('2')
     child1.expect('Return to Logs menu')
     # read some logs
-    child1.send('2q')
+    child1.sendline('2')
+    child1.expect('core')
+    # return to namespaces menu
+    child1.send('q')
     child1.expect('Return to Logs menu')
     # return to logs menu
     child1.sendline('3')

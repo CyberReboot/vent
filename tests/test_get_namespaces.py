@@ -16,8 +16,16 @@ def test_no_args():
 
 def test_mimetypes_flag():
     """ tests get_namespaces using -m flag """
+    path_dirs = test_env.PathDirs()
     parser = get_namespaces.set_parser()
     get_namespaces.parse_args(parser.parse_args(['-m']), parser)
+    get_namespaces.parse_args(parser.parse_args(['-m', '-t', path_dirs.template_dir]), parser)
+
+def test_template_dir_flag():
+    """ tests get_namespaces using -t flag """
+    parser = get_namespaces.set_parser()
+    with pytest.raises(SystemExit):
+        get_namespaces.parse_args(parser.parse_args(['-t']), parser)
 
 def test_help_flag():
     """ tests get_namespaces using -h flag """
@@ -42,4 +50,4 @@ def test_main():
 def test_entrypoint():
     """ test the entrypoint of get_namespaces """
     path_dirs = test_env.PathDirs()
-    os.system("python2.7 "+path_dirs.info_dir+"get_namespaces.py -m")
+    os.system("python2.7 "+path_dirs.info_dir+"get_namespaces.py -m -t "+path_dirs.template_dir)

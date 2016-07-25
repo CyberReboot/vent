@@ -15,7 +15,8 @@ class PathDirs:
                  plugins_dir="plugins/",
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
-                 vis_dir="visualization"):
+                 vis_dir="visualization",
+                 data_dir="/data/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         self.core_dir = base_dir + core_dir
@@ -23,6 +24,7 @@ class PathDirs:
         self.plugin_repos = base_dir + plugin_repos
         self.template_dir = base_dir + template_dir
         self.vis_dir = base_dir + vis_dir
+        self.data_dir = data_dir
 
 """
 add_plugins(path_dirs, plugin_url)
@@ -163,7 +165,7 @@ def add_plugins(path_dirs, plugin_url):
                     os.system("sudo rm -rf "+path_dirs.plugin_repos+"/"+plugin_name)
                     return
         # resources installed correctly. Building...
-        os.system("/bin/sh "+path_dirs.base_dir+"build_images.sh --basedir "+path_dirs.base_dir[:-1])
+        os.system("/bin/sh "+path_dirs.data_dir+"build_images.sh --basedir "+path_dirs.base_dir[:-1])
     except Exception as e:
         pass
 
