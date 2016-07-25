@@ -91,6 +91,11 @@ def add_installed_vis_options(subparsers, path_dirs):
     vis_parser = subparsers.add_parser('vis', help='installed visualizations')
     add_override_options(vis_parser, path_dirs)
 
+def add_installed_repos_options(subparsers, path_dirs):
+    """ Subparser for get_installed_plugins """
+    plugin_parser = subparsers.add_parser('repos', help='installed plugin repos')
+    add_override_options(plugin_parser,path_dirs)
+
 def add_status_options(subparsers, path_dirs):
     """ Subparser for get_status """
     status_parser = subparsers.add_parser('all', help='all status information')
@@ -571,6 +576,14 @@ def get_status(path_dirs):
 
     return plugins
 
+def get_installed_repos(path_dirs):
+    try:
+        return [ plugin_repo for plugin_repo in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, plugin_repo)) ]
+    except Exception as e:
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_installed_repos")
+        pass
+
 def main(path_dirs, parser, args):
     """ Calls the appropriate function and prints to stdout """
     status = None
@@ -613,6 +626,8 @@ def main(path_dirs, parser, args):
             status = get_installed_plugins(path_dirs)
         elif args.cmd == "vis":
             status = get_installed_vis(path_dirs)
+        elif args.cmd == "repos":
+            status = get_installed_repos(path_dirs)
         else:
             parser.print_help()
 
@@ -643,7 +658,9 @@ if __name__ == "__main__":
         add_mode_config_options(subparsers, path_dirs)
         add_mode_enabled_options(subparsers, path_dirs)
         add_installed_plugins_options(subparsers, path_dirs)
+        add_installed_repos_options(subparsers, path_dirs)
         add_installed_vis_options(subparsers, path_dirs)
+
 
         args = parser.parse_args()
         # If no values provided, set get_status as default

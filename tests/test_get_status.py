@@ -54,6 +54,14 @@ def test_get_installed_vis():
     get_status.get_installed_vis(path_dirs)
     get_status.get_installed_vis(invalid_dirs)
 
+
+def test_get_installed_repos():
+    """Test get_installed_repos function with valid and invalid directories"""
+    path_dirs = test_env.PathDirs()
+    invalid_dirs = test_env.PathDirs(vis_dir="/tmp/foo")
+    get_status.get_installed_repos(path_dirs)
+    get_status.get_installed_repos(invalid_dirs)
+
 def test_get_installed_plugins():
     """ Test get_installed_plugins function with valid and invalid directories """
     path_dirs = test_env.PathDirs()
@@ -233,7 +241,8 @@ def test_arg_parse():
         "mconfig",
         "menabled",
         "plugins",
-        "vis"
+        "vis",
+        "repos"
     ]
 
     # Test with no commands
