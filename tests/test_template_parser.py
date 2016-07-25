@@ -61,6 +61,7 @@ def test_read_template_types():
         filedata = f.read()
     filedata = filedata.replace('#rmq-es-connector', 'rmq-es-connector')
     filedata = filedata.replace('#passive = off', 'passive = on')
+    filedata = filedata.replace('#active', 'active')
     with open(path_dirs.template_dir + 'core.template', 'w') as f:
         f.write(filedata)
 
