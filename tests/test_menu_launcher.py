@@ -11,214 +11,6 @@ def test_pathdirs():
     """ Gets path directory class from menu_launcher """
     path_dirs = menu_launcher.PathDirs()
 
-
-def test_get_mode_config():
-    """ Test get_mode_config function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(template_dir="/tmp/foo")
-    menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_config(invalid_dirs)
-
-    # Mode_Config after init
-    env = test_env.TestEnv()
-    env.initconfigs(path_dirs, False)
-    menu_launcher.get_mode_config(path_dirs)
-
-def test_get_core_config():
-    """ Test get_core_config function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(template_dir="/tmp/foo")
-    menu_launcher.get_core_config(path_dirs)
-    menu_launcher.get_core_config(invalid_dirs)
-
-    # Mode_Config after init
-    env = test_env.TestEnv()
-    env.initconfigs(path_dirs, False)
-    menu_launcher.get_core_config(path_dirs)
-
-def test_get_installed_cores():
-    """ Test get_installed_cores function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(core_dir="/tmp/foo")
-    menu_launcher.get_installed_cores(path_dirs)
-    menu_launcher.get_installed_cores(invalid_dirs)
-
-def test_get_installed_collectors():
-    """ Test get_installed_collectors function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(collectors_dir="/tmp/foo")
-    menu_launcher.get_installed_collectors(path_dirs, "all")
-    menu_launcher.get_installed_collectors(path_dirs, "passive")
-    menu_launcher.get_installed_collectors(path_dirs, "active")
-    menu_launcher.get_installed_collectors(invalid_dirs, "all")
-    menu_launcher.get_installed_collectors(invalid_dirs, "passive")
-    menu_launcher.get_installed_collectors(invalid_dirs, "active")
-    menu_launcher.get_installed_collectors(path_dirs, "foobar")
-
-def test_get_installed_vis():
-    """ Test get_installed_vis function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(vis_dir="/tmp/foo")
-    menu_launcher.get_installed_vis(path_dirs)
-    menu_launcher.get_installed_vis(invalid_dirs)
-
-def test_get_installed_plugins():
-    """ Test get_installed_plugins function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(plugins_dir="/tmp/foo")
-    menu_launcher.get_installed_plugins(path_dirs)
-    menu_launcher.get_installed_plugins(invalid_dirs)
-
-    # Test with installed plugins
-    url = "https://github.com/CyberReboot/vent-plugins.git"
-    env = test_env.TestEnv()
-    env.add_plugin(path_dirs, url)
-    env.remove_plugin(path_dirs, url)
-
-def test_get_all_installed():
-    """ Test get_all_installed function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(vis_dir="/tmp/doesntexist")
-    menu_launcher.get_all_installed(path_dirs)
-    menu_launcher.get_all_installed(invalid_dirs)
-
-def test_get_mode_enabled():
-    """ Test get_mode_enabled function with valid and invalid directories """
-    os.system("cp modes.backup templates/modes.template")
-
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(base_dir="/tmp/")
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-    empty_config = menu_launcher.get_mode_config(invalid_dirs)
-    menu_launcher.get_mode_enabled(invalid_dirs, empty_config)
-
-    # Set modes.template to have an option = "none"
-    env = test_env.TestEnv()
-    new_conf = {'modes.template': [('plugins', 'core', 'none')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have an option with a value not "all"/"none"
-    new_conf = {'modes.template': [('plugins', 'core', 'rmq-es-connector')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have collectors = "all"
-    new_conf = {'modes.template': [('plugins', 'collectors', 'all')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have collectors = "none"
-    new_conf = {'modes.template': [('plugins', 'collectors', 'none')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have collectors = not "all"/"none"
-    new_conf = {'modes.template': [('plugins', 'collectors', 'active-dns')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have visualization = "none"
-    new_conf = {'modes.template': [('plugins', 'visualization', 'none')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have visualization = not "all"/"none"
-    new_conf = {'modes.template': [('plugins', 'visualization', 'test')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have zzz = "none"
-    new_conf = {'modes.template': [('plugins', 'zzz', 'none')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have zzz = not "all"/none"
-    new_conf = {'modes.template': [('plugins', 'zzz', 'test')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Set modes.template to have a section it didn't have
-    new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Delete template and call get_mode_config
-    os.system("rm "+path_dirs.template_dir+'modes.template')
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Create template without 'core' section
-    os.system("touch "+path_dirs.template_dir+'modes.template')
-    new_conf = {'modes.template': [('foo', 'zzz', 'test')]}
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    # Cleanup
-    os.system("cp modes.backup templates/modes.template")
-
-def test_get_core_enabled():
-    """ Test get_core_enabled function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(base_dir="/tmp/")
-
-    os.system("cp core.backup templates/core.template")
-
-    filedata = None
-    with open(path_dirs.template_dir + 'core.template', 'r') as f:
-        filedata = f.read()
-    filedata = filedata.replace('#passive', 'passive')
-    filedata = filedata.replace('#active', 'active')
-    with open(path_dirs.template_dir + 'core.template', 'w') as f:
-        f.write(filedata)
-
-    core_config = menu_launcher.get_core_config(path_dirs)
-    menu_launcher.get_core_enabled(path_dirs, core_config)
-    empty_config = menu_launcher.get_core_config(invalid_dirs)
-    menu_launcher.get_core_enabled(invalid_dirs, empty_config)
-
-    env = test_env.TestEnv()
-    # Set core.template to have passive = on
-    new_conf = {'core.template': [('local-collection', 'passive', 'on')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-    # Set core.template to have active = on
-    new_conf = {'core.template': [('local-collection', 'active', 'on')]}
-    env.modifyconfigs(path_dirs, new_conf)
-    mode_config = menu_launcher.get_mode_config(path_dirs)
-    menu_launcher.get_mode_enabled(path_dirs, mode_config)
-
-    os.system("cp core.backup templates/core.template")
-
-def test_get_enabled():
-    """ Test get_enabled function with valid and invalid directories """
-    path_dirs = test_env.PathDirs()
-    invalid_dirs = test_env.PathDirs(base_dir="/tmp/")
-    menu_launcher.get_enabled(path_dirs)
-    menu_launcher.get_enabled(invalid_dirs)
-
-    # Modify modes.template to create some disabled images
-    url = "https://github.com/CyberReboot/vent-plugins.git"
-    url2 = "https://github.com/Joecakes4u/test_template_file_ignore.git"
-    env = test_env.TestEnv()
-    env.add_plugin(path_dirs, url)
-    env.add_plugin(path_dirs, url2)
-    menu_launcher.get_enabled(path_dirs)
-    env.remove_plugin(path_dirs, url)
-    env.remove_plugin(path_dirs, url2)
-
 def test_get_plugin_status():
     """ Test get_plugin_status function with valid and invalid directories """
     path_dirs = test_env.PathDirs()
@@ -231,21 +23,34 @@ def test_run_plugins():
     # Prep
     os.system("cp modes.backup templates/modes.template")
     os.system("cp core.backup templates/core.template")
+    os.system("rm templates/core.template")
+    os.system("rm templates/modes.template")
 
+    env = test_env.TestEnv()
     path_dirs = test_env.PathDirs()
+    env.initconfigs(path_dirs, False)
     invalid_dirs = test_env.PathDirs(base_dir="/tmp/")
     menu_launcher.run_plugins(path_dirs, "start")
     menu_launcher.run_plugins(invalid_dirs, "start")
 
+    ### Core Test ###
+    # Check if modes.template has core as a namespace
+    config = ConfigParser.RawConfigParser()
+    config.read(path_dirs.template_dir+'modes.template')
+    if config.has_section("plugins"):
+        config.set("plugins", "core", "all")
+
+    with open(path_dirs.template_dir+'modes.template', 'w') as f:
+        config.write(f)
+
+    menu_launcher.run_plugins(path_dirs, "start")
+
     ### Visualization Test ###
     # Find modes.template
-    os.system("touch "+path_dirs.template_dir+'modes.template')
     config = ConfigParser.RawConfigParser()
     config.read(path_dirs.template_dir+'modes.template')
 
     # Check for valid sections/options
-    if not config.has_section("plugins"):
-        config.add_section("plugins")
     config.set("plugins", "vis_test", "all")
 
     with open(path_dirs.template_dir+'modes.template', 'w') as f:
@@ -261,6 +66,7 @@ def test_run_plugins():
     # Cleanup
     os.system("rm -rf "+path_dirs.vis_dir+vis_test)
     os.system("cp modes.backup templates/modes.template")
+    os.system("cp core.backup templates/core.template")
 
     ### Collectors: Passive/Active Test ###
     # Find core.template
@@ -287,9 +93,10 @@ def test_run_plugins():
     menu_launcher.run_plugins(path_dirs, "start")
 
     # Cleanup
-    os.system("rm -rf "+path_dirs.collectors_dir+active)
-    os.system("rm -rf "+path_dirs.collectors_dir+active)
+    #os.system("rm -rf "+path_dirs.collectors_dir+active)
+    #os.system("rm -rf "+path_dirs.collectors_dir+active)
     os.system("cp core.backup templates/core.template")
+    os.system("cp modes.backup templates/modes.template")
 
     menu_launcher.run_plugins(path_dirs, "start")
 
@@ -353,7 +160,7 @@ def test_running_menu():
     child0.close()
 
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     invalid_url = "https://thisisinvalid-.git"
     child = pexpect.spawn(cmd)
     # expect main menu
@@ -473,40 +280,48 @@ def test_running_menu():
     # go to containers menu
     child.sendline('1')
     child.expect('Return to Logs menu')
-    # return to logs menu
-    child.sendline('2')
-    child.expect('Return to System Commands menu')
+    # close
+    child.close()
+    # spawn child
+    child1 = pexpect.spawn(cmd)
+    child1.expect('Exit')
+    # go to system commands
+    child1.sendline('5')
+    child1.expect('Return to Vent menu')
+    # go to logs menu
+    child1.sendline('1')
+    child1.expect('Return to System Commands menu')
     # go to namespaces menu
-    child.sendline('2')
-    child.expect('Return to Logs menu')
+    child1.sendline('2')
+    child1.expect('Return to Logs menu')
     # return to logs menu
-    child.sendline('2')
-    child.expect('Return to System Commands menu')
+    child1.sendline('2')
+    child1.expect('Return to System Commands menu')
     # return to system commands menu
-    child.sendline('5')
-    child.expect('Return to Vent menu')
+    child1.sendline('5')
+    child1.expect('Return to Vent menu')
     # go to main menu
-    child.sendline('5')
-    child.expect('Exit')
+    child1.sendline('5')
+    child1.expect('Exit')
 
     ### Help ###
     # go to Help
-    child.sendline('6')
-    child.expect('getting started')
+    child1.sendline('6')
+    child1.expect('getting started')
     # return to Main Menu
-    child.send('q')
-    child.expect('Exit')
+    child1.send('q')
+    child1.expect('Exit')
 
     # exit
-    child.sendline('7')
-    child.read()
-    child.close()
+    child1.sendline('7')
+    child1.read()
+    child1.close()
     # TODO finish going through menu actions
 
 def test_running_add_plugin():
     """ testing running the menu and adding a plugin """
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
     child1.timeout = 600
     ### Plugins Menu ###
@@ -529,7 +344,7 @@ def test_running_add_plugin():
 def test_running_remove_plugin():
     """ testing running the menu and removing a plugin """
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
     ### Plugins Menu ###
     # go to plugins menu
@@ -555,7 +370,7 @@ def test_running_remove_plugin():
 def test_running_configure_template():
     """ testing running the menu and configuring a template file """
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
     # go to modes menu
     child1.sendline('1')
