@@ -273,16 +273,19 @@ def test_running_menu():
 
     ### System Commands Menu ###
     # go to system commands
-    child.sendline('5')
-    child.expect('Return to Vent menu')
+    #child.sendline('5')
+    #child.expect('Return to Vent menu')
     # go to logs menu
-    child.sendline('1')
-    child.expect('Return to System Commands menu')
+    #child.sendline('1')
+    #child.expect('Return to System Commands menu')
     # go to containers menu
     #child.sendline('1')
     #child.expect('Return to Logs menu')
     # close
+    child.sendline('7')
+    child.read()
     child.close()
+
     # spawn child
     child1 = pexpect.spawn(cmd)
     child1.expect('Exit')
