@@ -603,8 +603,8 @@ def build_menu_dict(path_dirs):
         },
         { 'title': "Build", 'type': MENU, 'subtitle': '',
           'options': [
-            { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh' },
-            { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --no-cache' },
+            { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1] },
+            { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1]+' --no-cache' },
           ]
         },
         { 'title': "System Commands", 'type': MENU, 'subtitle': '',

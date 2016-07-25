@@ -316,7 +316,6 @@ def test_running_menu():
     child1.sendline('7')
     child1.read()
     child1.close()
-    # TODO finish going through menu actions
 
 def test_running_add_plugin():
     """ testing running the menu and adding a plugin """
