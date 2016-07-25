@@ -21,7 +21,7 @@ try:
         curses.start_color()
         curses.init_pair(1,curses.COLOR_BLACK, curses.COLOR_WHITE)
         h = curses.color_pair(1)
-except Exception as e:
+except Exception as e: # pragma: no cover
     pass
 
 MENU = "menu"
@@ -71,7 +71,7 @@ def get_container_menu(path_dirs):
         p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
         for d in p['options']:
             d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
     return p
 
@@ -90,7 +90,7 @@ def get_namespace_menu(path_dirs):
         p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
         for d in p['options']:
             d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
     return p
 
@@ -106,7 +106,7 @@ def getch():
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, settings)
         return ch
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
 
 def confirm():
@@ -145,7 +145,7 @@ def get_plugin_status(path_dirs):
             running_errors = status['Running Errors']
             nr_errors = status['Not Running Errors']
             built_errors = status['Built Errors']
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             with open('/tmp/error.log', 'a+') as myfile:
                 myfile.write("Error - menu_launcher.py: Unable to get plugin status")
 
@@ -187,7 +187,7 @@ def get_plugin_status(path_dirs):
         # Only show errors if they exist
         if not hide_errors:
             p['options'].append({ 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu })
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
 
     return p
@@ -225,7 +225,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins:'
             p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
 
     return p
@@ -260,7 +260,7 @@ def run_plugins(path_dirs, action):
 
             # get number of installed visualizations
             vis = len(ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py vis --base_dir '+path_dirs.base_dir, shell=True)))
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             with open('/tmp/error.log', 'a+') as myfile:
                 myfile.write("Unable to get installed cores/collectors/vis.")
 
@@ -278,7 +278,7 @@ def run_plugins(path_dirs, action):
                     p['type'] = INFO2
                     p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py '+plugin+' '+action
                     modes.append(p)
-                except Exception as e:
+                except Exception as e: # pragma: no cover
                     # if no name is provided, it doesn't get listed
                     pass
         try:
@@ -310,7 +310,7 @@ def run_plugins(path_dirs, action):
                         modes.append(p)
                 except Exception as e:
                     pass
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
         if len(modes) > 1:
             p = {}
