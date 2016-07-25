@@ -279,8 +279,8 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to System Commands menu')
     # go to containers menu
-    child.sendline('1')
-    child.expect('Return to Logs menu')
+    #child.sendline('1')
+    #child.expect('Return to Logs menu')
     # close
     child.close()
     # spawn child
