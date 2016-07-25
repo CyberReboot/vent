@@ -298,8 +298,11 @@ def test_running_menu():
     # go to namespaces menu
     child1.sendline('2')
     child1.expect('Return to Logs menu')
+    # read some logs
+    child1.send('2q')
+    child1.expect('Return to Logs menu')
     # return to logs menu
-    child1.sendline('2')
+    child1.sendline('3')
     child1.expect('Return to System Commands menu')
     # return to system commands menu
     child1.sendline('5')
