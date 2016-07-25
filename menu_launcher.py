@@ -496,7 +496,7 @@ def processmenu(path_dirs, menu, parent=None):
                     os.system("python2.7 "+path_dirs.data_dir+"plugin_parser.py add_plugins "+plugin_url+" "+path_dirs.base_dir+" "+path_dirs.data_dir)
                 confirm()
                 screen.clear()
-                #os.execl(sys.executable, sys.executable, *sys.argv)
+                os.execl(sys.executable, sys.executable, *sys.argv)
             elif menu['options'][getin]['title'] == "Files":
                 filename = get_param("Enter the name of the file to print logs")
                 curses.def_prog_mode()
