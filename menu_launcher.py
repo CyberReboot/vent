@@ -44,8 +44,7 @@ class PathDirs:
                  template_dir="templates/",
                  vis_dir="visualization",
                  info_dir="/data/info_tools/",
-                 data_dir="/data/"
-                 ):
+                 data_dir="/data/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         self.core_dir = base_dir + core_dir
