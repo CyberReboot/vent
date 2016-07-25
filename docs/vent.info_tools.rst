@@ -12,6 +12,22 @@ vent.info_tools.get_logs module
     :undoc-members:
     :show-inheritance:
 
+vent.info_tools.get_namespaces module
+-------------------------------------
+
+.. automodule:: vent.info_tools.get_namespaces
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+vent.info_tools.get_status module
+---------------------------------
+
+.. automodule:: vent.info_tools.get_status
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------
