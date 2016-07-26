@@ -174,7 +174,9 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.send("\033[A")
+    child.sendline()
+#    child.sendline('2')
     child.expect('Return to Vent menu')
     # go to stop
     child.sendline('2')
