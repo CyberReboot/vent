@@ -176,10 +176,6 @@ def test_running_menu():
     # return to mode
     child.send("[A")
     child.sendline('')
-    child.interact()
-    child.send("[A")
-    child.sendline('')
-    child.send("^]")
 #    child.sendline('2')
     child.expect('Return to Vent menu')
     # go to stop
