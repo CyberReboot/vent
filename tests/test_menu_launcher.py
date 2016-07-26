@@ -163,7 +163,7 @@ def test_running_menu():
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     invalid_url = "https://thisisinvalid-.git"
     child = pexpect.spawn(cmd)
-    child.timeout = 1200
+#    child.timeout = 1200
     # expect main menu
     child.expect('Exit')
     ### Mode Menu ###
@@ -174,8 +174,12 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Mode menu')
     # return to mode
-    child.send("\033[A")
-    child.sendline()
+    child.send("[A")
+    child.sendline('')
+    child.interact()
+    child.send("[A")
+    child.sendline('')
+    child.send("^]")
 #    child.sendline('2')
     child.expect('Return to Vent menu')
     # go to stop
@@ -353,7 +357,7 @@ def test_running_add_plugin():
 
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
-    child1.timeout = 600
+    child1.timeout = 1200
     ### Plugins Menu ###
     # go to plugins menu
     child1.sendline('2')
