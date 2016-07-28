@@ -15,13 +15,14 @@ new features:
  - added get_namespaces script to get namespace info
  - added new template option `public_nic` for specifying public interface to run core services on
  - added new template option `mime_types` for plugin namespaces to specify the mime_types they support
+ - supports files other than just PCAPs
 
 environment:
  - based on boot2docker 1.11.2
  - using docker 1.11.2
  - using python 2.7.11
 
-# v0.1.1 
+# v0.1.1
 
 bug fixes:
  - configparser sometimes wouldn't preserve case sensitivity
@@ -39,7 +40,7 @@ improvements:
 new features:
  - added `Logs` as a menu option
  - added `Plugin Status: Errors` menu
- 
+
 environment:
  - based on boot2docker 1.11.2
  - using docker 1.11.2
