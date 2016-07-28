@@ -208,6 +208,13 @@ def test_get_core_enabled():
 
     os.system("cp core.backup templates/core.template")
 
+def test_get_external():
+    """ Test get_external function with valid and invalid directories """
+    path_dirs = test_env.PathDirs()
+    invalid_dirs = test_env.PathDirs(base_dir="/tmp/")
+    get_status.get_external(path_dirs)
+    get_status.get_external(invalid_dirs)
+
 def test_get_enabled():
     """ Test get_enabled function with valid and invalid directories """
     path_dirs = test_env.PathDirs()
