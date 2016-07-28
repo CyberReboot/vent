@@ -96,6 +96,11 @@ def add_installed_repos_options(subparsers, path_dirs):
     plugin_parser = subparsers.add_parser('repos', help='installed plugin repos')
     add_override_options(plugin_parser,path_dirs)
 
+def add_external_options(subparsers, path_dirs):
+    """ Subparser for get_external """
+    extconf_parser = subparsers.add_parser('external', help='services set to run externally')
+    add_override_options(extconf_parser, path_dirs)
+
 def add_status_options(subparsers, path_dirs):
     """ Subparser for get_status """
     status_parser = subparsers.add_parser('all', help='all status information')
@@ -238,6 +243,14 @@ def get_installed_plugins(path_dirs):
         pass
 
     return p
+
+def get_installed_repos(path_dirs):
+    try:
+        return [ plugin_repo for plugin_repo in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, plugin_repo)) ]
+    except Exception as e:
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_installed_repos")
+        pass
 
 def get_all_installed(path_dirs):
     """
@@ -492,6 +505,30 @@ def get_enabled(path_dirs):
 
     return enabled, disabled
 
+def get_external(path_dirs):
+    """ Returns all images that should be running externally """
+    # returned in format {'elasticsearch': 'off', etc...}
+    extconf = {}
+
+    try:
+        ### Parse core.template to find any services set to run externally ###
+        config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        config.optionxform=str
+        config.read(path_dirs.template_dir+'core.template')
+        # check section exists
+        if config.has_section("external"):
+            # check if there are any options
+            if config.options("external"):
+                for option in config.options("external"):
+                    extconf[option] = config.get("external", option)
+    except Exception as e:
+        with open('/tmp/error.log', 'a+') as myfile:
+            myfile.write("Error - get_status.py: get_external")
+        pass
+
+    return extconf
+
 def get_status(path_dirs):
     """ Displays status of all running, not running/built, not built, and disabled plugins """
     plugins = {}
@@ -559,12 +596,17 @@ def get_status(path_dirs):
                 if namespace in disabled and image not in disabled[namespace] and namespace+'/'+image not in built:
                     notbuilt.append(namespace+'/'+image)
 
+        ### Get Externally Running Services ###
+        external = {}
+        external = get_external(path_dirs)
+
         plugins['Running'] = running
         plugins['Not Running'] = nrbuilt
         plugins['Built'] = built
         plugins['Disabled Containers'] = disabled_containers
         plugins['Disabled Images'] = disabled_images
         plugins['Not Built'] = notbuilt
+        plugins['External'] = external
         plugins['Running Errors'] = running_errors
         plugins['Not Running Errors'] = nr_errors
         plugins['Built Errors'] = built_errors
@@ -575,14 +617,6 @@ def get_status(path_dirs):
         pass
 
     return plugins
-
-def get_installed_repos(path_dirs):
-    try:
-        return [ plugin_repo for plugin_repo in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, plugin_repo)) ]
-    except Exception as e:
-        with open('/tmp/error.log', 'a+') as myfile:
-            myfile.write("Error - get_status.py: get_installed_repos")
-        pass
 
 def main(path_dirs, parser, args):
     """ Calls the appropriate function and prints to stdout """
@@ -628,6 +662,8 @@ def main(path_dirs, parser, args):
             status = get_installed_vis(path_dirs)
         elif args.cmd == "repos":
             status = get_installed_repos(path_dirs)
+        elif args.cmd == "external":
+            status = get_external(path_dirs)
         else:
             parser.print_help()
 
@@ -660,6 +696,7 @@ if __name__ == "__main__":
         add_installed_plugins_options(subparsers, path_dirs)
         add_installed_repos_options(subparsers, path_dirs)
         add_installed_vis_options(subparsers, path_dirs)
+        add_external_options(subparsers, path_dirs)
 
 
         args = parser.parse_args()
