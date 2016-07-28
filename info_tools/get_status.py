@@ -127,7 +127,6 @@ def get_mode_config(path_dirs):
     except Exception as e: # pragma: no cover
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_mode_config")
-        pass
 
     return modes
 
@@ -168,7 +167,6 @@ def get_core_config(path_dirs):
     except Exception as e: # pragma: no cover
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_core_config")
-        pass
 
     return cores
 
@@ -182,7 +180,6 @@ def get_installed_cores(path_dirs):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_installed_cores")
-        pass
 
     return cores
 
@@ -208,7 +205,6 @@ def get_installed_collectors(path_dirs, c_type):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_installed_collectors")
-        pass
 
     return colls
 
@@ -222,7 +218,6 @@ def get_installed_vis(path_dirs):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_installed_vis")
-        pass
 
     return vis
 
@@ -240,7 +235,6 @@ def get_installed_plugins(path_dirs):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_installed_plugins")
-        pass
 
     return p
 
@@ -250,7 +244,6 @@ def get_installed_repos(path_dirs):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_installed_repos")
-        pass
 
 def get_all_installed(path_dirs):
     """
@@ -277,7 +270,6 @@ def get_all_installed(path_dirs):
     except Exception as e: # pragma: no cover
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_all_installed")
-        pass
 
     return all_installed, all_cores, all_colls, all_vis, all_plugins
 
@@ -364,7 +356,6 @@ def get_mode_enabled(path_dirs, mode_config):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_mode_enabled")
-        pass
 
     return mode_enabled
 
@@ -415,7 +406,6 @@ def get_core_enabled(path_dirs, core_config):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_core_enabled")
-        pass
 
     return core_enabled, core_disabled
 
@@ -501,7 +491,6 @@ def get_enabled(path_dirs):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_enabled")
-        pass
 
     return enabled, disabled
 
@@ -525,7 +514,6 @@ def get_external(path_dirs):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_external")
-        pass
 
     return extconf
 
@@ -614,7 +602,6 @@ def get_status(path_dirs):
     except Exception as e:
         with open('/tmp/error.log', 'a+') as myfile:
             myfile.write("Error - get_status.py: get_status")
-        pass
 
     return plugins
 
