@@ -434,13 +434,17 @@ def runmenu(menu, parent):
                             i += 1
                     else:
                         result = check_output((menu['options'][index]['command']).split())
-                    screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
+                    # don't display a '-'
+                    if menu['options'][index]['title'] == "":
+                        screen.addstr(5+index,4, "{0!s}{1!s}".format(menu['options'][index]['title'], result), textstyle)
+                    else:
+                        screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
                 elif menu['options'][index]['type'] == INFO2:
                     screen.addstr(5+index,4, "{0!s}".format((menu['options'][index]['title'])), textstyle)
                 else:
                     # don't display a '-'
                     if menu['options'][index]['title'] == "":
-                        screen.addstr(5+index,4, "{0:d} {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
+                        screen.addstr(5+index,4, "{0:d}{1!s}".format(index+1, menu['options'][index]['title']), textstyle)
                     else:
                         screen.addstr(5+index,4, "{0:d} - {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
             textstyle = n
@@ -448,7 +452,7 @@ def runmenu(menu, parent):
                 textstyle = h
             # don't display a '-'
             if menu['options'][index]['title'] == "":
-                screen.addstr(6+optioncount,4, "{0:d} {1!s}".format(optioncount+1, lastoption), textstyle)
+                screen.addstr(6+optioncount,4, "{0:d}{1!s}".format(optioncount+1, lastoption), textstyle)
             else:
                 screen.addstr(6+optioncount,4, "{0:d} - {1!s}".format(optioncount+1, lastoption), textstyle)
             screen.refresh()
