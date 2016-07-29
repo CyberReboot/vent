@@ -282,7 +282,8 @@ def test_running_menu():
     # return to System Commands Menu
     child.sendcontrol('c')
     child.expect('Return to Vent menu')
-    child.sendline('7')
+    # return to Main Menu
+    child.sendline('6')
     child.read()
     child.close()
 
