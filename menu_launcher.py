@@ -221,14 +221,18 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py remove_plugins "
             p['title'] = 'Remove Plugins'
             p['subtitle'] = 'Please select a plugin to remove:'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-            for d in p['options']:
-                with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
-                    repo_name = ""
-                    while not "url" in repo_name:
-                        repo_name = myfile.readline()
-                    repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            if plugins:
+                p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
+                for d in p['options']:
+                    with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
+                        repo_name = ""
+                        while not "url" in repo_name:
+                            repo_name = myfile.readline()
+                        repo_name = repo_name.split("url = ")[-1]
+                        d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            else:
+                p['options'] = [ {'title': 'You have no installed plugins to remove.', 'type': DISPLAY, 'command': ''} ]
         elif command=="update":
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py update_plugins "
             p['title'] = 'Update Plugins'
