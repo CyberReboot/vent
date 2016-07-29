@@ -64,7 +64,7 @@ def get_container_menu(path_dirs):
         command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -c "
         command3 = " | tee /tmp/vent_logs/vent_container_"
         p['title'] = 'Container Logs'
-        p['subtitle'] = 'Please select a container:'
+        p['subtitle'] = 'Please select a service:'
         containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | grep -v Dead | awk \"{print \$1}\"", shell=True).split("\n")
         containers = filter(None, containers)
         p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
@@ -650,7 +650,7 @@ def build_menu_dict(path_dirs):
             'options': [
                 { 'title': "Logs", 'type': MENU, 'subtitle': 'Please select a group to view logs for:', 'command': '',
                     'options': [
-                        {'title': "Services", 'type': MENU, 'subtitle': '', 'command': ''},
+                        {'title': "Containers", 'type': MENU, 'subtitle': '', 'command': ''},
                         {'title': "Namespaces", 'type': MENU, 'subtitle': '', 'command': ''},
                         {'title': "Files", 'type': INPUT, 'command': ''},
                         {'title': "All", 'type': COMMAND, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
