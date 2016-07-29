@@ -168,11 +168,11 @@ def get_plugin_status(path_dirs):
         # Only add to p_error_menu if errors exist for that section
         p_error_menu = []
         if len(running_errors) > 0:
-            p_error_menu.append({'title': "Running Errors", 'subtitle': "Containers that should not be running because they are disabled...", 'type': MENU, 'options': p_running_errors})
+            p_error_menu.append({'title': "Running Errors", 'subtitle': "Services that should not be running because they are disabled...", 'type': MENU, 'options': p_running_errors})
         if len(nr_errors) > 0:
-            p_error_menu.append({'title': "Not Running Errors", 'subtitle': "Containers that should be removed because they are disabled...", 'type': MENU, 'options': p_nr_errors})
+            p_error_menu.append({'title': "Not Running Errors", 'subtitle': "Services that should be removed because they are disabled...", 'type': MENU, 'options': p_nr_errors})
         if len(built_errors) > 0:
-            p_error_menu.append({'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': MENU, 'options': p_built_errors})
+            p_error_menu.append({'title': "Built Errors", 'subtitle': "Images that should not be built because they are disabled...", 'type': MENU, 'options': p_built_errors})
 
         # If there is nothing populating a menu, notify the user.
         for menu in [p_running, p_nrbuilt, p_disabled_cont, p_disabled_images, p_built, p_notbuilt, p_external, p_error_menu]:
@@ -205,7 +205,7 @@ def get_plugin_status(path_dirs):
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
                          { 'title': "External", 'subtitle': "Currently set to run externally...", 'type': MENU, 'options': p_external },
-                         { 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu }
+                         { 'title': "Errors", 'subtitle': "Runtime errors for containers and images:", 'type': MENU, 'options': p_error_menu }
                         ]
     except Exception as e: # pragma: no cover
         pass
@@ -220,31 +220,43 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
         if command=="remove":
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py remove_plugins "
             p['title'] = 'Remove Plugins'
-            p['subtitle'] = 'Please select a plugin to remove...'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-            for d in p['options']:
-                with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
-                    repo_name = ""
-                    while not "url" in repo_name:
-                        repo_name = myfile.readline()
-                    repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            p['subtitle'] = 'Please select a plugin to remove:'
+            plugins = [ plug for plug in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            if plugins:
+                p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
+                for d in p['options']:
+                    with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
+                        repo_name = ""
+                        while not "url" in repo_name:
+                            repo_name = myfile.readline()
+                        repo_name = repo_name.split("url = ")[-1]
+                        d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            else:
+                p['options'] = [ {'title': 'You have no installed plugins to remove.', 'type': DISPLAY, 'command': ''} ]
         elif command=="update":
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py update_plugins "
             p['title'] = 'Update Plugins'
-            p['subtitle'] = 'Please select a plugin to update...'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-            for d in p['options']:
-                with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
-                    repo_name = ""
-                    while not "url" in repo_name:
-                        repo_name = myfile.readline()
-                    repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            p['subtitle'] = 'Please select a plugin to update:'
+            plugins = [ plug for plug in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            if plugins:
+                p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
+                for d in p['options']:
+                    with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
+                        repo_name = ""
+                        while not "url" in repo_name:
+                            repo_name = myfile.readline()
+                        repo_name = repo_name.split("url = ")[-1]
+                        d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            else:
+                p['options'] = [ {'title': 'You have no installed plugins to update.', 'type': DISPLAY, 'command': ''} ]
         else:
             p['title'] = 'Installed Plugins'
-            p['subtitle'] = 'Installed Plugins:'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            p['subtitle'] = 'Installed Plugins...'
+            plugins = [ plug for plug in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            if plugins:
+                p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
+            else:
+                p['options'] = [ {'title': 'You have no plugins installed.', 'type': DISPLAY, 'command': ''} ]
     except Exception as e: # pragma: no cover
         pass
 
@@ -338,6 +350,9 @@ def run_plugins(path_dirs, action):
             p['type'] = INFO2
             p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py all '+action
             modes.append(p)
+        elif len(modes) == 0:
+            p = {'title': "You have no services to "+action+".", 'type': DISPLAY, 'command': ''}
+            modes.append(p)
     except Exception as e:
         print "unable to get the configuration of modes from the templates.\n"
 
@@ -419,15 +434,27 @@ def runmenu(menu, parent):
                             i += 1
                     else:
                         result = check_output((menu['options'][index]['command']).split())
-                    screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
+                    # don't display a '-'
+                    if menu['options'][index]['title'] == "":
+                        screen.addstr(5+index,4, "{0!s}{1!s}".format(menu['options'][index]['title'], result), textstyle)
+                    else:
+                        screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
                 elif menu['options'][index]['type'] == INFO2:
                     screen.addstr(5+index,4, "{0!s}".format((menu['options'][index]['title'])), textstyle)
                 else:
-                    screen.addstr(5+index,4, "{0:d} - {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
+                    # don't display a '-'
+                    if menu['options'][index]['title'] == "":
+                        screen.addstr(5+index,4, "{0:d}{1!s}".format(index+1, menu['options'][index]['title']), textstyle)
+                    else:
+                        screen.addstr(5+index,4, "{0:d} - {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
             textstyle = n
             if pos==optioncount:
                 textstyle = h
-            screen.addstr(6+optioncount,4, "{0:d} - {1!s}".format(optioncount+1, lastoption), textstyle)
+            # don't display a '-'
+            if menu['options'][index]['title'] == "":
+                screen.addstr(6+optioncount,4, "{0:d}{1!s}".format(optioncount+1, lastoption), textstyle)
+            else:
+                screen.addstr(6+optioncount,4, "{0:d} - {1!s}".format(optioncount+1, lastoption), textstyle)
             screen.refresh()
 
         x = screen.getch()
@@ -506,7 +533,7 @@ def processmenu(path_dirs, menu, parent=None):
                 pass
         elif menu['options'][getin]['type'] == INPUT:
             if menu['options'][getin]['title'] == "Add Plugins":
-                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git")
+                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git:")
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
@@ -519,7 +546,7 @@ def processmenu(path_dirs, menu, parent=None):
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
             elif menu['options'][getin]['title'] == "Files":
-                filename = get_param("Enter the name of the file to print logs")
+                filename = get_param("Enter the name of the file to print logs:")
                 curses.def_prog_mode()
                 os.system('reset')
                 os.system("clear")
@@ -579,28 +606,28 @@ def build_menu_dict(path_dirs):
     except Exception as e:
         pass
     menu_data = {
-      'title': "Vent - "+v_version, 'type': MENU, 'subtitle': "Please select an option...",
+      'title': "Vent - "+v_version, 'type': MENU, 'subtitle': "Please select an option:",
       'options':[
-        { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option...',
+        { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option:',
           'options': [
-            { 'title': "Start", 'type': MENU, 'subtitle': '',
+            { 'title': "Start", 'type': MENU, 'subtitle': 'Choose a set of services to start:',
               'options': run_plugins(path_dirs, "start")
             },
-            { 'title': "Stop", 'type': MENU, 'subtitle': '',
+            { 'title': "Stop", 'type': MENU, 'subtitle': 'Choose a set of services to stop:',
               'options': run_plugins(path_dirs, "stop")
             },
-            { 'title': "Clean (Stop and Remove Containers)", 'type': MENU, 'subtitle': '',
+            { 'title': "Clean (Stop and Remove Containers)", 'type': MENU, 'subtitle': 'Choose a set of services to clean:',
               'options': run_plugins(path_dirs, "clean")
             },
             { 'title': "Status", 'type': MENU, 'subtitle': '',
               'command': ''
             },
-            { 'title': "Configure", 'type': MENU, 'subtitle': '',
+            { 'title': "Configure", 'type': MENU, 'subtitle': 'Choose a template to configure:',
               'options': update_plugins(path_dirs)
             }
           ]
         },
-        { 'title': "Plugins", 'type': MENU, 'subtitle': 'Please select an option...',
+        { 'title': "Plugins", 'type': MENU, 'subtitle': 'Please select an option:',
           'options': [
             { 'title': "Add Plugins", 'type': INPUT, 'command': '' },
             { 'title': "Remove Plugins", 'type': MENU, 'command': '' },
