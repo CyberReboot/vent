@@ -372,7 +372,11 @@ def test_running_add_plugin():
 def test_running_remove_plugin():
     """ testing running the menu and removing a plugin """
     path_dirs = test_env.PathDirs()
+    env = test_env.TestEnv()
+    plugin = "https://github.com/CyberReboot/vent-plugins.git"
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
+    # need to add a plugin before we can remove one
+    env.add_plugin(path_dirs, plugin)
     child1 = pexpect.spawn(cmd)
     ### Plugins Menu ###
     # go to plugins menu
