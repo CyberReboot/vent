@@ -97,4 +97,29 @@ It is every maintainer's responsibility to:
 
 Just like everything else: by making a pull request :)
 
-*Derivative work from [Docker](https://github.com/doocker/docker/blob/master/CONTRIBUTING.md).*
+## Developer Tips & Tricks
+
+After you've installed and setup `vent`, familiarized yourself with the contents, and are ready to make changes these might be helpful to bear in mind.
+
+### Rebuilding `vent`
+To rebuild a docker-machine provisioned instance of `vent`:
+```
+$ make clean
+$ make
+$ docker-machine rm -y vent
+$ docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhost:8000/vent.iso vent
+```
+
+But rebuilding Vent can be time-consuming and costly, so for most small changes `Update Vent` is the better choice.
+
+### Updating `vent`
+
+To update a docker-machine provisioned instance of `vent`:
+
+```
+$ docker-machine scp .../file vent:/tmp
+$ docker-machine ssh vent "sudo mv /tmp/file /..."
+$ docker-machine ssh vent
+```
+
+*Derivative work from [Docker](https://github.com/docker/docker/blob/master/CONTRIBUTING.md).*

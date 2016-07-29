@@ -132,6 +132,7 @@ def get_plugin_status(path_dirs):
         running_errors = []
         nr_errors = []
         built_errors = []
+        external = {}
 
         try:
             status = ast.literal_eval(check_output("python2.7 "+path_dirs.info_dir+'get_status.py all --base_dir '+path_dirs.base_dir, shell=True))
@@ -141,6 +142,7 @@ def get_plugin_status(path_dirs):
             disabled_containers = status['Disabled Containers']
             disabled_images = status['Disabled Images']
             notbuilt = status['Not Built']
+            external = status['External']
             running_errors = status['Running Errors']
             nr_errors = status['Not Running Errors']
             built_errors = status['Built Errors']
@@ -149,28 +151,48 @@ def get_plugin_status(path_dirs):
                 myfile.write("Error - menu_launcher.py: Unable to get plugin status")
 
         ### Prepare Statuses for MENU ###
-        p_running = [ {'title': x, 'type': 'INFO', 'command': '' } for x in running ]
-        p_nrbuilt = [ {'title': x, 'type': 'INFO', 'command': '' } for x in nrbuilt ]
-        p_disabled_cont = [ {'title': x, 'type': 'INFO', 'command': '' } for x in disabled_containers ]
-        p_disabled_images = [ {'title': x, 'type': 'INFO', 'command': '' } for x in disabled_images ]
-        p_built = [ {'title': x, 'type': 'INFO', 'command': '' } for x in built ]
-        p_notbuilt = [ {'title': x, 'type': 'INFO', 'command': ''} for x in notbuilt ]
+        p_running = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in running ]
+        p_nrbuilt = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in nrbuilt ]
+        p_disabled_cont = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in disabled_containers ]
+        p_disabled_images = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in disabled_images ]
+        p_built = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in built ]
+        p_notbuilt = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in notbuilt ]
+        # format for title is: 'elasticsearch @ 0.0.0.0'
+        p_external = [ {'title': x+' @ '+external[x], 'type': DISPLAY, 'command': ''} for x in external ]
 
         ### Prepare Errors for MENU ###
-        # True if 0 errors
-        hide_errors = len(running_errors)+len(nr_errors)+len(built_errors) == 0
-        p_running_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in running_errors ]
-        p_nr_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in nr_errors ]
-        p_built_errors = [ {'title': x, 'type': 'INFO', 'command': ''} for x in built_errors ]
+        p_running_errors = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in running_errors ]
+        p_nr_errors = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in nr_errors ]
+        p_built_errors = [ {'title': x, 'type': DISPLAY, 'command': ''} for x in built_errors ]
 
         # Only add to p_error_menu if errors exist for that section
         p_error_menu = []
         if len(running_errors) > 0:
-            p_error_menu.append({'title': "Running Errors", 'subtitle': "Containers that should not be running because they are disabled...", 'type': MENU, 'options': p_running_errors })
+            p_error_menu.append({'title': "Running Errors", 'subtitle': "Containers that should not be running because they are disabled...", 'type': MENU, 'options': p_running_errors})
         if len(nr_errors) > 0:
-            p_error_menu.append({'title': "Not Running Errors", 'subtitle': "Containers that should be removed because they are disabled...", 'type': MENU, 'options': p_nr_errors })
+            p_error_menu.append({'title': "Not Running Errors", 'subtitle': "Containers that should be removed because they are disabled...", 'type': MENU, 'options': p_nr_errors})
         if len(built_errors) > 0:
-            p_error_menu.append({'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': MENU, 'options': p_built_errors })
+            p_error_menu.append({'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': MENU, 'options': p_built_errors})
+
+        # If there is nothing populating a menu, notify the user.
+        for menu in [p_running, p_nrbuilt, p_disabled_cont, p_disabled_images, p_built, p_notbuilt, p_external, p_error_menu]:
+            if len(menu) == 0:
+                if menu == p_running:
+                    menu.append({'title': 'There are no services running.', 'type': DISPLAY, 'command': ''})
+                elif menu == p_nrbuilt:
+                    menu.append({'title': 'There are no services that are not running.', 'type': DISPLAY, 'command': ''})
+                elif menu == p_disabled_cont:
+                    menu.append({'title': 'There are no services that are disabled.', 'type': DISPLAY, 'command': ''})
+                elif menu == p_disabled_images:
+                    menu.append({'title': 'There are no images that are disabled.', 'type': DISPLAY, 'command': ''})
+                elif menu == p_built:
+                    menu.append({'title': 'There are no built images.', 'type': DISPLAY, 'command': ''})
+                elif menu == p_notbuilt:
+                    menu.append({'title': 'There are no unbuilt images.', 'type': DISPLAY, 'command': ''})
+                elif menu == p_external:
+                    menu.append({'title': 'There are services set to run externally.', 'type': DISPLAY, 'command': ''})
+                elif menu == p_error_menu:
+                    menu.append({'title': 'There are no service/image errors. :-)', 'type': DISPLAY, 'command': ''})
 
         ### Returned Menu Dictionary
         p['title'] = 'Plugin Status'
@@ -178,14 +200,13 @@ def get_plugin_status(path_dirs):
         p['options'] = [
                          { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
                          { 'title': "Not Running Containers", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
-                         { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...", 'type': MENU, 'options': p_disabled_cont },
-                         { 'title': "Disabled Images", 'subtitle': "Currently disabled images...", 'type': MENU, 'options': p_disabled_images },
+                         { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...check the \'External\' menu", 'type': MENU, 'options': p_disabled_cont },
+                         { 'title': "Disabled Images", 'subtitle': "Currently disabled images...check the \'External\' menu.", 'type': MENU, 'options': p_disabled_images },
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
+                         { 'title': "External", 'subtitle': "Currently set to run externally...", 'type': MENU, 'options': p_external },
+                         { 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu }
                         ]
-        # Only show errors if they exist
-        if not hide_errors:
-            p['options'].append({ 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu })
     except Exception as e: # pragma: no cover
         pass
 
