@@ -246,14 +246,8 @@ def test_running_menu():
     # go to System Info Menu
     child.sendline('3')
     child.expect('Return to Vent menu')
-    # go to Container Stats
-    child.sendline('1')
-    child.expect('CONTAINER')
-    # return to System Info Menu
-    child.sendcontrol('c')
-    child.expect('Return to Vent menu')
     # return to Main Menu
-    child.sendline('9')
+    child.sendline('7')
     child.expect('Exit')
 
     ### Build Menu ###
@@ -272,9 +266,9 @@ def test_running_menu():
     child.expect('Exit')
 
     ### System Commands Menu ###
-    # go to system commands
-    #child.sendline('5')
-    #child.expect('Return to Vent menu')
+    #go to system commands
+    child.sendline('5')
+    child.expect('Return to Vent menu')
     # go to logs menu
     #child.sendline('1')
     #child.expect('Return to System Commands menu')
@@ -282,6 +276,12 @@ def test_running_menu():
     #child.sendline('1')
     #child.expect('Return to Logs menu')
     # close
+    # go to Service Stats
+    child.sendline('2')
+    child.expect('CONTAINER')
+    # return to System Commands Menu
+    child.sendcontrol('c')
+    child.expect('Return to Vent menu')
     child.sendline('7')
     child.read()
     child.close()
