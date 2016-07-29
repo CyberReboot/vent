@@ -191,6 +191,10 @@ def read_template_types(template_type, container_cmd, path_dirs):
         for section in sections:
             instructions = {}
             try:
+                config = ConfigParser.RawConfigParser()
+                # needed to preserve case sensitive options
+                config.optionxform=str
+                config.read(template_path)
                 options = config.options(section)
             except Exception as e:
                 options = []
