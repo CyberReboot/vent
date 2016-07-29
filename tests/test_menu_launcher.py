@@ -224,9 +224,9 @@ def test_running_menu():
     child.sendline('2')
     child.expect('Return to Plugins menu')
     # remove plugin
-    child.sendline('1')
+    child.sendline('2')
     child.expect('Return to Vent menu')
-    # go to install plugins
+    # go to installed plugins
     child.sendline('3')
     child.expect('Return to Plugins menu')
     # go to plugins menu

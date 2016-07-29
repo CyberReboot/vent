@@ -64,7 +64,7 @@ def get_container_menu(path_dirs):
         command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -c "
         command3 = " | tee /tmp/vent_logs/vent_container_"
         p['title'] = 'Container Logs'
-        p['subtitle'] = 'Please select a container...'
+        p['subtitle'] = 'Please select a service:'
         containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | grep -v Dead | awk \"{print \$1}\"", shell=True).split("\n")
         containers = filter(None, containers)
         p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
@@ -83,7 +83,7 @@ def get_namespace_menu(path_dirs):
         command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -n "
         command3 = " | tee /tmp/vent_logs/vent_namespace_"
         p['title'] = 'Namespace Logs'
-        p['subtitle'] = 'Please select a namespace...'
+        p['subtitle'] = 'Please select a namespace:'
         namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | uniq", shell=True).split("\n")
         namespaces = filter(None, namespaces)
         p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
@@ -196,16 +196,16 @@ def get_plugin_status(path_dirs):
 
         ### Returned Menu Dictionary
         p['title'] = 'Plugin Status'
-        p['subtitle'] = 'Choose a category...'
+        p['subtitle'] = 'Please select a status to view:'
         p['options'] = [
-                         { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
-                         { 'title': "Not Running Containers", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
-                         { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...check the \'External\' menu", 'type': MENU, 'options': p_disabled_cont },
+                         { 'title': "Running Services", 'subtitle': "Currently running services...", 'type': MENU, 'options': p_running },
+                         { 'title': "Not Running Services", 'subtitle': "Built but not currently running services...", 'type': MENU, 'options': p_nrbuilt },
+                         { 'title': "Disabled Services", 'subtitle': "Currently disabled services...check the \'External\' menu", 'type': MENU, 'options': p_disabled_cont },
                          { 'title': "Disabled Images", 'subtitle': "Currently disabled images...check the \'External\' menu.", 'type': MENU, 'options': p_disabled_images },
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
-                         { 'title': "External", 'subtitle': "Currently set to run externally...", 'type': MENU, 'options': p_external },
-                         { 'title': "Errors", 'subtitle': "Runtime errors for containers and images:", 'type': MENU, 'options': p_error_menu }
+                         { 'title': "External", 'subtitle': "Current services and images set to run externally...", 'type': MENU, 'options': p_external },
+                         { 'title': "Errors", 'subtitle': "Please select a runtime error option to view:", 'type': MENU, 'options': p_error_menu }
                         ]
     except Exception as e: # pragma: no cover
         pass
@@ -436,25 +436,17 @@ def runmenu(menu, parent):
                         result = check_output((menu['options'][index]['command']).split())
                     # don't display a '-'
                     if menu['options'][index]['title'] == "":
-                        screen.addstr(5+index,4, "{0!s}{1!s}".format(menu['options'][index]['title'], result), textstyle)
+                        screen.addstr(5+index,4, "{0!s} {1!s}".format(menu['options'][index]['title'], result), textstyle)
                     else:
                         screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
                 elif menu['options'][index]['type'] == INFO2:
                     screen.addstr(5+index,4, "{0!s}".format((menu['options'][index]['title'])), textstyle)
                 else:
-                    # don't display a '-'
-                    if menu['options'][index]['title'] == "":
-                        screen.addstr(5+index,4, "{0:d}{1!s}".format(index+1, menu['options'][index]['title']), textstyle)
-                    else:
-                        screen.addstr(5+index,4, "{0:d} - {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
+                    screen.addstr(5+index,4, "{0:d} - {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
             textstyle = n
             if pos==optioncount:
                 textstyle = h
-            # don't display a '-'
-            if menu['options'][index]['title'] == "":
-                screen.addstr(6+optioncount,4, "{0:d}{1!s}".format(optioncount+1, lastoption), textstyle)
-            else:
-                screen.addstr(6+optioncount,4, "{0:d} - {1!s}".format(optioncount+1, lastoption), textstyle)
+            screen.addstr(6+optioncount,4, "{0:d} - {1!s}".format(optioncount+1, lastoption), textstyle)
             screen.refresh()
 
         x = screen.getch()
@@ -616,7 +608,7 @@ def build_menu_dict(path_dirs):
             { 'title': "Stop", 'type': MENU, 'subtitle': 'Choose a set of services to stop:',
               'options': run_plugins(path_dirs, "stop")
             },
-            { 'title': "Clean (Stop and Remove Containers)", 'type': MENU, 'subtitle': 'Choose a set of services to clean:',
+            { 'title': "Clean (Stop and Remove Services)", 'type': MENU, 'subtitle': 'Choose a set of services to clean:',
               'options': run_plugins(path_dirs, "clean")
             },
             { 'title': "Status", 'type': MENU, 'subtitle': '',
@@ -635,10 +627,10 @@ def build_menu_dict(path_dirs):
             { 'title': "Update Plugins", 'type': MENU, 'command': '' },
           ]
         },
-        { 'title': "System Info", 'type': MENU, 'subtitle': '',
+        { 'title': "System Info", 'type': MENU, 'subtitle': 'Select Service Stats to view more stats.',
           'options': [
             #{ 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
-            { 'title': "Container Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
+            { 'title': "Service Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
             { 'title': "", 'type': INFO, 'command': 'echo'},
             { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py aaa-rabbitmq mgmt' },
             { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py rq-dashboard mgmt' },
@@ -648,18 +640,18 @@ def build_menu_dict(path_dirs):
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
           ]
         },
-        { 'title': "Build", 'type': MENU, 'subtitle': '',
+        { 'title': "Build", 'type': MENU, 'subtitle': 'Please select a service group to build:',
           'options': [
             { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1] },
             { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1]+' --no-cache' },
           ]
         },
-        { 'title': "System Commands", 'type': MENU, 'subtitle': '',
+        { 'title': "System Commands", 'type': MENU, 'subtitle': 'Please select an option:',
             'options': [
-                { 'title': "Logs", 'type': MENU, 'subtitle': '', 'command': '',
+                { 'title': "Logs", 'type': MENU, 'subtitle': 'Please select a group to view logs for:', 'command': '',
                     'options': [
-                        {'title': "Containers", 'type': MENU, 'subtitle': 'Please select a container...', 'command': ''},
-                        {'title': "Namespaces", 'type': MENU, 'subtitle': 'Please select a namespace...', 'command': ''},
+                        {'title': "Containers", 'type': MENU, 'subtitle': '', 'command': ''},
+                        {'title': "Namespaces", 'type': MENU, 'subtitle': '', 'command': ''},
                         {'title': "Files", 'type': INPUT, 'command': ''},
                         {'title': "All", 'type': COMMAND, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
                     ]
