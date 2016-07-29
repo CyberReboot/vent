@@ -97,14 +97,24 @@ def read_template_types(template_type, container_cmd, path_dirs):
     delay_sections = {}
 
     try:
-        # get list of sections per template file
-        with open(template_path): pass
-        config = ConfigParser.RawConfigParser()
-        # needed to preserve case sensitive options
-        config.optionxform=str
-        config.read(template_path)
-        sections = config.sections()
+        mode_enabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py menabled", shell=True))
+        if template_type in mode_enabled:
+            mode_enabled = mode_enabled[template_type]
+        elif template_type in ['active', 'passive'] and 'collectors' in mode_enabled:
+            mode_enabled = mode_enabled['collectors']
+        # filters out core_disabled containers from modes_enabled list.
+        core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled", shell=True))
+
+        if template_type in core_disabled:
+            core_disabled = core_disabled[template_type]
+        elif template_type in ['active', 'passive'] and 'collectors' in core_disabled:
+            core_disabled = core_disabled['collectors']
+        
+        sections = [container for container in mode_enabled if not container in core_disabled]
+        print sections
+
     except Exception as e:
+        print e
         sections = []
 
     try:
@@ -178,22 +188,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         sections.append(tool)
             except Exception as e:
                 pass
-
-        # check if active or passive are disabled
-        if template_type in ["active", "passive"]:
-            try:
-                core_config = ConfigParser.RawConfigParser()
-                # needed to preserve case sensitive options
-                core_config.optionxform=str
-                core_config.read(template_dir+'core.template')
-                # check dependencies like elasticsearch and rabbitmq
-                local_collection = core_config.options("local-collection")
-                check = core_config.get("local-collection", template_type)
-                if check != "on":
-                    sections = []
-            except Exception as e:
-                # default to disabled
-                sections = []
 
         # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
         for section in sections:
