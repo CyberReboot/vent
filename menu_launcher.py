@@ -205,7 +205,7 @@ def get_plugin_status(path_dirs):
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
                          { 'title': "External", 'subtitle': "Current services and images set to run externally...", 'type': MENU, 'options': p_external },
-                         { 'title': "Errors", 'subtitle': "Runtime errors for services and images:", 'type': MENU, 'options': p_error_menu }
+                         { 'title': "Errors", 'subtitle': "Please select a runtime error option to view:", 'type': MENU, 'options': p_error_menu }
                         ]
     except Exception as e: # pragma: no cover
         pass
