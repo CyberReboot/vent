@@ -186,9 +186,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         sections.append(tool)
             except Exception as e:
                 pass
-
         # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
         for section in sections:
+            host_config_exists = False
             instructions = {}
             try:
                 config = ConfigParser.RawConfigParser()
@@ -199,7 +199,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
             except Exception as e:
                 options = []
             for option in options:
-                host_config_exists = False
                 if section == "info" and option == "name":
                     info_name = config.get(section, option)
                 elif section == "service" and option == "schedule":
