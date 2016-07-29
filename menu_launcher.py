@@ -237,7 +237,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py update_plugins "
             p['title'] = 'Update Plugins'
             p['subtitle'] = 'Please select a plugin to update:'
-            plugins = [ plug for plug in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
             if plugins:
                 p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
                 for d in p['options']:
@@ -252,7 +252,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
         else:
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins...'
-            plugins = [ plug for plug in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
             if plugins:
                 p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
             else:
