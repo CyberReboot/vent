@@ -111,10 +111,8 @@ def read_template_types(template_type, container_cmd, path_dirs):
             core_disabled = core_disabled['collectors']
         
         sections = [container for container in mode_enabled if not container in core_disabled]
-        print sections
 
     except Exception as e:
-        print e
         sections = []
 
     try:
