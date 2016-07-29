@@ -411,7 +411,10 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         try:
                             instance_count = config.get("instances", section)
                             for i in range(int(instance_count)):
-                                instructions['Image'] = template_type+'/'+section
+                                if template_type in ['active','passive']:
+                                    instructions['Image'] = 'collectors/'+section
+                                else:
+                                    instructions['Image'] = template_type+'/'+section
                                 instructions['Volumes'] = {"/"+section+"-data": {}}
                                 if template_type == "core":
                                     tool_core[template_type+"-"+section+str(i)] = instructions
@@ -420,7 +423,10 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         except Exception as e:
                             pass
                     else:
-                        instructions['Image'] = template_type+'/'+section
+                        if template_type in ['active','passive']:
+                            instructions['Image'] = 'collectors/'+section
+                        else:
+                            instructions['Image'] = template_type+'/'+section
                         instructions['Volumes'] = {"/"+section+"-data": {}}
                         if template_type == "core":
                             tool_core[template_type+"-"+section] = instructions
