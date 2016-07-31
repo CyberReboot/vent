@@ -67,9 +67,12 @@ def get_container_menu(path_dirs):
         p['subtitle'] = 'Please select a service:'
         containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | grep -v Dead | awk \"{print \$1}\"", shell=True).split("\n")
         containers = filter(None, containers)
-        p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
-        for d in p['options']:
-            d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+        if containers:
+            p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
+            for d in p['options']:
+                d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+        else:
+            p['options'] = [ {'title': "There are no services to show logs for.", 'type': DISPLAY, 'command': ''} ]
     except Exception as e: # pragma: no cover
         pass
     return p
@@ -86,9 +89,12 @@ def get_namespace_menu(path_dirs):
         p['subtitle'] = 'Please select a namespace:'
         namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | uniq", shell=True).split("\n")
         namespaces = filter(None, namespaces)
-        p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
-        for d in p['options']:
-            d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+        if namespaces:
+            p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
+            for d in p['options']:
+                d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+        else:
+            p['options'] = [ {'title': "There are no namespaces to show logs for.", 'type': DISPLAY, 'command': ''} ]
     except Exception as e: # pragma: no cover
         pass
     return p
@@ -200,8 +206,8 @@ def get_plugin_status(path_dirs):
         p['options'] = [
                          { 'title': "Running Services", 'subtitle': "Currently running services...", 'type': MENU, 'options': p_running },
                          { 'title': "Not Running Services", 'subtitle': "Built but not currently running services...", 'type': MENU, 'options': p_nrbuilt },
-                         { 'title': "Disabled Services", 'subtitle': "Currently disabled services...check the \'External\' menu", 'type': MENU, 'options': p_disabled_cont },
-                         { 'title': "Disabled Images", 'subtitle': "Currently disabled images...check the \'External\' menu.", 'type': MENU, 'options': p_disabled_images },
+                         { 'title': "Disabled Services", 'subtitle': "Currently disabled services; check the \'External\' menu...", 'type': MENU, 'options': p_disabled_cont },
+                         { 'title': "Disabled Images", 'subtitle': "Currently disabled images; check the \'External\' menu...", 'type': MENU, 'options': p_disabled_images },
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
                          { 'title': "External", 'subtitle': "Current services and images set to run externally...", 'type': MENU, 'options': p_external },
@@ -221,7 +227,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py remove_plugins "
             p['title'] = 'Remove Plugins'
             p['subtitle'] = 'Please select a plugin to remove:'
-            plugins = [ plug for plug in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
             if plugins:
                 p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
                 for d in p['options']:
@@ -237,7 +243,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py update_plugins "
             p['title'] = 'Update Plugins'
             p['subtitle'] = 'Please select a plugin to update:'
-            plugins = [ plug for plug in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
             if plugins:
                 p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
                 for d in p['options']:
@@ -252,7 +258,7 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
         else:
             p['title'] = 'Installed Plugins'
             p['subtitle'] = 'Installed Plugins...'
-            plugins = [ plug for plug in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
             if plugins:
                 p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
             else:
@@ -627,17 +633,15 @@ def build_menu_dict(path_dirs):
             { 'title': "Update Plugins", 'type': MENU, 'command': '' },
           ]
         },
-        { 'title': "System Info", 'type': MENU, 'subtitle': 'Select Service Stats to view more stats.',
+        { 'title': "System Info", 'type': MENU, 'subtitle': 'Some core service statuses...',
           'options': [
             #{ 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
-            { 'title': "Service Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
-            { 'title': "", 'type': INFO, 'command': 'echo'},
             { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py aaa-rabbitmq mgmt' },
             { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py rq-dashboard mgmt' },
             { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch head' },
             { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch marvel' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
-            { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
+            { 'title': "Uptime", 'type': INFO, 'command': 'uptime' }
           ]
         },
         { 'title': "Build", 'type': MENU, 'subtitle': 'Please select a service group to build:',
@@ -656,6 +660,7 @@ def build_menu_dict(path_dirs):
                         {'title': "All", 'type': COMMAND, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
                     ]
                 },
+                { 'title': "Service Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
                 { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
                 { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
                 { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
