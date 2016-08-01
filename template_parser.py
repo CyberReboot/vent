@@ -97,13 +97,21 @@ def read_template_types(template_type, container_cmd, path_dirs):
     delay_sections = {}
 
     try:
-        # get list of sections per template file
-        with open(template_path): pass
-        config = ConfigParser.RawConfigParser()
-        # needed to preserve case sensitive options
-        config.optionxform=str
-        config.read(template_path)
-        sections = config.sections()
+        mode_enabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py menabled", shell=True))
+        if template_type in mode_enabled:
+            mode_enabled = mode_enabled[template_type]
+        elif template_type in ['active', 'passive'] and 'collectors' in mode_enabled:
+            mode_enabled = mode_enabled['collectors']
+        # filters out core_disabled containers from modes_enabled list.
+        core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled", shell=True))
+
+        if template_type in core_disabled:
+            core_disabled = core_disabled[template_type]
+        elif template_type in ['active', 'passive'] and 'collectors' in core_disabled:
+            core_disabled = core_disabled['collectors']
+        
+        sections = [container for container in mode_enabled if not container in core_disabled]
+
     except Exception as e:
         sections = []
 
@@ -178,32 +186,19 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         sections.append(tool)
             except Exception as e:
                 pass
-
-        # check if active or passive are disabled
-        if template_type in ["active", "passive"]:
-            try:
-                core_config = ConfigParser.RawConfigParser()
-                # needed to preserve case sensitive options
-                core_config.optionxform=str
-                core_config.read(template_dir+'core.template')
-                # check dependencies like elasticsearch and rabbitmq
-                local_collection = core_config.options("local-collection")
-                check = core_config.get("local-collection", template_type)
-                if check != "on":
-                    sections = []
-            except Exception as e:
-                # default to disabled
-                sections = []
-
         # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
         for section in sections:
+            host_config_exists = False
             instructions = {}
             try:
+                config = ConfigParser.RawConfigParser()
+                # needed to preserve case sensitive options
+                config.optionxform=str
+                config.read(template_path)
                 options = config.options(section)
             except Exception as e:
                 options = []
             for option in options:
-                host_config_exists = False
                 if section == "info" and option == "name":
                     info_name = config.get(section, option)
                 elif section == "service" and option == "schedule":
@@ -416,7 +411,10 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         try:
                             instance_count = config.get("instances", section)
                             for i in range(int(instance_count)):
-                                instructions['Image'] = template_type+'/'+section
+                                if template_type in ['active','passive']:
+                                    instructions['Image'] = 'collectors/'+section
+                                else:
+                                    instructions['Image'] = template_type+'/'+section
                                 instructions['Volumes'] = {"/"+section+"-data": {}}
                                 if template_type == "core":
                                     tool_core[template_type+"-"+section+str(i)] = instructions
@@ -425,7 +423,10 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         except Exception as e:
                             pass
                     else:
-                        instructions['Image'] = template_type+'/'+section
+                        if template_type in ['active','passive']:
+                            instructions['Image'] = 'collectors/'+section
+                        else:
+                            instructions['Image'] = template_type+'/'+section
                         instructions['Volumes'] = {"/"+section+"-data": {}}
                         if template_type == "core":
                             tool_core[template_type+"-"+section] = instructions
