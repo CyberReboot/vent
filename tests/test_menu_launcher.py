@@ -163,7 +163,7 @@ def test_running_menu():
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     invalid_url = "https://thisisinvalid-.git"
     child = pexpect.spawn(cmd)
-#    child.timeout = 1200
+    child.timeout = 600
     # expect main menu
     child.expect('Exit')
     ### Mode Menu ###
