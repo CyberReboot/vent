@@ -266,7 +266,7 @@ def test_running_menu():
     child.expect('Exit')
 
     ### System Commands Menu ###
-    #go to system commands
+    # go to system commands
     child.sendline('5')
     child.expect('Return to Vent menu')
     # go to logs menu
@@ -274,15 +274,34 @@ def test_running_menu():
     child.expect('Return to System Commands menu')
     # go to containers menu
     child.sendline('1')
-    child.expect('Please select a service:')
+    child.expect('Container Logs')
     # return to logs menu
     child.sendline('\033')
     child.expect('Return to System Commands menu')
+    # go to namespace menu
+    child.sendline('2')
+    child.expect('Please select a namespace:')
+    # return to logs menu
+    child.sendline('\033')
+    child.expect('Container Logs')
+    # go to files
+    child.sendline('3')
+    child.expect('Enter the name of the file to print logs:')
+    # enter invalid file
+    child.sendline('')
+    child.expect('END')
+    # return to logs menu
+    child.send('q')
+    child.expect('Please select a group to view logs for:')
+    # go to all
+    child.sendline('4')
+    child.expect('END')
+    # return to logs menu
+    child.send('q')
+    child.expect('Please select a group to view logs for:')
     # return to System Commands menu
     child.sendline('\033')
     child.expect('Return to Vent menu')
-
-
     # go to Service Stats
     child.sendline('2')
     child.expect('CONTAINER')
