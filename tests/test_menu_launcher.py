@@ -155,7 +155,7 @@ def test_running_menu():
     child0.sendline('6')
     child0.expect('Exit')
     # exit
-    child0.sendline('7')
+    child0.sendline('\033')
     child0.read()
     child0.close()
 
