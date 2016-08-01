@@ -75,7 +75,7 @@ class RmqEs():
 
         binding_keys = sys.argv[1:]
         if not binding_keys:
-            print(>> sys.stderr, "Usage: {0!s} [binding_key]...".format(sys.argv[0]))
+            print(sys.stderr, "Usage: {0!s} [binding_key]...".format(sys.argv[0]))
             sys.exit(0)
 
         for binding_key in binding_keys:
