@@ -97,13 +97,13 @@ def read_template_types(template_type, container_cmd, path_dirs):
     delay_sections = {}
 
     try:
-        mode_enabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py menabled", shell=True))
+        mode_enabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py menabled -b "+base_dir, shell=True))
         if template_type in mode_enabled:
             mode_enabled = mode_enabled[template_type]
         elif template_type in ['active', 'passive'] and 'collectors' in mode_enabled:
             mode_enabled = mode_enabled['collectors']
         # filters out core_disabled containers from modes_enabled list.
-        core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled", shell=True))
+        core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled -b "+base_dir, shell=True))
 
         if template_type in core_disabled:
             core_disabled = core_disabled[template_type]
