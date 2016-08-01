@@ -273,22 +273,12 @@ def test_running_menu():
     # go to logs menu
     child.sendline('1')
     child.expect('Return to System Commands menu')
-    # go to containers menu
-    child.sendline('1')
-    child.expect('error')
-    # kill child
-    child.close()
-    # create new child
-    child1 = pexpect.spawn(cmd)
-    child1.timeout = 600
-    # expect Main Menu
-    child1.expect('Exit')
-    # go to System Commands
-    child.sendline('5')
-    child.expect('Return to Vent menu')
-    # go to logs menu
-    child.sendline('1')
-    child.expect('Return to System Commands menu')
+
+    # # go to containers menu
+    # child.sendline('1')
+    # # curses blows up because the length of the menu exceeds the terminal size
+    # child.expect('error')
+
     # go to namespace menu
     child.sendline('2')
     child.expect('Please select a namespace:')
