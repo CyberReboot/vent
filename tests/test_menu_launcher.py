@@ -152,10 +152,10 @@ def test_running_menu():
     child0.sendline('1')
     child0.expect('Return to Vent menu')
     # go to main menu
-    child0.sendline('6')
+    child0.sendline('\033')
     child0.expect('Exit')
     # exit
-    child0.sendline('01b')
+    child0.sendline('\033')
     child0.read()
     child0.close()
 
@@ -273,13 +273,13 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to System Commands menu')
     # go to containers menu
-    child.sendline('1')
-    child.expect('Return to Logs menu')
-    # return to logs menu
-    child.sendline(259)
-    child.expect('Return to System Commands menu')
+    # child.sendline('1')
+    # child.expect('Return to Logs menu')
+    # # return to logs menu
+    # child.sendline(259)
+    # child.expect('Return to System Commands menu')
     # return to System Commands menu
-    child.sendline(5)
+    child.sendline('5')
     child.expect('Return to Vent menu')
 
 
