@@ -320,7 +320,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                             else:
                                 option_val = str(host_config_new).replace("'", '"')
                         except Exception as e:
-                            pass
+                            raise e
                     option_val = option_val.replace("True", "true")
                     option_val = option_val.replace("False", "false")
                     if option_val != "{}":
