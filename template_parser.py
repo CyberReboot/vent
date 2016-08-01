@@ -291,7 +291,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                                 except Exception as e:
                                                     pass
                                             else:
-                                                print "no local "+r_name+" but an external one wasn't specified."
+                                                print("no local "+r_name+" but an external one wasn't specified.")
                                 option_val = str(host_config_new).replace("'", '"')
                                 if len(host_config_new["Links"]) == 0:
                                     del host_config_new["Links"]
@@ -309,7 +309,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                                 except Exception as e:
                                                     pass
                                             else:
-                                                print "no local syslog but an external one wasn't specified."
+                                                print("no local syslog but an external one wasn't specified.")
                                     host_config_new["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
                                     option_val = str(host_config_new).replace("'", '"')
                                 except Exception as e:
@@ -350,7 +350,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                         except Exception as e:
                                             pass
                                     else:
-                                        print "no local rabbitmq but an external one wasn't specified."
+                                        print("no local rabbitmq but an external one wasn't specified.")
                             if not external_rabbit:
                                 host_config["Links"] = ["core-aaa-rabbitmq:rabbitmq"]
                         except Exception as e:
@@ -369,7 +369,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                         except Exception as e:
                                             pass
                                     else:
-                                        print "no local syslog but an external one wasn't specified."
+                                        print("no local syslog but an external one wasn't specified.")
                             host_config["LogConfig"] = { "Type": "syslog", "Config": {"tag":"\{\{.ImageName\}\}/\{\{.Name\}\}/\{\{.ID\}\}","syslog-address":"tcp://"+syslog_host} }
                         except Exception as e:
                             pass

@@ -25,24 +25,21 @@ class GZHandler(PatternMatchingEventHandler):
         """
         try:
             q = Queue(connection=Redis(host="redis"), default_timeout=86400)
-            if event.event_type == "created":
-                print event.event_type, event.src_path
+            if event.event_type == "created" and event.src_path.endswith(".template"):
+                print(event.event_type, event.src_path)
                 # let jobs run for up to one day
                 # let jobs be queued for up to 30 days
-                if event.src_path.endswith(".template"):
-                    result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
-            elif event.event_type == "modified":
-                print event.event_type, event.src_path
+                result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
+            elif event.event_type == "modified" and event.src_path.endswith(".template"):
+                print(event.event_type, event.src_path)
                 # let jobs run for up to one day
                 # let jobs be queued for up to 30 days
-                if event.src_path.endswith(".template"):
-                    result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
-            elif event.event_type == "deleted":
-                print event.event_type, event.src_path
+                result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
+            elif event.event_type == "deleted" and event.src_path.endswith(".template"):
+                print(event.event_type, event.src_path)
                 # let jobs run for up to one day
                 # let jobs be queued for up to 30 days
-                if event.src_path.endswith(".template"):
-                    result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
+                result = q.enqueue('file_watch.template_queue', event.event_type+":"+event.src_path, ttl=2592000)
         except Exception as e:
             pass
 

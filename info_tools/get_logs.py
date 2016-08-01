@@ -55,7 +55,7 @@ def parse_args(args, parser):
             print_all_logs(cores)
         else:
             parser.print_help()
-            print "get_logs: error: argument -a/--all: expected no arguments, -n/--namespace, or -c/--container IMAGE"
+            print("get_logs: error: argument -a/--all: expected no arguments, -n/--namespace, or -c/--container IMAGE")
             return
     elif args.container != None:
         #-c CONTAINER -f FILE
@@ -70,7 +70,7 @@ def parse_args(args, parser):
     elif args.namespace != None:
         if args.namespace == []:
             parser.print_help()
-            print "get_logs: error: argument -n/--namespace: expected at least one argument"
+            print("get_logs: error: argument -n/--namespace: expected at least one argument")
             return
         #-n NAMESPACE -f FILE
         if args.file != [] and args.file != None:
@@ -84,7 +84,7 @@ def parse_args(args, parser):
     elif args.file != None:
         if args.file == []:
             parser.print_help()
-            print "get_logs: error: argument -f/--file: expected at least one argument"
+            print("get_logs: error: argument -f/--file: expected at least one argument")
             return
         #-f FILE
         for f in args.file:
@@ -104,7 +104,7 @@ def print_container(container, cores):
     """print logs for each container"""
     for core in cores:
         if container == core:
-            print container
+            print(container)
             os.system("docker logs "+container)
         os.system("docker logs "+core+" | grep "+container+"/ | tee")
 

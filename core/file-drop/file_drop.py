@@ -32,11 +32,11 @@ class GZHandler(PatternMatchingEventHandler):
         try:
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
             if event.event_type == "created" and event.is_directory == False:
-                print event.src_path
+                print(event.src_path)
                 # let jobs be queued for up to 30 days
                 result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
         except Exception as e:
-            print str(e)
+            print(str(e))
 
     def on_created(self, event):
         self.process(event, 'redis')

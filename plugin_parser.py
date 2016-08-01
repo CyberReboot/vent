@@ -43,18 +43,18 @@ def add_plugins(path_dirs, plugin_url):
             plugin_url = plugin_url + ".git"
         plugin_name = plugin_url.split("/")[-1].split(".git")[0]
         if plugin_name == "":
-            print "No plugins added, url is not formatted correctly"
-            print "Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git"
+            print("No plugins added, url is not formatted correctly")
+            print("Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
             return
         # check to see if plugin already exists in filesystem
         if os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name):
-            print plugin_name+" already exists. Not installing."
+            print(plugin_name+" already exists. Not installing.")
             return
         os.system("git config --global http.sslVerify false")
         os.system("cd "+path_dirs.plugin_repos+"/ && git clone --recursive "+plugin_url)
         # check to see if repo was cloned correctly
         if not os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name):
-            print plugin_name+" did not install. Is this a git repository?"
+            print(plugin_name+" did not install. Is this a git repository?")
             return
 
         subdirs = [x[0] for x in os.walk(path_dirs.plugin_repos+"/"+plugin_name)]
@@ -81,7 +81,7 @@ def add_plugins(path_dirs, plugin_url):
                         # makes sure that every namespace has a corresponding template file
                         namespace = recdir.split("/")[0]
                         if not os.path.isfile(path_dirs.plugin_repos+"/"+plugin_name+"/templates/"+namespace+".template"):
-                            print "Warning! Plugin namespace has no template. Not installing "+namespace
+                            print("Warning! Plugin namespace has no template. Not installing "+namespace)
                             shutil.rmtree(path_dirs.plugins_dir+namespace)
                 elif subdir.startswith(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/"):
                     recdir = subdir.split(path_dirs.plugin_repos+"/"+plugin_name+"/visualization/")[-1]
@@ -135,7 +135,7 @@ def add_plugins(path_dirs, plugin_url):
                                 if os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name+"/plugins/"+namespace):
                                     shutil.copyfile(subdir+"/"+filename, dest+filename)
                                 else:
-                                    print "Warning! Plugin template with no corresponding plugins to install. Not installing "+namespace+".template"
+                                    print("Warning! Plugin template with no corresponding plugins to install. Not installing "+namespace+".template")
                                     os.remove(path_dirs.plugin_repos+"/"+plugin_name+"/templates/"+filename)
             except Exception as e:
                 pass
@@ -161,7 +161,7 @@ def add_plugins(path_dirs, plugin_url):
                 if subdir == path_dirs.plugin_repos+"/"+plugin_name:
                     continue
                 if not os.path.isdir(path_dirs.base_dir + directory):
-                    print "Failed to install "+plugin_name+" resource: "+directory
+                    print("Failed to install "+plugin_name+" resource: "+directory)
                     os.system("sudo rm -rf "+path_dirs.plugin_repos+"/"+plugin_name)
                     return
         # resources installed correctly. Building...
@@ -185,7 +185,7 @@ def remove_plugins(path_dirs, plugin_url):
             plugin_url = plugin_url.split(".git")[0]
         plugin_name = plugin_url.split("/")[-1]
         if not os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name):
-            print "Plugin is not installed. Not removing "+plugin_name
+            print("Plugin is not installed. Not removing "+plugin_name)
             return
         repo_subdirs = [x[0] for x in os.walk(path_dirs.plugin_repos+"/"+plugin_name, topdown=False)]
         sys_subdirs = [x[0] for x in os.walk(path_dirs.base_dir)]
@@ -289,7 +289,7 @@ def remove_plugins(path_dirs, plugin_url):
                         break
         #remove git repo once done    
         shutil.rmtree(path_dirs.plugin_repos+"/"+plugin_name)
-        print "Successfully removed Plugin: "+plugin_name
+        print("Successfully removed Plugin: "+plugin_name)
 
     except Exception as e:
         pass
@@ -330,6 +330,6 @@ if __name__ == "__main__":
             remove_plugins(path_dirs, sys.argv[2])
             update_images(path_dirs)
         else:
-            print "invalid plugin type to parse"
+            print("invalid plugin type to parse")
     else:
-        print "Invalid number of arguments"
+        print("Invalid number of arguments")

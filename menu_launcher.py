@@ -64,12 +64,15 @@ def get_container_menu(path_dirs):
         command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -c "
         command3 = " | tee /tmp/vent_logs/vent_container_"
         p['title'] = 'Container Logs'
-        p['subtitle'] = 'Please select a container...'
+        p['subtitle'] = 'Please select a service:'
         containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | grep -v Dead | awk \"{print \$1}\"", shell=True).split("\n")
         containers = filter(None, containers)
-        p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
-        for d in p['options']:
-            d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+        if containers:
+            p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in containers ]
+            for d in p['options']:
+                d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+        else:
+            p['options'] = [ {'title': "There are no services to show logs for.", 'type': DISPLAY, 'command': ''} ]
     except Exception as e: # pragma: no cover
         pass
     return p
@@ -83,12 +86,15 @@ def get_namespace_menu(path_dirs):
         command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -n "
         command3 = " | tee /tmp/vent_logs/vent_namespace_"
         p['title'] = 'Namespace Logs'
-        p['subtitle'] = 'Please select a namespace...'
+        p['subtitle'] = 'Please select a namespace:'
         namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | uniq", shell=True).split("\n")
         namespaces = filter(None, namespaces)
-        p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
-        for d in p['options']:
-            d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+        if namespaces:
+            p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
+            for d in p['options']:
+                d['command'] = command1+command2+d['title']+command3+d['title']+".log | less"
+        else:
+            p['options'] = [ {'title': "There are no namespaces to show logs for.", 'type': DISPLAY, 'command': ''} ]
     except Exception as e: # pragma: no cover
         pass
     return p
@@ -168,11 +174,11 @@ def get_plugin_status(path_dirs):
         # Only add to p_error_menu if errors exist for that section
         p_error_menu = []
         if len(running_errors) > 0:
-            p_error_menu.append({'title': "Running Errors", 'subtitle': "Containers that should not be running because they are disabled...", 'type': MENU, 'options': p_running_errors})
+            p_error_menu.append({'title': "Running Errors", 'subtitle': "Services that should not be running because they are disabled...", 'type': MENU, 'options': p_running_errors})
         if len(nr_errors) > 0:
-            p_error_menu.append({'title': "Not Running Errors", 'subtitle': "Containers that should be removed because they are disabled...", 'type': MENU, 'options': p_nr_errors})
+            p_error_menu.append({'title': "Not Running Errors", 'subtitle': "Services that should be removed because they are disabled...", 'type': MENU, 'options': p_nr_errors})
         if len(built_errors) > 0:
-            p_error_menu.append({'title': "Built Errors", 'subtitle': "Containers that should not be built because they are disabled...", 'type': MENU, 'options': p_built_errors})
+            p_error_menu.append({'title': "Built Errors", 'subtitle': "Images that should not be built because they are disabled...", 'type': MENU, 'options': p_built_errors})
 
         # If there is nothing populating a menu, notify the user.
         for menu in [p_running, p_nrbuilt, p_disabled_cont, p_disabled_images, p_built, p_notbuilt, p_external, p_error_menu]:
@@ -196,16 +202,16 @@ def get_plugin_status(path_dirs):
 
         ### Returned Menu Dictionary
         p['title'] = 'Plugin Status'
-        p['subtitle'] = 'Choose a category...'
+        p['subtitle'] = 'Please select a status to view:'
         p['options'] = [
-                         { 'title': "Running Containers", 'subtitle': "Currently running...", 'type': MENU, 'options': p_running },
-                         { 'title': "Not Running Containers", 'subtitle': "Built but not currently running...", 'type': MENU, 'options': p_nrbuilt },
-                         { 'title': "Disabled Containers", 'subtitle': "Currently disabled by config...check the \'External\' menu", 'type': MENU, 'options': p_disabled_cont },
-                         { 'title': "Disabled Images", 'subtitle': "Currently disabled images...check the \'External\' menu.", 'type': MENU, 'options': p_disabled_images },
+                         { 'title': "Running Services", 'subtitle': "Currently running services...", 'type': MENU, 'options': p_running },
+                         { 'title': "Not Running Services", 'subtitle': "Built but not currently running services...", 'type': MENU, 'options': p_nrbuilt },
+                         { 'title': "Disabled Services", 'subtitle': "Currently disabled services; check the \'External\' menu...", 'type': MENU, 'options': p_disabled_cont },
+                         { 'title': "Disabled Images", 'subtitle': "Currently disabled images; check the \'External\' menu...", 'type': MENU, 'options': p_disabled_images },
                          { 'title': "Built Images", 'subtitle': "Currently built images...", 'type': MENU, 'options': p_built },
                          { 'title': "Not Built Images", 'subtitle': "Currently not built (do not have images)...", 'type': MENU, 'options': p_notbuilt },
-                         { 'title': "External", 'subtitle': "Currently set to run externally...", 'type': MENU, 'options': p_external },
-                         { 'title': "Errors", 'subtitle': "Runtime errors for containers and images...", 'type': MENU, 'options': p_error_menu }
+                         { 'title': "External", 'subtitle': "Current services and images set to run externally...", 'type': MENU, 'options': p_external },
+                         { 'title': "Errors", 'subtitle': "Please select a runtime error option to view:", 'type': MENU, 'options': p_error_menu }
                         ]
     except Exception as e: # pragma: no cover
         pass
@@ -220,31 +226,43 @@ def get_installed_plugin_repos(path_dirs, m_type, command):
         if command=="remove":
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py remove_plugins "
             p['title'] = 'Remove Plugins'
-            p['subtitle'] = 'Please select a plugin to remove...'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-            for d in p['options']:
-                with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
-                    repo_name = ""
-                    while not "url" in repo_name:
-                        repo_name = myfile.readline()
-                    repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            p['subtitle'] = 'Please select a plugin to remove:'
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            if plugins:
+                p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
+                for d in p['options']:
+                    with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
+                        repo_name = ""
+                        while not "url" in repo_name:
+                            repo_name = myfile.readline()
+                        repo_name = repo_name.split("url = ")[-1]
+                        d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            else:
+                p['options'] = [ {'title': 'You have no installed plugins to remove.', 'type': DISPLAY, 'command': ''} ]
         elif command=="update":
             command1 = "python2.7 "+path_dirs.data_dir+"plugin_parser.py update_plugins "
             p['title'] = 'Update Plugins'
-            p['subtitle'] = 'Please select a plugin to update...'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
-            for d in p['options']:
-                with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
-                    repo_name = ""
-                    while not "url" in repo_name:
-                        repo_name = myfile.readline()
-                    repo_name = repo_name.split("url = ")[-1]
-                    d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            p['subtitle'] = 'Please select a plugin to update:'
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            if plugins:
+                p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
+                for d in p['options']:
+                    with open(path_dirs.plugin_repos+"/"+d['title']+"/.git/config", "r") as myfile:
+                        repo_name = ""
+                        while not "url" in repo_name:
+                            repo_name = myfile.readline()
+                        repo_name = repo_name.split("url = ")[-1]
+                        d['command'] = command1+repo_name+" "+path_dirs.base_dir+" "+path_dirs.data_dir
+            else:
+                p['options'] = [ {'title': 'You have no installed plugins to update.', 'type': DISPLAY, 'command': ''} ]
         else:
             p['title'] = 'Installed Plugins'
-            p['subtitle'] = 'Installed Plugins:'
-            p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            p['subtitle'] = 'Installed Plugins...'
+            plugins = [ name for name in os.listdir(path_dirs.plugin_repos) if os.path.isdir(os.path.join(path_dirs.plugin_repos, name)) ]
+            if plugins:
+                p['options'] = [ {'title': name, 'type': m_type, 'command': '' } for name in plugins ]
+            else:
+                p['options'] = [ {'title': 'You have no plugins installed.', 'type': DISPLAY, 'command': ''} ]
     except Exception as e: # pragma: no cover
         pass
 
@@ -338,13 +356,16 @@ def run_plugins(path_dirs, action):
             p['type'] = INFO2
             p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py all '+action
             modes.append(p)
+        elif len(modes) == 0:
+            p = {'title': "You have no services to "+action+".", 'type': DISPLAY, 'command': ''}
+            modes.append(p)
     except Exception as e:
-        print "unable to get the configuration of modes from the templates.\n"
+        print("unable to get the configuration of modes from the templates.\n")
 
     # make sure that vent-management is running
     try:
         result = check_output('/bin/sh '+path_dirs.data_dir+'bootlocal.sh').split()
-        print result
+        print(result)
     except Exception as e:
         pass
 
@@ -361,7 +382,7 @@ def update_plugins(path_dirs):
                 p['command'] = 'python2.7 '+path_dirs.data_dir+'suplemon/suplemon.py '+path_dirs.template_dir+f
                 modes.append(p)
     except Exception as e:
-        print "unable to get the configuration templates.\n"
+        print("unable to get the configuration templates.\n")
     return modes
 
 def get_param(prompt_string):
@@ -419,7 +440,11 @@ def runmenu(menu, parent):
                             i += 1
                     else:
                         result = check_output((menu['options'][index]['command']).split())
-                    screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
+                    # don't display a '-'
+                    if menu['options'][index]['title'] == "":
+                        screen.addstr(5+index,4, "{0!s} {1!s}".format(menu['options'][index]['title'], result), textstyle)
+                    else:
+                        screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
                 elif menu['options'][index]['type'] == INFO2:
                     screen.addstr(5+index,4, "{0!s}".format((menu['options'][index]['title'])), textstyle)
                 else:
@@ -506,7 +531,7 @@ def processmenu(path_dirs, menu, parent=None):
                 pass
         elif menu['options'][getin]['type'] == INPUT:
             if menu['options'][getin]['title'] == "Add Plugins":
-                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git")
+                plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git:")
                 curses.def_prog_mode()
                 os.system('reset')
                 screen.clear()
@@ -519,7 +544,7 @@ def processmenu(path_dirs, menu, parent=None):
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
             elif menu['options'][getin]['title'] == "Files":
-                filename = get_param("Enter the name of the file to print logs")
+                filename = get_param("Enter the name of the file to print logs:")
                 curses.def_prog_mode()
                 os.system('reset')
                 os.system("clear")
@@ -579,28 +604,28 @@ def build_menu_dict(path_dirs):
     except Exception as e:
         pass
     menu_data = {
-      'title': "Vent - "+v_version, 'type': MENU, 'subtitle': "Please select an option...",
+      'title': "Vent - "+v_version, 'type': MENU, 'subtitle': "Please select an option:",
       'options':[
-        { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option...',
+        { 'title': "Mode", 'type': MENU, 'subtitle': 'Please select an option:',
           'options': [
-            { 'title': "Start", 'type': MENU, 'subtitle': '',
+            { 'title': "Start", 'type': MENU, 'subtitle': 'Choose a set of services to start:',
               'options': run_plugins(path_dirs, "start")
             },
-            { 'title': "Stop", 'type': MENU, 'subtitle': '',
+            { 'title': "Stop", 'type': MENU, 'subtitle': 'Choose a set of services to stop:',
               'options': run_plugins(path_dirs, "stop")
             },
-            { 'title': "Clean (Stop and Remove Containers)", 'type': MENU, 'subtitle': '',
+            { 'title': "Clean (Stop and Remove Services)", 'type': MENU, 'subtitle': 'Choose a set of services to clean:',
               'options': run_plugins(path_dirs, "clean")
             },
             { 'title': "Status", 'type': MENU, 'subtitle': '',
               'command': ''
             },
-            { 'title': "Configure", 'type': MENU, 'subtitle': '',
+            { 'title': "Configure", 'type': MENU, 'subtitle': 'Choose a template to configure:',
               'options': update_plugins(path_dirs)
             }
           ]
         },
-        { 'title': "Plugins", 'type': MENU, 'subtitle': 'Please select an option...',
+        { 'title': "Plugins", 'type': MENU, 'subtitle': 'Please select an option:',
           'options': [
             { 'title': "Add Plugins", 'type': INPUT, 'command': '' },
             { 'title': "Remove Plugins", 'type': MENU, 'command': '' },
@@ -608,35 +633,34 @@ def build_menu_dict(path_dirs):
             { 'title': "Update Plugins", 'type': MENU, 'command': '' },
           ]
         },
-        { 'title': "System Info", 'type': MENU, 'subtitle': '',
+        { 'title': "System Info", 'type': MENU, 'subtitle': 'Some core service statuses...',
           'options': [
             #{ 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
-            { 'title': "Container Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
-            { 'title': "", 'type': INFO, 'command': 'echo'},
             { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py aaa-rabbitmq mgmt' },
             { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py rq-dashboard mgmt' },
             { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch head' },
             { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch marvel' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
-            { 'title': "Uptime", 'type': INFO, 'command': 'uptime' },
+            { 'title': "Uptime", 'type': INFO, 'command': 'uptime' }
           ]
         },
-        { 'title': "Build", 'type': MENU, 'subtitle': '',
+        { 'title': "Build", 'type': MENU, 'subtitle': 'Please select a service group to build:',
           'options': [
             { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1] },
             { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1]+' --no-cache' },
           ]
         },
-        { 'title': "System Commands", 'type': MENU, 'subtitle': '',
+        { 'title': "System Commands", 'type': MENU, 'subtitle': 'Please select an option:',
             'options': [
-                { 'title': "Logs", 'type': MENU, 'subtitle': '', 'command': '',
+                { 'title': "Logs", 'type': MENU, 'subtitle': 'Please select a group to view logs for:', 'command': '',
                     'options': [
-                        {'title': "Containers", 'type': MENU, 'subtitle': 'Please select a container...', 'command': ''},
-                        {'title': "Namespaces", 'type': MENU, 'subtitle': 'Please select a namespace...', 'command': ''},
+                        {'title': "Containers", 'type': MENU, 'subtitle': '', 'command': ''},
+                        {'title': "Namespaces", 'type': MENU, 'subtitle': '', 'command': ''},
                         {'title': "Files", 'type': INPUT, 'command': ''},
                         {'title': "All", 'type': COMMAND, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
                     ]
                 },
+                { 'title': "Service Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
                 { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
                 { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
                 { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
@@ -665,7 +689,7 @@ if __name__ == "__main__": # pragma: no cover
     # make sure that vent-management is running
     try:
         result = check_output('/bin/sh /data/bootlocal.sh'.split())
-        print result
+        print(result)
     except Exception as e:
         pass
     if len(sys.argv) == 4:

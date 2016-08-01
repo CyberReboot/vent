@@ -79,6 +79,6 @@ if __name__ == "__main__": # pragma: no cover
     path_dirs = PathDirs()
     try:
         url_str = url(path_dirs, sys.argv[1], sys.argv[2])
-        print url_str
+        print(url_str)
     except Exception as e:
         pass
