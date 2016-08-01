@@ -133,24 +133,16 @@ def test_execute_template():
 def test_main():
     """ Testing main function """
     path_dirs = PathDirs()
-    # Test starting all
-    template_type = "all"
-    template_execution = "start"
-    container_cmd = ""
-    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
-    # Test stopping all
-    template_execution = "stop"
-    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
-    # Test removing all
-    template_execution = "clean"
-    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
-    # Test starting cores
-    template_type = "core"
-    template_execution = "start"
-    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
-    # Test stopping cores
-    template_execution = "stop"
-    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
-    # Test removing cores
-    template_execution = "clean"
-    template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+    # Stop running containers
+    os.system("docker ps -q | xargs docker stop")
+    for template_type in ["all", "core", "passive", "active", "visualization"]:
+        # Test starting
+        template_execution = "start"
+        container_cmd = ""
+        template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+        # Test stopping
+        template_execution = "stop"
+        template_parser.main(path_dirs, template_type, template_execution, container_cmd)
+        # Test removing
+        template_execution = "clean"
+        template_parser.main(path_dirs, template_type, template_execution, container_cmd)
