@@ -174,34 +174,34 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline('\033')
     child.expect('Return to Vent menu')
     # go to stop
     child.sendline('2')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline('\033')
     child.expect('Return to Vent menu')
     # go to clean
     child.sendline('3')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline('\033')
     child.expect('Return to Vent menu')
     # go to status
     child.sendline('4')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('9')
+    child.sendline('\033')
     child.expect('Return to Vent menu')
     # go to configure
     child.sendline('5')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('5')
+    child.sendline('\033')
     child.expect('Return to Vent menu')
     # return to main menu
-    child.sendline('6')
+    child.sendline('\033')
     child.expect('Exit')
 
     ### Plugins Menu ###
@@ -223,23 +223,23 @@ def test_running_menu():
     # go to remove plugin
     child.sendline('2')
     child.expect('Return to Plugins menu')
-    # remove plugin
-    child.sendline('2')
+    # return to Plugins menu
+    child.sendline('\033')
     child.expect('Return to Vent menu')
     # go to installed plugins
     child.sendline('3')
     child.expect('Return to Plugins menu')
     # go to plugins menu
-    child.sendline('2')
+    child.sendline('\033')
     child.expect('Return to Vent menu')
     # go to update plugins
     child.sendline('4')
     child.expect('Return to Plugins menu')
-    # go to plugins menu
-    child.sendline('2')
+    # return to plugins menu
+    child.sendline('\033')
     child.expect('Return to Vent menu')
     # go to main menu
-    child.sendline('5')
+    child.sendline('\033')
     child.expect('Exit')
 
     ### System Info Menu ###
@@ -247,7 +247,7 @@ def test_running_menu():
     child.sendline('3')
     child.expect('Return to Vent menu')
     # return to Main Menu
-    child.sendline('7')
+    child.sendline('\033')
     child.expect('Exit')
 
     ### Build Menu ###
@@ -262,7 +262,7 @@ def test_running_menu():
     child.expect('Return to Vent menu')
     # !! TODO - Test Force Rebuild
     # return to Main Menu
-    child.sendline('3')
+    child.sendline('\033')
     child.expect('Exit')
 
     ### System Commands Menu ###
@@ -273,13 +273,13 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to System Commands menu')
     # go to containers menu
-    # child.sendline('1')
-    # child.expect('Return to Logs menu')
-    # # return to logs menu
-    # child.sendline(259)
-    # child.expect('Return to System Commands menu')
+    child.sendline('1')
+    child.expect('Return to Logs menu')
+    # return to logs menu
+    child.sendline('\033')
+    child.expect('Return to System Commands menu')
     # return to System Commands menu
-    child.sendline('5')
+    child.sendline('\033')
     child.expect('Return to Vent menu')
 
 
@@ -290,7 +290,7 @@ def test_running_menu():
     child.sendcontrol('c')
     child.expect('Return to Vent menu')
     # return to Main Menu
-    child.sendline('6')
+    child.sendline('\033')
     child.expect('Exit')
 
     ### Help ###
@@ -302,7 +302,7 @@ def test_running_menu():
     child.expect('Exit')
 
     # exit
-    child.sendline('7')
+    child.sendline('\033')
     child.read()
     child.close()
 
