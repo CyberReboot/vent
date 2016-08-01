@@ -472,6 +472,8 @@ def runmenu(menu, parent):
                 pos += -1
             else:
                 pos = optioncount
+        elif x == 27: # escape
+            pos = optioncount
         elif ord('1') <= x <= ord(str(num_options+1)):
             pos = x - ord('0') - 1
     return pos

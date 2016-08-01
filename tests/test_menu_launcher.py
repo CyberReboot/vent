@@ -144,6 +144,7 @@ def test_get_namespace_menu():
 
 def test_running_menu():
     """ test running the actual menu """
+    ESC = '\033' # escape key for returning to previous menu
     cmd_invalid_path = "python2.7 menu_launcher.py "
     child0 = pexpect.spawn(cmd_invalid_path)
     # expect main menu
@@ -152,10 +153,10 @@ def test_running_menu():
     child0.sendline('1')
     child0.expect('Return to Vent menu')
     # go to main menu
-    child0.sendline('6')
+    child0.sendline(ESC)
     child0.expect('Exit')
     # exit
-    child0.sendline('7')
+    child0.sendline(ESC)
     child0.read()
     child0.close()
 
@@ -163,7 +164,7 @@ def test_running_menu():
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     invalid_url = "https://thisisinvalid-.git"
     child = pexpect.spawn(cmd)
-    child.timeout = 600
+    child.timeout = 120
     # expect main menu
     child.expect('Exit')
     ### Mode Menu ###
@@ -174,34 +175,34 @@ def test_running_menu():
     child.sendline('1')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline(ESC)
     child.expect('Return to Vent menu')
     # go to stop
     child.sendline('2')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline(ESC)
     child.expect('Return to Vent menu')
     # go to clean
     child.sendline('3')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('2')
+    child.sendline(ESC)
     child.expect('Return to Vent menu')
     # go to status
     child.sendline('4')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('9')
+    child.sendline(ESC)
     child.expect('Return to Vent menu')
     # go to configure
     child.sendline('5')
     child.expect('Return to Mode menu')
     # return to mode
-    child.sendline('5')
+    child.sendline(ESC)
     child.expect('Return to Vent menu')
     # return to main menu
-    child.sendline('6')
+    child.sendline(ESC)
     child.expect('Exit')
 
     ### Plugins Menu ###
@@ -223,23 +224,23 @@ def test_running_menu():
     # go to remove plugin
     child.sendline('2')
     child.expect('Return to Plugins menu')
-    # remove plugin
-    child.sendline('2')
+    # return to Plugins menu
+    child.sendline(ESC)
     child.expect('Return to Vent menu')
     # go to installed plugins
     child.sendline('3')
     child.expect('Return to Plugins menu')
     # go to plugins menu
-    child.sendline('2')
+    child.sendline(ESC)
     child.expect('Return to Vent menu')
     # go to update plugins
     child.sendline('4')
     child.expect('Return to Plugins menu')
-    # go to plugins menu
-    child.sendline('2')
+    # return to plugins menu
+    child.sendline(ESC)
     child.expect('Return to Vent menu')
     # go to main menu
-    child.sendline('5')
+    child.sendline(ESC)
     child.expect('Exit')
 
     ### System Info Menu ###
@@ -247,7 +248,7 @@ def test_running_menu():
     child.sendline('3')
     child.expect('Return to Vent menu')
     # return to Main Menu
-    child.sendline('7')
+    child.sendline(ESC)
     child.expect('Exit')
 
     ### Build Menu ###
@@ -262,20 +263,45 @@ def test_running_menu():
     child.expect('Return to Vent menu')
     # !! TODO - Test Force Rebuild
     # return to Main Menu
-    child.sendline('3')
+    child.sendline(ESC)
     child.expect('Exit')
 
     ### System Commands Menu ###
-    #go to system commands
+    # go to system commands
     child.sendline('5')
     child.expect('Return to Vent menu')
     # go to logs menu
-    #child.sendline('1')
-    #child.expect('Return to System Commands menu')
-    # go to containers menu
-    #child.sendline('1')
-    #child.expect('Return to Logs menu')
-    # close
+    child.sendline('1')
+    child.expect('Return to System Commands menu')
+
+    # # go to containers menu
+    # child.sendline('1')
+    # # curses blows up because the length of the menu exceeds the terminal size
+    # child.expect('error')
+
+    # go to namespace menu
+    child.sendline('2')
+    child.expect('Please select a namespace:')
+    # return to logs menu
+    child.sendline(ESC)
+    child.expect('Return to System Commands menu')
+    # go to files
+    child.sendline('3')
+    child.expect('Enter the name of the file to print logs:')
+    # enter invalid file
+    child.sendline('')
+    child.expect('END')
+    # return to logs menu
+    child.send('q')
+    child.expect('Please select a group to view logs for:')
+    # go to all
+    child.sendline('4')
+    # return to logs menu
+    child.send('q')
+    child.expect('Return to System Commands menu')
+    # return to System Commands menu
+    child.sendline(ESC)
+    child.expect('Return to Vent menu')
     # go to Service Stats
     child.sendline('2')
     child.expect('CONTAINER')
@@ -283,7 +309,7 @@ def test_running_menu():
     child.sendcontrol('c')
     child.expect('Return to Vent menu')
     # return to Main Menu
-    child.sendline('6')
+    child.sendline(ESC)
     child.expect('Exit')
 
     ### Help ###
@@ -295,7 +321,7 @@ def test_running_menu():
     child.expect('Exit')
 
     # exit
-    child.sendline('7')
+    child.sendline(ESC)
     child.read()
     child.close()
 
@@ -323,7 +349,7 @@ def test_running_add_plugin():
 
     cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
-    child1.timeout = 600
+    child1.timeout = 120
     ### Plugins Menu ###
     # go to plugins menu
     child1.sendline('2')
