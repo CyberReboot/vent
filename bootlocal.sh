@@ -8,7 +8,7 @@ exists=$(docker ps -aq --filter name=vent-management | wc -l)
 if [ "$exists" == "1" ]; then
 	docker start vent-management
 else
-	docker run --name vent-management --restart="always" -d -v /mnt/sda1/var/lib/boot2docker/tls:/certs -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp vent-management
+	docker run --name vent-management --restart="always" -d -v /mnt/sda1/var/lib/boot2docker/tls:/certs -v /usr/local/bin/docker:/usr/local/bin/docker -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp vent-management
 fi
 if [ -d "/var/lib/docker/data/images" ]; then
 	image_exists=$(docker images -q | wc -l)
