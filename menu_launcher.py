@@ -360,12 +360,12 @@ def run_plugins(path_dirs, action):
             p = {'title': "You have no services to "+action+".", 'type': DISPLAY, 'command': ''}
             modes.append(p)
     except Exception as e:
-        print "unable to get the configuration of modes from the templates.\n"
+        print("unable to get the configuration of modes from the templates.\n")
 
     # make sure that vent-management is running
     try:
         result = check_output('/bin/sh '+path_dirs.data_dir+'bootlocal.sh').split()
-        print result
+        print(result)
     except Exception as e:
         pass
 
@@ -382,7 +382,7 @@ def update_plugins(path_dirs):
                 p['command'] = 'python2.7 '+path_dirs.data_dir+'suplemon/suplemon.py '+path_dirs.template_dir+f
                 modes.append(p)
     except Exception as e:
-        print "unable to get the configuration templates.\n"
+        print("unable to get the configuration templates.\n")
     return modes
 
 def get_param(prompt_string):
@@ -689,7 +689,7 @@ if __name__ == "__main__": # pragma: no cover
     # make sure that vent-management is running
     try:
         result = check_output('/bin/sh /data/bootlocal.sh'.split())
-        print result
+        print(result)
     except Exception as e:
         pass
     if len(sys.argv) == 4:

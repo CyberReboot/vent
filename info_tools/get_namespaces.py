@@ -44,7 +44,7 @@ def parse_args(args, parser):
                         pass
         except Exception as e:
             pass
-        print str(m_types)
+        print(str(m_types))
     else:
         parser.print_help()
     return
