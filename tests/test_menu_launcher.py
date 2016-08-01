@@ -270,12 +270,21 @@ def test_running_menu():
     child.sendline('5')
     child.expect('Return to Vent menu')
     # go to logs menu
-    #child.sendline('1')
-    #child.expect('Return to System Commands menu')
+    child.sendline('1')
+    child.expect('Return to System Commands menu')
     # go to containers menu
-    #child.sendline('1')
-    #child.expect('Return to Logs menu')
-    # close
+    child.sendline('1')
+    child.expect('Return to Logs menu')
+    # return to logs menu
+    entries = subprocess.check_output('docker ps -aq', shell=True).split('\n')
+    back = entries + 1
+    child.sendline(back)
+    child.expect('Return to System Commands menu')
+    # return to System Commands menu
+    child.sendline(5)
+    child.expect('Return to Vent menu')
+
+
     # go to Service Stats
     child.sendline('2')
     child.expect('CONTAINER')
