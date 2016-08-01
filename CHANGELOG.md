@@ -1,4 +1,22 @@
-# v0.1.2 (current, released)
+# v0.1.3 (2016-08-01)
+
+bug fixes:
+ - fixed the following issues: #44, #78, #87, #88, #96, #128, #138
+
+improvements:
+ - added more test coverage
+ - better readability in the UI
+
+new features:
+ - added helper scripts for vent to the path for easy execution
+ - added perl for git submodules
+
+environment:
+ - based on boot2docker 1.12.0
+ - using docker 1.12.0
+ - using python 2.7.11
+
+# v0.1.2
 
 bug fixes:
  - fixed some bash issues

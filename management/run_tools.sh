@@ -46,15 +46,16 @@ start_containers() {
       p="${p//\]\"/\]}"
       p=$(echo "$p" | sed 's/\\//g')
       echo "$name: $p"
-      exists="echo -e 'GET /containers/json?all=1&filters={%22name%22:[%22$name%22]} HTTP/1.1\r\n\r\n'"
+      exists="echo -e 'GET /containers/json?all=1&filters={%22name%22:[%22$name%22]} HTTP/1.1\r\nHost: localhost\r\n\r\n'"
       container_id=$(eval $exists | nc -U /var/run/docker.sock | tail -1 | jq '.[].Id')
       if [ -z "$container_id" ]; then
-        one="echo -e 'POST /containers/create?name=$name HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 1023\r\n\r\n$p'"
+        one="echo -e 'POST /containers/create?name=$name HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 1023\r\n\r\n$p'"
         container_id=$(eval $one | nc -U /var/run/docker.sock | tail -1 | jq '.Id')
       fi
       echo "$container_id"
-      two="echo -e \"POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n{}'\" | nc -U /var/run/docker.sock"
-      eval $two
+      #two="echo -e 'POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n'"
+      #eval $two | nc -U /var/run/docker.sock
+      /usr/local/bin/docker start ${container_id:1:${#container_id}-2}
       : $[i++]
     done
 
@@ -75,15 +76,16 @@ start_containers() {
       p="${p//\]\"/\]}"
       p=$(echo "$p" | sed 's/\\//g')
       echo "$name: $p"
-      exists="echo -e 'GET /containers/json?all=1&filters={%22name%22:[%22$name%22]} HTTP/1.1\r\n\r\n'"
+      exists="echo -e 'GET /containers/json?all=1&filters={%22name%22:[%22$name%22]} HTTP/1.1\r\nHost: localhost\r\n\r\n'"
       container_id=$(eval $exists | nc -U /var/run/docker.sock | tail -1 | jq '.[].Id')
       if [ -z "$container_id" ]; then
-        one="echo -e 'POST /containers/create?name=$name HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 1023\r\n\r\n$p'"
+        one="echo -e 'POST /containers/create?name=$name HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 1023\r\n\r\n$p'"
         container_id=$(eval $one | nc -U /var/run/docker.sock | tail -1 | jq '.Id')
       fi
       echo "$container_id"
-      two="echo -e \"POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.1\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n{}'\" | nc -U /var/run/docker.sock"
-      eval $two
+      #two="echo -e 'POST /containers/${container_id:1:${#container_id}-2}/start HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 36\r\n\r\n'"
+      #eval $two | nc -U /var/run/docker.sock
+      /usr/local/bin/docker start ${container_id:1:${#container_id}-2}
       : $[i++]
     done
     : $[n++]
