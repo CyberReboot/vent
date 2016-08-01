@@ -657,7 +657,7 @@ def main(path_dirs, parser, args):
     except Exception as e:
         pass
 
-    print status
+    print(status)
 
 if __name__ == "__main__":
     try:

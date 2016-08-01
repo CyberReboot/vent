@@ -41,9 +41,9 @@ class RmqEs():
                 self.queue_name = result.method.queue
                 self.es_conn = Elasticsearch([self.es_host])
                 wait = False
-                print "connected to rabbitmq..."
+                print("connected to rabbitmq...")
             except Exception as e:
-                print "waiting for connection to rabbitmq..."
+                print("waiting for connection to rabbitmq...")
                 time.sleep(2)
                 wait = True
 
@@ -65,7 +65,7 @@ class RmqEs():
         try:
             doc = ast.literal_eval(body)
             res = self.es_conn.index(index=index, doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
-            print " [x] "+str(datetime.datetime.utcnow())+" UTC {0!r}:{1!r}".format(method.routing_key, body)
+            print(" [x] "+str(datetime.datetime.utcnow())+" UTC {0!r}:{1!r}".format(method.routing_key, body))
         except Exception as e:
             pass
 
@@ -75,7 +75,7 @@ class RmqEs():
 
         binding_keys = sys.argv[1:]
         if not binding_keys:
-            print >> sys.stderr, "Usage: {0!s} [binding_key]...".format(sys.argv[0])
+            print(>> sys.stderr, "Usage: {0!s} [binding_key]...".format(sys.argv[0]))
             sys.exit(0)
 
         for binding_key in binding_keys:
@@ -85,7 +85,7 @@ class RmqEs():
 
     def consume(self): # pragma: no cover
         """ start consuming rabbitmq messages """
-        print ' [*] Waiting for logs. To exit press CTRL+C'
+        print(' [*] Waiting for logs. To exit press CTRL+C')
         self.channel.basic_consume(self.callback,
                               queue=self.queue_name,
                               no_ack=True)
