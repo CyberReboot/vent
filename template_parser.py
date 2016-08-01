@@ -112,6 +112,19 @@ def read_template_types(template_type, container_cmd, path_dirs):
         
         sections = [container for container in mode_enabled if not container in core_disabled]
 
+        # add sections that exist in the template, but are not enabled containers
+        config = ConfigParser.RawConfigParser()
+        # needed to preserve case sensitive options
+        config.optionxform=str
+        config.read(template_path)
+        for s in config.sections():
+            if s in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"]:
+                sections.append(section)
+
+
+
+
+
     except Exception as e:
         sections = []
 
@@ -191,10 +204,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
             host_config_exists = False
             instructions = {}
             try:
-                config = ConfigParser.RawConfigParser()
-                # needed to preserve case sensitive options
-                config.optionxform=str
-                config.read(template_path)
                 options = config.options(section)
             except Exception as e:
                 options = []
