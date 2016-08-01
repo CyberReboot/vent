@@ -284,49 +284,20 @@ def test_running_menu():
     child.expect('Return to Vent menu')
     # return to Main Menu
     child.sendline('6')
-    child.read()
-    child.close()
-
-    # spawn child
-    child1 = pexpect.spawn(cmd)
-    child1.expect('Exit')
-    # go to system commands
-    child1.sendline('5')
-    child1.expect('Return to Vent menu')
-    # go to logs menu
-    child1.sendline('1')
-    child1.expect('Return to System Commands menu')
-    # go to namespaces menu
-    #child1.sendline('2')
-    #child1.expect('Return to Logs menu')
-    # read some logs
-    #child1.sendline('2')
-    #child1.expect('core')
-    # return to namespaces menu
-    #child1.send('q')
-    #child1.expect('Return to Logs menu')
-    # return to logs menu
-    #child1.sendline('6')
-    #child1.expect('Return to System Commands menu')
-    # return to system commands menu
-    child1.sendline('5')
-    child1.expect('Return to Vent menu')
-    # go to main menu
-    child1.sendline('5')
-    child1.expect('Exit')
+    child.expect('Exit')
 
     ### Help ###
     # go to Help
-    child1.sendline('6')
-    child1.expect('getting started')
+    child.sendline('6')
+    child.expect('getting started')
     # return to Main Menu
-    child1.send('q')
-    child1.expect('Exit')
+    child.send('q')
+    child.expect('Exit')
 
     # exit
-    child1.sendline('7')
-    child1.read()
-    child1.close()
+    child.sendline('7')
+    child.read()
+    child.close()
 
 def test_running_add_plugin():
     """ testing running the menu and adding a plugin """
