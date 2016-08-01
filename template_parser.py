@@ -119,7 +119,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
         config.read(template_path)
         for s in config.sections():
             if s in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"]:
-                sections.append(section)
+                sections.append(s)
 
 
 
