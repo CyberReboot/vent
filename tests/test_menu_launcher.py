@@ -274,7 +274,7 @@ def test_running_menu():
     child.expect('Return to System Commands menu')
     # go to containers menu
     child.sendline('1')
-    child.expect('Return to Logs menu')
+    child.expect('Please select a service:')
     # return to logs menu
     child.sendline('\033')
     child.expect('Return to System Commands menu')
