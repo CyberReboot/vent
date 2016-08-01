@@ -277,7 +277,7 @@ def test_running_menu():
     child.expect('Return to Logs menu')
     # return to logs menu
     entries = subprocess.check_output('docker ps -aq', shell=True).split('\n')
-    back = entries + 1
+    back = len(entries) + 1
     child.sendline(back)
     child.expect('Return to System Commands menu')
     # return to System Commands menu
