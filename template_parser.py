@@ -120,11 +120,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
         for s in config.sections():
             if s in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"]:
                 sections.append(s)
-
-
-
-
-
     except Exception as e:
         sections = []
 
@@ -172,7 +167,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
         external_overrides = []
         external_hosts = {}
         instances = []
-
         # plugin template file
         if template_type not in ["visualization", "core", "active", "passive"]:
             try:
