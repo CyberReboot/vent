@@ -97,13 +97,13 @@ def read_template_types(template_type, container_cmd, path_dirs):
     delay_sections = {}
 
     try:
-        mode_enabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py menabled -b "+base_dir, shell=True))
+        mode_enabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py menabled", shell=True))
         if template_type in mode_enabled:
             mode_enabled = mode_enabled[template_type]
         elif template_type in ['active', 'passive'] and 'collectors' in mode_enabled:
             mode_enabled = mode_enabled['collectors']
         # filters out core_disabled containers from modes_enabled list.
-        core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled -b "+base_dir, shell=True))
+        core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled", shell=True))
 
         if template_type in core_disabled:
             core_disabled = core_disabled[template_type]
@@ -112,14 +112,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
         
         sections = [container for container in mode_enabled if not container in core_disabled]
 
-        # add sections that exist in the template, but are not enabled containers
-        config = ConfigParser.RawConfigParser()
-        # needed to preserve case sensitive options
-        config.optionxform=str
-        config.read(template_path)
-        for s in config.sections():
-            if s in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"]:
-                sections.append(s)
     except Exception as e:
         sections = []
 
@@ -167,6 +159,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
         external_overrides = []
         external_hosts = {}
         instances = []
+
         # plugin template file
         if template_type not in ["visualization", "core", "active", "passive"]:
             try:
@@ -198,6 +191,10 @@ def read_template_types(template_type, container_cmd, path_dirs):
             host_config_exists = False
             instructions = {}
             try:
+                config = ConfigParser.RawConfigParser()
+                # needed to preserve case sensitive options
+                config.optionxform=str
+                config.read(template_path)
                 options = config.options(section)
             except Exception as e:
                 options = []
@@ -320,7 +317,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                             else:
                                 option_val = str(host_config_new).replace("'", '"')
                         except Exception as e:
-                            raise e
+                            pass
                     option_val = option_val.replace("True", "true")
                     option_val = option_val.replace("False", "false")
                     if option_val != "{}":
