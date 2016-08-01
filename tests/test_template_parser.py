@@ -31,7 +31,10 @@ def test_read_template_types():
     """ Testing reading from all templates """
     path_dirs = PathDirs()
 
+
+    os.system("rm templates/*.template")
     os.system("cp core.backup templates/core.template")
+    os.system("cp modes.backup templates/modes.template")
 
     template_parser.read_template_types("core", "", path_dirs)
     template_parser.read_template_types("active", "", path_dirs)
