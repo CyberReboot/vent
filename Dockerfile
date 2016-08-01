@@ -29,5 +29,10 @@ RUN rm -rf $ROOTFS/data/.gitignore
 RUN chmod -R 777 $ROOTFS/data/plugins
 RUN chmod -R 777 $ROOTFS/data/templates
 
+# install perl5 for git submodules
+RUN curl -L -o /tmp/perl5.tcz $TCL_REPO_BASE/tcz/perl5.tcz && \
+unsquashfs -f -d $ROOTFS /tmp/perl5.tcz && \
+rm -rf /tmp/perl5.tcz
+
 RUN /make_iso.sh
 CMD ["cat", "/boot2docker.iso"]
