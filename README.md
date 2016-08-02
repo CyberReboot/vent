@@ -10,6 +10,27 @@ vent
 [![Code Issues](https://www.quantifiedcode.com/api/v1/project/ffe3b2d6a9254b98a12de6b3273676b3/badge.svg)](https://www.quantifiedcode.com/app/project/ffe3b2d6a9254b98a12de6b3273676b3)
 [![Github Release Downloads](https://img.shields.io/github/downloads/cyberreboot/vent/total.svg?maxAge=2592000)](https://github.com/CyberReboot/vent/releases)
 
+            '.,
+              'b      *
+               '$    #.
+                $:   #:
+                *#  @):
+                :@,@):   ,.**:'
+      ,         :@@*: ..**'
+       '#o.    .:(@'.@*"'
+          'bq,..:,@@*'   ,*
+          ,p$q8,:@)'  .p*'
+         '    '@@Pp@@*'
+               Y7'.'
+              :@):.
+             .:@:'.
+           .::(@:. 
+                       _   
+      __   _____ _ __ | |_ 
+      \ \ / / _ \ '_ \| __|
+       \ V /  __/ | | | |_ 
+        \_/ \___|_| |_|\__|
+
 overview
 ====
 vent is a lightweight, self-contained operating system designed to serve as a general platform for analyzing network flow. built with some basic functionality, vent serves as a user-friendly slate to build custom `plugins` on to perform user-defined processing on incoming network data. currently vent only supports pcap analytics.
