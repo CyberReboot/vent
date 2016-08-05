@@ -551,6 +551,9 @@ def processmenu(path_dirs, menu, parent=None):
                 os.system('reset')
                 os.system("clear")
                 screen.clear()
+                # ensure directory exists
+                os.system("if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi;")
+                # retrieve logs
                 os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | tee /tmp/vent_logs/vent_file_"+filename+" | less")
                 screen.clear()
                 curses.reset_prog_mode()
@@ -659,7 +662,7 @@ def build_menu_dict(path_dirs):
                         {'title': "Services", 'type': MENU, 'subtitle': '', 'command': ''},
                         {'title': "Namespaces", 'type': MENU, 'subtitle': '', 'command': ''},
                         {'title': "Files", 'type': INPUT, 'command': ''},
-                        {'title': "All", 'type': COMMAND, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
+                        {'title': "All", 'type': COMMAND, 'command': 'if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi; python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
                     ]
                 },
                 { 'title': "Service Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
