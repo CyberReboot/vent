@@ -11,6 +11,7 @@ else
 	docker run --name vent-management --restart="always" -d -v /mnt/sda1/var/lib/boot2docker/tls:/certs -v /usr/local/bin/docker:/usr/local/bin/docker -v /var/run/docker.sock:/var/run/docker.sock -v /tmp:/tmp vent-management
 fi
 if [ -d "/var/lib/docker/data/images" ]; then
+	echo "TERM=xterm LANG=C.UTF-8 /usr/local/bin/python2.7 /data/menu_launcher.py" >> /root/.profile
 	image_exists=$(docker images -q | wc -l)
 	if [ "$image_exists" == "1" ]; then
 		cd /var/lib/docker/data/images
