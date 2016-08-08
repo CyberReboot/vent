@@ -63,7 +63,7 @@ def get_container_menu(path_dirs):
         command1 = "if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi; "
         command2 = "python2.7 "+path_dirs.info_dir+"get_logs.py -c "
         command3 = " | tee /tmp/vent_logs/vent_container_"
-        p['title'] = 'Container Logs'
+        p['title'] = 'Service Logs'
         p['subtitle'] = 'Please select a service:'
         containers = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed containers | grep -v NAMES | grep -v Built\ Containers | grep -v Dead | awk \"{print \$1}\"", shell=True).split("\n")
         containers = filter(None, containers)
@@ -551,6 +551,9 @@ def processmenu(path_dirs, menu, parent=None):
                 os.system('reset')
                 os.system("clear")
                 screen.clear()
+                # ensure directory exists
+                os.system("if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi;")
+                # retrieve logs
                 os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | tee /tmp/vent_logs/vent_file_"+filename+" | less")
                 screen.clear()
                 curses.reset_prog_mode()
@@ -580,7 +583,7 @@ def processmenu(path_dirs, menu, parent=None):
                 plugins = get_plugin_status(path_dirs)
                 processmenu(path_dirs, plugins, menu)
                 screen.clear()
-            elif menu['options'][getin]['title'] == "Containers":
+            elif menu['options'][getin]['title'] == "Services":
                 screen.clear()
                 containers = get_container_menu(path_dirs)
                 processmenu(path_dirs, containers, menu)
@@ -656,10 +659,10 @@ def build_menu_dict(path_dirs):
             'options': [
                 { 'title': "Logs", 'type': MENU, 'subtitle': 'Please select a group to view logs for:', 'command': '',
                     'options': [
-                        {'title': "Containers", 'type': MENU, 'subtitle': '', 'command': ''},
+                        {'title': "Services", 'type': MENU, 'subtitle': '', 'command': ''},
                         {'title': "Namespaces", 'type': MENU, 'subtitle': '', 'command': ''},
                         {'title': "Files", 'type': INPUT, 'command': ''},
-                        {'title': "All", 'type': COMMAND, 'command': 'python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
+                        {'title': "All", 'type': COMMAND, 'command': 'if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi; python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
                     ]
                 },
                 { 'title': "Service Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
