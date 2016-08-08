@@ -34,6 +34,8 @@ def test_rmq_es_connector_callback():
     rmq_es.callback(None, method, None, "[]")
     method = Method(routing_key="hex_flow.foo")
     rmq_es.callback(None, method, None, "[]")
+    method = Method(routing_key="file.json")
+    rmq_es.callback(None, method, None, "[]")
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
     rmq_es.connections(True)
     rmq_es.callback(None, method, None, "[]")
