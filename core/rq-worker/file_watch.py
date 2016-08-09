@@ -124,7 +124,7 @@ def template_queue(path, base_dir="/data/"):
             except Exception as e:
                 pass
 
-        enabled, disabled = check_output("python2.7 "+base_dir+"info_tools/get_status.py enabled", shell=True)
+        enabled, disabled = check_output("python2.7 "+base_dir+"info_tools/get_status.py -b "+base_dir+" enabled", shell=True)
         disabled = ast.literal_eval(disabled)
 
         # remove disabled running containers
