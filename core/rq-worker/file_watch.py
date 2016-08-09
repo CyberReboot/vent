@@ -111,72 +111,73 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
     from docker.utils.types import LogConfig
     c = Client(base_url='unix://var/run/docker.sock')
 
-    # keep track of running containers to restart
-    running_containers = c.containers()
+    try:
+        # keep track of running containers to restart
+        running_containers = c.containers()
 
-    # first some cleanup
-    containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
-    for cont in containers:
-        try:
-            # will only remove containers that aren't running
-            c.remove_container(cont['Id'])
-        except Exception as e:
-            pass
+        # first some cleanup
+        containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
+        for cont in containers:
+            try:
+                # will only remove containers that aren't running
+                c.remove_container(cont['Id'])
+            except Exception as e:
+                pass
 
-    enabled, disabled = check_output("python2.7 /data/info_tools/get_status.py enabled", shell=True)
-    disabled = ast.literal_eval(disabled)
+        enabled, disabled = check_output("python2.7 /data/info_tools/get_status.py enabled", shell=True)
+        disabled = ast.literal_eval(disabled)
 
-    # remove disabled running containers
-    for container in containers:
-        for name in container["Names"]:
-            if name in disabled:
-                try:
+        # remove disabled running containers
+        for container in containers:
+            for name in container["Names"]:
+                if name in disabled:
+                    try:
+                        c.kill(container["Id"])
+                        c.remove_container(container["Id"])
+                        continue
+                    except Exception as e:
+                        pass
+
+        core_containers = c.containers(all=True, filters={'name':"core-"})
+
+        # remove core containers, so when restarted, behavior matches current configuration
+        for container in core_containers:
+            try:
+                if container["Status"] == "exited":
+                    c.remove_container(container["Id"])
+                else:
                     c.kill(container["Id"])
                     c.remove_container(container["Id"])
-                    continue
-                except Exception as e:
-                    pass
-
-    core_containers = c.containers(all=True, filters={'name':"core-"})
-
-    # remove core containers, so when restarted, behavior matches current configuration
-    for container in core_containers:
-        try:
-            if container["Status"] == "exited":
-                c.remove_container(container["Id"])
-            else:
-                c.kill(container["Id"])
-                c.remove_container(container["Id"])
-        except Exception as e:
-            pass
-
-    vent_dir = "/vent/"
-    if base_dir != "/var/lib/docker/data/":
-        vent_dir = base_dir
-
-    # start enabled containers
-    os.system('python2.7 '+vent_dir+'template_parser.py core start')
-
-    active_started = False
-    passive_started = False
-    vis_started = False
-
-    for container in running_containers:
-        # usually containers have one name, but container["Names"] is a list, so we have to be sure
-        for name in container["Names"]:
-            if active_started and passive_started and vis_started:
-                break
-            elif "active-" in name and not active_started:
-                os.system('python2.7 '+vent_dir+'template_parser.py active start')
-                active_started = True
-            elif "passive-" in name and not passive_started:
-                os.system('python2.7 '+vent_dir+'template_parser.py passive start')
-                passive_started = True
-            elif "visualization-" in name and not vis_started:
-                os.system('python2.7 '+vent_dir+'template_parser.py visualization start')
-                vis_started = True
-            else:
+            except Exception as e:
                 pass
+
+        vent_dir = "/vent/"
+        if base_dir != "/var/lib/docker/data/":
+            vent_dir = base_dir
+
+        # start enabled containers
+        os.system('python2.7 '+vent_dir+'template_parser.py core start')
+
+        active_started = False
+        passive_started = False
+        vis_started = False
+
+        for container in running_containers:
+            # usually containers have one name, but container["Names"] is a list, so we have to be sure
+            for name in container["Names"]:
+                if active_started and passive_started and vis_started:
+                    break
+                elif "active-" in name and not active_started:
+                    os.system('python2.7 '+vent_dir+'template_parser.py active start')
+                    active_started = True
+                elif "passive-" in name and not passive_started:
+                    os.system('python2.7 '+vent_dir+'template_parser.py passive start')
+                    passive_started = True
+                elif "visualization-" in name and not vis_started:
+                    os.system('python2.7 '+vent_dir+'template_parser.py visualization start')
+                    vis_started = True
+                else:
+                    pass
     except Exception as e:
         print(str(e))
     return
