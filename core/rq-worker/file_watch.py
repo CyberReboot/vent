@@ -158,12 +158,8 @@ def template_queue(path, base_dir="/data/"):
         c.kill(this_container)
         c.remove_container(this_container)
 
-        vent_dir = "/vent/"
-        if base_dir != "/data/":
-            vent_dir = base_dir
-
         # start enabled containers
-        os.system('python2.7 '+vent_dir+'template_parser.py core start')
+        os.system('python2.7 '+base_dir+'template_parser.py core start')
 
         active_started = False
         passive_started = False
@@ -175,13 +171,13 @@ def template_queue(path, base_dir="/data/"):
                 if active_started and passive_started and vis_started:
                     break
                 elif "active-" in name and not active_started:
-                    os.system('python2.7 '+vent_dir+'template_parser.py active start')
+                    os.system('python2.7 '+base_dir+'template_parser.py active start')
                     active_started = True
                 elif "passive-" in name and not passive_started:
-                    os.system('python2.7 '+vent_dir+'template_parser.py passive start')
+                    os.system('python2.7 '+base_dir+'template_parser.py passive start')
                     passive_started = True
                 elif "visualization-" in name and not vis_started:
-                    os.system('python2.7 '+vent_dir+'template_parser.py visualization start')
+                    os.system('python2.7 '+base_dir+'template_parser.py visualization start')
                     vis_started = True
                 else:
                     pass
