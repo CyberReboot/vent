@@ -59,4 +59,4 @@ HostConfig = {"PortBindings": { "514/tcp": [{ "HostPort": "514" }]}, "Links": ["
 [template-change]
 Cmd = /templates
 Env = ["PYTHONUNBUFFERED=0"]
-HostConfig = {"Binds": ["/var/lib/docker/data/templates:/templates:ro", "/var/run/docker.sock:/var/run/docker.sock"], "Links": ["core-aaa-redis:redis"]}
+HostConfig = {"Binds": ["/var/lib/docker/data/templates:/templates:ro"], "Links": ["core-aaa-redis:redis"]}
