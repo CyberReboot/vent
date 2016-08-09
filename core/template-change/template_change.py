@@ -8,7 +8,7 @@ from watchdog.events import PatternMatchingEventHandler
 
 class GZHandler(PatternMatchingEventHandler):
     """
-    Handles when an event on the dictory being watched happens that matches the values in patterns
+    Handles when an event on the directory being watched happens that matches the values in patterns
     """
 
     patterns = ["*"]
