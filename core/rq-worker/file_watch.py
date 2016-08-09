@@ -145,11 +145,18 @@ def template_queue(path, base_dir="/data/"):
             try:
                 if container["Status"] == "exited":
                     c.remove_container(container["Id"])
+                elif container["Name"].startswith(os.environ.get('HOSTNAME')):
+                    # skip this container until the end
+                    this_container = container["Id"]
                 else:
                     c.kill(container["Id"])
                     c.remove_container(container["Id"])
             except Exception as e:
                 pass
+
+        # restart this container last
+        c.kill(this_container)
+        c.remove_container(this_container)
 
         vent_dir = "/vent/"
         if base_dir != "/data/":
