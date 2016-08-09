@@ -62,9 +62,6 @@ class RmqEs():
             index = "dshell_netflow"
         elif method.routing_key.split(".")[0] == 'hex_flow':
             index = "hex_flow"
-        # handles any plugin with 'json' in the name
-        elif "json" in method.routing_key.split(".")[0]:
-            index = "json"
         try:
             doc = ast.literal_eval(body)
             res = self.es_conn.index(index=index, doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
