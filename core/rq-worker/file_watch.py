@@ -91,7 +91,7 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
         print(str(e))
     return
 
-def template_queue(path, base_dir="/var/lib/docker/data/"):
+def template_queue(path, base_dir="/data/"):
     """
     Processes template files that have been added or changed or deleted from
     the rq-worker. Then, removes exited containers, kills and removes disabled containers,
@@ -124,7 +124,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
             except Exception as e:
                 pass
 
-        enabled, disabled = check_output("python2.7 /data/info_tools/get_status.py enabled", shell=True)
+        enabled, disabled = check_output("python2.7 "+base_dir+"info_tools/get_status.py enabled", shell=True)
         disabled = ast.literal_eval(disabled)
 
         # remove disabled running containers
@@ -152,7 +152,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
                 pass
 
         vent_dir = "/vent/"
-        if base_dir != "/var/lib/docker/data/":
+        if base_dir != "/data/":
             vent_dir = base_dir
 
         # start enabled containers
