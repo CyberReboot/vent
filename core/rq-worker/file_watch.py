@@ -129,7 +129,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
                 data_dir = base_dir
             enabled, disabled = ast.literal_eval(check_output("python2.7 "+data_dir+"info_tools/get_status.py enabled -b "+base_dir, shell=True))
         except Exception as e:
-            raise e
+            pass
         # remove disabled running containers
         for container in containers:
             for name in container["Names"]:
@@ -187,5 +187,5 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
                 else:
                     pass
     except Exception as e:
-        print(str(e))
+        pass
     return
