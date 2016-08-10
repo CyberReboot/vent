@@ -148,7 +148,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
             try:
                 if container["Status"] == "exited":
                     c.remove_container(container["Id"])
-                elif container["Name"].startswith(os.environ.get('HOSTNAME')):
+                elif container["Id"].startswith(os.environ.get('HOSTNAME')):
                     # skip this container until the end
                     this_container = container["Id"]
                 else:
