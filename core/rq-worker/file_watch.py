@@ -3,7 +3,6 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
     Processes files that have been added from the rq-worker, and tells
     vent-management to start plugins that match the mime type for the new file.
     """
-    import ast
     import ConfigParser
     import magic
     import os
@@ -11,7 +10,6 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
 
     from docker import Client
     from docker.utils.types import LogConfig
-    from subprocess import check_output
 
     c = Client(base_url='unix://var/run/docker.sock')
 
