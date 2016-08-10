@@ -546,15 +546,23 @@ def processmenu(path_dirs, menu, parent=None):
                 screen.clear()
                 os.execl(sys.executable, sys.executable, *sys.argv)
             elif menu['options'][getin]['title'] == "Files":
-                filename = get_param("Enter the name of the file to print logs:")
+                filename = get_param("Enter the name of the processed file to lookup logs for:")
                 curses.def_prog_mode()
                 os.system('reset')
                 os.system("clear")
                 screen.clear()
-                # ensure directory exists
-                os.system("if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi;")
-                # retrieve logs
-                os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | tee /tmp/vent_logs/vent_file_"+filename+" | less")
+                try:
+                    # ensure directory exists
+                    os.system("if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi;")
+                    # check logs exist for that file
+                    found = call("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | grep "+filename, shell=True)
+                    if found == 0:
+                        # print logs
+                        os.system("python2.7 "+path_dirs.info_dir+"get_logs.py -f "+filename+" | tee /tmp/vent_logs/vent_file_"+filename+" | less")
+                    else:
+                        os.system("echo \"No logs found for that file.\" | less")
+                except Exception as e:
+                    os.system("echo \"Error retrieving logs for that file.\" | less")
                 screen.clear()
                 curses.reset_prog_mode()
                 try:
