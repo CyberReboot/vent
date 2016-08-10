@@ -24,14 +24,30 @@ try:
 except Exception as e: # pragma: no cover
     pass
 
+# Curses Menu Types #
+
+# menu indicates a type that expands to another menu.
+# exitmenu is the type that returns to previous menu.
 MENU = "menu"
-COMMAND = "command"
 EXITMENU = "exitmenu"
-INFO = "info"
-INFO2 = "info2"
-SETTING = "setting"
+
+# command runs a simple command without user confirmation on selection.
+# the command is in the 'command' index of the dictionary and runs on user selection.
+COMMAND = "command"
+
+# confirm is the same as command, however it waits for user confirmation before clearing results.
+CONFIRM = "confirm"
+
+# input is similar to confirm, but it requires manual user input prior to running. 
 INPUT = "input"
+
+# display shows processed results on menu load but it does not use the 'command' index.
+# this is because results of the display type require heavier processing.
 DISPLAY = "display"
+
+# info shows command results inline in menu without user confirmation.
+# it does this by running the command stored in the 'command' index on menu load.
+INFO = "info"
 
 class PathDirs:
     """ Global path directories for parsing templates """
@@ -196,9 +212,9 @@ def get_plugin_status(path_dirs):
                 elif menu == p_notbuilt:
                     menu.append({'title': 'There are no unbuilt images.', 'type': DISPLAY, 'command': ''})
                 elif menu == p_external:
-                    menu.append({'title': 'There are services set to run externally.', 'type': DISPLAY, 'command': ''})
+                    menu.append({'title': 'There are no services set to run externally.', 'type': DISPLAY, 'command': ''})
                 elif menu == p_error_menu:
-                    menu.append({'title': 'There are no service/image errors. :-)', 'type': DISPLAY, 'command': ''})
+                    menu.append({'title': 'There are no service/image errors.', 'type': DISPLAY, 'command': ''})
 
         ### Returned Menu Dictionary
         p['title'] = 'Plugin Status'
@@ -313,7 +329,7 @@ def run_plugins(path_dirs, action):
                     config.read(path_dirs.template_dir+plugin+'.template')
                     plugin_name = config.get("info", "name")
                     p['title'] = plugin_name
-                    p['type'] = INFO2
+                    p['type'] = CONFIRM
                     p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py '+plugin+' '+action
                     modes.append(p)
                 except Exception as e: # pragma: no cover
@@ -331,7 +347,7 @@ def run_plugins(path_dirs, action):
                     if passive == "on":
                         p = {}
                         p['title'] = "Local Passive Collection"
-                        p['type'] = INFO2
+                        p['type'] = CONFIRM
                         p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py passive '+action
                         modes.append(p)
                 except Exception as e:
@@ -343,7 +359,7 @@ def run_plugins(path_dirs, action):
                     if active == "on":
                         p = {}
                         p['title'] = "Local Active Collection"
-                        p['type'] = INFO2
+                        p['type'] = CONFIRM
                         p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py active '+action
                         modes.append(p)
                 except Exception as e:
@@ -353,7 +369,7 @@ def run_plugins(path_dirs, action):
         if len(modes) > 1:
             p = {}
             p['title'] = "All"
-            p['type'] = INFO2
+            p['type'] = CONFIRM
             p['command'] = 'python2.7 '+path_dirs.data_dir+'template_parser.py all '+action
             modes.append(p)
         elif len(modes) == 0:
@@ -378,7 +394,7 @@ def update_plugins(path_dirs):
             if f.endswith(".template"):
                 p = {}
                 p['title'] = f
-                p['type'] = SETTING
+                p['type'] = COMMAND
                 p['command'] = 'python2.7 '+path_dirs.data_dir+'suplemon/suplemon.py '+path_dirs.template_dir+f
                 modes.append(p)
     except Exception as e:
@@ -440,14 +456,10 @@ def runmenu(menu, parent):
                             i += 1
                     else:
                         result = check_output((menu['options'][index]['command']).split())
-                    # don't display a '-'
-                    if menu['options'][index]['title'] == "":
-                        screen.addstr(5+index,4, "{0!s} {1!s}".format(menu['options'][index]['title'], result), textstyle)
-                    else:
-                        screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
-                elif menu['options'][index]['type'] == INFO2:
-                    screen.addstr(5+index,4, "{0!s}".format((menu['options'][index]['title'])), textstyle)
-                else:
+                    screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
+                elif menu['options'][index]['type'] == DISPLAY:
+                    screen.addstr(5+index,4, "{0!s}".format(menu['options'][index]['title']), textstyle)
+                else: # COMMAND, CONFIRM, INPUT
                     screen.addstr(5+index,4, "{0:d} - {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
             textstyle = n
             if pos==optioncount:
@@ -486,11 +498,17 @@ def processmenu(path_dirs, menu, parent=None):
         getin = runmenu(menu, parent)
         if getin == optioncount:
             exitmenu = True
-        elif menu['options'][getin]['type'] == COMMAND:
+        elif menu['options'][getin]['type'] in [COMMAND, CONFIRM]:
             curses.def_prog_mode()
             os.system('reset')
             screen.clear()
             os.system(menu['options'][getin]['command'])
+
+            if menu['options'][getin]['type'] == CONFIRM:
+                if menu['title'] == "Remove Plugins":
+                    exitmenu = True
+                confirm()
+
             screen.clear()
             curses.reset_prog_mode()
             try:
@@ -498,39 +516,8 @@ def processmenu(path_dirs, menu, parent=None):
                 curses.curs_set(0)
             except Exception as e:
                 pass
-        elif menu['options'][getin]['type'] == INFO2:
-            curses.def_prog_mode()
-            os.system('reset')
-            screen.clear()
-            os.system(menu['options'][getin]['command'])
-            if menu['title'] == "Remove Plugins":
-                exitmenu = True
-            confirm()
-            screen.clear()
-            curses.reset_prog_mode()
-            try:
-                curses.curs_set(1)
-                curses.curs_set(0)
-            except Exception as e:
-                pass
-        # !! TODO
-        elif menu['options'][getin]['type'] == INFO:
+        elif menu['options'][getin]['type'] in [INFO, DISPLAY]:
             pass
-        elif menu['options'][getin]['type'] == DISPLAY:
-            pass
-        # !! TODO
-        elif menu['options'][getin]['type'] == SETTING:
-            curses.def_prog_mode()
-            os.system('reset')
-            screen.clear()
-            os.system(menu['options'][getin]['command'])
-            screen.clear()
-            curses.reset_prog_mode()
-            try:
-                curses.curs_set(1)
-                curses.curs_set(0)
-            except Exception as e:
-                pass
         elif menu['options'][getin]['type'] == INPUT:
             if menu['options'][getin]['title'] == "Add Plugins":
                 plugin_url = get_param("Enter the HTTPS Git URL that contains the new plugins, e.g. https://github.com/CyberReboot/vent-plugins.git:")
@@ -573,7 +560,7 @@ def processmenu(path_dirs, menu, parent=None):
         elif menu['options'][getin]['type'] == MENU:
             if menu['options'][getin]['title'] == "Remove Plugins":
                 screen.clear()
-                installed_plugins = get_installed_plugin_repos(path_dirs, INFO2, "remove")
+                installed_plugins = get_installed_plugin_repos(path_dirs, CONFIRM, "remove")
                 processmenu(path_dirs, installed_plugins, menu)
                 screen.clear()
             elif menu['options'][getin]['title'] == "Show Installed Plugins":
@@ -583,7 +570,7 @@ def processmenu(path_dirs, menu, parent=None):
                 screen.clear()
             elif menu['options'][getin]['title'] == "Update Plugins":
                 screen.clear()
-                installed_plugins = get_installed_plugin_repos(path_dirs, INFO2, "update")
+                installed_plugins = get_installed_plugin_repos(path_dirs, CONFIRM, "update")
                 processmenu(path_dirs, installed_plugins, menu)
                 screen.clear()
             elif menu['options'][getin]['title'] == "Status":
@@ -659,8 +646,8 @@ def build_menu_dict(path_dirs):
         },
         { 'title': "Build", 'type': MENU, 'subtitle': 'Please select a service group to build:',
           'options': [
-            { 'title': "Build new plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1] },
-            { 'title': "Force rebuild all plugins and core", 'type': INFO2, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1]+' --no-cache' },
+            { 'title': "Build new plugins and core", 'type': CONFIRM, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1] },
+            { 'title': "Force rebuild all plugins and core", 'type': CONFIRM, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1]+' --no-cache' },
           ]
         },
         { 'title': "System Commands", 'type': MENU, 'subtitle': 'Please select an option:',
@@ -673,7 +660,7 @@ def build_menu_dict(path_dirs):
                         {'title': "All", 'type': COMMAND, 'command': 'if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi; python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
                     ]
                 },
-                { 'title': "Service Stats", 'type': COMMAND, 'command': "docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
+                { 'title': "Service Stats", 'type': COMMAND, 'command': "echo \"Service Stats: CTRL+C to Exit\"; docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
                 { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
                 { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
                 { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
