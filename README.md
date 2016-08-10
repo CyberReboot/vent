@@ -33,7 +33,7 @@ vent
 
 overview
 ====
-vent is a lightweight, self-contained operating system designed to serve as a general platform for analyzing network flow. built with some basic functionality, vent serves as a user-friendly slate to build custom `plugins` on to perform user-defined processing on incoming network data. currently vent only supports pcap analytics.
+vent is a lightweight, self-contained virtual appliance designed to serve as a general platform for analyzing network flow. built with some basic functionality, vent serves as a user-friendly slate to build custom `plugins` on to perform user-defined processing on incoming network data. currently vent only supports pcap analytics.
 
 simply create your `plugins`, point vent to them & install them, and drop a pcap file in vent to begin processing!
 
