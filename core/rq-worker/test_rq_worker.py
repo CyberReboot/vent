@@ -53,7 +53,7 @@ def test_template_queue():
     os.environ['HOSTNAME'] = subprocess.check_output('docker run --name visualization-template-queue2 -d alpine:latest /bin/sh -c "while true; do echo core hello world; sleep 1; done"', shell=True)[:4]
     file_watch.template_queue("/visualization.template")
 
-    file_watch.template_queue("/modes.template", base_dir=os.getcwd()+"/")
-    file_watch.template_queue("/core.template", base_dir=os.getcwd()+"/")
-    file_watch.template_queue("/collectors.template", base_dir=os.getcwd()+"/")
-    file_watch.template_queue("/visualization.template", base_dir=os.getcwd()+"/")
+    file_watch.template_queue("/modes.template", base_dir=path_dirs.base_dir+"/")
+    file_watch.template_queue("/core.template", base_dir=path_dirs.base_dir+"/")
+    file_watch.template_queue("/collectors.template", base_dir=path_dirs.base_dir+"/")
+    file_watch.template_queue("/visualization.template", base_dir=path_dirs.base_dir+"/")
