@@ -32,6 +32,7 @@ def test_file_queue():
 
 def test_template_queue():
     """ Tests simulation of new/modified template """
+    path_dirs = test_env.PathDirs()
     os.environ['HOSTNAME'] = "test"
     os.system('docker run -d alpine:latest /bin/sh -c "echo core hello world;"')
     os.system('docker run --name core-template-queue1 -d alpine:latest /bin/sh -c "while true; do echo core hello world; sleep 1; done"')
