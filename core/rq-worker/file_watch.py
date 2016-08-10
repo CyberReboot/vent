@@ -160,9 +160,11 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
                 pass
 
         # restart this container last
-        c.kill(this_container)
-        c.remove_container(this_container)
-
+        try:
+            c.kill(this_container)
+            c.remove_container(this_container)
+        except Exception as e:
+            pass
         # start enabled containers
         os.system('python2.7 '+data_dir+'template_parser.py core start')
 
