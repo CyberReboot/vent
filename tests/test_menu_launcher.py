@@ -287,7 +287,7 @@ def test_running_menu():
     child.expect('Return to System Commands menu')
     # go to files
     child.sendline('3')
-    child.expect('Enter the name of the file to print logs:')
+    child.expect('Enter the name of the processed file to lookup logs for:')
     # enter invalid file
     child.sendline('')
     child.expect('END')

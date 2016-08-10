@@ -3,7 +3,6 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
     Processes files that have been added from the rq-worker, and tells
     vent-management to start plugins that match the mime type for the new file.
     """
-    import ast
     import ConfigParser
     import magic
     import os
@@ -11,7 +10,6 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
 
     from docker import Client
     from docker.utils.types import LogConfig
-    from subprocess import check_output
 
     c = Client(base_url='unix://var/run/docker.sock')
 
@@ -98,6 +96,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
     and starts/restarts enabled containers. Only restarts enabled containers which were
     running at the time of the configuration change.
     """
+    import ast
     import os
     import sys
     import time
@@ -109,6 +108,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
 
     from docker import Client
     from docker.utils.types import LogConfig
+    from subprocess import check_output
     c = Client(base_url='unix://var/run/docker.sock')
 
     try:
@@ -123,10 +123,13 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
                 c.remove_container(cont['Id'])
             except Exception as e:
                 pass
-
-        enabled, disabled = check_output("python2.7 "+base_dir+"info_tools/get_status.py -b "+base_dir+" enabled", shell=True)
-        disabled = ast.literal_eval(disabled)
-
+        try:
+            data_dir = "/data/"
+            if base_dir != "/var/lib/docker/data/":
+                data_dir = base_dir
+            enabled, disabled = ast.literal_eval(check_output("python2.7 "+data_dir+"info_tools/get_status.py enabled -b "+base_dir, shell=True))
+        except Exception as e:
+            pass
         # remove disabled running containers
         for container in containers:
             for name in container["Names"]:
@@ -145,7 +148,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
             try:
                 if container["Status"] == "exited":
                     c.remove_container(container["Id"])
-                elif container["Name"].startswith(os.environ.get('HOSTNAME')):
+                elif container["Id"].startswith(os.environ.get('HOSTNAME')):
                     # skip this container until the end
                     this_container = container["Id"]
                 else:
@@ -155,15 +158,13 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
                 pass
 
         # restart this container last
-        c.kill(this_container)
-        c.remove_container(this_container)
-
-        vent_dir = "/data/"
-        if base_dir != "/var/lib/docker/data/":
-            vent_dir = base_dir
-
+        try:
+            c.kill(this_container)
+            c.remove_container(this_container)
+        except Exception as e:
+            pass
         # start enabled containers
-        os.system('python2.7 '+vent_dir+'template_parser.py core start')
+        os.system('python2.7 '+data_dir+'template_parser.py core start')
 
         active_started = False
         passive_started = False
@@ -186,5 +187,5 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
                 else:
                     pass
     except Exception as e:
-        print(str(e))
+        pass
     return
