@@ -562,7 +562,7 @@ def processmenu(path_dirs, menu, parent=None):
                     else:
                         os.system("echo \"No logs found for that file.\" | less")
                 except Exception as e:
-                    pass
+                    os.system("echo \"Error retrieving logs for that file.\" | less")
                 screen.clear()
                 curses.reset_prog_mode()
                 try:
