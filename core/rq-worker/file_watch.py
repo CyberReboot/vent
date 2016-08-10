@@ -98,6 +98,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
     and starts/restarts enabled containers. Only restarts enabled containers which were
     running at the time of the configuration change.
     """
+    import ast
     import os
     import sys
     import time
@@ -109,6 +110,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
 
     from docker import Client
     from docker.utils.types import LogConfig
+    from subprocess import check_output
     c = Client(base_url='unix://var/run/docker.sock')
 
     try:
