@@ -38,7 +38,7 @@ COMMAND = "command"
 # confirm is the same as command, however it waits for user confirmation before clearing results.
 CONFIRM = "confirm"
 
-# input is similar to confirm, but it requires manual user input prior to running. 
+# input is similar to confirm, but it requires manual user input prior to running.
 INPUT = "input"
 
 # display shows processed results on menu load but it does not use the 'command' index.
@@ -422,9 +422,21 @@ def runmenu(menu, parent):
             menu_name = menu_name.split("-")[0].strip()
         lastoption = "Return to {0!s} menu".format(menu_name)
 
+    # last value on the screen by position
     optioncount = len(menu['options'])
+    entries = []
+    # get all valid entries (interactive entries)
+    for index in range(optioncount):
+        if menu['options'][index]['type'] not in [INFO, DISPLAY]:
+            # append relative position of entry amongst entries
+            entries.append(index)
+    # add last option
+    entries.append(optioncount)
 
+    # set initial position to first valid entry
     pos = 0
+    if entries:
+        pos = entries[0]
     oldpos = None
     x = None
 
@@ -440,6 +452,7 @@ def runmenu(menu, parent):
                 if pos==index:
                     textstyle = h
                 if menu['options'][index]['type'] == INFO:
+                    # run piped commands individually else run single command
                     if "|" in menu['options'][index]['command']:
                         cmds = menu['options'][index]['command'].split("|")
                         i = 0
@@ -459,35 +472,47 @@ def runmenu(menu, parent):
                     screen.addstr(5+index,4, "{0!s} - {1!s}".format(menu['options'][index]['title'], result), textstyle)
                 elif menu['options'][index]['type'] == DISPLAY:
                     screen.addstr(5+index,4, "{0!s}".format(menu['options'][index]['title']), textstyle)
-                else: # COMMAND, CONFIRM, INPUT
-                    screen.addstr(5+index,4, "{0:d} - {1!s}".format(index+1, menu['options'][index]['title']), textstyle)
+                else: # COMMAND, CONFIRM, INPUT, MENU
+                    number = entries.index(index)
+                    screen.addstr(5+index,4, "{0:d} - {1!s}".format(number+1, menu['options'][index]['title']), textstyle)
             textstyle = n
             if pos==optioncount:
                 textstyle = h
-            screen.addstr(6+optioncount,4, "{0:d} - {1!s}".format(optioncount+1, lastoption), textstyle)
+            #
+            number = entries.index(optioncount)
+            screen.addstr(6+optioncount,4, "{0:d} - {1!s}".format(number+1, lastoption), textstyle)
             screen.refresh()
 
         x = screen.getch()
 
         # !! TODO hack for now, long term should probably take multiple character numbers and update on return
-        num_options = optioncount
-        if optioncount > 8:
-            num_options = 8
+        num_options = len(entries)
+        if len(entries) > 9:
+            num_options = 9
 
         if x == 258: # down arrow
-            if pos < optioncount:
-                pos += 1
-            else:
-                pos = 0
+            # check that we aren't navigating through an empty menu or menu with no interactive items
+            if entries:
+                # check pos isn't at end of interactive entries
+                if pos < entries[-1]:
+                    # find current index and increment
+                    pos = entries.index(pos)+1
+                else:
+                    pos = entries[0]
         elif x == 259: # up arrow
-            if pos > 0:
-                pos += -1
-            else:
-                pos = optioncount
+            # check that we aren't navigating through an empty menu or menu with no interactive items
+            if entries:
+                # check pos isn't at beginning of interactive entries
+                if pos > entries[0]:
+                    # find current index and decrement
+                    pos = entries.index(pos)-1
+                else:
+                    pos = entries[-1]
         elif x == 27: # escape
-            pos = optioncount
-        elif ord('1') <= x <= ord(str(num_options+1)):
-            pos = x - ord('0') - 1
+            pos = entries[-1]
+        elif ord('1') <= x <= ord(str(num_options)): # other typed input
+            # calculate number to traverse to, get entries position
+            pos = entries[x - ord('0') - 1]
     return pos
 
 def processmenu(path_dirs, menu, parent=None):
