@@ -168,7 +168,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
             public_network = response.split(":")[1].strip()
         except Exception as e:
             pass
-
     try:
         running_containers = []
         running_containers = subprocess.check_output("docker ps | awk \"{print \$NF}\"", shell=True).split("\n")
@@ -208,7 +207,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         sections.append(tool)
             except Exception as e:
                 pass
-
         # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
         for section in sections:
             host_config_exists = False
@@ -437,6 +435,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                 instructions['Volumes'] = {"/"+section+"-data": {}}
                                 if template_type == "core":
                                     tool_core[template_type+"-"+section+str(i)] = instructions
+                                elif template_type in ['active', 'passive']:
+                                    if template_type in section:
+                                        tool_dict[section+str(i)] = instructions
                                 else:
                                     tool_dict[template_type+"-"+section+str(i)] = instructions
                         except Exception as e:
@@ -449,6 +450,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         instructions['Volumes'] = {"/"+section+"-data": {}}
                         if template_type == "core":
                             tool_core[template_type+"-"+section] = instructions
+                        elif template_type in ['active', 'passive']:
+                            if template_type in section:
+                                tool_dict[section] = instructions
                         else:
                             tool_dict[template_type+"-"+section] = instructions
     except Exception as e:
