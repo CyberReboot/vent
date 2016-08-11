@@ -92,9 +92,11 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
 def template_queue(path, base_dir="/var/lib/docker/data/"):
     """
     Processes template files that have been added or changed or deleted from
-    the rq-worker, and tells vent-management to restart containers based on
-    changes made to the templates.
+    the rq-worker. Then, removes exited containers, kills and removes disabled containers,
+    and starts/restarts enabled containers. Only restarts enabled containers which were
+    running at the time of the configuration change.
     """
+    import ast
     import os
     import sys
     import time
@@ -106,126 +108,84 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
 
     from docker import Client
     from docker.utils.types import LogConfig
+    from subprocess import check_output
     c = Client(base_url='unix://var/run/docker.sock')
 
-    # first some cleanup
-    containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
-    for cont in containers:
+    try:
+        # keep track of running containers to restart
+        running_containers = c.containers()
+
+        # first some cleanup
+        containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
+        for cont in containers:
+            try:
+                # will only remove containers that aren't running
+                c.remove_container(cont['Id'])
+            except Exception as e:
+                pass
         try:
-            # will only remove containers that aren't running
-            c.remove_container(cont['Id'])
+            data_dir = "/data/"
+            if base_dir != "/var/lib/docker/data/":
+                data_dir = base_dir
+            enabled, disabled = ast.literal_eval(check_output("python2.7 "+data_dir+"info_tools/get_status.py enabled -b "+base_dir, shell=True))
         except Exception as e:
             pass
-
-    template_dir = base_dir+"templates/"
-    vent_dir = "/vent/"
-    if base_dir != "/var/lib/docker/data/":
-        vent_dir = base_dir
-    # check for template type
-    try:
-        template = path.split("/")[-1]
-        if template == "modes.template":
-            # kill all running containers, just in case, then start the core
-            # !! TODO perhaps also start collectors and viz if they were previously running?
-            # check if the container is this one and kill it last!
-            hostname = os.environ.get('HOSTNAME')
-            current_container = hostname
-            core_containers = c.containers(all=True)
-            for cont in core_containers:
-                if cont['Id'].startswith(current_container):
-                    current_container = cont['Id']
-                else:
+        # remove disabled running containers
+        for container in containers:
+            for name in container["Names"]:
+                if name in disabled:
                     try:
-                        c.kill(cont['Id'])
-                        c.remove_container(cont['Id'])
-                    except Exception as e:
-                        pass
-            if len(core_containers) > 0:
-                os.system('python2.7 '+vent_dir+'template_parser.py core start')
-            # !! TODO failing, so commenting out for now
-            #c.restart(current_container)
-        elif template == "core.template":
-            # check if the container is this one and kill it last!
-            hostname = os.environ.get('HOSTNAME')
-            current_container = hostname
-            # check if active/passive are disabled, and kill/remove containers
-            if os.path.isfile(template_dir+'core.template'):
-                config.read(template_dir+'core.template')
-            local_collection = []
-            passive = False
-            active = False
-            if config.has_section("local-collection") and config.options("local-collection"):
-                local_collection = config.options("local-collection")
-            for collector in local_collection:
-                val = config.get("local-collection", collector)
-                if collector == "passive" and val == "on":
-                    passive = True
-                if collector == "active" and val == "on":
-                    active = True
-            if not passive:
-                passive_containers = c.containers(all=True, filters={'name':"passive"})
-                for cont in passive_containers:
-                    try:
-                        c.kill(cont['Id'])
-                        c.remove_container(cont['Id'])
-                    except Exception as e:
-                        pass
-            if not active:
-                active_containers = c.containers(all=True, filters={'name':"active"})
-                for cont in active_containers:
-                    try:
-                        c.kill(cont['Id'])
-                        c.remove_container(cont['Id'])
+                        c.kill(container["Id"])
+                        c.remove_container(container["Id"])
+                        continue
                     except Exception as e:
                         pass
 
-            # kill and remove core containers
-            core_containers = c.containers(quiet=True, all=True, filters={'name':"core"})
-            for cont in core_containers:
-                if cont['Id'].startswith(current_container):
-                    current_container = cont['Id']
+        core_containers = c.containers(all=True, filters={'name':"core-"})
+
+        # remove core containers, so when restarted, behavior matches current configuration
+        for container in core_containers:
+            try:
+                if container["Status"] == "exited":
+                    c.remove_container(container["Id"])
+                elif container["Id"].startswith(os.environ.get('HOSTNAME')):
+                    # skip this container until the end
+                    this_container = container["Id"]
                 else:
-                    try:
-                        c.kill(cont['Id'])
-                        c.remove_container(cont['Id'])
-                    except Exception as e:
-                        pass
-            if len(core_containers) > 0:
-                os.system('python2.7 '+vent_dir+'template_parser.py core start')
-            # !! TODO failing, so commenting out for now
-            #c.restart(current_container)
-        elif template == "collectors.template":
-            active_containers = c.containers(quiet=True, all=True, filters={'name':"active"})
-            for cont in active_containers:
-                try:
-                    c.kill(cont['Id'])
-                    c.remove_container(cont['Id'])
-                except Exception as e:
-                    pass
-            if len(active_containers) > 0:
-                os.system('python2.7 '+vent_dir+'template_parser.py active start')
-            passive_containers = c.containers(quiet=True, all=True, filters={'name':"passive"})
-            for cont in passive_containers:
-                try:
-                    c.kill(cont['Id'])
-                    c.remove_container(cont['Id'])
-                except Exception as e:
-                    pass
-            if len(passive_containers) > 0:
-                os.system('python2.7 '+vent_dir+'template_parser.py passive start')
-        elif template == "visualization.template":
-            viz_containers = c.containers(quiet=True, all=True, filters={'name':"visualization"})
-            for cont in viz_containers:
-                try:
-                    c.kill(cont['Id'])
-                    c.remove_container(cont['Id'])
-                except Exception as e:
-                    pass
-            if len(viz_containers) > 0:
-                os.system('python2.7 '+vent_dir+'template_parser.py visualization start')
-        else:
+                    c.kill(container["Id"])
+                    c.remove_container(container["Id"])
+            except Exception as e:
+                pass
+
+        # restart this container last
+        try:
+            c.kill(this_container)
+            c.remove_container(this_container)
+        except Exception as e:
             pass
-            # plugin
+        # start enabled containers
+        os.system('python2.7 '+data_dir+'template_parser.py core start')
+
+        active_started = False
+        passive_started = False
+        vis_started = False
+
+        for container in running_containers:
+            # usually containers have one name, but container["Names"] is a list, so we have to be sure
+            for name in container["Names"]:
+                if active_started and passive_started and vis_started:
+                    break
+                elif "active-" in name and not active_started:
+                    os.system('python2.7 '+base_dir+'template_parser.py active start')
+                    active_started = True
+                elif "passive-" in name and not passive_started:
+                    os.system('python2.7 '+base_dir+'template_parser.py passive start')
+                    passive_started = True
+                elif "visualization-" in name and not vis_started:
+                    os.system('python2.7 '+base_dir+'template_parser.py visualization start')
+                    vis_started = True
+                else:
+                    pass
     except Exception as e:
-        print(str(e))
+        pass
     return

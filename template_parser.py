@@ -101,7 +101,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
         if template_type in mode_enabled:
             mode_enabled = mode_enabled[template_type]
         elif template_type in ['active', 'passive'] and 'collectors' in mode_enabled:
-            mode_enabled = mode_enabled['collectors']
+            mode_enabled = [name for name in mode_enabled['collectors'] if template_type in name]
         # filters out core_disabled containers from modes_enabled list.
         core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled -b "+path_dirs.base_dir, shell=True))
 
@@ -109,7 +109,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
             core_disabled = core_disabled[template_type]
         elif template_type in ['active', 'passive'] and 'collectors' in core_disabled:
             core_disabled = core_disabled['collectors']
-        
+
         sections = [container for container in mode_enabled if not container in core_disabled]
 
         # add sections that exist in the template, but are not enabled containers
@@ -153,7 +153,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
             public_network = response.split(":")[1].strip()
         except Exception as e:
             pass
-
     try:
         running_containers = []
         running_containers = subprocess.check_output("docker ps | awk \"{print \$NF}\"", shell=True).split("\n")
@@ -421,6 +420,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                 instructions['Volumes'] = {"/"+section+"-data": {}}
                                 if template_type == "core":
                                     tool_core[template_type+"-"+section+str(i)] = instructions
+                                elif template_type in ['active', 'passive']:
+                                    if template_type in section:
+                                        tool_dict[section+str(i)] = instructions
                                 else:
                                     tool_dict[template_type+"-"+section+str(i)] = instructions
                         except Exception as e:
@@ -433,6 +435,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                         instructions['Volumes'] = {"/"+section+"-data": {}}
                         if template_type == "core":
                             tool_core[template_type+"-"+section] = instructions
+                        elif template_type in ['active', 'passive']:
+                            if template_type in section:
+                                tool_dict[section] = instructions
                         else:
                             tool_dict[template_type+"-"+section] = instructions
     except Exception as e:
