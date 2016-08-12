@@ -101,16 +101,26 @@ def read_template_types(template_type, container_cmd, path_dirs):
         if template_type in mode_enabled:
             mode_enabled = mode_enabled[template_type]
         elif template_type in ['active', 'passive'] and 'collectors' in mode_enabled:
-            mode_enabled = [name for name in mode_enabled['collectors'] if template_type in name]
+            mode_enabled = [container for container in mode_enabled['collectors'] if container.startswith(template_type+"-")]
+
         # filters out core_disabled containers from modes_enabled list.
         core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled -b "+path_dirs.base_dir, shell=True))
-
         if template_type in core_disabled:
             core_disabled = core_disabled[template_type]
         elif template_type in ['active', 'passive'] and 'collectors' in core_disabled:
             core_disabled = core_disabled['collectors']
-
         sections = [container for container in mode_enabled if not container in core_disabled]
+
+        # start enabled containers. If a container is restarted from stopped to running, remove it from 'sections'
+        stopped_containers = subprocess.check_output("docker ps -a --filter 'status=exited' --filter 'name="+template_type+"-' | awk '{print $NF}'", shell=True).split("\n")
+        stopped_containers = sorted(stopped_containers)
+        restarted_containers = []
+        for sc in stopped_containers:
+            for section in sections:
+                if section in sc:
+                    os.system("docker start "+sc)
+                    restarted_containers.append(section)
+        sections = [section for section in sections if not section in restarted_containers]
 
         # add sections that exist in the template, but are not enabled containers
         config = ConfigParser.RawConfigParser()
