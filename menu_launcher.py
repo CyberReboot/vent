@@ -685,7 +685,7 @@ def build_menu_dict(path_dirs):
                         {'title': "All", 'type': COMMAND, 'command': 'if [ ! -d /tmp/vent_logs ]; then mkdir /tmp/vent_logs; fi; python2.7 '+path_dirs.info_dir+'get_logs.py -a | tee /tmp/vent_logs/vent_all.log | less'},
                     ]
                 },
-                { 'title': "Service Stats", 'type': COMMAND, 'command': "echo \"Service Stats: CTRL+C to Exit\"; docker ps | awk '{print $NF}' | grep -v NAMES | xargs docker stats" },
+                { 'title': "Service Stats", 'type': COMMAND, 'command': "sh "+path_dirs.info_dir+"get_stats.sh -r" },
                 { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh /etc/profile.d/boot2docker.sh; /bin/sh' },
                 { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
                 { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },

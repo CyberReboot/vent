@@ -53,15 +53,10 @@ class RmqEs():
         an elasticsearch index
         """
         # !! TODO index needs to be reworked for multiple file types
-        index = "pcap"
+        index = method.routing_key.split(".")[0]
         if method.routing_key.split(".")[0] == 'syslog':
             body = body.strip().replace('"', '\"')
             body = '{"log":"'+body+'"}'
-            index = "syslog"
-        elif method.routing_key.split(".")[0] == 'dshell_netflow':
-            index = "dshell_netflow"
-        elif method.routing_key.split(".")[0] == 'hex_flow':
-            index = "hex_flow"
         try:
             doc = ast.literal_eval(body)
             res = self.es_conn.index(index=index, doc_type=method.routing_key.split(".")[0], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
