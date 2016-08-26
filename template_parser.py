@@ -101,23 +101,19 @@ def read_template_types(template_type, container_cmd, path_dirs):
         mode_enabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py menabled -b "+path_dirs.base_dir, shell=True))
         # filter out core_disabled containers from modes_enabled. For collectors, containers must be in mode_enabled and core_enabled to be enabled
         core_enabled, core_disabled = ast.literal_eval(subprocess.check_output("python2.7 "+info_dir+"get_status.py cenabled -b "+path_dirs.base_dir, shell=True))
-
+        sections = []
         if template_type in ['active', 'passive']:
             if 'collectors' in mode_enabled and 'collectors' in core_enabled:
                 mode_enabled = [container for container in mode_enabled['collectors'] if container.startswith(template_type+"-")]
                 core_enabled = core_enabled['collectors']
                 sections = [container for container in mode_enabled if container in core_enabled]
-            else:
-                sections = []
         elif template_type in mode_enabled:
             mode_enabled = mode_enabled[template_type]
+            sections = mode_enabled
             if template_type in core_disabled:
                 core_disabled = core_disabled[template_type]
                 sections = [container for container in mode_enabled if not container in core_disabled]
-            else:
-                sections = mode_enabled
-        else:
-            sections = []
+                
 
         # start enabled containers. If a container is restarted from stopped to running, remove it from 'sections'
         stopped_containers = subprocess.check_output("docker ps -a --filter 'status=exited' --filter 'name="+template_type+"-' | awk '{print $NF}'", shell=True).split("\n")
