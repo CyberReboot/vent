@@ -343,7 +343,7 @@ def test_running_add_plugin():
     # go to plugins menu
     child1.send('q')
     child1.expect('Exit')
-    child1.sendline('7')
+    child1.sendline('8')
     child1.read()
     child1.close()
 
@@ -363,7 +363,7 @@ def test_running_add_plugin():
     # go to plugins menu
     child1.send('q')
     child1.expect('Exit')
-    child1.sendline('7')
+    child1.sendline('8')
     child1.read()
     child1.close()
 
@@ -389,7 +389,7 @@ def test_running_remove_plugin():
     # go to main menu
     child1.sendline('5')
     child1.expect('Exit')
-    child1.sendline('7')
+    child1.sendline('8')
     child1.read()
     child1.close()
 
@@ -416,6 +416,21 @@ def test_running_configure_template():
     # go to main menu
     child1.sendline('6')
     child1.expect('Exit')
+    child1.sendline('8')
+    child1.read()
+    child1.close()
+
+def test_visualization_endpoints():
+    """ testing running the menu and viewing visualization endpoints """
+    path_dirs = test_env.PathDirs()
+    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
+    child1 = pexpect.spawn(cmd)
+    # go to visualization endoints menu
     child1.sendline('7')
+    child1.expect('Return to Vent menu')
+    # go to main menu
+    child1.sendline('1')
+    child1.expect('Exit')
+    child1.sendline('8')
     child1.read()
     child1.close()

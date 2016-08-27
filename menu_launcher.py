@@ -387,7 +387,27 @@ def run_plugins(path_dirs, action):
 
     return modes
 
+def visualizations(path_dirs):
+    """adds visualizations endpoints to the menu"""
+    modes = []
+    try:
+        results = check_output(path_dirs.info_dir+'get_visualization.sh').split("\n")
+        for result in results:
+            if results != "":
+                p = {}
+                p['title'] = result
+                p['type'] = DISPLAY
+                p['command'] = ''
+                modes.append(p)
+    except Exception as e:
+        pass
+    if len(modes) == 0:
+        p = {'title': "You have no visualizations installed", 'type': DISPLAY, 'command': ''}
+        modes.append(p)
+    return modes
+
 def update_plugins(path_dirs):
+    """adds the plugins that can be updated to the menu"""
     modes = []
     try:
         for f in os.listdir(path_dirs.template_dir):
@@ -660,7 +680,6 @@ def build_menu_dict(path_dirs):
         },
         { 'title': "System Info", 'type': MENU, 'subtitle': 'Some core service statuses...',
           'options': [
-            #{ 'title': "Visualization Endpoint Status", 'type': INFO, 'command': '/bin/sh /var/lib/docker/data/visualization/get_url.sh' },
             { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py aaa-rabbitmq mgmt' },
             { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py rq-dashboard mgmt' },
             { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch head' },
@@ -692,6 +711,9 @@ def build_menu_dict(path_dirs):
             ]
         },
         { 'title': "Help", 'type': COMMAND, 'command': 'less '+path_dirs.data_dir+'help' },
+        { 'title': "Visualization Endpoints", 'type': MENU, 'subtitle': 'Status of visualization endpoints',
+          'options': visualizations(path_dirs)
+        },
       ]
     }
     return menu_data
