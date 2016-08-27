@@ -388,6 +388,7 @@ def run_plugins(path_dirs, action):
     return modes
 
 def visualizations(path_dirs):
+    """adds visualizations endpoints to the menu"""
     modes = []
     try:
         results = check_output(path_dirs.info_dir+'get_visualization.sh').split("\n")
@@ -406,6 +407,7 @@ def visualizations(path_dirs):
     return modes
 
 def update_plugins(path_dirs):
+    """adds the plugins that can be updated to the menu"""
     modes = []
     try:
         for f in os.listdir(path_dirs.template_dir):
