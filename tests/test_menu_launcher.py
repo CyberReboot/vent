@@ -27,7 +27,8 @@ def test_run_plugins():
     os.system("rm templates/modes.template")
 
     env = test_env.TestEnv()
-    path_dirs = test_env.PathDirs() env.initconfigs(path_dirs, False)
+    path_dirs = test_env.PathDirs()
+    env.initconfigs(path_dirs, False)
     invalid_dirs = test_env.PathDirs(base_dir="/tmp/")
     menu_launcher.run_plugins(path_dirs, "start")
     menu_launcher.run_plugins(invalid_dirs, "start")
