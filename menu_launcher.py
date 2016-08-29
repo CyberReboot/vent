@@ -393,7 +393,7 @@ def visualizations(path_dirs):
     try:
         results = check_output(path_dirs.info_dir+'get_visualization.sh').split("\n")
         for result in results:
-            if results != "":
+            if result != "":
                 p = {}
                 p['title'] = result
                 p['type'] = DISPLAY
