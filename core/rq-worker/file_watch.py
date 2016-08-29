@@ -76,7 +76,19 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
                     mime_types = config.get("service", "mime_types").split(",")
             except Exception as e:
                 print(str(e))
-            if len(mime_types) == 0 or file_mime in mime_types:
+            # check file extensions
+            ext_types = []
+            try:
+                config = ConfigParser.RawConfigParser()
+                # needed to preserve case sensitive options
+                config.optionxform=str
+                if os.path.isfile(template_dir+plugin+'.template'):
+                    config.read(template_dir+plugin+'.template')
+                if config.has_section("service") and config.has_option("service", "ext_types"):
+                    ext_types = config.get("service", "ext_types").split(",")
+            except Exception as e:
+                print(str(e))
+            if len(mime_types) == 0 or file_mime in mime_types or path.split(".", -1)[-1] in ext_types:
                 # check resources before creating container
                 # wait until there are resources available
                 container_count = len(c.containers(filters={'status':'running'}))
