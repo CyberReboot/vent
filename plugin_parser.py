@@ -53,7 +53,7 @@ def add_plugins(path_dirs, plugin_url, user=None, pw=None):
             print(plugin_name+" already exists. Not installing.")
             return
         os.system("git config --global http.sslVerify false")
-        if user == None and pw == None:
+        if not user and not pw:
             os.system("cd "+path_dirs.plugin_repos+"/ && git clone --recursive "+plugin_url)
         else:
             new_plugin_url = plugin_url.split("https://")[-1]
