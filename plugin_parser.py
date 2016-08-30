@@ -337,7 +337,7 @@ if __name__ == "__main__":
             update_images(path_dirs)
         else:
             print("invalid plugin type to parse")
-    # accepts username and password passed in from vcontrol.
+    # accepts username and password passed in from vcontrol. WARNING: should ONLY works for vcontrol
     elif len(sys.argv) == 6:
         user = sys.argv[3]
         pw = re.escape(base64.b64decode(sys.argv[4]))
@@ -347,9 +347,6 @@ if __name__ == "__main__":
             update_images(path_dirs)
         elif sys.argv[1] == "add_plugins":
             add_plugins(path_dirs, sys.argv[2], user, pw)
-        elif sys.argv[1] == "remove_plugins":
-            remove_plugins(path_dirs, sys.argv[2])
-            update_images(path_dirs)
         else:
             print("invalid plugin type to parse")
     else:

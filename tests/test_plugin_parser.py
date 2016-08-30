@@ -40,6 +40,12 @@ def test_update_images():
     plugin_parser.update_images(path_dirs)
     plugin_parser.remove_plugins(path_dirs, "https://github.com/CyberReboot/vent-plugins.git")
 
+def test_private_repos():
+    """ Tests the entrypoint of plugin_parser with private repo args """
+    path_dirs = test_env.PathDirs()
+    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py add_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs+" user pass private")
+    os.system("python2.7 "+path_dirs.base_dir+"plugin_parser.py update_plugins https://github.com/CyberReboot/vent-plugins.git "+path_dirs+" user pass private")
+
 def test_entrypoint():
     """ Tests the entrypoint of plugin_parser """
     path_dirs = test_env.PathDirs()
