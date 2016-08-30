@@ -1,7 +1,9 @@
 #!/usr/bin/env python2.7
 
+import base64
 import ConfigParser
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -37,7 +39,7 @@ copying files from plugin_repos to the correct location in local Vent filesystem
 after copying files, update templates
 """
 
-def add_plugins(path_dirs, plugin_url):
+def add_plugins(path_dirs, plugin_url, user=None, pw=None):
     try:
         if not ".git" in plugin_url:
             plugin_url = plugin_url + ".git"
@@ -51,7 +53,11 @@ def add_plugins(path_dirs, plugin_url):
             print(plugin_name+" already exists. Not installing.")
             return
         os.system("git config --global http.sslVerify false")
-        os.system("cd "+path_dirs.plugin_repos+"/ && git clone --recursive "+plugin_url)
+        if not user and not pw:
+            os.system("cd "+path_dirs.plugin_repos+"/ && git clone --recursive "+plugin_url)
+        else:
+            new_plugin_url = plugin_url.split("https://")[-1]
+            os.system("cd "+path_dirs.plugin_repos+"/ && git clone --recursive https://"+user+":"+pw+"@"+new_plugin_url)
         # check to see if repo was cloned correctly
         if not os.path.isdir(path_dirs.plugin_repos+"/"+plugin_name):
             print(plugin_name+" did not install. Is this a git repository?")
@@ -278,7 +284,7 @@ def remove_plugins(path_dirs, plugin_url):
                         config.read(path_dirs.template_dir + namespace + ".template")
                         config.remove_section(repo_dir.split("/")[0])
                         with open(path_dirs.template_dir + namespace + ".template", 'w') as configfile:
-                            config.write(configfile)  
+                            config.write(configfile)
                         config = ConfigParser.RawConfigParser()
                         # needed to preserve case sensitive options
                         config.optionxform=str
@@ -287,7 +293,7 @@ def remove_plugins(path_dirs, plugin_url):
                         with open(path_dirs.template_dir + "modes.template", 'w') as configfile:
                             config.write(configfile)
                         break
-        #remove git repo once done    
+        #remove git repo once done
         shutil.rmtree(path_dirs.plugin_repos+"/"+plugin_name)
         print("Successfully removed Plugin: "+plugin_name)
 
@@ -314,6 +320,10 @@ def update_images(path_dirs):
 if __name__ == "__main__":
     path_dirs = PathDirs()
 
+    if len(sys.argv) == 8:
+        path_dirs = PathDirs(base_dir=sys.argv[6], data_dir=sys.argv[7])
+        sys.argv = sys.argv[:-2]
+
     # change base dir for tests
     if len(sys.argv) == 5:
         path_dirs = PathDirs(base_dir=sys.argv[3], data_dir=sys.argv[4])
@@ -329,6 +339,18 @@ if __name__ == "__main__":
         elif sys.argv[1] == "remove_plugins":
             remove_plugins(path_dirs, sys.argv[2])
             update_images(path_dirs)
+        else:
+            print("invalid plugin type to parse")
+    # accepts username and password passed in from vcontrol. WARNING: should ONLY work for vcontrol
+    elif len(sys.argv) == 6:
+        user = sys.argv[3]
+        pw = re.escape(base64.b64decode(sys.argv[4]))
+        if sys.argv[1] == "update_plugins":
+            remove_plugins(path_dirs, sys.argv[2])
+            add_plugins(path_dirs, sys.argv[2], user, pw)
+            update_images(path_dirs)
+        elif sys.argv[1] == "add_plugins":
+            add_plugins(path_dirs, sys.argv[2], user, pw)
         else:
             print("invalid plugin type to parse")
     else:
