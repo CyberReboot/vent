@@ -320,6 +320,10 @@ def update_images(path_dirs):
 if __name__ == "__main__":
     path_dirs = PathDirs()
 
+    if len(sys.argv) == 8:
+        path_dirs = PathDirs(base_dir=sys.argv[6], data_dir=sys.argv[7])
+        sys.argv = sys.argv[:-2]
+
     # change base dir for tests
     if len(sys.argv) == 5:
         path_dirs = PathDirs(base_dir=sys.argv[3], data_dir=sys.argv[4])
@@ -339,8 +343,6 @@ if __name__ == "__main__":
             print("invalid plugin type to parse")
     # accepts username and password passed in from vcontrol. WARNING: should ONLY work for vcontrol
     elif len(sys.argv) == 6:
-        if sys.argv[5] != "private":
-            path_dirs = PathDirs(base_dir=sys.argv[2], data_dir=sys.argv[5])
         user = sys.argv[3]
         pw = re.escape(base64.b64decode(sys.argv[4]))
         if sys.argv[1] == "update_plugins":
