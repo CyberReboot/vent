@@ -280,9 +280,9 @@ def read_template_types(template_type, container_cmd, path_dirs):
                                     host_config_new["Links"] = ["core-aaa-rabbitmq:rabbitmq"]
                                 # add files volume
                                 if "Binds" in host_config:
-                                    host_config_new["Binds"].append("/files:/files:ro")
+                                    host_config_new["Binds"].append("/files:/files:rw")
                                 else:
-                                    host_config_new["Binds"] = ["/files:/files:ro"]
+                                    host_config_new["Binds"] = ["/files:/files:rw"]
                             if "Links" in host_config:
                                 for rec in host_config["Links"]:
                                     r = rec.split(":")
@@ -347,7 +347,7 @@ def read_template_types(template_type, container_cmd, path_dirs):
                 if not host_config_exists:
                     host_config = {}
                     if template_type not in ["visualization", "core", "active", "passive"]:
-                        host_config["Binds"] = ["/files:/files:ro"]
+                        host_config["Binds"] = ["/files:/files:rw"]
                         try:
                             rabbitmq_host = "rabbitmq"
                             external_rabbit = False
