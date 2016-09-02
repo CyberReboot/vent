@@ -1,3 +1,24 @@
+# v0.2.0 (2016-09-01)
+
+bug fixes:
+ - fixed the following issues: #38, #43, #56, #92, #109, #110, #121, #130, #134, #135, #151, #153, #154, #160, #165, #167
+
+improvements:
+ - plugins can write out new files that other plugins can pick up
+ - added ext_type and mime_type as template options for plugins
+ - better readability in the UI
+ - updated Elasticsearch to 2.3.5
+ - vent now allows vcontrol to use private repositories
+
+new features:
+ - added Visualization Endpoints to menu
+    - supported: Kibana, Grafana
+
+environment:
+ - based on boot2docker 1.12.1
+ - using docker 1.12.1
+ - using python 2.7.11
+
 # v0.1.3 (2016-08-01)
 
 bug fixes:
