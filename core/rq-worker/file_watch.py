@@ -95,7 +95,7 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
                 while container_count >= container_max:
                     time.sleep(5)
                     container_count = len(c.containers(filters={'status':'running'}))
-                cmd = "python2.7 "+vent_dir+"template_parser.py "+plugin+" start "+path
+                cmd = "python2.7 "+vent_dir+"template_parser.py "+plugin+" start "+f_path
                 os.system(cmd)
     except Exception as e:
         print(str(e))
