@@ -399,7 +399,13 @@ def read_template_types(template_type, container_cmd, path_dirs):
                     # vent hostname
                     hostname = container_cmd.split("_", 1)[0]
                     if "Env" in instructions:
-                        instructions['Env'].append("VENT_HOST="+hostname)
+                        if type(instructions['Env']) == list:
+                            instructions['Env'].append("VENT_HOST="+hostname)
+                        else:
+                            temp_env = instructions['Env'][1:-1].split(",")
+                            instructions['Env'] = []
+                            for item in temp_env:
+                                instructions['Env'].append(item.strip()[1:-1])
                     else:
                         instructions['Env'] = ["VENT_HOST="+hostname]
                     # override the container command to be what was passed in
