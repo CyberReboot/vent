@@ -1,3 +1,14 @@
+# v0.2.1 (2016-09-07)
+
+bug fixes:
+ - fixed issue where turning off local rabbitmq would break syslog and subsequent core containers
+ - fixed issue where specifying a single Env for a plugin was breaking
+
+environment:
+ - based on boot2docker 1.12.1
+ - using docker 1.12.1
+ - using python 2.7.11
+
 # v0.2.0 (2016-09-01)
 
 bug fixes:
