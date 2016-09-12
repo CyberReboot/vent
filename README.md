@@ -172,3 +172,20 @@ FAQ
 **Q**: I went into the shell and did a `docker ps` but no containers are running, how do I get it working again?
 
 **A**: Execute `docker rm vent-management; sudo /data/custom`, if that doesn't work, restart the machine.
+
+**Q**: I'm not running DHCP, how do I statically set the IP Address?
+
+**A**: For a quick and dirty solution (doesn't survive reboot):
+
+```
+ifconfig eth0 192.168.99.101 netmask 255.255.255.0 broadcast 192.168.99.255 up
+ip route add default via 192.168.99.1
+```
+
+Additionally if you need to set DNS, add the following to `/etc/resolv.conf`:
+
+```
+nameserver 8.8.8.8
+```
+
+For a more permanent solution look at the [docs](https://github.com/boot2docker/boot2docker) for boot2docker
