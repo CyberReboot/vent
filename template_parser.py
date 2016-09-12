@@ -113,7 +113,6 @@ def read_template_types(template_type, container_cmd, path_dirs):
             if template_type in core_disabled:
                 core_disabled = core_disabled[template_type]
                 sections = [container for container in mode_enabled if not container in core_disabled]
-                
 
         # start enabled containers. If a container is restarted from stopped to running, remove it from 'sections'
         stopped_containers = subprocess.check_output("docker ps -a --filter 'status=exited' --filter 'name="+template_type+"-' | awk '{print $NF}'", shell=True).split("\n")
@@ -208,23 +207,36 @@ def read_template_types(template_type, container_cmd, path_dirs):
                 pass
         # parse through each section of the template file, creating corresponding fields for the JSON file written in execute_template()
         for section in sections:
+            external_overrides = []
+            instances = []
             host_config_exists = False
             instructions = {}
             try:
                 options = config.options(section)
             except Exception as e:
                 options = []
+            try:
+                info_name = config.get("info", "name")
+            except Exception as e:
+                info_name = ""
+            try:
+                service_schedule[template_type] = json.loads(config.get("service", "schedule"))
+            except Exception as e:
+                service_schedule[template_type] = {}
+            try:
+                # !! TODO this is not correct, should be a dictionary of options and values
+                instances = config.options("instances")
+            except Exception as e:
+                instances = []
+            try:
+                locally_active = config.options("locally-active")
+                for l_a in locally_active:
+                    if config.get("locally-active", l_a) == "off":
+                        external_overrides.append(l_a)
+            except Exception as e:
+                external_overrides = []
             for option in options:
-                if section == "info" and option == "name":
-                    info_name = config.get(section, option)
-                elif section == "service" and option == "schedule":
-                    service_schedule[template_type] = json.loads(config.get(section, option))
-                elif section == "instances":
-                    # !! TODO this is not correct, should be a dictionary of options and values
-                    instances = config.options(section)
-                elif section == "locally-active" and config.get(section, option) == "off":
-                    external_overrides.append(option)
-                elif section not in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"] and section not in external_overrides:
+                if section not in ["info", "service", "locally-active", "external", "instances", "active-containers", "local-collection"] and section not in external_overrides:
                     option_val = config.get(section, option)
                     try:
                         option_val = int(option_val)
@@ -399,7 +411,13 @@ def read_template_types(template_type, container_cmd, path_dirs):
                     # vent hostname
                     hostname = container_cmd.split("_", 1)[0]
                     if "Env" in instructions:
-                        instructions['Env'].append("VENT_HOST="+hostname)
+                        if type(instructions['Env']) == list:
+                            instructions['Env'].append("VENT_HOST="+hostname)
+                        else:
+                            temp_env = instructions['Env'][1:-1].split(",")
+                            instructions['Env'] = []
+                            for item in temp_env:
+                                instructions['Env'].append(item.strip()[1:-1])
                     else:
                         instructions['Env'] = ["VENT_HOST="+hostname]
                     # override the container command to be what was passed in
