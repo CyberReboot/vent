@@ -20,5 +20,12 @@ if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
 	sudo ln -s /data/info_tools/get_tools.sh /usr/local/bin/vent_get_tools
 	sudo ln -s /data/info_tools/get_types.sh /usr/local/bin/vent_get_types
 	sudo ln -s /data/info_tools/get_visualization.sh /usr/local/bin/vent_get_visualization
+	if ! [ "$(ls -A /var/lib/docker/data/templates/core)" ]; then
+		sudo mv /data/templates/ /var/lib/docker/data/templates 2>/dev/null
+	fi
+	if ! [ "$(ls -A /var/lib/docker/data/core)" ]; then
+		sudo mv /data/core/ /var/lib/docker/data/core 2>/dev/null
+	fi
+	sudo chmod -R 777 /var/lib/docker/data/core
 fi
 

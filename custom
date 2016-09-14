@@ -16,10 +16,3 @@ sudo chmod -R 777 /var/lib/docker/data/visualization
 sudo chmod -R 777 /var/lib/docker/data/collectors
 sudo chmod -R 777 /var/lib/docker/data/plugins
 sudo chmod -R 777 /var/lib/docker/data/plugin_repos
-if ! [ "$(ls -A /var/lib/docker/data/templates)" ]; then
-	sudo mv /data/templates/ /var/lib/docker/data/templates 2>/dev/null
-fi
-if ! [ "$(ls -A /var/lib/docker/data/core)" ]; then
-	sudo mv /data/core/ /var/lib/docker/data/core 2>/dev/null
-fi
-sudo chmod -R 777 /var/lib/docker/data/core
