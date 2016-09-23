@@ -5,23 +5,34 @@
 # !! TODO have a flag for --build-plugins to build plugins on the first boot
 #rm -rf vent-*.iso
 
+# commentted out a bunch of lines because bootstrapped
+
+#echo "building python for tinycore linux..."
+#if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
+#    docker build --no-cache -t tce-python .
+#else
+#    docker build -t tce-python .
+#fi
+
+# get latest boot2docker
+docker pull boot2docker/boot2docker
+
 cd dependencies/tinycore-python2
-echo "building python for tinycore linux..."
-if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
-    docker build --no-cache -t tce-python .
-else
-    docker build -t tce-python .
-fi
-docker run --rm tce-python > python2.tar
+docker pull cyberreboot/tce-python
+docker run --rm cyberreboot/tce-python > python2.tar
+
+#echo "building vent-management..."
+#if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
+#    docker build --no-cache -t vent-management .
+#else
+#    docker build -t vent-management .
+#fi
+
 cd -
 cd management
-echo "building vent-management..."
-if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
-    docker build --no-cache -t vent-management .
-else
-    docker build -t vent-management .
-fi
-docker save -o vent-management.tar vent-management
+docker pull cyberreboot/vent-management
+docker save -o vent-management.tar cyberreboot/vent-management
+
 echo "done..."
 cd -
 if [ "$1" = "--build-plugins" -o "$2" = "--build-plugins" ]; then
