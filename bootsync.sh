@@ -5,27 +5,29 @@ if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
 	mkdir -p /var/lib/docker/data/files
 	chmod -R 777 /var/lib/docker/data/files
 	ln -s /var/lib/docker/data/files /files
-	mv /data/profile /var/lib/boot2docker/profile
-	echo $'Match User docker\n\tAllowTCPForwarding no\n\tX11Forwarding no\n\tForceCommand /data/wrapper.sh' >> /usr/local/etc/ssh/sshd_config
+	mv /vent/profile /var/lib/boot2docker/profile
+	echo $'Match User docker\n\tAllowTCPForwarding no\n\tX11Forwarding no\n\tForceCommand /vent/wrapper.sh' >> /usr/local/etc/ssh/sshd_config
 	sudo /usr/local/etc/init.d/openssh restart
-	touch /var/lib/boot2docker/vent.sh
 	# TODO loop through files in info_tools rather than manually doing each one
-	sudo ln -s /data/info_tools/get_info.sh /usr/local/bin/vent_get_info
-	sudo ln -s /data/info_tools/get_logs.py /usr/local/bin/vent_get_logs
-	sudo ln -s /data/info_tools/get_messages.sh /usr/local/bin/vent_get_messages
-	sudo ln -s /data/info_tools/get_namespaces.py /usr/local/bin/vent_get_namespaces
-	sudo ln -s /data/info_tools/get_service.sh /usr/local/bin/vent_get_service
-	sudo ln -s /data/info_tools/get_status.py /usr/local/bin/vent_get_status
-	sudo ln -s /data/info_tools/get_tasks.sh /usr/local/bin/vent_get_tasks
-	sudo ln -s /data/info_tools/get_tools.sh /usr/local/bin/vent_get_tools
-	sudo ln -s /data/info_tools/get_types.sh /usr/local/bin/vent_get_types
-	sudo ln -s /data/info_tools/get_visualization.sh /usr/local/bin/vent_get_visualization
+	sudo ln -s /vent/info_tools/get_info.sh /usr/local/bin/vent-get-info
+	sudo ln -s /vent/info_tools/get_logs.py /usr/local/bin/vent-get-logs
+	sudo ln -s /vent/info_tools/get_messages.sh /usr/local/bin/vent-get-messages
+	sudo ln -s /vent/info_tools/get_namespaces.py /usr/local/bin/vent-get-namespaces
+	sudo ln -s /vent/info_tools/get_service.sh /usr/local/bin/vent-get-service
+	sudo ln -s /vent/info_tools/get_status.py /usr/local/bin/vent-get-status
+	sudo ln -s /vent/info_tools/get_tasks.sh /usr/local/bin/vent-get-tasks
+	sudo ln -s /vent/info_tools/get_tools.sh /usr/local/bin/vent-get-tools
+	sudo ln -s /vent/info_tools/get_types.sh /usr/local/bin/vent-get-types
+	sudo ln -s /vent/info_tools/get_visualization.sh /usr/local/bin/vent-get-visualization
+	sudo ln -s /vent/vent /usr/local/bin/vent
+	sudo ln -s /vent/vent-generic /usr/local/bin/vent-generic
 	if ! [ "$(ls -A /var/lib/docker/data/templates/core)" ]; then
-		sudo mv /data/templates/ /var/lib/docker/data/templates 2>/dev/null
+		sudo mv /vent/templates/ /var/lib/docker/data/templates 2>/dev/null
 	fi
 	if ! [ "$(ls -A /var/lib/docker/data/core)" ]; then
-		sudo mv /data/core/ /var/lib/docker/data/core 2>/dev/null
+		sudo mv /vent/core/ /var/lib/docker/data/core 2>/dev/null
 	fi
 	sudo chmod -R 777 /var/lib/docker/data/core
+	touch /var/lib/boot2docker/vent.sh
 fi
 

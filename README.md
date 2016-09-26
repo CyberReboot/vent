@@ -88,7 +88,7 @@ docker-machine create -d virtualbox --virtualbox-boot2docker-url http://localhos
 docker-machine ssh vent
 ```
 
-of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  vent runs in RAM, so changes need to be made under `/var/lib/docker` or `/var/lib/boot2docker` as those are persistent (see boot2docker [documentation](https://github.com/boot2docker/boot2docker/blob/master/README.md) for more information).  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running, execute `sudo /data/custom`.
+of course traditional ways of deploying an ISO work as well, including VMWare, OpenStack, and booting from it to install on bare metal.  a couple of things to note: it will automatically install and provision the disk and then restart when done.  vent runs in RAM, so changes need to be made under `/var/lib/docker` or `/var/lib/boot2docker` as those are persistent (see boot2docker [documentation](https://github.com/boot2docker/boot2docker/blob/master/README.md) for more information).  it's possible that `vent-management` won't automatically get added and run, if you run `docker ps` and it's not running, execute `sudo /vent/custom`.
 
 getting started
 ====
@@ -171,7 +171,7 @@ FAQ
 
 **Q**: I went into the shell and did a `docker ps` but no containers are running, how do I get it working again?
 
-**A**: Execute `docker rm vent-management; sudo /data/custom`, if that doesn't work, restart the machine.
+**A**: Execute `docker rm vent-management; sudo /vent/custom`, if that doesn't work, restart the machine.
 
 **Q**: I'm not running DHCP, how do I statically set the IP Address?
 

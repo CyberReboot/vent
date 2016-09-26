@@ -1,6 +1,7 @@
-*.iso
 *.gz
+*.iso
 *.pyc
+*.tar
 *.zip
 .git
 images

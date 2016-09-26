@@ -147,12 +147,12 @@ fi
 # vent instance version
 if [ "$version" = true ]; then
     echo -n "Version: ";
-    cat /data/VERSION | grep -v built
+    cat /vent/VERSION | grep -v built
 fi
 
 # date of vent instance creation
 if [ "$build_date" = true ]; then
-    cat /data/VERSION | grep built
+    cat /vent/VERSION | grep built
 fi
 
 # uptime of current vent instance
