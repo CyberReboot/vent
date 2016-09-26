@@ -739,6 +739,7 @@ def main(base_dir=None, info_dir=None, data_dir=None):
     os.system('clear')
 
 def execute(cmd):
+    """executes a subprocess command and iterates ... as the output is created"""
     popen = Popen(cmd, stdout=PIPE, shell=True, universal_newlines=True)
     stdout_lines = iter(popen.stdout.readline, "")
     for stdout_line in stdout_lines:
@@ -752,10 +753,10 @@ def execute(cmd):
 if __name__ == "__main__": # pragma: no cover
     # make sure that vent-management is running
     try:
-        print "loading",
+        print("loading"),
         for result in execute('/bin/sh /vent/bootlocal.sh'):
-            print result,
-        print
+            print(result),
+        print("")
     except Exception as e:
         pass
 
