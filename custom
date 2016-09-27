@@ -10,6 +10,7 @@ sudo mkdir -p /var/lib/docker/data/collectors
 sudo mkdir -p /var/lib/docker/data/visualization
 sudo mkdir -p /var/lib/docker/data/plugin_repos
 sudo mkdir -p /var/lib/docker/data/images
+sudo chmod -R 777 /var/lib/docker/data
 sudo chmod -R 777 /var/lib/docker/data/images
 sudo chmod -R 777 /var/lib/docker/data/visualization
 sudo chmod -R 777 /var/lib/docker/data/collectors
