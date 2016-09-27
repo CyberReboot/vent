@@ -9,26 +9,7 @@ import subprocess
 import sys
 import time
 
-class PathDirs:
-    """ Global path directories for parsing templates """
-    def __init__(self,
-                 base_dir="/var/lib/docker/data/",
-                 collectors_dir="collectors",
-                 core_dir="core",
-                 plugins_dir="plugins/",
-                 plugin_repos="plugin_repos",
-                 template_dir="templates/",
-                 vis_dir="visualization",
-                 info_dir="/vent/info_tools/"
-                 ):
-        self.base_dir = base_dir
-        self.collectors_dir = base_dir + collectors_dir
-        self.core_dir = base_dir + core_dir
-        self.plugins_dir = base_dir + plugins_dir
-        self.plugin_repos = base_dir + plugin_repos
-        self.template_dir = base_dir + template_dir
-        self.vis_dir = base_dir + vis_dir
-        self.info_dir = info_dir
+from helpers.paths import PathDirs
 
 def execute_template(template_type, template_execution, info_name, service_schedule, tool_core, tool_dict, delay_sections):
     # note for plugin, also run core
