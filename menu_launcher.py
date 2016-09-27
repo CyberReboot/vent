@@ -15,6 +15,7 @@ import termios
 import tty
 
 from subprocess import call, check_output, CalledProcessError, PIPE, Popen
+from helpers.paths import PathDirs
 
 try:
     screen = curses.initscr()
@@ -54,28 +55,6 @@ DISPLAY = "display"
 # info shows command results inline in menu without user confirmation.
 # it does this by running the command stored in the 'command' index on menu load.
 INFO = "info"
-
-class PathDirs:
-    """ Global path directories for parsing templates """
-    def __init__(self,
-                 base_dir="/var/lib/docker/data/",
-                 collectors_dir="collectors",
-                 core_dir="core",
-                 plugins_dir="plugins/",
-                 plugin_repos="plugin_repos",
-                 template_dir="templates/",
-                 vis_dir="visualization",
-                 info_dir="/vent/info_tools/",
-                 data_dir="/vent/"):
-        self.base_dir = base_dir
-        self.collectors_dir = base_dir + collectors_dir
-        self.core_dir = base_dir + core_dir
-        self.plugins_dir = base_dir + plugins_dir
-        self.plugin_repos = base_dir + plugin_repos
-        self.template_dir = base_dir + template_dir
-        self.vis_dir = base_dir + vis_dir
-        self.info_dir = info_dir
-        self.data_dir = data_dir
 
 def get_container_menu(path_dirs):
     """get a list of containers, returns a menu with containers as options"""
