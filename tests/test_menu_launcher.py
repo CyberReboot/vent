@@ -280,11 +280,11 @@ def test_running_menu():
     # child.expect('error')
 
     # go to namespace menu
-    child.sendline('2')
-    child.expect('Please select a namespace:')
+    #child.sendline('2')
+    #child.expect('Please select a namespace:')
     # return to logs menu
-    child.sendline(ESC)
-    child.expect('Return to System Commands menu')
+    #child.sendline(ESC)
+    #child.expect('Return to System Commands menu')
     # go to files
     child.sendline('3')
     child.expect('Enter the name of the processed file to lookup logs for:')
