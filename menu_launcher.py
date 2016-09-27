@@ -1,6 +1,12 @@
 #!/usr/bin/env python2.7
 
-import ConfigParser
+try:
+    # python2
+    import ConfigParser
+except ImportError:
+    # python3
+    import configparser as ConfigParser
+
 import ast
 import curses
 import os
@@ -8,7 +14,7 @@ import sys
 import termios
 import tty
 
-from subprocess import call, check_output, PIPE, Popen
+from subprocess import call, check_output, CalledProcessError, PIPE, Popen
 
 try:
     screen = curses.initscr()
@@ -59,8 +65,8 @@ class PathDirs:
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
                  vis_dir="visualization",
-                 info_dir="/data/info_tools/",
-                 data_dir="/data/"):
+                 info_dir="/vent/info_tools/",
+                 data_dir="/vent/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         self.core_dir = base_dir + core_dir
@@ -732,13 +738,29 @@ def main(base_dir=None, info_dir=None, data_dir=None):
     curses.endwin()
     os.system('clear')
 
+def execute(cmd):
+    """executes a subprocess command and iterates ... as the output is created"""
+    popen = Popen(cmd, stdout=PIPE, shell=True, universal_newlines=True)
+    stdout_lines = iter(popen.stdout.readline, "")
+    for stdout_line in stdout_lines:
+        yield "..."
+
+    popen.stdout.close()
+    return_code = popen.wait()
+    if return_code != 0:
+        raise CalledProcessError(return_code, cmd)
+
 if __name__ == "__main__": # pragma: no cover
     # make sure that vent-management is running
     try:
-        result = check_output('/bin/sh /data/bootlocal.sh'.split())
-        print(result)
+        print("loading"),
+        for result in execute('/bin/sh /vent/bootlocal.sh'):
+            print(result),
+        print("")
     except Exception as e:
         pass
+
+    # run main program
     if len(sys.argv) == 4:
         main(base_dir=sys.argv[1], info_dir=sys.argv[2], data_dir=sys.argv[3])
     else:

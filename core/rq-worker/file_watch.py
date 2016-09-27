@@ -24,7 +24,7 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
 
     template_dir = base_dir+"templates/"
     plugins_dir = base_dir+"plugins/"
-    vent_dir = "/data/"
+    vent_dir = "/vent/"
     if base_dir != "/var/lib/docker/data/":
         vent_dir = base_dir
     try:
@@ -136,7 +136,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
             except Exception as e:
                 pass
         try:
-            data_dir = "/data/"
+            data_dir = "/vent/"
             if base_dir != "/var/lib/docker/data/":
                 data_dir = base_dir
             enabled, disabled = ast.literal_eval(check_output("python2.7 "+data_dir+"info_tools/get_status.py enabled -b "+base_dir, shell=True))

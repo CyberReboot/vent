@@ -19,7 +19,7 @@ class PathDirs:
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
                  vis_dir="visualization",
-                 info_dir="/data/info_tools/"
+                 info_dir="/vent/info_tools/"
                  ):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir

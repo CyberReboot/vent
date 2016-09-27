@@ -18,5 +18,5 @@ for file in `ls *` ; do
     fi
 done
 if [ "$2" = "tar" ]; then
-    ssh docker@$HOST "/data/bootlocal.sh"
+    ssh docker@$HOST "/vent/bootlocal.sh"
 fi

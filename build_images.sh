@@ -21,7 +21,7 @@ if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
 		cd $basedir/core && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && (docker pull cyberreboot/core-$(echo {} | sed 's%^.\/%%') && docker tag cyberreboot/core-$(echo {} | sed 's%^.\/%%') core/$(echo {} | sed 's%^.\/%%') || docker build --no-cache -t core/$(echo {} | sed 's%^.\/%%') .))' ';'
 		cd $basedir/plugins && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t $(echo {} | sed 's%^.\/%%') .)' ';'
 		cd $basedir/collectors && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t collectors/$(echo {} | sed 's%^.\/%%') .)' ';'
-		cd $basedir/data/visualization && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t visualization/$(echo {} | sed 's%^.\/%%') .)' ';'
+		cd $basedir/vent/visualization && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build --no-cache -t visualization/$(echo {} | sed 's%^.\/%%') .)' ';'
 	fi
 else
 	if [ "$1" = "--save" -o "$2" = "--save" ]; then
