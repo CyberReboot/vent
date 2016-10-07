@@ -2,7 +2,7 @@
 
 image_exists=$(docker images -q cyberreboot/vent-management | wc -l)
 if [ "$image_exists" == "0" ]; then
-	docker load -i /data/management/vent-management.tar
+	docker load -i /vent/management/vent-management.tar
 fi
 exists=$(docker ps -aq --filter name=vent-management | wc -l)
 if [ "$exists" == "1" ]; then
