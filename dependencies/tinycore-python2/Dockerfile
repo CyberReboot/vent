@@ -1,4 +1,4 @@
-FROM tatsushid/tinycore:7.0-x86_64
+FROM tatsushid/tinycore:7.2-x86_64
 
 # Instructions are run with 'tc' user
 
