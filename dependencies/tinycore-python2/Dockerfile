@@ -4,7 +4,7 @@ FROM tatsushid/tinycore:7.2-x86_64
 
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8 LC_ALL=C
 
 #RUN echo 'http://distro.ibiblio.org/tinycorelinux/' > /opt/tcemirror
 RUN tce-load -wic gnupg curl \
