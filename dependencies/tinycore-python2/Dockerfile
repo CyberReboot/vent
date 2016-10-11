@@ -1,10 +1,10 @@
-FROM tatsushid/tinycore:7.0-x86_64
+FROM tatsushid/tinycore:7.2-x86_64
 
 # Instructions are run with 'tc' user
 
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8 LC_ALL=C
 
 #RUN echo 'http://distro.ibiblio.org/tinycorelinux/' > /opt/tcemirror
 RUN tce-load -wic gnupg curl \
@@ -13,10 +13,10 @@ RUN tce-load -wic gnupg curl \
 # gpg: key 18ADD4FF: public key "Benjamin Peterson <benjamin@python.org>" imported
 RUN gpg2 --keyserver pool.sks-keyservers.net --recv-keys C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF
 
-ENV PYTHON_VERSION 2.7.11
+ENV PYTHON_VERSION 2.7.12
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 7.1.2
+ENV PYTHON_PIP_VERSION 8.1.2
 
 RUN tce-load -wic \
         bzip2-dev \
