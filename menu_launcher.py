@@ -88,7 +88,7 @@ def get_namespace_menu(path_dirs):
         command3 = " | tee /tmp/vent_logs/vent_namespace_"
         p['title'] = 'Namespace Logs'
         p['subtitle'] = 'Please select a namespace:'
-        namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | uniq", shell=True).split("\n")
+        namespaces = check_output("/bin/sh "+path_dirs.info_dir+"get_info.sh installed images | grep / | cut -f1 -d\"/\" | sort | uniq", shell=True).split("\n")
         namespaces = filter(None, namespaces)
         if namespaces:
             p['options'] = [ {'title': name, 'type': COMMAND, 'command': '' } for name in namespaces ]
