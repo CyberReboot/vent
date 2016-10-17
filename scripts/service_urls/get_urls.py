@@ -15,7 +15,7 @@ class PathDirs:
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
                  vis_dir="visualization",
-                 info_dir="/vent/info_tools/"
+                 info_dir="/scripts/info_tools/"
                  ):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
@@ -61,16 +61,16 @@ def url(path_dirs, service, service_type):
         else:
             if service == "elasticsearch":
                 if service_type == "head":
-                    url_str = check_output("/vent/service_urls/get_elasticsearch_head_url.sh")
+                    url_str = check_output("/scripts/service_urls/get_elasticsearch_head_url.sh")
                 elif service_type == "marvel":
-                    url_str = check_output("/vent/service_urls/get_elasticsearch_marvel_url.sh")
+                    url_str = check_output("/scripts/service_urls/get_elasticsearch_marvel_url.sh")
             elif service == "aaa-rabbitmq":
-                url_str = check_output("/vent/service_urls/get_rabbitmq_url.sh")
+                url_str = check_output("/scripts/service_urls/get_rabbitmq_url.sh")
             elif service == "aaa-syslog":
                 # !! TODO
                 pass
             elif service == "rq-dashboard":
-                url_str = check_output("/vent/service_urls/get_rqdashboard_url.sh")
+                url_str = check_output("/scripts/service_urls/get_rqdashboard_url.sh")
     except Exception as e:
         pass
     return url_str

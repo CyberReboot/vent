@@ -8,9 +8,11 @@ class PathDirs:
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
                  vis_dir="visualization",
-                 info_dir="/vent/info_tools/",
+                 info_dir="info_tools/",
                  vent_dir="/vent/",
-                 data_dir="/vent/"):
+                 data_dir="/vent/",
+                 vendor_dir="/vendor/",
+                 scripts_dir="/scripts/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         self.core_dir = base_dir + core_dir
@@ -18,6 +20,8 @@ class PathDirs:
         self.plugin_repos = base_dir + plugin_repos
         self.template_dir = base_dir + template_dir
         self.vis_dir = base_dir + vis_dir
-        self.info_dir = info_dir
+        self.scripts_dir = scripts_dir
+        self.info_dir = scripts_dir + info_dir
         self.vent_dir = vent_dir
         self.data_dir = data_dir
+        self.vendor_dir = vendor_dir
