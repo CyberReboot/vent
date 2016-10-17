@@ -365,7 +365,7 @@ def run_plugins(path_dirs, action):
 
     # make sure that vent-management is running
     try:
-        result = check_output('/bin/sh '+path_dirs.data_dir+'bootlocal.sh').split()
+        result = check_output('/bin/sh '+path_dirs.scripts_dir+'bootlocal.sh').split()
         print(result)
     except Exception as e:
         pass
@@ -400,7 +400,7 @@ def update_plugins(path_dirs):
                 p = {}
                 p['title'] = f
                 p['type'] = COMMAND
-                p['command'] = 'python2.7 '+path_dirs.data_dir+'suplemon/suplemon.py '+path_dirs.template_dir+f
+                p['command'] = 'python2.7 '+path_dirs.vendor_dir+'suplemon/suplemon.py '+path_dirs.template_dir+f
                 modes.append(p)
     except Exception as e:
         print("unable to get the configuration templates.\n")
@@ -665,18 +665,18 @@ def build_menu_dict(path_dirs):
         },
         { 'title': "System Info", 'type': MENU, 'subtitle': 'Some core service statuses...',
           'options': [
-            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py aaa-rabbitmq mgmt' },
-            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py rq-dashboard mgmt' },
-            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch head' },
-            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.data_dir+'service_urls/get_urls.py elasticsearch marvel' },
+            { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.scripts_dir+'service_urls/get_urls.py aaa-rabbitmq mgmt' },
+            { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.scripts_dir+'service_urls/get_urls.py rq-dashboard mgmt' },
+            { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.scripts_dir+'service_urls/get_urls.py elasticsearch head' },
+            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.scripts_dir+'service_urls/get_urls.py elasticsearch marvel' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' }
           ]
         },
         { 'title': "Build", 'type': MENU, 'subtitle': 'Please select a service group to build:',
           'options': [
-            { 'title': "Build new plugins and core", 'type': CONFIRM, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1] },
-            { 'title': "Force rebuild all plugins and core", 'type': CONFIRM, 'command': '/bin/sh '+path_dirs.data_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1]+' --no-cache' },
+            { 'title': "Build new plugins and core", 'type': CONFIRM, 'command': '/bin/sh '+path_dirs.scripts_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1] },
+            { 'title': "Force rebuild all plugins and core", 'type': CONFIRM, 'command': '/bin/sh '+path_dirs.scripts_dir+'build_images.sh --basedir '+path_dirs.base_dir[:-1]+' --no-cache' },
           ]
         },
         { 'title': "System Commands", 'type': MENU, 'subtitle': 'Please select an option:',
@@ -733,7 +733,7 @@ if __name__ == "__main__": # pragma: no cover
     # make sure that vent-management is running
     try:
         print("loading"),
-        for result in execute('/bin/sh /vent/bootlocal.sh'):
+        for result in execute('/bin/sh /scripts/bootlocal.sh'):
             print(result),
         print("")
     except Exception as e:

@@ -1,9 +1,9 @@
 #!/bin/sh
 sudo mkdir -p /var/lib/docker/data/images
 sudo chmod -R 777 /var/lib/docker/data/images
-sudo mv /vent/images/ /var/lib/docker/data/images 2>/dev/null
-sudo /vent/bootsync.sh
-sudo /vent/bootlocal.sh
+sudo mv /images/ /var/lib/docker/data/images 2>/dev/null
+sudo /scripts/bootsync.sh
+sudo /scripts/bootlocal.sh
 sudo mkdir -p /var/lib/docker/data
 sudo mkdir -p /var/lib/docker/data/plugins
 sudo mkdir -p /var/lib/docker/data/collectors

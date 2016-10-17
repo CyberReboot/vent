@@ -61,4 +61,4 @@ FAQ
 
 **Q**: I went into the shell and did a `docker ps` but no containers are running, how do I get it working again?
 
-**A**: execute `docker rm vent-management; sudo /vent/custom`, if that doesn't work, restart the VM.
+**A**: execute `docker rm vent-management; sudo /scripts/custom`, if that doesn't work, restart the VM.

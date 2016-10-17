@@ -9,7 +9,7 @@ test:
 	@echo "checking dependencies"
 	@echo
 	pip -V
-	pip install -r tests/requirements.txt
+	pip install -r vent/tests/requirements.txt
 	py.test -v --cov=. -k 'not suplemon' --cov-report term-missing
 
 pull:
@@ -19,28 +19,28 @@ vent: depends
 	rm -rf images/*.tar
 	docker build -t vent .
 	docker run --rm vent > vent.iso
-	rm -rf dependencies/tinycore-python2/python2.tar
-	rm -rf management/vent-management.tar
+	rm -rf vendor/tinycore-python2/python2.tar
+	rm -rf vent/management/vent-management.tar
 .PHONY: vent
 
 prebuilt: depends-prebuilt
 	docker build -t vent .
 	docker run --rm vent > vent.iso
-	rm -rf dependencies/tinycore-python2/python2.tar
-	rm -rf management/vent-management.tar
+	rm -rf vendor/tinycore-python2/python2.tar
+	rm -rf vent/management/vent-management.tar
 
 no-cache: depends-no-cache
 	rm -rf images/*.tar
 	docker build --no-cache -t vent .
 	docker run --rm vent > vent.iso
-	rm -rf dependencies/tinycore-python2/python2.tar
-	rm -rf management/vent-management.tar
+	rm -rf vendor/tinycore-python2/python2.tar
+	rm -rf vent/management/vent-management.tar
 
 prebuilt-no-cache: depends-prebuilt-no-cache
 	docker build --no-cache -t vent .
 	docker run --rm vent > vent.iso
-	rm -rf dependencies/tinycore-python2/python2.tar
-	rm -rf management/vent-management.tar
+	rm -rf vendor/tinycore-python2/python2.tar
+	rm -rf vent/management/vent-management.tar
 	rm -rf images/*.tar
 
 depends:
@@ -48,35 +48,35 @@ depends:
 	@echo "checking dependencies"
 	@echo
 	docker -v
-	./build.sh
+	./scripts/build.sh
 
 depends-no-cache:
 	@echo
 	@echo "checking dependencies"
 	@echo
 	docker -v
-	./build.sh --no-cache
+	./scripts/build.sh --no-cache
 
 depends-prebuilt:
 	@echo
 	@echo "checking dependencies"
 	@echo
 	docker -v
-	./build.sh --build-plugins
+	./scripts/build.sh --build-plugins
 
 depends-prebuilt-no-cache:
 	@echo
 	@echo "checking dependencies"
 	@echo
 	docker -v
-	./build.sh --build-plugins --no-cache
+	./scripts/build.sh --build-plugins --no-cache
 
 install:
 	@echo
 	@echo "installing vent and vent-generic to /usr/local/bin/"
 	@echo "------"
-	cp vent /usr/local/bin/vent
-	cp vent-generic /usr/local/bin/vent-generic
+	cp scripts/vent /usr/local/bin/vent
+	cp scripts/vent-generic /usr/local/bin/vent-generic
 	@echo "------"
 	@echo
 .PHONY: install
@@ -97,7 +97,7 @@ images: depends-prebuilt
 clean:
 	rm -rf images
 	rm -rf images.zip
-	rm -rf dependencies/tinycore-python2/python2.tar
-	rm -rf management/vent-management.tar
+	rm -rf vendor/tinycore-python2/python2.tar
+	rm -rf vent/management/vent-management.tar
 	rm -vf vent.iso
 .PHONY: clean

@@ -18,7 +18,7 @@ class PathDirs:
                  plugin_repos="plugin_repos",
                  template_dir="templates/",
                  vis_dir="visualization",
-                 info_dir="/vent/info_tools/",
+                 info_dir="/scripts/info_tools/",
                  data_dir="/vent/"
                  ):
         self.base_dir = base_dir
