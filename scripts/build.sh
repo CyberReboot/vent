@@ -17,7 +17,7 @@
 # get latest boot2docker
 docker pull boot2docker/boot2docker
 
-cd dependencies/tinycore-python2
+cd vendor/tinycore-python2
 docker pull cyberreboot/tce-python
 docker run --rm cyberreboot/tce-python > python2.tar
 
@@ -29,7 +29,7 @@ docker run --rm cyberreboot/tce-python > python2.tar
 #fi
 
 cd -
-cd management
+cd vent/management
 docker pull cyberreboot/vent-management
 docker save -o vent-management.tar cyberreboot/vent-management
 

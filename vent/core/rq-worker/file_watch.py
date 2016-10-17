@@ -136,7 +136,7 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
             except Exception as e:
                 pass
         try:
-            data_dir = "/vent/"
+            data_dir = "/scripts/"
             if base_dir != "/var/lib/docker/data/":
                 data_dir = base_dir
             enabled, disabled = ast.literal_eval(check_output("python2.7 "+data_dir+"info_tools/get_status.py enabled -b "+base_dir, shell=True))
@@ -176,6 +176,9 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
         except Exception as e:
             pass
         # start enabled containers
+        data_dir = "/vent/"
+        if base_dir != "/var/lib/docker/data/":
+            data_dir = base_dir
         os.system('python2.7 '+data_dir+'template_parser.py core start')
 
         active_started = False
