@@ -3,7 +3,7 @@ import pytest
 import subprocess
 import time
 
-from vent.tests import test_env
+from tests import test_env
 import file_watch
 
 def test_settings():
