@@ -2,8 +2,8 @@ import os
 import pytest
 import sys
 
-from vent.scripts.info_tools import get_logs
-from vent.vent.tests import test_env
+from scripts.info_tools import get_logs
+from tests import test_env
 
 def test_msg():
     """ tests custom output """

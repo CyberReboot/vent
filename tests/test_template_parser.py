@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from vent.vent import template_parser
+from vent import template_parser
 
 class PathDirs:
     """ Global path directories for parsing templates """
