@@ -37,6 +37,15 @@ vent is a lightweight, self-contained virtual appliance designed to serve as a g
 
 simply create your `plugins`, point vent to them & install them, and drop a file in vent to begin processing!
 
+Installation
+====
+- clone the repository
+
+`$ git clone https://github.com/CyberReboot/vent`
+- running setup.py
+
+`$ python setup.py install`
+
 download pre-compiled ISO
 ====
 
