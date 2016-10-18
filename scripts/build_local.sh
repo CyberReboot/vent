@@ -1,4 +1,7 @@
 #!/bin/bash
+########################################################
+##### EXPERIMENTAL, USE AT YOUR OWN RISK!!! ############
+########################################################
 
 # TODO check distro
 # TODO check if docker is already installed, and check version
