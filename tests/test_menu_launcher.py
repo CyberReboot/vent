@@ -245,11 +245,11 @@ def test_running_menu():
 
     ### System Info Menu ###
     # go to System Info Menu
-    child.sendline('3')
-    child.expect('Return to Vent menu')
+    #child.sendline('3')
+    #child.expect('Return to Vent menu')
     # return to Main Menu
-    child.sendline(ESC)
-    child.expect('Exit')
+    #child.sendline(ESC)
+    #child.expect('Exit')
 
     ### Build Menu ###
     # go to Build menu
@@ -405,11 +405,11 @@ def test_running_configure_template():
     child1.sendline('5')
     child1.expect('Return to Mode menu')
     # configure a template
-    child1.sendline('1')
-    child1.expect('Suplemon')
+    #child1.sendline('1')
+    #child1.expect('Suplemon')
     # quit out of editing the template
-    child1.sendcontrol('q')
-    child1.expect('Return to Mode menu')
+    #child1.sendcontrol('q')
+    #child1.expect('Return to Mode menu')
     # return to modes menu
     child1.sendline('6')
     child1.expect('Return to Vent menu')
