@@ -1,8 +1,11 @@
+*.egg-info
+*.gz
 *.iso
 *.swp
 *.pyc
 *.tar
-*.gz
 *.zip
 .DS_Store
 .coverage
+build
+dist
