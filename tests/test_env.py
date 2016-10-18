@@ -15,7 +15,8 @@ class PathDirs:
                  template_dir="vent/templates/",
                  vis_dir="visualization",
                  info_dir="scripts/info_tools/",
-                 data_dir=os.getcwd()+"/vent/"):
+                 data_dir=os.getcwd()+"/vent/",
+                 scripts_dir=os.getcwd()+"/scripts/"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
         if not os.path.exists(self.collectors_dir):
@@ -31,6 +32,7 @@ class PathDirs:
             os.makedirs(self.vis_dir)
         self.info_dir = info_dir
         self.data_dir = data_dir
+        self.scripts_dir = scripts_dir
 
 class TestEnv():
     """ Class to create the right env for testing - installing plugins, modifying modes.template/core.template, etc... """
