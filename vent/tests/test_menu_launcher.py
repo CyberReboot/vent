@@ -4,8 +4,8 @@ import os
 import pexpect
 import pytest
 
-from vent import menu_launcher
-from vent.tests import test_env
+from vent.vent import menu_launcher
+from vent.vent.tests import test_env
 
 def test_pathdirs():
     """ Gets path directory class from menu_launcher """

@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from vent.info_tools import get_status
+from vent.scripts.info_tools import get_status
 import test_env
 
 def test_get_mode_config():

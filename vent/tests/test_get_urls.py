@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from vent.service_urls import get_urls
+from vent.scripts.service_urls import get_urls
 
 def test_url():
     """ Tests get_urls """

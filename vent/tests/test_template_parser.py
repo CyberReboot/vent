@@ -1,18 +1,18 @@
 import os
 import pytest
 
-from vent import template_parser
+from vent.vent import template_parser
 
 class PathDirs:
     """ Global path directories for parsing templates """
     def __init__(self,
                  base_dir=os.getcwd()+"/",
                  collectors_dir="collectors",
-                 core_dir="core",
-                 plugins_dir="plugins/",
+                 core_dir="vent/core",
+                 plugins_dir="vent/plugins/",
                  plugin_repos="plugin_repos",
-                 template_dir="templates/",
-                 info_dir="info_tools/",
+                 template_dir="vent/templates/",
+                 info_dir="scripts/info_tools/",
                  vis_dir="visualization"):
         self.base_dir = base_dir
         self.collectors_dir = base_dir + collectors_dir
