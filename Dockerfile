@@ -8,6 +8,7 @@ RUN curl -L -o /tmp/perl5.tcz $TCL_REPO_BASE/tcz/perl5.tcz \
 
 ADD vent $ROOTFS/vent/
 ADD scripts $ROOTFS/scripts/
+ADD scripts/vent-cli $ROOTFS/usr/local/bin/vent-cli
 ADD vendor $ROOTFS/vendor/
 ADD motd $ROOTFS/etc/motd
 RUN echo "built on $(date)" >> $ROOTFS/vent/VERSION
@@ -29,8 +30,6 @@ RUN tar xf python.tar \
     && mv python2.7 $ROOTFS/usr/local/lib/python2.7
 RUN tar xf python-include.tar \
     && mv python2.7 $ROOTFS/usr/local/include/python2.7
-RUN echo "TERM=xterm LANG=C.UTF-8 /usr/local/bin/python2.7 /vent/menu_launcher.py" >> $ROOTFS/usr/local/bin/vent-cli
-RUN chmod +x $ROOTFS/usr/local/bin/vent-cli
 RUN rm -rf $ROOTFS/vendor/tinycore-python2
 RUN chmod -R 777 $ROOTFS/vent/plugins
 RUN chmod -R 777 $ROOTFS/vent/templates

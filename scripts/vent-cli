@@ -1,0 +1,1 @@
+TERM=xterm LANG=C.UTF-8 /usr/local/bin/python2.7 /vent/menu_launcher.py
