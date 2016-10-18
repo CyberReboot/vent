@@ -2,7 +2,7 @@ import os
 import pytest
 
 from vent import plugin_parser
-from vent.tests import test_env
+from tests import test_env
 
 def test_pathdirs():
     """ Test path directories """

@@ -2,8 +2,8 @@ import os
 import pytest
 import sys
 
-from vent.info_tools import get_namespaces
-from vent.tests import test_env
+from scripts.info_tools import get_namespaces
+from tests import test_env
 
 def test_init():
     """ tests argparse initialization """
