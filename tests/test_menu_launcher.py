@@ -145,7 +145,7 @@ def test_get_namespace_menu():
 def test_running_menu():
     """ test running the actual menu """
     ESC = '\033' # escape key for returning to previous menu
-    cmd_invalid_path = "python2.7 menu_launcher.py "
+    cmd_invalid_path = "python2.7 vent/menu_launcher.py "
     child0 = pexpect.spawn(cmd_invalid_path)
     # expect main menu
     child0.expect('Exit')
@@ -161,7 +161,7 @@ def test_running_menu():
     child0.close()
 
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 vent/menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     invalid_url = "https://thisisinvalid-.git"
     child = pexpect.spawn(cmd)
     child.timeout = 120
@@ -328,7 +328,7 @@ def test_running_menu():
 def test_running_add_plugin():
     """ testing running the menu and adding a plugin """
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 vent/menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
     ### Plugins Menu ###
     # go to plugins menu
@@ -347,7 +347,7 @@ def test_running_add_plugin():
     child1.read()
     child1.close()
 
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 vent/menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
     child1.timeout = 120
     ### Plugins Menu ###
@@ -370,7 +370,7 @@ def test_running_add_plugin():
 def test_running_remove_plugin():
     """ testing running the menu and removing a plugin """
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 vent/menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
     ### Plugins Menu ###
     # go to plugins menu
@@ -396,7 +396,7 @@ def test_running_remove_plugin():
 def test_running_configure_template():
     """ testing running the menu and configuring a template file """
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 vent/menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
     # go to modes menu
     child1.sendline('1')
@@ -423,7 +423,7 @@ def test_running_configure_template():
 def test_visualization_endpoints():
     """ testing running the menu and viewing visualization endpoints """
     path_dirs = test_env.PathDirs()
-    cmd = "python2.7 menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
+    cmd = "python2.7 vent/menu_launcher.py "+path_dirs.base_dir+" "+path_dirs.info_dir+" "+path_dirs.data_dir
     child1 = pexpect.spawn(cmd)
     # go to visualization endoints menu
     child1.sendline('7')
