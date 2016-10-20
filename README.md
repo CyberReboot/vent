@@ -37,15 +37,6 @@ vent is a lightweight, self-contained virtual appliance designed to serve as a g
 
 simply create your `plugins`, point vent to them & install them, and drop a file in vent to begin processing!
 
-Installation
-====
-- clone the repository
-
-`$ git clone https://github.com/CyberReboot/vent`
-- running setup.py
-
-`$ python setup.py install`
-
 download pre-compiled ISO
 ====
 
@@ -106,7 +97,9 @@ from within the vent interface (once SSH'd in) first `build` the core.  it might
 
 once it's built you're ready to start the `core` from the `mode` menu option.
 
-after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to copy up pcaps.  that's it!
+after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to install plugins (again in the vent interface, under the plugins menu).  here's an example one that can handle PCAP files: https://github.com/CyberReboot/vent-plugins
+
+once you're finished installing plugins, you're ready to copy up files to be processed, in the case of the above example plugin, you'd want to copy up PCAP files.  see below for how to do that, but once the files are copied up, they are automatically processed, sent as messages on a queue and indexed for quick and easy analysis.
 
 copy up new pcaps
 ====
@@ -159,6 +152,15 @@ if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
 ```
 scp modes.template docker@vent:/var/lib/docker/data/templates/modes.template
 ```
+
+package installation for development (experimental)
+====
+- clone the repository
+
+`$ git clone --recursive https://github.com/CyberReboot/vent`
+- running setup.py
+
+`$ python setup.py install`
 
 documentation
 ====
