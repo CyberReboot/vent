@@ -6,9 +6,9 @@ RUN apk add --update \
     py-pip \
     && rm -rf /var/cache/apk/*
 
-ADD requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-ADD rmq_es_connector.py rmq_es_connector.py
+ADD requirements.txt /vent/requirements.txt
+RUN pip install -r /vent/requirements.txt
+ADD rmq_es_connector.py /vent/rmq_es_connector.py
 
-ENTRYPOINT ["python", "rmq_es_connector.py"]
+ENTRYPOINT ["python", "/vent/rmq_es_connector.py"]
 CMD [""]
