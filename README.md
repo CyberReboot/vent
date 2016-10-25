@@ -48,11 +48,9 @@ build the ISO
 
 ### build dependencies
 
-```
-docker
-make
-zip
-```
+- docker
+- make
+- zip
 
 ### getting the bits
 
