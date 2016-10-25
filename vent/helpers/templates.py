@@ -8,26 +8,34 @@ class Template:
         if template:
             self.config.read(template)
 
-    def get_sections(self):
+    @staticmethod
+    def get_sections():
         return
 
-    def get_options(self, section):
+    @staticmethod
+    def get_options(section):
         return
 
-    def set_section(self, section):
+    @staticmethod
+    def set_section(section):
         return
 
-    def set_option(self, section, option):
+    @staticmethod
+    def set_option(section, option):
         return
 
-    def add_section(self, section):
+    @staticmethod
+    def add_section(section):
         return
 
-    def add_option(self, section, option):
+    @staticmethod
+    def add_option(section, option):
         return
 
-    def del_section(self, section):
+    @staticmethod
+    def del_section(section):
         return
 
-    def del_option(self, section, option):
+    @staticmethod
+    def del_option(section, option):
         return
