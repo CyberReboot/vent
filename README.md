@@ -97,6 +97,8 @@ from within the vent interface (once SSH'd in) first `build` the core.  it might
 
 once it's built you're ready to start the `core` from the `mode` menu option.
 
+if you're using Virtualbox, before starting the `core` you'll want to first uncomment the `public_nic` option in the `core.template` by removing the `#` so that it uses `eth1` instead of the default `eth0`.  You can change this through the menu by going to  `Mode -> Configure`.
+
 after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to install plugins (again in the vent interface, under the plugins menu).  here's an example one that can handle PCAP files: https://github.com/CyberReboot/vent-plugins
 
 once you're finished installing plugins, you're ready to copy up files to be processed, in the case of the above example plugin, you'd want to copy up PCAP files.  see below for how to do that, but once the files are copied up, they are automatically processed, sent as messages on a queue and indexed for quick and easy analysis.
