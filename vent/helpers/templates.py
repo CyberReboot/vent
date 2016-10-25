@@ -1,10 +1,11 @@
 import ConfigParser
 
+
 class Template:
     """ Handle parsing templates """
     def __init__(self, template=None):
         self.config = ConfigParser.RawConfigParser()
-        self.config.optionxform=str
+        self.config.optionxform = str
         if template:
             self.config.read(template)
 
