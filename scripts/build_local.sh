@@ -3,15 +3,13 @@
 ##### EXPERIMENTAL, USE AT YOUR OWN RISK!!! ############
 ########################################################
 
-# TODO check distro
-# TODO check if docker is already installed, and check version
-# TODO check that python is installed and which version
 distro_family=$(uname -s 2> /dev/null || echo "unknown")
 docker_installed=false
 python_installed=false
 
 # check operating system
 if [ "$distro_family" = "Linux" ]; then
+    # !! TODO
     echo "found Linux..."
     distro_name="unknown"
     distro_version="unknown"
