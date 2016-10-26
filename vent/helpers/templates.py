@@ -10,19 +10,19 @@ class Template:
             self.config.read(template)
 
     @staticmethod
-    def get_sections():
+    def sections():
         return
 
     @staticmethod
-    def get_options(section):
+    def section(section):
         return
 
     @staticmethod
-    def set_section(section):
+    def options(section):
         return
 
     @staticmethod
-    def set_option(section, option):
+    def option(section, option):
         return
 
     @staticmethod
