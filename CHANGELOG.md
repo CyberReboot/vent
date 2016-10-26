@@ -1,3 +1,21 @@
+# v0.3.0 (2016-10-26)
+
+bug fixes:
+ - fixed the following issues: #41, #182, #184, #195, #207, #216, #217
+ - fixed issue where containers were getting killed when going into the shell
+
+improvements:
+ - updated suplemon#c808217
+ - restructured directories and files to make it cleaner and more structured
+ - changed data path on vent instance from /data to /vent
+ - experimental local install that isn't inside a virtual machine, not complete
+ - updated documentation
+
+environment:
+ - based on boot2docker 1.12.2
+ - using docker 1.12.2
+ - using python 2.7.12
+
 # v0.2.1 (2016-09-07)
 
 bug fixes:
