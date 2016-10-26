@@ -1,33 +1,42 @@
 import ConfigParser
 
+
 class Template:
     """ Handle parsing templates """
     def __init__(self, template=None):
         self.config = ConfigParser.RawConfigParser()
-        self.config.optionxform=str
+        self.config.optionxform = str
         if template:
             self.config.read(template)
 
-    def get_sections(self):
+    @staticmethod
+    def sections():
         return
 
-    def get_options(self, section):
+    @staticmethod
+    def section(section):
         return
 
-    def set_section(self, section):
+    @staticmethod
+    def options(section):
         return
 
-    def set_option(self, section, option):
+    @staticmethod
+    def option(section, option):
         return
 
-    def add_section(self, section):
+    @staticmethod
+    def add_section(section):
         return
 
-    def add_option(self, section, option):
+    @staticmethod
+    def add_option(section, option):
         return
 
-    def del_section(self, section):
+    @staticmethod
+    def del_section(section):
         return
 
-    def del_option(self, section, option):
+    @staticmethod
+    def del_option(section, option):
         return
