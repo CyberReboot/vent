@@ -38,9 +38,9 @@ cd -
 if [ "$1" = "--build-plugins" -o "$2" = "--build-plugins" ]; then
     echo "building plugins...this might take a while, and a couple GB of space..."
     if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
-        ./build_images.sh --no-cache --save
+        ./scripts/build_images.sh --no-cache --save
     else
-        ./build_images.sh --save
+        ./scripts/build_images.sh --save
     fi
     mkdir -p images
     mv /tmp/vent-*.tar images/
