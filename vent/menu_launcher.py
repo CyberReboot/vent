@@ -690,7 +690,7 @@ def build_menu_dict(path_dirs):
                     ]
                 },
                 { 'title': "Service Stats", 'type': COMMAND, 'command': "sh "+path_dirs.info_dir+"get_stats.sh -r" },
-                { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; /bin/sh' },
+                { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; cat /vent/VERSION; /bin/sh' },
                 { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
                 { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
             ]
