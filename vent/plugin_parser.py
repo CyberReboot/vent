@@ -335,5 +335,7 @@ if __name__ == "__main__":
             add_plugins(path_dirs, sys.argv[2], user, pw)
         else:
             print("invalid plugin type to parse")
+            sys.exit(10)
     else:
         print("Invalid number of arguments")
+        sys.exit(20)
