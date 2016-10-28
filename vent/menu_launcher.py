@@ -45,6 +45,9 @@ COMMAND = "command"
 # confirm is the same as command, however it waits for user confirmation before clearing results.
 CONFIRM = "confirm"
 
+# prompt is the same as command, however it waits for user confirmation prior to running.
+PROMPT = "prompt"
+
 # input is similar to confirm, but it requires manual user input prior to running.
 INPUT = "input"
 
@@ -123,6 +126,15 @@ def confirm():
     os.system("echo Operation complete. Press any key to continue...")
     while getch():
         break
+        
+def prompt():
+    """wait for user confimation"""
+    os.system('echo "Do you want to continue [Y/n]?"')
+    char = getch()
+    if char == "Y":
+        return True
+    else:
+        return False
 
 def get_plugin_status(path_dirs):
     """ Displays status of all running, not running/built, not built, and disabled plugins """
@@ -528,6 +540,20 @@ def processmenu(path_dirs, menu, parent=None):
         getin = runmenu(menu, parent)
         if getin == optioncount:
             exitmenu = True
+        elif menu['options'][getin]['type'] in [PROMPT]:
+            curses.def_prog_mode()
+            os.system('reset')
+            screen.clear()
+            if prompt():
+                os.system(menu['options'][getin]['command'])
+
+            screen.clear()
+            curses.reset_prog_mode()
+            try:
+                curses.curs_set(1)
+                curses.curs_set(0)
+            except Exception as e:
+                pass
         elif menu['options'][getin]['type'] in [COMMAND, CONFIRM]:
             curses.def_prog_mode()
             os.system('reset')
@@ -691,8 +717,8 @@ def build_menu_dict(path_dirs):
                 },
                 { 'title': "Service Stats", 'type': COMMAND, 'command': "sh "+path_dirs.info_dir+"get_stats.sh -r" },
                 { 'title': "Shell Access", 'type': COMMAND, 'command': 'cat /etc/motd; cat /vent/VERSION; /bin/sh' },
-                { 'title': "Reboot", 'type': COMMAND, 'command': 'sudo reboot' },
-                { 'title': "Shutdown", 'type': COMMAND, 'command': 'sudo shutdown -h now' },
+                { 'title': "Reboot", 'type': PROMPT, 'command': 'sudo reboot' },
+                { 'title': "Shutdown", 'type': PROMPT, 'command': 'sudo shutdown -h now' },
             ]
         },
         { 'title': "Help", 'type': COMMAND, 'command': 'less '+path_dirs.data_dir+'help' },

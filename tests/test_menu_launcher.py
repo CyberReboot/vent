@@ -270,6 +270,14 @@ def test_running_menu():
     # go to system commands
     child.sendline('5')
     child.expect('Return to Vent menu')
+    # choose reboot
+    child.sendline('4')
+    child.expect('Do you want to continue')
+    child.send('n')
+    # choose shutdown
+    child.sendline('5')
+    child.expect('Do you want to continue')
+    child.send('n')
     # go to logs menu
     child.sendline('1')
     child.expect('Return to System Commands menu')
