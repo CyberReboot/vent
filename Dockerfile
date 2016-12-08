@@ -34,5 +34,5 @@ RUN rm -rf $ROOTFS/vendor/tinycore-python2
 RUN chmod -R 777 $ROOTFS/vent/plugins
 RUN chmod -R 777 $ROOTFS/vent/templates
 
-RUN /make_iso.sh
+RUN /tmp/make_iso.sh
 CMD ["cat", "/boot2docker.iso"]
