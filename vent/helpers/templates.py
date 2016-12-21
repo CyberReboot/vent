@@ -1,7 +1,5 @@
 import ConfigParser
 
-# !! TODO ErrorHandler decorator
-
 def ErrorHandler(function):
     def wrapper(*args, **kwargs):
         try:
