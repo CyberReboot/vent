@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='vent',
-    version='v0.3.1-dev',
+    version='v0.3.1',
     packages=['vent', 'vent.core', 'vent.core.file-drop', 'vent.core.rq-worker',
               'vent.core.rq-dashboard', 'vent.core.template-change',
               'vent.core.rmq-es-connector', 'vent.helpers'],

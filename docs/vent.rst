@@ -7,9 +7,7 @@ Subpackages
 .. toctree::
 
     vent.core
-    vent.info_tools
-    vent.service_urls
-    vent.tests
+    vent.helpers
 
 Submodules
 ----------

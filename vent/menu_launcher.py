@@ -694,7 +694,6 @@ def build_menu_dict(path_dirs):
             { 'title': "RabbitMQ Management Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.scripts_dir+'service_urls/get_urls.py aaa-rabbitmq mgmt' },
             { 'title': "RQ Dashboard Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.scripts_dir+'service_urls/get_urls.py rq-dashboard mgmt' },
             { 'title': "Elasticsearch Head Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.scripts_dir+'service_urls/get_urls.py elasticsearch head' },
-            { 'title': "Elasticsearch Marvel Status", 'type': INFO, 'command': 'python2.7 '+path_dirs.scripts_dir+'service_urls/get_urls.py elasticsearch marvel' },
             { 'title': "Containers Running", 'type': INFO, 'command': 'docker ps | sed 1d | wc -l' },
             { 'title': "Uptime", 'type': INFO, 'command': 'uptime' }
           ]

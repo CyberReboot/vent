@@ -1,9 +1,9 @@
-FROM alpine:3.4
+FROM alpine:3.5
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
     python \
-    py-pip \
+    py2-pip \
     && rm -rf /var/cache/apk/*
 
 ADD . /template-change

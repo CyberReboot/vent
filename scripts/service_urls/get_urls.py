@@ -50,8 +50,6 @@ def url(path_dirs, service, service_type):
             if service == "elasticsearch":
                 if service_type == "head":
                     url_str = "http://"+external_host+":9200/_plugin/head"
-                elif service_type == "marvel":
-                    url_str = "http://"+external_host+":9200/_plugin/marvel"
             elif service == "aaa-rabbitmq":
                 url_str = "http://"+external_host+":15672 login: guest/guest"
             elif service == "aaa-syslog":
@@ -62,8 +60,6 @@ def url(path_dirs, service, service_type):
             if service == "elasticsearch":
                 if service_type == "head":
                     url_str = check_output("/scripts/service_urls/get_elasticsearch_head_url.sh")
-                elif service_type == "marvel":
-                    url_str = check_output("/scripts/service_urls/get_elasticsearch_marvel_url.sh")
             elif service == "aaa-rabbitmq":
                 url_str = check_output("/scripts/service_urls/get_rabbitmq_url.sh")
             elif service == "aaa-syslog":

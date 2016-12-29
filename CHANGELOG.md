@@ -1,3 +1,21 @@
+# v0.3.1 (2016-12-29)
+
+improvements:
+ - put back version info when new shell is created
+ - plugin_parser now throws errors as appropriate
+ - reboot now prompts for confirmation
+ - template parser helper functions now implemented
+ - updated documentation
+
+environment:
+ - based on boot2docker 1.12.5
+ - using docker 1.12.5
+ - using python 2.7.13
+ - using pip 9.0.1
+ - using redis:alpine
+ - using alpine:3.5
+ - using elasticsearch 2.4.3
+
 # v0.3.0 (2016-10-26)
 
 bug fixes:
