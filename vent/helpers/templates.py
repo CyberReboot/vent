@@ -5,7 +5,7 @@ def ErrorHandler(function):
         try:
             return function(*args, **kwargs)
         except Exception as e:
-            print e
+            print(e)
     return wrapper
 
 class Template:
