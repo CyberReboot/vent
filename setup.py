@@ -22,7 +22,6 @@ setup(
                                              'scripts/info_tools/get_types.sh',
                                              'scripts/info_tools/get_visualization.sh']),
                 ('vent/scripts/service_urls', ['scripts/service_urls/get_elasticsearch_head_url.sh',
-                                               'scripts/service_urls/get_elasticsearch_marvel_url.sh',
                                                'scripts/service_urls/get_rabbitmq_url.sh',
                                                'scripts/service_urls/get_rqdashboard_url.sh',
                                                'scripts/service_urls/get_urls.py']),
