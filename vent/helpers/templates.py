@@ -19,31 +19,31 @@ class Template:
     """ Returns a list of sections """
     @ErrorHandler
     def sections(self):
-        return self.config.sections()
+        return (True, self.config.sections())
 
     """ Returns a list of tuples of (option, value) for the section """
     @ErrorHandler
     def section(self, section):
         # check if the named section exists
         if self.config.has_section(section):
-            return self.config.items(section)
-        return "Section: " + section + " does not exist"
+            return (True, self.config.items(section))
+        return (False, "Section: " + section + " does not exist")
 
     """ Returns a list of options for a section """
     @ErrorHandler
     def options(self, section):
         if self.config.has_section(section):
-            return self.config.options(section)
-        return "Section: " + section + " does not exist"
+            return (True, self.config.options(section))
+        return (False, "Section: " + section + " does not exist")
 
     """ Returns the value of the option """
     @ErrorHandler
     def option(self, section, option):
         if self.config.has_section(section):
             if self.config.has_option(section, option):
-                return self.config.get(section, option)
-            return "Option: " + option + " does not exist"
-        return "Section: " + section + " does not exist"
+                return (True, self.config.get(section, option))
+            return (False, "Option: " + option + " does not exist")
+        return (False, "Section: " + section + " does not exist")
 
     """
     If section exists, returns log,
@@ -55,23 +55,19 @@ class Template:
         if not self.config.has_section(section):
             self.config.add_section(section)
             # return updated sections
-            return self.config.sections()
-        return "Section: " + section + " already exists"
+            return (True, self.config.sections())
+        return (False, "Section: " + section + " already exists")
 
     """
     Creates an option for a section. If the section does
-    not exist, can create the section. If no value is provided
-    the option is set to a default value. Only adds option if it
-    doesn't already exist.
+    not exist, it will create the section.
     """
     @ErrorHandler
-    def add_option(self, section, option, value=None, force=False):
-        # creates section if it doesn't exist
-        if force:
-            # if duplicate section, do not force, and return message
-            message = self.add_section(section)
-            if type(message) == str:
-                return message
+    def add_option(self, section, option, value=None):
+        # if duplicate section, and return error message
+        message = self.add_section(section)
+        if not message[0]:
+            return message
         # check if section exists
         if self.config.has_section(section):
             if not self.config.has_option(section, option):
@@ -80,17 +76,17 @@ class Template:
                     self.config.set(section, option, value)
                 else:
                     self.config.set(section, option)
-                return self.config.options(section)
-            return "Option: " + option + " already exists in " + section
-        return "Section: " + section + " does not exist. Did you want to force it?"
+                return (True, self.config.options(section))
+            return (False, "Option: " + option + " already exists in " + section)
+        return (False, "Section: " + section + " does not exist. Did you want to force it?")
 
     """ Deletes a section if it exists """
     @ErrorHandler
     def del_section(self, section):
         if self.config.has_section(section):
             self.config.remove_section(section)
-            return self.config.sections()
-        return "Section: " + section + " does not exist"
+            return (True, self.config.sections())
+        return (False, "Section: " + section + " does not exist")
 
     """ Deletes an option if the section and option exist """
     @ErrorHandler
@@ -98,9 +94,9 @@ class Template:
         if self.config.has_section(section):
             if self.config.has_option(section, option):
                 self.config.remove_option(section, option)
-                return self.config.options(section)
-            return "Option: " + option + " does not exist"
-        return "Section: " + section + " does not exist"
+                return (True, self.config.options(section))
+            return (False, "Option: " + option + " does not exist")
+        return (False, "Section: " + section + " does not exist")
 
     """
     Sets an option to a value in the given section. Option is created if it
@@ -109,22 +105,22 @@ class Template:
     @ErrorHandler
     def set_option(self, section, option, value):
         if self.config.has_section(section):
-            return self.config.set(section, option, value)
-        return "Section: " + section + " does not exist"
+            return (True, self.config.set(section, option, value))
+        return (False, "Section: " + section + " does not exist")
 
     """ Renames a section by transferring all option-value pairs to a new section """
     @ErrorHandler
     def rename_section(self, original, new):
         if self.config.has_section(original):
             if not self.config.has_section(new):
-                values = self.section(original)
+                values = self.section(original)[1]
                 self.del_section(original)
                 self.add_section(new)
                 for value in values:
-                    self.add_option(new, value[0], value[1])
-                return self.config.sections()
-            return "Section: " + new + " already exists"
-        return "Section: " + original + " does not exist"
+                    self.set_option(new, value[0], value[1])
+                return (True, self.config.sections())
+            return (False, "Section: " + new + " already exists")
+        return (False, "Section: " + original + " does not exist")
 
     """ Moves an option from one section to another """
     @ErrorHandler
@@ -134,7 +130,7 @@ class Template:
                 if self.config.has_option(source, option):
                     # check that option does not exist at destination
                     if not self.config.has_option(destination, option):
-                        self.add_option(destination, option, self.config.get(source, option))
+                        self.set_option(destination, option, self.config.get(source, option))
                         self.del_option(source, option)
                     else:
                         # only overwrite if True
@@ -142,8 +138,8 @@ class Template:
                             self.config.set(destination, option, self.config.get(source, option))
                             self.del_option(source, option)
                         else:
-                            return "Option: " + option + " already exists in " + destination + ". Did you want to overwrite?"
-                    return self.config.options(destination)
-                return "Option: " + option + " does not exist in " + source
-            return "Section: " + destination + " does not exist"
-        return "Section: " + source + " does not exist"
+                            return (False, "Option: " + option + " already exists in " + destination + ". Did you want to overwrite?")
+                    return (True, self.config.options(destination))
+                return (False, "Option: " + option + " does not exist in " + source)
+            return (False, "Section: " + destination + " does not exist")
+        return (False, "Section: " + source + " does not exist")
