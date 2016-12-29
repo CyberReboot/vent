@@ -13,6 +13,7 @@ dependencies:
     # necessary to fix curses import
     - sudo apt-get install -y libncurses5 libncurses5-dev libncursesw5
     - pyenv uninstall -f 2.7.11
+    - pyenv uninstall -f 2.7.12
     - pyenv install 2.7.12
     - chmod -R 777 /home/ubuntu/vent
 test:
