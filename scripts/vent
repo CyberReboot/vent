@@ -1,0 +1,22 @@
+#!/bin/bash
+
+echo "Assumes you have docker-machine installed and vent is connected to it."
+if [ "$#" -ne 1 ]; then
+    HOST="vent"
+else
+    HOST=$1
+fi
+
+echo "Note: this does not copy files recursively..."
+for file in `ls *` ; do
+    if [ "$2" = "tar" ]; then
+        docker-machine ssh $HOST "mkdir -p /var/lib/docker/data/images"
+        docker-machine scp $file $HOST:/var/lib/docker/data/images/${file}
+    else
+        docker-machine scp $file $HOST:/tmp/.${file}.tmp
+        docker-machine ssh $HOST "mv /tmp/.${file}.tmp /files/$file"
+    fi
+done
+if [ "$2" = "tar" ]; then
+    docker-machine ssh $HOST "/vent/bootlocal.sh"
+fi
