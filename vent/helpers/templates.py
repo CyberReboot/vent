@@ -1,4 +1,9 @@
-import ConfigParser
+try:
+    # python2
+    import ConfigParser
+except ImportError:
+    # python3
+    import configparser as ConfigParser
 
 def ErrorHandler(function):
     def wrapper(*args, **kwargs):
