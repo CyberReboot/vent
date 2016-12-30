@@ -25,3 +25,4 @@ class PathDirs:
         self.vent_dir = vent_dir
         self.data_dir = data_dir
         self.vendor_dir = vendor_dir
+        # !! TODO should make sure the paths exists, if not create them
