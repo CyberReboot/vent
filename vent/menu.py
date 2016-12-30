@@ -41,8 +41,7 @@ class Menu:
         except Exception as e:
             return ('failed', e)
 
-    @staticmethod
-    def run():
+    def run(self):
         while True:
             self.display_menu(self.title)
             c = self.screen.getch()
