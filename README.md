@@ -97,11 +97,11 @@ once it's built you're ready to start the `core` from the `mode` menu option.
 
 if you're using Virtualbox, before starting the `core` you'll want to first uncomment the `public_nic` option in the `core.template` by removing the `#` so that it uses `eth1` instead of the default `eth0`.  you can change this through the menu by going to  `Mode -> Configure`.
 
-after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to install plugins (again in the vent interface, under the plugins menu).  here's an example one that can handle PCAP files: https://github.com/CyberReboot/vent-plugins
+after starting, you should be able to go into `system info` and see that everything is running as expected.  once that looks good, you're ready to install plugins (again in the vent interface, under the plugins menu).  here's an example of one that can handle PCAP or CSV files: https://github.com/CyberReboot/vent-plugins
 
-once you're finished installing plugins, you're ready to copy up files to be processed, in the case of the above example plugin, you'd want to copy up PCAP files.  see below for how to do that, but once the files are copied up, they are automatically processed, sent as messages on a queue and indexed for quick and easy analysis.
+once you're finished installing plugins, you're ready to copy up files to be processed, in the case of the above example plugin, you'd want to copy up PCAP or CSV files.  see below for how to do that, but once the files are copied up, they are automatically processed, sent as messages on a queue and indexed for quick and easy analysis.
 
-copy up new pcaps
+copy up new files
 ====
 
 install the `vent` script locally first:
@@ -112,21 +112,21 @@ sudo make install
 if using docker-machine cli to provision:
 
 ```
-# from the directory that contains your pcaps
+# from the directory that contains your files
 # optionally add an argument of the name for vent in
 #     docker-machine if you called it something other than vent
-cd /path/where/pcaps/are/
+cd /path/where/files/are/
 vent
 ```
 
 if deploying as a self-configured machine (VMWare, OpenStack, bare metal, etc.):
 
 ```
-# from the directory that contains your pcaps
+# from the directory that contains your files
 # optionally add an argument of the name/ip for vent on your network
 cd vent
 cp vent-generic /usr/local/bin/vent
-cd /path/where/pcaps/are/
+cd /path/where/files/are/
 vent
 ```
 

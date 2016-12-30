@@ -68,6 +68,14 @@ tests.test_template_parser module
     :undoc-members:
     :show-inheritance:
 
+tests.test_templates module
+---------------------------
+
+.. automodule:: tests.test_templates
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

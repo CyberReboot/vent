@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='vent',
-    version='v0.3.1-dev',
+    version='v0.3.1',
     packages=['vent', 'vent.core', 'vent.core.file-drop', 'vent.core.rq-worker',
               'vent.core.rq-dashboard', 'vent.core.template-change',
               'vent.core.rmq-es-connector', 'vent.helpers'],
@@ -22,7 +22,6 @@ setup(
                                              'scripts/info_tools/get_types.sh',
                                              'scripts/info_tools/get_visualization.sh']),
                 ('vent/scripts/service_urls', ['scripts/service_urls/get_elasticsearch_head_url.sh',
-                                               'scripts/service_urls/get_elasticsearch_marvel_url.sh',
                                                'scripts/service_urls/get_rabbitmq_url.sh',
                                                'scripts/service_urls/get_rqdashboard_url.sh',
                                                'scripts/service_urls/get_urls.py']),
