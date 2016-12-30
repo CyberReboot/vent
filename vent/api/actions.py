@@ -1,4 +1,4 @@
-class Actions:
+class Action:
    """ Handle actions """
    def __init__(self):
        pass
