@@ -26,7 +26,7 @@ if [ "$1" = "--no-cache" -o "$2" = "--no-cache" ]; then
 else
 	if [ "$1" = "--save" -o "$2" = "--save" ]; then
 		cd vent/core && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker pull cyberreboot/core-$(echo {} | sed 's%^.\/%%') && docker save -o /tmp/vent-core-$(echo {} | sed 's%^.\/%%' | sed 's%\/%-%').tar cyberreboot/core-$(echo {} | sed 's%^.\/%%') && docker tag cyberreboot/core-$(echo {} | sed 's%^.\/%%') core/$(echo {} | sed 's%^.\/%%') || docker build -t core/$(echo {} | sed 's%^.\/%%') . && docker save -o /tmp/vent-core-$(echo {} | sed 's%^.\/%%' | sed 's%\/%-%').tar core/$(echo {} | sed 's%^.\/%%'))' ';'
-        cd ..
+        	cd ..
 		cd plugins && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t $(echo {} | sed 's%^.\/%%') . && docker save -o /tmp/vent-$(echo {} | sed 's%^.\/%%' | sed 's%\/%-%').tar $(echo {} | sed 's%^.\/%%'))' ';'
 		cd ..
 		cd collectors && find . -type d -exec sh -c '(cd {} && [ -f Dockerfile ] && echo {} && docker build -t collectors/$(echo {} | sed 's%^.\/%%') . && docker save -o /tmp/vent-collectors-$(echo {} | sed 's%^.\/%%' | sed 's%\/%-%').tar collectors/$(echo {} | sed 's%^.\/%%'))' ';'
