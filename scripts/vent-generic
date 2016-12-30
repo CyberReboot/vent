@@ -1,0 +1,22 @@
+#!/bin/bash
+
+echo "You'll need to supply the password 'tcuser' for each file you're uploading."
+if [ "$#" -ne 1 ]; then
+    HOST="vent"
+else
+    HOST=$1
+fi
+echo "Note: this does not copy files recursively..."
+for file in `ls *` ; do
+    if [ "$2" = "tar" ]; then
+        ssh docker@$HOST "mkdir -p /var/lib/docker/data/images"
+        scp $file docker@$HOST:/var/lib/docker/data/images/${file}
+    else
+        # XXX TODO use expect
+        scp $file docker@$HOST:/tmp/.${file}.tmp
+        ssh docker@$HOST "mv /tmp/.${file}.tmp /files/$file"
+    fi
+done
+if [ "$2" = "tar" ]; then
+    ssh docker@$HOST "/vent/bootlocal.sh"
+fi
