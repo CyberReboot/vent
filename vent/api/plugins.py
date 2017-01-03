@@ -10,7 +10,7 @@ class Plugin:
     def __init__(self, **kargs):
         self.path_dirs = PathDirs(**kargs)
 
-    def add(self, repo, tools=[], overrides=[], version=None):
+    def add(self, repo, tools=[], overrides=[], version=None, branch="master"):
         """ Adds a plugin of tool(s) """
         org = None
         name = None
@@ -36,9 +36,44 @@ class Plugin:
             return ('failed', status)
 
     @staticmethod
-    def add_image(image):
+    def add_image(image, tag="latest"):
+        """
+        Add an image from a registry/hub rather than building from a
+        repository
+        """
         return
 
-    @ staticmethod
-    def remove():
+    @staticmethod
+    def remove(tool=None, repo=None, branch="master"):
+        """ Remove tool or repository """
+        return
+
+    @staticmethod
+    def versions(tool, branch="master"):
+        """ Get available versions (built) of a tool """
+        return
+
+    @staticmethod
+    def version(tool, branch="master"):
+        """ Return active version for a given tool """
+        return
+
+    @staticmethod
+    def state(tool, branch="master"):
+        """ Return state of a tool, disabled/enabled """
+        return
+
+    @staticmethod
+    def checkout(tool, version, branch="master"):
+        """ Checkout and build a specific version of a tool """
+        return
+
+    @staticmethod
+    def enable(tool, version="head", branch="master"):
+        """ Enable tool at a specific version, default to head """
+        return
+
+    @staticmethod
+    def disable(tool, version="head", branch="master"):
+        """ Disable tool at a specific version, default to head """
         return
