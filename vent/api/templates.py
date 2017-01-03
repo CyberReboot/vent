@@ -15,6 +15,7 @@ class Template:
         self.config.optionxform = str
         if template:
             self.config.read(template)
+            self.template = template
 
     @ErrorHandler
     def sections(self):
@@ -105,8 +106,15 @@ class Template:
         does not already exist
         """
         if self.config.has_section(section):
-            return (True, self.config.set(section, option, value))
+            self.config.set(section, option, value)
+            return (True, self.config.options(section))
         return (False, "Section: " + section + " does not exist")
+
+    @ErrorHandler
+    def write_config(self):
+        with open(self.template, 'wb') as configfile:
+            self.config.write(configfile)
+        return
 
     @ErrorHandler
     def rename_section(self, original, new):
@@ -135,7 +143,7 @@ class Template:
                     else:
                         # only overwrite if True
                         if overwrite:
-                            self.config.set(destination, option, self.config.get(source, option))
+                            self.set_option(destination, option, self.config.get(source, option))
                             self.del_option(source, option)
                         else:
                             return (False, "Option: " + option + " already exists in " + destination + ". Did you want to overwrite?")
