@@ -53,5 +53,5 @@ class PathDirs:
             if e.errno == errno.EEXIST and os.path.isdir(path):
                 pass
             else:
-                return ('failed', e)
-        return ('succeeded', path)
+                return (False, e)
+        return (True, path)
