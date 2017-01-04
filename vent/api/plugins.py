@@ -15,7 +15,7 @@ class Plugin:
 
     def add(self, repo, tools=[], overrides=[], version="HEAD",
             branch="master", build=True, user=None, pw=None, group=None,
-            version_alias=None, wild=None):
+            version_alias=None, wild=None, remove_old=True, disable_old=True):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -45,6 +45,10 @@ class Plugin:
           the order of the items in the wild list will expect values to tacked
           on in the same order to the tuple for tools and overrides in
           additional to the tool name and version
+        remove_old lets you specify whether or not to remove previously found
+          tools that match to ones being added currently
+        disable_old lets you specify whether or not to disable previously found
+          tools that match to ones being added currently
         Examples:
           repo=fe
             (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
@@ -68,6 +72,8 @@ class Plugin:
             return (False, None)
         # !! TODO implement features: group, version_alias, and wild
         self.repo = repo
+        self.tools = tools
+        self.overrides = overrides
         self.version = version
         self.branch = branch
         self.build = build
@@ -79,6 +85,8 @@ class Plugin:
         self.org, self.name = self.repo.split("/")[-2:]
         self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
         response = self.path_dirs.ensure_dir(self.path)
+        if not response[0]:
+            return response
 
         cwd = os.getcwd()
         os.chdir(self.path)
@@ -89,29 +97,28 @@ class Plugin:
             # https only is supported when using user/pw
             self.repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
         if status == 0 or status == 128: # new or already exists
-            if len(tools) == 0 and len(overrides) == 0: # get all tools
+            if len(self.tools) == 0: # get all tools
+                # also catches the case where overrides is also empty - this is intended
+                response = self.checkout()
                 if response[0]:
                     matches = self.available_tools()
                     response = self.build_manifest(matches)
-            elif len(overrides) == 0: # there's something in tools
+            elif len(self.overrides) == 0: # there's something in tools
                 # only grab the tools specified
                 # !! TODO check for pre-existing that conflict with request and disable and remove image
                 template = Template(template=self.manifest)
+                # !! TODO this whole block is wrong, need to keep tuple
                 matches = []
-                for tool in tools:
+                for tool in self.tools:
                     if tool[1] != '':
-                        self.version = tool[1]
+                        match_version = tool[1]
                     match = ''
                     if tool[0].endswith('/'):
                         match = tool[0][:-1]
                     elif tool[0] != '.':
                         match = tool[0]
-                    matches.append(match)
+                    matches.append((match, match_version))
                 response = self.build_manifest(matches)
-            elif len(tools) == 0: # there's something in overrides
-                # grab all of the tools except override the ones specified
-                # !! TODO
-                pass
             else: # both tools and overrides were specified
                 # grab only the tools specified, with the overrides applied
                 # !! TODO
@@ -126,21 +133,23 @@ class Plugin:
         response = (True, None)
         template = Template(template=self.manifest)
         for match in matches:
+            # !! TODO check for overrides or special settings here first for the specific match
+            self.version = match[1]
             response = self.checkout()
             if response[0]:
-                section = self.org + ":" + self.name + ":" + match
+                section = self.org + ":" + self.name + ":" + match[0] + ":" + self.branch + ":" + self.version
                 template.add_section(section)
-                match_path = self.path + match
+                match_path = self.path + match[0]
                 template.set_option(section, "path", match_path)
                 template.set_option(section, "repo", self.repo)
                 template.set_option(section, "enabled", "yes")
                 template.set_option(section, "branch", self.branch)
                 template.set_option(section, "version", self.version)
                 image_name = self.org + "-" + self.name + "-"
-                if match == '':
+                if match[0] == '':
                     image_name += self.branch + ":" + self.version
                 else:
-                    image_name += '-'.join(match.split('/')[1:]) + "-" + self.branch + ":" + self.version
+                    image_name += '-'.join(match[0].split('/')[1:]) + "-" + self.branch + ":" + self.version
                 template.set_option(section, "image_name", image_name)
                 # !! TODO break this out for being able to build separate of add
                 if self.build:
@@ -165,7 +174,8 @@ class Plugin:
         matches = []
         for root, dirnames, filenames in os.walk(self.path):
             for filename in fnmatch.filter(filenames, 'Dockerfile'):
-                matches.append(root.split(self.path)[1])
+                # !! TODO deal with wild/groups/etc.?
+                matches.append((root.split(self.path)[1], self.version))
         return matches
 
     @staticmethod
