@@ -10,9 +10,12 @@ class Plugin:
     """ Handle Plugins """
     def __init__(self, **kargs):
         self.path_dirs = PathDirs(**kargs)
-        self.manifest = os.path.join(self.path_dirs.meta_dir, "plugin_manifest.cfg")
+        self.manifest = os.path.join(self.path_dirs.meta_dir,
+                                     "plugin_manifest.cfg")
 
-    def add(self, repo, tools=[], overrides=[], version="HEAD", branch="master", build=True, user=None, pw=None):
+    def add(self, repo, tools=[], overrides=[], version="HEAD",
+            branch="master", build=True, user=None, pw=None, group=None,
+            wild=None):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -21,14 +24,28 @@ class Plugin:
           (if version in tuple is '', then defaults to version)
         overrides is a list of tuples, where the pair is a tool name (path to
         Dockerfile) and a version
-          overrides are for explicitly removing tools and overriding versions of tools
-          (if version in tuple is '', then tool is removed, otherwise that tool
-           is checked out at the specific version in the tuple)
+          overrides are for explicitly removing tools and overriding versions
+          of tools (if version in tuple is '', then tool is removed, otherwise
+          that tool is checked out at the specific version in the tuple)
         if tools and overrides are left as empty lists, then all tools in the
-          repo are pulled down at the version and branch specified or defaulted to
+          repo are pulled down at the version and branch specified or defaulted
+          to
+        version is globally set for all tools, unless overridden in tools or
+          overrides
+        branch is globally set for all tools
+        build is a boolean of whether or not to build the tools now
+        user is the username for a private repo if needed
+        pw is the password to go along with the username for a private repo
+        group is globally set for all tools
+        wild lets you specify individual overrides for additional values in the
+          tuple of tools or overrides wild can be a list containing one or more
+          of the following: branch, build, group
+          the order of the items in the wild list will expect values to tacked
+          on in the same order to the tuple for tools and overrides in
+          additional to the tool name and version
         Examples:
-          repo=foo
-            (get all tools from repo 'foo' at version 'HEAD' on branch 'master')
+          repo=fe
+            (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
           repo=foo, version="3d1f", branch="foo"
             (get all tools from repo 'foo' at verion '3d1f' on branch 'foo')
           repo=foo, tools=[('bar', ''), ('baz', '1d32')]
@@ -46,7 +63,8 @@ class Plugin:
         if repo == "":
             print("No plugins added, url is not formatted correctly")
             print("Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
-            return
+            return (False, None)
+        # !! TODO implement features: group and wild
         self.repo = repo
         self.version = version
         self.branch = branch
@@ -68,11 +86,11 @@ class Plugin:
         else:
             # https only is supported when using user/pw
             self.repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
-        if status == 0 or status == 128:
+        if status == 0 or status == 128: # new or already exists
             if len(tools) == 0 and len(overrides) == 0: # get all tools
                 if response[0]:
                     matches = self.available_tools()
-                    response = self.build_tools(matches)
+                    response = self.build_manifest(matches)
             elif len(overrides) == 0: # there's something in tools
                 # only grab the tools specified
                 # !! TODO check for pre-existing that conflict with request and disable and remove image
@@ -87,19 +105,22 @@ class Plugin:
                     elif tool[0] != '.':
                         match = tool[0]
                     matches.append(match)
-                response = self.build_tools(matches)
+                response = self.build_manifest(matches)
             elif len(tools) == 0: # there's something in overrides
                 # grab all of the tools except override the ones specified
+                # !! TODO
                 pass
             else: # both tools and overrides were specified
                 # grab only the tools specified, with the overrides applied
+                # !! TODO
                 pass
         else:
             response = (False, status)
         os.chdir(cwd)
         return response
 
-    def build_tools(self, matches):
+    def build_manifest(self, matches):
+        """ Builds and writes the manifest for the tools being added """
         response = (True, None)
         template = Template(template=self.manifest)
         for match in matches:
@@ -119,6 +140,7 @@ class Plugin:
                 else:
                     image_name += '-'.join(match.split('/')[1:]) + "-" + self.branch + ":" + self.version
                 template.set_option(section, "image_name", image_name)
+                # !! TODO break this out for being about to build separate of add
                 if self.build:
                     os.chdir(match_path)
                     status = subprocess.call(shlex.split("docker build --label vent -t " + image_name + " ."))
