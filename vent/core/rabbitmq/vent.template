@@ -1,0 +1,12 @@
+[info]
+name = RabbitMQ
+groups = core,messages
+
+[settings]
+instances = 1
+locally_active = on
+#external_host = 0.0.0.0
+priority = 3,1
+
+[docker]
+HostConfig = {"PublishAllPorts": true}
