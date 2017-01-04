@@ -15,7 +15,7 @@ class Plugin:
 
     def add(self, repo, tools=[], overrides=[], version="HEAD",
             branch="master", build=True, user=None, pw=None, group=None,
-            wild=None):
+            version_alias=None, wild=None):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -37,9 +37,11 @@ class Plugin:
         user is the username for a private repo if needed
         pw is the password to go along with the username for a private repo
         group is globally set for all tools
+        version_alias is globally set for all tools and is a mapping from a
+          friendly version tag to the real version commit ID
         wild lets you specify individual overrides for additional values in the
           tuple of tools or overrides wild can be a list containing one or more
-          of the following: branch, build, group
+          of the following: branch, build, group, version_alias
           the order of the items in the wild list will expect values to tacked
           on in the same order to the tuple for tools and overrides in
           additional to the tool name and version
@@ -64,7 +66,7 @@ class Plugin:
             print("No plugins added, url is not formatted correctly")
             print("Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
             return (False, None)
-        # !! TODO implement features: group and wild
+        # !! TODO implement features: group, version_alias, and wild
         self.repo = repo
         self.version = version
         self.branch = branch

@@ -1,0 +1,12 @@
+[info]
+name = Template-Change
+groups = core,templates
+
+[settings]
+instances = 1
+priority = 6,1
+
+[docker]
+Cmd = /templates
+Env = ["PYTHONUNBUFFERED=0"]
+HostConfig = {"Binds": ["/var/lib/docker/data/templates:/templates:ro"], "Links": ["Redis:redis"]}

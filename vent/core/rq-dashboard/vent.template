@@ -1,0 +1,11 @@
+[info]
+name = RQ-Dashboard
+groups = core
+
+[settings]
+instances = 1
+priority = 5
+
+[docker]
+Env = ["REMOTE_REDIS_HOST=redis"]
+HostConfig = {"Links": ["Redis:redis"], "PublishAllPorts": true}
