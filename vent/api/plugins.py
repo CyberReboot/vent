@@ -12,7 +12,7 @@ class Plugin:
         self.path_dirs = PathDirs(**kargs)
         self.manifest = os.path.join(self.path_dirs.meta_dir, "plugin_manifest.cfg")
 
-    def add(self, repo, tools=[], overrides=[], version="HEAD", branch="master", build=True):
+    def add(self, repo, tools=[], overrides=[], version="HEAD", branch="master", build=True, user=None, pw=None):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -43,6 +43,10 @@ class Plugin:
             version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
             'master', ignore all other tools)
         """
+        if repo == "":
+            print("No plugins added, url is not formatted correctly")
+            print("Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
+            return
         self.repo = repo
         self.version = version
         self.branch = branch
@@ -58,7 +62,12 @@ class Plugin:
 
         cwd = os.getcwd()
         os.chdir(self.path)
-        status = subprocess.call(shlex.split("git clone " + self.repo + " ."))
+        status = subprocess.call(shlex.split("git config --global http.sslVerify false"))
+        if not user and not pw:
+            status = subprocess.call(shlex.split("git clone --recursive " + self.repo + " ."))
+        else:
+            # https only is supported when using user/pw
+            self.repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
         if status == 0 or status == 128:
             if len(tools) == 0 and len(overrides) == 0: # get all tools
                 if response[0]:
@@ -95,31 +104,32 @@ class Plugin:
         template = Template(template=self.manifest)
         for match in matches:
             response = self.checkout()
-            section = self.org + ":" + self.name + ":" + match
-            template.add_section(section)
-            match_path = self.path + match
-            template.set_option(section, "path", match_path)
-            template.set_option(section, "repo", self.repo)
-            template.set_option(section, "enabled", "yes")
-            template.set_option(section, "branch", self.branch)
-            template.set_option(section, "version", self.version)
-            image_name = self.org + "-" + self.name + "-"
-            if match == '':
-                image_name += self.branch + ":" + self.version
-            else:
-                image_name += '-'.join(match.split('/')[1:]) + "-" + self.branch + ":" + self.version
-            template.set_option(section, "image_name", image_name)
-            if self.build:
-                os.chdir(match_path)
-                status = subprocess.call(shlex.split("docker build --label vent -t " + image_name + " ."))
-                if status == 0:
-                    response = (True, status)
-                    template.set_option(section, "built", "yes")
+            if response[0]:
+                section = self.org + ":" + self.name + ":" + match
+                template.add_section(section)
+                match_path = self.path + match
+                template.set_option(section, "path", match_path)
+                template.set_option(section, "repo", self.repo)
+                template.set_option(section, "enabled", "yes")
+                template.set_option(section, "branch", self.branch)
+                template.set_option(section, "version", self.version)
+                image_name = self.org + "-" + self.name + "-"
+                if match == '':
+                    image_name += self.branch + ":" + self.version
                 else:
-                    template.set_option(section, "built", "failed")
-                    response = (False, status)
-            else:
-                template.set_option(section, "built", "no")
+                    image_name += '-'.join(match.split('/')[1:]) + "-" + self.branch + ":" + self.version
+                template.set_option(section, "image_name", image_name)
+                if self.build:
+                    os.chdir(match_path)
+                    status = subprocess.call(shlex.split("docker build --label vent -t " + image_name + " ."))
+                    if status == 0:
+                        response = (True, status)
+                        template.set_option(section, "built", "yes")
+                    else:
+                        template.set_option(section, "built", "failed")
+                        response = (False, status)
+                else:
+                    template.set_option(section, "built", "no")
         template.write_config()
         os.chdir(self.path)
         return response
