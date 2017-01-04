@@ -43,95 +43,42 @@ class Plugin:
             version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
             'master', ignore all other tools)
         """
+        self.repo = repo
+        self.version = version
+        self.branch = branch
+        self.build = build
         response = (True, None)
-        org = None
-        name = None
-        if repo.endswith(".git"):
-            repo = repo.split(".git")[0]
-        org, name = repo.split("/")[-2:]
-        path = os.path.join(self.path_dirs.plugins_dir, org, name)
-        response = self.path_dirs.ensure_dir(path)
+        self.org = None
+        self.name = None
+        if self.repo.endswith(".git"):
+            self.repo = self.repo.split(".git")[0]
+        self.org, self.name = self.repo.split("/")[-2:]
+        self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
+        response = self.path_dirs.ensure_dir(self.path)
 
         cwd = os.getcwd()
-        os.chdir(path)
-        status = subprocess.call(shlex.split("git clone " + repo + " ."))
+        os.chdir(self.path)
+        status = subprocess.call(shlex.split("git clone " + self.repo + " ."))
         if status == 0 or status == 128:
             if len(tools) == 0 and len(overrides) == 0: # get all tools
-                response = self.checkout(version, branch)
                 if response[0]:
-                    matches = self.available_tools(path)
-                    template = Template(template=self.manifest)
-                    for match in matches:
-                        section = org + ":" + name + ":" + match
-                        template.add_section(section)
-                        match_path = path + match
-                        template.set_option(section, "path", match_path)
-                        template.set_option(section, "repo", repo)
-                        template.set_option(section, "enabled", "yes")
-                        template.set_option(section, "branch", branch)
-                        template.set_option(section, "version", version)
-                        image_name = org + "-" + name + "-"
-                        if match == '':
-                            image_name += branch + ":" + version
-                        else:
-                            image_name += '-'.join(match.split('/')[1:]) + "-" + branch + ":" + version
-                        template.set_option(section, "image_name", image_name)
-                        if build:
-                            os.chdir(match_path)
-                            status = subprocess.call(shlex.split("docker build --label vent -t " + image_name + " ."))
-                            if status == 0:
-                                response = (True, status)
-                                template.set_option(section, "built", "yes")
-                            else:
-                                template.set_option(section, "built", "failed")
-                                response = (False, status)
-                        else:
-                            template.set_option(section, "built", "no")
-                    template.write_config()
-                    os.chdir(path)
+                    matches = self.available_tools()
+                    response = self.build_tools(matches)
             elif len(overrides) == 0: # there's something in tools
                 # only grab the tools specified
                 # !! TODO check for pre-existing that conflict with request and disable and remove image
                 template = Template(template=self.manifest)
+                matches = []
                 for tool in tools:
                     if tool[1] != '':
-                        version = tool[1]
+                        self.version = tool[1]
                     match = ''
                     if tool[0].endswith('/'):
                         match = tool[0][:-1]
                     elif tool[0] != '.':
                         match = tool[0]
-                    if match.startswith('/'):
-                        match = match[1:]
-                    response = self.checkout(version, branch)
-                    # !! TODO below is copy/pasta
-                    section = org + ":" + name + ":" + match
-                    template.add_section(section)
-                    match_path = os.path.join(path, match)
-                    template.set_option(section, "path", match_path)
-                    template.set_option(section, "repo", repo)
-                    template.set_option(section, "enabled", "yes")
-                    template.set_option(section, "branch", branch)
-                    template.set_option(section, "version", version)
-                    image_name = org + "-" + name + "-"
-                    if match == '':
-                        image_name += branch + ":" + version
-                    else:
-                        image_name += '-'.join(match.split('/')[1:]) + "-" + branch + ":" + version
-                    template.set_option(section, "image_name", image_name)
-                    if build:
-                        os.chdir(match_path)
-                        status = subprocess.call(shlex.split("docker build --label vent -t " + image_name + " ."))
-                        if status == 0:
-                            response = (True, status)
-                            template.set_option(section, "built", "yes")
-                        else:
-                            template.set_option(section, "built", "failed")
-                            response = (False, status)
-                    else:
-                        template.set_option(section, "built", "no")
-                template.write_config()
-                os.chdir(path)
+                    matches.append(match)
+                response = self.build_tools(matches)
             elif len(tools) == 0: # there's something in overrides
                 # grab all of the tools except override the ones specified
                 pass
@@ -143,15 +90,48 @@ class Plugin:
         os.chdir(cwd)
         return response
 
-    @staticmethod
-    def available_tools(path):
+    def build_tools(self, matches):
+        response = (True, None)
+        template = Template(template=self.manifest)
+        for match in matches:
+            response = self.checkout()
+            section = self.org + ":" + self.name + ":" + match
+            template.add_section(section)
+            match_path = self.path + match
+            template.set_option(section, "path", match_path)
+            template.set_option(section, "repo", self.repo)
+            template.set_option(section, "enabled", "yes")
+            template.set_option(section, "branch", self.branch)
+            template.set_option(section, "version", self.version)
+            image_name = self.org + "-" + self.name + "-"
+            if match == '':
+                image_name += self.branch + ":" + self.version
+            else:
+                image_name += '-'.join(match.split('/')[1:]) + "-" + self.branch + ":" + self.version
+            template.set_option(section, "image_name", image_name)
+            if self.build:
+                os.chdir(match_path)
+                status = subprocess.call(shlex.split("docker build --label vent -t " + image_name + " ."))
+                if status == 0:
+                    response = (True, status)
+                    template.set_option(section, "built", "yes")
+                else:
+                    template.set_option(section, "built", "failed")
+                    response = (False, status)
+            else:
+                template.set_option(section, "built", "no")
+        template.write_config()
+        os.chdir(self.path)
+        return response
+
+    def available_tools(self):
         """
         Return list of possible tools in repo for the given version and branch
         """
         matches = []
-        for root, dirnames, filenames in os.walk(path):
+        for root, dirnames, filenames in os.walk(self.path):
             for filename in fnmatch.filter(filenames, 'Dockerfile'):
-                matches.append(root.split(path)[1])
+                matches.append(root.split(self.path)[1])
         return matches
 
     @staticmethod
@@ -182,15 +162,14 @@ class Plugin:
         """ Return state of a tool, disabled/enabled """
         return
 
-    @staticmethod
-    def checkout(version="HEAD", branch="master"):
+    def checkout(self):
         """ Checkout a specific version and branch of a repo """
         response = (True, None)
-        status = subprocess.call(shlex.split("git checkout " + branch))
+        status = subprocess.call(shlex.split("git checkout " + self.branch))
         if status == 0:
             status = subprocess.call(shlex.split("git pull"))
             if status == 0:
-                status = subprocess.call(shlex.split("git reset --hard " + version))
+                status = subprocess.call(shlex.split("git reset --hard " + self.version))
                 if status == 0:
                     response = (True, status)
                 else:
