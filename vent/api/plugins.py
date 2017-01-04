@@ -70,7 +70,7 @@ class Plugin:
             print("No plugins added, url is not formatted correctly")
             print("Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
             return (False, None)
-        # !! TODO implement features: group, version_alias, and wild
+        # !! TODO implement features: group, version_alias, wild, remove_old, disable_old
         self.repo = repo
         self.tools = tools
         self.overrides = overrides
@@ -110,6 +110,7 @@ class Plugin:
                 # !! TODO this whole block is wrong, need to keep tuple
                 matches = []
                 for tool in self.tools:
+                    match_version = self.version
                     if tool[1] != '':
                         match_version = tool[1]
                     match = ''
