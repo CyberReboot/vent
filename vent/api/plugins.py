@@ -140,7 +140,7 @@ class Plugin:
                 else:
                     image_name += '-'.join(match.split('/')[1:]) + "-" + self.branch + ":" + self.version
                 template.set_option(section, "image_name", image_name)
-                # !! TODO break this out for being about to build separate of add
+                # !! TODO break this out for being able to build separate of add
                 if self.build:
                     os.chdir(match_path)
                     status = subprocess.call(shlex.split("docker build --label vent -t " + image_name + " ."))
