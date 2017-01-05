@@ -14,7 +14,7 @@ class Plugin:
         self.manifest = os.path.join(self.path_dirs.meta_dir,
                                      "plugin_manifest.cfg")
 
-    def add(self, repo, tools=[], overrides=[], version="HEAD",
+    def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, group=None,
             version_alias=None, wild=None, remove_old=True, disable_old=True):
         """
@@ -69,6 +69,10 @@ class Plugin:
         """
         # !! TODO implement features: group, version_alias, wild, remove_old, disable_old
         # initialize and store class objects
+        if not tools:
+            tools = []
+        if not overrides:
+            overrides = []
         self.repo = repo
         self.tools = tools
         self.overrides = overrides
@@ -120,7 +124,7 @@ class Plugin:
         response = (True, None)
 
         # check result of clone, ensure successful or that it already exists
-        if status == 0 or status == 128:
+        if status in [0, 128]:
             response = self.checkout()
             if response[0]:
                 matches = []
