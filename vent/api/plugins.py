@@ -1,3 +1,4 @@
+import datetime
 import fnmatch
 import os
 import shlex
@@ -147,10 +148,10 @@ class Plugin:
     def build_manifest(self, matches):
         """ Builds and writes the manifest for the tools being added """
         response = (True, None)
-        # !! TODO check for pre-existing that conflict with request and disable and remove image
+        # !! TODO check for pre-existing that conflict with request and disable and/or remove image
         template = Template(template=self.manifest)
         for match in matches:
-            # !! TODO check for overrides or special settings here first for the specific match
+            # !! TODO check for special settings here first for the specific match
             self.version = match[1]
             response = self.checkout()
             if response[0]:
@@ -162,6 +163,7 @@ class Plugin:
                 template.set_option(section, "enabled", "yes")
                 template.set_option(section, "branch", self.branch)
                 template.set_option(section, "version", self.version)
+                template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
                 image_name = self.org + "-" + self.name + "-"
                 if match[0] == '':
                     image_name += self.branch + ":" + self.version
