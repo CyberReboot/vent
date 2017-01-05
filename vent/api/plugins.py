@@ -105,33 +105,49 @@ class Plugin:
                     response = self.build_manifest(matches)
             elif len(self.overrides) == 0: # there's something in tools
                 # only grab the tools specified
-                # !! TODO check for pre-existing that conflict with request and disable and remove image
-                template = Template(template=self.manifest)
-                # !! TODO this whole block is wrong, need to keep tuple
-                matches = []
-                for tool in self.tools:
-                    match_version = self.version
-                    if tool[1] != '':
-                        match_version = tool[1]
-                    match = ''
-                    if tool[0].endswith('/'):
-                        match = tool[0][:-1]
-                    elif tool[0] != '.':
-                        match = tool[0]
-                    matches.append((match, match_version))
+                matches = self.get_tool_matches()
                 response = self.build_manifest(matches)
             else: # both tools and overrides were specified
                 # grab only the tools specified, with the overrides applied
-                # !! TODO
-                pass
+                matches = self.get_tool_matches()
+                filtered_matches = matches
+                for override in overrides:
+                    override_t = None
+                    if override[0] == '.':
+                        override_t = ('', override[1])
+                    else:
+                        override_t = override
+                    for match in matches:
+                        if override_t[0] == match[0]:
+                            filtered_matches.remove(match)
+                            filtered_matches.append(override_t)
+                response = self.build_manifest(filtered_matches)
         else:
             response = (False, status)
         os.chdir(cwd)
         return response
 
+    def get_tool_matches(self):
+        matches = []
+        for tool in self.tools:
+            match_version = self.version
+            if tool[1] != '':
+                match_version = tool[1]
+            match = ''
+            if tool[0].endswith('/'):
+                match = tool[0][:-1]
+            elif tool[0] != '.':
+                match = tool[0]
+            if not match.startswith('/') and match != '':
+                match = '/'+match
+            matches.append((match, match_version))
+        print matches
+        return matches
+
     def build_manifest(self, matches):
         """ Builds and writes the manifest for the tools being added """
         response = (True, None)
+        # !! TODO check for pre-existing that conflict with request and disable and remove image
         template = Template(template=self.manifest)
         for match in matches:
             # !! TODO check for overrides or special settings here first for the specific match
