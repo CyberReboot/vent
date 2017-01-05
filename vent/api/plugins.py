@@ -4,7 +4,7 @@ import os
 import shlex
 import subprocess
 
-from api.templates import  Template
+from api.templates import Template
 from helpers.paths import PathDirs
 
 class Plugin:
@@ -67,68 +67,101 @@ class Plugin:
             version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
             'master', ignore all other tools)
         """
-        if repo == "":
-            print("No plugins added, url is not formatted correctly")
-            print("Please use a git url, e.g. https://github.com/CyberReboot/vent-plugins.git")
-            return (False, None)
         # !! TODO implement features: group, version_alias, wild, remove_old, disable_old
+        # initialize and store class objects
         self.repo = repo
         self.tools = tools
         self.overrides = overrides
         self.version = version
         self.branch = branch
         self.build = build
-        response = (True, None)
         self.org = None
         self.name = None
+        response = (True, None)
+
+        # rewrite repo for consistency
         if self.repo.endswith(".git"):
             self.repo = self.repo.split(".git")[0]
+
+        # get org and repo name and path repo will be cloned to
         self.org, self.name = self.repo.split("/")[-2:]
         self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
+
+        # make sure the path can be created, otherwise exit function now
         response = self.path_dirs.ensure_dir(self.path)
         if not response[0]:
             return response
 
+        # save current path, set to new repo path
         cwd = os.getcwd()
         os.chdir(self.path)
+
+        # ensure cloning still works even if ssl is broken...probably should be improved
         status = subprocess.call(shlex.split("git config --global http.sslVerify false"))
-        if not user and not pw:
-            status = subprocess.call(shlex.split("git clone --recursive " + self.repo + " ."))
-        else:
-            # https only is supported when using user/pw
+
+        # check if user and pw were supplied, typically for private repos
+        if user and pw:
+            # only https is supported when using user/pw
             self.repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
-        if status == 0 or status == 128: # new or already exists
-            if len(self.tools) == 0: # get all tools
-                # also catches the case where overrides is also empty - this is intended
-                response = self.checkout()
-                if response[0]:
-                    matches = self.available_tools()
-                    self.build_manifest(matches)
-            elif len(self.overrides) == 0: # there's something in tools
-                # only grab the tools specified
-                matches = self.get_tool_matches()
-                self.build_manifest(matches)
-            else: # both tools and overrides were specified
-                # grab only the tools specified, with the overrides applied
-                matches = self.get_tool_matches()
-                filtered_matches = matches
-                for override in overrides:
-                    override_t = None
-                    if override[0] == '.':
-                        override_t = ('', override[1])
-                    else:
-                        override_t = override
-                    for match in matches:
-                        if override_t[0] == match[0]:
-                            filtered_matches.remove(match)
-                            filtered_matches.append(override_t)
-                self.build_manifest(filtered_matches)
-        else:
-            response = (False, status)
+
+        # clone repo and build tools
+        status = subprocess.call(shlex.split("git clone --recursive " + self.repo + " ."))
+        response = self.build_tools(status)
+
+        # set back to original path
         os.chdir(cwd)
         return response
 
+    def build_tools(self, status):
+        """
+        Create list of tools, paths, and versions to be built and sends them to
+        build_manifest
+        """
+        response = (True, None)
+
+        # check result of clone, ensure successful or that it already exists
+        if status == 0 or status == 128:
+            response = self.checkout()
+            if response[0]:
+                matches = []
+                if len(self.tools) == 0 and len(self.overrides) == 0:
+                    # get all tools
+                    matches = self.available_tools()
+                elif len(self.tools) == 0:
+                    # there's only something in overrides
+                    # grab all the tools then apply overrides
+                    matches = self.available_tools()
+                    # !! TODO apply overrides to matches
+                elif len(self.overrides) == 0:
+                    # there's only something in tools
+                    # only grab the tools specified
+                    matches = self.get_tool_matches()
+                else:
+                    # both tools and overrides were specified
+                    # grab only the tools specified, with the overrides applied
+                    orig_matches = self.get_tool_matches()
+                    matches = orig_matches
+                    for override in self.overrides:
+                        override_t = None
+                        if override[0] == '.':
+                            override_t = ('', override[1])
+                        else:
+                            override_t = override
+                        for match in orig_matches:
+                            if override_t[0] == match[0]:
+                                matches.remove(match)
+                                matches.append(override_t)
+                if len(matches) > 0:
+                    self.build_manifest(matches)
+        else:
+            response = (False, status)
+        return response
+
     def get_tool_matches(self):
+        """
+        Get the tools paths and versions that were specified by self.tools and
+        self.version
+        """
         matches = []
         for tool in self.tools:
             match_version = self.version
@@ -142,7 +175,6 @@ class Plugin:
             if not match.startswith('/') and match != '':
                 match = '/'+match
             matches.append((match, match_version))
-        print matches
         return matches
 
     def build_manifest(self, matches):
@@ -155,38 +187,46 @@ class Plugin:
             response = self.checkout()
             if response[0]:
                 section = self.org + ":" + self.name + ":" + match[0] + ":" + self.branch + ":" + self.version
-                template.add_section(section)
                 match_path = self.path + match[0]
+                image_name = self.org + "-" + self.name + "-"
+                if match[0] != '':
+                    # if tool is in a subdir, add that to the name of the image
+                    image_name += '-'.join(match[0].split('/')[1:]) + "-"
+                image_name += self.branch + ":" + self.version
+
+                # set template section and options for tool at version and branch
+                template.add_section(section)
                 template.set_option(section, "path", match_path)
                 template.set_option(section, "repo", self.repo)
                 template.set_option(section, "enabled", "yes")
                 template.set_option(section, "branch", self.branch)
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                image_name = self.org + "-" + self.name + "-"
-                if match[0] == '':
-                    image_name += self.branch + ":" + self.version
-                else:
-                    image_name += '-'.join(match[0].split('/')[1:]) + "-" + self.branch + ":" + self.version
                 template.set_option(section, "image_name", image_name)
-                # !! TODO break this out for being able to build separate of add
-                if self.build:
-                    os.chdir(match_path)
-                    try:
-                        output = subprocess.check_output(shlex.split("docker build --label vent -t " + image_name + " ."))
-                        image_id = ""
-                        for line in output.split("\n"):
-                            if line.startswith("Successfully built "):
-                                image_id = line.split("Successfully built ")[1].strip()
-                        template.set_option(section, "built", "yes")
-                        template.set_option(section, "image_id", image_id)
-                    except Exception as e:
-                        template.set_option(section, "built", "failed")
-                else:
-                    template.set_option(section, "built", "no")
+                template = self.build_image(template, match_path, image_name, section)
+
+        # write out configuration to the manifest file and reset to repo directory
         template.write_config()
         os.chdir(self.path)
         return
+
+    def build_image(self, template, match_path, image_name, section):
+        """ Build docker images and store results in template """
+        if self.build:
+            try:
+                os.chdir(match_path)
+                output = subprocess.check_output(shlex.split("docker build --label vent -t " + image_name + " ."))
+                image_id = ""
+                for line in output.split("\n"):
+                    if line.startswith("Successfully built "):
+                        image_id = line.split("Successfully built ")[1].strip()
+                template.set_option(section, "built", "yes")
+                template.set_option(section, "image_id", image_id)
+            except Exception as e:
+                template.set_option(section, "built", "failed")
+        else:
+            template.set_option(section, "built", "no")
+        return template
 
     def available_tools(self):
         """
