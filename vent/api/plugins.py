@@ -103,11 +103,11 @@ class Plugin:
                 response = self.checkout()
                 if response[0]:
                     matches = self.available_tools()
-                    response = self.build_manifest(matches)
+                    self.build_manifest(matches)
             elif len(self.overrides) == 0: # there's something in tools
                 # only grab the tools specified
                 matches = self.get_tool_matches()
-                response = self.build_manifest(matches)
+                self.build_manifest(matches)
             else: # both tools and overrides were specified
                 # grab only the tools specified, with the overrides applied
                 matches = self.get_tool_matches()
@@ -122,7 +122,7 @@ class Plugin:
                         if override_t[0] == match[0]:
                             filtered_matches.remove(match)
                             filtered_matches.append(override_t)
-                response = self.build_manifest(filtered_matches)
+                self.build_manifest(filtered_matches)
         else:
             response = (False, status)
         os.chdir(cwd)
@@ -147,7 +147,6 @@ class Plugin:
 
     def build_manifest(self, matches):
         """ Builds and writes the manifest for the tools being added """
-        response = (True, None)
         # !! TODO check for pre-existing that conflict with request and disable and/or remove image
         template = Template(template=self.manifest)
         for match in matches:
@@ -173,18 +172,21 @@ class Plugin:
                 # !! TODO break this out for being able to build separate of add
                 if self.build:
                     os.chdir(match_path)
-                    status = subprocess.call(shlex.split("docker build --label vent -t " + image_name + " ."))
-                    if status == 0:
-                        response = (True, status)
+                    try:
+                        output = subprocess.check_output(shlex.split("docker build --label vent -t " + image_name + " ."))
+                        image_id = ""
+                        for line in output.split("\n"):
+                            if line.startswith("Successfully built "):
+                                image_id = line.split("Successfully built ")[1].strip()
                         template.set_option(section, "built", "yes")
-                    else:
+                        template.set_option(section, "image_id", image_id)
+                    except Exception as e:
                         template.set_option(section, "built", "failed")
-                        response = (False, status)
                 else:
                     template.set_option(section, "built", "no")
         template.write_config()
         os.chdir(self.path)
-        return response
+        return
 
     def available_tools(self):
         """
