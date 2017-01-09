@@ -237,12 +237,12 @@ class Plugin:
                 if head:
                     # no need to store previous commits if not HEAD, since
                     # the version will always be the same commit ID
-                    if previous_commit != commit_id:
-                        if previous_commits:
+                    if previous_commit and previous_commit != commit_id:
+                        if previous_commits and previous_commit not in previous_commits:
                             previous_commits = previous_commit+','+previous_commits
-                        else:
+                        elif not previous_commits:
                             previous_commits = previous_commit
-                    if previous_commits != commit_id:
+                    if previous_commits and previous_commits != commit_id:
                         template.set_option(section, "previous_versions", previous_commits)
                 template = self.build_image(template, match_path, image_name, section)
 
@@ -288,6 +288,28 @@ class Plugin:
         """
         return
 
+    def tools(self):
+        """ Return list of tuples of all tools """
+        tools = []
+        template = Template(template=self.manifest)
+        exists, sections = template.sections()
+        if exists:
+            for section in sections:
+                enabled = None
+                built = None
+                exists, value = template.option(section, 'enabled')
+                if exists:
+                    enabled = value
+                exists, value = template.option(section, 'built')
+                if exists:
+                    built = value
+                # store each tool at a version as a three-tuple:
+                #   section contains org:repo_name:tool_path:branch:commit_id
+                #   built is either yes/no/failed/None
+                #   enabled is either yes/no/None
+                tools.append((section, built, enabled))
+        return tools
+
     @staticmethod
     def remove(tool=None, repo=None, branch="master"):
         """ Remove tool or repository """
@@ -295,17 +317,17 @@ class Plugin:
 
     @staticmethod
     def versions(tool, branch="master"):
-        """ Get available versions (built) of a tool """
+        """ Get available versions of a tool """
         return
 
     @staticmethod
-    def version(tool, branch="master"):
-        """ Return active version for a given tool """
+    def active_versions(tool, branch="master"):
+        """ Return active version(s) for a given tool """
         return
 
     @staticmethod
     def state(tool, branch="master"):
-        """ Return state of a tool, disabled/enabled """
+        """ Return state of a tool, disabled/enabled for each version """
         return
 
     def checkout(self):
@@ -327,11 +349,11 @@ class Plugin:
         return response
 
     @staticmethod
-    def enable(tool, version="HEAD", branch="master"):
+    def enable(tool, branch="master", version="HEAD"):
         """ Enable tool at a specific version, default to head """
         return
 
     @staticmethod
-    def disable(tool, version="head", branch="master"):
+    def disable(tool, branch="master", version="HEAD"):
         """ Disable tool at a specific version, default to head """
         return
