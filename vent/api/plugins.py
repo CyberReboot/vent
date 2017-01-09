@@ -306,6 +306,7 @@ class Plugin:
         Add an image from a registry/hub rather than building from a
         repository
         """
+        # !! TODO
         return
 
     def tools(self):
@@ -330,8 +331,7 @@ class Plugin:
                 tools.append((section, built, enabled))
         return tools
 
-    @staticmethod
-    def remove(tool=None, repo=None, namespace=None, branch=None):
+    def remove(self, tool=None, repo=None, namespace=None, branch=None):
         """ Remove tool or repository """
         # !! TODO
         # potentially remove images, cloned repos, and entries in config file
@@ -372,22 +372,42 @@ class Plugin:
                             versions.append((section, version_list))
         return versions
 
-    @staticmethod
-    def active_versions(tool, namespace=None, branch="master"):
-        """ Return active version(s) for a given tool """
-        return
+    def current_version(self, tool, namespace=None, branch="master"):
+        """ Return current version for a given tool """
+        versions = []
+        template = Template(template=self.manifest)
+        exists, sections = template.sections()
+        if exists:
+            for section in sections:
+                exists, value = template.option(section, 'name')
+                if exists and value == tool:
+                    exists, value = template.option(section, 'branch')
+                    if exists and value == branch:
+                        # limit tool matches to the defined namespace
+                        if namespace:
+                            exists, value = template.option(section, 'namespace')
+                            if exists and value == namespace:
+                                exists, value = template.option(section, 'version')
+                                if exists:
+                                    versions.append((section, value))
+                        else:
+                            # get all tools that match the name, regardless of namespace
+                            exists, value = template.option(section, 'version')
+                            if exists:
+                                versions.append((section, value))
+        return versions
 
-    @staticmethod
-    def state(tool, namespace=None, branch="master"):
+    def state(self, tool, namespace=None, branch="master"):
         """ Return state of a tool, disabled/enabled for each version """
+        # !! TODO
         return
 
-    @staticmethod
-    def enable(tool, namespace=None, branch="master", version="HEAD"):
+    def enable(self, tool, namespace=None, branch="master", version="HEAD"):
         """ Enable tool at a specific version, default to head """
+        # !! TODO
         return
 
-    @staticmethod
-    def disable(tool, namespace=None, branch="master", version="HEAD"):
+    def disable(self, tool, namespace=None, branch="master", version="HEAD"):
         """ Disable tool at a specific version, default to head """
+        # !! TODO
         return
