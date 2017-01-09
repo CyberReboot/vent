@@ -222,6 +222,8 @@ class Plugin:
 
                 # set template section and options for tool at version and branch
                 template.add_section(section)
+                template.set_option(section, "name", match[0].split('/')[-1])
+                template.set_option(section, "namespace", self.org+'/'+self.name)
                 template.set_option(section, "path", match_path)
                 template.set_option(section, "repo", self.repo)
                 template.set_option(section, "enabled", "yes")
@@ -280,6 +282,24 @@ class Plugin:
                 matches.append((root.split(self.path)[1], self.version))
         return matches
 
+    def checkout(self):
+        """ Checkout a specific version and branch of a repo """
+        response = (True, None)
+        status = subprocess.call(shlex.split("git checkout " + self.branch))
+        if status == 0:
+            status = subprocess.call(shlex.split("git pull"))
+            if status == 0:
+                status = subprocess.call(shlex.split("git reset --hard " + self.version))
+                if status == 0:
+                    response = (True, status)
+                else:
+                    response = (False, status)
+            else:
+                response = (False, status)
+        else:
+            response = (False, status)
+        return response
+
     @staticmethod
     def add_image(image, tag="latest"):
         """
@@ -311,49 +331,63 @@ class Plugin:
         return tools
 
     @staticmethod
-    def remove(tool=None, repo=None, branch="master"):
+    def remove(tool=None, repo=None, namespace=None, branch=None):
         """ Remove tool or repository """
+        # !! TODO
+        # potentially remove images, cloned repos, and entries in config file
         return
 
-    @staticmethod
-    def versions(tool, branch="master"):
-        """ Get available versions of a tool """
-        return
+    def versions(self, tool, namespace=None, branch="master"):
+        """ Return available versions of a tool """
+        versions = []
+        template = Template(template=self.manifest)
+        exists, sections = template.sections()
+        if exists:
+            for section in sections:
+                exists, value = template.option(section, 'name')
+                if exists and value == tool:
+                    exists, value = template.option(section, 'branch')
+                    if exists and value == branch:
+                        # limit tool matches to the defined namespace
+                        if namespace:
+                            exists, value = template.option(section, 'namespace')
+                            if exists and value == namespace:
+                                version_list = []
+                                exists, value = template.option(section, 'version')
+                                if exists:
+                                    version_list = [value]
+                                exists, value = template.option(section, 'previous_versions')
+                                if exists:
+                                    version_list = version_list+(value).split(',')
+                                versions.append((section, version_list))
+                        else:
+                            # get all tools that match the name, regardless of namespace
+                            version_list = []
+                            exists, value = template.option(section, 'version')
+                            if exists:
+                                version_list = [value]
+                            exists, value = template.option(section, 'previous_versions')
+                            if exists:
+                                version_list = version_list+(value).split(',')
+                            versions.append((section, version_list))
+        return versions
 
     @staticmethod
-    def active_versions(tool, branch="master"):
+    def active_versions(tool, namespace=None, branch="master"):
         """ Return active version(s) for a given tool """
         return
 
     @staticmethod
-    def state(tool, branch="master"):
+    def state(tool, namespace=None, branch="master"):
         """ Return state of a tool, disabled/enabled for each version """
         return
 
-    def checkout(self):
-        """ Checkout a specific version and branch of a repo """
-        response = (True, None)
-        status = subprocess.call(shlex.split("git checkout " + self.branch))
-        if status == 0:
-            status = subprocess.call(shlex.split("git pull"))
-            if status == 0:
-                status = subprocess.call(shlex.split("git reset --hard " + self.version))
-                if status == 0:
-                    response = (True, status)
-                else:
-                    response = (False, status)
-            else:
-                response = (False, status)
-        else:
-            response = (False, status)
-        return response
-
     @staticmethod
-    def enable(tool, branch="master", version="HEAD"):
+    def enable(tool, namespace=None, branch="master", version="HEAD"):
         """ Enable tool at a specific version, default to head """
         return
 
     @staticmethod
-    def disable(tool, branch="master", version="HEAD"):
+    def disable(tool, namespace=None, branch="master", version="HEAD"):
         """ Disable tool at a specific version, default to head """
         return
