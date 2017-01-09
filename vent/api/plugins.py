@@ -337,6 +337,7 @@ class Plugin:
         # potentially remove images, cloned repos, and entries in config file
         return
 
+    # TODO refactor function - too much duplication
     def versions(self, tool, namespace=None, branch="master"):
         """ Return available versions of a tool """
         versions = []
@@ -372,6 +373,7 @@ class Plugin:
                             versions.append((section, version_list))
         return versions
 
+    # TODO refactor function - too much duplication
     def current_version(self, tool, namespace=None, branch="master"):
         """ Return current version for a given tool """
         versions = []
@@ -397,17 +399,78 @@ class Plugin:
                                 versions.append((section, value))
         return versions
 
+    # TODO refactor function - too much duplication
     def state(self, tool, namespace=None, branch="master"):
         """ Return state of a tool, disabled/enabled for each version """
-        # !! TODO
-        return
+        states = []
+        template = Template(template=self.manifest)
+        exists, sections = template.sections()
+        if exists:
+            for section in sections:
+                exists, value = template.option(section, 'name')
+                if exists and value == tool:
+                    exists, value = template.option(section, 'branch')
+                    if exists and value == branch:
+                        # limit tool matches to the defined namespace
+                        if namespace:
+                            exists, value = template.option(section, 'namespace')
+                            if exists and value == namespace:
+                                exists, value = template.option(section, 'enabled')
+                                if exists:
+                                    if value == 'yes': value = 'enabled'
+                                    if value == 'no': value = 'disabled'
+                                    states.append((section, value))
+                        else:
+                            # get all tools that match the name, regardless of namespace
+                            exists, value = template.option(section, 'enabled')
+                            if exists:
+                                if value == 'yes': value = 'enabled'
+                                if value == 'no': value = 'disabled'
+                                states.append((section, value))
+        return states
 
+    # TODO refactor function - too much duplication
     def enable(self, tool, namespace=None, branch="master", version="HEAD"):
         """ Enable tool at a specific version, default to head """
-        # !! TODO
-        return
+        status = (False, None)
+        template = Template(template=self.manifest)
+        exists, sections = template.sections()
+        if exists:
+            for section in sections:
+                exists, value = template.option(section, 'name')
+                if exists and value == tool:
+                    exists, value = template.option(section, 'branch')
+                    if exists and value == branch:
+                        # limit tool matches to the defined namespace
+                        if namespace:
+                            exists, value = template.option(section, 'namespace')
+                            if exists and value == namespace:
+                                status = template.set_option(section, 'enabled', 'yes')
+                        else:
+                            # get all tools that match the name, regardless of namespace
+                            status = template.set_option(section, 'enabled', 'yes')
+                        template.write_config()
+        return status
 
+    # TODO refactor function - too much duplication
     def disable(self, tool, namespace=None, branch="master", version="HEAD"):
         """ Disable tool at a specific version, default to head """
-        # !! TODO
-        return
+        status = (False, None)
+        template = Template(template=self.manifest)
+        exists, sections = template.sections()
+        if exists:
+            for section in sections:
+                exists, value = template.option(section, 'name')
+                if exists and value == tool:
+                    exists, value = template.option(section, 'branch')
+                    if exists and value == branch:
+                        # limit tool matches to the defined namespace
+                        if namespace:
+                            exists, value = template.option(section, 'namespace')
+                            if exists and value == namespace:
+                                status = template.set_option(section, 'enabled', 'no')
+                        else:
+                            # get all tools that match the name, regardless of namespace
+                            status = template.set_option(section, 'enabled', 'no')
+                        template.write_config()
+        return status
