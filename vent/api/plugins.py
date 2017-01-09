@@ -198,6 +198,28 @@ class Plugin:
                     image_name += '-'.join(match[0].split('/')[1:]) + "-"
                 image_name += self.branch + ":" + self.version
 
+                # check if the section already exists
+                exists, options = template.section(section)
+                previous_commit = None
+                previous_commits = None
+                head = False
+                if exists:
+                    for option in options:
+                        # TODO check if tool name but a different version exists - then disable/remove if set
+                        if option[0] == 'version' and option[1] == 'HEAD':
+                            head = True
+                        if option[0] == 'built' and option[1] == 'yes':
+                            # !! TODO remove pre-existing image
+                            pass
+                        if option[0] == 'commit_id':
+                            previous_commit = option[1]
+                        if option[0] == 'previous_versions':
+                            previous_commits = option[1]
+
+                # !! TODO
+                # check if section should be removed from config - i.e. all tools,
+                # but new commit removed one that was in a previous commit
+
                 # set template section and options for tool at version and branch
                 template.add_section(section)
                 template.set_option(section, "path", match_path)
@@ -207,6 +229,21 @@ class Plugin:
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
                 template.set_option(section, "image_name", image_name)
+                commit_id = None
+                if self.version == 'HEAD':
+                    os.chdir(match_path)
+                    commit_id = subprocess.check_output(shlex.split("git rev-parse --short HEAD")).strip()
+                    template.set_option(section, "commit_id", commit_id)
+                if head:
+                    # no need to store previous commits if not HEAD, since
+                    # the version will always be the same commit ID
+                    if previous_commit != commit_id:
+                        if previous_commits:
+                            previous_commits = previous_commit+','+previous_commits
+                        else:
+                            previous_commits = previous_commit
+                    if previous_commits != commit_id:
+                        template.set_option(section, "previous_versions", previous_commits)
                 template = self.build_image(template, match_path, image_name, section)
 
         # write out configuration to the manifest file and reset to repo directory
