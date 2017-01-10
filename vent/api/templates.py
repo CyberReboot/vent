@@ -156,13 +156,29 @@ class Template:
         return (False, "Section: " + source + " does not exist")
 
     @ErrorHandler
-    def constrained_sections(self, constraints, options=None):
+    def constrained_sections(self, constraints=None, options=None):
         """
         Takes a dictionary of option/values (constraints) that must be present
         in a section, and returns a dictionary of sections and optionally a
         dictionary of option/values defined by a list of options called options
         that match the constraints
         """
-        sections = []
-        # !! TODO
+        sections = {}
+        if not constraints:
+            constraints = {}
+        if not options:
+            options = []
+        all_sections = self.sections()
+        for a_section in all_sections[1]:
+            include = True
+            for constraint in constraints:
+                result = self.option(a_section, constraint)
+                if not result[0] or result[1] != constraints[constraint]:
+                    include = False
+            if include:
+                sections[a_section] = {}
+                for option in options:
+                    result = self.option(a_section, option)
+                    if result:
+                        sections[a_section][option] = result[1]
         return sections
