@@ -118,7 +118,10 @@ class Template:
 
     @ErrorHandler
     def rename_section(self, original, new):
-        """ Renames a section by transferring all option-value pairs to a new section """
+        """
+        Renames a section by transferring all option-value pairs to a new
+        section
+        """
         if self.config.has_section(original):
             if not self.config.has_section(new):
                 values = self.section(original)[1]
@@ -151,3 +154,15 @@ class Template:
                 return (False, "Option: " + option + " does not exist in " + source)
             return (False, "Section: " + destination + " does not exist")
         return (False, "Section: " + source + " does not exist")
+
+    @ErrorHandler
+    def constrained_sections(self, constraints, options=None):
+        """
+        Takes a dictionary of option/values (constraints) that must be present
+        in a section, and returns a dictionary of sections and optionally a
+        dictionary of option/values defined by a list of options called options
+        that match the constraints
+        """
+        sections = []
+        # !! TODO
+        return sections
