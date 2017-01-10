@@ -337,15 +337,41 @@ class Plugin:
         Remove tool or repository, repository is the name, i.e. vent, not the
         url
         """
-        # !! TODO
-        # potentially remove images, cloned repos, and entries in config file
+        # !! TODO potentially remove images, cloned repos
         status = (False, None)
         template = Template(template=self.manifest)
 
         if tool and repo:
             # only remove the specified tool in the specified repo
-            # !! TODO
-            pass
+            exists, sections = template.sections()
+            if exists:
+                for section in sections:
+                    exists, value = template.option(section, 'name')
+                    if exists and value == tool:
+                        exists, value = template.option(section, 'repo')
+                        if exists and value.split('/')[-1] == repo:
+                            if branch:
+                                exists, value = template.option(section, 'branch')
+                                if exists and value == branch:
+                                    # limit tool matches to the defined namespace
+                                    if namespace:
+                                        exists, value = template.option(section, 'namespace')
+                                        if exists and value == namespace:
+                                            status = template.del_section(section)
+                                    else:
+                                        status = template.del_section(section)
+                            elif namespace:
+                                exists, value = template.option(section, 'namespace')
+                                if exists and value == namespace:
+                                    # limit tool matches to the defined branch
+                                    if branch:
+                                        exists, value = template.option(section, 'branch')
+                                        if exists and value == branch:
+                                            status = template.del_section(section)
+                                    else:
+                                        status = template.del_section(section)
+                            else:
+                                status = template.del_section(section)
         elif tool:
             # remove all occurances of the tool regardless of repo
             exists, sections = template.sections()
