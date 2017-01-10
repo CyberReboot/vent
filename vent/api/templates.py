@@ -1,12 +1,6 @@
 import ConfigParser
 
-def ErrorHandler(function):
-    def wrapper(*args, **kwargs):
-        try:
-            return function(*args, **kwargs)
-        except Exception as e:
-            print(e)
-    return wrapper
+from helpers.errors import ErrorHandler
 
 class Template:
     """ Handle parsing templates """
