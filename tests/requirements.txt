@@ -1,0 +1,10 @@
+docker-py==1.7.2
+elasticsearch
+pexpect
+pika
+pytest
+pytest-cov
+python-magic
+redis
+rq
+watchdog
