@@ -309,6 +309,17 @@ class Plugin:
         # !! TODO
         return
 
+    def constraint_options(self, constraint_dict, options):
+        """ Return result of constraints and options against a template """
+        constraints = {}
+        template = Template(template=self.manifest)
+        for constraint in constraint_dict:
+            if constraint != 'self':
+                if constraint_dict[constraint] or constraint_dict[constraint] == '':
+                    constraints[constraint] = constraint_dict[constraint]
+        results = template.constrained_sections(constraints=constraints, options=options)
+        return results
+
     def tools(self):
         """ Return list of tuples of all tools """
         tools = []
@@ -437,96 +448,49 @@ class Plugin:
             template.write_config()
         return status
 
-    # TODO refactor function - too much duplication (use Template.constrained_sections())
-    def versions(self, tool, namespace=None, branch="master"):
+    def versions(self, name, namespace=None, branch="master"):
         """ Return available versions of a tool """
+        # initialize
+        args = locals()
         versions = []
-        template = Template(template=self.manifest)
-        exists, sections = template.sections()
-        if exists:
-            for section in sections:
-                exists, value = template.option(section, 'name')
-                if exists and value == tool:
-                    exists, value = template.option(section, 'branch')
-                    if exists and value == branch:
-                        # limit tool matches to the defined namespace
-                        if namespace:
-                            exists, value = template.option(section, 'namespace')
-                            if exists and value == namespace:
-                                version_list = []
-                                exists, value = template.option(section, 'version')
-                                if exists:
-                                    version_list = [value]
-                                exists, value = template.option(section, 'previous_versions')
-                                if exists:
-                                    version_list = version_list+(value).split(',')
-                                versions.append((section, version_list))
-                        else:
-                            # get all tools that match the name, regardless of namespace
-                            version_list = []
-                            exists, value = template.option(section, 'version')
-                            if exists:
-                                version_list = [value]
-                            exists, value = template.option(section, 'previous_versions')
-                            if exists:
-                                version_list = version_list+(value).split(',')
-                            versions.append((section, version_list))
+        options = ['version', 'previous_versions']
+
+        # get resulting dictionary of sections with options that match constraints
+        results = self.constraint_options(args, options)
+        for result in results:
+            version_list = [results[result]['version']]
+            if 'previous_versions' in results[result]:
+                version_list = version_list+(results[result]['previous_versions']).split(',')
+            versions.append((result, version_list))
         return versions
 
-    # TODO refactor function - too much duplication (use Template.constrained_sections())
-    def current_version(self, tool, namespace=None, branch="master"):
+    def current_version(self, name, namespace=None, branch="master"):
         """ Return current version for a given tool """
+        # initialize
+        args = locals()
         versions = []
-        template = Template(template=self.manifest)
-        exists, sections = template.sections()
-        if exists:
-            for section in sections:
-                exists, value = template.option(section, 'name')
-                if exists and value == tool:
-                    exists, value = template.option(section, 'branch')
-                    if exists and value == branch:
-                        # limit tool matches to the defined namespace
-                        if namespace:
-                            exists, value = template.option(section, 'namespace')
-                            if exists and value == namespace:
-                                exists, value = template.option(section, 'version')
-                                if exists:
-                                    versions.append((section, value))
-                        else:
-                            # get all tools that match the name, regardless of namespace
-                            exists, value = template.option(section, 'version')
-                            if exists:
-                                versions.append((section, value))
+        options = ['version']
+
+        # get resulting dictionary of sections with options that match constraints
+        results = self.constraint_options(args, options)
+        for result in results:
+            versions.append((result, results[result]['version']))
         return versions
 
-    # TODO refactor function - too much duplication (use Template.constrained_sections())
-    def state(self, tool, namespace=None, branch="master"):
+    def state(self, name, namespace=None, branch="master"):
         """ Return state of a tool, disabled/enabled for each version """
+        # initialize
+        args = locals()
         states = []
-        template = Template(template=self.manifest)
-        exists, sections = template.sections()
-        if exists:
-            for section in sections:
-                exists, value = template.option(section, 'name')
-                if exists and value == tool:
-                    exists, value = template.option(section, 'branch')
-                    if exists and value == branch:
-                        # limit tool matches to the defined namespace
-                        if namespace:
-                            exists, value = template.option(section, 'namespace')
-                            if exists and value == namespace:
-                                exists, value = template.option(section, 'enabled')
-                                if exists:
-                                    if value == 'yes': value = 'enabled'
-                                    if value == 'no': value = 'disabled'
-                                    states.append((section, value))
-                        else:
-                            # get all tools that match the name, regardless of namespace
-                            exists, value = template.option(section, 'enabled')
-                            if exists:
-                                if value == 'yes': value = 'enabled'
-                                if value == 'no': value = 'disabled'
-                                states.append((section, value))
+        options = ['enabled']
+
+        # get resulting dictionary of sections with options that match constraints
+        results = self.constraint_options(args, options)
+        for result in results:
+            if results[result]['enabled'] == 'yes':
+                states.append((result, 'enabled'))
+            else:
+                states.append((result, 'disabled'))
         return states
 
     # TODO refactor function - too much duplication (use Template.constrained_sections())
