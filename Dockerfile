@@ -14,6 +14,7 @@ ADD motd $ROOTFS/etc/motd
 RUN echo "built on $(date)" >> $ROOTFS/vent/VERSION
 RUN echo "echo \"vent \$(cat /vent/VERSION)\"" >> $ROOTFS/etc/profile.d/boot2docker.sh
 RUN cat $ROOTFS/scripts/custom >> $ROOTFS/etc/profile.d/boot2docker.sh
+RUN echo "vent-cli" >> $ROOTFS/root/.profile
 
 # install dependencies
 WORKDIR /tmp
@@ -31,8 +32,6 @@ RUN tar xf python.tar \
 RUN tar xf python-include.tar \
     && mv python2.7 $ROOTFS/usr/local/include/python2.7
 RUN rm -rf $ROOTFS/vendor/tinycore-python2
-RUN chmod -R 777 $ROOTFS/vent/plugins
-RUN chmod -R 777 $ROOTFS/vent/templates
 
 RUN /tmp/make_iso.sh
 CMD ["cat", "/boot2docker.iso"]

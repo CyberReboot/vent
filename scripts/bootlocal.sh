@@ -12,12 +12,4 @@ else
 fi
 if [ -d "/var/lib/docker/data/images" ]; then
 	echo "TERM=xterm LANG=C.UTF-8 /usr/local/bin/python2.7 /vent/menu_launcher.py" >> /root/.profile
-	image_exists=$(docker images -q | wc -l)
-	if [ "$image_exists" == "1" ]; then
-		cd /var/lib/docker/data/images
-		for i in `ls *.tar 1> /dev/null 2>&1`; do
-			docker load -i "$i"
-		done
-	fi
-	sudo rm -rf /var/lib/docker/data/images/*
 fi

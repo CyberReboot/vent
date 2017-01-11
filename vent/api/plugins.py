@@ -68,6 +68,7 @@ class Plugin:
             'master', ignore all other tools)
         """
         # !! TODO implement features: group, version_alias, wild, remove_old, disable_old
+        # !! TODO check for vent.template file for groups and name alias (can still be overridden, in the function call)
         # initialize and store class objects
         if not tools:
             tools = []
