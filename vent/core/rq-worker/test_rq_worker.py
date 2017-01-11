@@ -1,10 +1,8 @@
+import file_watch
 import os
 import pytest
 import subprocess
 import time
-
-from tests import test_env
-import file_watch
 
 def test_settings():
     """ Tests settings """
@@ -21,14 +19,6 @@ def test_file_queue():
     file_watch.file_queue("/tmp")
     file_watch.file_queue("/dev/null")
     file_watch.file_queue("/dev/null", base_dir=os.getcwd()+"/")
-
-    # Test with installed plugins
-    url = "https://github.com/CyberReboot/vent-plugins.git"
-    env = test_env.TestEnv()
-    path_dirs = test_env.PathDirs()
-    env.add_plugin(path_dirs, url)
-    file_watch.file_queue("vent_/dev/null", base_dir=os.getcwd()+"/")
-    env.remove_plugin(path_dirs, url)
 
 def test_template_queue():
     """ Tests simulation of new/modified template """
