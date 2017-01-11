@@ -173,6 +173,6 @@ class Template:
                 sections[a_section] = {}
                 for option in options:
                     result = self.option(a_section, option)
-                    if result:
+                    if result[0]:
                         sections[a_section][option] = result[1]
         return sections
