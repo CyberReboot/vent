@@ -1,5 +1,0 @@
-import os
-URL_PREFIX=os.environ['DASH_PREFIX']
-REDIS_HOST=os.environ['REMOTE_REDIS_HOST']
-REDIS_PORT=os.environ['REMOTE_REDIS_PORT']
-REDIS_PASSWORD=os.environ['REMOTE_REDIS_PSWD']
