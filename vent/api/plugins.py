@@ -318,7 +318,7 @@ class Plugin:
                 if constraint_dict[constraint] or constraint_dict[constraint] == '':
                     constraints[constraint] = constraint_dict[constraint]
         results = template.constrained_sections(constraints=constraints, options=options)
-        return results
+        return results, template
 
     def tools(self):
         """ Return list of tuples of all tools """
@@ -342,110 +342,21 @@ class Plugin:
                 tools.append((section, built, enabled))
         return tools
 
-    # TODO refactor function - too much duplication (use Template.constrained_sections())
-    def remove(self, tool=None, repo=None, namespace=None, branch=None):
+    def remove(self, name=None, repo=None, namespace=None, branch=None):
         """
-        Remove tool or repository, repository is the name, i.e. vent, not the
-        url
+        Remove tool (name) or repository, repository is the url. If no
+        arguments are specified, all tools will be removed
         """
         # !! TODO potentially remove images, cloned repos
+        # initialize
+        args = locals()
         status = (False, None)
-        template = Template(template=self.manifest)
 
-        if tool and repo:
-            # only remove the specified tool in the specified repo
-            exists, sections = template.sections()
-            if exists:
-                for section in sections:
-                    exists, value = template.option(section, 'name')
-                    if exists and value == tool:
-                        exists, value = template.option(section, 'repo')
-                        if exists and value.split('/')[-1] == repo:
-                            if branch:
-                                exists, value = template.option(section, 'branch')
-                                if exists and value == branch:
-                                    # limit tool matches to the defined namespace
-                                    if namespace:
-                                        exists, value = template.option(section, 'namespace')
-                                        if exists and value == namespace:
-                                            status = template.del_section(section)
-                                    else:
-                                        status = template.del_section(section)
-                            elif namespace:
-                                exists, value = template.option(section, 'namespace')
-                                if exists and value == namespace:
-                                    # limit tool matches to the defined branch
-                                    if branch:
-                                        exists, value = template.option(section, 'branch')
-                                        if exists and value == branch:
-                                            status = template.del_section(section)
-                                    else:
-                                        status = template.del_section(section)
-                            else:
-                                status = template.del_section(section)
-        elif tool:
-            # remove all occurances of the tool regardless of repo
-            exists, sections = template.sections()
-            if exists:
-                for section in sections:
-                    exists, value = template.option(section, 'name')
-                    if exists and value == tool:
-                        if branch:
-                            exists, value = template.option(section, 'branch')
-                            if exists and value == branch:
-                                # limit tool matches to the defined namespace
-                                if namespace:
-                                    exists, value = template.option(section, 'namespace')
-                                    if exists and value == namespace:
-                                        status = template.del_section(section)
-                                else:
-                                    status = template.del_section(section)
-                        elif namespace:
-                            exists, value = template.option(section, 'namespace')
-                            if exists and value == namespace:
-                                # limit tool matches to the defined branch
-                                if branch:
-                                    exists, value = template.option(section, 'branch')
-                                    if exists and value == branch:
-                                        status = template.del_section(section)
-                                else:
-                                    status = template.del_section(section)
-                        else:
-                            status = template.del_section(section)
-        elif repo:
-            # completely remove repo including all tools within it
-            exists, sections = template.sections()
-            if exists:
-                for section in sections:
-                    exists, value = template.option(section, 'repo')
-                    if exists and value.split('/')[-1] == repo:
-                        if branch:
-                            exists, value = template.option(section, 'branch')
-                            if exists and value == branch:
-                                # limit repo matches to the defined namespace
-                                if namespace:
-                                    exists, value = template.option(section, 'namespace')
-                                    if exists and value == namespace:
-                                        status = template.del_section(section)
-                                else:
-                                    status = template.del_section(section)
-                        elif namespace:
-                            exists, value = template.option(section, 'namespace')
-                            if exists and value == namespace:
-                                # limit repo matches to the defined branch
-                                if branch:
-                                    exists, value = template.option(section, 'branch')
-                                    if exists and value == branch:
-                                        status = template.del_section(section)
-                                else:
-                                    status = template.del_section(section)
-                        else:
-                            status = template.del_section(section)
-        else:
-            # fail, must specify either a repo or a tool
-            status = (False, "Must specify either a repo or a tool to remove")
-        if status[0]:
-            template.write_config()
+        # get resulting dictionary of sections with options that match constraints
+        results, template = self.constraint_options(args, [])
+        for result in results:
+            status = template.del_section(result)
+        template.write_config()
         return status
 
     def versions(self, name, namespace=None, branch="master"):
@@ -456,7 +367,7 @@ class Plugin:
         options = ['version', 'previous_versions']
 
         # get resulting dictionary of sections with options that match constraints
-        results = self.constraint_options(args, options)
+        results, _ = self.constraint_options(args, options)
         for result in results:
             version_list = [results[result]['version']]
             if 'previous_versions' in results[result]:
@@ -472,7 +383,7 @@ class Plugin:
         options = ['version']
 
         # get resulting dictionary of sections with options that match constraints
-        results = self.constraint_options(args, options)
+        results, _ = self.constraint_options(args, options)
         for result in results:
             versions.append((result, results[result]['version']))
         return versions
@@ -485,7 +396,7 @@ class Plugin:
         options = ['enabled']
 
         # get resulting dictionary of sections with options that match constraints
-        results = self.constraint_options(args, options)
+        results, _ = self.constraint_options(args, options)
         for result in results:
             if results[result]['enabled'] == 'yes':
                 states.append((result, 'enabled'))
@@ -493,50 +404,28 @@ class Plugin:
                 states.append((result, 'disabled'))
         return states
 
-    # TODO refactor function - too much duplication (use Template.constrained_sections())
-    def enable(self, tool, namespace=None, branch="master", version="HEAD"):
+    def enable(self, name, namespace=None, branch="master", version="HEAD"):
         """ Enable tool at a specific version, default to head """
+        # initialize
+        args = locals()
         status = (False, None)
-        template = Template(template=self.manifest)
-        exists, sections = template.sections()
-        if exists:
-            for section in sections:
-                exists, value = template.option(section, 'name')
-                if exists and value == tool:
-                    exists, value = template.option(section, 'branch')
-                    if exists and value == branch:
-                        # limit tool matches to the defined namespace
-                        if namespace:
-                            exists, value = template.option(section, 'namespace')
-                            if exists and value == namespace:
-                                status = template.set_option(section, 'enabled', 'yes')
-                        else:
-                            # get all tools that match the name, regardless of namespace
-                            status = template.set_option(section, 'enabled', 'yes')
-        if status[0]:
-            template.write_config()
+
+        # get resulting dictionary of sections with options that match constraints
+        results, template = self.constraint_options(args, [])
+        for result in results:
+            status = template.set_option(result, 'enabled', 'yes')
+        template.write_config()
         return status
 
-    # TODO refactor function - too much duplication (use Template.constrained_sections())
-    def disable(self, tool, namespace=None, branch="master", version="HEAD"):
+    def disable(self, name, namespace=None, branch="master", version="HEAD"):
         """ Disable tool at a specific version, default to head """
+        # initialize
+        args = locals()
         status = (False, None)
-        template = Template(template=self.manifest)
-        exists, sections = template.sections()
-        if exists:
-            for section in sections:
-                exists, value = template.option(section, 'name')
-                if exists and value == tool:
-                    exists, value = template.option(section, 'branch')
-                    if exists and value == branch:
-                        # limit tool matches to the defined namespace
-                        if namespace:
-                            exists, value = template.option(section, 'namespace')
-                            if exists and value == namespace:
-                                status = template.set_option(section, 'enabled', 'no')
-                        else:
-                            # get all tools that match the name, regardless of namespace
-                            status = template.set_option(section, 'enabled', 'no')
-        if status[0]:
-            template.write_config()
+
+        # get resulting dictionary of sections with options that match constraints
+        results, template = self.constraint_options(args, [])
+        for result in results:
+            status = template.set_option(section, 'enabled', 'no')
+        template.write_config()
         return status
