@@ -1,5 +1,0 @@
-#!/bin/sh
-sudo /scripts/bootsync.sh
-sudo /scripts/bootlocal.sh
-sudo mkdir -p /var/lib/docker/data/plugins
-sudo chmod -R 777 /var/lib/docker/data
