@@ -13,7 +13,8 @@ ADD vendor $ROOTFS/vendor/
 ADD motd $ROOTFS/etc/motd
 RUN echo "built on $(date)" >> $ROOTFS/vent/VERSION
 RUN echo "echo \"vent \$(cat /vent/VERSION)\"" >> $ROOTFS/etc/profile.d/boot2docker.sh
-RUN cat $ROOTFS/scripts/custom >> $ROOTFS/etc/profile.d/boot2docker.sh
+RUN sed -i "67i cp /scripts/bootsync.sh /var/lib/boot2docker/bootsync.sh" $ROOTFS/opt/bootscript.sh
+RUN sed -i "67i cp /scripts/bootlocal.sh /var/lib/boot2docker/bootlocal.sh" $ROOTFS/opt/bootscript.sh
 RUN echo "vent-cli" >> $ROOTFS/root/.profile
 
 # install dependencies

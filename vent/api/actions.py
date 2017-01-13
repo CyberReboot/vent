@@ -1,5 +1,5 @@
 class Action:
-   """ Handle actions """
+   """ Handle actions in menu """
    def __init__(self):
        pass
 
