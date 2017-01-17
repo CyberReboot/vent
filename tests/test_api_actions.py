@@ -22,7 +22,8 @@ def test_clean():
 
 def test_build():
     """ Test the build function """
-    status = Action.build()
+    instance = Action()
+    status = instance.build()
     assert status[0] == True
 
 def test_backup():
