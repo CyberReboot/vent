@@ -4,8 +4,8 @@ import os
 import shlex
 import subprocess
 
-from api.templates import Template
-from helpers.paths import PathDirs
+from vent.api.templates import Template
+from vent.helpers.paths import PathDirs
 
 class Plugin:
     """ Handle Plugins """

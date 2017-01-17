@@ -1,6 +1,6 @@
 import ConfigParser
 
-from helpers.errors import ErrorHandler
+from vent.helpers.errors import ErrorHandler
 
 class Template:
     """ Handle parsing templates """
