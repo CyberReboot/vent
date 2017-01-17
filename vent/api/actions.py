@@ -1,7 +1,6 @@
 import os
 
 from api.plugins import Plugin
-from api.templates import Template
 
 class Action:
    """ Handle actions in menu """
