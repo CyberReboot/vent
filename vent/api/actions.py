@@ -1,6 +1,6 @@
 import os
 
-from api.plugins import Plugin
+from vent.api.plugins import Plugin
 
 class Action:
    """ Handle actions in menu """
@@ -28,6 +28,7 @@ class Action:
        return
 
    def build(self, repo=None, name=None, group=None, enabled="yes", branch="master", version="HEAD"):
+       """ Build a set of tools that match the parameters given """
        args = locals()
        options = ['image_name', 'path']
        status = (True, None)
