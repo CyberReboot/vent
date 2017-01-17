@@ -28,55 +28,21 @@ class Action:
    def clean():
        return
 
-   def build(self, repo=None, tool=None, group=None, enabled=True, branch="master", version="HEAD"):
-       build_all = True
-       response = (True, None)
-       if repo:
-           # build all tools in the manifest for this repo for this branch and this version
-           # if enabled is True, only build ones that are enabled
-           build_all = False
-           matches = {}
-           self.plugin.build = True
-           self.plugin.branch = branch
-           self.plugin.version = version
-           template = Template(template=self.plugin.manifest)
-           sections = template.sections()
-           for section in sections[1]:
-               # !! TODO if tool
-               # !! TODO if group
-               store = False
-               if template.option(section, 'namespace')[1].split('/')[-1] == repo \
-                  and template.option(section, 'branch')[1] == branch \
-                  and template.option(section, 'version')[1] == version:
-                   if enabled:
-                       if template.option(section, 'enabled')[1] == 'yes':
-                           store = True
-                   else:
-                       store = True
-               if store:
-                   matches[section] = {}
-                   matches[section]['image_name'] = template.option(section, 'image_name')[1]
-                   matches[section]['path'] = template.option(section, 'path')[1]
-
-           for match in matches:
-               os.chdir(matches[match]['path'])
-               response = self.plugin.checkout()
-               if response[0]:
-                   template = self.plugin.build_image(template, matches[match]['path'], matches[match]['image_name'], match)
-       if tool:
-           # build all tools in the manifest for this tool name for this branch and this version
-           # if enabled is True, only build ones that are enabled
-           build_all = False
-       if group:
-           # build all tools in the manifest that belong to this group name for this branch and this version
-           # if enabled is True, only build ones that are enabled
-           build_all = False
-       if build_all:
-           # get all tools in the manifest and build them for this branch and this version
-           # if enabled is True, only build ones that are enabled
-           pass
+   def build(self, repo=None, name=None, group=None, enabled="yes", branch="master", version="HEAD"):
+       args = locals()
+       options = ['image_name', 'path']
+       status = (True, None)
+       self.plugin.build = True
+       self.plugin.branch = branch
+       self.plugin.version = version
+       sections, template = self.plugin.constraint_options(args, options)
+       for section in sections:
+           os.chdir(sections[section]['path'])
+           status = self.plugin.checkout()
+           if status[0]:
+               template = self.plugin.build_image(template, sections[section]['path'], sections[section]['image_name'], section)
        template.write_config()
-       return response
+       return status
 
    @staticmethod
    def backup():
