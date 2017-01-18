@@ -12,7 +12,7 @@ def test_add():
     assert status[0] == False
     bad_instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
-    assert status[0] == False
+    assert status[0] == True
 
 def test_build_tools():
     """ Test the build_tools function """
