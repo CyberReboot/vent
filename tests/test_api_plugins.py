@@ -10,9 +10,9 @@ def test_build_tools():
     """ Test the build_tools function """
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     status = instance.build_tools(0)
-    assert status[0] == True
+    assert status[0] == False
     status = instance.build_tools(128)
-    assert status[0] == True
+    assert status[0] == False
     status = instance.build_tools(255)
     assert status[0] == False
     status = instance.build_tools(-1)
