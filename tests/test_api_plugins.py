@@ -10,6 +10,9 @@ def test_add():
     bad_instance = Plugin()
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
     assert status[0] == False
+    bad_instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    status = bad_instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
+    assert status[0] == False
 
 def test_build_tools():
     """ Test the build_tools function """
@@ -29,3 +32,25 @@ def test_get_tool_matches():
     instance.tools = []
     matches = instance.get_tool_matches()
     assert matches == []
+
+def test_add_image():
+    """ Test the add_image function """
+    Plugin.add_image('foo')
+
+def test_remove():
+    """ Test the remove function """
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    status = instance.remove(repo='https://github.com/cyberreboot/vent')
+    assert status[0] == True
+    status = instance.remove(repo='https://github.com/cyberreboot/vent')
+    assert status[0] == False
+    status = instance.remove()
+    assert status[0] == True
+
+def test_tools():
+    """ Test the tools function """
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    tools = instance.tools()
+    assert tools = []
+
+
