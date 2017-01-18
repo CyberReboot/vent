@@ -40,10 +40,6 @@ def test_add_image():
 def test_remove():
     """ Test the remove function """
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
-    status = instance.remove(repo='https://github.com/cyberreboot/vent')
-    assert status[0] == True
-    status = instance.remove(repo='https://github.com/cyberreboot/vent')
-    assert status[0] == False
     status = instance.remove()
     assert status[0] == True
 
