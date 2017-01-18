@@ -71,10 +71,10 @@ def test_enable():
     """ Test the enable function """
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     status = instance.enable('foo')
-    assert status == False
+    assert status[0] == False
 
 def test_disable():
     """ Test the disable function """
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     status = instance.disable('foo')
-    assert status == False
+    assert status[0] == False
