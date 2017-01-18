@@ -285,8 +285,8 @@ class Plugin:
 
     def checkout(self):
         """ Checkout a specific version and branch of a repo """
-        if not self.branch: self.branch = 'master'
-        if not self.version: self.version = 'HEAD'
+        if not hasattr(self, 'branch'): self.branch = 'master'
+        if not hasattr(self, 'version'): self.version = 'HEAD'
         response = (True, None)
         status = subprocess.call(shlex.split("git checkout " + self.branch))
         if status == 0:
