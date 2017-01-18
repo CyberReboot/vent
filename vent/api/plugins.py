@@ -168,6 +168,8 @@ class Plugin:
         self.version
         """
         matches = []
+        if not hasattr(self, 'tools'): self.tools = []
+        if not hasattr(self, 'version'): self.version = 'HEAD'
         for tool in self.tools:
             match_version = self.version
             if tool[1] != '':
@@ -285,6 +287,8 @@ class Plugin:
 
     def checkout(self):
         """ Checkout a specific version and branch of a repo """
+        if not hasattr(self, 'branch'): self.branch = 'master'
+        if not hasattr(self, 'version'): self.version = 'HEAD'
         response = (True, None)
         status = subprocess.call(shlex.split("git checkout " + self.branch))
         if status == 0:
