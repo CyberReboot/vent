@@ -1,12 +1,8 @@
 from vent.api.plugins import Plugin
 
-def create_instance():
-    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
-    return instance
-
 def test_add():
     """ Test the add function """
-    instance = create_instance()
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     status = instance.add('https://github.com/cyberreboot/vent', build=False)
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent.git', build=True)
@@ -14,13 +10,10 @@ def test_add():
     bad_instance = Plugin()
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
     assert status[0] == False
-    bad_instance = create_instance()
-    status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
-    assert status[0] == False
 
 def test_build_tools():
     """ Test the build_tools function """
-    instance = create_instance()
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     status = instance.build_tools(0)
     assert status[0] == False
     status = instance.build_tools(128)
@@ -32,6 +25,6 @@ def test_build_tools():
 
 def test_get_tool_matches():
     """ Test the get_tool_matches function """
-    instance = create_instance()
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     matches = instance.get_tool_matches()
     assert matches == []
