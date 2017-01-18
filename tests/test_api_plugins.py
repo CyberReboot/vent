@@ -49,4 +49,32 @@ def test_tools():
     tools = instance.tools()
     assert tools == []
 
+def test_versions():
+    """ Test the versions function """
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    versions = instance.versions('foo')
+    assert versions == []
 
+def test_current_version():
+    """ Test the current_version function """
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    versions = instance.current_version('foo')
+    assert versions == []
+
+def test_state():
+    """ Test the state function """
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    states = instance.state('foo')
+    assert states == []
+
+def test_enable():
+    """ Test the enable function """
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    status = instance.enable('foo')
+    assert status == False
+
+def test_disable():
+    """ Test the disable function """
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    status = instance.disable('foo')
+    assert status == False
