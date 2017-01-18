@@ -168,7 +168,7 @@ class Plugin:
         self.version
         """
         matches = []
-        if not hasattr(self, 'tools'): return matches
+        if not hasattr(self, 'tools'): self.tools = []
         if not hasattr(self, 'version'): self.version = 'HEAD'
         for tool in self.tools:
             match_version = self.version

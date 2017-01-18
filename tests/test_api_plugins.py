@@ -26,5 +26,6 @@ def test_build_tools():
 def test_get_tool_matches():
     """ Test the get_tool_matches function """
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    instance.tools = []
     matches = instance.get_tool_matches()
     assert matches == []
