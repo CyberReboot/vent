@@ -51,6 +51,6 @@ def test_tools():
     """ Test the tools function """
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     tools = instance.tools()
-    assert tools = []
+    assert tools == []
 
 
