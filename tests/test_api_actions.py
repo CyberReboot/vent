@@ -10,7 +10,8 @@ def test_remove():
 
 def test_start():
     """ Test the start function """
-    Action.start()
+    instance = Action()
+    instance.start()
 
 def test_stop():
     """ Test the stop function """

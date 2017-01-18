@@ -6,7 +6,6 @@ if [ ! -f "/var/lib/boot2docker/vent.sh" ]; then
 	sudo /usr/local/etc/init.d/openssh restart
 	mkdir -p /var/lib/docker/data/files
 	mkdir -p /var/lib/docker/data/plugins
-	mkdir -p /var/lib/docker/data/core
 	ln -s /var/lib/docker/data/files /files
 	sudo ln -s /scripts/vent /usr/local/bin/vent
 	sudo ln -s /scripts/vent-generic /usr/local/bin/vent-generic

@@ -15,8 +15,15 @@ class Action:
    def remove():
        return
 
-   @staticmethod
-   def start():
+   def start(self, repo=None, name=None, group=None, enabled="yes", branch="master", version="HEAD"):
+       """
+       Start a set of tools that match the parameters given, if no parameters
+       are given, start all installed tools on the master branch at verison
+       HEAD that are enabled
+       """
+       args = locals()
+       # ensure tools are built before starting them
+       # !! TODO check vent.template files for runtime dependencies (links, etc.)
        return
 
    @staticmethod
