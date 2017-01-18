@@ -1,6 +1,6 @@
 #!/bin/sh
 
-sleep 5
+sleep 15
 image_exists=$(docker images -q cyberreboot/vent-management | wc -l)
 if [ "$image_exists" == "0" ]; then
 	docker load -i /var/lib/docker/data/core/management/vent-management.tar
