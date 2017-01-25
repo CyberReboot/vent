@@ -41,6 +41,7 @@ class Action:
                template_path = os.path.join(sections[section]['path'], 'vent.template')
                container_name = sections[section]['image_name'].replace(':','-')
                image_name = sections[section]['image_name']
+               # !! TODO checkout branch at version
                vent_template = Template(template_path)
                status = vent_template.section('docker')
                tool_dict[container_name] = {'Image':image_name}
