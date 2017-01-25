@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Vent'
-copyright = u'2016 In-Q-Tel, Inc, All Rights Reserved.'
+copyright = u'2017 In-Q-Tel, Inc, All Rights Reserved.'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
