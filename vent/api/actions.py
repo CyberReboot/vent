@@ -1,6 +1,8 @@
+import json
 import os
 
 from vent.api.plugins import Plugin
+from vent.api.templates import Template
 
 class Action:
    """ Handle actions in menu """
@@ -22,9 +24,39 @@ class Action:
        HEAD that are enabled
        """
        args = locals()
-       # ensure tools are built before starting them
-       # !! TODO check vent.template files for runtime dependencies (links, etc.)
-       return
+       options = ['name', 'namespace', 'built', 'path', 'image_name', 'branch', 'version']
+       status = (True, None)
+       sections, template = self.plugin.constraint_options(args, options)
+       for section in sections:
+           # !! TODO check vent.template files for runtime dependencies (links, etc.)
+           # ensure tools are built before starting them
+           # TODO check that built is in the section
+           if not sections[section]['built'] == 'yes':
+               # !! TODO try and build the tool first
+               pass
+           # only start tools that have been built
+           if sections[section]['built'] == 'yes':
+               # !!TODO
+               tool_dict = {}
+               template_path = os.path.join(sections[section]['path'], 'vent.template')
+               container_name = sections[section]['image_name'].replace(':','-')
+               image_name = sections[section]['image_name']
+               vent_template = Template(template_path)
+               status = vent_template.section('docker')
+               tool_dict[container_name] = {'Image':image_name}
+               if status[0]:
+                   for option in status[1]:
+                       tool_dict[container_name][option[0]] = option[1]
+               # !! TODO add labels for vent, groups, namespace, branch, version, name
+           with open('/tmp/vent_start.txt', 'a') as f:
+               json.dump(tool_dict, f)
+               f.write("|")
+               if 'groups' in sections[section] and 'core' in sections[section]['groups']:
+                   f.write("0")
+               else:
+                   f.write("1")
+               f.write("\n")
+       return status
 
    @staticmethod
    def stop():
