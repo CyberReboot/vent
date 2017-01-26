@@ -128,9 +128,9 @@ class Plugin:
         response = (True, None)
         if not hasattr(self, 'tools'): self.tools = []
         if not hasattr(self, 'overrides'): self.overrides = []
-        if not self.tools:
+        if not self.tools or type(self.tools) != []:
             self.tools = []
-        if not self.overrides:
+        if not self.overrides or type(self.overrides) != []:
             self.overrides = []
 
         # check result of clone, ensure successful or that it already exists
