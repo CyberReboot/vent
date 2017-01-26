@@ -7,7 +7,6 @@ def test_add():
     assert status[0] == False
     status = instance.add('https://github.com/CyberReboot/vent', branch='experimental', build=False)
     assert status[0] == True
-    assert status[1] == None
 
 def test_remove():
     """ Test the remove function """

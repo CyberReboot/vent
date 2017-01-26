@@ -126,6 +126,8 @@ class Plugin:
         build_manifest
         """
         response = (True, None)
+        if not hasattr(self, 'tools'): self.tools = []
+        if not hasattr(self, 'overrides'): self.overrides = []
         if not self.tools:
             self.tools = []
         if not self.overrides:
