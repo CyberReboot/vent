@@ -89,8 +89,11 @@ class Plugin:
             self.repo = self.repo.split(".git")[0]
 
         # get org and repo name and path repo will be cloned to
-        self.org, self.name = self.repo.split("/")[-2:]
-        self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
+        try:
+            self.org, self.name = self.repo.split("/")[-2:]
+            self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
+        except Exception as e:
+            return (False, str(e))
 
         # make sure the path can be created, otherwise exit function now
         response = self.path_dirs.ensure_dir(self.path)
