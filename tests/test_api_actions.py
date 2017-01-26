@@ -14,15 +14,15 @@ def test_remove():
 
 def test_build():
     """ Test the build function """
-    test_add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('elasticsearch','')], build=False)
     instance = Action()
+    instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('elasticsearch','')], build=False)
     status = instance.build()
     assert status[0] == True
 
 def test_start():
     """ Test the start function """
-    test_add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('elasticsearch','')])
     instance = Action()
+    instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('elasticsearch','')])
     status = instance.start('elasticsearch')
     assert status[0] == True
 
