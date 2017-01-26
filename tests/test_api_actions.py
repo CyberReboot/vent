@@ -2,7 +2,11 @@ from vent.api.actions import Action
 
 def test_add():
     """ Test the add function """
-    Action.add()
+    instance = Action()
+    status = instance.add()
+    assert status[0] == False
+    status = instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental')
+    assert status[0] == True
 
 def test_remove():
     """ Test the remove function """
@@ -10,8 +14,10 @@ def test_remove():
 
 def test_start():
     """ Test the start function """
+    test_add()
     instance = Action()
-    instance.start()
+    status = instance.start('elasticsearch')
+    assert status[0] == True
 
 def test_stop():
     """ Test the stop function """
@@ -23,6 +29,7 @@ def test_clean():
 
 def test_build():
     """ Test the build function """
+    test_add()
     instance = Action()
     status = instance.build()
     assert status[0] == True
