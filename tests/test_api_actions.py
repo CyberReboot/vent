@@ -5,16 +5,23 @@ def test_add():
     instance = Action()
     status = instance.add('bad')
     assert status[0] == False
-    status = instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental')
+    status = instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', build=False)
     assert status[0] == True
 
 def test_remove():
     """ Test the remove function """
     Action.remove()
 
+def test_build():
+    """ Test the build function """
+    test_add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('elasticsearch','')], build=False)
+    instance = Action()
+    status = instance.build()
+    assert status[0] == True
+
 def test_start():
     """ Test the start function """
-    test_add('https://github.com/CyberReboot/vent-plugins', branch='experimental')
+    test_add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('elasticsearch','')])
     instance = Action()
     status = instance.start('elasticsearch')
     assert status[0] == True
@@ -26,13 +33,6 @@ def test_stop():
 def test_clean():
     """ Test the clean function """
     Action.clean()
-
-def test_build():
-    """ Test the build function """
-    test_add('https://github.com/CyberReboot/vent-plugins', branch='experimental')
-    instance = Action()
-    status = instance.build()
-    assert status[0] == True
 
 def test_backup():
     """ Test the backup function """
