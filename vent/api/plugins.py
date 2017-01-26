@@ -126,6 +126,10 @@ class Plugin:
         build_manifest
         """
         response = (True, None)
+        if not self.tools:
+            self.tools = []
+        if not self.overrides:
+            self.overrides = []
 
         # check result of clone, ensure successful or that it already exists
         if status in [0, 128]:
