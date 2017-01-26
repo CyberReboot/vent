@@ -16,18 +16,18 @@ class Action:
        """ Add a new set of tool(s) """
        status = (True, None)
        status = self.plugin.add(repo,
-                                tools=None,
-                                overrides=None,
-                                version="HEAD",
-                                branch="master",
-                                build=True,
-                                user=None,
-                                pw=None,
-                                group=None,
-                                version_alias=None,
-                                wild=None,
-                                remove_old=True,
-                                disable_old=True)
+                                tools=tools,
+                                overrides=overrides,
+                                version=version,
+                                branch=branch,
+                                build=build,
+                                user=user,
+                                pw=pw,
+                                group=group,
+                                version_alias=version_alias,
+                                wild=wild,
+                                remove_old=remove_old,
+                                disable_old=disable_old)
        return status
 
    @staticmethod
