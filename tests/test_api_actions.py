@@ -2,12 +2,12 @@ from vent.api.actions import Action
 
 def test_add():
     """ Test the add function """
-    instance = Action()
+    instance = Action(base_dir='/home/ubuntu/')
     status = instance.add('bad')
     assert status[0] == False
     status = instance.add('https://github.com/CyberReboot/vent', branch='experimental', build=False)
-    assert status[1] == None
     assert status[0] == True
+    assert status[1] == None
 
 def test_remove():
     """ Test the remove function """
