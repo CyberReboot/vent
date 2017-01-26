@@ -114,24 +114,18 @@ class Plugin:
 
         # clone repo and build tools
         status = subprocess.call(shlex.split("git clone --recursive " + self.repo + " ."))
-        response = self.build_tools(status)
+        response = self._build_tools(status)
 
         # set back to original path
         os.chdir(cwd)
         return response
 
-    def build_tools(self, status):
+    def _build_tools(self, status):
         """
         Create list of tools, paths, and versions to be built and sends them to
         build_manifest
         """
         response = (True, None)
-        if not hasattr(self, 'tools'): self.tools = []
-        if not hasattr(self, 'overrides'): self.overrides = []
-        if not self.tools or type(self.tools) != []:
-            self.tools = []
-        if not self.overrides or type(self.overrides) != []:
-            self.overrides = []
 
         # check result of clone, ensure successful or that it already exists
         if status in [0, 128]:
