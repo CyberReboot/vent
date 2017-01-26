@@ -14,9 +14,20 @@ class Action:
            branch="master", build=True, user=None, pw=None, group=None,
            version_alias=None, wild=None, remove_old=True, disable_old=True):
        """ Add a new set of tool(s) """
-       args = locals()
        status = (True, None)
-       status = self.plugin.add(args)
+       status = self.plugin.add(repo,
+                                tools=None,
+                                overrides=None,
+                                version="HEAD",
+                                branch="master",
+                                build=True,
+                                user=None,
+                                pw=None,
+                                group=None,
+                                version_alias=None,
+                                wild=None,
+                                remove_old=True,
+                                disable_old=True)
        return status
 
    @staticmethod
