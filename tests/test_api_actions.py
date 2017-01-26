@@ -15,15 +15,15 @@ def test_remove():
 def test_build():
     """ Test the build function """
     instance = Action()
-    instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('elasticsearch','')], build=False)
+    instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('kibana','')], build=False)
     status = instance.build()
     assert status[0] == True
 
 def test_start():
     """ Test the start function """
     instance = Action()
-    instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('elasticsearch','')])
-    status = instance.start('elasticsearch')
+    instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('kibana','')])
+    status = instance.start('kibana')
     assert status[0] == True
 
 def test_stop():
