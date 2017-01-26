@@ -288,6 +288,7 @@ class Plugin:
         Return list of possible tools in repo for the given version and branch
         """
         matches = []
+        if not hasattr(self, 'path'): return matches
         for root, dirnames, filenames in os.walk(self.path):
             for filename in fnmatch.filter(filenames, 'Dockerfile'):
                 # !! TODO deal with wild/groups/etc.?
