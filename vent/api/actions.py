@@ -3,6 +3,7 @@ import os
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
+from vent.helpers.meta import Version
 
 class Action:
    """ Handle actions in menu """
@@ -28,27 +29,52 @@ class Action:
        status = (True, None)
        sections, template = self.plugin.constraint_options(args, options)
        for section in sections:
-           # !! TODO check vent.template files for runtime dependencies (links, etc.)
            # ensure tools are built before starting them
-           # TODO check that built is in the section
            if not sections[section]['built'] == 'yes':
-               # !! TODO try and build the tool first
-               pass
+               # try and build the tool first
+               status = self.build(name=sections[section]['name'],
+                                   group=group,
+                                   enabled=enabled,
+                                   branch=branch,
+                                   version=version)
+
            # only start tools that have been built
            if sections[section]['built'] == 'yes':
-               # !!TODO
+               # initialize needed vars
                tool_dict = {}
                template_path = os.path.join(sections[section]['path'], 'vent.template')
                container_name = sections[section]['image_name'].replace(':','-')
                image_name = sections[section]['image_name']
-               # !! TODO checkout branch at version
+
+               # checkout the right version and branch of the repo
+               self.plugin.branch = branch
+               self.plugin.version = version
+               cwd = os.getcwd()
+               os.chdir(os.path.join(sections[section]['path']))
+               status = self.plugin.checkout()
+               os.chdir(cwd)
+
+               # set docker settings for container
                vent_template = Template(template_path)
                status = vent_template.section('docker')
                tool_dict[container_name] = {'Image':image_name}
                if status[0]:
+                   # !! TODO check vent.template files for runtime dependencies (links, etc.)
+                   # !! TODO link to rabbitmq container for plugin containers
                    for option in status[1]:
                        tool_dict[container_name][option[0]] = option[1]
-               # !! TODO add labels for vent, groups, namespace, branch, version, name
+
+                   # add extra labels
+                   if 'Labels' not in tool_dict[container_name]:
+                       tool_dict[container_name]['Labels'] = {}
+                   tool_dict[container_name]['Labels']['vent'] = Version()
+                   tool_dict[container_name]['Labels']['vent.groups'] = '' # TODO
+                   tool_dict[container_name]['Labels']['vent.namespace'] = sections[section]['namespace']
+                   tool_dict[container_name]['Labels']['vent.branch'] = branch
+                   tool_dict[container_name]['Labels']['vent.version'] = version
+                   tool_dict[container_name]['Labels']['vent.name'] = sections[section]['name']
+
+           # write out container configurations to be started by vent-management
            with open('/tmp/vent_start.txt', 'a') as f:
                json.dump(tool_dict, f)
                f.write("|")
