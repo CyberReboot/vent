@@ -89,8 +89,11 @@ class Plugin:
             self.repo = self.repo.split(".git")[0]
 
         # get org and repo name and path repo will be cloned to
-        self.org, self.name = self.repo.split("/")[-2:]
-        self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
+        try:
+            self.org, self.name = self.repo.split("/")[-2:]
+            self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
+        except Exception as e:
+            return (False, str(e))
 
         # make sure the path can be created, otherwise exit function now
         response = self.path_dirs.ensure_dir(self.path)
@@ -111,13 +114,13 @@ class Plugin:
 
         # clone repo and build tools
         status = subprocess.call(shlex.split("git clone --recursive " + self.repo + " ."))
-        response = self.build_tools(status)
+        response = self._build_tools(status)
 
         # set back to original path
         os.chdir(cwd)
         return response
 
-    def build_tools(self, status):
+    def _build_tools(self, status):
         """
         Create list of tools, paths, and versions to be built and sends them to
         build_manifest
@@ -279,6 +282,7 @@ class Plugin:
         Return list of possible tools in repo for the given version and branch
         """
         matches = []
+        if not hasattr(self, 'path'): return matches
         for root, dirnames, filenames in os.walk(self.path):
             for filename in fnmatch.filter(filenames, 'Dockerfile'):
                 # !! TODO deal with wild/groups/etc.?

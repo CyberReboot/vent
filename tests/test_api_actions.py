@@ -2,16 +2,29 @@ from vent.api.actions import Action
 
 def test_add():
     """ Test the add function """
-    Action.add()
+    instance = Action(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    status = instance.add('bad')
+    assert status[0] == False
+    status = instance.add('https://github.com/CyberReboot/vent', branch='experimental', build=False)
+    assert status[0] == True
 
 def test_remove():
     """ Test the remove function """
     Action.remove()
 
+def test_build():
+    """ Test the build function """
+    instance = Action(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('kibana','')], build=False)
+    status = instance.build()
+    assert status[0] == True
+
 def test_start():
     """ Test the start function """
-    instance = Action()
-    instance.start()
+    instance = Action(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    instance.add('https://github.com/CyberReboot/vent-plugins', branch='experimental', tools=[('kibana','')])
+    status = instance.start('kibana')
+    assert status[0] == True
 
 def test_stop():
     """ Test the stop function """
@@ -20,12 +33,6 @@ def test_stop():
 def test_clean():
     """ Test the clean function """
     Action.clean()
-
-def test_build():
-    """ Test the build function """
-    instance = Action()
-    status = instance.build()
-    assert status[0] == True
 
 def test_backup():
     """ Test the backup function """

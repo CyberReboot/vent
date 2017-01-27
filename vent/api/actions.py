@@ -10,22 +10,50 @@ class Action:
    def __init__(self, **kargs):
        self.plugin = Plugin(**kargs)
 
-   @staticmethod
-   def add():
-       return
+   def add(self, repo, tools=None, overrides=None, version="HEAD",
+           branch="master", build=True, user=None, pw=None, group=None,
+           version_alias=None, wild=None, remove_old=True, disable_old=True):
+       """ Add a new set of tool(s) """
+       status = (True, None)
+       status = self.plugin.add(repo,
+                                tools=tools,
+                                overrides=overrides,
+                                version=version,
+                                branch=branch,
+                                build=build,
+                                user=user,
+                                pw=pw,
+                                group=group,
+                                version_alias=version_alias,
+                                wild=wild,
+                                remove_old=remove_old,
+                                disable_old=disable_old)
+       return status
 
    @staticmethod
    def remove():
        return
 
-   def start(self, repo=None, name=None, group=None, enabled="yes", branch="master", version="HEAD"):
+   def start(self,
+             repo=None,
+             name=None,
+             group=None,
+             enabled="yes",
+             branch="master",
+             version="HEAD"):
        """
        Start a set of tools that match the parameters given, if no parameters
        are given, start all installed tools on the master branch at verison
        HEAD that are enabled
        """
        args = locals()
-       options = ['name', 'namespace', 'built', 'path', 'image_name', 'branch', 'version']
+       options = ['name',
+                  'namespace',
+                  'built',
+                  'path',
+                  'image_name',
+                  'branch',
+                  'version']
        status = (True, None)
        sections, template = self.plugin.constraint_options(args, options)
        for section in sections:
@@ -93,7 +121,13 @@ class Action:
    def clean():
        return
 
-   def build(self, repo=None, name=None, group=None, enabled="yes", branch="master", version="HEAD"):
+   def build(self,
+             repo=None,
+             name=None,
+             group=None,
+             enabled="yes",
+             branch="master",
+             version="HEAD"):
        """ Build a set of tools that match the parameters given """
        args = locals()
        options = ['image_name', 'path']
@@ -106,7 +140,10 @@ class Action:
            os.chdir(sections[section]['path'])
            status = self.plugin.checkout()
            if status[0]:
-               template = self.plugin.build_image(template, sections[section]['path'], sections[section]['image_name'], section)
+               template = self.plugin.build_image(template,
+                                                  sections[section]['path'],
+                                                  sections[section]['image_name'],
+                                                  section)
        template.write_config()
        return status
 
