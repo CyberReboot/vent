@@ -132,6 +132,7 @@ class Action:
        """ Build a set of tools that match the parameters given """
        args = locals()
        options = ['image_name', 'path']
+       status = (True, None)
        sections, template = self.plugin.constraint_options(args, options)
        for section in sections:
            print "Building", section, "..."
@@ -140,7 +141,7 @@ class Action:
                                         section, build=True, branch=branch,
                                         version=version)
        template.write_config()
-       return
+       return status
 
    @staticmethod
    def backup():
