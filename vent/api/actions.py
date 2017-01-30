@@ -11,7 +11,7 @@ class Action:
        self.plugin = Plugin(**kargs)
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
-           branch="master", build=True, user=None, pw=None, group=None,
+           branch="master", build=True, user=None, pw=None, groups=None,
            version_alias=None, wild=None, remove_old=True, disable_old=True):
        """ Add a new set of tool(s) """
        status = (True, None)
@@ -23,7 +23,7 @@ class Action:
                                 build=build,
                                 user=user,
                                 pw=pw,
-                                group=group,
+                                groups=groups,
                                 version_alias=version_alias,
                                 wild=wild,
                                 remove_old=remove_old,
@@ -37,7 +37,7 @@ class Action:
    def start(self,
              repo=None,
              name=None,
-             group=None,
+             groups=None,
              enabled="yes",
              branch="master",
              version="HEAD"):
@@ -61,7 +61,7 @@ class Action:
            if not sections[section]['built'] == 'yes':
                # try and build the tool first
                status = self.build(name=sections[section]['name'],
-                                   group=group,
+                                   groups=groups,
                                    enabled=enabled,
                                    branch=branch,
                                    version=version)
@@ -124,7 +124,7 @@ class Action:
    def build(self,
              repo=None,
              name=None,
-             group=None,
+             groups=None,
              enabled="yes",
              branch="master",
              version="HEAD"):
@@ -137,13 +137,14 @@ class Action:
        self.plugin.version = version
        sections, template = self.plugin.constraint_options(args, options)
        for section in sections:
+           # TODO make these operations a callable function in plugins
            os.chdir(sections[section]['path'])
            status = self.plugin.checkout()
            if status[0]:
-               template = self.plugin.build_image(template,
-                                                  sections[section]['path'],
-                                                  sections[section]['image_name'],
-                                                  section)
+               template = self.plugin._build_image(template,
+                                                   sections[section]['path'],
+                                                   sections[section]['image_name'],
+                                                   section)
        template.write_config()
        return status
 
