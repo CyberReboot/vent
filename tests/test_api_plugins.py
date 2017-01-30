@@ -36,12 +36,12 @@ def test_builder():
     """ Test the builder function """
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     template = Template()
-    template = instance.builder(template, 'bad_path', 'image_name', 'section', build=True, branch='master', version='HEAD')
     template = instance.builder(template, instance.manifest, 'image_name', 'section')
+    template = instance.builder(template, 'bad_path', 'image_name', 'section', build=True, branch='master', version='HEAD')
 
 def test_build_tools():
     """ Test the _build_tools function """
-    instance = Plugin()
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     status = instance._build_tools(256)
     assert status[0] == False
 
