@@ -5,6 +5,7 @@ import shlex
 import subprocess
 
 from vent.api.templates import Template
+from vent.helpers.errors import ErrorHandler
 from vent.helpers.paths import PathDirs
 
 class Plugin:
@@ -130,6 +131,7 @@ class Plugin:
         os.chdir(cwd)
         return response
 
+    @ErrorHandler
     def builder(self, template, match_path, image_name, section, build=None,
               branch=None, version=None):
         """ Build tools """
