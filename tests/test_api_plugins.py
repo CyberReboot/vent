@@ -1,4 +1,5 @@
 from vent.api.plugins import Plugin
+from vent.api.templates import Template
 
 def test_add():
     """ Test the add function """
@@ -10,8 +11,14 @@ def test_add():
     bad_instance = Plugin()
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
     assert status[0] == False
-    bad_instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
-    status = bad_instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
+    assert status[0] == True
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')])
+    assert status[0] == True
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, tools=[('.', 'HEAD')], overrides=[('.', 'HEAD')])
     assert status[0] == True
 
 def test_get_tool_matches():
@@ -24,6 +31,19 @@ def test_get_tool_matches():
 def test_add_image():
     """ Test the add_image function """
     Plugin.add_image('foo')
+
+def test_builder():
+    """ Test the builder function """
+    instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
+    template = Template()
+    template = instance.builder(template, 'bad_path', 'image_name', 'section', build=True, branch='master', version='HEAD')
+    template = instance.builder(template, 'bad_path', 'image_name', 'section')
+
+def test_build_tools():
+    """ Test the _build_tools function """
+    instance = Plugin()
+    status = instance._build_tools(256)
+    assert status[0] == False
 
 def test_remove():
     """ Test the remove function """
