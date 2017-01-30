@@ -134,11 +134,11 @@ class Plugin:
                 matches = []
                 if len(self.tools) == 0 and len(self.overrides) == 0:
                     # get all tools
-                    matches = self.available_tools()
+                    matches = self._available_tools()
                 elif len(self.tools) == 0:
                     # there's only something in overrides
                     # grab all the tools then apply overrides
-                    matches = self.available_tools()
+                    matches = self._available_tools()
                     # !! TODO apply overrides to matches
                 elif len(self.overrides) == 0:
                     # there's only something in tools
@@ -252,14 +252,14 @@ class Plugin:
                             previous_commits = previous_commit
                     if previous_commits and previous_commits != commit_id:
                         template.set_option(section, "previous_versions", previous_commits)
-                template = self.build_image(template, match_path, image_name, section)
+                template = self._build_image(template, match_path, image_name, section)
 
         # write out configuration to the manifest file and reset to repo directory
         template.write_config()
         os.chdir(self.path)
         return
 
-    def build_image(self, template, match_path, image_name, section):
+    def _build_image(self, template, match_path, image_name, section):
         """ Build docker images and store results in template """
         if self.build:
             try:
@@ -277,7 +277,7 @@ class Plugin:
             template.set_option(section, "built", "no")
         return template
 
-    def available_tools(self):
+    def _available_tools(self):
         """
         Return list of possible tools in repo for the given version and branch
         """
@@ -351,6 +351,7 @@ class Plugin:
                 tools.append((section, built, enabled))
         return tools
 
+    # !! TODO name or repo or group ?
     def remove(self, name=None, repo=None, namespace=None, branch=None):
         """
         Remove tool (name) or repository, repository is the url. If no
@@ -368,6 +369,7 @@ class Plugin:
         template.write_config()
         return status
 
+    # !! TODO name or group ?
     def versions(self, name, namespace=None, branch="master"):
         """ Return available versions of a tool """
         # initialize
@@ -384,6 +386,7 @@ class Plugin:
             versions.append((result, version_list))
         return versions
 
+    # !! TODO name or group ?
     def current_version(self, name, namespace=None, branch="master"):
         """ Return current version for a given tool """
         # initialize
@@ -397,6 +400,7 @@ class Plugin:
             versions.append((result, results[result]['version']))
         return versions
 
+    # !! TODO name or group ?
     def state(self, name, namespace=None, branch="master"):
         """ Return state of a tool, disabled/enabled for each version """
         # initialize
@@ -413,6 +417,7 @@ class Plugin:
                 states.append((result, 'disabled'))
         return states
 
+    # !! TODO name or group ?
     def enable(self, name, namespace=None, branch="master", version="HEAD"):
         """ Enable tool at a specific version, default to head """
         # initialize
@@ -426,6 +431,7 @@ class Plugin:
         template.write_config()
         return status
 
+    # !! TODO name or group ?
     def disable(self, name, namespace=None, branch="master", version="HEAD"):
         """ Disable tool at a specific version, default to head """
         # initialize

@@ -137,13 +137,14 @@ class Action:
        self.plugin.version = version
        sections, template = self.plugin.constraint_options(args, options)
        for section in sections:
+           # TODO make these operations a callable function in plugins
            os.chdir(sections[section]['path'])
            status = self.plugin.checkout()
            if status[0]:
-               template = self.plugin.build_image(template,
-                                                  sections[section]['path'],
-                                                  sections[section]['image_name'],
-                                                  section)
+               template = self.plugin._build_image(template,
+                                                   sections[section]['path'],
+                                                   sections[section]['image_name'],
+                                                   section)
        template.write_config()
        return status
 
