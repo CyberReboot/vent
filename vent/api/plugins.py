@@ -160,7 +160,7 @@ class Plugin:
                                 matches.remove(match)
                                 matches.append(override_t)
                 if len(matches) > 0:
-                    self.build_manifest(matches)
+                    self._build_manifest(matches)
         else:
             response = (False, status)
         return response
@@ -187,7 +187,7 @@ class Plugin:
             matches.append((match, match_version))
         return matches
 
-    def build_manifest(self, matches):
+    def _build_manifest(self, matches):
         """ Builds and writes the manifest for the tools being added """
         # !! TODO check for pre-existing that conflict with request and disable and/or remove image
         template = Template(template=self.manifest)
