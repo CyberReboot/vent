@@ -170,7 +170,7 @@ class Template:
                 if not result[0] or result[1] != constraints[constraint]:
                     include = False
                 # handle group membership
-                if result[0] and a_section == 'groups' and constraints[constraint] in result[1]:
+                if result[0] and constraint == 'groups' and constraints[constraint] in result[1]:
                     include = True
             if include:
                 sections[a_section] = {}
