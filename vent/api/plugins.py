@@ -16,7 +16,7 @@ class Plugin:
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
-            version_alias=None, wild=None, remove_old=True, disable_old=True):
+            version_alias=None, wild=None, remove_old=True, disable_old=True, limit_groups=None):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -52,6 +52,8 @@ class Plugin:
         disable_old lets you specify whether or not to disable previously found
           tools that match to ones being added currently (note does not stop
           currently running instances of the older version)
+        limit_groups is a list of groups to build tools for that match group
+          names in vent.template of each tool if exists
         Examples:
           repo=fe
             (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
@@ -74,6 +76,8 @@ class Plugin:
             tools = []
         if not overrides:
             overrides = []
+        if not limit_groups:
+            limit_groups = []
         self.repo = repo
         self.tools = tools
         self.overrides = overrides
@@ -85,6 +89,7 @@ class Plugin:
         self.wild = wild
         self.remove_old = remove_old
         self.disable_old = disable_old
+        self.limit_groups = limit_groups
         self.org = None
         self.name = None
         response = (True, None)
@@ -131,7 +136,7 @@ class Plugin:
         build_manifest
         """
         response = (True, None)
-        # !! TODO implement features: wild, remove_old, disable_old
+        # !! TODO implement features: wild, remove_old, disable_old, limit_groups
 
         # check result of clone, ensure successful or that it already exists
         if status in [0, 128]:
