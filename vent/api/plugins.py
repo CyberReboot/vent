@@ -15,7 +15,7 @@ class Plugin:
                                      "plugin_manifest.cfg")
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
-            branch="master", build=True, user=None, pw=None, group=None,
+            branch="master", build=True, user=None, pw=None, groups=None,
             version_alias=None, wild=None, remove_old=True, disable_old=True):
         """
         Adds a plugin of tool(s)
@@ -37,19 +37,21 @@ class Plugin:
         build is a boolean of whether or not to build the tools now
         user is the username for a private repo if needed
         pw is the password to go along with the username for a private repo
-        group is globally set for all tools
+        groups is globally set for all tools
         version_alias is globally set for all tools and is a mapping from a
           friendly version tag to the real version commit ID
         wild lets you specify individual overrides for additional values in the
-          tuple of tools or overrides wild can be a list containing one or more
-          of the following: branch, build, group, version_alias
-          the order of the items in the wild list will expect values to tacked
-          on in the same order to the tuple for tools and overrides in
+          tuple of tools or overrides.  wild is a list containing one or more
+          of the following: branch, build, groups, version_alias
+          the order of the items in the wild list will expect values to be
+          tacked on in the same order to the tuple for tools and overrides in
           additional to the tool name and version
         remove_old lets you specify whether or not to remove previously found
-          tools that match to ones being added currently
+          tools that match to ones being added currently (note does not stop
+          currently running instances of the older version)
         disable_old lets you specify whether or not to disable previously found
-          tools that match to ones being added currently
+          tools that match to ones being added currently (note does not stop
+          currently running instances of the older version)
         Examples:
           repo=fe
             (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
@@ -67,8 +69,6 @@ class Plugin:
             version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
             'master', ignore all other tools)
         """
-        # !! TODO implement features: group, version_alias, wild, remove_old, disable_old
-        # !! TODO check for vent.template file for groups and name alias (can still be overridden, in the function call)
         # initialize and store class objects
         if not tools:
             tools = []
@@ -80,6 +80,11 @@ class Plugin:
         self.version = version
         self.branch = branch
         self.build = build
+        self.groups = groups
+        self.version_alias = version_alias
+        self.wild = wild
+        self.remove_old = remove_old
+        self.disable_old = disable_old
         self.org = None
         self.name = None
         response = (True, None)
@@ -126,6 +131,7 @@ class Plugin:
         build_manifest
         """
         response = (True, None)
+        # !! TODO implement features: wild, remove_old, disable_old
 
         # check result of clone, ensure successful or that it already exists
         if status in [0, 128]:
@@ -252,6 +258,18 @@ class Plugin:
                             previous_commits = previous_commit
                     if previous_commits and previous_commits != commit_id:
                         template.set_option(section, "previous_versions", previous_commits)
+
+                if self.version_alias:
+                    template.set_option(section, "version_alias", self.version_alias)
+                if self.groups:
+                    template.set_option(section, "groups", self.groups)
+                else:
+                    vent_template = os.path.join(match_path, 'vent.template')
+                    if os.path.exists(vent_template):
+                        v_template = Template(template=vent_template)
+                        groups = v_template.option("info", "groups")
+                        if groups[0]:
+                            template.set_option(section, "groups", groups[1])
                 template = self._build_image(template, match_path, image_name, section)
 
         # write out configuration to the manifest file and reset to repo directory
