@@ -18,7 +18,7 @@ def test_add():
     status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')])
     assert status[0] == True
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
-    status = instance.add('https://github.com/cyberreboot/vent', build=False, tools=[('.', 'HEAD')], overrides=[('.', 'HEAD')])
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, tools=[('vent/', 'HEAD')], overrides=[('vent', 'HEAD')])
     assert status[0] == True
 
 def test_get_tool_matches():
@@ -37,7 +37,7 @@ def test_builder():
     instance = Plugin(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/')
     template = Template()
     template = instance.builder(template, 'bad_path', 'image_name', 'section', build=True, branch='master', version='HEAD')
-    template = instance.builder(template, 'bad_path', 'image_name', 'section')
+    template = instance.builder(template, instance.manifest, 'image_name', 'section')
 
 def test_build_tools():
     """ Test the _build_tools function """
