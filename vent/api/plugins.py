@@ -130,6 +130,24 @@ class Plugin:
         os.chdir(cwd)
         return response
 
+    def builder(self, template, match_path, image_name, section, build=None,
+              branch=None, version=None):
+        """ Build tools """
+        if build:
+            self.build = build
+        elif not hasattr(self, 'build'): self.build = True
+        if branch:
+            self.branch = branch
+        elif not hasattr(self, 'branch'): self.branch = 'master'
+        if version:
+            self.version = version
+        elif not hasattr(self, 'version'): self.version = 'HEAD'
+        cwd = os.getcwd()
+        os.chdir(match_path)
+        template = self._build_image(template, match_path, image_name, section)
+        os.chdir(cwd)
+        return template
+
     def _build_tools(self, status):
         """
         Create list of tools, paths, and versions to be built and sends them to
@@ -221,6 +239,7 @@ class Plugin:
                 previous_commits = None
                 head = False
                 if exists:
+
                     for option in options:
                         # TODO check if tool name but a different version exists - then disable/remove if set
                         if option[0] == 'version' and option[1] == 'HEAD':
@@ -284,6 +303,7 @@ class Plugin:
 
     def _build_image(self, template, match_path, image_name, section):
         """ Build docker images and store results in template """
+        # !! TODO return status of whether it built successfully or not
         if self.build:
             try:
                 os.chdir(match_path)
