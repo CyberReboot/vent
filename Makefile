@@ -19,8 +19,6 @@ test:
 	@echo
 	pip -V
 	pip install -r tests/requirements.txt
-	pip uninstall -y vent
-	pip install .
 	py.test -v --cov=. -k 'not vendor' --cov-report term-missing
 
 depends: clean
