@@ -17,13 +17,6 @@ dependencies:
     - chmod -R 777 /home/ubuntu/vent
 test:
   override:
-    - PYTHONPATH="${PYTHONPATH}:/home/ubuntu/vent" make test
-    # currently broken due to not being able to pull boot2docker/boot2docker:latest on circleci
-    # - make
+    - make test
   post:
     - bash <(curl -s https://codecov.io/bash)
-
-general:
-  branches:
-    ignore:
-      - experimental
