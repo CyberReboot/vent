@@ -15,9 +15,11 @@ def test_remove():
 def test_build():
     """ Test the build function """
     instance = Action(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/', meta_dir='/tmp/.vent')
-    instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')], build=False)
+    status = instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')], build=False)
+    print status
     status = instance.build()
-    assert status[0] == True
+    print status
+    assert status[0] == False
 
 def test_start():
     """ Test the start function """
