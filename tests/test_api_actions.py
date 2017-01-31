@@ -18,10 +18,8 @@ def test_build():
     """ Test the build function """
     instance = Action(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
     status = instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')], build=False)
-    print status
     status = instance.build()
-    print status
-    assert status[0] == False
+    assert status[0] == True
 
 def test_start():
     """ Test the start function """
