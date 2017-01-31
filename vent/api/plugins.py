@@ -486,6 +486,6 @@ class Plugin:
         # get resulting dictionary of sections with options that match constraints
         results, template = self.constraint_options(args, [])
         for result in results:
-            status = template.set_option(section, 'enabled', 'no')
+            status = template.set_option(result, 'enabled', 'no')
         template.write_config()
         return status
