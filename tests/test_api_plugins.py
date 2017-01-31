@@ -61,29 +61,30 @@ def test_remove():
 def test_versions():
     """ Test the versions function """
     instance = Plugin(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
-    versions = instance.versions('foo')
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, branch='experimental')
+    versions = instance.versions('elasticsearch')
     assert versions == []
 
 def test_current_version():
     """ Test the current_version function """
     instance = Plugin(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
-    versions = instance.current_version('foo')
+    versions = instance.current_version('elasticsearch')
     assert versions == []
 
 def test_state():
     """ Test the state function """
     instance = Plugin(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
-    states = instance.state('foo')
+    states = instance.state('elasticsearch')
     assert states == []
 
 def test_enable():
     """ Test the enable function """
     instance = Plugin(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
-    status = instance.enable('foo')
+    status = instance.enable('elasticsearch')
     assert status[0] == False
 
 def test_disable():
     """ Test the disable function """
     instance = Plugin(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
-    status = instance.disable('foo')
+    status = instance.disable('elasticsearch')
     assert status[0] == False

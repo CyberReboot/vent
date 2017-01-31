@@ -24,7 +24,7 @@ def test_build():
 def test_start():
     """ Test the start function """
     instance = Action(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
-    status = instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')])
+    status = instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')], groups='foo')
     assert status[0] == True
     status = instance.start(name='kibana', branch='experimental')
     assert status[0] == True
