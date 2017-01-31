@@ -76,7 +76,7 @@ def test_state():
     """ Test the state function """
     instance = Plugin(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
     states = instance.state('elasticsearch', branch='experimental')
-    assert stats == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', 'enabled')]
+    assert states == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', 'enabled')]
 
 def test_enable():
     """ Test the enable function """
