@@ -50,6 +50,7 @@ class Action:
        options = ['name',
                   'namespace',
                   'built',
+                  'groups',
                   'path',
                   'image_name',
                   'branch',
