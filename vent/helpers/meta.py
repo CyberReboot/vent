@@ -7,6 +7,6 @@ def Version():
         path = '/'.join(path.split('/')[:-2])
         with open(os.path.join(path, 'VERSION'), 'r') as f:
             version = f.read().split('\n')[0].strip()
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
     return version

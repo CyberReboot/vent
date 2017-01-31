@@ -95,8 +95,9 @@ class Action:
                    # add extra labels
                    if 'Labels' not in tool_dict[container_name]:
                        tool_dict[container_name]['Labels'] = {}
+                   if 'groups' in sections[section]:
+                       tool_dict[container_name]['Labels']['vent.groups'] = sections[section]['groups']
                    tool_dict[container_name]['Labels']['vent'] = Version()
-                   tool_dict[container_name]['Labels']['vent.groups'] = '' # TODO
                    tool_dict[container_name]['Labels']['vent.namespace'] = sections[section]['namespace']
                    tool_dict[container_name]['Labels']['vent.branch'] = branch
                    tool_dict[container_name]['Labels']['vent.version'] = version
@@ -132,19 +133,13 @@ class Action:
        args = locals()
        options = ['image_name', 'path']
        status = (True, None)
-       self.plugin.build = True
-       self.plugin.branch = branch
-       self.plugin.version = version
        sections, template = self.plugin.constraint_options(args, options)
        for section in sections:
-           # TODO make these operations a callable function in plugins
-           os.chdir(sections[section]['path'])
-           status = self.plugin.checkout()
-           if status[0]:
-               template = self.plugin._build_image(template,
-                                                   sections[section]['path'],
-                                                   sections[section]['image_name'],
-                                                   section)
+           print "Building", section, "..."
+           template = self.plugin.builder(template, sections[section]['path'],
+                                        sections[section]['image_name'],
+                                        section, build=True, branch=branch,
+                                        version=version)
        template.write_config()
        return status
 
