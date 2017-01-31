@@ -5,9 +5,14 @@
 *.pyc
 *.tar
 *.zip
-.DS_Store
+.cache
 .coverage
+.DS_Store
 .git
+.vent
 build
+core
 dist
 images
+plugins
+tests/__pycache__

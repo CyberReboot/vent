@@ -1,8 +1,10 @@
+import os
+
 from vent.api.actions import Action
 
 def test_add():
     """ Test the add function """
-    instance = Action(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/', meta_dir='/tmp/.vent')
+    instance = Action(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
     status = instance.add('bad')
     assert status[0] == False
     status = instance.add('https://github.com/cyberreboot/vent', branch='experimental', build=False)
@@ -14,17 +16,17 @@ def test_remove():
 
 def test_build():
     """ Test the build function """
-    instance = Action(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/', meta_dir='/tmp/.vent')
-    instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')], build=False)
-    status = instance.build()
+    instance = Action(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
+    status = instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')], build=False)
+    status = instance.build(branch='experimental')
     assert status[0] == True
 
 def test_start():
     """ Test the start function """
-    instance = Action(base_dir='/tmp/', vent_dir='/tmp/', vendor_dir='/tmp/', scripts_dir='/tmp/', meta_dir='/tmp/.vent')
-    status = instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')])
+    instance = Action(base_dir=os.getcwd()+'/', vent_dir=os.getcwd()+'/vent/', vendor_dir=os.getcwd()+'/vendor/', scripts_dir=os.getcwd()+'/scripts/', meta_dir=os.getcwd()+'/.vent')
+    status = instance.add('https://github.com/cyberreboot/vent-plugins', branch='experimental', tools=[('kibana','')], groups='foo')
     assert status[0] == True
-    status = instance.start('kibana')
+    status = instance.start(name='kibana', branch='experimental')
     assert status[0] == True
 
 def test_stop():

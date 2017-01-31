@@ -8,5 +8,10 @@
 .cache
 .coverage
 .DS_Store
+.vent
 build
+core
 dist
+images
+plugins
+tests/__pycache__
