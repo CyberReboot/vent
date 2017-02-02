@@ -6,5 +6,5 @@ from vent.menu import VentApp
 
 def test_onStart():
     """ Test the onStart function """
-    instance = VentApp(npyscreen..NPSAppManaged)
+    instance = VentApp(npyscreen.NPSAppManaged)
     instance.onStart()
