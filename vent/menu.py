@@ -6,9 +6,11 @@ import npyscreen
 import subprocess
 
 class VentForm(npyscreen.FormBaseNewWithMenus):
+    """ Main information landing form for the Vent CLI """
     d_client = docker.from_env()
 
     def while_waiting(self):
+        """ Update fields periodically if nothing is happening """
         self.addfield.value = str(datetime.datetime.now())+" UTC"
         self.addfield.display()
         self.addfield2.value = str(subprocess.check_output(["uptime"]))[1:]
@@ -17,6 +19,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield3.display()
 
     def create(self):
+        """ Override method for creating FormBaseNewWithMenu form """
         self.add_handlers({"^T": self.change_forms})
         self.addfield = self.add(npyscreen.TitleFixedText, name='Date:', value=str(datetime.datetime.now())+" UTC")
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:', value=str(subprocess.check_output(["uptime"]))[1:])
@@ -43,6 +46,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         ])
 
     def change_forms(self, *args, **keywords):
+        """ Checks which form is currently displayed and toggles it to the other one """
         if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle help":
             change_to = "MAIN"
         else:
@@ -52,11 +56,14 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.parentApp.change_form(change_to)
 
 class HelpForm(npyscreen.FormBaseNew):
+    """ Help form for the Vent CLI """
     def create(self):
+        """ Override method for creating FormBaseNew form """
         self.add_handlers({"^T": self.change_forms})
         self.addfield = self.add(npyscreen.TitlePager, name="Vent", values="""Help\nmore\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more""".split("\n"))
 
     def change_forms(self, *args, **keywords):
+        """ Checks which form is currently displayed and toggles it to the other one """
         if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle help":
             change_to = "MAIN"
         else:
@@ -66,13 +73,16 @@ class HelpForm(npyscreen.FormBaseNew):
         self.parentApp.change_form(change_to)
 
 class VentApp(npyscreen.NPSAppManaged):
+    """ Main menu app for vent CLI """
     keypress_timeout_default = 10
 
     def onStart(self):
+        """ Override onStart method for npyscreen """
         self.addForm("MAIN", VentForm, name="Vent\t\t\t\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle help", color="DANGER")
 
     def change_form(self, name):
+        """ Changes the form (window) that is displayed """
         self.switchForm(name)
         self.resetHistory()
 
