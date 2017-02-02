@@ -1,74 +1,81 @@
 #!/usr/bin/env python2.7
 
-import curses
+import datetime
+import docker
+import npyscreen
+import subprocess
 
-class Menu:
-    def __init__(self, paths=None):
-        # setup curses !! TODO
-        # use default paths unless given !! TODO
-        # version # !! TODO
-        try:
-            self.screen = curses.initscr()
-            curses.noecho()
-            curses.cbreak()
-            self.screen.keypard(1)
-            self.screen.border(0)
-            self.title_text = curses.A_STANDOUT
-            self.subtitle_text = curses.A_BOLD
-            self.normal_text = curses.A_NORMAL
-            self.up = curses.KEY_UP
-            self.down = curses.KEY_DOWN
-            self.right = curses.KEY_RIGHT
-            self.left = curses.KEY_LEFT
-            self.esc = 27
+class VentForm(npyscreen.FormBaseNewWithMenus):
+    d_client = docker.from_env()
 
-            # check if terminal can support color
-            if curses.has_colors():
-                curses.start_color()
-                curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
-                bold = curses.color_pair(1)
+    def while_waiting(self):
+        self.addfield.value = str(datetime.datetime.now())+" UTC"
+        self.addfield.display()
+        self.addfield2.value = str(subprocess.check_output(["uptime"]))[1:]
+        self.addfield2.display()
+        self.addfield3.value = str(len(self.d_client.containers.list()))+" running"
+        self.addfield3.display()
 
-            self.horizontal_pad = 2
-            self.vertical_pad = 2
+    def create(self):
+        self.add_handlers({"^T": self.change_forms})
+        self.addfield = self.add(npyscreen.TitleFixedText, name='Date:', value=str(datetime.datetime.now())+" UTC")
+        self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:', value=str(subprocess.check_output(["uptime"]))[1:])
+        self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:', value=str(len(self.d_client.containers.list()))+" running")
+        self.m1 = self.add_menu(name="Tools", shortcut="t")
+        self.m1.addItemsFromList([
+            ("Just Beep", None, "e"),
+        ])
+        self.m2 = self.add_menu(name="Plugins", shortcut="p",)
+        self.m2.addItemsFromList([
+            ("Just Beep", None),
+        ])
+        self.m3 = self.add_menu(name="Logs", shortcut="l",)
+        self.m3.addItemsFromList([
+            ("Just Beep", None),
+        ])
+        self.m3 = self.add_menu(name="System Commands", shortcut="s",)
+        self.m3.addItemsFromList([
+            ("Just Beep", None),
+        ])
+        self.m4 = self.add_menu(name="System Configuration", shortcut="c",)
+        self.m4.addItemsFromList([
+            ("Just Beep", None),
+        ])
 
-            # Initial Menu defaults
-            self.title = 'main'
-            self.subtitle = None
-            self.parent = None
-            self.menu = ['Tools', 'Plugins', 'System Info', 'Troubleshooting']
+    def change_forms(self, *args, **keywords):
+        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle help":
+            change_to = "MAIN"
+        else:
+            change_to = "HELP"
 
-            self.run()
-        except Exception as e:
-            return ('failed', e)
+        # Tell the VentApp object to change forms.
+        self.parentApp.change_form(change_to)
 
-    def run(self):
-        while True:
-            self.display_menu(self.title)
-            c = self.screen.getch()
-            # !! TODO
-            # if c == [up, down, left, right, enter, esc]
-            # note if esc just return to parent menu (self.parent)
-            # enter should build new menu
+class HelpForm(npyscreen.FormBaseNew):
+    def create(self):
+        self.add_handlers({"^T": self.change_forms})
+        self.addfield = self.add(npyscreen.TitlePager, name="Vent", values="""Help\nmore\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more""".split("\n"))
 
-    def display_menu(self, title):
-        """ Curses wrapper around dictionary that represents menu; handles user selection """
-        # !! TODO
-        return self.build_menu(title)
+    def change_forms(self, *args, **keywords):
+        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle help":
+            change_to = "MAIN"
+        else:
+            change_to = "HELP"
 
-    def build_menu(self, title):
-        """ Takes in a string that maps to the menu to build """
-        menu = {}
-        # !! TODO
-        if title == 'main':
-            menu = {}
-        return menu
+        # Tell the VentApp object to change forms.
+        self.parentApp.change_form(change_to)
 
-    def restore(self):
-        curses.initscr()
-        curses.endwin()
+class VentApp(npyscreen.NPSAppManaged):
+    keypress_timeout_default = 10
 
-    def __del__(self):
-        self.restore()
+    def onStart(self):
+        self.addForm("MAIN", VentForm, name="Vent\t\t\t\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
+        self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle help", color="DANGER")
+
+    def change_form(self, name):
+        self.switchForm(name)
+        self.resetHistory()
 
 if __name__ == '__main__':
-    menu = Menu()
+    app = VentApp()
+    app.run()
