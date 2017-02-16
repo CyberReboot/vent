@@ -177,7 +177,16 @@ class Action:
        return
 
    @staticmethod
-   def logs():
+   def logs(grep_list=None):
+       # generically filter logs stored in log containers
+       cores = ["core-aaa-syslog", "core-aaa-redis", "core-aaa-rabbitmq", "core-rmq-es-connector", "vent-management"]
+       if grep_list:
+           for expression in grep_list:
+               for core in cores:
+                   os.system("docker logs "+core+" | grep "+expression+" | tee")
+       else:
+           for core in cores:
+               os.system("docker logs "+core+" | tee")
        return
 
    @staticmethod
