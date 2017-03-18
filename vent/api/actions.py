@@ -178,15 +178,20 @@ class Action:
 
    @staticmethod
    def logs(grep_list=None):
+       d_client = docker.from_env()
        # generically filter logs stored in log containers
-       cores = ["core-aaa-syslog", "core-aaa-redis", "core-aaa-rabbitmq", "core-rmq-es-connector", "vent-management"]
+       containers = d_client.containers().list()
+       cores = [c for c in containers if ("core" in c.name or "vent-management" in c.name)]
        if grep_list:
            for expression in grep_list:
                for core in cores:
-                   os.system("docker logs "+core+" | grep "+expression+" | tee")
+                   # 'logs' stores each line which contains the expression
+                   logs  = [log for log in core.logs().split("\n") if expression in log]
+                   for log in logs:
+                       print log
        else:
            for core in cores:
-               os.system("docker logs "+core+" | tee")
+               print core.logs()
        return
 
    @staticmethod
