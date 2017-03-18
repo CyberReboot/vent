@@ -70,6 +70,7 @@ def test_logs():
     Action.logs()
     Action.logs(["core"])
 
+
 def test_help():
     """ Test the help function """
     Action.help()
