@@ -10,7 +10,7 @@ class Action:
    """ Handle actions in menu """
    def __init__(self, **kargs):
        self.plugin = Plugin(**kargs)
-       self.d_client = docker.from_env()
+
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
            branch="master", build=True, user=None, pw=None, groups=None,
@@ -180,8 +180,10 @@ class Action:
 
    @staticmethod
    def logs(grep_list=None):
+       import docker
        # generically filter logs stored in log containers
-       containers = self.d_client.containers().list()
+       d_client = docker.from_env()
+       containers = d_client.containers().list()
        cores = [c for c in containers if ("core" in c.name or "vent-management" in c.name)]
        if grep_list:
            for expression in grep_list:
