@@ -55,6 +55,7 @@ class Action:
                   'image_name',
                   'branch',
                   'version']
+       # !! TODO needs to be an array of statuses
        status = (True, None)
        sections, template = self.plugin.constraint_options(args, options)
        for section in sections:
