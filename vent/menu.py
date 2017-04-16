@@ -1,4 +1,5 @@
 #!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
 
 import datetime
 import docker
@@ -24,6 +25,37 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield = self.add(npyscreen.TitleFixedText, name='Date:', value=str(datetime.datetime.now())+" UTC")
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:', value=str(subprocess.check_output(["uptime"]))[1:])
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:', value=str(len(self.d_client.containers.list()))+" running")
+        self.addfield4 = self.add(npyscreen.TitleFixedText, name='Version:', value="")
+        self.addfield5 = self.add(npyscreen.TitleFixedText, name='Jobs:', value="")
+        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Status:', value="Healthy")
+        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Management:', value="Running")
+        self.addfield8 = self.add(npyscreen.TitleFixedText, name='Cluster Membership:', value="No")
+        self.multifield1 =  self.add(npyscreen.MultiLineEdit,
+               value = """
+
+            '.,
+              'b      *
+               '$    #.
+                $:   #:
+                *#  @):
+                :@,@):   ,.**:'
+      ,         :@@*: ..**'
+       '#o.    .:(@'.@*"'
+          'bq,..:,@@*'   ,*
+          ,p$q8,:@)'  .p*'
+         '    '@@Pp@@*'
+               Y7'.'
+              :@):.
+             .:@:'.
+           .::(@:.
+                       _
+      __   _____ _ __ | |_
+      \ \ / / _ \ '_ \| __|
+       \ V /  __/ | | | |_
+        \_/ \___|_| |_|\__|
+                           """,
+               max_height=22, rely=9)
+
         self.m1 = self.add_menu(name="Tools", shortcut="t")
         self.m1.addItemsFromList([
             ("Just Beep", None, "e"),
@@ -42,6 +74,10 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         ])
         self.m4 = self.add_menu(name="System Configuration", shortcut="c",)
         self.m4.addItemsFromList([
+            ("Just Beep", None),
+        ])
+        self.m5 = self.add_menu(name="Cluster Management", shortcut="m",)
+        self.m5.addItemsFromList([
             ("Just Beep", None),
         ])
 
