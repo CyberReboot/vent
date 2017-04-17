@@ -3,6 +3,7 @@ import os
 import platform
 
 def Version():
+    """ Get Vent version """
     version = ''
     try:
         path = os.path.realpath(__file__)
@@ -14,9 +15,11 @@ def Version():
     return version
 
 def System():
+    """ Get system operating system """
     return platform.system()
 
 def Docker():
+    """ Get Docker setup information """
     docker_info = {'server':{}, 'env':'', 'type':'', 'os':''}
 
     # get docker server version
