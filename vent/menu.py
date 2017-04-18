@@ -29,7 +29,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5 = self.add(npyscreen.TitleFixedText, name='Jobs:', value="")
         self.addfield6 = self.add(npyscreen.TitleFixedText, name='Status:', value="Healthy")
         self.addfield7 = self.add(npyscreen.TitleFixedText, name='Management:', value="Running")
-        self.addfield8 = self.add(npyscreen.TitleFixedText, name='Cluster Membership:', value="No")
+        self.addfield8 = self.add(npyscreen.TitleFixedText, name='Clustered:', value="No")
         self.multifield1 =  self.add(npyscreen.MultiLineEdit,
                value = """
 
@@ -54,7 +54,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
        \ V /  __/ | | | |_
         \_/ \___|_| |_|\__|
                            """,
-               max_height=22, rely=9)
+               max_height=22, editable=False)
 
         self.m1 = self.add_menu(name="Tools", shortcut="t")
         self.m1.addItemsFromList([
