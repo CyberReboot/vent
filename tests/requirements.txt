@@ -1,4 +1,4 @@
-docker-py>=2.0.0
+docker>=2.0.0
 elasticsearch
 npyscreen
 pexpect
