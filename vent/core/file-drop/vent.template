@@ -3,5 +3,6 @@ name = FileDrop
 groups = core
 
 [docker]
-Env = ["PYTHONUNBUFFERED=0", "VENT_HOST=`hostname`"]
-HostConfig = {"Binds": ["/files:/files:ro"], "Links": ["Redis:redis"]}
+environment = ["PYTHONUNBUFFERED=0", "VENT_HOST=`hostname`"]
+volumes = {'/files': {'bind': '/files', 'mode': 'ro'}}
+links = {"Redis":"redis"}
