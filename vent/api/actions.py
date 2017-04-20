@@ -60,6 +60,7 @@ class Action:
        # !! TODO needs to be an array of statuses
        status = (True, None)
        sections, template = self.plugin.constraint_options(args, options)
+       tool_dict = {}
        for section in sections:
            # ensure tools are built before starting them
            if not sections[section]['built'] == 'yes':
@@ -71,7 +72,6 @@ class Action:
                                    version=version)
 
            # initialize needed vars
-           tool_dict = {}
            template_path = os.path.join(sections[section]['path'], 'vent.template')
            container_name = sections[section]['image_name'].replace(':','-')
            image_name = sections[section]['image_name']
@@ -87,39 +87,76 @@ class Action:
            # set docker settings for container
            vent_template = Template(template_path)
            status = vent_template.section('docker')
-           tool_dict[container_name] = {'image':image_name}
+           tool_dict[container_name] = {'image':image_name, 'name':container_name}
            if status[0]:
-               # !! TODO check vent.template files for runtime dependencies (links, etc.)
-               # !! TODO link to rabbitmq container for plugin containers
                for option in status[1]:
                    try:
                        tool_dict[container_name][option[0]] = ast.literal_eval(option[1])
                    except Exception as e:
                        tool_dict[container_name][option[0]] = option[1]
 
-               # add extra labels
-               if 'labels' not in tool_dict[container_name]:
-                   tool_dict[container_name]['labels'] = {}
-               if 'groups' in sections[section]:
-                   tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
-               tool_dict[container_name]['labels']['vent'] = Version()
-               tool_dict[container_name]['labels']['vent.namespace'] = sections[section]['namespace']
-               tool_dict[container_name]['labels']['vent.branch'] = branch
-               tool_dict[container_name]['labels']['vent.version'] = version
-               tool_dict[container_name]['labels']['vent.name'] = sections[section]['name']
+           # get temporary name for links, etc.
+           status = vent_template.section('info')
+           if status[0]:
+               for option in status[1]:
+                   if option[0] == 'name':
+                       tool_dict[container_name]['tmp_name'] = option[1]
+
+           # add extra labels
+           if 'labels' not in tool_dict[container_name]:
+               tool_dict[container_name]['labels'] = {}
+           tool_dict[container_name]['labels']['vent'] = Version()
+           tool_dict[container_name]['labels']['vent.namespace'] = sections[section]['namespace']
+           tool_dict[container_name]['labels']['vent.branch'] = branch
+           tool_dict[container_name]['labels']['vent.version'] = version
+           tool_dict[container_name]['labels']['vent.name'] = sections[section]['name']
+
+           # add labels for groups
+           if 'groups' in sections[section]:
+               tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
+               if 'core' not in sections[section]['groups']:
+                   # !! TODO link to rabbitmq container for plugin containers
+                   pass
+               if 'syslog' not in sections[section]['groups']:
+                   # !! TODO link logging driver syslog container
+                   pass
+           else:
+               # !! TODO link logging driver syslog container
+               # !! TODO link to rabbitmq container for plugin containers
+               pass
+
+           # !! TODO check for `<command>` and store executed result
 
            # only start tools that have been built
-           # TODO not currently covered by tests due to outdated version of Docker
-           if sections[section]['built'] == 'yes': # pragma: no cover
-               # write out container configurations to be started by vent-management
-               with open('/tmp/vent_start.txt', 'a') as f:
-                   json.dump(tool_dict, f)
-                   f.write("|")
-                   if 'groups' in sections[section] and 'core' in sections[section]['groups']:
-                       f.write("0")
-                   else:
-                       f.write("1")
-                   f.write("\n")
+           if sections[section]['built'] != 'yes':
+               del tool_dict[container_name]
+
+       # check and update links, volumes_from, network_mode
+       for container in tool_dict.keys():
+           if 'links' in tool_dict[container]:
+               for link in tool_dict[container]['links']:
+                   for c in tool_dict.keys():
+                       if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == link:
+                           tool_dict[container]['links'][tool_dict[c]['name']] = tool_dict[container]['links'].pop(link)
+           if 'volumes_from' in tool_dict[container]:
+               # !! TODO
+               pass
+           if 'network_mode' in tool_dict[container]:
+               # !! TODO
+               pass
+
+       # remove tmp_names
+       for c in tool_dict.keys():
+           if 'tmp_name' in tool_dict[c]:
+               del tool_dict[c]['tmp_name']
+
+       d_client = docker.from_env()
+       for container in tool_dict:
+           try:
+               container_id = d_client.containers.run(detach=True, **tool_dict[container])
+               print container_id
+           except Exception as e:
+               print "failed to start", container, "because:", str(e)
        return status
 
    @staticmethod
