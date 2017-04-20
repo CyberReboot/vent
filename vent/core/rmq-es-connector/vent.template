@@ -10,4 +10,4 @@ priority = 20
 [docker]
 command = #
 environment = ["PYTHONUNBUFFERED=0"]
-links = {"RabbitMQ:rabbitmq", "Elasticsearch:elasticsearch"}
+links = {"RabbitMQ":"rabbitmq", "Elasticsearch":"elasticsearch"}

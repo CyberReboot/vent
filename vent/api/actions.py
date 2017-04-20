@@ -1,5 +1,6 @@
-import json
+import ast
 import docker
+import json
 import os
 
 from vent.api.plugins import Plugin
@@ -86,23 +87,26 @@ class Action:
            # set docker settings for container
            vent_template = Template(template_path)
            status = vent_template.section('docker')
-           tool_dict[container_name] = {'Image':image_name}
+           tool_dict[container_name] = {'image':image_name}
            if status[0]:
                # !! TODO check vent.template files for runtime dependencies (links, etc.)
                # !! TODO link to rabbitmq container for plugin containers
                for option in status[1]:
-                   tool_dict[container_name][option[0]] = option[1]
+                   try:
+                       tool_dict[container_name][option[0]] = ast.literal_eval(option[1])
+                   except Exception as e:
+                       tool_dict[container_name][option[0]] = option[1]
 
                # add extra labels
-               if 'Labels' not in tool_dict[container_name]:
-                   tool_dict[container_name]['Labels'] = {}
+               if 'labels' not in tool_dict[container_name]:
+                   tool_dict[container_name]['labels'] = {}
                if 'groups' in sections[section]:
-                   tool_dict[container_name]['Labels']['vent.groups'] = sections[section]['groups']
-               tool_dict[container_name]['Labels']['vent'] = Version()
-               tool_dict[container_name]['Labels']['vent.namespace'] = sections[section]['namespace']
-               tool_dict[container_name]['Labels']['vent.branch'] = branch
-               tool_dict[container_name]['Labels']['vent.version'] = version
-               tool_dict[container_name]['Labels']['vent.name'] = sections[section]['name']
+                   tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
+               tool_dict[container_name]['labels']['vent'] = Version()
+               tool_dict[container_name]['labels']['vent.namespace'] = sections[section]['namespace']
+               tool_dict[container_name]['labels']['vent.branch'] = branch
+               tool_dict[container_name]['labels']['vent.version'] = version
+               tool_dict[container_name]['labels']['vent.name'] = sections[section]['name']
 
            # only start tools that have been built
            # TODO not currently covered by tests due to outdated version of Docker
