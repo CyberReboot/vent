@@ -10,5 +10,5 @@ locally_active = on
 priority = 10,1
 
 [docker]
-#Cmd = -Des.network.host=0.0.0.0
-HostConfig = {"PublishAllPorts": true}
+#command = -Des.network.host=0.0.0.0
+publish_all_ports = True

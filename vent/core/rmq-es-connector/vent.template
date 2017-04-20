@@ -8,6 +8,6 @@ locally_active = on
 priority = 20
 
 [docker]
-Cmd = #
-Env = ["PYTHONUNBUFFERED=0"]
-HostConfig = {"Links": ["RabbitMQ:rabbitmq", "Elasticsearch:elasticsearch"]}
+command = #
+environment = ["PYTHONUNBUFFERED=0"]
+links = {"RabbitMQ:rabbitmq", "Elasticsearch:elasticsearch"}

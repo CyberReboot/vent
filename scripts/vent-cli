@@ -1,3 +1,0 @@
-#!/bin/sh
-
-cd /vent && TERM=xterm LANG=C.UTF-8 LC_ALL=C /usr/local/bin/python2.7 menu.py

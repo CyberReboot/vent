@@ -1,4 +1,5 @@
 import json
+import docker
 import os
 
 from vent.api.plugins import Plugin
@@ -183,4 +184,9 @@ class Action:
 
    @staticmethod
    def help():
+       return
+
+   @staticmethod
+   def inventory():
+       # plugins that have been added, built, etc.
        return

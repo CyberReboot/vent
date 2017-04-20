@@ -7,5 +7,6 @@ instances = 1
 priority = 5
 
 [docker]
-Env = ["REMOTE_REDIS_HOST=redis"]
-HostConfig = {"Links": ["Redis:redis"], "PublishAllPorts": true}
+environment = ["REMOTE_REDIS_HOST=redis"]
+links = {"Redis:redis"}
+publish_all_ports = True
