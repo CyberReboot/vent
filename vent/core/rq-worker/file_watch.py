@@ -8,19 +8,20 @@ def file_queue(path, base_dir="/var/lib/docker/data/"):
     import os
     import time
 
-    from docker import Client
-    from docker.utils.types import LogConfig
-
-    c = Client(base_url='unix://var/run/docker.sock')
-
-    # first some cleanup
-    containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
-    for cont in containers:
-        try:
-            # will only remove containers that aren't running
-            c.remove_container(cont['Id'])
-        except Exception as e:
-            pass
+    # TODO rewrite
+    #from docker import Client
+    #from docker.utils.types import LogConfig
+    #
+    #c = Client(base_url='unix://var/run/docker.sock')
+    #
+    ## first some cleanup
+    #containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
+    #for cont in containers:
+    #    try:
+    #        # will only remove containers that aren't running
+    #        c.remove_container(cont['Id'])
+    #    except Exception as e:
+    #        pass
 
     template_dir = base_dir+"templates/"
     plugins_dir = base_dir+"plugins/"
@@ -118,89 +119,91 @@ def template_queue(path, base_dir="/var/lib/docker/data/"):
     # needed to preserve case sensitive options
     config.optionxform=str
 
-    from docker import Client
-    from docker.utils.types import LogConfig
     from subprocess import check_output
-    c = Client(base_url='unix://var/run/docker.sock')
 
-    try:
-        # keep track of running containers to restart
-        running_containers = c.containers()
-
-        # first some cleanup
-        containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
-        for cont in containers:
-            try:
-                # will only remove containers that aren't running
-                c.remove_container(cont['Id'])
-            except Exception as e:
-                pass
-        try:
-            data_dir = "/scripts/"
-            if base_dir != "/var/lib/docker/data/":
-                data_dir = base_dir
-            enabled, disabled = ast.literal_eval(check_output("python2.7 "+data_dir+"info_tools/get_status.py enabled -b "+base_dir, shell=True))
-        except Exception as e:
-            pass
-        # remove disabled running containers
-        for container in containers:
-            for name in container["Names"]:
-                if name in disabled:
-                    try:
-                        c.kill(container["Id"])
-                        c.remove_container(container["Id"])
-                        continue
-                    except Exception as e:
-                        pass
-
-        core_containers = c.containers(all=True, filters={'name':"core-"})
-
-        # remove core containers, so when restarted, behavior matches current configuration
-        for container in core_containers:
-            try:
-                if container["Status"] == "exited":
-                    c.remove_container(container["Id"])
-                elif container["Id"].startswith(os.environ.get('HOSTNAME')):
-                    # skip this container until the end
-                    this_container = container["Id"]
-                else:
-                    c.kill(container["Id"])
-                    c.remove_container(container["Id"])
-            except Exception as e:
-                pass
-
-        # restart this container last
-        try:
-            c.kill(this_container)
-            c.remove_container(this_container)
-        except Exception as e:
-            pass
-        # start enabled containers
-        data_dir = "/vent/"
-        if base_dir != "/var/lib/docker/data/":
-            data_dir = base_dir
-        os.system('python2.7 '+data_dir+'template_parser.py core start')
-
-        active_started = False
-        passive_started = False
-        vis_started = False
-
-        for container in running_containers:
-            # usually containers have one name, but container["Names"] is a list, so we have to be sure
-            for name in container["Names"]:
-                if active_started and passive_started and vis_started:
-                    break
-                elif "active-" in name and not active_started:
-                    os.system('python2.7 '+base_dir+'template_parser.py active start')
-                    active_started = True
-                elif "passive-" in name and not passive_started:
-                    os.system('python2.7 '+base_dir+'template_parser.py passive start')
-                    passive_started = True
-                elif "visualization-" in name and not vis_started:
-                    os.system('python2.7 '+base_dir+'template_parser.py visualization start')
-                    vis_started = True
-                else:
-                    pass
-    except Exception as e:
-        pass
+    # TODO rewrite
+    #from docker import Client
+    #from docker.utils.types import LogConfig
+    #c = Client(base_url='unix://var/run/docker.sock')
+    #
+    #try:
+    #    # keep track of running containers to restart
+    #    running_containers = c.containers()
+    #
+    #    # first some cleanup
+    #    containers = c.containers(quiet=True, all=True, filters={'status':"exited"})
+    #    for cont in containers:
+    #        try:
+    #            # will only remove containers that aren't running
+    #            c.remove_container(cont['Id'])
+    #        except Exception as e:
+    #            pass
+    #    try:
+    #        data_dir = "/scripts/"
+    #        if base_dir != "/var/lib/docker/data/":
+    #            data_dir = base_dir
+    #        enabled, disabled = ast.literal_eval(check_output("python2.7 "+data_dir+"info_tools/get_status.py enabled -b "+base_dir, shell=True))
+    #    except Exception as e:
+    #        pass
+    #    # remove disabled running containers
+    #    for container in containers:
+    #        for name in container["Names"]:
+    #            if name in disabled:
+    #                try:
+    #                    c.kill(container["Id"])
+    #                    c.remove_container(container["Id"])
+    #                    continue
+    #                except Exception as e:
+    #                    pass
+    #
+    #    core_containers = c.containers(all=True, filters={'name':"core-"})
+    #
+    #    # remove core containers, so when restarted, behavior matches current configuration
+    #    for container in core_containers:
+    #        try:
+    #            if container["Status"] == "exited":
+    #                c.remove_container(container["Id"])
+    #            elif container["Id"].startswith(os.environ.get('HOSTNAME')):
+    #                # skip this container until the end
+    #                this_container = container["Id"]
+    #            else:
+    #                c.kill(container["Id"])
+    #                c.remove_container(container["Id"])
+    #        except Exception as e:
+    #            pass
+    #
+    #    # restart this container last
+    #    try:
+    #        c.kill(this_container)
+    #        c.remove_container(this_container)
+    #    except Exception as e:
+    #        pass
+    #    # start enabled containers
+    #    data_dir = "/vent/"
+    #    if base_dir != "/var/lib/docker/data/":
+    #        data_dir = base_dir
+    #    os.system('python2.7 '+data_dir+'template_parser.py core start')
+    #
+    #    active_started = False
+    #    passive_started = False
+    #    vis_started = False
+    #
+    #    for container in running_containers:
+    #        # usually containers have one name, but container["Names"] is a list, so we have to be sure
+    #        for name in container["Names"]:
+    #            if active_started and passive_started and vis_started:
+    #                break
+    #            elif "active-" in name and not active_started:
+    #                os.system('python2.7 '+base_dir+'template_parser.py active start')
+    #                active_started = True
+    #            elif "passive-" in name and not passive_started:
+    #                os.system('python2.7 '+base_dir+'template_parser.py passive start')
+    #                passive_started = True
+    #            elif "visualization-" in name and not vis_started:
+    #                os.system('python2.7 '+base_dir+'template_parser.py visualization start')
+    #                vis_started = True
+    #            else:
+    #                pass
+    #except Exception as e:
+    #    pass
     return
