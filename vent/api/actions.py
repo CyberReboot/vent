@@ -11,6 +11,7 @@ class Action:
    """ Handle actions in menu """
    def __init__(self, **kargs):
        self.plugin = Plugin(**kargs)
+       self.d_client = docker.from_env()
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
            branch="master", build=True, user=None, pw=None, groups=None,
@@ -150,10 +151,9 @@ class Action:
            if 'tmp_name' in tool_dict[c]:
                del tool_dict[c]['tmp_name']
 
-       d_client = docker.from_env()
        for container in tool_dict:
            try:
-               container_id = d_client.containers.run(detach=True, **tool_dict[container])
+               container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
                print container_id
            except Exception as e:
                print "failed to start", container, "because:", str(e)
