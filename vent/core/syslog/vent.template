@@ -1,6 +1,6 @@
 [info]
 name = Syslog
-groups = core,logging
+groups = core,logging,syslog
 
 [settings]
 #public_ip = 192.168.99.100
