@@ -155,12 +155,21 @@ scp modes.template docker@vent:/var/lib/docker/data/templates/modes.template
 
 package installation for development (experimental)
 ====
-- clone the repository
+1. Clone the repository
+```
+$ git clone --recursive https://github.com/CyberReboot/vent
+$ cd vent
+```
+2. Install using setup.py (sudo maybe be required to overwrite)
+```
+$ python setup.py install
+```
+3. Run vent
+```
+$ vent-cli
+```
 
-`$ git clone --recursive https://github.com/CyberReboot/vent`
-- running setup.py
-
-`$ python setup.py install`
+_Note - If you already have `docker-py` installed on your machine, you may need to_ `pip uninstall docker-py` _first. `vent` will install `docker-py` as part of the installation process, however there are known incompatibilities of `docker-py` with older versions._
 
 documentation
 ====

@@ -6,6 +6,9 @@ import docker
 import npyscreen
 import subprocess
 
+from vent.helpers.meta import Version
+
+
 class VentForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
     d_client = docker.from_env()
@@ -25,11 +28,10 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield = self.add(npyscreen.TitleFixedText, name='Date:', value=str(datetime.datetime.now())+" UTC")
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:', value=str(subprocess.check_output(["uptime"]))[1:])
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:', value=str(len(self.d_client.containers.list()))+" running")
-        self.addfield4 = self.add(npyscreen.TitleFixedText, name='Version:', value="")
-        self.addfield5 = self.add(npyscreen.TitleFixedText, name='Jobs:', value="")
-        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Status:', value="Healthy")
-        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Management:', value="Running")
-        self.addfield8 = self.add(npyscreen.TitleFixedText, name='Clustered:', value="No")
+        self.addfield4 = self.add(npyscreen.TitleFixedText, name='Jobs:', value="")
+        self.addfield5 = self.add(npyscreen.TitleFixedText, name='Status:', value="Healthy")
+        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Management:', value="Running")
+        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Clustered:', value="No")
         self.multifield1 =  self.add(npyscreen.MultiLineEdit,
                value = """
 
@@ -114,7 +116,8 @@ class VentApp(npyscreen.NPSAppManaged):
 
     def onStart(self):
         """ Override onStart method for npyscreen """
-        self.addForm("MAIN", VentForm, name="Vent\t\t\t\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
+        version = Version()
+        self.addForm("MAIN", VentForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle help", color="DANGER")
 
     def change_form(self, name):
