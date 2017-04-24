@@ -12,6 +12,7 @@ class Action:
    def __init__(self, **kargs):
        self.plugin = Plugin(**kargs)
        self.d_client = docker.from_env()
+       self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir, "vent.cfg")
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
            branch="master", build=True, user=None, pw=None, groups=None,
@@ -60,6 +61,8 @@ class Action:
                   'version']
        # !! TODO needs to be an array of statuses
        status = (True, None)
+       vent_config = Template(template=self.vent_config)
+       files = vent_config.option('main', 'files')
        sections, template = self.plugin.constraint_options(args, options)
        tool_dict = {}
        for section in sections:
@@ -121,6 +124,9 @@ class Action:
                if 'syslog' not in sections[section]['groups']:
                    # !! TODO link logging driver syslog container
                    pass
+               if 'files' in sections[section]['groups'] and files[0]:
+                   # !! TODO check if volumes already exists
+                   tool_dict[container_name]['volumes'] = {files[1]: {'bind': '/files', 'mode': 'ro'}}
            else:
                # !! TODO link logging driver syslog container
                # !! TODO link to rabbitmq container for plugin containers
@@ -180,14 +186,15 @@ class Action:
        groups = sorted(set(groups))
        started_containers = []
        for group in groups:
-           for container_tuple in sorted(group_orders[group]):
-               if container_tuple[1] not in started_containers:
-                   started_containers.append(container_tuple[1])
-                   try:
-                       container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
-                       print "started", container_tuple[1], "with ID:", str(container_id)
-                   except Exception as e:
-                       print "failed to start", container_tuple[1], "because:", str(e)
+           if group in group_orders:
+               for container_tuple in sorted(group_orders[group]):
+                   if container_tuple[1] not in started_containers:
+                       started_containers.append(container_tuple[1])
+                       try:
+                           container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
+                           print "started", container_tuple[1], "with ID:", str(container_id)
+                       except Exception as e:
+                           print "failed to start", container_tuple[1], "because:", str(e)
 
        # start the rest of the containers that didn't have any priorities set
        for container in containers_remaining:
