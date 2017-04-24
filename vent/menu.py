@@ -6,7 +6,7 @@ import docker
 import npyscreen
 import subprocess
 
-from helpers.meta import Version
+from vent.helpers.meta import Version
 
 
 class VentForm(npyscreen.FormBaseNewWithMenus):

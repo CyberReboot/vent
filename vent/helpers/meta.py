@@ -7,16 +7,9 @@ def Version():
     """ Get Vent version """
     version = ''
     try:
-        path = os.path.realpath(__file__)
-        path = '/'.join(path.split('/')[:-2])
-        with open(os.path.join(path, 'VERSION'), 'r') as f:
-            version = f.read().split('\n')[0].strip()
-    except Exception as e: # pragma: no cover
-        # if installed as package, VERSION might not be available
-        try:
-            version = "v"+pkg_resources.require("vent")[0].version
-        except:
-            pass
+        version = "v"+pkg_resources.require("vent")[0].version
+    except:
+        pass
     return version
 
 def System():
