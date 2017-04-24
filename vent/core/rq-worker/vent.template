@@ -1,6 +1,6 @@
 [info]
 name = RQ-Worker
-groups = core
+groups = core,files
 
 [settings]
 instances = 2
@@ -8,5 +8,5 @@ priority = 6
 
 [docker]
 environment = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
-volumes = {'/files': {'bind': '/files', 'mode': 'ro'}, '/tmp': {'bind': '/tmp', 'mode': 'rw'}, '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}, '/var/lib/docker/data': {'bind': '/var/lib/docker/data', 'mode': 'ro'}}
+volumes = {'/tmp': {'bind': '/tmp', 'mode': 'rw'}, '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}}
 links = {"Redis":"redis"}

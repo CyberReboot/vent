@@ -125,8 +125,10 @@ class Action:
                    # !! TODO link logging driver syslog container
                    pass
                if 'files' in sections[section]['groups'] and files[0]:
-                   # !! TODO check if volumes already exists
-                   tool_dict[container_name]['volumes'] = {files[1]: {'bind': '/files', 'mode': 'ro'}}
+                   if 'volumes' in tool_dict[container_name]:
+                       tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
+                   else:
+                       tool_dict[container_name]['volumes'] = {files[1]: {'bind': '/files', 'mode': 'ro'}}
            else:
                # !! TODO link logging driver syslog container
                # !! TODO link to rabbitmq container for plugin containers

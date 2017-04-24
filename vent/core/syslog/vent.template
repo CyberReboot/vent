@@ -12,5 +12,4 @@ priority = 15,1
 [docker]
 environment = ["VENT_HOST=`hostname`"]
 ports = {'514/tcp': 514}
-volumes = {'/var/log/syslog-ng': {'bind': '/var/log/syslog-ng', 'mode': 'rw'}}
 links = {"RabbitMQ":"rabbitmq"}
