@@ -11,6 +11,6 @@ npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = True
 app = VentApp()
 
 try:
-    app.run(fork=False)
+    app.run(fork=True)
 except Exception as e:
     pass
