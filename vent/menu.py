@@ -4,8 +4,10 @@
 import datetime
 import docker
 import npyscreen
-import pkg_resources
 import subprocess
+
+from helpers.meta import Version
+
 
 class VentForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
@@ -114,7 +116,7 @@ class VentApp(npyscreen.NPSAppManaged):
 
     def onStart(self):
         """ Override onStart method for npyscreen """
-        version = pkg_resources.require("vent")[0].version
+        version = Version()
         self.addForm("MAIN", VentForm, name="Vent v"+version+"\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle help", color="DANGER")
 
