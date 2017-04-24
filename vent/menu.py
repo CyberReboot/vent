@@ -117,7 +117,7 @@ class VentApp(npyscreen.NPSAppManaged):
     def onStart(self):
         """ Override onStart method for npyscreen """
         version = Version()
-        self.addForm("MAIN", VentForm, name="Vent v"+version+"\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
+        self.addForm("MAIN", VentForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle help", color="DANGER")
 
     def change_form(self, name):
