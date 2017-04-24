@@ -126,6 +126,13 @@ class Action:
                # !! TODO link to rabbitmq container for plugin containers
                pass
 
+           # add label for priority
+           status = vent_template.section('settings')
+           if status[0]:
+               for option in status[1]:
+                   if option[0] == 'priority':
+                       tool_dict[container_name]['labels']['vent.priority'] = option[1]
+
            # !! TODO check for `<command>` and store executed result
 
            # only start tools that have been built
@@ -151,12 +158,45 @@ class Action:
            if 'tmp_name' in tool_dict[c]:
                del tool_dict[c]['tmp_name']
 
+       # check start priorities (priority of groups is alphabetical for now)
+       group_orders = {}
+       groups = []
+       containers_remaining = []
        for container in tool_dict:
+           containers_remaining.append(container)
+           if 'labels' in tool_dict[container]:
+               if 'vent.groups' in tool_dict[container]['labels']:
+                   groups += tool_dict[container]['labels']['vent.groups'].split(',')
+                   if 'vent.priority' in tool_dict[container]['labels']:
+                       priorities = tool_dict[container]['labels']['vent.priority'].split(',')
+                       container_groups = tool_dict[container]['labels']['vent.groups'].split(',')
+                       for i, priority in enumerate(priorities):
+                           if container_groups[i] not in group_orders:
+                               group_orders[container_groups[i]] = []
+                           group_orders[container_groups[i]].append((int(priority), container))
+                       containers_remaining.remove(container)
+
+       # start containers based on priorities
+       groups = sorted(set(groups))
+       started_containers = []
+       for group in groups:
+           for container_tuple in sorted(group_orders[group]):
+               if container_tuple[1] not in started_containers:
+                   started_containers.append(container_tuple[1])
+                   try:
+                       container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
+                       print "started", container_tuple[1], "with ID:", str(container_id)
+                   except Exception as e:
+                       print "failed to start", container_tuple[1], "because:", str(e)
+
+       # start the rest of the containers that didn't have any priorities set
+       for container in containers_remaining:
            try:
                container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
-               print container_id
+               print "started", container, "with ID:", str(container_id)
            except Exception as e:
                print "failed to start", container, "because:", str(e)
+
        return status
 
    @staticmethod
