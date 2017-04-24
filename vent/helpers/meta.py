@@ -1,15 +1,13 @@
 import docker
 import os
+import pkg_resources
 import platform
 
 def Version():
     """ Get Vent version """
     version = ''
     try:
-        path = os.path.realpath(__file__)
-        path = '/'.join(path.split('/')[:-2])
-        with open(os.path.join(path, 'VERSION'), 'r') as f:
-            version = f.read().split('\n')[0].strip()
+        version = "v"+pkg_resources.require("vent")[0].version
     except Exception as e: # pragma: no cover
         pass
     return version
