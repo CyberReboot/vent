@@ -160,7 +160,7 @@ package installation for development (experimental)
 $ git clone --recursive https://github.com/CyberReboot/vent
 $ cd vent
 ```
-2. Install using setup.py
+2. Install using setup.py (sudo maybe be required to overwrite)
 ```
 $ python setup.py install
 ```
