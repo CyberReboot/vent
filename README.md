@@ -168,10 +168,6 @@ $ python setup.py install
 ```
 $ vent-cli
 ```
-  OR
-```
-python vent/menu.py
-```
 
 _Note - If you already have `docker-py` installed on your machine, you may need to_ `pip uninstall docker-py` _first. `vent` will install `docker-py` as part of the installation process, however there are known incompatibilities of `docker-py` with older versions._
 

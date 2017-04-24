@@ -8,7 +8,7 @@ def Version():
     version = ''
     try:
         version = "v"+pkg_resources.require("vent")[0].version
-    except:
+    except Exception as e: # pragma: no cover
         pass
     return version
 
