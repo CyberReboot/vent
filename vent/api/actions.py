@@ -207,6 +207,10 @@ class Action:
        return status
 
    @staticmethod
+   def update():
+       return
+
+   @staticmethod
    def stop():
        return
 
