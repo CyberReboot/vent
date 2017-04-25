@@ -9,5 +9,6 @@ def file_queue(path):
     import time
 
     d_client = docker.from_env()
+    #d_client.containers.run()
 
     return
