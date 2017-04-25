@@ -4,7 +4,7 @@ import os
 class PathDirs:
     """ Global path directories for vent """
     def __init__(self,
-                 base_dir=os.path.join(os.path.expanduser("~"), ".vent",
+                 base_dir=os.path.join(os.path.expanduser("~"), ".vent"),
                  plugins_dir="plugins/",
                  meta_dir=os.path.join(os.path.expanduser("~"), ".vent")):
         self.base_dir = base_dir
