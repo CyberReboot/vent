@@ -100,6 +100,7 @@ class Action:
                        tool_dict[container_name][option[0]] = option[1]
 
            # get temporary name for links, etc.
+           # TODO need to get all names for all possible containers
            status = vent_template.section('info')
            if status[0]:
                for option in status[1]:
