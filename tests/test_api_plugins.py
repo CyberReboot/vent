@@ -12,7 +12,7 @@ def test_add():
     assert status[0] == True
     bad_instance = Plugin()
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
-    assert status[0] == False
+    assert status[0] == True
     instance = Plugin(base_dir=os.getcwd()+'/', meta_dir=os.getcwd()+'/.vent')
     status = instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
     assert status[0] == True

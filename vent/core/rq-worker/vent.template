@@ -8,5 +8,5 @@ priority = 6
 
 [docker]
 environment = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
-volumes = {'/tmp': {'bind': '/tmp', 'mode': 'rw'}, '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}}
+volumes = {'~/.vent': {'bind': '~/.vent', 'mode': 'rw'}, '/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}}
 links = {"Redis":"redis"}
