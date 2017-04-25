@@ -125,7 +125,7 @@ class Action:
                if 'syslog' not in sections[section]['groups']:
                    # !! TODO link logging driver syslog container
                    pass
-               if 'files' in sections[section]['groups']
+               if 'files' in sections[section]['groups']:
                    if 'volumes' in tool_dict[container_name]:
                        tool_dict[container_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}}
                    else:
