@@ -278,11 +278,11 @@ class Action:
        # restart, shutdown, upgrade, etc.
        return
 
-   def logs(grep_list=["core","vent-management"]):
+   def logs(self, grep_list={"core","vent-management"}):
        # generically filter logs stored in log containers
        containers = self.d_client.containers().list()
        cores = [c for c in containers if ("core" in c.name or "vent-management" in c.name)]
-       for expression in grep_list:
+      for expression in grep_list:
            for core in cores:
                # 'logs' stores each line which contains the expression
                logs  = [log for log in core.logs().split("\n") if expression in log]
