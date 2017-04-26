@@ -9,4 +9,4 @@ locally_active = on
 priority = 3,1
 
 [docker]
-HostConfig = {"PublishAllPorts": true}
+publish_all_ports = True

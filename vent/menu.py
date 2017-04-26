@@ -1,9 +1,13 @@
 #!/usr/bin/env python2.7
+# -*- coding: utf-8 -*-
 
 import datetime
 import docker
 import npyscreen
 import subprocess
+
+from vent.helpers.meta import Version
+
 
 class VentForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
@@ -24,6 +28,36 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield = self.add(npyscreen.TitleFixedText, name='Date:', value=str(datetime.datetime.now())+" UTC")
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:', value=str(subprocess.check_output(["uptime"]))[1:])
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:', value=str(len(self.d_client.containers.list()))+" running")
+        self.addfield4 = self.add(npyscreen.TitleFixedText, name='Jobs:', value="")
+        self.addfield5 = self.add(npyscreen.TitleFixedText, name='Status:', value="Healthy")
+        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Management:', value="Running")
+        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Clustered:', value="No")
+        self.multifield1 =  self.add(npyscreen.MultiLineEdit,
+               value = """
+
+            '.,
+              'b      *
+               '$    #.
+                $:   #:
+                *#  @):
+                :@,@):   ,.**:'
+      ,         :@@*: ..**'
+       '#o.    .:(@'.@*"'
+          'bq,..:,@@*'   ,*
+          ,p$q8,:@)'  .p*'
+         '    '@@Pp@@*'
+               Y7'.'
+              :@):.
+             .:@:'.
+           .::(@:.
+                       _
+      __   _____ _ __ | |_
+      \ \ / / _ \ '_ \| __|
+       \ V /  __/ | | | |_
+        \_/ \___|_| |_|\__|
+                           """,
+               max_height=22, editable=False)
+
         self.m1 = self.add_menu(name="Tools", shortcut="t")
         self.m1.addItemsFromList([
             ("Just Beep", None, "e"),
@@ -42,6 +76,10 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         ])
         self.m4 = self.add_menu(name="System Configuration", shortcut="c",)
         self.m4.addItemsFromList([
+            ("Just Beep", None),
+        ])
+        self.m5 = self.add_menu(name="Cluster Management", shortcut="m",)
+        self.m5.addItemsFromList([
             ("Just Beep", None),
         ])
 
@@ -78,7 +116,8 @@ class VentApp(npyscreen.NPSAppManaged):
 
     def onStart(self):
         """ Override onStart method for npyscreen """
-        self.addForm("MAIN", VentForm, name="Vent\t\t\t\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
+        version = Version()
+        self.addForm("MAIN", VentForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle help", color="DANGER")
 
     def change_form(self, name):

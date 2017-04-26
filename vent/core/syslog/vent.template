@@ -1,6 +1,6 @@
 [info]
 name = Syslog
-groups = core,logging
+groups = core,logging,syslog
 
 [settings]
 #public_ip = 192.168.99.100
@@ -10,5 +10,6 @@ locally_active = on
 priority = 15,1
 
 [docker]
-Env = ["VENT_HOST=`hostname`"]
-HostConfig = {"PortBindings": { "514/tcp": [{ "HostPort": "514" }]}, "Links": ["RabbitMQ:rabbitmq"], "Binds":["/var/log/syslog-ng:/var/log/syslog-ng"]}
+environment = ["VENT_HOST=`hostname`"]
+ports = {'514/tcp': 514}
+links = {"RabbitMQ":"rabbitmq"}
