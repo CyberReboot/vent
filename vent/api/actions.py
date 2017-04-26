@@ -69,6 +69,7 @@ class Action:
            # ensure tools are built before starting them
            if not sections[section]['built'] == 'yes':
                # try and build the tool first
+               # !! TODO make this an optional flag (it'll make it easier for testing without merging later
                status = self.build(name=sections[section]['name'],
                                    groups=groups,
                                    enabled=enabled,
@@ -119,9 +120,6 @@ class Action:
            # add labels for groups
            if 'groups' in sections[section]:
                tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
-               if 'core' not in sections[section]['groups']:
-                   # !! TODO link to rabbitmq container for plugin containers
-                   pass
                if 'syslog' not in sections[section]['groups']:
                    # !! TODO link logging driver syslog container
                    pass
@@ -134,7 +132,6 @@ class Action:
                        tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
            else:
                # !! TODO link logging driver syslog container
-               # !! TODO link to rabbitmq container for plugin containers
                pass
 
            # add label for priority
