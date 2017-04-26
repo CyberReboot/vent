@@ -31,6 +31,7 @@ class GZHandler(PatternMatchingEventHandler):
         # let jobs run for up to one day
         try:
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
+            # TODO should directories be treated as bulk paths to send to a plugin?
             if event.event_type == "created" and event.is_directory == False:
                 print(event.src_path)
                 # let jobs be queued for up to 30 days

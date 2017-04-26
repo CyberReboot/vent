@@ -53,6 +53,7 @@ class RmqEs():
         an elasticsearch index
         """
         # !! TODO index needs to be reworked for multiple file types
+        # !! TODO this will need to account for keeping logs and plugin output seperate
         index = method.routing_key.split(".")[0]
         if method.routing_key.split(".")[0] == 'syslog':
             body = body.strip().replace('"', '\"')
