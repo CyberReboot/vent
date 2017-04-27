@@ -11,7 +11,7 @@ def file_queue(path):
 
     d_client = docker.from_env()
 
-    images = []
+    images = ['none']
     # TODO read in configuration of plugins to get the ones that should run against the path.
     config = ConfigParser.RawConfigParser()
     config.optionxform=str
@@ -39,4 +39,4 @@ def file_queue(path):
     for image in images:
         d_client.containers.run(image, detach=True)
 
-    return
+    return images
