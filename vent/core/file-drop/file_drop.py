@@ -38,17 +38,17 @@ class GZHandler(PatternMatchingEventHandler):
                 # check if the file was already queued and ignore
                 time.sleep(30)
                 exists = False
-                queued_jobs = q.jobs
+                jobs = []
+                for queue_name in q.all():
+                    jobs.extend(queue_name.jobs)
                 print uid, "started", event.src_path
-                print uid, len(q)
-                print uid, q.job_ids
-                print uid, queued_jobs
-                for queued_job in queued_jobs:
+                print uid, jobs
+                for job in jobs:
                     print uid, "***"
-                    print uid, queued_job.description
-                    print uid, queued_job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2]
+                    print uid, job.description
+                    print uid, job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2]
                     print uid, event.src_path
-                    if queued_job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2] == event.src_path:
+                    if job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2] == event.src_path:
                         print uid, "true"
                         exists = True
                     print uid, "***"
