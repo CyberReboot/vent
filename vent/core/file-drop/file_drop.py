@@ -36,6 +36,7 @@ class GZHandler(PatternMatchingEventHandler):
                 print(event.src_path)
                 # let jobs be queued for up to 30 days
                 result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
+                print result
         except Exception as e:
             print(str(e))
 
