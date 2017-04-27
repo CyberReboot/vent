@@ -66,16 +66,6 @@ class Action:
        sections, template = self.plugin.constraint_options(args, options)
        tool_dict = {}
        for section in sections:
-           # ensure tools are built before starting them
-           if not sections[section]['built'] == 'yes':
-               # try and build the tool first
-               # !! TODO make this an optional flag (it'll make it easier for testing without merging later
-               status = self.build(name=sections[section]['name'],
-                                   groups=groups,
-                                   enabled=enabled,
-                                   branch=branch,
-                                   version=version)
-
            # initialize needed vars
            template_path = os.path.join(sections[section]['path'], 'vent.template')
            container_name = sections[section]['image_name'].replace(':','-')
@@ -88,6 +78,16 @@ class Action:
            os.chdir(os.path.join(sections[section]['path']))
            status = self.plugin.checkout()
            os.chdir(cwd)
+
+           # ensure tools are built before starting them
+           if not sections[section]['built'] == 'yes':
+               # try and build the tool first
+               # !! TODO make this an optional flag (it'll make it easier for testing without merging later
+               status = self.build(name=sections[section]['name'],
+                                   groups=groups,
+                                   enabled=enabled,
+                                   branch=branch,
+                                   version=version)
 
            # set docker settings for container
            vent_template = Template(template_path)
