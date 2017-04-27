@@ -8,7 +8,7 @@ import rmq_es_connector
 class Method():
     """ create mock method object """
     routing_key = None
-    def __init__(self, routing_key=""):
+    def __init__(self, routing_key="foo.bar"):
         self.routing_key = routing_key
 
 def test_rmq_es_connector_connections():
