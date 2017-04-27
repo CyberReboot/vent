@@ -34,6 +34,7 @@ class GZHandler(PatternMatchingEventHandler):
             # TODO should directories be treated as bulk paths to send to a plugin?
             if event.event_type == "created" and event.is_directory == False:
                 # check if the file was already queued and ignore
+                time.sleep(30)
                 exists = False
                 queued_jobs = q.jobs
                 for queued_job in queued_jobs:
@@ -41,7 +42,6 @@ class GZHandler(PatternMatchingEventHandler):
                         exists = True
                 if not exists:
                     # !! TODO this should be a configuration option in the vent.template
-                    time.sleep(30)
                     print(event.src_path)
                     # let jobs be queued for up to 30 days
                     result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
