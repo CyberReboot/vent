@@ -11,7 +11,7 @@ def file_queue(path):
 
     d_client = docker.from_env()
 
-    containers = []
+    images = []
     # TODO read in configuration of plugins to get the ones that should run against the path.
     config = ConfigParser.RawConfigParser()
     config.optionxform=str
@@ -30,12 +30,13 @@ def file_queue(path):
                 ext_types = ext_types.split(',')
                 for ext_type in ext_types:
                     if path.endswith(ext_type):
-                        containers.append(section)
+                        images.append(config.get(section, 'image_name'))
 
     # TODO add connections to syslog, and file path etc.
 
     # TODO start containers
 
-    #d_client.containers.run()
+    for image in images:
+        d_client.containers.run(image, detach=True)
 
-    return containers
+    return
