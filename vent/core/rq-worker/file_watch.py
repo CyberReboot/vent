@@ -9,11 +9,12 @@ def file_queue(path):
     import os
     import time
 
-    print "start"
     d_client = docker.from_env()
 
     images = []
-    # TODO read in configuration of plugins to get the ones that should run against the path.
+
+    # read in configuration of plugins to get the ones that should run against the path.
+    # TODO error checking and catching...
     config = ConfigParser.RawConfigParser()
     config.optionxform=str
     config.read('/vent/plugin_manifest.cfg')
@@ -30,11 +31,15 @@ def file_queue(path):
                 if path.endswith(ext_type):
                     images.append(config.get(section, 'image_name'))
 
-    # TODO add connections to syslog, and file path etc.
+    # TODO add connections to syslog, labels, and file path etc.
+    # TODO get syslog address rather than hardcode
+    # TODO get group and name for tag
+    # TODO add rw volume for plugin output to be plugin input
+    log_config = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'foo'}}
+    volumes = {path:{'bind':path, 'mode':'ro'}}
 
-    # TODO start containers
-
+    # start containers
     for image in images:
-        d_client.containers.run(image, detach=True)
+        d_client.containers.run(image=image, command=path.split('_')[1], detach=True, log_config=log_config, volumes=volumes)
 
     return images
