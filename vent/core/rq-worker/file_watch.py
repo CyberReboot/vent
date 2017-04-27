@@ -14,7 +14,9 @@ def file_queue(path):
     images = []
 
     # get the correct path for binding
-    vent_config = Template(template='/vent/vent.cfg')
+    vent_config = ConfigParser.RawConfigParser()
+    vent_config.optionxform=str
+    vent_config.read('/vent/vent.cfg')
     files = vent_config.option('main', 'files')
     hostname, path = path.split('_', 1)
     path = path.replace('/files', files, 1)
