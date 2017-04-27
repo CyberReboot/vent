@@ -17,7 +17,10 @@ def file_queue(path):
     vent_config = ConfigParser.RawConfigParser()
     vent_config.optionxform=str
     vent_config.read('/vent/vent.cfg')
-    files = vent_config.option('main', 'files')
+    if vent_config.has_section('main') and vent_config.has_option('main', 'files'):
+        files = vent_config.get('main', 'files')
+    else:
+        files = '/'
     hostname, path = path.split('_', 1)
     path = path.replace('/files', files, 1)
 
