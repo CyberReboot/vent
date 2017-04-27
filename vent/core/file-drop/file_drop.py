@@ -4,6 +4,7 @@ import time
 import uuid
 
 from redis import Redis
+from redis import StrictRedis
 from rq import Queue
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
@@ -36,19 +37,18 @@ class GZHandler(PatternMatchingEventHandler):
             # TODO should directories be treated as bulk paths to send to a plugin?
             if event.event_type == "created" and event.is_directory == False:
                 # check if the file was already queued and ignore
-                time.sleep(30)
+                time.sleep(15)
                 exists = False
-                jobs = []
-                for queue_name in q.all():
-                    jobs.extend(queue_name.jobs)
                 print uid, "started", event.src_path
-                print uid, jobs
+                r = StrictRedis(host=r_host, port=6379, db=0)
+                jobs = r.keys(pattern="rq:job*")
                 for job in jobs:
                     print uid, "***"
-                    print uid, job.description
-                    print uid, job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2]
+                    description = r.hget(job, description)
+                    print uid, description
+                    print uid, description.split("file_watch.file_queue('"+hostname+"_")[1][:-2]
                     print uid, event.src_path
-                    if job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2] == event.src_path:
+                    if description.split("file_watch.file_queue('"+hostname+"_")[1][:-2] == event.src_path:
                         print uid, "true"
                         exists = True
                     print uid, "***"
