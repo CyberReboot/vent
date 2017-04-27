@@ -33,9 +33,18 @@ class GZHandler(PatternMatchingEventHandler):
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
             # TODO should directories be treated as bulk paths to send to a plugin?
             if event.event_type == "created" and event.is_directory == False:
-                print(event.src_path)
-                # let jobs be queued for up to 30 days
-                result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
+                # check if the file was already queued and ignore
+                exists = False
+                queued_jobs = q.jobs
+                for queued_job in queued_jobs:
+                    if queued_job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2] == event.src_path:
+                        exists = True
+                if not exists:
+                    # !! TODO this should be a configuration option in the vent.template
+                    time.sleep(30)
+                    print(event.src_path)
+                    # let jobs be queued for up to 30 days
+                    result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
         except Exception as e:
             print(str(e))
 
