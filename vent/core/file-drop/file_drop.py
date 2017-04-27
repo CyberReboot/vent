@@ -44,7 +44,7 @@ class GZHandler(PatternMatchingEventHandler):
                 jobs = r.keys(pattern="rq:job*")
                 for job in jobs:
                     print uid, "***"
-                    description = r.hget(job, description)
+                    description = r.hget(job, 'description')
                     print uid, description
                     print uid, description.split("file_watch.file_queue('"+hostname+"_")[1][:-2]
                     print uid, event.src_path
