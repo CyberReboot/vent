@@ -12,6 +12,24 @@ def file_queue(path):
     d_client = docker.from_env()
 
     # TODO read in configuration of plugins to get the ones that should run against the path.
+    config = ConfigParser.RawConfigParser()
+    config.optionxform=str
+    config.read('/vent/plugin_manifest.cfg')
+    sections = config.sections()
+    for section in sections:
+        template_path = config.get(section, 'path')
+        template_path = '/vent/plugins/' + template_path.split('/plugins/')[1] + "/vent.template"
+        t_config = ConfigParser.RawConfigParser()
+        t_config.optionxform=str
+        t_config.read('/vent/plugin_manifest.cfg')
+        t_config.read(template_path)
+        if t_config.has_section('settings'):
+            if t_config.has_option('settings', 'ext_types'):
+                ext_types = t_config.get('settings', 'ext_types')
+                ext_types = ext_types.split(',')
+                for ext_type in ext_types:
+                    if path.endswith(ext_type):
+                        print section
 
     # TODO add connections to syslog, and file path etc.
 
