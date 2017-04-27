@@ -13,6 +13,7 @@ def file_queue(path):
 
     images = []
 
+    hostname, path = path.split('_', 1)
     # read in configuration of plugins to get the ones that should run against the path.
     # TODO error checking and catching...
     config = ConfigParser.RawConfigParser()
@@ -40,6 +41,6 @@ def file_queue(path):
 
     # start containers
     for image in images:
-        d_client.containers.run(image=image, command=path.split('_')[1], detach=True, log_config=log_config, volumes=volumes)
+        d_client.containers.run(image=image, command=path, detach=True, log_config=log_config, volumes=volumes)
 
     return images
