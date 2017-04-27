@@ -9,6 +9,7 @@ def file_queue(path):
     import os
     import time
 
+    print "start"
     d_client = docker.from_env()
 
     images = ['none']
@@ -22,15 +23,12 @@ def file_queue(path):
         template_path = '/vent/plugins/' + template_path.split('/plugins/')[1] + "/vent.template"
         t_config = ConfigParser.RawConfigParser()
         t_config.optionxform=str
-        t_config.read('/vent/plugin_manifest.cfg')
         t_config.read(template_path)
-        if t_config.has_section('settings'):
-            if t_config.has_option('settings', 'ext_types'):
-                ext_types = t_config.get('settings', 'ext_types')
-                ext_types = ext_types.split(',')
-                for ext_type in ext_types:
-                    if path.endswith(ext_type):
-                        images.append(config.get(section, 'image_name'))
+        if t_config.has_section('settings') and t_config.has_option('settings', 'ext_types'):
+            ext_types = t_config.get('settings', 'ext_types').split(',')
+            for ext_type in ext_types:
+                if path.endswith(ext_type):
+                    images.append(config.get(section, 'image_name'))
 
     # TODO add connections to syslog, and file path etc.
 

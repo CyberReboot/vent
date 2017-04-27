@@ -7,6 +7,6 @@ instances = 2
 priority = 6
 
 [docker]
-environment = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379"]
+environment = ["REMOTE_REDIS_HOST=redis", "REMOTE_REDIS_PORT=6379", "PYTHONUNBUFFERED=0"]
 volumes = {'/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}}
 links = {"Redis":"redis"}
