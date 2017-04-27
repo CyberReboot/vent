@@ -40,6 +40,8 @@ class GZHandler(PatternMatchingEventHandler):
                 exists = False
                 queued_jobs = q.jobs
                 print uid, "started", event.src_path
+                print uid, len(q)
+                print uid, q.job_ids
                 print uid, queued_jobs
                 for queued_job in queued_jobs:
                     print uid, "***"
