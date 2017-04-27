@@ -46,7 +46,7 @@ def file_queue(path):
     # TODO get syslog address rather than hardcode
     # TODO get group and name for tag
     # TODO add rw volume for plugin output to be plugin input
-    log_config = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'foo'}}
+    log_config = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':path.rsplit('.', 1)[-1]}}
     volumes = {path:{'bind':path, 'mode':'ro'}}
 
     # start containers
