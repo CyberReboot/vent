@@ -37,14 +37,23 @@ class GZHandler(PatternMatchingEventHandler):
                 time.sleep(30)
                 exists = False
                 queued_jobs = q.jobs
+                print "started", event.src_path
+                print queued_jobs
                 for queued_job in queued_jobs:
+                    print "***"
+                    print queued_job.description
+                    print queued_job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2]
+                    print event.src_path
                     if queued_job.description.split("file_watch.file_queue('"+hostname+"_")[1][:-2] == event.src_path:
+                        print "true"
                         exists = True
+                    print "***"
                 if not exists:
                     # !! TODO this should be a configuration option in the vent.template
-                    print(event.src_path)
+                    print "let's queue it", event.src_path
                     # let jobs be queued for up to 30 days
                     result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
+                print "end", event.src_path
         except Exception as e:
             print(str(e))
 
