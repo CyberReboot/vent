@@ -80,14 +80,13 @@ class Action:
            os.chdir(cwd)
 
            # ensure tools are built before starting them
-           if not sections[section]['built'] == 'yes':
-               # try and build the tool first
-               # !! TODO make this an optional flag (it'll make it easier for testing without merging later
-               status = self.build(name=sections[section]['name'],
-                                   groups=groups,
-                                   enabled=enabled,
-                                   branch=branch,
-                                   version=version)
+           # try and build the tool first
+           # !! TODO make this an optional flag (it'll make it easier for testing without merging later
+           status = self.build(name=sections[section]['name'],
+                               groups=groups,
+                               enabled=enabled,
+                               branch=branch,
+                               version=version)
 
            # set docker settings for container
            vent_template = Template(template_path)

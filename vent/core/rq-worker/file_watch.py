@@ -13,7 +13,12 @@ def file_queue(path):
 
     images = []
 
+    # get the correct path for binding
+    vent_config = Template(template='/vent/vent.cfg')
+    files = vent_config.option('main', 'files')
     hostname, path = path.split('_', 1)
+    path = path.replace('/files', files, 1)
+
     # read in configuration of plugins to get the ones that should run against the path.
     # TODO error checking and catching...
     config = ConfigParser.RawConfigParser()
