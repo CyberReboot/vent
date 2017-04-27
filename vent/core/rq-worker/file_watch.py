@@ -12,7 +12,7 @@ def file_queue(path):
     print "start"
     d_client = docker.from_env()
 
-    images = ['none']
+    images = []
     # TODO read in configuration of plugins to get the ones that should run against the path.
     config = ConfigParser.RawConfigParser()
     config.optionxform=str
