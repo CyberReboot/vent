@@ -1,4 +1,9 @@
-import ConfigParser
+try:
+    # python2
+    import ConfigParser
+except ImportError:
+    # python3
+    import configparser as ConfigParser
 
 from vent.helpers.errors import ErrorHandler
 

@@ -15,3 +15,8 @@ test:
     - PYTHONPATH="${PYTHONPATH}:/home/ubuntu/vent" make test
   post:
     - bash <(curl -s https://codecov.io/bash)
+
+general:
+  branches:
+    ignore:
+      - experimental
