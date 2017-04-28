@@ -64,7 +64,6 @@ class RmqEs():
                 pass
         try:
             res = self.es_conn.index(index=index, doc_type=method.routing_key.split(".")[1], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
-            print(" [x] "+str(datetime.datetime.utcnow())+" UTC {0!r}:{1!r}".format(method.routing_key, body))
         except Exception as e:
             pass
 

@@ -116,12 +116,13 @@ class Action:
            tool_dict[container_name]['labels']['vent.version'] = version
            tool_dict[container_name]['labels']['vent.name'] = sections[section]['name']
 
-           # add labels for groups
            if 'groups' in sections[section]:
+               # add labels for groups
                tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
-               if 'syslog' not in sections[section]['groups']:
-                   # !! TODO link logging driver syslog container
-                   pass
+               # send logs to syslog
+               if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
+                   tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
+               # mount necessary directories
                if 'files' in sections[section]['groups']:
                    if 'volumes' in tool_dict[container_name]:
                        tool_dict[container_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}

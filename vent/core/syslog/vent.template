@@ -7,7 +7,7 @@ groups = core,logging,syslog
 instances = 1
 locally_active = on
 #external_host = 0.0.0.0
-priority = 15,1
+priority = 2,1,2
 
 [docker]
 environment = ["VENT_HOST=`hostname`"]
