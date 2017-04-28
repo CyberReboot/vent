@@ -6,12 +6,14 @@ import docker
 import npyscreen
 import subprocess
 
+from vent.api.actions import Action
 from vent.helpers.meta import Version
 
 
 class VentForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
     d_client = docker.from_env()
+    api_action = Action()
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
@@ -21,6 +23,15 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield2.display()
         self.addfield3.value = str(len(self.d_client.containers.list()))+" running"
         self.addfield3.display()
+
+    def perform_action(self, action):
+        if action == 'start':
+            self.api_action.start(branch='experimental')
+        elif action == 'stop':
+            self.api_action.stop(branch='experimental')
+        elif action == 'clean':
+            self.api_action.clean(branch='experimental')
+        return
 
     def create(self):
         """ Override method for creating FormBaseNewWithMenu form """
@@ -63,9 +74,9 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
             ("Just Beep", None, "e"),
         ])
         self.m2 = self.add_menu(name="Plugins", shortcut="p",)
-        self.m2.addItemsFromList([
-            ("Just Beep", None),
-        ])
+        self.m2.addItem(text='Start', onSelect=self.perform_action, arguments=['start'], shortcut='s')
+        self.m2.addItem(text='Stop', onSelect=self.perform_action, arguments=['stop'], shortcut='p')
+        self.m2.addItem(text='Clean', onSelect=self.perform_action, arguments=['clean'], shortcut='c')
         self.m3 = self.add_menu(name="Logs", shortcut="l",)
         self.m3.addItemsFromList([
             ("Just Beep", None),

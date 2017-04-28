@@ -1,7 +1,6 @@
 import file_watch
 import os
 import pytest
-import subprocess
 import time
 
 def test_settings():
