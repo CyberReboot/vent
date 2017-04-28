@@ -116,7 +116,10 @@ class Plugin:
         os.chdir(self.path)
 
         # ensure cloning still works even if ssl is broken...probably should be improved
-        status = subprocess.call(shlex.split("git config --global http.sslVerify false"))
+        try:
+            status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT)
+        except Exception as e:
+            pass
 
         # check if user and pw were supplied, typically for private repos
         if user and pw:
@@ -124,8 +127,13 @@ class Plugin:
             self.repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
 
         # clone repo and build tools
-        status = subprocess.call(shlex.split("git clone --recursive " + self.repo + " ."))
-        response = self._build_tools(status)
+        try:
+            status = subprocess.check_output(shlex.split("git clone --recursive " + self.repo + " ."), stderr=subprocess.STDOUT)
+            status_code = 0
+        except subprocess.CalledProcessError as e:
+            status_code = e.returncode
+
+        response = self._build_tools(status_code)
 
         # set back to original path
         os.chdir(cwd)
@@ -272,7 +280,7 @@ class Plugin:
                 commit_id = None
                 if self.version == 'HEAD':
                     os.chdir(match_path)
-                    commit_id = subprocess.check_output(shlex.split("git rev-parse --short HEAD")).strip()
+                    commit_id = subprocess.check_output(shlex.split("git rev-parse --short HEAD"), stderr=subprocess.STDOUT).strip()
                     template.set_option(section, "commit_id", commit_id)
                 if head:
                     # no need to store previous commits if not HEAD, since
@@ -309,7 +317,7 @@ class Plugin:
         if self.build:
             try:
                 os.chdir(match_path)
-                output = subprocess.check_output(shlex.split("docker build --label vent -t " + image_name + " ."))
+                output = subprocess.check_output(shlex.split("docker build --label vent -t " + image_name + " ."), stderr=subprocess.STDOUT)
                 image_id = ""
                 for line in output.split("\n"):
                     if line.startswith("Successfully built "):
@@ -339,19 +347,13 @@ class Plugin:
         if not hasattr(self, 'branch'): self.branch = 'master'
         if not hasattr(self, 'version'): self.version = 'HEAD'
         response = (True, None)
-        status = subprocess.call(shlex.split("git checkout " + self.branch))
-        if status == 0:
-            status = subprocess.call(shlex.split("git pull"))
-            if status == 0:
-                status = subprocess.call(shlex.split("git reset --hard " + self.version))
-                if status == 0:
-                    response = (True, status)
-                else:
-                    response = (False, status)
-            else:
-                response = (False, status)
-        else:
-            response = (False, status)
+        try:
+            status = subprocess.check_output(shlex.split("git checkout " + self.branch), stderr=subprocess.STDOUT)
+            status = subprocess.check_output(shlex.split("git pull"), stderr=subprocess.STDOUT)
+            status = subprocess.check_output(shlex.split("git reset --hard " + self.version), stderr=subprocess.STDOUT)
+            response = (True, status)
+        except Exception as e:
+            response = (False, str(e))
         return response
 
     @staticmethod

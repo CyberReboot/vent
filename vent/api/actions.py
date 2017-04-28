@@ -193,6 +193,7 @@ class Action:
                    if container_tuple[1] not in started_containers:
                        started_containers.append(container_tuple[1])
                        try:
+                           # !! TODO check if container exists and start it instead of run
                            container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
                            print "started", container_tuple[1], "with ID:", str(container_id)
                        except Exception as e:
@@ -212,13 +213,73 @@ class Action:
    def update():
        return
 
-   @staticmethod
-   def stop():
-       return
+   def stop(self,
+             repo=None,
+             name=None,
+             groups=None,
+             enabled="yes",
+             branch="master",
+             version="HEAD"):
+       """
+       Stop a set of tools that match the parameters given, if no parameters
+       are given, stop all installed tools on the master branch at verison
+       HEAD that are enabled
+       """
+       # !! TODO need to account for plugin containers that have random names
+       args = locals()
+       options = ['name',
+                  'namespace',
+                  'built',
+                  'groups',
+                  'path',
+                  'image_name',
+                  'branch',
+                  'version']
+       sections, template = self.plugin.constraint_options(args, options)
+       status = (True, None)
+       for section in sections:
+           container_name = sections[section]['image_name'].replace(':','-')
+           try:
+               container = self.d_client.containers.get(container_name)
+               container.stop()
+               print "stopped", container_name
+           except Exception as e:
+               print "failed to stop", container_name, "because:", str(e)
+       return status
 
-   @staticmethod
-   def clean():
-       return
+   def clean(self,
+             repo=None,
+             name=None,
+             groups=None,
+             enabled="yes",
+             branch="master",
+             version="HEAD"):
+       """
+       Clean (stop and remove) a set of tools that match the parameters given,
+       if no parameters are given, clean all installed tools on the master
+       branch at verison HEAD that are enabled
+       """
+       # !! TODO need to account for plugin containers that have random names
+       args = locals()
+       options = ['name',
+                  'namespace',
+                  'built',
+                  'groups',
+                  'path',
+                  'image_name',
+                  'branch',
+                  'version']
+       sections, template = self.plugin.constraint_options(args, options)
+       status = (True, None)
+       for section in sections:
+           container_name = sections[section]['image_name'].replace(':','-')
+           try:
+               container = self.d_client.containers.get(container_name)
+               container.remove(force=True)
+               print "cleaned", container_name
+           except Exception as e:
+               print "failed to clean", container_name, "because:", str(e)
+       return status
 
    def build(self,
              repo=None,
