@@ -35,11 +35,13 @@ def test_start():
 
 def test_stop():
     """ Test the stop function """
-    Action.stop()
+    instance = Action()
+    status = instance.stop()
 
 def test_clean():
     """ Test the clean function """
-    Action.clean()
+    instance = Action()
+    status = instance.clean()
 
 def test_backup():
     """ Test the backup function """
