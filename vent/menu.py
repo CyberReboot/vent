@@ -11,6 +11,18 @@ from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Version
 
+class AddForm(npyscreen.ActionForm):
+    """ For for adding a new repo """
+    # TODO all of this ...
+    def create(self):
+        self.m1 = self.add(npyscreen.TitleCombo, value=0, values=["foo", "bar"], name='Branches')
+
+    def on_ok(self):
+        self.parentApp.switchFormPrevious()
+
+    def on_cancel(self):
+        self.parentApp.switchFormPrevious()
+
 class VentForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
     d_client = docker.from_env()
@@ -50,7 +62,9 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
             return
 
         original_containers = Containers()
-        if action == 'start':
+        if action == 'add':
+            self.parentApp.change_form('ADD')
+        elif action == 'start':
             # TODO pass in actual args and kwargs
             # TODO show a build popup first to improve UX
             thr = threading.Thread(target=self.api_action.start, args=(),
@@ -79,7 +93,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
                                   value=str(subprocess.check_output(["uptime"]))[1:])
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
-                                  value=str(len(Containers()))+" running")
+                                  value=str(len(self.d_client.containers.list()))+" running")
         self.addfield4 = self.add(npyscreen.TitleFixedText, name='Jobs:',
                                   value="")
         self.addfield5 = self.add(npyscreen.TitleFixedText, name='Status:',
@@ -117,6 +131,16 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
             ("Just Beep", None, "e"),
         ])
         self.m2 = self.add_menu(name="Plugins", shortcut="p",)
+        self.m2.addItem(text='Add', onSelect=self.perform_action,
+                        arguments=['add'], shortcut='a')
+        self.m2.addItem(text='List', onSelect=self.perform_action,
+                        arguments=['list'], shortcut='l')
+        self.m2.addItem(text='Update', onSelect=self.perform_action,
+                        arguments=['update'], shortcut='u')
+        self.m2.addItem(text='Remove', onSelect=self.perform_action,
+                        arguments=['Remove'], shortcut='r')
+        self.m2.addItem(text='Build', onSelect=self.perform_action,
+                        arguments=['build'], shortcut='b')
         self.m2.addItem(text='Start', onSelect=self.perform_action,
                         arguments=['start'], shortcut='s')
         self.m2.addItem(text='Stop', onSelect=self.perform_action,
@@ -157,8 +181,11 @@ class HelpForm(npyscreen.FormBaseNew):
     """ Help form for the Vent CLI """
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms})
+        self.add_handlers({"^T": self.change_forms,'^Q': self.quit})
         self.addfield = self.add(npyscreen.TitlePager, name="Vent", values="""Help\nmore\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more""".split("\n"))
+
+    def quit(self, *args, **kwargs):
+        self.parentApp.switchForm(None)
 
     def change_forms(self, *args, **keywords):
         """ Checks which form is currently displayed and toggles it to the other one """
@@ -179,6 +206,7 @@ class VentApp(npyscreen.NPSAppManaged):
         version = Version()
         self.addForm("MAIN", VentForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle help", color="DANGER")
+        self.addForm("ADD", AddForm, name="Add\t\t\t\t\t\t\t\tPress ^T to toggle help", color="CONTROL")
 
     def change_form(self, name):
         """ Changes the form (window) that is displayed """
