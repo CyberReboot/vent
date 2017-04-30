@@ -225,7 +225,7 @@ class Action:
        are given, stop all installed tools on the master branch at verison
        HEAD that are enabled
        """
-       # !! TODO need to account for plugin containers that have random names
+       # !! TODO need to account for plugin containers that have random names, use labels perhaps
        args = locals()
        options = ['name',
                   'namespace',
@@ -259,7 +259,7 @@ class Action:
        if no parameters are given, clean all installed tools on the master
        branch at verison HEAD that are enabled
        """
-       # !! TODO need to account for plugin containers that have random names
+       # !! TODO need to account for plugin containers that have random names, use labels perhaps
        args = locals()
        options = ['name',
                   'namespace',

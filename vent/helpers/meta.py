@@ -44,3 +44,40 @@ def Docker():
         # using "local" server
         docker_info['type'] = 'native'
     return docker_info
+
+def Containers(vent=True, running=True):
+    """
+    Get containers that are created, by default limit to vent containers that
+    are running
+    """
+    containers = []
+
+    try:
+        d_client = docker.from_env()
+        if vent:
+            c = d_client.containers.list(all=running, filters={'label':'vent'})
+        else:
+            c = d_client.containers.list(all=running)
+        for container in c:
+            containers.append((container.name, container.status))
+    except Exception as e: # pragma: no cover
+        pass
+
+    return containers
+
+def Images(vent=True):
+    """ Get images that are build, by default limit to vent images """
+    images = []
+
+    try:
+        d_client = docker.from_env()
+        if vent:
+            i = d_client.images.list(filters={'label':'vent'})
+        else:
+            i = d_client.images.list()
+        for image in i:
+            images.append((image.tags, image.short_id))
+    except Exception as e: # pragma: no cover
+        pass
+
+    return images
