@@ -16,3 +16,8 @@ def test_menu():
         A.run(fork=False)
     except Exception as e:
         pass
+
+def test_addform_create():
+    """ Test create in AddForm """
+    a = AddForm()
+    a.create()
