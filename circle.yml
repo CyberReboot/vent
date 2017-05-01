@@ -2,7 +2,6 @@ machine:
   post:
     - curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz && sudo tar --strip-components=1 -xvzf docker-17.04.0-ce.tgz -C /usr/local/bin
     - sudo container=yes docker daemon: { background: true }
-    - sudo usermod -aG docker $USER
   python:
     version: 2.7.12
   services:
@@ -15,7 +14,7 @@ checkout:
     - git submodule update --recursive --init
 test:
   override:
-    - PYTHONPATH="${PYTHONPATH}:/home/ubuntu/vent" make test
+    - sudo PYTHONPATH="${PYTHONPATH}:/home/ubuntu/vent" make test
   post:
     - bash <(curl -s https://codecov.io/bash)
 
