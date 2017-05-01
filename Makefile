@@ -2,6 +2,7 @@ test:
 	@echo
 	@echo "checking dependencies"
 	@echo
+	env
 	docker version
 	pip -V
 	pip install -r tests/requirements.txt

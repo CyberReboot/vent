@@ -3,16 +3,13 @@ machine:
     - curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz && sudo tar --strip-components=1 -xvzf docker-17.04.0-ce.tgz -C /usr/local/bin
   python:
     version: 2.7.12
-  services:
-    - elasticsearch
-    - rabbitmq-server
-    - redis
 checkout:
   post:
     - git submodule sync --recursive
     - git submodule update --recursive --init
 test:
   override:
+    - for c in $(env | grep DOCKER | cut -d '=' -f 1); do unset $c; done
     - sudo container=yes docker daemon: { background: true }
     - PYTHONPATH="${PYTHONPATH}:/home/ubuntu/vent" make test
   post:
