@@ -13,6 +13,7 @@ def file_queue(path):
 
     images = []
 
+    status = (True, None)
     # get the correct path for binding
     vent_config = ConfigParser.RawConfigParser()
     vent_config.optionxform=str
@@ -21,36 +22,48 @@ def file_queue(path):
         files = vent_config.get('main', 'files')
     else:
         files = '/'
-    hostname, path = path.split('_', 1)
-    path = path.replace('/files', files, 1)
 
-    # read in configuration of plugins to get the ones that should run against the path.
-    # TODO error checking and catching...
-    config = ConfigParser.RawConfigParser()
-    config.optionxform=str
-    config.read('/vent/plugin_manifest.cfg')
-    sections = config.sections()
-    for section in sections:
-        template_path = config.get(section, 'path')
-        template_path = '/vent/plugins/' + template_path.split('/plugins/')[1] + "/vent.template"
-        t_config = ConfigParser.RawConfigParser()
-        t_config.optionxform=str
-        t_config.read(template_path)
-        if t_config.has_section('settings') and t_config.has_option('settings', 'ext_types'):
-            ext_types = t_config.get('settings', 'ext_types').split(',')
-            for ext_type in ext_types:
-                if path.endswith(ext_type):
-                    images.append(config.get(section, 'image_name'))
+    try:
+        hostname, path = path.split('_', 1)
+        path = path.replace('/files', files, 1)
 
-    # TODO add connections to syslog, labels, and file path etc.
-    # TODO get syslog address rather than hardcode
-    # TODO get group and name for tag
-    # TODO add rw volume for plugin output to be plugin input
-    log_config = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':path.rsplit('.', 1)[-1]}}
-    volumes = {path:{'bind':path, 'mode':'ro'}}
+        # read in configuration of plugins to get the ones that should run against the path.
+        # TODO error checking and catching...
+        config = ConfigParser.RawConfigParser()
+        config.optionxform=str
+        config.read('/vent/plugin_manifest.cfg')
+        sections = config.sections()
+        for section in sections:
+            template_path = config.get(section, 'path')
+            template_path = '/vent/plugins/' + template_path.split('/plugins/')[1] + "/vent.template"
+            t_config = ConfigParser.RawConfigParser()
+            t_config.optionxform=str
+            t_config.read(template_path)
+            if t_config.has_section('settings') and t_config.has_option('settings', 'ext_types'):
+                ext_types = t_config.get('settings', 'ext_types').split(',')
+                for ext_type in ext_types:
+                    if path.endswith(ext_type):
+                        images.append(config.get(section, 'image_name'))
 
-    # start containers
-    for image in images:
-        d_client.containers.run(image=image, command=path, detach=True, log_config=log_config, volumes=volumes)
+        # TODO add connections to syslog, labels, and file path etc.
+        # TODO get syslog address rather than hardcode
+        # TODO get group and name for tag
+        # TODO add rw volume for plugin output to be plugin input
+        log_config = {'type':'syslog',
+                      'config': {'syslog-address':'tcp://0.0.0.0:514',
+                                 'syslog-facility':'daemon',
+                                 'tag':path.rsplit('.', 1)[-1]}}
+        volumes = {path:{'bind':path, 'mode':'ro'}}
 
-    return images
+        # start containers
+        for image in images:
+            d_client.containers.run(image=image,
+                                    command=path,
+                                    detach=True,
+                                    log_config=log_config,
+                                    volumes=volumes)
+        status = (True, images)
+    except Exception as e:
+        status = (False, None)
+
+    return status
