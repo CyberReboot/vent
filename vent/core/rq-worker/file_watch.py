@@ -1,4 +1,4 @@
-def file_queue(path):
+def file_queue(path, template_path="/vent/"):
     """
     Processes files that have been added from the rq-worker, starts plugins
     that match the mime type for the new file.
@@ -17,7 +17,7 @@ def file_queue(path):
     # get the correct path for binding
     vent_config = ConfigParser.RawConfigParser()
     vent_config.optionxform=str
-    vent_config.read('/vent/vent.cfg')
+    vent_config.read(template_path+'vent.cfg')
     if vent_config.has_section('main') and vent_config.has_option('main', 'files'):
         files = vent_config.get('main', 'files')
     else:
@@ -31,14 +31,14 @@ def file_queue(path):
         # TODO error checking and catching...
         config = ConfigParser.RawConfigParser()
         config.optionxform=str
-        config.read('/vent/plugin_manifest.cfg')
+        config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         for section in sections:
-            template_path = config.get(section, 'path')
-            template_path = '/vent/plugins/' + template_path.split('/plugins/')[1] + "/vent.template"
+            t_path = config.get(section, 'path')
+            t_path = template_path+'plugins/' + t_path.split('/plugins/')[1] + "/vent.template"
             t_config = ConfigParser.RawConfigParser()
             t_config.optionxform=str
-            t_config.read(template_path)
+            t_config.read(t_path)
             if t_config.has_section('settings') and t_config.has_option('settings', 'ext_types'):
                 ext_types = t_config.get('settings', 'ext_types').split(',')
                 for ext_type in ext_types:

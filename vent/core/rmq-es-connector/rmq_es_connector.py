@@ -42,7 +42,7 @@ class RmqEs():
                 self.es_conn = Elasticsearch([self.es_host])
                 wait = False
                 print("connected to rabbitmq...")
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 print("waiting for connection to rabbitmq...")
                 time.sleep(2)
                 wait = True
@@ -60,7 +60,7 @@ class RmqEs():
                 body = body.strip().replace('"', '\"')
                 body = '{"log":"'+body+'"}'
                 doc = ast.literal_eval(body)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 pass
         try:
             res = self.es_conn.index(index=index, doc_type=method.routing_key.split(".")[1], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
