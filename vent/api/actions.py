@@ -1,5 +1,4 @@
 import ast
-import docker
 import json
 import os
 
@@ -11,7 +10,7 @@ class Action:
    """ Handle actions in menu """
    def __init__(self, **kargs):
        self.plugin = Plugin(**kargs)
-       self.d_client = docker.from_env()
+       self.d_client = self.plugin.d_client
        self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
                                        "vent.cfg")
 
@@ -116,7 +115,7 @@ class Action:
                for option in status[1]:
                    try:
                        tool_dict[container_name][option[0]] = ast.literal_eval(option[1])
-                   except Exception as e:
+                   except Exception as e: # pragma: no cover
                        tool_dict[container_name][option[0]] = option[1]
 
            # get temporary name for links, etc.

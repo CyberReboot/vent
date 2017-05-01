@@ -1,12 +1,10 @@
 machine:
-  post:
-    - curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-17.04.0-ce.tgz && sudo tar --strip-components=1 -xvzf docker-17.04.0-ce.tgz -C /usr/local/bin
-    - sudo container=yes docker daemon: { background: true }
   python:
     version: 2.7.12
   services:
-    - elasticsearch
+    - docker
     - rabbitmq-server
+    - elasticsearch
     - redis
 checkout:
   post:
