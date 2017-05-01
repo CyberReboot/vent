@@ -12,7 +12,8 @@ class Action:
    def __init__(self, **kargs):
        self.plugin = Plugin(**kargs)
        self.d_client = docker.from_env()
-       self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir, "vent.cfg")
+       self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
+                                       "vent.cfg")
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
            branch="master", build=True, user=None, pw=None, groups=None,
@@ -34,7 +35,8 @@ class Action:
                                 disable_old=disable_old)
        return status
 
-   def remove(self, repo=None, namespace=None, name=None, groups=None, enabled="yes", branch="master", version="HEAD", built="yes"):
+   def remove(self, repo=None, namespace=None, name=None, groups=None,
+              enabled="yes", branch="master", version="HEAD", built="yes"):
        """ Remove tools or a repo """
        args = locals()
        options = ['name',

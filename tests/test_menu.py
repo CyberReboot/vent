@@ -1,6 +1,7 @@
 import curses
 import npyscreen
 
+from vent.menu import AddForm
 from vent.menu import HelpForm
 from vent.menu import VentApp
 from vent.menu import VentForm

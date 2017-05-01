@@ -12,7 +12,11 @@ def test_add():
 
 def test_remove():
     """ Test the remove function """
-    Action.remove()
+    instance = Action()
+    status = instance.remove()
+    assert status[0] == False
+    status = instance.remove(repo='https://github.com/cyberreboot/vent')
+    assert status[0] == True
 
 def test_build():
     """ Test the build function """
@@ -51,9 +55,10 @@ def test_restore():
     """ Test the restore function """
     Action.restore()
 
-def test_show():
-    """ Test the show function """
-    Action.show()
+def test_inventory():
+    """ Test the inventory function """
+    instance = Action()
+    status = instance.inventory(choices=[])
 
 def test_configure():
     """ Test the configure function """
