@@ -1,24 +1,67 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
+import ast
 import datetime
 import docker
 import npyscreen
 import subprocess
 import threading
+import time
 
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
+from vent.helpers.meta import Tools
 from vent.helpers.meta import Version
 
 class AddForm(npyscreen.ActionForm):
     """ For for adding a new repo """
-    # TODO all of this ...
+    build_values = ['True', 'False']
     def create(self):
-        self.m1 = self.add(npyscreen.TitleCombo, value=0, values=["foo", "bar"], name='Branches')
+        self.repo = self.add(npyscreen.TitleText, name='Repository',
+                             value='https://github.com/cyberreboot/vent-plugins')
+        self.build = self.add(npyscreen.TitleCombo, value=0,
+                              values=self.build_values, name='Build')
+        self.user = self.add(npyscreen.TitleText, name='Username')
+        self.pw = self.add(npyscreen.TitleText, name='Password')
+        self.repo.when_value_edited()
 
     def on_ok(self):
+        """ Add the repository """
+        def diff(first, second):
+            """
+            Get the elements that exist in the first list and not in the second
+            """
+            second = set(second)
+            return [item for item in first if item not in second]
+
+        def popup(original_tools, thr, title):
+            """
+            Start the thread and display a popup of the tools being added until
+            the thread is finished
+            """
+            thr.start()
+            while thr.is_alive():
+                tools = diff(Tools(), original_tools)
+                tool_str = "Cloning repository..."
+                for tool in tools:
+                    # TODO limit length of tool_str to fit box
+                    tool_str = "Adding: "+tool+"\n"+tool_str
+                time.sleep(1)
+                npyscreen.notify_wait(tool_str, title=title)
+            return
+
+        api_action = Action()
+        original_tools = Tools()
+        thr = threading.Thread(target=api_action.add, args=(),
+                               kwargs={'repo':self.repo.value,
+                                       'build':ast.literal_eval(self.build_values[self.build.value]),
+                                       'user':self.user.value,
+                                       'pw':self.pw.value})
+        popup(original_tools, thr, 'Please wait, adding repository...')
         self.parentApp.switchFormPrevious()
+        npyscreen.notify_confirm("Done adding repository: "+self.repo.value,
+                                 title='Added Repository')
 
     def on_cancel(self):
         self.parentApp.switchFormPrevious()
@@ -58,6 +101,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
                 for container in containers:
                     # TODO limit length of container_str to fit box
                     container_str += container[0]+": "+container[1]+"\n"
+                time.sleep(1)
                 npyscreen.notify_wait(container_str, title=title)
             return
 
@@ -71,18 +115,24 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
                                    kwargs={'branch':'experimental'})
             popup(original_containers, thr,
                   'Please wait, starting containers...')
+            npyscreen.notify_confirm("Done starting containers.",
+                                     title='Started Containers')
         elif action == 'stop':
             # TODO pass in actual args and kwargs
             thr = threading.Thread(target=self.api_action.stop, args=(),
                                    kwargs={'branch':'experimental'})
             popup(original_containers, thr,
                   'Please wait, stopping containers...')
+            npyscreen.notify_confirm("Done stopping containers.",
+                                     title='Stopped Containers')
         elif action == 'clean':
             # TODO pass in actual args and kwargs
             thr = threading.Thread(target=self.api_action.clean, args=(),
                                    kwargs={'branch':'experimental'})
             popup(original_containers, thr,
                   'Please wait, cleaning containers...')
+            npyscreen.notify_confirm("Done cleaning containers.",
+                                     title='Cleaned Containers')
         return
 
     def create(self):
