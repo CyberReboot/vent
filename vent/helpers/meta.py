@@ -81,3 +81,9 @@ def Images(vent=True):
         pass
 
     return images
+
+def Tools():
+    """ Get tools that exist in the manifest """
+    tools = []
+    # !! TODO
+    return tools
