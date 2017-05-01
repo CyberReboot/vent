@@ -1,0 +1,15 @@
+sudo: required
+
+services:
+  - docker
+  - rabbitmq
+  - redis
+  - elasticsearch
+language: python
+python:
+  - "2.7"
+before_script:
+  - sleep 10
+script:
+  - make test
+  - bash <(curl -s https://codecov.io/bash)
