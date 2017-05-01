@@ -24,11 +24,13 @@ def test_docker():
 def test_containers():
     """ Test the containers function """
     containers = Containers()
+    containers = Containers(vent=False)
     assert type(containers) == list
 
 def test_images():
     """ Test the images function """
     images = Images()
+    images = Images(vent=False)
     assert type(images) == list
 
 def test_tools():
