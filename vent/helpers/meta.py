@@ -58,9 +58,9 @@ def Containers(vent=True, running=True):
     try:
         d_client = docker.from_env()
         if vent:
-            c = d_client.containers.list(all=running, filters={'label':'vent'})
+            c = d_client.containers.list(all=not running, filters={'label':'vent'})
         else:
-            c = d_client.containers.list(all=running)
+            c = d_client.containers.list(all=not running)
         for container in c:
             containers.append((container.name, container.status))
     except Exception as e: # pragma: no cover
