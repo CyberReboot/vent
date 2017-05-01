@@ -1,4 +1,5 @@
 import datetime
+import docker
 import fnmatch
 import os
 import shlex
@@ -14,6 +15,7 @@ class Plugin:
         self.path_dirs = PathDirs(**kargs)
         self.manifest = os.path.join(self.path_dirs.meta_dir,
                                      "plugin_manifest.cfg")
+        self.d_client = docker.from_env()
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
@@ -118,7 +120,7 @@ class Plugin:
         # ensure cloning still works even if ssl is broken...probably should be improved
         try:
             status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
 
         # check if user and pw were supplied, typically for private repos
@@ -319,6 +321,7 @@ class Plugin:
         if self.build:
             try:
                 os.chdir(match_path)
+                # currentyl can't use docker-py because it doesn't support labels on images yet
                 output = subprocess.check_output(shlex.split("docker build --label vent -t " + image_name + " ."), stderr=subprocess.STDOUT)
                 image_id = ""
                 for line in output.split("\n"):
@@ -354,7 +357,7 @@ class Plugin:
             status = subprocess.check_output(shlex.split("git pull"), stderr=subprocess.STDOUT)
             status = subprocess.check_output(shlex.split("git reset --hard " + self.version), stderr=subprocess.STDOUT)
             response = (True, status)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             response = (False, str(e))
         return response
 
