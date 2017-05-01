@@ -15,5 +15,6 @@ test:
 	rm -rf build
 	rm -rf plugins
 	rm -rf core
+	python setup.py install
 	py.test -v --cov=. -k 'not vendor' --cov-report term-missing
 .PHONY: test
