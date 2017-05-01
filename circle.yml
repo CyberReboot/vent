@@ -3,6 +3,9 @@ machine:
     version: 2.7.12
   services:
     - docker
+    - rabbitmq-server
+    - elasticsearch
+    - redis
 checkout:
   post:
     - git submodule sync --recursive
