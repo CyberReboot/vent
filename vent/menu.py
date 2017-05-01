@@ -47,8 +47,8 @@ class AddForm(npyscreen.ActionForm):
                 for tool in tools:
                     # TODO limit length of tool_str to fit box
                     tool_str = "Adding: "+tool+"\n"+tool_str
-                time.sleep(1)
                 npyscreen.notify_wait(tool_str, title=title)
+                time.sleep(1)
             return
 
         api_action = Action()
@@ -101,8 +101,8 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
                 for container in containers:
                     # TODO limit length of container_str to fit box
                     container_str += container[0]+": "+container[1]+"\n"
-                time.sleep(1)
                 npyscreen.notify_wait(container_str, title=title)
+                time.sleep(1)
             return
 
         original_containers = Containers()
