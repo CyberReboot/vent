@@ -9,4 +9,4 @@ locally_active = on
 priority = 1,1,1
 
 [docker]
-publish_all_ports = True
+ports = {'15672/tcp': ('0.0.0.0', None)}

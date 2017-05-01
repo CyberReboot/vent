@@ -11,4 +11,4 @@ priority = 10,1
 
 [docker]
 #command = -Des.network.host=0.0.0.0
-publish_all_ports = True
+ports = {'9200/tcp': ('0.0.0.0': None)}
