@@ -47,6 +47,10 @@ def test_clean():
     instance = Action()
     status = instance.clean()
 
+def test_update():
+    """ Test the update function """
+    Action.update()
+
 def test_backup():
     """ Test the backup function """
     Action.backup()

@@ -11,4 +11,5 @@ def test_settings():
 
 def test_file_queue():
     """ Tests simulation of new file """
-    pass
+    images = file_watch.file_queue('/tmp/foo')
+    assert type(images) == list

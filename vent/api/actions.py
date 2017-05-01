@@ -365,7 +365,7 @@ class Action:
            for choice in choices:
                # !! TODO
                items[choice] = ()
-       except Exception as e:
+       except Exception as e: # pragma: no cover
            pass
 
        return items
