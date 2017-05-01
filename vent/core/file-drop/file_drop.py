@@ -39,25 +39,25 @@ class GZHandler(PatternMatchingEventHandler):
                 # check if the file was already queued and ignore
                 time.sleep(15)
                 exists = False
-                print uid, "started", event.src_path
+                print(uid+" started " + event.src_path)
                 r = StrictRedis(host=r_host, port=6379, db=0)
                 jobs = r.keys(pattern="rq:job*")
                 for job in jobs:
-                    print uid, "***"
+                    print(uid+" ***")
                     description = r.hget(job, 'description')
-                    print uid, description
-                    print uid, description.split("file_watch.file_queue('"+hostname+"_")[1][:-2]
-                    print uid, event.src_path
+                    print(uid+" "+description)
+                    print(uid+" "+description.split("file_watch.file_queue('"+hostname+"_")[1][:-2])
+                    print(uid+" "+event.src_path)
                     if description.split("file_watch.file_queue('"+hostname+"_")[1][:-2] == event.src_path:
-                        print uid, "true"
+                        print(uid+" true")
                         exists = True
-                    print uid, "***"
+                    print(uid+" ***")
                 if not exists:
                     # !! TODO this should be a configuration option in the vent.template
-                    print uid, "let's queue it", event.src_path
+                    print(uid+" let's queue it "+event.src_path)
                     # let jobs be queued for up to 30 days
                     result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
-                print uid, "end", event.src_path
+                print(uid+" end "+event.src_path)
         except Exception as e:
             print(str(e))
 

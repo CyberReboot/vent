@@ -4,6 +4,7 @@ import os
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
+from vent.helpers.logs import Logger
 from vent.helpers.meta import Version
 
 class Action:
@@ -13,6 +14,7 @@ class Action:
        self.d_client = self.plugin.d_client
        self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
                                        "vent.cfg")
+       self.logger = Logger(__name__, **kargs)
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
            branch="master", build=True, user=None, pw=None, groups=None,
@@ -214,17 +216,17 @@ class Action:
                        try:
                            # !! TODO check if container exists and start it instead of run
                            container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
-                           print "started", container_tuple[1], "with ID:", str(container_id)
+                           self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
                        except Exception as e:
-                           print "failed to start", container_tuple[1], "because:", str(e)
+                           self.logger.warning("failed to start "+str(container_tuple[1])+" because: "+str(e))
 
        # start the rest of the containers that didn't have any priorities set
        for container in containers_remaining:
            try:
                container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
-               print "started", container, "with ID:", str(container_id)
+               self.logger.info("started "+str(container)+" with ID: "+str(container_id))
            except Exception as e:
-               print "failed to start", container, "because:", str(e)
+               self.logger.warning("failed to start "+str(container)+" because: "+str(e))
 
        return status
 
@@ -261,9 +263,9 @@ class Action:
            try:
                container = self.d_client.containers.get(container_name)
                container.stop()
-               print "stopped", container_name
+               self.logger.info("stopped "+str(container_name))
            except Exception as e:
-               print "failed to stop", container_name, "because:", str(e)
+               self.logger.warning("failed to stop "+str(container_name)+" because: "+str(e))
        return status
 
    def clean(self,
@@ -295,9 +297,9 @@ class Action:
            try:
                container = self.d_client.containers.get(container_name)
                container.remove(force=True)
-               print "cleaned", container_name
+               self.logger.info("cleaned "+str(container_name))
            except Exception as e:
-               print "failed to clean", container_name, "because:", str(e)
+               self.logger.warning("failed to clean "+str(container_name)+" because: "+str(e))
        return status
 
    def build(self,
@@ -313,7 +315,7 @@ class Action:
        status = (True, None)
        sections, template = self.plugin.constraint_options(args, options)
        for section in sections:
-           print "Building", section, "..."
+           self.logger.info("Building "+str(section)+" ...")
            template = self.plugin.builder(template, sections[section]['path'],
                                         sections[section]['image_name'],
                                         section, build=True, branch=branch,
