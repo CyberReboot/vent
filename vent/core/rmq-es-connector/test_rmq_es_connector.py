@@ -37,6 +37,7 @@ def test_rmq_es_connector_callback():
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
     rmq_es.connections(True)
     rmq_es.callback(None, method, None, "[]")
+    rmq_es.callback(None, method, None, "asdf * '[]'")
 
 def test_rmq_es_connector_start():
     """ tests the start function """
