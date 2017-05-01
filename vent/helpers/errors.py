@@ -3,5 +3,5 @@ def ErrorHandler(function):
         try:
             return function(*args, **kwargs)
         except Exception as e: # pragma: no cover
-            print(e)
+            pass
     return wrapper
