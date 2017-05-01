@@ -18,6 +18,7 @@ class AddForm(npyscreen.ActionForm):
     """ For for adding a new repo """
     build_values = ['True', 'False']
     def create(self):
+        """ Create widgets for AddForm """
         self.repo = self.add(npyscreen.TitleText, name='Repository',
                              value='https://github.com/cyberreboot/vent-plugins')
         self.build = self.add(npyscreen.TitleCombo, value=0,
@@ -41,12 +42,14 @@ class AddForm(npyscreen.ActionForm):
             the thread is finished
             """
             thr.start()
+            tool_str = "Cloning repository..."
+            npyscreen.notify_wait(tool_str, title=title)
             while thr.is_alive():
                 tools = diff(Tools(), original_tools)
-                tool_str = "Cloning repository..."
+                tool_str = ""
                 for tool in tools:
                     # TODO limit length of tool_str to fit box
-                    tool_str = "Adding: "+tool+"\n"+tool_str
+                    tool_str = "Added: "+tool+"\n"+tool_str
                 npyscreen.notify_wait(tool_str, title=title)
                 time.sleep(1)
             return
