@@ -1,4 +1,5 @@
 import ast
+
 import docker
 import json
 import os
@@ -12,7 +13,9 @@ class Action:
    def __init__(self, **kargs):
        self.plugin = Plugin(**kargs)
        self.d_client = docker.from_env()
+
        self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir, "vent.cfg")
+
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
            branch="master", build=True, user=None, pw=None, groups=None,
@@ -333,8 +336,16 @@ class Action:
        # restart, shutdown, upgrade, etc.
        return
 
-   @staticmethod
-   def logs():
+   def logs(self, grep_list={"core","vent-management"}):
+       # generically filter logs stored in log containers
+       containers = self.d_client.containers().list()
+       cores = [c for c in containers if ("core" in c.name or "vent-management" in c.name)]
+      for expression in grep_list:
+           for core in cores:
+               # 'logs' stores each line which contains the expression
+               logs  = [log for log in core.logs().split("\n") if expression in log]
+               for log in logs:
+                   print log
        return
 
    @staticmethod
