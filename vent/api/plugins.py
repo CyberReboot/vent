@@ -229,8 +229,8 @@ class Plugin:
     def _build_manifest(self, matches):
         """ Builds and writes the manifest for the tools being added """
         # !! TODO check for pre-existing that conflict with request and disable and/or remove image
-        template = Template(template=self.manifest)
         for match in matches:
+            template = Template(template=self.manifest)
             # !! TODO check for special settings here first for the specific match
             self.version = match[1]
             response = self.checkout()
@@ -306,8 +306,10 @@ class Plugin:
                             template.set_option(section, "groups", groups[1])
                 template = self._build_image(template, match_path, image_name, section)
 
-        # write out configuration to the manifest file and reset to repo directory
-        template.write_config()
+            # write out configuration to the manifest file
+            template.write_config()
+
+        # reset to repo directory
         os.chdir(self.path)
         return
 

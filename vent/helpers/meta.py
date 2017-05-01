@@ -3,6 +3,9 @@ import os
 import pkg_resources
 import platform
 
+from vent.api.templates import Template
+from vent.helpers.paths import PathDirs
+
 def Version():
     """ Get Vent version """
     version = ''
@@ -82,8 +85,10 @@ def Images(vent=True):
 
     return images
 
-def Tools():
+def Tools(**kargs):
     """ Get tools that exist in the manifest """
-    tools = []
-    # !! TODO
-    return tools
+    path_dirs = PathDirs(**kargs)
+    manifest = os.path.join(path_dirs.meta_dir, "plugin_manifest.cfg")
+    template = Template(template=manifest)
+    tools = template.sections()
+    return tools[1]

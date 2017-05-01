@@ -1,5 +1,8 @@
+from vent.helpers.meta import Containers
 from vent.helpers.meta import Docker
+from vent.helpers.meta import Images
 from vent.helpers.meta import System
+from vent.helpers.meta import Tools
 from vent.helpers.meta import Version
 
 def test_version():
@@ -17,3 +20,18 @@ def test_docker():
     docker = Docker()
     assert type(docker) == dict
     assert type(docker['server']) == dict
+
+def test_containers():
+    """ Test the containers function """
+    containers = Containers()
+    assert type(containers) == list
+
+def test_images():
+    """ Test the images function """
+    images = Images()
+    assert type(images) == list
+
+def test_tools():
+    """ Test the tools function """
+    tools = Tools()
+    assert type(tools) == list

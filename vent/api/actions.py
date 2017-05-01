@@ -12,7 +12,8 @@ class Action:
    def __init__(self, **kargs):
        self.plugin = Plugin(**kargs)
        self.d_client = docker.from_env()
-       self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir, "vent.cfg")
+       self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
+                                       "vent.cfg")
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
            branch="master", build=True, user=None, pw=None, groups=None,
@@ -34,9 +35,28 @@ class Action:
                                 disable_old=disable_old)
        return status
 
-   @staticmethod
-   def remove():
-       return
+   def remove(self, repo=None, namespace=None, name=None, groups=None,
+              enabled="yes", branch="master", version="HEAD", built="yes"):
+       """ Remove tools or a repo """
+       args = locals()
+       options = ['name',
+                  'namespace',
+                  'groups',
+                  'enabled',
+                  'branch',
+                  'built',
+                  'version']
+       status = (True, None)
+
+       if not repo and not name and not groups and not namespace:
+           # at least of these needs to be specified
+           status = (False, None)
+       else:
+           # !! TODO
+           # !! TODO if repo, remove the git clone too
+           pass
+
+       return status
 
    def start(self,
              repo=None,
@@ -311,11 +331,6 @@ class Action:
        return
 
    @staticmethod
-   def show():
-       # repos, core, tools, images, built, running, etc.
-       return
-
-   @staticmethod
    def configure():
        # tools, core, etc.
        return
@@ -341,7 +356,16 @@ class Action:
    def help():
        return
 
-   @staticmethod
-   def inventory():
+   def inventory(self, choices=None):
+       # repos, core, tools, images, built, running, etc.
        # plugins that have been added, built, etc.
-       return
+       items = {}
+
+       try:
+           for choice in choices:
+               # !! TODO
+               items[choice] = ()
+       except Exception as e:
+           pass
+
+       return items
