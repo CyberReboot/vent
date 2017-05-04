@@ -475,7 +475,7 @@ class Plugin:
             status = subprocess.check_output(shlex.split("git reset --hard " + self.version), stderr=subprocess.STDOUT)
             response = (True, status)
         except Exception as e: # pragma: no cover
-            response = (False, str(e))
+            response = (False, os.getcwd()+str(e))
         return response
 
     @staticmethod
