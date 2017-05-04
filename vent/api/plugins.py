@@ -63,7 +63,10 @@ class Plugin:
         branches = list(set(branches))
         for branch in branches:
             junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT)
-        os.chdir(cwd)
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
 
         return (True, branches)
 
@@ -81,7 +84,10 @@ class Plugin:
             branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT)
             branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
             commits.append((branch, branch_output))
-        os.chdir(cwd)
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
 
         return commits
 
@@ -98,7 +104,11 @@ class Plugin:
         response = self.checkout()
         if response[0]:
             tools = self._available_tools()
-        os.chdir(cwd)
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
+
         return tools
 
     def clone(self, repo, user=None, pw=None):
@@ -231,7 +241,10 @@ class Plugin:
         response = self._build_tools(status_code)
 
         # set back to original path
-        os.chdir(cwd)
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
         return response
 
     @ErrorHandler
@@ -250,7 +263,10 @@ class Plugin:
         cwd = os.getcwd()
         os.chdir(match_path)
         template = self._build_image(template, match_path, image_name, section)
-        os.chdir(cwd)
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
         return template
 
     def _build_tools(self, status):
