@@ -137,15 +137,15 @@ class Plugin:
         if not response[0]:
             return -1, cwd
 
+        # set to new repo path
+        os.chdir(self.path)
+
         if response[0] and response[1] == 'exists':
             try:
                 status = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT)
                 return 0, cwd
             except Exception as e:
                 return -1, cwd
-
-        # set to new repo path
-        os.chdir(self.path)
 
         # ensure cloning still works even if ssl is broken...probably should be improved
         try:
