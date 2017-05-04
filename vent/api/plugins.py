@@ -133,7 +133,7 @@ class Plugin:
 
         # check if the directory exists, if so return now
         response = self.path_dirs.ensure_dir(self.path)
-        if not response[0]
+        if not response[0]:
             return response
 
         if response[0] and response[1] == 'exists':
