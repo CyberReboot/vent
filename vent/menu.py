@@ -18,13 +18,14 @@ from vent.helpers.meta import Version
 
 repo_value = None
 
-def get_values(self):
+def repo_values(self):
+    """ Set the appropriate repo dir and get the branches and commits of it """
     global repo_value
     branches = []
     commits = {}
     plugin = Plugin()
-    branches = plugin.get_branches(repo_value)[1]
-    c = plugin.get_commits(repo_value)
+    branches = plugin.repo_branches(repo_value)[1]
+    c = plugin.repo_commits(repo_value)
     for commit in c:
         commits[commit[0]] = commit[1]
     return branches, commits
@@ -65,8 +66,9 @@ class AddOptionsForm(npyscreen.ActionForm):
         self.add(npyscreen.TitleText, name='Branches:', editable=False)
 
     def while_waiting(self):
+        """ Update with current branches and commits """
         if not self.branches or not self.commits:
-            self.branches, self.commits = get_values(self)
+            self.branches, self.commits = repo_values(self)
             i = 3
             for branch in self.branches:
                 self.branch_dict[branch] = self.add(npyscreen.CheckBox,
@@ -78,6 +80,9 @@ class AddOptionsForm(npyscreen.ActionForm):
                 i += 1
 
     def on_ok(self):
+        """
+        Take the branch, commit, and tool selection and add them as plugins
+        """
         global repo_value
         for branch in self.branch_dict:
             if self.branch_dict[branch].value:

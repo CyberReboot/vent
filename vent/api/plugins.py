@@ -19,7 +19,7 @@ class Plugin:
         self.d_client = docker.from_env()
         self.logger = Logger(__name__, **kargs)
 
-    def set_path(self, repo):
+    def apply_path(self, repo):
         """ Set path to where the repo is and return original path """
         # rewrite repo for consistency
         if repo.endswith(".git"):
@@ -39,11 +39,11 @@ class Plugin:
 
         return (True, cwd)
 
-    def get_branches(self, repo):
+    def repo_branches(self, repo):
         """ Get the branches of a repository """
         branches = []
 
-        cwd = self.set_path(repo)
+        cwd = self.apply_path(repo)
         if cwd[0]:
             cwd = cwd[1]
         else:
@@ -67,12 +67,12 @@ class Plugin:
 
         return (True, branches)
 
-    def get_commits(self, repo):
+    def repo_commits(self, repo):
         """ Get the commit IDs for all of the branches of a repository """
         commits = []
 
-        branches = self.get_branches(repo)
-        cwd = self.set_path(repo)
+        branches = self.repo_branches(repo)
+        cwd = self.apply_path(repo)
         if cwd[0]:
             cwd = cwd[1]
         else:
@@ -85,10 +85,10 @@ class Plugin:
 
         return commits
 
-    def get_tools(self, repo, branch, version):
+    def repo_tools(self, repo, branch, version):
         """ Get available tools for a repository branch at a version """
         tools = []
-        cwd = self.set_path(repo)
+        cwd = self.apply_path(repo)
         if cwd[0]:
             cwd = cwd[1]
         else:
