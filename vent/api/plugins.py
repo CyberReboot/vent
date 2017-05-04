@@ -138,7 +138,11 @@ class Plugin:
             return -1, cwd
 
         if response[0] and response[1] == 'exists':
-            return subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT), cwd
+            try:
+                status = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT)
+                return 0, cwd
+            except Exception as e:
+                return -1, cwd
 
         # set to new repo path
         os.chdir(self.path)
