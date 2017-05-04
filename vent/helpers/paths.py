@@ -21,7 +21,7 @@ class PathDirs:
             os.makedirs(path)
         except OSError as e:
             if e.errno == errno.EEXIST and os.path.isdir(path):
-                return (False, "exists")
+                return (True, "exists")
             else:
                 return (False, e)
         return (True, path)
