@@ -62,7 +62,7 @@ def test_versions():
     """ Test the versions function """
     instance = Plugin(base_dir=os.getcwd()+'/', meta_dir=os.getcwd()+'/.vent')
     status = instance.add('https://github.com/cyberreboot/vent', build=False, branch='experimental')
-    assert status[0] == True
+    assert status == True
     versions = instance.versions('elasticsearch', branch='experimental')
     assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', ['HEAD'])]
 

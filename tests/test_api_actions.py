@@ -35,7 +35,7 @@ def test_start():
                           branch='experimental',
                           tools=[('kibana','')],
                           groups='foo')
-    assert status[0] == True
+    assert status == True
     status = instance.start(name='kibana', branch='experimental')
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent',
