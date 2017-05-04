@@ -135,7 +135,7 @@ class Plugin:
         response = self.path_dirs.ensure_dir(self.path)
         if response[0] and response[1] == 'exists':
             return subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT), cwd
-        elif not response[1]:
+        elif not response[0]:
             return (False, 'not a git repo')
 
         # set to new repo path
