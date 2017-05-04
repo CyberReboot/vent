@@ -7,6 +7,7 @@ import subprocess
 
 from vent.api.templates import Template
 from vent.helpers.errors import ErrorHandler
+from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 
 class Plugin:
@@ -16,6 +17,155 @@ class Plugin:
         self.manifest = os.path.join(self.path_dirs.meta_dir,
                                      "plugin_manifest.cfg")
         self.d_client = docker.from_env()
+        self.logger = Logger(__name__, **kargs)
+
+    def apply_path(self, repo):
+        """ Set path to where the repo is and return original path """
+        # rewrite repo for consistency
+        if repo.endswith(".git"):
+            repo = repo.split(".git")[0]
+
+        # get org and repo name and path repo will be cloned to
+        try:
+            org, name = repo.split("/")[-2:]
+            self.path = os.path.join(self.path_dirs.plugins_dir, org, name)
+        except Exception as e:
+            return (False, str(e))
+
+        # save current path
+        cwd = os.getcwd()
+        # set to new repo path
+        os.chdir(self.path)
+
+        return (True, cwd)
+
+    def repo_branches(self, repo):
+        """ Get the branches of a repository """
+        branches = []
+
+        cwd = self.apply_path(repo)
+        if cwd[0]:
+            cwd = cwd[1]
+        else:
+            return branches
+        junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT)
+        branch_output = subprocess.check_output(shlex.split("git branch -a"), stderr=subprocess.STDOUT)
+        branch_output = branch_output.split("\n")
+        for branch in branch_output:
+            b = branch.strip()
+            if b.startswith('*'):
+                b = b[2:]
+            if "/" in b:
+                branches.append(b.rsplit('/', 1)[1])
+            elif b:
+                branches.append(b)
+
+        branches = list(set(branches))
+        for branch in branches:
+            junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT)
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
+
+        return (True, branches)
+
+    def repo_commits(self, repo):
+        """ Get the commit IDs for all of the branches of a repository """
+        commits = []
+
+        branches = self.repo_branches(repo)
+        cwd = self.apply_path(repo)
+        if cwd[0]:
+            cwd = cwd[1]
+        else:
+            return commits
+        for branch in branches[1]:
+            branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT)
+            branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
+            commits.append((branch, branch_output))
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
+
+        return commits
+
+    def repo_tools(self, repo, branch, version):
+        """ Get available tools for a repository branch at a version """
+        tools = []
+        cwd = self.apply_path(repo)
+        if cwd[0]:
+            cwd = cwd[1]
+        else:
+            return tools
+        self.branch = branch
+        self.version = version
+        response = self.checkout()
+        if response[0]:
+            tools = self._available_tools()
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
+
+        return tools
+
+    def clone(self, repo, user=None, pw=None):
+        """ Clone the repository """
+        self.org = None
+        self.name = None
+        self.repo = repo
+
+        # save current path
+        cwd = os.getcwd()
+
+        # rewrite repo for consistency
+        if self.repo.endswith(".git"):
+            self.repo = self.repo.split(".git")[0]
+
+        # get org and repo name and path repo will be cloned to
+        try:
+            self.org, self.name = self.repo.split("/")[-2:]
+            self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
+        except Exception as e:
+            return -1, cwd
+
+
+        # check if the directory exists, if so return now
+        response = self.path_dirs.ensure_dir(self.path)
+        if not response[0]:
+            return -1, cwd
+
+        # set to new repo path
+        os.chdir(self.path)
+
+        if response[0] and response[1] == 'exists':
+            try:
+                status = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT)
+                return 0, cwd
+            except Exception as e:
+                return -1, cwd
+
+        # ensure cloning still works even if ssl is broken...probably should be improved
+        try:
+            status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT)
+        except Exception as e: # pragma: no cover
+            return -1, cwd
+
+        # check if user and pw were supplied, typically for private repos
+        if user and pw:
+            # only https is supported when using user/pw
+            repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
+
+        # clone repo and build tools
+        try:
+            status = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT)
+            status_code = 0
+        except subprocess.CalledProcessError as e:
+            status_code = e.returncode
+
+        return status_code, cwd
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
@@ -81,7 +231,6 @@ class Plugin:
             overrides = []
         if not limit_groups:
             limit_groups = []
-        self.repo = repo
         self.tools = tools
         self.overrides = overrides
         self.version = version
@@ -93,52 +242,17 @@ class Plugin:
         self.remove_old = remove_old
         self.disable_old = disable_old
         self.limit_groups = limit_groups
-        self.org = None
-        self.name = None
         response = (True, None)
 
-        # rewrite repo for consistency
-        if self.repo.endswith(".git"):
-            self.repo = self.repo.split(".git")[0]
-
-        # get org and repo name and path repo will be cloned to
-        try:
-            self.org, self.name = self.repo.split("/")[-2:]
-            self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
-        except Exception as e:
-            return (False, str(e))
-
-        # make sure the path can be created, otherwise exit function now
-        response = self.path_dirs.ensure_dir(self.path)
-        if not response[0]:
-            return response
-
-        # save current path, set to new repo path
-        cwd = os.getcwd()
-        os.chdir(self.path)
-
-        # ensure cloning still works even if ssl is broken...probably should be improved
-        try:
-            status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT)
-        except Exception as e: # pragma: no cover
-            pass
-
-        # check if user and pw were supplied, typically for private repos
-        if user and pw:
-            # only https is supported when using user/pw
-            self.repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
-
-        # clone repo and build tools
-        try:
-            status = subprocess.check_output(shlex.split("git clone --recursive " + self.repo + " ."), stderr=subprocess.STDOUT)
-            status_code = 0
-        except subprocess.CalledProcessError as e:
-            status_code = e.returncode
+        status_code, cwd = self.clone(repo, user=user, pw=pw)
 
         response = self._build_tools(status_code)
 
         # set back to original path
-        os.chdir(cwd)
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
         return response
 
     @ErrorHandler
@@ -157,7 +271,10 @@ class Plugin:
         cwd = os.getcwd()
         os.chdir(match_path)
         template = self._build_image(template, match_path, image_name, section)
-        os.chdir(cwd)
+        try:
+            os.chdir(cwd)
+        except Exception as e:
+            pass
         return template
 
     def _build_tools(self, status):
@@ -358,7 +475,7 @@ class Plugin:
             status = subprocess.check_output(shlex.split("git reset --hard " + self.version), stderr=subprocess.STDOUT)
             response = (True, status)
         except Exception as e: # pragma: no cover
-            response = (False, str(e))
+            response = (False, os.getcwd()+str(e))
         return response
 
     @staticmethod
