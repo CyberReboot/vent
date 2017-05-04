@@ -133,10 +133,11 @@ class Plugin:
 
         # check if the directory exists, if so return now
         response = self.path_dirs.ensure_dir(self.path)
+        if not response[0]
+            return response
+
         if response[0] and response[1] == 'exists':
             return subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT), cwd
-        elif not response[0]:
-            return (False, 'not a git repo')
 
         # set to new repo path
         os.chdir(self.path)
@@ -239,6 +240,9 @@ class Plugin:
         response = (True, None)
 
         status_code, cwd = self.clone(repo, user=user, pw=pw)
+
+        if status_code[0] == False:
+            return status_code
 
         response = self._build_tools(status_code)
 
