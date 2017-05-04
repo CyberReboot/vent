@@ -117,6 +117,9 @@ class Plugin:
         self.name = None
         self.repo = repo
 
+        # save current path
+        cwd = os.getcwd()
+
         # rewrite repo for consistency
         if self.repo.endswith(".git"):
             self.repo = self.repo.split(".git")[0]
@@ -126,15 +129,13 @@ class Plugin:
             self.org, self.name = self.repo.split("/")[-2:]
             self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
         except Exception as e:
-            return (False, str(e))
+            return -1, cwd
 
-        # save current path
-        cwd = os.getcwd()
 
         # check if the directory exists, if so return now
         response = self.path_dirs.ensure_dir(self.path)
         if not response[0]:
-            return response
+            return -1, cwd
 
         if response[0] and response[1] == 'exists':
             return subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT), cwd
@@ -146,7 +147,7 @@ class Plugin:
         try:
             status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT)
         except Exception as e: # pragma: no cover
-            return (False, str(e))
+            return -1, cwd
 
         # check if user and pw were supplied, typically for private repos
         if user and pw:
@@ -240,9 +241,6 @@ class Plugin:
         response = (True, None)
 
         status_code, cwd = self.clone(repo, user=user, pw=pw)
-
-        if status_code[0] == False:
-            return status_code
 
         response = self._build_tools(status_code)
 
