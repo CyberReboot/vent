@@ -57,9 +57,15 @@ class ServicesForm(npyscreen.FormBaseNew):
         # Tell the VentApp object to change forms.
         self.parentApp.change_form(change_to)
 
+class ChooseToolsForm(npyscreen.ActionForm):
+    """ For picking which tools to add """
+    # !! TODO
+    pass
+
 class AddOptionsForm(npyscreen.ActionForm):
     """ For specifying options when adding a repo """
     branch_dict = {}
+    commit_tc = {}
     branches = []
     commits = {}
     def create(self):
@@ -74,9 +80,9 @@ class AddOptionsForm(npyscreen.ActionForm):
                 self.branch_dict[branch] = self.add(npyscreen.CheckBox,
                                                     name=branch, rely=i,
                                                     relx=5, max_width=35)
-                self.commit_tc = self.add(npyscreen.TitleCombo, value=0, rely=i,
-                                          relx=40, max_width=30, name='Commit:',
-                                          values=self.commits[branch])
+                self.commit_tc[branch] = self.add(npyscreen.TitleCombo, value=0, rely=i,
+                                                  relx=40, max_width=30, name='Commit:',
+                                                  values=self.commits[branch])
                 i += 1
 
     def on_ok(self):
@@ -84,10 +90,42 @@ class AddOptionsForm(npyscreen.ActionForm):
         Take the branch, commit, and tool selection and add them as plugins
         """
         global repo_value
+
+        def diff(first, second):
+            """
+            Get the elements that exist in the first list and not in the second
+            """
+            second = set(second)
+            return [item for item in first if item not in second]
+
+        def popup(original_tools, thr, title):
+            """
+            Start the thread and display a popup of the tools being added until
+            the thread is finished
+            """
+            thr.start()
+            tool_str = "Adding repository..."
+            npyscreen.notify_wait(tool_str, title=title)
+            while thr.is_alive():
+                tools = diff(Tools(), original_tools)
+                tool_str = ""
+                for tool in tools:
+                    # TODO limit length of tool_str to fit box
+                    tool_str = "Added: "+tool+"\n"+tool_str
+                npyscreen.notify_wait(tool_str, title=title)
+                time.sleep(1)
+            return
+
         for branch in self.branch_dict:
             if self.branch_dict[branch].value:
-                # !! TODO process checkboxes
-                pass
+                # process checkboxes
+                api_action = Action()
+                original_tools = Tools()
+                thr = threading.Thread(target=api_action.add, args=(),
+                                       kwargs={'repo':repo_value,
+                                               'branch':branch,
+                                               'version':self.commit_tc[branch].values[self.commit_tc[branch].value]})
+                popup(original_tools, thr, 'Please wait, adding '+branch+' branch...')
         self.parentApp.change_form("MAIN")
         npyscreen.notify_confirm("Done adding repository: "+repo_value,
                                  title='Added Repository')
