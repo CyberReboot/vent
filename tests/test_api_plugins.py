@@ -9,7 +9,7 @@ def test_add():
     status = instance.add('https://github.com/cyberreboot/vent', build=False)
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent.git', build=True)
-    assert status[0] == True
+    assert status == True
     bad_instance = Plugin()
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
     assert status[0] == True
