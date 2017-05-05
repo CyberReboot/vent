@@ -55,7 +55,7 @@ _Note - If you already have `docker-py` installed on your machine, you may need 
 ### running
 
 ```
-vent-cli
+vent
 ```
 
 getting started

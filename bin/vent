@@ -1,14 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env python
 
-echo "Assumes you have docker-machine installed and vent is connected to it."
-if [ "$#" -ne 1 ]; then
-    HOST="vent"
-else
-    HOST=$1
-fi
+from vent.menu import VentApp
 
-echo "Note: this does not copy files recursively..."
-for file in `ls *` ; do
-    docker-machine scp $file $HOST:/tmp/.${file}.tmp
-    docker-machine ssh $HOST "mv /tmp/.${file}.tmp /files/$file"
-done
+app = VentApp()
+app.run()
