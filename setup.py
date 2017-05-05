@@ -8,7 +8,7 @@ setup(
               'vent.core.rmq-es-connector', 'vent.helpers', 'vent.api'],
     data_files=[('vent', ['vent/help'])],
     install_requires=['docker', 'npyscreen'],
-    scripts=['bin/vent-cli', 'bin/vent', 'bin/vent-generic'],
+    scripts=['bin/vent'],
     license='Apache License 2.0',
     author='arpit',
     author_email='',
