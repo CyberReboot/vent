@@ -5,6 +5,9 @@ from vent.menu import AddForm
 from vent.menu import HelpForm
 from vent.menu import VentApp
 from vent.menu import VentForm
+from vent.menu import ServicesForm
+from vent.menu import ChooseToolsForm
+from vent.menu import AddOptionsForm
 
 def test_menu():
     """ Test the menu """

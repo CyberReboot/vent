@@ -1,8 +1,12 @@
 from vent.helpers.meta import Containers
+from vent.helpers.meta import Core
 from vent.helpers.meta import Docker
 from vent.helpers.meta import Images
+from vent.helpers.meta import Services
 from vent.helpers.meta import System
+from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Tools
+from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
 
 def test_version():
@@ -37,3 +41,25 @@ def test_tools():
     """ Test the tools function """
     tools = Tools()
     assert type(tools) == list
+
+def test_services():
+    """ Test the services function """
+    services = Services()
+    assert type(services) == list
+    services = Services(vent=False)
+    assert type(services) == list
+
+def test_core():
+    """ Test the core function """
+    core = Core()
+    assert type(core) == dict
+
+def test_timestamp():
+    """ Test the timestamp function """
+    timestamp = Timestamp()
+    assert type(timestamp) == str
+
+def test_uptime():
+    """ Test the uptime function """
+    uptime = Uptime()
+    assert type(uptime) == str
