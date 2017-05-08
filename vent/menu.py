@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import ast
-import datetime
-import docker
 import npyscreen
-import subprocess
 import threading
 import time
 
@@ -13,7 +10,9 @@ from vent.api.actions import Action
 from vent.api.plugins import Plugin
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Services
+from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Tools
+from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
 
 repo_value = {}
@@ -245,16 +244,15 @@ class AddForm(npyscreen.ActionForm):
 
 class VentForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
-    d_client = docker.from_env()
     api_action = Action()
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
-        self.addfield.value = str(datetime.datetime.now())+" UTC"
+        self.addfield.value = Timestamp()
         self.addfield.display()
-        self.addfield2.value = str(subprocess.check_output(["uptime"]))[1:]
+        self.addfield2.value = Uptime()
         self.addfield2.display()
-        self.addfield3.value = str(len(self.d_client.containers.list()))+" running"
+        self.addfield3.value = str(len(Containers()))+" running"
         self.addfield3.display()
 
     def perform_action(self, action):
@@ -317,21 +315,21 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         """ Override method for creating FormBaseNewWithMenu form """
         self.add_handlers({"^T": self.change_forms, "^S": self.services_form})
         self.addfield = self.add(npyscreen.TitleFixedText, name='Date:',
-                                 value=str(datetime.datetime.now())+" UTC")
+                                 labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
-                                  value=str(subprocess.check_output(["uptime"]))[1:])
+                                  labelColor='DEFAULT', value=Uptime())
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
-                                  value=str(len(self.d_client.containers.list()))+" running")
-        self.addfield4 = self.add(npyscreen.TitleFixedText,
-                                  name='Core Tools:', labelColor='DANGER', value="Not built")
-        self.addfield5 = self.add(npyscreen.TitleFixedText, name='Jobs:',
-                                  value="")
-        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Status:',
+                                  labelColor='DEFAULT',
+                                  value=str(len(Containers()))+" running")
+        self.addfield4 = self.add(npyscreen.TitleFixedText, name='Status:',
                                   value="Healthy")
-        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Management:',
-                                  value="Running")
-        self.addfield8 = self.add(npyscreen.TitleFixedText, name='Clustered:',
-                                  value="No")
+        self.addfield5 = self.add(npyscreen.TitleFixedText,
+                                  name='Core Tools:', labelColor='DANGER',
+                                  value="Not built")
+        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Clustered:',
+                                  value="No", labelColor='DEFAULT')
+        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Jobs:',
+                                  value="None", labelColor='DEFAULT')
         self.multifield1 =  self.add(npyscreen.MultiLineEdit, max_height=22,
                                      editable=False, value = """
 

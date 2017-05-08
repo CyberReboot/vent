@@ -1,7 +1,9 @@
+import datetime
 import docker
 import os
 import pkg_resources
 import platform
+import subprocess
 
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
@@ -119,3 +121,24 @@ def Services(vent=True):
     except Exception as e: # pragma: no cover
         pass
     return services
+
+def Core():
+    """
+    Get the normal core tools, and the currently installed/built/running ones,
+    including custom core services
+    """
+    core = {'built':[], 'running':[], 'installed':[], 'normal':[]}
+    # !! TODO
+    # get tools from vent repo at master that are in the core group and put into normal
+    # check the manifest for installed with group core
+    # check docker images for built with group core
+    # check docker containers for running with group core
+    return core
+
+def Timestamp():
+    """ Get the current datetime in UTC """
+    return str(datetime.datetime.now())+" UTC"
+
+def Uptime():
+    """ Get the current uptime information """
+    return str(subprocess.check_output(["uptime"]))[1:]
