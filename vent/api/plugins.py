@@ -102,6 +102,7 @@ class Plugin:
         self.branch = branch
         self.version = version
         response = self.checkout()
+        self.logger.info(str(response))
         if response[0]:
             tools = self._available_tools()
         try:
