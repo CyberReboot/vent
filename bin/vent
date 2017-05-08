@@ -2,5 +2,7 @@
 
 from vent.menu import VentApp
 
-app = VentApp()
-app.run()
+# !! TODO should actually have a way to quit
+while True:
+    app = VentApp()
+    app.run()
