@@ -19,12 +19,12 @@ def test_menu():
     except Exception as e:
         pass
 
-def test_repo_tools:
+def test_repo_tools():
     a = VentApp()
     tools = repo_tools(a, 'master')
     assert type(tools) == list
 
-def test_repo_values:
+def test_repo_values():
     a = VentApp()
     branches, commits = repo_values(a)
     assert type(branches) == list
