@@ -17,27 +17,6 @@ from vent.helpers.meta import Version
 
 repo_value = {}
 
-def repo_tools(self, branch):
-    """ Set the appropriate repo dir and get the tools available of it """
-    tools = []
-    plugin = Plugin()
-    t = plugin.repo_tools(repo_value['repo'], branch, repo_value['versions'][branch])
-    for tool in t:
-        tools.append(tool[0])
-    return tools
-
-def repo_values(self):
-    """ Set the appropriate repo dir and get the branches and commits of it """
-    global repo_value
-    branches = []
-    commits = {}
-    plugin = Plugin()
-    branches = plugin.repo_branches(repo_value['repo'])[1]
-    c = plugin.repo_commits(repo_value['repo'])
-    for commit in c:
-        commits[commit[0]] = commit[1]
-    return branches, commits
-
 class ServicesForm(npyscreen.FormBaseNew):
     """ Services form for the Vent CLI """
     # !! TODO need to navigate key handlers
@@ -69,6 +48,15 @@ class ChooseToolsForm(npyscreen.ActionForm):
     """ For picking which tools to add """
     tools_tc = {}
     triggered = 0
+    def repo_tools(self, branch):
+        """ Set the appropriate repo dir and get the tools available of it """
+        tools = []
+        plugin = Plugin()
+        t = plugin.repo_tools(repo_value['repo'], branch, repo_value['versions'][branch])
+        for tool in t:
+            tools.append(tool[0])
+        return tools
+
     def create(self):
         self.add(npyscreen.TitleText, name='Select which tools to add from each branch selected:', editable=False)
 
@@ -81,7 +69,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
             for branch in repo_value['versions']:
                 self.tools_tc[branch] = {}
                 self.add(npyscreen.TitleText, name='Branch: '+branch, editable=False, rely=i, relx=5, max_width=25)
-                tools = repo_tools(self, branch)
+                tools = self.repo_tools(branch)
                 i += 1
                 for tool in tools:
                     value = True
@@ -161,13 +149,25 @@ class AddOptionsForm(npyscreen.ActionForm):
     build_tc = {}
     branches = []
     commits = {}
+    def repo_values(self):
+        """ Set the appropriate repo dir and get the branches and commits of it """
+        global repo_value
+        branches = []
+        commits = {}
+        plugin = Plugin()
+        branches = plugin.repo_branches(repo_value['repo'])[1]
+        c = plugin.repo_commits(repo_value['repo'])
+        for commit in c:
+            commits[commit[0]] = commit[1]
+        return branches, commits
+
     def create(self):
         self.add(npyscreen.TitleText, name='Branches:', editable=False)
 
     def while_waiting(self):
         """ Update with current branches and commits """
         if not self.branches or not self.commits:
-            self.branches, self.commits = repo_values(self)
+            self.branches, self.commits = self.repo_values()
             i = 3
             for branch in self.branches:
                 self.branch_cb[branch] = self.add(npyscreen.CheckBox,
