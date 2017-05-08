@@ -24,13 +24,3 @@ def test_del_option():
     """ Test the del_option function """
     instance = Template()
     instance.del_option('foo', 'bar')
-
-def test_rename_section():
-    """ Test the rename_section function """
-    instance = Template()
-    instance.rename_section('foo', 'bar')
-
-def test_move_option():
-    """ Test the move_option function """
-    instance = Template()
-    instance.move_option('foo', 'bar', 'baz')

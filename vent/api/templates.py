@@ -116,45 +116,6 @@ class Template:
         return
 
     @ErrorHandler
-    def rename_section(self, original, new):
-        """
-        Renames a section by transferring all option-value pairs to a new
-        section
-        """
-        if self.config.has_section(original):
-            if not self.config.has_section(new):
-                values = self.section(original)[1]
-                self.del_section(original)
-                self.add_section(new)
-                for value in values:
-                    self.set_option(new, value[0], value[1])
-                return (True, self.config.sections())
-            return (False, "Section: " + new + " already exists")
-        return (False, "Section: " + original + " does not exist")
-
-    @ErrorHandler
-    def move_option(self, source, destination, option, overwrite=False):
-        """ Moves an option from one section to another """
-        if self.config.has_section(source):
-            if self.config.has_section(destination):
-                if self.config.has_option(source, option):
-                    # check that option does not exist at destination
-                    if not self.config.has_option(destination, option):
-                        self.set_option(destination, option, self.config.get(source, option))
-                        self.del_option(source, option)
-                    else:
-                        # only overwrite if True
-                        if overwrite:
-                            self.set_option(destination, option, self.config.get(source, option))
-                            self.del_option(source, option)
-                        else:
-                            return (False, "Option: " + option + " already exists in " + destination + ". Did you want to overwrite?")
-                    return (True, self.config.options(destination))
-                return (False, "Option: " + option + " does not exist in " + source)
-            return (False, "Section: " + destination + " does not exist")
-        return (False, "Section: " + source + " does not exist")
-
-    @ErrorHandler
     def constrained_sections(self, constraints=None, options=None):
         """
         Takes a dictionary of option/values (constraints) that must be present
