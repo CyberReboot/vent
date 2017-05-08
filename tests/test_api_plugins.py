@@ -89,3 +89,30 @@ def test_disable():
     instance = Plugin()
     status = instance.disable('elasticsearch', branch='experimental')
     assert status[0] == True
+
+def test_apply_path():
+    """ Test the apply_path function """
+    instance = Plugin()
+    status = instance.apply_path('https://github.com/cyberreboot/vent')
+    assert status[0] == True
+    status = instance.apply_path('https://github.com/cyberreboot/vent.git')
+    assert status[0] == True
+
+def test_repo_branches():
+    """ Test the repo_branches function """
+    instance = Plugin()
+    status = instance.repo_branches('https://github.com/cyberreboot/vent')
+    assert status[0] == True
+    assert type(status[1]) == list
+
+def test_repo_commits():
+    """ Test the repo_commits function """
+    instance = Plugin()
+    commits = instance.repo_commits('https://github.com/cyberreboot/vent')
+    assert type(commits) == list
+
+def test_repo_tools():
+    """ Test the repo_tools function """
+    instance = Plugin()
+    tools = instance.repo_tools('https://github.com/cyberreboot/vent', 'experimental', 'HEAD')
+    assert type(tools) == list
