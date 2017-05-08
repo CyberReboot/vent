@@ -270,6 +270,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
             until the thread is finished
             """
             thr.start()
+            container_str = ""
             while thr.is_alive():
                 containers = diff(Containers(), original_containers)
                 if containers:
