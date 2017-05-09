@@ -349,7 +349,6 @@ class Action:
         # restart, shutdown, upgrade, etc.
         return
 
-    @staticmethod
     def logs(self, grep_list={}):
         """ generically filter logs stored in log containers """
         if not grep_list:
@@ -361,7 +360,7 @@ class Action:
                 # 'logs' stores each line which contains the expression
                 logs  = [log for log in core.logs().split("\n") if expression in log]
                 for log in logs:
-                    print log
+                    self.logger.info(log)
         return
 
     @staticmethod
