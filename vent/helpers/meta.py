@@ -5,6 +5,7 @@ import pkg_resources
 import platform
 import subprocess
 
+from vent.api.plugins import Plugin
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
 
@@ -122,17 +123,61 @@ def Services(vent=True):
         pass
     return services
 
-def Core():
+def Core(**kargs):
     """
     Get the normal core tools, and the currently installed/built/running ones,
     including custom core services
     """
     core = {'built':[], 'running':[], 'installed':[], 'normal':[]}
-    # !! TODO
-    # get tools from vent repo at master that are in the core group and put into normal
-    # check the manifest for installed with group core
-    # check docker images for built with group core
-    # check docker containers for running with group core
+
+    # get normal core tools
+    plugins = Plugin(plugins_dir=".internals/plugins")
+    status, cwd = plugins.clone('https://github.com/cyberreboot/vent')
+    if status == 0:
+        plugins.version = 'HEAD'
+        # enable these two line to change the branch, otherwise defaults to master
+        #plugins.branch = "experimental"
+        #response = plugins.checkout()
+        matches = plugins._available_tools(groups='core')
+        for match in matches:
+            core['normal'].append(match[0].split('/')[-1])
+    else:
+        core['normal'] = 'failed'
+
+    # get core tools that have been installed
+    path_dirs = PathDirs(**kargs)
+    manifest = os.path.join(path_dirs.meta_dir, "plugin_manifest.cfg")
+    template = Template(template=manifest)
+    tools = template.sections()
+    if tools[0]:
+        for tool in tools[1]:
+            groups = template.option(tool, "groups")
+            if groups[0] and "core" in groups[1]:
+                name = template.option(tool, "name")
+                if name[0]:
+                    core['installed'].append(name[1])
+
+    # get core tools that have been built and/or are running
+    try:
+        d_client = docker.from_env()
+        images = d_client.images.list()
+        for image in images:
+            try:
+                if "vent.groups" in image.attrs['Labels'] and 'core' in image.attrs['Labels']['vent.groups']:
+                    if 'vent.name' in image.attrs['Labels']:
+                        core['built'].append(image.attrs['Labels']['vent.name'])
+            except Exception as err: # pragma: no cover
+                pass
+        containers = d_client.containers.list()
+        for container in containers:
+            try:
+                if "vent.groups" in container.attrs['Config']['Labels'] and 'core' in container.attrs['Config']['Labels']['vent.groups']:
+                    if 'vent.name' in container.attrs['Config']['Labels']:
+                        core['running'].append(container.attrs['Config']['Labels']['vent.name'])
+            except Exception as err: # pragma: no cover
+                pass
+    except Exception as e: # pragma: no cover
+        pass
     return core
 
 def Timestamp():

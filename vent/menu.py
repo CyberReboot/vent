@@ -9,6 +9,7 @@ import time
 from vent.api.actions import Action
 from vent.api.plugins import Plugin
 from vent.helpers.meta import Containers
+from vent.helpers.meta import Core
 from vent.helpers.meta import Services
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Tools
@@ -254,6 +255,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield2.display()
         self.addfield3.value = str(len(Containers()))+" running"
         self.addfield3.display()
+        # !! TODO update fields such as core tools, health status, jobs, etc. alsoo
 
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
