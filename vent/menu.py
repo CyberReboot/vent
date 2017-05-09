@@ -255,7 +255,52 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
         self.addfield2.display()
         self.addfield3.value = str(len(Containers()))+" running"
         self.addfield3.display()
-        # !! TODO update fields such as core tools, health status, jobs, etc. alsoo
+
+        # set core value string
+        core = Core()
+        installed = 0
+        custom_installed = 0
+        built = 0
+        custom_built = 0
+        running = 0
+        custom_running = 0
+        normal = str(len(core['normal']))
+        for tool in core['running']:
+            if tool in core['normal']:
+                running += 1
+            else:
+                custom_running += 1
+        for tool in core['built']:
+            if tool in core['normal']:
+                built += 1
+            else:
+                custom_built += 1
+        for tool in core['installed']:
+            if tool in core['normal']:
+                installed += 1
+            else:
+                custom_installed += 1
+        core_str = str(running+custom_running)+"/"+normal+" running"
+        if custom_running > 0:
+            core_str += " ("+str(custom_running)+" custom)"
+        core_str += ", "+str(built+custom_built)+"/"+normal+" built"
+        if custom_built > 0:
+            core_str += " ("+str(custom_built)+" custom)"
+        core_str += ", "+str(installed+custom_installed)+"/"+normal+" installed"
+        if custom_built > 0:
+            core_str += " ("+str(custom_installed)+" custom)"
+        self.addfield5.value = core_str
+        if running+custom_running == 0:
+            color = "DANGER"
+        elif running >= int(normal):
+            color = "GOOD"
+        else:
+            color = "CAUTION"
+        self.addfield5.labelColor = color
+        self.addfield5.display()
+
+        # !! TODO update fields such as health status, jobs, etc. alsoo
+        return
 
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
