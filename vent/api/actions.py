@@ -351,8 +351,10 @@ class Action:
         return
 
     @staticmethod
-    def logs(self, grep_list={"core","vent-management"}):
-        # generically filter logs stored in log containers
+    def logs(self, grep_list):
+        """ generically filter logs stored in log containers """
+        if !grep_list:
+            grep_list = {"core","vent-management"}
         containers = self.d_client.containers().list()
         cores = [c for c in containers if ("core" in c.name or "vent-management" in c.name)]
         for expression in grep_list:
