@@ -440,7 +440,9 @@ class Plugin:
             try:
                 os.chdir(match_path)
                 # currentyl can't use docker-py because it doesn't support labels on images yet
-                output = subprocess.check_output(shlex.split("docker build --label vent -t " + image_name + " ."), stderr=subprocess.STDOUT)
+                name = template.option(section, "name")
+                groups = template.option(section, "groups")
+                output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT)
                 image_id = ""
                 for line in output.split("\n"):
                     if line.startswith("Successfully built "):
@@ -453,16 +455,28 @@ class Plugin:
             template.set_option(section, "built", "no")
         return template
 
-    def _available_tools(self):
+    def _available_tools(self, groups=None):
         """
         Return list of possible tools in repo for the given version and branch
         """
         matches = []
         if not hasattr(self, 'path'): return matches
+        if groups:
+            groups = groups.split(",")
         for root, dirnames, filenames in os.walk(self.path):
             for filename in fnmatch.filter(filenames, 'Dockerfile'):
-                # !! TODO deal with wild/groups/etc.?
-                matches.append((root.split(self.path)[1], self.version))
+                # !! TODO deal with wild/etc.?
+                if groups:
+                    try:
+                        template = Template(template=os.path.join(root, 'vent.template'))
+                        for group in groups:
+                            template_groups = template.option("info", "groups")
+                            if template_groups[0] and group in template_groups[1]:
+                                matches.append((root.split(self.path)[1], self.version))
+                    except Exception as e: # pragma: no cover
+                        pass
+                else:
+                    matches.append((root.split(self.path)[1], self.version))
         return matches
 
     def checkout(self):
