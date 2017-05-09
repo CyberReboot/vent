@@ -92,7 +92,8 @@ def test_system_commands():
 
 def test_logs():
     """ Test the logs function """
-    Action.logs()
+    instance = Action()
+    instance.logs()
 
 def test_help():
     """ Test the help function """

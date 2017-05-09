@@ -356,11 +356,14 @@ class Action:
         containers = self.d_client.containers().list()
         cores = [c for c in containers if ("core" in c.name)]
         for expression in grep_list:
-            for core in cores:
-                # 'logs' stores each line which contains the expression
-                logs  = [log for log in core.logs().split("\n") if expression in log]
-                for log in logs:
-                    self.logger.info(log)
+            try:
+                for core in cores:
+                    # 'logs' stores each line which contains the expression
+                    logs  = [log for log in core.logs().split("\n") if expression in log]
+                    for log in logs:
+                        self.logger.info(log)
+            except Exception as e:
+                pass
         return
 
     @staticmethod
