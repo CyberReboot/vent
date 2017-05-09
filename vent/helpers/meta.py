@@ -128,6 +128,7 @@ def Core(**kargs):
     Get the normal core tools, and the currently installed/built/running ones,
     including custom core services
     """
+    # !! TODO this might need to store namespaces/branches/versions
     core = {'built':[], 'running':[], 'installed':[], 'normal':[]}
 
     # get normal core tools
