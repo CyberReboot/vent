@@ -1,5 +1,4 @@
 import ast
-import docker
 import json
 import os
 
@@ -351,12 +350,12 @@ class Action:
         return
 
     @staticmethod
-    def logs(self, grep_list):
+    def logs(self, grep_list={}):
         """ generically filter logs stored in log containers """
         if not grep_list:
-            grep_list = {"core","vent-management"}
+            grep_list = {"core"}
         containers = self.d_client.containers().list()
-        cores = [c for c in containers if ("core" in c.name or "vent-management" in c.name)]
+        cores = [c for c in containers if ("core" in c.name)]
         for expression in grep_list:
             for core in cores:
                 # 'logs' stores each line which contains the expression
