@@ -20,27 +20,36 @@ repo_value = {}
 
 class ServicesForm(npyscreen.FormBaseNew):
     """ Services form for the Vent CLI """
-    # !! TODO need to navigate key handlers
+    triggered = 0
+    services_tft = None
+    def while_waiting(self):
+        """ Update with current services running """
+        if not self.triggered:
+            self.services_tft.hidden = True
+            self.services_tft.display()
+            self.triggered = 1
+            services = Services()
+            if services:
+                for service in services:
+                    value = ""
+                    for val in service[1]:
+                        value += val+", "
+                    title_text = self.add(npyscreen.TitleFixedText,
+                                          name=service[0],
+                                          value=value[:-2])
+                    title_text.display()
+
     def create(self):
         """ Override method for creating FormBaseNew form """
         self.add_handlers({"^T": self.change_forms,'^Q': self.quit})
-        self.addfield = self.add(npyscreen.TitleFixedText, name='Services:', value="")
-        services = Services()
-        for service in services:
-            value = ""
-            for val in service[1]:
-                value += val+", "
-            self.add(npyscreen.TitleFixedText, name=service[0], value=value[:-2])
+        self.services_tft = self.add(npyscreen.TitleFixedText, name='No services running.', value="")
 
     def quit(self, *args, **kwargs):
         self.parentApp.switchForm(None)
 
     def change_forms(self, *args, **keywords):
-        """ Checks which form is currently displayed and toggles it to the other one """
-        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle help":
-            change_to = "MAIN"
-        else:
-            change_to = "SERVICES"
+        """ Toggles back to main """
+        change_to = "MAIN"
 
         # Tell the VentApp object to change forms.
         self.parentApp.change_form(change_to)
@@ -69,7 +78,8 @@ class ChooseToolsForm(npyscreen.ActionForm):
             i = 4
             for branch in repo_value['versions']:
                 self.tools_tc[branch] = {}
-                self.add(npyscreen.TitleText, name='Branch: '+branch, editable=False, rely=i, relx=5, max_width=25)
+                title_text = self.add(npyscreen.TitleText, name='Branch: '+branch, editable=False, rely=i, relx=5, max_width=25)
+                title_text.display()
                 tools = self.repo_tools(branch)
                 i += 1
                 for tool in tools:
@@ -79,6 +89,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
                     if tool == "":
                         tool = "/"
                     self.tools_tc[branch][tool] = self.add(npyscreen.CheckBox, name=tool, value=value, relx=10)
+                    self.tools_tc[branch][tool].display()
                     i += 1
                 i += 2
             self.triggered = 1
@@ -174,12 +185,15 @@ class AddOptionsForm(npyscreen.ActionForm):
                 self.branch_cb[branch] = self.add(npyscreen.CheckBox,
                                                     name=branch, rely=i,
                                                     relx=5, max_width=25)
+                self.branch_cb[branch].display()
                 self.commit_tc[branch] = self.add(npyscreen.TitleCombo, value=0, rely=i+1,
                                                   relx=10, max_width=30, name='Commit:',
                                                   values=self.commits[branch])
+                self.commit_tc[branch].display()
                 self.build_tc[branch] = self.add(npyscreen.TitleCombo, value=0, rely=i+1,
                                                  relx=45, max_width=25, name='Build:',
                                                  values=[True, False])
+                self.build_tc[branch].display()
                 i += 3
 
     def quit(self, *args, **kwargs):
@@ -402,11 +416,7 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
        \ V /  __/ | | | |_
         \_/ \___|_| |_|\__|
                            """)
-        self.m1 = self.add_menu(name="Tools", shortcut="t")
-        self.m1.addItemsFromList([
-            ("Just Beep", None, "e"),
-        ])
-        self.m2 = self.add_menu(name="Plugins", shortcut="p",)
+        self.m2 = self.add_menu(name="Plugins", shortcut="p")
         self.m2.addItem(text='Add', onSelect=self.perform_action,
                         arguments=['add'], shortcut='a')
         self.m2.addItem(text='List', onSelect=self.perform_action,
@@ -423,23 +433,21 @@ class VentForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['stop'], shortcut='p')
         self.m2.addItem(text='Clean', onSelect=self.perform_action,
                         arguments=['clean'], shortcut='c')
-        self.m3 = self.add_menu(name="Logs", shortcut="l",)
+        self.m2.addItem(text='Services', onSelect=self.services_form,
+                        arguments=[])
+        self.m3 = self.add_menu(name="Logs", shortcut="l")
         self.m3.addItemsFromList([
             ("Just Beep", None),
         ])
-        self.m4 = self.add_menu(name="Core Tools", shortcut="c",)
+        self.m4 = self.add_menu(name="Core Tools", shortcut="t")
         self.m4.addItemsFromList([
             ("Just Beep", None),
         ])
-        self.m5 = self.add_menu(name="System Commands", shortcut="s",)
+        self.m5 = self.add_menu(name="System Commands", shortcut="c")
         self.m5.addItemsFromList([
             ("Just Beep", None),
         ])
-        self.m6 = self.add_menu(name="System Configuration", shortcut="g",)
-        self.m6.addItemsFromList([
-            ("Just Beep", None),
-        ])
-        self.m7 = self.add_menu(name="Cluster Management", shortcut="m",)
+        self.m7 = self.add_menu(name="Cluster Management", shortcut="m")
         self.m7.addItemsFromList([
             ("Just Beep", None),
         ])
@@ -472,7 +480,7 @@ class HelpForm(npyscreen.FormBaseNew):
 
     def change_forms(self, *args, **keywords):
         """ Checks which form is currently displayed and toggles it to the other one """
-        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle help":
+        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle main":
             change_to = "MAIN"
         else:
             change_to = "HELP"
@@ -488,11 +496,11 @@ class VentApp(npyscreen.NPSAppManaged):
         """ Override onStart method for npyscreen """
         version = Version()
         self.addForm("MAIN", VentForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help", color="IMPORTANT")
-        self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle help", color="DANGER")
+        self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle main", color="DANGER")
         self.addForm("ADD", AddForm, name="Add\t\t\t\t\t\t\t\tPress ^T to toggle help", color="CONTROL")
         self.addForm("ADDOPTIONS", AddOptionsForm, name="Set options for new plugin", color="CONTROL")
         self.addForm("CHOOSETOOLS", ChooseToolsForm, name="Choose tools to add for new plugin", color="CONTROL")
-        self.addForm("SERVICES", ServicesForm, name="", color="STANDOUT")
+        self.addForm("SERVICES", ServicesForm, name="Services\t\t\t\t\t\t\t\tPress ^T to toggle main", color="STANDOUT")
 
     def change_form(self, name):
         """ Changes the form (window) that is displayed """
