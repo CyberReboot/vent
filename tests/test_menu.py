@@ -19,9 +19,3 @@ def test_menu():
         a.run(fork=False)
     except Exception as e:
         pass
-
-def test_add():
-    """ Test the add form """
-    a = VentApp()
-    b = AddForm(a)
-    b.create()
