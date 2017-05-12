@@ -14,8 +14,14 @@ def test_menu():
     npyscreen.TEST_SETTINGS['TEST_INPUT'] = ['^X', '^T']
     npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = True
 
-    A = VentApp()
+    a = VentApp()
     try:
-        A.run(fork=False)
+        a.run(fork=False)
     except Exception as e:
         pass
+
+def test_add():
+    """ Test the add form """
+    a = VentApp()
+    b = AddForm(a)
+    b.create()
