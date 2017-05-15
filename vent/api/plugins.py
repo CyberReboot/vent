@@ -170,7 +170,8 @@ class Plugin:
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
-            version_alias=None, wild=None, remove_old=True, disable_old=True, limit_groups=None):
+            version_alias=None, wild=None, remove_old=True, disable_old=True,
+            limit_groups=None):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -226,12 +227,6 @@ class Plugin:
             'master', ignore all other tools)
         """
         # initialize and store class objects
-        if tools is None:
-            tools = []
-        if overrides is None:
-            overrides = []
-        if limit_groups is None:
-            limit_groups = []
         self.tools = tools
         self.overrides = overrides
         self.version = version

@@ -2,6 +2,8 @@ import ast
 import datetime
 import json
 import os
+import shlex
+import subprocess
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
@@ -90,7 +92,6 @@ class Action:
        files = vent_config.option('main', 'files')
        sections, template = self.plugin.constraint_options(args, options)
        tool_dict = {}
-       self.logger.info(str(sections))
        for section in sections:
            # initialize needed vars
            template_path = os.path.join(sections[section]['path'], 'vent.template')
@@ -362,20 +363,36 @@ class Action:
                for tool in core['normal']:
                    for section in sections[1]:
                        image_name = plugin_config.option(section, "image_name")
-                       try:
-                           image_id = self.d_client.images.pull('cyberreboot/vent-'+tool, tag=branch)
-                           if image_name[1] == "cyberreboot/vent-"+tool+":"+branch:
-                               plugin_config.set_option(section, "built", "yes")
-                               plugin_config.set_option(section, "image_id", image_id.short_id.split(":")[1])
-                               plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                           status = (True, "Pulled "+tool)
-                       except Exception as e:
-                           if image_name[1] == "cyberreboot/vent-"+tool+":"+branch:
+                       if image_name[1] == "cyberreboot/vent-"+tool+":"+branch:
+                           try:
+                               # currently can't use docker-py because it
+                               # returns a 404 on pull so no way to valid if it
+                               # worked or didn't
+                               #image_id = self.d_client.images.pull('cyberreboot/vent-'+tool, tag=branch)
+                               image_id = None
+                               output = subprocess.check_output(shlex.split("docker pull cyberreboot/vent-"+tool+":"+branch), stderr=subprocess.STDOUT)
+                               for line in output.split('\n'):
+                                   if line.startswith("Digest: sha256:"):
+                                       image_id = line.split("Digest: sha256:")[1][:12]
+                               if image_id:
+                                   plugin_config.set_option(section, "built", "yes")
+                                   plugin_config.set_option(section, "image_id", image_id)
+                                   plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                                   status = (True, "Pulled "+tool)
+                                   self.logger.info(str(status))
+                               else:
+                                   plugin_config.set_option(section, "built", "failed")
+                                   plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                                   status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
+                                   self.logger.info(str(status))
+                           except Exception as e:
                                plugin_config.set_option(section, "built", "failed")
                                plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                           status = (False, "Failed to pull image "+str(e))
+                               status = (False, "Failed to pull image "+str(e))
+                               self.logger.info(str(status))
            except Exception as e:
                status = (False, "Failed to pull images "+str(e))
+               self.logger.info(str(status))
            plugin_config.write_config()
        elif action == "start":
            status = self.start(groups="core", branch=branch)
