@@ -67,6 +67,65 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # !! TODO update fields such as health status, jobs, etc. alsoo
         return
 
+    def core_tools(self, action):
+        """ Perform actions for core tools """
+        def diff(first, second):
+            """
+            Get the elements that exist in the first list and not in the second
+            """
+            second = set(second)
+            return [item for item in first if item not in second]
+
+        def popup(original, orig_type, thr, title):
+            """
+            Start the thread and display a popup of info
+            until the thread is finished
+            """
+            thr.start()
+            info_str = ""
+            while thr.is_alive():
+                info = diff(Containers(), original)
+                if info:
+                    info_str = ""
+                for entry in info:
+                    # TODO limit length of info_str to fit box
+                    info_str += entry[0]+": "+entry[1]+"\n"
+                npyscreen.notify_wait(info_str, title=title)
+                time.sleep(1)
+            return
+
+        if action == 'install':
+            # !! TODO
+            pass
+        elif action == 'build':
+            original_images = Images()
+            # !! TODO
+        elif action == 'start':
+            original_containers = Containers()
+            thr = threading.Thread(target=self.api_action.start, args=(),
+                                   kwargs={'groups':'core'})
+            popup(original_containers, "containers", thr,
+                  'Please wait, starting core containers...')
+            npyscreen.notify_confirm("Done starting core containers.",
+                                     title='Started core containers')
+        elif action == 'stop':
+            original_containers = Containers()
+            thr = threading.Thread(target=self.api_action.stop, args=(),
+                                   kwargs={'groups':'core'})
+            popup(original_containers, "containers", thr,
+                  'Please wait, stopping core containers...')
+            npyscreen.notify_confirm("Done stopping core containers.",
+                                     title='Stopped core containers')
+        elif action == 'clean':
+            original_containers = Containers()
+            thr = threading.Thread(target=self.api_action.clean, args=(),
+                                   kwargs={'groups':'core'})
+            popup(original_containers, "containers", thr,
+                  'Please wait, cleaning core containers...')
+            npyscreen.notify_confirm("Done cleaning core containers.",
+                                     title='Cleaned core containers')
+        return
+
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
         def diff(first, second):
@@ -167,41 +226,57 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
        \ V /  __/ | | | |_
         \_/ \___|_| |_|\__|
                            """)
-        self.m2 = self.add_menu(name="Plugins", shortcut="p")
-        self.m2.addItem(text='Add', onSelect=self.perform_action,
-                        arguments=['add'], shortcut='a')
-        self.m2.addItem(text='List', onSelect=self.perform_action,
-                        arguments=['list'], shortcut='l')
-        self.m2.addItem(text='Update', onSelect=self.perform_action,
-                        arguments=['update'], shortcut='u')
-        self.m2.addItem(text='Remove', onSelect=self.perform_action,
-                        arguments=['Remove'], shortcut='r')
-        self.m2.addItem(text='Build', onSelect=self.perform_action,
+        self.m2 = self.add_menu(name="Core Tools", shortcut="t")
+        self.m2.addItem(text='Install all latest core tools',
+                        onSelect=self.core_tools,
+                        arguments=['install'], shortcut='i')
+        self.m2.addItem(text='Build all core tools',
+                        onSelect=self.core_tools,
                         arguments=['build'], shortcut='b')
-        self.m2.addItem(text='Start', onSelect=self.perform_action,
+        self.m2.addItem(text='Start all core tools',
+                        onSelect=self.core_tools,
                         arguments=['start'], shortcut='s')
-        self.m2.addItem(text='Stop', onSelect=self.perform_action,
+        self.m2.addItem(text='Stop all core tools',
+                        onSelect=self.core_tools,
                         arguments=['stop'], shortcut='p')
-        self.m2.addItem(text='Clean', onSelect=self.perform_action,
+        self.m2.addItem(text='Clean all core tools',
+                        onSelect=self.core_tools,
                         arguments=['clean'], shortcut='c')
-        self.m2.addItem(text='Services', onSelect=self.services_form,
+        self.m3 = self.add_menu(name="Plugins", shortcut="p")
+        self.m3.addItem(text='Add new repository',
+                        onSelect=self.perform_action,
+                        arguments=['add'], shortcut='a')
+        self.m3.addItem(text='List installed repositories',
+                        onSelect=self.perform_action,
+                        arguments=['list'], shortcut='l')
+        self.m3.addItem(text='Update repositories',
+                        onSelect=self.perform_action,
+                        arguments=['update'], shortcut='u')
+        self.m3.addItem(text='Remove tools',
+                        onSelect=self.perform_action,
+                        arguments=['Remove'], shortcut='r')
+        self.m3.addItem(text='Build tools', onSelect=self.perform_action,
+                        arguments=['build'], shortcut='b')
+        self.m3.addItem(text='Start tools', onSelect=self.perform_action,
+                        arguments=['start'], shortcut='s')
+        self.m3.addItem(text='Stop tools', onSelect=self.perform_action,
+                        arguments=['stop'], shortcut='p')
+        self.m3.addItem(text='Clean tools', onSelect=self.perform_action,
+                        arguments=['clean'], shortcut='c')
+        self.m3.addItem(text='Services Running', onSelect=self.services_form,
                         arguments=[])
-        self.m3 = self.add_menu(name="Logs", shortcut="l")
-        self.m3.addItemsFromList([
-            ("Just Beep", None),
-        ])
-        self.m4 = self.add_menu(name="Core Tools", shortcut="t")
+        self.m4 = self.add_menu(name="Logs", shortcut="l")
         self.m4.addItemsFromList([
             ("Just Beep", None),
         ])
-        self.m5 = self.add_menu(name="System Commands", shortcut="c")
-        self.m5.addItemsFromList([
-            ("Just Beep", None),
-        ])
-        self.m7 = self.add_menu(name="Cluster Management", shortcut="m")
-        self.m7.addItemsFromList([
-            ("Just Beep", None),
-        ])
+        #self.m5 = self.add_menu(name="System Commands", shortcut="c")
+        #self.m5.addItemsFromList([
+        #    ("Just Beep", None),
+        #])
+        #self.m7 = self.add_menu(name="Cluster Management", shortcut="m")
+        #self.m7.addItemsFromList([
+        #    ("Just Beep", None),
+        #])
 
     def services_form(self, *args, **keywords):
         self.parentApp.change_form("SERVICES")

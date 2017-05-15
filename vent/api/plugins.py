@@ -442,6 +442,10 @@ class Plugin:
                 # currentyl can't use docker-py because it doesn't support labels on images yet
                 name = template.option(section, "name")
                 groups = template.option(section, "groups")
+                if groups[1] == "" or not groups[0]:
+                    groups = (True, "none")
+                if not name[0]:
+                    name = (True, image_name)
                 output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT)
                 image_id = ""
                 for line in output.split("\n"):
