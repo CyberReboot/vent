@@ -226,11 +226,11 @@ class Plugin:
             'master', ignore all other tools)
         """
         # initialize and store class objects
-        if not tools:
+        if tools is None:
             tools = []
-        if not overrides:
+        if overrides is None:
             overrides = []
-        if not limit_groups:
+        if limit_groups is None:
             limit_groups = []
         self.tools = tools
         self.overrides = overrides
@@ -291,15 +291,15 @@ class Plugin:
             response = self.checkout()
             if response[0]:
                 matches = []
-                if len(self.tools) == 0 and len(self.overrides) == 0:
+                if self.tools is None and self.overrides is None:
                     # get all tools
                     matches = self._available_tools()
-                elif len(self.tools) == 0:
+                elif self.tools is None:
                     # there's only something in overrides
                     # grab all the tools then apply overrides
                     matches = self._available_tools()
                     # !! TODO apply overrides to matches
-                elif len(self.overrides) == 0:
+                elif self.overrides is None:
                     # there's only something in tools
                     # only grab the tools specified
                     matches = self.get_tool_matches()
@@ -439,7 +439,7 @@ class Plugin:
         if self.build:
             try:
                 os.chdir(match_path)
-                # currentyl can't use docker-py because it doesn't support labels on images yet
+                # currently can't use docker-py because it doesn't support labels on images yet
                 name = template.option(section, "name")
                 groups = template.option(section, "groups")
                 if groups[1] == "" or not groups[0]:

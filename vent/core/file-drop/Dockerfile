@@ -11,6 +11,10 @@ RUN pip install -r /file-drop/requirements.txt
 
 WORKDIR /file-drop
 
+LABEL vent="" \
+      vent.name="file-drop" \
+      vent.groups="core,files"
+
 ENTRYPOINT ["python", "/file-drop/file_drop.py"]
 
 # volume dir to watch
