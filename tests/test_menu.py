@@ -1,10 +1,13 @@
 import curses
 import npyscreen
 
-from vent.menu import AddForm
-from vent.menu import HelpForm
 from vent.menu import VentApp
-from vent.menu import VentForm
+from vent.menus.add import AddForm
+from vent.menus.help import HelpForm
+from vent.menus.main import MainForm
+from vent.menus.services import ServicesForm
+from vent.menus.choose_tools import ChooseToolsForm
+from vent.menus.add_options import AddOptionsForm
 
 def test_menu():
     """ Test the menu """

@@ -1,4 +1,4 @@
-test:
+build: clean
 	@echo
 	@echo "checking dependencies"
 	@echo
@@ -6,6 +6,9 @@ test:
 	docker version
 	pip -V
 	pip install -r tests/requirements.txt
+	python setup.py install
+
+clean:
 	rm -rf .cache
 	rm -rf .coverage
 	rm -rf .vent
@@ -15,6 +18,9 @@ test:
 	rm -rf build
 	rm -rf plugins
 	rm -rf core
-	python setup.py install
+	pip uninstall -y vent || true
+
+test: build
 	py.test -v --cov=. -k 'not vendor' --cov-report term-missing
-.PHONY: test
+
+.PHONY: build test
