@@ -14,8 +14,8 @@ def test_menu():
     npyscreen.TEST_SETTINGS['TEST_INPUT'] = ['^X', '^T']
     npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = True
 
-    a = VentApp()
+    A = VentApp()
     try:
-        a.run(fork=False)
+        A.run(fork=False)
     except Exception as e:
         pass
