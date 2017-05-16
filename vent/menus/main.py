@@ -26,7 +26,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield3.display()
 
         # set core value string
-        core = Core()
+        # !! TODO remove hardcoded experimental
+        core = Core(branch='experimental')
         installed = 0
         custom_installed = 0
         built = 0
