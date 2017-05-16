@@ -170,7 +170,8 @@ class Plugin:
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
-            version_alias=None, wild=None, remove_old=True, disable_old=True, limit_groups=None):
+            version_alias=None, wild=None, remove_old=True, disable_old=True,
+            limit_groups=None):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -226,12 +227,6 @@ class Plugin:
             'master', ignore all other tools)
         """
         # initialize and store class objects
-        if not tools:
-            tools = []
-        if not overrides:
-            overrides = []
-        if not limit_groups:
-            limit_groups = []
         self.tools = tools
         self.overrides = overrides
         self.version = version
@@ -291,15 +286,15 @@ class Plugin:
             response = self.checkout()
             if response[0]:
                 matches = []
-                if len(self.tools) == 0 and len(self.overrides) == 0:
+                if self.tools is None and self.overrides is None:
                     # get all tools
                     matches = self._available_tools()
-                elif len(self.tools) == 0:
+                elif self.tools is None:
                     # there's only something in overrides
                     # grab all the tools then apply overrides
                     matches = self._available_tools()
                     # !! TODO apply overrides to matches
-                elif len(self.overrides) == 0:
+                elif self.overrides is None:
                     # there's only something in tools
                     # only grab the tools specified
                     matches = self.get_tool_matches()
@@ -439,7 +434,7 @@ class Plugin:
         if self.build:
             try:
                 os.chdir(match_path)
-                # currentyl can't use docker-py because it doesn't support labels on images yet
+                # currently can't use docker-py because it doesn't support labels on images yet
                 name = template.option(section, "name")
                 groups = template.option(section, "groups")
                 if groups[1] == "" or not groups[0]:

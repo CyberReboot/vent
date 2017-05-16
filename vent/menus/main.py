@@ -5,6 +5,7 @@ import time
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
+from vent.helpers.meta import Images
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 
@@ -14,6 +15,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
+        # give a little extra time for file descriptors to close
+        time.sleep(0.5)
+
         self.addfield.value = Timestamp()
         self.addfield.display()
         self.addfield2.value = Uptime()
@@ -84,7 +88,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             thr.start()
             info_str = ""
             while thr.is_alive():
-                info = diff(Containers(), original)
+                if orig_type == 'containers':
+                    info = diff(Containers(), original)
+                elif orig_type == 'images':
+                    info = diff(Images(), original)
                 if info:
                     info_str = ""
                 for entry in info:
@@ -94,32 +101,48 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 time.sleep(1)
             return
 
+        # !! TODO remove hardcoded experimental branch
         if action == 'install':
-            # !! TODO
-            pass
+            original_images = Images()
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"install",
+                                           "branch":"experimental"})
+            popup(original_images, "images", thr,
+                  'Please wait, installing core containers...')
+            npyscreen.notify_confirm("Done installing core containers.",
+                                     title='Installed core containers')
         elif action == 'build':
             original_images = Images()
-            # !! TODO
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"build",
+                                           "branch":"experimental"})
+            popup(original_images, "images", thr,
+                  'Please wait, building core containers...')
+            npyscreen.notify_confirm("Done building core containers.",
+                                     title='Built core containers')
         elif action == 'start':
             original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.start, args=(),
-                                   kwargs={'groups':'core'})
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"start",
+                                           "branch":"experimental"})
             popup(original_containers, "containers", thr,
                   'Please wait, starting core containers...')
             npyscreen.notify_confirm("Done starting core containers.",
                                      title='Started core containers')
         elif action == 'stop':
             original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.stop, args=(),
-                                   kwargs={'groups':'core'})
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"stop",
+                                           "branch":"experimental"})
             popup(original_containers, "containers", thr,
                   'Please wait, stopping core containers...')
             npyscreen.notify_confirm("Done stopping core containers.",
                                      title='Stopped core containers')
         elif action == 'clean':
             original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.clean, args=(),
-                                   kwargs={'groups':'core'})
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"clean",
+                                           "branch":"experimental"})
             popup(original_containers, "containers", thr,
                   'Please wait, cleaning core containers...')
             npyscreen.notify_confirm("Done cleaning core containers.",
@@ -160,7 +183,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # TODO pass in actual args and kwargs
             # TODO show a build popup first to improve UX
             thr = threading.Thread(target=self.api_action.start, args=(),
-                                   kwargs={'branch':'experimental'})
+                                   kwargs={})
             popup(original_containers, thr,
                   'Please wait, starting containers...')
             npyscreen.notify_confirm("Done starting containers.",
@@ -168,7 +191,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         elif action == 'stop':
             # TODO pass in actual args and kwargs
             thr = threading.Thread(target=self.api_action.stop, args=(),
-                                   kwargs={'branch':'experimental'})
+                                   kwargs={})
             popup(original_containers, thr,
                   'Please wait, stopping containers...')
             npyscreen.notify_confirm("Done stopping containers.",
@@ -176,7 +199,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         elif action == 'clean':
             # TODO pass in actual args and kwargs
             thr = threading.Thread(target=self.api_action.clean, args=(),
-                                   kwargs={'branch':'experimental'})
+                                   kwargs={})
             popup(original_containers, thr,
                   'Please wait, cleaning containers...')
             npyscreen.notify_confirm("Done cleaning containers.",

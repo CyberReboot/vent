@@ -17,4 +17,8 @@ RUN chmod 755 /run.sh
 
 EXPOSE 9181
 
+LABEL vent="" \
+      vent.name="rq-dashboard" \
+      vent.groups="core"
+
 CMD ["/run.sh"]

@@ -82,7 +82,7 @@ def Images(vent=True):
         else:
             i = d_client.images.list()
         for image in i:
-            images.append((image.tags, image.short_id))
+            images.append((image.tags[0], image.short_id))
     except Exception as e: # pragma: no cover
         pass
 
@@ -123,7 +123,7 @@ def Services(vent=True):
         pass
     return services
 
-def Core(**kargs):
+def Core(branch="master", **kargs):
     """
     Get the normal core tools, and the currently installed/built/running ones,
     including custom core services
@@ -136,9 +136,8 @@ def Core(**kargs):
     status, cwd = plugins.clone('https://github.com/cyberreboot/vent')
     if status == 0:
         plugins.version = 'HEAD'
-        # enable these two line to change the branch, otherwise defaults to master
-        #plugins.branch = "experimental"
-        #response = plugins.checkout()
+        plugins.branch = branch
+        response = plugins.checkout()
         matches = plugins._available_tools(groups='core')
         for match in matches:
             core['normal'].append(match[0].split('/')[-1])
@@ -187,4 +186,4 @@ def Timestamp():
 
 def Uptime():
     """ Get the current uptime information """
-    return str(subprocess.check_output(["uptime"]))[1:]
+    return str(subprocess.check_output(["uptime"], close_fds=True))[1:]
