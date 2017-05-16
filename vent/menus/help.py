@@ -7,7 +7,7 @@ class HelpForm(npyscreen.FormBaseNew):
     def create(self):
         """ Override method for creating FormBaseNew form """
         self.add_handlers({"^T": self.change_forms,'^Q': self.exit})
-        self.addfield = self.add(npyscreen.TitlePager, name="Vent", values="""Help\nmore\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more\nand more""".split("\n"))
+        self.addfield = self.add(npyscreen.TitlePager, name="Vent", values="""To Be Implemented...""".split("\n"))
 
     def exit(self, *args, **keywords):
         os.system('reset')
