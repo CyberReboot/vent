@@ -1,4 +1,6 @@
 import npyscreen
+import os
+import sys
 import threading
 import time
 
@@ -12,6 +14,14 @@ from vent.helpers.meta import Uptime
 class MainForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
     api_action = Action()
+
+    def exit(self, *args, **keywords):
+        os.system('reset')
+        os.system('stty sane')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
@@ -209,7 +219,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def create(self):
         """ Override method for creating FormBaseNewWithMenu form """
-        self.add_handlers({"^T": self.change_forms, "^S": self.services_form})
+        self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
         self.addfield = self.add(npyscreen.TitleFixedText, name='Date:',
                                  labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
@@ -310,7 +320,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         Checks which form is currently displayed and toggles it to the other
         one
         """
-        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle help":
+        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit":
             change_to = "MAIN"
         else:
             change_to = "HELP"
