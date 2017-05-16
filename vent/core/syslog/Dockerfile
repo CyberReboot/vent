@@ -8,4 +8,8 @@ RUN apk add --update \
 ADD syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 EXPOSE 514
 
+LABEL vent="" \
+      vent.name="syslog" \
+      vent.groups="core,logging,syslog"
+
 ENTRYPOINT ["/usr/sbin/syslog-ng", "-F", "-f", "/etc/syslog-ng/syslog-ng.conf"]

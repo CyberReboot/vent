@@ -1,10 +1,13 @@
 import npyscreen
+import os
+import sys
 import threading
 import time
 
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
+from vent.helpers.meta import Images
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 
@@ -12,8 +15,19 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
     api_action = Action()
 
+    def exit(self, *args, **keywords):
+        os.system('reset')
+        os.system('stty sane')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
+
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
+        # give a little extra time for file descriptors to close
+        time.sleep(0.5)
+
         self.addfield.value = Timestamp()
         self.addfield.display()
         self.addfield2.value = Uptime()
@@ -22,7 +36,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield3.display()
 
         # set core value string
-        core = Core()
+        # !! TODO remove hardcoded experimental
+        core = Core(branch='experimental')
         installed = 0
         custom_installed = 0
         built = 0
@@ -64,7 +79,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5.labelColor = color
         self.addfield5.display()
 
-        # !! TODO update fields such as health status, jobs, etc. alsoo
+        # !! TODO update fields such as health status, jobs, etc.
         return
 
     def core_tools(self, action):
@@ -84,7 +99,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             thr.start()
             info_str = ""
             while thr.is_alive():
-                info = diff(Containers(), original)
+                if orig_type == 'containers':
+                    info = diff(Containers(), original)
+                elif orig_type == 'images':
+                    info = diff(Images(), original)
                 if info:
                     info_str = ""
                 for entry in info:
@@ -94,32 +112,48 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 time.sleep(1)
             return
 
+        # !! TODO remove hardcoded experimental branch
         if action == 'install':
-            # !! TODO
-            pass
+            original_images = Images()
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"install",
+                                           "branch":"experimental"})
+            popup(original_images, "images", thr,
+                  'Please wait, installing core containers...')
+            npyscreen.notify_confirm("Done installing core containers.",
+                                     title='Installed core containers')
         elif action == 'build':
             original_images = Images()
-            # !! TODO
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"build",
+                                           "branch":"experimental"})
+            popup(original_images, "images", thr,
+                  'Please wait, building core containers...')
+            npyscreen.notify_confirm("Done building core containers.",
+                                     title='Built core containers')
         elif action == 'start':
             original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.start, args=(),
-                                   kwargs={'groups':'core'})
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"start",
+                                           "branch":"experimental"})
             popup(original_containers, "containers", thr,
                   'Please wait, starting core containers...')
             npyscreen.notify_confirm("Done starting core containers.",
                                      title='Started core containers')
         elif action == 'stop':
             original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.stop, args=(),
-                                   kwargs={'groups':'core'})
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"stop",
+                                           "branch":"experimental"})
             popup(original_containers, "containers", thr,
                   'Please wait, stopping core containers...')
             npyscreen.notify_confirm("Done stopping core containers.",
                                      title='Stopped core containers')
         elif action == 'clean':
             original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.clean, args=(),
-                                   kwargs={'groups':'core'})
+            thr = threading.Thread(target=self.api_action.cores, args=(),
+                                   kwargs={"action":"clean",
+                                           "branch":"experimental"})
             popup(original_containers, "containers", thr,
                   'Please wait, cleaning core containers...')
             npyscreen.notify_confirm("Done cleaning core containers.",
@@ -160,7 +194,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # TODO pass in actual args and kwargs
             # TODO show a build popup first to improve UX
             thr = threading.Thread(target=self.api_action.start, args=(),
-                                   kwargs={'branch':'experimental'})
+                                   kwargs={})
             popup(original_containers, thr,
                   'Please wait, starting containers...')
             npyscreen.notify_confirm("Done starting containers.",
@@ -168,7 +202,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         elif action == 'stop':
             # TODO pass in actual args and kwargs
             thr = threading.Thread(target=self.api_action.stop, args=(),
-                                   kwargs={'branch':'experimental'})
+                                   kwargs={})
             popup(original_containers, thr,
                   'Please wait, stopping containers...')
             npyscreen.notify_confirm("Done stopping containers.",
@@ -176,7 +210,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         elif action == 'clean':
             # TODO pass in actual args and kwargs
             thr = threading.Thread(target=self.api_action.clean, args=(),
-                                   kwargs={'branch':'experimental'})
+                                   kwargs={})
             popup(original_containers, thr,
                   'Please wait, cleaning containers...')
             npyscreen.notify_confirm("Done cleaning containers.",
@@ -185,7 +219,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def create(self):
         """ Override method for creating FormBaseNewWithMenu form """
-        self.add_handlers({"^T": self.change_forms, "^S": self.services_form})
+        self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
         self.addfield = self.add(npyscreen.TitleFixedText, name='Date:',
                                  labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
@@ -194,14 +228,14 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                   labelColor='DEFAULT',
                                   value=str(len(Containers()))+" running")
         self.addfield4 = self.add(npyscreen.TitleFixedText, name='Status:',
-                                  value="Healthy")
+                                  value="To Be Implemented...")
         self.addfield5 = self.add(npyscreen.TitleFixedText,
                                   name='Core Tools:', labelColor='DANGER',
                                   value="Not built")
-        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Clustered:',
-                                  value="No", labelColor='DEFAULT')
+        #self.addfield6 = self.add(npyscreen.TitleFixedText, name='Clustered:',
+        #                          value="No", labelColor='DEFAULT')
         self.addfield7 = self.add(npyscreen.TitleFixedText, name='Jobs:',
-                                  value="None", labelColor='DEFAULT')
+                                  value="To Be Implemented...", labelColor='DEFAULT')
         self.multifield1 =  self.add(npyscreen.MultiLineEdit, max_height=22,
                                      editable=False, value = """
 
@@ -233,6 +267,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Build all core tools',
                         onSelect=self.core_tools,
                         arguments=['build'], shortcut='b')
+        self.m2.addItem(text='Update all core tools (To Be Implemented...)',
+                        onSelect=self.core_tools,
+                        arguments=['update'], shortcut='u')
         self.m2.addItem(text='Start all core tools',
                         onSelect=self.core_tools,
                         arguments=['start'], shortcut='s')
@@ -242,32 +279,35 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Clean all core tools',
                         onSelect=self.core_tools,
                         arguments=['clean'], shortcut='c')
+        self.m2.addItem(text='Remove all core tools (To Be Implemented...)',
+                        onSelect=self.core_tools,
+                        arguments=['remove'], shortcut='r')
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
         self.m3.addItem(text='Add new repository',
                         onSelect=self.perform_action,
                         arguments=['add'], shortcut='a')
-        self.m3.addItem(text='List installed repositories',
+        self.m3.addItem(text='List installed repositories (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['list'], shortcut='l')
-        self.m3.addItem(text='Update repositories',
+        self.m3.addItem(text='Update repositories (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
-        self.m3.addItem(text='Remove tools',
+        self.m3.addItem(text='Remove tools (To Be Implemented...)',
                         onSelect=self.perform_action,
-                        arguments=['Remove'], shortcut='r')
-        self.m3.addItem(text='Build tools', onSelect=self.perform_action,
+                        arguments=['remove'], shortcut='r')
+        self.m3.addItem(text='Build tools (To Be Implemented...)', onSelect=self.perform_action,
                         arguments=['build'], shortcut='b')
-        self.m3.addItem(text='Start tools', onSelect=self.perform_action,
+        self.m3.addItem(text='Start tools (To Be Implemented...)', onSelect=self.perform_action,
                         arguments=['start'], shortcut='s')
-        self.m3.addItem(text='Stop tools', onSelect=self.perform_action,
+        self.m3.addItem(text='Stop tools (To Be Implemented...)', onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
-        self.m3.addItem(text='Clean tools', onSelect=self.perform_action,
+        self.m3.addItem(text='Clean tools (To Be Implemented...)', onSelect=self.perform_action,
                         arguments=['clean'], shortcut='c')
         self.m3.addItem(text='Services Running', onSelect=self.services_form,
                         arguments=[])
-        self.m4 = self.add_menu(name="Logs", shortcut="l")
+        self.m4 = self.add_menu(name="Logs (To Be Implemented...)", shortcut="l")
         self.m4.addItemsFromList([
-            ("Just Beep", None),
+            ("To Be Implemented...", None),
         ])
         #self.m5 = self.add_menu(name="System Commands", shortcut="c")
         #self.m5.addItemsFromList([
@@ -286,7 +326,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         Checks which form is currently displayed and toggles it to the other
         one
         """
-        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle help":
+        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit":
             change_to = "MAIN"
         else:
             change_to = "HELP"

@@ -1,10 +1,14 @@
 import ast
+import datetime
 import json
 import os
+import shlex
+import subprocess
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
+from vent.helpers.meta import Core
 from vent.helpers.meta import Version
 
 class Action:
@@ -50,7 +54,7 @@ class Action:
        status = (True, None)
 
        if not repo and not name and not groups and not namespace:
-           # at least of these needs to be specified
+           # at least one of these needs to be specified
            status = (False, None)
        else:
            # !! TODO
@@ -65,13 +69,15 @@ class Action:
              groups=None,
              enabled="yes",
              branch="master",
-             version="HEAD"):
+             version="HEAD",
+             run_build=False):
        """
        Start a set of tools that match the parameters given, if no parameters
        are given, start all installed tools on the master branch at verison
        HEAD that are enabled
        """
        args = locals()
+       del args['run_build']
        options = ['name',
                   'namespace',
                   'built',
@@ -90,6 +96,7 @@ class Action:
            # initialize needed vars
            template_path = os.path.join(sections[section]['path'], 'vent.template')
            container_name = sections[section]['image_name'].replace(':','-')
+           container_name = container_name.replace('/','-')
            image_name = sections[section]['image_name']
 
            # checkout the right version and branch of the repo
@@ -100,14 +107,12 @@ class Action:
            status = self.plugin.checkout()
            os.chdir(cwd)
 
-           # ensure tools are built before starting them
-           # try and build the tool first
-           # !! TODO make this an optional flag (it'll make it easier for testing without merging later
-           status = self.build(name=sections[section]['name'],
-                               groups=groups,
-                               enabled=enabled,
-                               branch=branch,
-                               version=version)
+           if run_build:
+               status = self.build(name=sections[section]['name'],
+                                   groups=groups,
+                                   enabled=enabled,
+                                   branch=branch,
+                                   version=version)
 
            # set docker settings for container
            vent_template = Template(template_path)
@@ -260,6 +265,7 @@ class Action:
        status = (True, None)
        for section in sections:
            container_name = sections[section]['image_name'].replace(':','-')
+           container_name = container_name.replace('/','-')
            try:
                container = self.d_client.containers.get(container_name)
                container.stop()
@@ -294,6 +300,7 @@ class Action:
        status = (True, None)
        for section in sections:
            container_name = sections[section]['image_name'].replace(':','-')
+           container_name = container_name.replace('/','-')
            try:
                container = self.d_client.containers.get(container_name)
                container.remove(force=True)
@@ -321,6 +328,78 @@ class Action:
                                         section, build=True, branch=branch,
                                         version=version)
        template.write_config()
+       return status
+
+   def cores(self, action, branch="master"):
+       """ Supply action (install, build, start, stop, clean) for core tools """
+       status = (True, None)
+       core = Core(branch=branch)
+       if action in ["install", "build"]:
+           tools = []
+           plugins = Plugin(plugins_dir=".internals/plugins")
+           plugins.version = 'HEAD'
+           plugins.branch = branch
+           plugins.apply_path('https://github.com/cyberreboot/vent')
+           response = plugins.checkout()
+           matches = plugins._available_tools(groups='core')
+           for match in matches:
+               tools.append((match[0], ''))
+           status = plugins.add('https://github.com/cyberreboot/vent', tools=tools, branch=branch, build=False)
+           plugin_config = Template(template=self.plugin.manifest)
+           sections = plugin_config.sections()
+           for tool in core['normal']:
+               for section in sections[1]:
+                   name = plugin_config.option(section, "name")
+                   orig_branch = plugin_config.option(section, "branch")
+                   namespace = plugin_config.option(section, "namespace")
+                   version = plugin_config.option(section, "version")
+                   if name[1] == tool and orig_branch[1] == branch and namespace[1] == "cyberreboot/vent" and version[1] == "HEAD":
+                       plugin_config.set_option(section, "image_name", "cyberreboot/vent-"+tool+":"+branch)
+           plugin_config.write_config()
+       if action == "build":
+           plugin_config = Template(template=self.plugin.manifest)
+           sections = plugin_config.sections()
+           try:
+               for tool in core['normal']:
+                   for section in sections[1]:
+                       image_name = plugin_config.option(section, "image_name")
+                       if image_name[1] == "cyberreboot/vent-"+tool+":"+branch:
+                           try:
+                               # currently can't use docker-py because it
+                               # returns a 404 on pull so no way to valid if it
+                               # worked or didn't
+                               #image_id = self.d_client.images.pull('cyberreboot/vent-'+tool, tag=branch)
+                               image_id = None
+                               output = subprocess.check_output(shlex.split("docker pull cyberreboot/vent-"+tool+":"+branch), stderr=subprocess.STDOUT)
+                               for line in output.split('\n'):
+                                   if line.startswith("Digest: sha256:"):
+                                       image_id = line.split("Digest: sha256:")[1][:12]
+                               if image_id:
+                                   plugin_config.set_option(section, "built", "yes")
+                                   plugin_config.set_option(section, "image_id", image_id)
+                                   plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                                   status = (True, "Pulled "+tool)
+                                   self.logger.info(str(status))
+                               else:
+                                   plugin_config.set_option(section, "built", "failed")
+                                   plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                                   status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
+                                   self.logger.warning(str(status))
+                           except Exception as e:
+                               plugin_config.set_option(section, "built", "failed")
+                               plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                               status = (False, "Failed to pull image "+str(e))
+                               self.logger.warning(str(status))
+           except Exception as e:
+               status = (False, "Failed to pull images "+str(e))
+               self.logger.warning(str(status))
+           plugin_config.write_config()
+       elif action == "start":
+           status = self.start(groups="core", branch=branch)
+       elif action == "stop":
+           status = self.stop(groups="core", branch=branch)
+       elif action == "clean":
+           status = self.clean(groups="core", branch=branch)
        return status
 
    @staticmethod
