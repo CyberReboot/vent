@@ -4,6 +4,7 @@ import sys
 import threading
 import time
 
+from docker.errors import DockerException
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
@@ -13,7 +14,7 @@ from vent.helpers.meta import Uptime
 
 class MainForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
-    api_action = Action()
+    triggered = False
 
     def exit(self, *args, **keywords):
         os.system('reset')
@@ -25,6 +26,17 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
+        def popup(message):
+            npyscreen.notify_confirm(str(message), title="Docker Error", form_color='DANGER', wrap=True)
+            self.exit()
+
+        if not self.triggered:
+            self.triggered = True
+            try:
+                self.api_action = Action()
+            except DockerException as de:
+                popup(de)
+
         # give a little extra time for file descriptors to close
         time.sleep(0.5)
 
@@ -78,7 +90,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             color = "CAUTION"
         self.addfield5.labelColor = color
         self.addfield5.display()
-
         # !! TODO update fields such as health status, jobs, etc.
         return
 
@@ -226,7 +237,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                   labelColor='DEFAULT', value=Uptime())
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
-                                  value=str(len(Containers()))+" running")
+                                  value="0 "+" running")
         self.addfield4 = self.add(npyscreen.TitleFixedText, name='Status:',
                                   value="To Be Implemented...")
         self.addfield5 = self.add(npyscreen.TitleFixedText,
