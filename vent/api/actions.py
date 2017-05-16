@@ -334,7 +334,7 @@ class Action:
        """ Supply action (install, build, start, stop, clean) for core tools """
        status = (True, None)
        core = Core(branch=branch)
-       if action == "install" or action == "build":
+       if action in ["install", "build"]:
            tools = []
            plugins = Plugin(plugins_dir=".internals/plugins")
            plugins.version = 'HEAD'
@@ -384,15 +384,15 @@ class Action:
                                    plugin_config.set_option(section, "built", "failed")
                                    plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
                                    status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
-                                   self.logger.info(str(status))
+                                   self.logger.warning(str(status))
                            except Exception as e:
                                plugin_config.set_option(section, "built", "failed")
                                plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
                                status = (False, "Failed to pull image "+str(e))
-                               self.logger.info(str(status))
+                               self.logger.warning(str(status))
            except Exception as e:
                status = (False, "Failed to pull images "+str(e))
-               self.logger.info(str(status))
+               self.logger.warning(str(status))
            plugin_config.write_config()
        elif action == "start":
            status = self.start(groups="core", branch=branch)
