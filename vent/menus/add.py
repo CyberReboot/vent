@@ -8,6 +8,7 @@ class AddForm(npyscreen.ActionForm):
     """ For for adding a new repo """
     def create(self):
         """ Create widgets for AddForm """
+        # !! TODO have option for image to pull from a registry with tag
         self.repo = self.add(npyscreen.TitleText, name='Repository',
                              value='https://github.com/cyberreboot/vent-plugins')
         self.user = self.add(npyscreen.TitleText, name='Username')

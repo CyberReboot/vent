@@ -232,9 +232,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                   'Please wait, cleaning containers...')
             npyscreen.notify_confirm("Done cleaning containers.",
                                      title='Cleaned Containers')
-        elif action == "list":
-            # !! TODO
-            pass
+        elif action == "inventory":
+            self.parentApp.change_form('INVENTORY')
         elif action == "update":
             # !! TODO
             pass
@@ -322,28 +321,28 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         onSelect=self.core_tools,
                         arguments=['remove'], shortcut='r')
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
-        self.m3.addItem(text='Add new repository',
+        self.m3.addItem(text='Add new plugin',
                         onSelect=self.perform_action,
                         arguments=['add'], shortcut='a')
-        self.m3.addItem(text='List installed repositories (To Be Implemented...)',
+        self.m3.addItem(text='Inventory of installed plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
-                        arguments=['list'], shortcut='l')
-        self.m3.addItem(text='Update repositories (To Be Implemented...)',
+                        arguments=['inventory'], shortcut='i')
+        self.m3.addItem(text='Update plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
-        self.m3.addItem(text='Remove tools (To Be Implemented...)',
+        self.m3.addItem(text='Remove plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['remove'], shortcut='r')
-        self.m3.addItem(text='Build tools (To Be Implemented...)',
+        self.m3.addItem(text='Build plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['build'], shortcut='b')
-        self.m3.addItem(text='Start tools (To Be Implemented...)',
+        self.m3.addItem(text='Start plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['start'], shortcut='s')
-        self.m3.addItem(text='Stop tools (To Be Implemented...)',
+        self.m3.addItem(text='Stop plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
-        self.m3.addItem(text='Clean tools (To Be Implemented...)',
+        self.m3.addItem(text='Clean plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['clean'], shortcut='c')
         self.m3.addItem(text='Services Running', onSelect=self.services_form,
