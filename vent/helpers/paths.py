@@ -1,6 +1,8 @@
 import errno
 import os
 
+from vent.api.templates import Template
+
 class PathDirs:
     """ Global path directories for vent """
     def __init__(self,
@@ -16,7 +18,8 @@ class PathDirs:
         self.ensure_dir(self.plugins_dir)
         self.ensure_dir(self.meta_dir)
 
-    def ensure_dir(self, path):
+    @staticmethod
+    def ensure_dir(path):
         try:
             os.makedirs(path)
         except OSError as e:
@@ -25,3 +28,19 @@ class PathDirs:
             else:
                 return (False, e)
         return (True, path)
+
+    def host_config(self):
+        """ Ensure the host configuration file exists """
+        default_file_dir = "/tmp/vent_files"
+        config = Template(template=os.path.join(self.base_dir, "vent.cfg"))
+        resp = config.section("main")
+        if resp[0]:
+            resp = config.option("main", "files")
+            if not resp[0]:
+                config.add_option("main", "files", default_file_dir)
+                self.ensure_dir(default_file_dir)
+        else:
+            config.add_option("main", "files", default_file_dir)
+            self.ensure_dir(default_file_dir)
+        config.write_config()
+        return

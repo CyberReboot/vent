@@ -4,6 +4,7 @@
 import npyscreen
 
 from vent.helpers.meta import Version
+from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.add_options import AddOptionsForm
 from vent.menus.choose_tools import ChooseToolsForm
@@ -18,6 +19,8 @@ class VentApp(npyscreen.NPSAppManaged):
 
     def onStart(self):
         """ Override onStart method for npyscreen """
+        paths = PathDirs()
+        paths.host_config()
         version = Version()
         self.addForm("MAIN", MainForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
