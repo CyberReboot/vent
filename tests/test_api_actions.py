@@ -78,14 +78,6 @@ def test_configure():
     """ Test the configure function """
     Action.configure()
 
-def test_system_info():
-    """ Test the system_info function """
-    Action.system_info()
-
-def test_system_conf():
-    """ Test the system_conf function """
-    Action.system_conf()
-
 def test_system_commands():
     """ Test the system_commands function """
     Action.system_commands()
