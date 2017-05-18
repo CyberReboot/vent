@@ -436,6 +436,7 @@ class Action:
        return
 
    def inventory(self, choices=None):
+       """ Return a dictionary of the inventory items and status """
        # choices: repos, core, tools, images, built, running, enabled
        items = {}
 
