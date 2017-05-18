@@ -4,10 +4,13 @@
 import npyscreen
 
 from vent.helpers.meta import Version
+from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.add_options import AddOptionsForm
+from vent.menus.core_inventory import CoreInventoryForm
 from vent.menus.choose_tools import ChooseToolsForm
 from vent.menus.help import HelpForm
+from vent.menus.inventory import InventoryForm
 from vent.menus.main import MainForm
 from vent.menus.services import ServicesForm
 
@@ -18,9 +21,13 @@ class VentApp(npyscreen.NPSAppManaged):
 
     def onStart(self):
         """ Override onStart method for npyscreen """
+        paths = PathDirs()
+        paths.host_config()
         version = Version()
         self.addForm("MAIN", MainForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("COREINVENTORY", CoreInventoryForm, name="Inventory of core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
+        self.addForm("INVENTORY", InventoryForm, name="Inventory of plugins\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("ADD", AddForm, name="Add\t\t\t\t\t\t\t\tPress ^T to toggle help (To Be Implemented...)\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("ADDOPTIONS", AddOptionsForm, name="Set options for new plugin\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("CHOOSETOOLS", ChooseToolsForm, name="Choose tools to add for new plugin\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")

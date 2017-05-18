@@ -38,7 +38,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 popup(de)
 
         # give a little extra time for file descriptors to close
-        time.sleep(0.5)
+        time.sleep(0.01)
 
         self.addfield.value = Timestamp()
         self.addfield.display()
@@ -169,6 +169,14 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                   'Please wait, cleaning core containers...')
             npyscreen.notify_confirm("Done cleaning core containers.",
                                      title='Cleaned core containers')
+        elif action == "inventory":
+            self.parentApp.change_form('COREINVENTORY')
+        elif action == 'update':
+            # !! TODO
+            pass
+        elif action == 'remove':
+            # !! TODO
+            pass
         return
 
     def perform_action(self, action):
@@ -226,6 +234,27 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                   'Please wait, cleaning containers...')
             npyscreen.notify_confirm("Done cleaning containers.",
                                      title='Cleaned Containers')
+        elif action == "inventory":
+            self.parentApp.change_form('INVENTORY')
+        elif action == "update":
+            # !! TODO
+            pass
+        elif action == "remove":
+            # !! TODO
+            pass
+        elif action == "build":
+            # !! TODO
+            pass
+        return
+
+    def system_commands(self, action):
+        """ Perform system commands """
+        if action == "reset":
+            # !! TODO
+            pass
+        elif action == "upgrade":
+            # !! TODO
+            pass
         return
 
     def create(self):
@@ -275,6 +304,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Install all latest core tools',
                         onSelect=self.core_tools,
                         arguments=['install'], shortcut='i')
+        self.m2.addItem(text='Inventory of core tools',
+                        onSelect=self.core_tools,
+                        arguments=['inventory'], shortcut='v')
         self.m2.addItem(text='Build all core tools',
                         onSelect=self.core_tools,
                         arguments=['build'], shortcut='b')
@@ -294,40 +326,40 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         onSelect=self.core_tools,
                         arguments=['remove'], shortcut='r')
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
-        self.m3.addItem(text='Add new repository',
+        self.m3.addItem(text='Add new plugin',
                         onSelect=self.perform_action,
                         arguments=['add'], shortcut='a')
-        self.m3.addItem(text='List installed repositories (To Be Implemented...)',
+        self.m3.addItem(text='Inventory of installed plugins',
                         onSelect=self.perform_action,
-                        arguments=['list'], shortcut='l')
-        self.m3.addItem(text='Update repositories (To Be Implemented...)',
+                        arguments=['inventory'], shortcut='i')
+        self.m3.addItem(text='Update plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
-        self.m3.addItem(text='Remove tools (To Be Implemented...)',
+        self.m3.addItem(text='Remove plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['remove'], shortcut='r')
-        self.m3.addItem(text='Build tools (To Be Implemented...)', onSelect=self.perform_action,
+        self.m3.addItem(text='Build plugins (To Be Implemented...)',
+                        onSelect=self.perform_action,
                         arguments=['build'], shortcut='b')
-        self.m3.addItem(text='Start tools (To Be Implemented...)', onSelect=self.perform_action,
+        self.m3.addItem(text='Start plugins (To Be Implemented...)',
+                        onSelect=self.perform_action,
                         arguments=['start'], shortcut='s')
-        self.m3.addItem(text='Stop tools (To Be Implemented...)', onSelect=self.perform_action,
+        self.m3.addItem(text='Stop plugins (To Be Implemented...)',
+                        onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
-        self.m3.addItem(text='Clean tools (To Be Implemented...)', onSelect=self.perform_action,
+        self.m3.addItem(text='Clean plugins (To Be Implemented...)',
+                        onSelect=self.perform_action,
                         arguments=['clean'], shortcut='c')
         self.m3.addItem(text='Services Running', onSelect=self.services_form,
                         arguments=[])
         self.m4 = self.add_menu(name="Logs (To Be Implemented...)", shortcut="l")
-        self.m4.addItemsFromList([
-            ("To Be Implemented...", None),
-        ])
-        #self.m5 = self.add_menu(name="System Commands", shortcut="c")
-        #self.m5.addItemsFromList([
-        #    ("Just Beep", None),
-        #])
-        #self.m7 = self.add_menu(name="Cluster Management", shortcut="m")
-        #self.m7.addItemsFromList([
-        #    ("Just Beep", None),
-        #])
+        self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="c")
+        self.m5.addItem(text='Reset (To Be Implemented...)',
+                        onSelect=self.system_commands,
+                        arguments=['reset'], shortcut='r')
+        self.m5.addItem(text='Upgrade (To Be Implemented...)',
+                        onSelect=self.system_commands,
+                        arguments=['upgrade'], shortcut='u')
 
     def services_form(self, *args, **keywords):
         self.parentApp.change_form("SERVICES")

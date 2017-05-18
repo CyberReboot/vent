@@ -37,17 +37,12 @@ vent is a library that includes a CLI designed to serve as a general platform fo
 
 simply create your `plugins`, point vent to them & install them, and drop a file in vent to begin processing!
 
-### getting the bits
+### getting the bits and building
 
 ```
 git clone --recursive https://github.com/CyberReboot/vent.git
 cd vent
-```
-
-### building
-
-```
-python setup.py install
+make
 ```
 
 _Note - If you already have `docker-py` installed on your machine, you may need to_ `pip uninstall docker-py` _first. `vent` will install `docker-py` as part of the installation process, however there are known incompatibilities of `docker-py` with older versions._

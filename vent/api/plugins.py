@@ -519,19 +519,20 @@ class Plugin:
         exists, sections = template.sections()
         if exists:
             for section in sections:
-                enabled = None
-                built = None
-                exists, value = template.option(section, 'enabled')
-                if exists:
-                    enabled = value
-                exists, value = template.option(section, 'built')
-                if exists:
-                    built = value
-                # store each tool at a version as a three-tuple:
-                #   section contains org:repo_name:tool_path:branch:commit_id
-                #   built is either yes/no/failed/None
-                #   enabled is either yes/no/None
-                tools.append((section, built, enabled))
+                options = {'section':section,
+                           'enabled':None,
+                           'built':None,
+                           'version':None,
+                           'repo':None,
+                           'branch':None,
+                           'name':None,
+                           'groups':None,
+                           'image_name':None}
+                for option in options.keys():
+                    exists, value = template.option(section, option)
+                    if exists:
+                        options[option] = value
+                tools.append(options)
         return tools
 
     # !! TODO name or repo or group ?
