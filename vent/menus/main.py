@@ -38,7 +38,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 popup(de)
 
         # give a little extra time for file descriptors to close
-        time.sleep(0.5)
+        time.sleep(0.01)
 
         self.addfield.value = Timestamp()
         self.addfield.display()
@@ -169,6 +169,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                   'Please wait, cleaning core containers...')
             npyscreen.notify_confirm("Done cleaning core containers.",
                                      title='Cleaned core containers')
+        elif action == "inventory":
+            self.parentApp.change_form('COREINVENTORY')
         elif action == 'update':
             # !! TODO
             pass
@@ -302,6 +304,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Install all latest core tools',
                         onSelect=self.core_tools,
                         arguments=['install'], shortcut='i')
+        self.m2.addItem(text='Inventory of core tools',
+                        onSelect=self.core_tools,
+                        arguments=['inventory'], shortcut='v')
         self.m2.addItem(text='Build all core tools',
                         onSelect=self.core_tools,
                         arguments=['build'], shortcut='b')
@@ -324,7 +329,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Add new plugin',
                         onSelect=self.perform_action,
                         arguments=['add'], shortcut='a')
-        self.m3.addItem(text='Inventory of installed plugins (To Be Implemented...)',
+        self.m3.addItem(text='Inventory of installed plugins',
                         onSelect=self.perform_action,
                         arguments=['inventory'], shortcut='i')
         self.m3.addItem(text='Update plugins (To Be Implemented...)',
