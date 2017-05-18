@@ -13,6 +13,7 @@ from vent.menus.help import HelpForm
 from vent.menus.inventory import InventoryForm
 from vent.menus.main import MainForm
 from vent.menus.services import ServicesForm
+from vent.menus.start_tools import StartToolsForm
 
 class VentApp(npyscreen.NPSAppManaged):
     """ Main menu app for vent CLI """
@@ -32,6 +33,7 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("ADDOPTIONS", AddOptionsForm, name="Set options for new plugin\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("CHOOSETOOLS", ChooseToolsForm, name="Choose tools to add for new plugin\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("SERVICES", ServicesForm, name="Services\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
+        self.addForm("STARTTOOLS", StartToolsForm, name="Start tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
 
     def change_form(self, name):
         """ Changes the form (window) that is displayed """
