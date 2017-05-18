@@ -210,14 +210,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         if action == 'add':
             self.parentApp.change_form('ADD')
         elif action == 'start':
-            # TODO pass in actual args and kwargs
-            # TODO show a build popup first to improve UX
-            thr = threading.Thread(target=self.api_action.start, args=(),
-                                   kwargs={})
-            popup(original_containers, thr,
-                  'Please wait, starting containers...')
-            npyscreen.notify_confirm("Done starting containers.",
-                                     title='Started Containers')
+            self.parentApp.change_form('STARTTOOLS')
         elif action == 'stop':
             # TODO pass in actual args and kwargs
             thr = threading.Thread(target=self.api_action.stop, args=(),
