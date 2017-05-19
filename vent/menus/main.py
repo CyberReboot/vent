@@ -8,6 +8,8 @@ from docker.errors import DockerException
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
+from vent.helpers.meta import Cpu
+from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
@@ -225,6 +227,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
                                   labelColor='DEFAULT', value=Uptime())
+        self.cpufield = self.add(npyscreen.TitleFixedText, name='Logical CPUs:',
+                                 labelColor='DEFAULT', value=Cpu())
+        self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
+                                 labelColor='DEFAULT', value=Gpu())
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
