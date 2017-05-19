@@ -90,7 +90,7 @@ def Gpu():
             gpus = proc.stdout.read()
             if gpus:
                 for line in gpus.strip().split("\n"):
-                    gpu += line.split("(UUID: ")[0] + ", "
+                    gpu += line.split(" (UUID: ")[0] + ", "
                 gpu = gpu[:-2]
             else:
                 gpu = "None"
