@@ -183,10 +183,10 @@ class Action:
                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == link:
                            tool_dict[container]['links'][tool_dict[c]['name']] = tool_dict[container]['links'].pop(link)
            if 'volumes_from' in tool_dict[container]:
-               # !! TODO
+               # !! TODO update volumes_from
                pass
            if 'network_mode' in tool_dict[container]:
-               # !! TODO
+               # !! TODO update network_mode
                pass
 
        # remove tmp_names
