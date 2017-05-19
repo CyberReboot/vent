@@ -1,5 +1,6 @@
 import datetime
 import docker
+import multiprocessing
 import os
 import pkg_resources
 import platform
@@ -70,6 +71,34 @@ def Containers(vent=True, running=True):
         pass
 
     return containers
+
+def Cpu():
+    cpu = "Unknown"
+    try:
+        cpu = str(multiprocessing.cpu_count())
+    except Exception as e: # pragma: no cover
+        pass
+    return cpu
+
+def Gpu():
+    gpu = ""
+    try:
+        d_client = docker.from_env()
+        nvidia_image = d_client.images.list(name='nvidia/cuda:8.0-runtime')
+        if len(nvidia_image) > 0:
+            proc = subprocess.Popen(['nvidia-docker run --rm nvidia/cuda:8.0-runtime nvidia-smi -L'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            gpus = proc.stdout.read()
+            if gpus:
+                for line in gpus.strip().split("\n"):
+                    gpu += line.split(" (UUID: ")[0] + ", "
+                gpu = gpu[:-2]
+            else:
+                gpu = "None"
+        else:
+            gpu = "None"
+    except Exception as e: # pragma: no cover
+        gpu = "Unknown"
+    return gpu
 
 def Images(vent=True):
     """ Get images that are build, by default limit to vent images """
