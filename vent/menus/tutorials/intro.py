@@ -4,12 +4,15 @@ class TutorialIntroForm(npyscreen.ActionFormWithMenus):
     """ Tutorial introduction landing form for the Vent CLI """
 
     def switch(self, name):
+        """ Wrapper that switches to provided form """
         self.parentApp.change_form(name)
 
     def quit(self, *args, **kwargs):
+        """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm('MAIN')
 
     def create(self):
+        """ Overridden to add handlers and content """
         self.add_handlers({"^Q": self.quit})
         self.add(npyscreen.TitleText, name="Tutorial Introduction", editable=False)
         self.multifield1 = self.add(npyscreen.MultiLineEdit, editable=False, value=
@@ -58,7 +61,9 @@ class TutorialIntroForm(npyscreen.ActionFormWithMenus):
         self.m6.addItem(text="Setting up Services", shortcut='s')
 
     def on_cancel(self):
+        """ When user clicks cancel, will return to MAIN """
         self.quit()
 
     def on_ok(self):
+        """ When user clicks ok, will proceed to next tutorial """
         self.switch("TUTORIALBACKGROUND")
