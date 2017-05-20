@@ -44,7 +44,7 @@ class AddOptionsForm(npyscreen.ActionForm):
                 i += 3
 
     def quit(self, *args, **kwargs):
-        self.parentApp.switchForm(None)
+        self.parentApp.switchForm('MAIN')
 
     def on_ok(self):
         """
@@ -61,4 +61,3 @@ class AddOptionsForm(npyscreen.ActionForm):
 
     def on_cancel(self):
         self.quit()
-

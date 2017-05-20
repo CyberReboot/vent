@@ -19,16 +19,21 @@ from vent.menus.start_core_tools import StartCoreToolsForm
 from vent.menus.start_tools import StartToolsForm
 from vent.menus.stop_core_tools import StopCoreToolsForm
 from vent.menus.stop_tools import StopToolsForm
+from vent.menus.tutorials.intro import TutorialIntroForm
+from vent.menus.tutorials.background import TutorialBackgroundForm
 
 class VentApp(npyscreen.NPSAppManaged):
     """ Main menu app for vent CLI """
     keypress_timeout_default = 10
     repo_value = {}
+    paths = PathDirs()
+    first_time = paths.ensure_file(paths.init_file)
+    if first_time[0] == True and first_time[1] != "exists":
+        npyscreen.NPSAppManaged.STARTING_FORM = "TUTORIALINTRO"
 
     def onStart(self):
         """ Override onStart method for npyscreen """
-        paths = PathDirs()
-        paths.host_config()
+        self.paths.host_config()
         version = Version()
         self.addForm("MAIN", MainForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="IMPORTANT")
         self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
@@ -44,6 +49,8 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("STARTCORETOOLS", StartCoreToolsForm, name="Start core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("STOPCORETOOLS", StopCoreToolsForm, name="Stop core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("CLEANCORETOOLS", CleanCoreToolsForm, name="Clean core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
+        self.addForm("TUTORIALINTRO", TutorialIntroForm, name="Vent Tutorial"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("TUTORIALBACKGROUND", TutorialBackgroundForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
 
     def change_form(self, name):
         """ Changes the form (window) that is displayed """

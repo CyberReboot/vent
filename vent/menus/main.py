@@ -78,7 +78,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         core_str += ", "+str(built+custom_built)+"/"+normal+" built"
         if custom_built > 0:
             core_str += " ("+str(custom_built)+" custom)"
-        core_str += ", "+str(installed+custom_installed)+"/"+normal+" installed" 
+        core_str += ", "+str(installed+custom_installed)+"/"+normal+" installed"
         if custom_built > 0:
             core_str += " ("+str(custom_installed)+" custom)"
         self.addfield5.value = core_str
@@ -206,6 +206,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         elif action == "build":
             # !! TODO
             pass
+        elif action == "background":
+            self.parentApp.change_form('TUTORIALBACKGROUND')
         return
 
     def system_commands(self, action):
@@ -261,7 +263,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
        \ V /  __/ | | | |_
         \_/ \___|_| |_|\__|
                            """)
-        self.m2 = self.add_menu(name="Core Tools", shortcut="t")
+        self.m2 = self.add_menu(name="Core Tools", shortcut="c")
         self.m2.addItem(text='Install all latest core tools',
                         onSelect=self.core_tools,
                         arguments=['install'], shortcut='i')
@@ -314,13 +316,28 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Services Running', onSelect=self.services_form,
                         arguments=[])
         self.m4 = self.add_menu(name="Logs (To Be Implemented...)", shortcut="l")
-        self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="c")
+        self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="s")
         self.m5.addItem(text='Reset (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
         self.m5.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
+        self.m6 = self.add_menu(name="Tutorials", shortcut="t")
+        self.s1 = self.m6.addNewSubmenu(name="About Vent", shortcut='v')
+        self.s1.addItem(text="Background", onSelect=self.perform_action,
+                        arguments=['background'], shortcut='b')
+        self.s1.addItem(text="Terminology", shortcut='t')
+        self.s1.addItem(text="Getting Setup", shortcut='s')
+        self.s2 = self.m6.addNewSubmenu(name="Working with Cores", shortcut='c')
+        self.s2.addItem(text="Building Cores", shortcut='b')
+        self.s2.addItem(text="Starting Cores", shortcut='c')
+        self.s3 = self.m6.addNewSubmenu(name="Working with Plugins", shortcut='p')
+        self.s3.addItem(text="Adding Plugins", shortcut='a')
+        self.s4 = self.m6.addNewSubmenu(name="Files", shortcut='f')
+        self.s4.addItem(text="Adding Files", shortcut='a')
+        self.s5 = self.m6.addNewSubmenu(name="Services", shortcut='s')
+        self.s5.addItem(text="Setting up Services", shortcut='s')
 
     def services_form(self, *args, **keywords):
         self.parentApp.change_form("SERVICES")
