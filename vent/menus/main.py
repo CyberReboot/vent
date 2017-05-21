@@ -8,6 +8,8 @@ from docker.errors import DockerException
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
+from vent.helpers.meta import Cpu
+from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
@@ -134,15 +136,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             npyscreen.notify_confirm("Done installing core containers.",
                                      title='Installed core containers')
         elif action == 'build':
-            # !! TODO select which tools to build
-            original_images = Images()
-            thr = threading.Thread(target=self.api_action.cores, args=(),
-                                   kwargs={"action":"build",
-                                           "branch":"experimental"})
-            popup(original_images, "images", thr,
-                  'Please wait, building core containers...')
-            npyscreen.notify_confirm("Done building core containers.",
-                                     title='Built core containers')
+            self.parentApp.change_form('BUILDCORETOOLS')
         elif action == 'start':
             self.parentApp.change_form('STARTCORETOOLS')
         elif action == 'stop':
@@ -189,6 +183,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         original_containers = Containers()
         if action == 'add':
             self.parentApp.change_form('ADD')
+        elif action == "build":
+            self.parentApp.change_form('BUILDTOOLS')
         elif action == 'start':
             self.parentApp.change_form('STARTTOOLS')
         elif action == 'stop':
@@ -201,9 +197,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # !! TODO
             pass
         elif action == "remove":
-            # !! TODO
-            pass
-        elif action == "build":
             # !! TODO
             pass
         # tutorial forms
@@ -242,6 +235,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
                                   labelColor='DEFAULT', value=Uptime())
+        self.cpufield = self.add(npyscreen.TitleFixedText, name='Logical CPUs:',
+                                 labelColor='DEFAULT', value=Cpu())
+        self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
+                                 labelColor='DEFAULT', value=Gpu())
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
@@ -285,7 +282,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Inventory of core tools',
                         onSelect=self.core_tools,
                         arguments=['inventory'], shortcut='v')
-        self.m2.addItem(text='Build all core tools',
+        self.m2.addItem(text='Build core tools',
                         onSelect=self.core_tools,
                         arguments=['build'], shortcut='b')
         self.m2.addItem(text='Update all core tools (To Be Implemented...)',
@@ -316,7 +313,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Remove plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['remove'], shortcut='r')
-        self.m3.addItem(text='Build plugins (To Be Implemented...)',
+        self.m3.addItem(text='Build plugin tools',
                         onSelect=self.perform_action,
                         arguments=['build'], shortcut='b')
         self.m3.addItem(text='Start plugin tools',

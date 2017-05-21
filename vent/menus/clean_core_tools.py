@@ -6,6 +6,7 @@ from vent.api.actions import Action
 from vent.api.plugins import Plugin
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
+from vent.helpers.meta import Images
 from vent.helpers.meta import Tools
 
 class CleanCoreToolsForm(npyscreen.ActionForm):

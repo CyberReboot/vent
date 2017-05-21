@@ -9,14 +9,14 @@ from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 from vent.helpers.meta import Tools
 
-class CleanToolsForm(npyscreen.ActionForm):
-    """ For picking which tools to clean """
+class BuildToolsForm(npyscreen.ActionForm):
+    """ For picking which tools to build """
     tools_tc = {}
     triggered = 0
     logger = Logger(__name__)
 
     def create(self):
-        self.add(npyscreen.TitleText, name='Select which tools to clean (only plugin tools are shown):', editable=False)
+        self.add(npyscreen.TitleText, name='Select which tools to build (only plugin tools are shown):', editable=False)
 
     def while_waiting(self):
         """ Update with current tools that are not cores """
@@ -51,11 +51,11 @@ class CleanToolsForm(npyscreen.ActionForm):
         return
 
     def quit(self, *args, **kwargs):
-        self.parentApp.switchForm('MAIN')
+        self.parentApp.switchForm(None)
 
     def on_ok(self):
         """
-        Take the tool selections and clean them
+        Take the tool selections and build them
         """
         def diff(first, second):
             """
@@ -85,7 +85,7 @@ class CleanToolsForm(npyscreen.ActionForm):
                 time.sleep(1)
             return
 
-        original_containers = Containers()
+        original_images = Images()
 
         api_action = Action()
         for repo in self.tools_tc:
@@ -96,14 +96,14 @@ class CleanToolsForm(npyscreen.ActionForm):
                     if t.startswith('/:'):
                         t = " "+t[1:]
                     t = t.split(":")
-                    thr = threading.Thread(target=api_action.clean, args=(),
+                    thr = threading.Thread(target=api_action.build, args=(),
                                            kwargs={'name':t[0],
                                                    'branch':t[1],
                                                    'version':t[2]})
-                    popup(original_containers, "containers", thr,
-                          'Please wait, cleaning containers...')
-        npyscreen.notify_confirm("Done cleaning containers.",
-                                 title='Cleaned containers')
+                    popup(original_images, "images", thr,
+                          'Please wait, building images...')
+        npyscreen.notify_confirm("Done building images.",
+                                 title='Built images')
         self.quit()
 
     def on_cancel(self):
