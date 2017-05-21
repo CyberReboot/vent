@@ -448,7 +448,8 @@ class Plugin:
                 pull = False
                 if '/' in image_name:
                     try:
-                        output = subprocess.check_output(shlex.split("docker pull "+image_name+":"+branch), stderr=subprocess.STDOUT)
+                        self.logger.info("Trying to pull "+image_name)
+                        output = subprocess.check_output(shlex.split("docker pull "+image_name), stderr=subprocess.STDOUT)
                         for line in output.split('\n'):
                             if line.startswith("Digest: sha256:"):
                                 image_id = line.split("Digest: sha256:")[1][:12]
@@ -456,7 +457,7 @@ class Plugin:
                             template.set_option(section, "built", "yes")
                             template.set_option(section, "image_id", image_id)
                             template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                            status = (True, "Pulled "+tool)
+                            status = (True, "Pulled "+image_name)
                             self.logger.info(str(status))
                         else:
                             template.set_option(section, "built", "failed")
@@ -465,7 +466,7 @@ class Plugin:
                             self.logger.warning(str(status))
                         pull = True
                     except Exception as e:
-                        pass
+                        self.logger.warning("Failed to pull image, going to build instead: "+str(e))
                 if not pull:
                     output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT)
                     image_id = ""
