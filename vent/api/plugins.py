@@ -444,13 +444,36 @@ class Plugin:
                     groups = (True, "none")
                 if not name[0]:
                     name = (True, image_name)
-                output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT)
-                image_id = ""
-                for line in output.split("\n"):
-                    if line.startswith("Successfully built "):
-                        image_id = line.split("Successfully built ")[1].strip()
-                template.set_option(section, "built", "yes")
-                template.set_option(section, "image_id", image_id)
+                # pull if '/' in image_name, fallback to build
+                pull = False
+                if '/' in image_name:
+                    try:
+                        output = subprocess.check_output(shlex.split("docker pull "+image_name+":"+branch), stderr=subprocess.STDOUT)
+                        for line in output.split('\n'):
+                            if line.startswith("Digest: sha256:"):
+                                image_id = line.split("Digest: sha256:")[1][:12]
+                        if image_id:
+                            template.set_option(section, "built", "yes")
+                            template.set_option(section, "image_id", image_id)
+                            template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                            status = (True, "Pulled "+tool)
+                            self.logger.info(str(status))
+                        else:
+                            template.set_option(section, "built", "failed")
+                            template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                            status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
+                            self.logger.warning(str(status))
+                        pull = True
+                    except Exception as e:
+                        pass
+                if not pull:
+                    output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT)
+                    image_id = ""
+                    for line in output.split("\n"):
+                        if line.startswith("Successfully built "):
+                            image_id = line.split("Successfully built ")[1].strip()
+                    template.set_option(section, "built", "yes")
+                    template.set_option(section, "image_id", image_id)
             except Exception as e:
                 template.set_option(section, "built", "failed")
         else:
@@ -583,6 +606,26 @@ class Plugin:
         # initialize
         args = locals()
         status = (False, None)
+        options = ['branch', 'groups']
+
+        # get resulting dictionary of sections with options that match constraints
+        results, template = self.constraint_options(args, options)
+        for result in results:
+            # check for container and remove
+            container_name = image_name.replace(':', '-').replace('/', '-')
+            try:
+                container = self.d_client.containers.get(container_name)
+                response = container.remove(v=True, force=True)
+            except Exception as e:
+                pass
+
+            # TODO git pull
+            # TODO build
+            # TODO docker pull
+            # TODO update tool in the manifest
+
+            self.logger.info("Updating plugin tool: "+result)
+        template.write_config()
         return status
 
     # !! TODO name or group ?
