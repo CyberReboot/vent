@@ -1,7 +1,7 @@
 import npyscreen
 
-class TutorialIntroForm(npyscreen.ActionFormWithMenus):
-    """ Tutorial introduction landing form for the Vent CLI """
+class TutorialStartingCoresForm(npyscreen.ActionFormWithMenus):
+    """ Tutorial Starting Cores form for the Vent CLI """
 
     def switch(self, name):
         """ Wrapper that switches to provided form """
@@ -14,37 +14,7 @@ class TutorialIntroForm(npyscreen.ActionFormWithMenus):
     def create(self):
         """ Overridden to add handlers and content """
         self.add_handlers({"^Q": self.quit})
-        self.add(npyscreen.TitleText, name="Tutorial Introduction", editable=False)
-        self.multifield1 = self.add(npyscreen.MultiLineEdit, editable=False, value=
-        """
-        Welcome to Vent!
-
-        We have created a tutorial to help you get up to speed on Vent, some of
-        the terminology we use, how to interact with this application, getting
-        setup, and more!
-
-        Please note the OK and CANCEL buttons on the bottom right of the screen.
-        If at any point you wish to quit the tutorial, simply click CANCEL to be
-        taken to the main menu. You can always find the tutorial menu again from
-        the main menu.
-
-        Navigating through our menus is simple! Directional arrow keys will let
-        you interact with the page and move between the buttons. ENTER will select
-        a button! At the top left you will notice additional keybindings: CTRL+Q
-        will take you back to the main menu for this page. At the bottom right you
-        will notice we have a menu for you to access. This menu is specific to the
-        tutorial and will allow you to skip to material you want. Press CTRL+X to
-        access the menu, up and down directional arrows to change between entries,
-        ENTER to dive deeper into a submenu, and ESC to exit the menu and return
-        to the current page! You can also use the shortcut letters to switch
-        between entries quickly!
-
-        We hope you enjoy using Vent!
-
-        Click OK when you are ready to continue on with the tutorial.
-
-        NEXT UP: About Vent - Background
-        """)
+        self.add(npyscreen.TitleText, name="Starting Cores", editable=False)
         self.m2 = self.add_menu(name="About Vent", shortcut='v')
         self.m2.addItem(text="Background", onSelect=self.switch,
                         arguments=['TUTORIALBACKGROUND'], shortcut='b')
@@ -73,4 +43,4 @@ class TutorialIntroForm(npyscreen.ActionFormWithMenus):
 
     def on_ok(self):
         """ When user clicks ok, will proceed to next tutorial """
-        self.switch("TUTORIALBACKGROUND")
+        self.switch("TUTORIALADDINGPLUGINS")

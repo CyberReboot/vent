@@ -21,6 +21,13 @@ from vent.menus.stop_core_tools import StopCoreToolsForm
 from vent.menus.stop_tools import StopToolsForm
 from vent.menus.tutorials.intro import TutorialIntroForm
 from vent.menus.tutorials.background import TutorialBackgroundForm
+from vent.menus.tutorials.terminology import TutorialTerminologyForm
+from vent.menus.tutorials.getting_setup import TutorialGettingSetupForm
+from vent.menus.tutorials.building_cores import TutorialBuildingCoresForm
+from vent.menus.tutorials.starting_cores import TutorialStartingCoresForm
+from vent.menus.tutorials.adding_plugins import TutorialAddingPluginsForm
+from vent.menus.tutorials.adding_files import TutorialAddingFilesForm
+from vent.menus.tutorials.setting_up_services import TutorialSettingUpServicesForm
 
 class VentApp(npyscreen.NPSAppManaged):
     """ Main menu app for vent CLI """
@@ -51,6 +58,13 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("CLEANCORETOOLS", CleanCoreToolsForm, name="Clean core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("TUTORIALINTRO", TutorialIntroForm, name="Vent Tutorial"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
         self.addForm("TUTORIALBACKGROUND", TutorialBackgroundForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("TUTORIALTERMINOLOGY", TutorialTerminologyForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("TUTORIALGETTINGSETUP", TutorialGettingSetupForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("TUTORIALBUILDINGCORES", TutorialBuildingCoresForm, name="Working with Cores"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("TUTORIALSTARTINGCORES", TutorialStartingCoresForm, name="Working with Cores"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("TUTORIALADDINGPLUGINS", TutorialAddingPluginsForm, name="Working with Plugins"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("TUTORIALADDINGFILES", TutorialAddingFilesForm, name="Files"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.addForm("TUTORIALSETTINGUPSERVICES", TutorialSettingUpServicesForm, name="Services"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
 
     def change_form(self, name):
         """ Changes the form (window) that is displayed """
