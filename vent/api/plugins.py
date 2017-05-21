@@ -233,11 +233,14 @@ class Plugin:
         self.branch = branch
         self.build = build
         self.groups = groups
+
+        # TODO these need to be implemented
         self.version_alias = version_alias
         self.wild = wild
         self.remove_old = remove_old
         self.disable_old = disable_old
         self.limit_groups = limit_groups
+
         response = (True, None)
 
         status_code, cwd = self.clone(repo, user=user, pw=pw)
@@ -535,13 +538,11 @@ class Plugin:
                 tools.append(options)
         return tools
 
-    # !! TODO name or repo or group ?
-    def remove(self, name=None, repo=None, namespace=None, branch=None):
+    def remove(self, name=None, repo=None, namespace=None, branch=None, groups=None):
         """
         Remove tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be removed
         """
-        # !! TODO potentially remove images, cloned repos
         # initialize
         args = locals()
         status = (False, None)
@@ -549,8 +550,39 @@ class Plugin:
         # get resulting dictionary of sections with options that match constraints
         results, template = self.constraint_options(args, [])
         for result in results:
+            response, image_name = template.option(result, 'image_name')
+
+            # check for container and remove
+            container_name = image_name.replace(':', '-').replace('/', '-')
+            try:
+                container = self.d_client.containers.get(container_name)
+                response = container.remove(v=True, force=True)
+            except Exception as e:
+                pass
+
+            # check for image and remove
+            try:
+                response = self.d_client.images.remove(image_name)
+                self.logger.info(response)
+                self.logger.info("Removing plugin image: "+image_name)
+            except Exception as e:
+                pass
+
+            # remove tool from the manifest
             status = template.del_section(result)
+            self.logger.info("Removing plugin tool: "+result)
+        # TODO if all tools from a repo have been removed, remove the repo
         template.write_config()
+        return status
+
+    def update(self, name=None, repo=None, namespace=None, branch=None, groups=None):
+        """
+        Update tool (name) or repository, repository is the url. If no
+        arguments are specified, all tools will be updated
+        """
+        # initialize
+        args = locals()
+        status = (False, None)
         return status
 
     # !! TODO name or group ?
