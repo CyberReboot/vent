@@ -16,6 +16,7 @@ class BuildCoreToolsForm(npyscreen.ActionForm):
     logger = Logger(__name__)
 
     def create(self):
+        self.add_handlers({"^T": self.change_forms, "^Q": self.quit})
         self.add(npyscreen.TitleText, name='Select which tools to build (only core tools are shown):', editable=False)
 
     def while_waiting(self):
@@ -50,7 +51,7 @@ class BuildCoreToolsForm(npyscreen.ActionForm):
         return
 
     def quit(self, *args, **kwargs):
-        self.parentApp.switchForm(None)
+        self.parentApp.switchForm('MAIN')
 
     def on_ok(self):
         """
@@ -107,3 +108,10 @@ class BuildCoreToolsForm(npyscreen.ActionForm):
 
     def on_cancel(self):
         self.quit()
+
+    def change_forms(self, *args, **keywords):
+        """ Toggles to main """
+        change_to = "MAIN"
+
+        # Tell the VentApp object to change forms.
+        self.parentApp.change_form(change_to)

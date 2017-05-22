@@ -362,14 +362,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.parentApp.change_form("SERVICES")
 
     def change_forms(self, *args, **keywords):
-        """
-        Checks which form is currently displayed and toggles it to the other
-        one
-        """
-        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit":
-            change_to = "MAIN"
-        else:
-            change_to = "HELP"
+        """ Toggles back and forth between help """
+        change_to = "HELP"
 
         # Tell the VentApp object to change forms.
         self.parentApp.change_form(change_to)

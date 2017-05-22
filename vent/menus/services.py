@@ -28,16 +28,11 @@ class ServicesForm(npyscreen.FormBaseNew):
 
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms,'^Q': self.exit})
+        self.add_handlers({"^T": self.change_forms,"^Q": self.exit})
         self.services_tft = self.add(npyscreen.TitleFixedText, name='No services running.', value="")
 
     def exit(self, *args, **keywords):
-        os.system('reset')
-        os.system('stty sane')
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+        self.parentApp.switchForm('MAIN')
 
     def change_forms(self, *args, **keywords):
         """ Toggles back to main """

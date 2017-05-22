@@ -45,18 +45,13 @@ class InventoryForm(npyscreen.FormBaseNew):
 
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms,'^Q': self.exit})
+        self.add_handlers({"^T": self.change_forms,"^Q": self.exit})
         self.add(npyscreen.TitleFixedText, name='Inventory items:', value='')
         self.inventory_mle = self.add(npyscreen.Pager,
                                       values=['Checking for plugins in the inventory, please wait...'])
 
     def exit(self, *args, **keywords):
-        os.system('reset')
-        os.system('stty sane')
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+        self.parentApp.switchForm('MAIN')
 
     def change_forms(self, *args, **keywords):
         """ Toggles back to main """
