@@ -40,7 +40,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 popup(de)
 
         # give a little extra time for file descriptors to close
-        time.sleep(0.01)
+        time.sleep(0.1)
 
         self.addfield.value = Timestamp()
         self.addfield.display()
