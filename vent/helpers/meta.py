@@ -86,7 +86,7 @@ def Gpu():
         d_client = docker.from_env()
         nvidia_image = d_client.images.list(name='nvidia/cuda:8.0-runtime')
         if len(nvidia_image) > 0:
-            proc = subprocess.Popen(['nvidia-docker run --rm nvidia/cuda:8.0-runtime nvidia-smi -L'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+            proc = subprocess.Popen(['nvidia-docker run --rm nvidia/cuda:8.0-runtime nvidia-smi -L'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True)
             gpus = proc.stdout.read()
             if gpus:
                 for line in gpus.strip().split("\n"):
