@@ -6,9 +6,11 @@ from vent.api.actions import Action
 
 class CoreInventoryForm(npyscreen.FormBaseNew):
     """ Core Inventory form for the Vent CLI """
-    action = Action()
+    action = None
     def while_waiting(self):
         """ Update the text with the core tools in the inventory when nothing is happening """
+        if self.action is None:
+            self.action = Action()
         # include only core tools in this inventory
         inventory = self.action.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled'])
         value = "Tools for each plugin found:\n"

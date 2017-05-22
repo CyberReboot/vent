@@ -8,6 +8,8 @@ from docker.errors import DockerException
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
+from vent.helpers.meta import Cpu
+from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
@@ -134,41 +136,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             npyscreen.notify_confirm("Done installing core containers.",
                                      title='Installed core containers')
         elif action == 'build':
-            original_images = Images()
-            thr = threading.Thread(target=self.api_action.cores, args=(),
-                                   kwargs={"action":"build",
-                                           "branch":"experimental"})
-            popup(original_images, "images", thr,
-                  'Please wait, building core containers...')
-            npyscreen.notify_confirm("Done building core containers.",
-                                     title='Built core containers')
+            self.parentApp.change_form('BUILDCORETOOLS')
         elif action == 'start':
-            original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.cores, args=(),
-                                   kwargs={"action":"start",
-                                           "branch":"experimental"})
-            popup(original_containers, "containers", thr,
-                  'Please wait, starting core containers...')
-            npyscreen.notify_confirm("Done starting core containers.",
-                                     title='Started core containers')
+            self.parentApp.change_form('STARTCORETOOLS')
         elif action == 'stop':
-            original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.cores, args=(),
-                                   kwargs={"action":"stop",
-                                           "branch":"experimental"})
-            popup(original_containers, "containers", thr,
-                  'Please wait, stopping core containers...')
-            npyscreen.notify_confirm("Done stopping core containers.",
-                                     title='Stopped core containers')
+            self.parentApp.change_form('STOPCORETOOLS')
         elif action == 'clean':
-            original_containers = Containers()
-            thr = threading.Thread(target=self.api_action.cores, args=(),
-                                   kwargs={"action":"clean",
-                                           "branch":"experimental"})
-            popup(original_containers, "containers", thr,
-                  'Please wait, cleaning core containers...')
-            npyscreen.notify_confirm("Done cleaning core containers.",
-                                     title='Cleaned core containers')
+            self.parentApp.change_form('CLEANCORETOOLS')
         elif action == "inventory":
             self.parentApp.change_form('COREINVENTORY')
         elif action == 'update':
@@ -209,40 +183,20 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         original_containers = Containers()
         if action == 'add':
             self.parentApp.change_form('ADD')
+        elif action == "build":
+            self.parentApp.change_form('BUILDTOOLS')
         elif action == 'start':
-            # TODO pass in actual args and kwargs
-            # TODO show a build popup first to improve UX
-            thr = threading.Thread(target=self.api_action.start, args=(),
-                                   kwargs={})
-            popup(original_containers, thr,
-                  'Please wait, starting containers...')
-            npyscreen.notify_confirm("Done starting containers.",
-                                     title='Started Containers')
+            self.parentApp.change_form('STARTTOOLS')
         elif action == 'stop':
-            # TODO pass in actual args and kwargs
-            thr = threading.Thread(target=self.api_action.stop, args=(),
-                                   kwargs={})
-            popup(original_containers, thr,
-                  'Please wait, stopping containers...')
-            npyscreen.notify_confirm("Done stopping containers.",
-                                     title='Stopped Containers')
+            self.parentApp.change_form('STOPTOOLS')
         elif action == 'clean':
-            # TODO pass in actual args and kwargs
-            thr = threading.Thread(target=self.api_action.clean, args=(),
-                                   kwargs={})
-            popup(original_containers, thr,
-                  'Please wait, cleaning containers...')
-            npyscreen.notify_confirm("Done cleaning containers.",
-                                     title='Cleaned Containers')
+            self.parentApp.change_form('CLEANTOOLS')
         elif action == "inventory":
             self.parentApp.change_form('INVENTORY')
         elif action == "update":
             # !! TODO
             pass
         elif action == "remove":
-            # !! TODO
-            pass
-        elif action == "build":
             # !! TODO
             pass
         return
@@ -264,6 +218,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
                                   labelColor='DEFAULT', value=Uptime())
+        self.cpufield = self.add(npyscreen.TitleFixedText, name='Logical CPUs:',
+                                 labelColor='DEFAULT', value=Cpu())
+        self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
+                                 labelColor='DEFAULT', value=Gpu())
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
@@ -307,19 +265,19 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Inventory of core tools',
                         onSelect=self.core_tools,
                         arguments=['inventory'], shortcut='v')
-        self.m2.addItem(text='Build all core tools',
+        self.m2.addItem(text='Build core tools',
                         onSelect=self.core_tools,
                         arguments=['build'], shortcut='b')
         self.m2.addItem(text='Update all core tools (To Be Implemented...)',
                         onSelect=self.core_tools,
                         arguments=['update'], shortcut='u')
-        self.m2.addItem(text='Start all core tools',
+        self.m2.addItem(text='Start core tools',
                         onSelect=self.core_tools,
                         arguments=['start'], shortcut='s')
-        self.m2.addItem(text='Stop all core tools',
+        self.m2.addItem(text='Stop core tools',
                         onSelect=self.core_tools,
                         arguments=['stop'], shortcut='p')
-        self.m2.addItem(text='Clean all core tools',
+        self.m2.addItem(text='Clean core tools',
                         onSelect=self.core_tools,
                         arguments=['clean'], shortcut='c')
         self.m2.addItem(text='Remove all core tools (To Be Implemented...)',
@@ -338,16 +296,16 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Remove plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['remove'], shortcut='r')
-        self.m3.addItem(text='Build plugins (To Be Implemented...)',
+        self.m3.addItem(text='Build plugin tools',
                         onSelect=self.perform_action,
                         arguments=['build'], shortcut='b')
-        self.m3.addItem(text='Start plugins (To Be Implemented...)',
+        self.m3.addItem(text='Start plugin tools',
                         onSelect=self.perform_action,
                         arguments=['start'], shortcut='s')
-        self.m3.addItem(text='Stop plugins (To Be Implemented...)',
+        self.m3.addItem(text='Stop plugin tools',
                         onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
-        self.m3.addItem(text='Clean plugins (To Be Implemented...)',
+        self.m3.addItem(text='Clean plugin tools',
                         onSelect=self.perform_action,
                         arguments=['clean'], shortcut='c')
         self.m3.addItem(text='Services Running', onSelect=self.services_form,

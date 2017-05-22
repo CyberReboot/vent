@@ -183,10 +183,10 @@ class Action:
                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == link:
                            tool_dict[container]['links'][tool_dict[c]['name']] = tool_dict[container]['links'].pop(link)
            if 'volumes_from' in tool_dict[container]:
-               # !! TODO
+               # !! TODO update volumes_from
                pass
            if 'network_mode' in tool_dict[container]:
-               # !! TODO
+               # !! TODO update network_mode
                pass
 
        # remove tmp_names
@@ -239,6 +239,8 @@ class Action:
 
    @staticmethod
    def update():
+       # if repo, pull and build
+       # if registry image, pull
        # !! TODO
        return
 
@@ -438,42 +440,29 @@ class Action:
    def inventory(self, choices=None):
        """ Return a dictionary of the inventory items and status """
        # choices: repos, core, tools, images, built, running, enabled
-       items = {}
+       items = {'repos':[], 'core':[], 'tools':[], 'images':[],
+                'built':[], 'running':[], 'enabled':[]}
 
        tools = self.plugin.tools()
-       try:
-           for choice in choices:
-               for tool in tools:
+       for choice in choices:
+           for tool in tools:
+               try:
                    if choice == 'repos':
                        if 'repo' in tool:
-                           if choice not in items:
-                               items[choice] = [tool['repo']]
-                           elif tool['repo'] and tool['repo'] not in items[choice]:
+                           if tool['repo'] and tool['repo'] not in items[choice]:
                                items[choice].append(tool['repo'])
                    elif choice == 'core':
                        if 'groups' in tool:
                            if 'core' in tool['groups']:
-                               if choice not in items:
-                                   items[choice] = [(tool['section'], tool['name'])]
-                               else:
-                                   items[choice].append((tool['section'], tool['name']))
+                               items[choice].append((tool['section'], tool['name']))
                    elif choice == 'tools':
-                       if choice not in items:
-                           items[choice] = [(tool['section'], tool['name'])]
-                       else:
-                           items[choice].append((tool['section'], tool['name']))
+                       items[choice].append((tool['section'], tool['name']))
                    elif choice == 'images':
                        # TODO also check against docker
                        images = Images()
-                       if choice not in items:
-                           items[choice] = [(tool['section'], tool['name'], tool['image_name'])]
-                       else:
-                           items[choice].append((tool['section'], tool['name'], tool['image_name']))
+                       items[choice].append((tool['section'], tool['name'], tool['image_name']))
                    elif choice == 'built':
-                       if choice not in items:
-                           items[choice] = [(tool['section'], tool['name'], tool['built'])]
-                       else:
-                           items[choice].append((tool['section'], tool['name'], tool['built']))
+                       items[choice].append((tool['section'], tool['name'], tool['built']))
                    elif choice == 'running':
                        containers = Containers()
                        status = 'not running'
@@ -483,19 +472,13 @@ class Action:
                            image_name = image_name.replace('/', '-')
                            if container[0] == image_name:
                                status = container[1]
-                       if choice not in items:
-                           items[choice] = [(tool['section'], tool['name'], status)]
-                       else:
-                           items[choice].append((tool['section'], tool['name'], status))
+                       items[choice].append((tool['section'], tool['name'], status))
                    elif choice == 'enabled':
-                       if choice not in items:
-                           items[choice] = [(tool['section'], tool['name'], tool['enabled'])]
-                       else:
-                           items[choice].append((tool['section'], tool['name'], tool['enabled']))
+                       items[choice].append((tool['section'], tool['name'], tool['enabled']))
                    else:
                        # unknown choice
                        pass
-       except Exception as e: # pragma: no cover
-           pass
+               except Exception as e: # pragma: no cover
+                   pass
 
        return items

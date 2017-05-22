@@ -233,11 +233,14 @@ class Plugin:
         self.branch = branch
         self.build = build
         self.groups = groups
+
+        # TODO these need to be implemented
         self.version_alias = version_alias
         self.wild = wild
         self.remove_old = remove_old
         self.disable_old = disable_old
         self.limit_groups = limit_groups
+
         response = (True, None)
 
         status_code, cwd = self.clone(repo, user=user, pw=pw)
@@ -441,13 +444,37 @@ class Plugin:
                     groups = (True, "none")
                 if not name[0]:
                     name = (True, image_name)
-                output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT)
-                image_id = ""
-                for line in output.split("\n"):
-                    if line.startswith("Successfully built "):
-                        image_id = line.split("Successfully built ")[1].strip()
-                template.set_option(section, "built", "yes")
-                template.set_option(section, "image_id", image_id)
+                # pull if '/' in image_name, fallback to build
+                pull = False
+                if '/' in image_name:
+                    try:
+                        self.logger.info("Trying to pull "+image_name)
+                        output = subprocess.check_output(shlex.split("docker pull "+image_name), stderr=subprocess.STDOUT)
+                        for line in output.split('\n'):
+                            if line.startswith("Digest: sha256:"):
+                                image_id = line.split("Digest: sha256:")[1][:12]
+                        if image_id:
+                            template.set_option(section, "built", "yes")
+                            template.set_option(section, "image_id", image_id)
+                            template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                            status = (True, "Pulled "+image_name)
+                            self.logger.info(str(status))
+                        else:
+                            template.set_option(section, "built", "failed")
+                            template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                            status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
+                            self.logger.warning(str(status))
+                        pull = True
+                    except Exception as e:
+                        self.logger.warning("Failed to pull image, going to build instead: "+str(e))
+                if not pull:
+                    output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT)
+                    image_id = ""
+                    for line in output.split("\n"):
+                        if line.startswith("Successfully built "):
+                            image_id = line.split("Successfully built ")[1].strip()
+                    template.set_option(section, "built", "yes")
+                    template.set_option(section, "image_id", image_id)
             except Exception as e:
                 template.set_option(section, "built", "failed")
         else:
@@ -535,13 +562,11 @@ class Plugin:
                 tools.append(options)
         return tools
 
-    # !! TODO name or repo or group ?
-    def remove(self, name=None, repo=None, namespace=None, branch=None):
+    def remove(self, name=None, repo=None, namespace=None, branch=None, groups=None):
         """
         Remove tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be removed
         """
-        # !! TODO potentially remove images, cloned repos
         # initialize
         args = locals()
         status = (False, None)
@@ -549,7 +574,58 @@ class Plugin:
         # get resulting dictionary of sections with options that match constraints
         results, template = self.constraint_options(args, [])
         for result in results:
+            response, image_name = template.option(result, 'image_name')
+
+            # check for container and remove
+            container_name = image_name.replace(':', '-').replace('/', '-')
+            try:
+                container = self.d_client.containers.get(container_name)
+                response = container.remove(v=True, force=True)
+            except Exception as e:
+                pass
+
+            # check for image and remove
+            try:
+                response = self.d_client.images.remove(image_name)
+                self.logger.info(response)
+                self.logger.info("Removing plugin image: "+image_name)
+            except Exception as e:
+                pass
+
+            # remove tool from the manifest
             status = template.del_section(result)
+            self.logger.info("Removing plugin tool: "+result)
+        # TODO if all tools from a repo have been removed, remove the repo
+        template.write_config()
+        return status
+
+    def update(self, name=None, repo=None, namespace=None, branch=None, groups=None):
+        """
+        Update tool (name) or repository, repository is the url. If no
+        arguments are specified, all tools will be updated
+        """
+        # initialize
+        args = locals()
+        status = (False, None)
+        options = ['branch', 'groups']
+
+        # get resulting dictionary of sections with options that match constraints
+        results, template = self.constraint_options(args, options)
+        for result in results:
+            # check for container and remove
+            container_name = image_name.replace(':', '-').replace('/', '-')
+            try:
+                container = self.d_client.containers.get(container_name)
+                response = container.remove(v=True, force=True)
+            except Exception as e:
+                pass
+
+            # TODO git pull
+            # TODO build
+            # TODO docker pull
+            # TODO update tool in the manifest
+
+            self.logger.info("Updating plugin tool: "+result)
         template.write_config()
         return status
 
