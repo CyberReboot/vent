@@ -13,7 +13,13 @@ from vent.menus.core_inventory import CoreInventoryForm
 from vent.menus.choose_tools import ChooseToolsForm
 from vent.menus.clean_core_tools import CleanCoreToolsForm
 from vent.menus.clean_tools import CleanToolsForm
-from vent.menus.help import HelpForm
+from vent.menus.help.concepts import HelpConceptsForm
+from vent.menus.help.cores import HelpCoresForm
+from vent.menus.help.filetypes import HelpFiletypesForm
+from vent.menus.help.help import HelpForm
+from vent.menus.help.plugins import HelpPluginsForm
+from vent.menus.help.status import HelpStatusForm
+from vent.menus.help.tools import HelpToolsForm
 from vent.menus.inventory import InventoryForm
 from vent.menus.main import MainForm
 from vent.menus.services import ServicesForm
