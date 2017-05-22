@@ -211,8 +211,18 @@ def Core(branch="master", **kargs):
 
 def Timestamp():
     """ Get the current datetime in UTC """
-    return str(datetime.datetime.now())+" UTC"
+    timestamp = ""
+    try:
+        timestamp = str(datetime.datetime.now())+" UTC"
+    except Exception as e:
+        pass
+    return timestamp
 
 def Uptime():
     """ Get the current uptime information """
-    return str(subprocess.check_output(["uptime"], close_fds=True))[1:]
+    uptime = ""
+    try:
+        uptime = str(subprocess.check_output(["uptime"], close_fds=True))[1:]
+    except Exception as e:
+        pass
+    return uptime
