@@ -46,9 +46,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
             self.triggered = 1
 
     def quit(self, *args, **kwargs):
-        # Clean up class variables
-        self.parentApp.repo_value = {}
-        self.parentApp.switchForm('MAIN')
+        self.parentApp.switchForm(None)
 
     def on_ok(self):
         """

@@ -45,9 +45,7 @@ class AddOptionsForm(npyscreen.ActionForm):
                 i += 3
 
     def quit(self, *args, **kwargs):
-        # Clean up class variables
-        self.parentApp.repo_value = {}
-        self.parentApp.switchForm('MAIN')
+        self.parentApp.switchForm(None)
 
     def on_ok(self):
         """
