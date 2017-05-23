@@ -80,7 +80,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         core_str += ", "+str(built+custom_built)+"/"+normal+" built"
         if custom_built > 0:
             core_str += " ("+str(custom_built)+" custom)"
-        core_str += ", "+str(installed+custom_installed)+"/"+normal+" installed" 
+        core_str += ", "+str(installed+custom_installed)+"/"+normal+" installed"
         if custom_built > 0:
             core_str += " ("+str(custom_installed)+" custom)"
         self.addfield5.value = core_str
@@ -199,6 +199,23 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         elif action == "remove":
             # !! TODO
             pass
+        # tutorial forms
+        elif action == "background":
+            self.parentApp.change_form('TUTORIALBACKGROUND')
+        elif action == "terminology":
+            self.parentApp.change_form('TUTORIALTERMINOLOGY')
+        elif action == "setup":
+            self.parentApp.change_form('TUTORIALGETTINGSETUP')
+        elif action == "building_cores":
+            self.parentApp.change_form('TUTORIALBUILDINGCORES')
+        elif action == "starting_cores":
+            self.parentApp.change_form('TUTORIALSTARTINGCORES')
+        elif action == "adding_plugins":
+            self.parentApp.change_form('TUTORIALADDINGPLUGINS')
+        elif action == "adding_files":
+            self.parentApp.change_form('TUTORIALADDINGFILES')
+        elif action == "setting_up_services":
+            self.parentApp.change_form('TUTORIALSETTINGUPSERVICES')
         return
 
     def system_commands(self, action):
@@ -258,7 +275,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
        \ V /  __/ | | | |_
         \_/ \___|_| |_|\__|
                            """)
-        self.m2 = self.add_menu(name="Core Tools", shortcut="t")
+        self.m2 = self.add_menu(name="Core Tools", shortcut="c")
         self.m2.addItem(text='Install all latest core tools',
                         onSelect=self.core_tools,
                         arguments=['install'], shortcut='i')
@@ -311,26 +328,42 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Services Running', onSelect=self.services_form,
                         arguments=[])
         self.m4 = self.add_menu(name="Logs (To Be Implemented...)", shortcut="l")
-        self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="c")
+        self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="s")
         self.m5.addItem(text='Reset (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
         self.m5.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
+        self.m6 = self.add_menu(name="Tutorials", shortcut="t")
+        self.s1 = self.m6.addNewSubmenu(name="About Vent", shortcut='v')
+        self.s1.addItem(text="Background", onSelect=self.perform_action,
+                        arguments=['background'], shortcut='b')
+        self.s1.addItem(text="Terminology", onSelect=self.perform_action,
+                        arguments=['terminology'], shortcut='t')
+        self.s1.addItem(text="Getting Setup", onSelect=self.perform_action,
+                        arguments=['setup'], shortcut='s')
+        self.s2 = self.m6.addNewSubmenu(name="Working with Cores", shortcut='c')
+        self.s2.addItem(text="Building Cores", onSelect=self.perform_action,
+                        arguments=['building_cores'], shortcut='b')
+        self.s2.addItem(text="Starting Cores", onSelect=self.perform_action,
+                        arguments=['starting_cores'], shortcut='c')
+        self.s3 = self.m6.addNewSubmenu(name="Working with Plugins", shortcut='p')
+        self.s3.addItem(text="Adding Plugins", onSelect=self.perform_action,
+                        arguments=['adding_plugins'], shortcut='a')
+        self.s4 = self.m6.addNewSubmenu(name="Files", shortcut='f')
+        self.s4.addItem(text="Adding Files", onSelect=self.perform_action,
+                        arguments=['adding_files'], shortcut='a')
+        self.s5 = self.m6.addNewSubmenu(name="Services", shortcut='s')
+        self.s5.addItem(text="Setting up Services", onSelect=self.perform_action,
+                        arguments=['setting_up_services'], shortcut='s')
 
     def services_form(self, *args, **keywords):
         self.parentApp.change_form("SERVICES")
 
     def change_forms(self, *args, **keywords):
-        """
-        Checks which form is currently displayed and toggles it to the other
-        one
-        """
-        if self.name == "Help\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit":
-            change_to = "MAIN"
-        else:
-            change_to = "HELP"
+        """ Toggles back and forth between help """
+        change_to = "HELP"
 
         # Tell the VentApp object to change forms.
         self.parentApp.change_form(change_to)

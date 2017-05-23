@@ -20,6 +20,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
         return tools
 
     def create(self):
+        self.add_handlers({"^Q": self.quit})
         self.add(npyscreen.TitleText, name='Select which tools to add from each branch selected:', editable=False)
 
     def while_waiting(self):
@@ -101,4 +102,3 @@ class ChooseToolsForm(npyscreen.ActionForm):
 
     def on_cancel(self):
         self.quit()
-
