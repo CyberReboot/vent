@@ -36,8 +36,8 @@ def test_prep_start():
                           tools=[('kibana','')],
                           groups='foo')
     assert status[0] == True
-    status = instance.start(name='kibana', branch='experimental')
-    assert status[0] == True
+    status = instance.prep_start(name='kibana', branch='experimental')
+    assert type(status) == dict
     status = instance.add('https://github.com/cyberreboot/vent',
                           branch='experimental',
                           tools=[('vent/core/file-drop',''),
