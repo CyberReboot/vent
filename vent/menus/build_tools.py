@@ -52,7 +52,7 @@ class BuildToolsForm(npyscreen.ActionForm):
         return
 
     def quit(self, *args, **kwargs):
-        self.parentApp.switchForm('MAIN')
+        self.parentApp.switchForm(None)
 
     def on_ok(self):
         """
