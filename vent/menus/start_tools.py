@@ -101,6 +101,7 @@ class StartToolsForm(npyscreen.ActionForm):
         original_containers = Containers()
 
         api_action = Action()
+        tool_dict = {}
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
                 self.logger.info(tool)
@@ -109,12 +110,10 @@ class StartToolsForm(npyscreen.ActionForm):
                     if t.startswith('/:'):
                         t = " "+t[1:]
                     t = t.split(":")
-                    thr = threading.Thread(target=api_action.start, args=(),
-                                           kwargs={'name':t[0],
-                                                   'branch':t[1],
-                                                   'version':t[2]})
-                    popup(original_containers, "containers", thr,
-                          'Please wait, starting containers...')
+                    tool_dict.update(api_action.prep_start(name=t[0], branch=t[1], version=t[2]))
+        thr = threading.Thread(target=api_action.start, args=(), kwargs={'tool_dict':tool_dict})
+        popup(original_containers, "containers", thr,
+              'Please wait, starting containers...')
         npyscreen.notify_confirm("Done starting containers.",
                                  title='Started containers')
         self.quit()

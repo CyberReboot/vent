@@ -65,7 +65,7 @@ class Action:
 
        return status
 
-   def start(self,
+   def prep_start(self,
              repo=None,
              name=None,
              groups=None,
@@ -128,12 +128,18 @@ class Action:
                        tool_dict[container_name][option[0]] = option[1]
 
            # get temporary name for links, etc.
-           # TODO need to get all names for all possible containers
            status = vent_template.section('info')
-           if status[0]:
-               for option in status[1]:
-                   if option[0] == 'name':
-                       tool_dict[container_name]['tmp_name'] = option[1]
+           plugin_config = Template(template=self.plugin.manifest)
+           status, plugin_sections = plugin_config.sections()
+           for plugin_section in plugin_sections:
+               status = plugin_config.option(plugin_section, "link_name")
+               image_status = plugin_config.option(plugin_section, "image_name")
+               if status[0] and image_status[0]:
+                   cont_name = image_status[1].replace(':','-')
+                   cont_name = cont_name.replace('/','-')
+                   if cont_name not in tool_dict:
+                       tool_dict[cont_name] = {'image':image_status[1], 'name':cont_name, 'start':False}
+                   tool_dict[cont_name]['tmp_name'] = status[1]
 
            # add extra labels
            if 'labels' not in tool_dict[container_name]:
@@ -194,6 +200,20 @@ class Action:
            if 'tmp_name' in tool_dict[c]:
                del tool_dict[c]['tmp_name']
 
+       # remove containers that shouldn't be started
+       for c in tool_dict.keys():
+           if 'start' in tool_dict[c] and not tool_dict[c]['start']:
+               del tool_dict[c]
+
+       return tool_dict
+
+   def start(self, tool_dict):
+       """
+       Start a set of tools that match the parameters given, if no parameters
+       are given, start all installed tools on the master branch at verison
+       HEAD that are enabled
+       """
+       status = (True, None)
        # check start priorities (priority of groups is alphabetical for now)
        group_orders = {}
        groups = []
