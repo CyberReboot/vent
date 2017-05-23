@@ -51,6 +51,8 @@ class AddOptionsForm(npyscreen.ActionForm):
         """
         Take the branch, commit, and build selection and add them as plugins
         """
+        self.parentApp.repo_value['versions'] = {}
+        self.parentApp.repo_value['build'] = {}
         for branch in self.branch_cb:
             if self.branch_cb[branch].value:
                 # process checkboxes

@@ -53,7 +53,7 @@ class CoreInventoryForm(npyscreen.FormBaseNew):
                                       values=['Checking for core plugins in the inventory, please wait...'])
 
     def exit(self, *args, **keywords):
-        self.parentApp.switchForm('MAIN')
+        self.parentApp.switchForm(None)
 
     def change_forms(self, *args, **keywords):
         """ Toggles back to main """
