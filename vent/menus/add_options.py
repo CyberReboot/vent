@@ -21,6 +21,7 @@ class AddOptionsForm(npyscreen.ActionForm):
         return branches, commits
 
     def create(self):
+        self.add_handlers({"^Q": self.quit})
         self.add(npyscreen.TitleText, name='Branches:', editable=False)
 
     def while_waiting(self):
@@ -61,4 +62,3 @@ class AddOptionsForm(npyscreen.ActionForm):
 
     def on_cancel(self):
         self.quit()
-

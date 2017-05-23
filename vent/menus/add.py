@@ -9,6 +9,7 @@ class AddForm(npyscreen.ActionForm):
     def create(self):
         """ Create widgets for AddForm """
         # !! TODO have option for image to pull from a registry with tag
+        self.add_handlers({"^T": self.change_forms, "^Q": self.quit})
         self.repo = self.add(npyscreen.TitleText, name='Repository',
                              value='https://github.com/cyberreboot/vent-plugins')
         self.user = self.add(npyscreen.TitleText, name='Username')
@@ -43,3 +44,10 @@ class AddForm(npyscreen.ActionForm):
 
     def on_cancel(self):
         self.quit()
+
+    def change_forms(self, *args, **keywords):
+        """ Toggles back and forth between help """
+        change_to = "HELP"
+
+        # Tell the VentApp object to change forms.
+        self.parentApp.change_form(change_to)

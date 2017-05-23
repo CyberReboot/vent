@@ -16,6 +16,7 @@ class BuildToolsForm(npyscreen.ActionForm):
     logger = Logger(__name__)
 
     def create(self):
+        self.add_handlers({"^T": self.change_forms, "^Q": self.quit})
         self.add(npyscreen.TitleText, name='Select which tools to build (only plugin tools are shown):', editable=False)
 
     def while_waiting(self):
@@ -108,3 +109,10 @@ class BuildToolsForm(npyscreen.ActionForm):
 
     def on_cancel(self):
         self.quit()
+
+    def change_forms(self, *args, **keywords):
+        """ Toggles back and forth between main """
+        change_to = "MAIN"
+
+        # Tell the VentApp object to change forms.
+        self.parentApp.change_form(change_to)
