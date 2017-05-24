@@ -159,7 +159,7 @@ class Action:
                # add labels for groups
                tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
                # send logs to syslog
-               if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
+               if 'syslog' not in sections[section]['groups']:
                    tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
                # mount necessary directories
                if 'files' in sections[section]['groups']:
@@ -170,8 +170,7 @@ class Action:
                    if files[0]:
                        tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
            else:
-               # !! TODO link logging driver syslog container
-               pass
+               tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
 
            # add label for priority
            status = vent_template.section('settings')
@@ -247,17 +246,26 @@ class Action:
                    if container_tuple[1] not in started_containers:
                        started_containers.append(container_tuple[1])
                        try:
-                           # !! TODO check if container exists and start it instead of run
-                           container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
-                           self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
+                           try:
+                               container = self.d_client.containers.get(container_tuple[1])
+                               container.start()
+                               self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container.short_id))
+                           except Exception as err:
+                               container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
+                               self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
                        except Exception as e:
                            self.logger.warning("failed to start "+str(container_tuple[1])+" because: "+str(e))
 
        # start the rest of the containers that didn't have any priorities set
        for container in containers_remaining:
            try:
-               container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
-               self.logger.info("started "+str(container)+" with ID: "+str(container_id))
+               try:
+                   c = self.d_client.containers.get(container)
+                   c.start()
+                   self.logger.info("started "+str(container)+" with ID: "+str(c.short_id))
+               except Exception as err:
+                   container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
+                   self.logger.info("started "+str(container)+" with ID: "+str(container_id))
            except Exception as e:
                self.logger.warning("failed to start "+str(container)+" because: "+str(e))
 
