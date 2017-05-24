@@ -159,8 +159,10 @@ class Action:
                # add labels for groups
                tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
                # send logs to syslog
-               if 'syslog' not in sections[section]['groups']:
+               if 'syslog' not in sections[section]['groups'] and 'core' in in sections[section]['groups']:
                    tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
+               if 'syslog' not in sections[section]['groups']:
+                   tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
                # mount necessary directories
                if 'files' in sections[section]['groups']:
                    if 'volumes' in tool_dict[container_name]:
@@ -170,7 +172,7 @@ class Action:
                    if files[0]:
                        tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
            else:
-               tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
+               tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
 
            # add label for priority
            status = vent_template.section('settings')
