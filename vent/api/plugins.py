@@ -395,6 +395,12 @@ class Plugin:
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
                 template.set_option(section, "image_name", image_name)
+                vent_template = Template(template=os.path.join(match_path, 'vent.template'))
+                vent_status, response = vent_template.option("info", "name")
+                if vent_status:
+                    template.set_option(section, "link_name", response)
+                else:
+                    template.set_option(section, "link_name", match[0].split('/')[-1])
                 commit_id = None
                 if self.version == 'HEAD':
                     os.chdir(match_path)

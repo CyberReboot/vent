@@ -45,6 +45,8 @@ class VentApp(npyscreen.NPSAppManaged):
     first_time = paths.ensure_file(paths.init_file)
     if first_time[0] == True and first_time[1] != "exists":
         npyscreen.NPSAppManaged.STARTING_FORM = "TUTORIALINTRO"
+    else:
+        npyscreen.NPSAppManaged.STARTING_FORM = "MAIN"
 
     def onStart(self):
         """ Override onStart method for npyscreen """
