@@ -159,7 +159,7 @@ class Action:
                # add labels for groups
                tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
                # send logs to syslog
-               if 'syslog' not in sections[section]['groups'] and 'core' in in sections[section]['groups']:
+               if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
                    tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
                if 'syslog' not in sections[section]['groups']:
                    tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
