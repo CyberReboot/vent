@@ -48,8 +48,8 @@ class Plugin:
             cwd = cwd[1]
         else:
             return branches
-        junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT)
-        branch_output = subprocess.check_output(shlex.split("git branch -a"), stderr=subprocess.STDOUT)
+        junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT, close_fds=True)
+        branch_output = subprocess.check_output(shlex.split("git branch -a"), stderr=subprocess.STDOUT, close_fds=True)
         branch_output = branch_output.split("\n")
         for branch in branch_output:
             b = branch.strip()
@@ -62,7 +62,7 @@ class Plugin:
 
         branches = list(set(branches))
         for branch in branches:
-            junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT)
+            junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
         try:
             os.chdir(cwd)
         except Exception as e:
@@ -81,7 +81,7 @@ class Plugin:
         else:
             return commits
         for branch in branches[1]:
-            branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT)
+            branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT, close_fds=True)
             branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
             commits.append((branch, branch_output))
         try:
@@ -143,14 +143,14 @@ class Plugin:
 
         if response[0] and response[1] == 'exists':
             try:
-                status = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT)
+                status = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT, close_fds=True)
                 return 0, cwd
             except Exception as e:
                 return -1, cwd
 
         # ensure cloning still works even if ssl is broken...probably should be improved
         try:
-            status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT)
+            status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT, close_fds=True)
         except Exception as e: # pragma: no cover
             return -1, cwd
 
@@ -161,7 +161,7 @@ class Plugin:
 
         # clone repo and build tools
         try:
-            status = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT)
+            status = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
             status_code = 0
         except subprocess.CalledProcessError as e:
             status_code = e.returncode
@@ -233,11 +233,14 @@ class Plugin:
         self.branch = branch
         self.build = build
         self.groups = groups
+
+        # TODO these need to be implemented
         self.version_alias = version_alias
         self.wild = wild
         self.remove_old = remove_old
         self.disable_old = disable_old
         self.limit_groups = limit_groups
+
         response = (True, None)
 
         status_code, cwd = self.clone(repo, user=user, pw=pw)
@@ -395,7 +398,7 @@ class Plugin:
                 commit_id = None
                 if self.version == 'HEAD':
                     os.chdir(match_path)
-                    commit_id = subprocess.check_output(shlex.split("git rev-parse --short HEAD"), stderr=subprocess.STDOUT).strip()
+                    commit_id = subprocess.check_output(shlex.split("git rev-parse --short HEAD"), stderr=subprocess.STDOUT, close_fds=True).strip()
                     template.set_option(section, "commit_id", commit_id)
                 if head:
                     # no need to store previous commits if not HEAD, since
@@ -441,13 +444,37 @@ class Plugin:
                     groups = (True, "none")
                 if not name[0]:
                     name = (True, image_name)
-                output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT)
-                image_id = ""
-                for line in output.split("\n"):
-                    if line.startswith("Successfully built "):
-                        image_id = line.split("Successfully built ")[1].strip()
-                template.set_option(section, "built", "yes")
-                template.set_option(section, "image_id", image_id)
+                # pull if '/' in image_name, fallback to build
+                pull = False
+                if '/' in image_name:
+                    try:
+                        self.logger.info("Trying to pull "+image_name)
+                        output = subprocess.check_output(shlex.split("docker pull "+image_name), stderr=subprocess.STDOUT, close_fds=True)
+                        for line in output.split('\n'):
+                            if line.startswith("Digest: sha256:"):
+                                image_id = line.split("Digest: sha256:")[1][:12]
+                        if image_id:
+                            template.set_option(section, "built", "yes")
+                            template.set_option(section, "image_id", image_id)
+                            template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                            status = (True, "Pulled "+image_name)
+                            self.logger.info(str(status))
+                        else:
+                            template.set_option(section, "built", "failed")
+                            template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                            status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
+                            self.logger.warning(str(status))
+                        pull = True
+                    except Exception as e:
+                        self.logger.warning("Failed to pull image, going to build instead: "+str(e))
+                if not pull:
+                    output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT, close_fds=True)
+                    image_id = ""
+                    for line in output.split("\n"):
+                        if line.startswith("Successfully built "):
+                            image_id = line.split("Successfully built ")[1].strip()
+                    template.set_option(section, "built", "yes")
+                    template.set_option(section, "image_id", image_id)
             except Exception as e:
                 template.set_option(section, "built", "failed")
         else:
@@ -484,9 +511,9 @@ class Plugin:
         if not hasattr(self, 'version'): self.version = 'HEAD'
         response = (True, None)
         try:
-            status = subprocess.check_output(shlex.split("git checkout " + self.branch), stderr=subprocess.STDOUT)
-            status = subprocess.check_output(shlex.split("git pull"), stderr=subprocess.STDOUT)
-            status = subprocess.check_output(shlex.split("git reset --hard " + self.version), stderr=subprocess.STDOUT)
+            status = subprocess.check_output(shlex.split("git checkout " + self.branch), stderr=subprocess.STDOUT, close_fds=True)
+            status = subprocess.check_output(shlex.split("git pull"), stderr=subprocess.STDOUT, close_fds=True)
+            status = subprocess.check_output(shlex.split("git reset --hard " + self.version), stderr=subprocess.STDOUT, close_fds=True)
             response = (True, status)
         except Exception as e: # pragma: no cover
             response = (False, os.getcwd()+str(e))
@@ -535,13 +562,11 @@ class Plugin:
                 tools.append(options)
         return tools
 
-    # !! TODO name or repo or group ?
-    def remove(self, name=None, repo=None, namespace=None, branch=None):
+    def remove(self, name=None, repo=None, namespace=None, branch=None, groups=None):
         """
         Remove tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be removed
         """
-        # !! TODO potentially remove images, cloned repos
         # initialize
         args = locals()
         status = (False, None)
@@ -549,7 +574,58 @@ class Plugin:
         # get resulting dictionary of sections with options that match constraints
         results, template = self.constraint_options(args, [])
         for result in results:
+            response, image_name = template.option(result, 'image_name')
+
+            # check for container and remove
+            container_name = image_name.replace(':', '-').replace('/', '-')
+            try:
+                container = self.d_client.containers.get(container_name)
+                response = container.remove(v=True, force=True)
+            except Exception as e:
+                pass
+
+            # check for image and remove
+            try:
+                response = self.d_client.images.remove(image_name)
+                self.logger.info(response)
+                self.logger.info("Removing plugin image: "+image_name)
+            except Exception as e:
+                pass
+
+            # remove tool from the manifest
             status = template.del_section(result)
+            self.logger.info("Removing plugin tool: "+result)
+        # TODO if all tools from a repo have been removed, remove the repo
+        template.write_config()
+        return status
+
+    def update(self, name=None, repo=None, namespace=None, branch=None, groups=None):
+        """
+        Update tool (name) or repository, repository is the url. If no
+        arguments are specified, all tools will be updated
+        """
+        # initialize
+        args = locals()
+        status = (False, None)
+        options = ['branch', 'groups']
+
+        # get resulting dictionary of sections with options that match constraints
+        results, template = self.constraint_options(args, options)
+        for result in results:
+            # check for container and remove
+            container_name = image_name.replace(':', '-').replace('/', '-')
+            try:
+                container = self.d_client.containers.get(container_name)
+                response = container.remove(v=True, force=True)
+            except Exception as e:
+                pass
+
+            # TODO git pull
+            # TODO build
+            # TODO docker pull
+            # TODO update tool in the manifest
+
+            self.logger.info("Updating plugin tool: "+result)
         template.write_config()
         return status
 

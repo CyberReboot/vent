@@ -32,7 +32,7 @@ class ServicesForm(npyscreen.FormBaseNew):
         self.services_tft = self.add(npyscreen.TitleFixedText, name='No services running.', value="")
 
     def exit(self, *args, **keywords):
-        self.parentApp.switchForm('MAIN')
+        self.parentApp.switchForm(None)
 
     def change_forms(self, *args, **keywords):
         """ Toggles back to main """

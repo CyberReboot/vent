@@ -17,9 +17,7 @@ class AddForm(npyscreen.ActionForm):
         self.repo.when_value_edited()
 
     def quit(self, *args, **kwargs):
-        # Clean up class variables
-        self.parentApp.repo_value = {}
-        self.parentApp.switchForm('MAIN')
+        self.parentApp.switchForm(None)
 
     def on_ok(self):
         """ Add the repository """

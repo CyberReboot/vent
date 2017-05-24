@@ -45,14 +45,14 @@ class AddOptionsForm(npyscreen.ActionForm):
                 i += 3
 
     def quit(self, *args, **kwargs):
-        # Clean up class variables
-        self.parentApp.repo_value = {}
-        self.parentApp.switchForm('MAIN')
+        self.parentApp.switchForm(None)
 
     def on_ok(self):
         """
         Take the branch, commit, and build selection and add them as plugins
         """
+        self.parentApp.repo_value['versions'] = {}
+        self.parentApp.repo_value['build'] = {}
         for branch in self.branch_cb:
             if self.branch_cb[branch].value:
                 # process checkboxes
