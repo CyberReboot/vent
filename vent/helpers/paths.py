@@ -12,6 +12,7 @@ class PathDirs:
         self.base_dir = base_dir
         self.plugins_dir = base_dir + plugins_dir
         self.meta_dir = meta_dir
+        self.init_file = base_dir+"vent.init"
 
         # make sure the paths exists, if not create them
         self.ensure_dir(self.base_dir)
@@ -20,6 +21,7 @@ class PathDirs:
 
     @staticmethod
     def ensure_dir(path):
+        """ Tries to create directory, if fails, checks if path already exists """
         try:
             os.makedirs(path)
         except OSError as e:
@@ -28,6 +30,19 @@ class PathDirs:
             else:
                 return (False, e)
         return (True, path)
+
+    @staticmethod
+    def ensure_file(path):
+        """ Checks if file exists, if fails, tries to create file """
+        try:
+            exists = os.path.isfile(path)
+            if not exists:
+                with open (path, 'w+') as fname:
+                    fname.write("initialized")
+                return (True, path)
+            return (True, "exists")
+        except OSError as e:
+            return (False, e)
 
     def host_config(self):
         """ Ensure the host configuration file exists """
