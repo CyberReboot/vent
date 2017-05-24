@@ -17,7 +17,7 @@ class Plugin:
         self.manifest = os.path.join(self.path_dirs.meta_dir,
                                      "plugin_manifest.cfg")
         self.d_client = docker.from_env()
-        self.logger = Logger(__name__, **kargs)
+        self.logger = Logger(__name__)
 
     def apply_path(self, repo):
         """ Set path to where the repo is and return original path """
