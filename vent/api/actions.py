@@ -20,7 +20,7 @@ class Action:
        self.d_client = self.plugin.d_client
        self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
                                        "vent.cfg")
-       self.logger = Logger(__name__, **kargs)
+       self.logger = Logger(__name__)
 
    def add(self, repo, tools=None, overrides=None, version="HEAD",
            branch="master", build=True, user=None, pw=None, groups=None,
@@ -88,8 +88,6 @@ class Action:
                   'image_name',
                   'branch',
                   'version']
-       # !! TODO needs to be an array of statuses
-       status = (True, None)
        vent_config = Template(template=self.vent_config)
        files = vent_config.option('main', 'files')
        sections, template = self.plugin.constraint_options(args, options)
@@ -107,6 +105,7 @@ class Action:
            cwd = os.getcwd()
            os.chdir(os.path.join(sections[section]['path']))
            status = self.plugin.checkout()
+           self.logger.info(status)
            os.chdir(cwd)
 
            if run_build:
@@ -115,10 +114,12 @@ class Action:
                                    enabled=enabled,
                                    branch=branch,
                                    version=version)
+               self.logger.info(status)
 
            # set docker settings for container
            vent_template = Template(template_path)
            status = vent_template.section('docker')
+           self.logger.info(status)
            tool_dict[container_name] = {'image':image_name, 'name':container_name}
            if status[0]:
                for option in status[1]:
@@ -129,11 +130,15 @@ class Action:
 
            # get temporary name for links, etc.
            status = vent_template.section('info')
+           self.logger.info(status)
            plugin_config = Template(template=self.plugin.manifest)
            status, plugin_sections = plugin_config.sections()
+           self.logger.info(status)
            for plugin_section in plugin_sections:
                status = plugin_config.option(plugin_section, "link_name")
+               self.logger.info(status)
                image_status = plugin_config.option(plugin_section, "image_name")
+               self.logger.info(image_status)
                if status[0] and image_status[0]:
                    cont_name = image_status[1].replace(':','-')
                    cont_name = cont_name.replace('/','-')
@@ -156,6 +161,8 @@ class Action:
                # send logs to syslog
                if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
                    tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
+               if 'syslog' not in sections[section]['groups']:
+                   tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
                # mount necessary directories
                if 'files' in sections[section]['groups']:
                    if 'volumes' in tool_dict[container_name]:
@@ -165,11 +172,11 @@ class Action:
                    if files[0]:
                        tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
            else:
-               # !! TODO link logging driver syslog container
-               pass
+               tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
 
            # add label for priority
            status = vent_template.section('settings')
+           self.logger.info(status)
            if status[0]:
                for option in status[1]:
                    if option[0] == 'priority':
@@ -241,17 +248,26 @@ class Action:
                    if container_tuple[1] not in started_containers:
                        started_containers.append(container_tuple[1])
                        try:
-                           # !! TODO check if container exists and start it instead of run
-                           container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
-                           self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
+                           try:
+                               container = self.d_client.containers.get(container_tuple[1])
+                               container.start()
+                               self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container.short_id))
+                           except Exception as err:
+                               container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
+                               self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
                        except Exception as e:
                            self.logger.warning("failed to start "+str(container_tuple[1])+" because: "+str(e))
 
        # start the rest of the containers that didn't have any priorities set
        for container in containers_remaining:
            try:
-               container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
-               self.logger.info("started "+str(container)+" with ID: "+str(container_id))
+               try:
+                   c = self.d_client.containers.get(container)
+                   c.start()
+                   self.logger.info("started "+str(container)+" with ID: "+str(c.short_id))
+               except Exception as err:
+                   container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
+                   self.logger.info("started "+str(container)+" with ID: "+str(container_id))
            except Exception as e:
                self.logger.warning("failed to start "+str(container)+" because: "+str(e))
 
