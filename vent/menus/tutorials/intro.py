@@ -28,9 +28,9 @@ class TutorialIntroForm(npyscreen.ActionFormWithMenus):
         taken to the main menu. You can always find the tutorial menu again from
         the main menu.
 
-        Navigating through our menus is simple! Directional arrow keys will let
-        you interact with the page and move between the buttons. ENTER will select
-        a button! At the top left you will notice additional keybindings: CTRL+Q
+        Navigating through our menus is simple! Directional arrow keys or TAB will 
+        let you interact with the page and move between the buttons. ENTER will
+        select a button! At the top left you will notice additional keybindings: CTRL+Q
         will take you back to the main menu for this page. At the bottom right you
         will notice we have a menu for you to access. This menu is specific to the
         tutorial and will allow you to skip to material you want. Press CTRL+X to
