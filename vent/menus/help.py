@@ -94,13 +94,13 @@ class HelpForm(npyscreen.ActionFormWithMenus):
                 system of containers. Knowledge of linking docker containers may
                 be necessary for more complex tasks that require creating multiple
                 containers for your plugin. For Help on building Plugins, check
-                out the Plugin section in our Help Menu."""
+                out the Working with Plugins section in our Help Menu."""
             elif page == 'Tools':
                 info_str = """
                 Tools are the individual building blocks of a Plugin. Each tool
                 should follow S.R.P, and over the entirety of the Plugin should
                 be able accomplish any task desired! For Help on building Tools,
-                check out the Plugin section in our Help Menu."""
+                check out the Working with Plugins section in our Help Menu."""
             elif page == 'Filetypes':
                 info_str = """
                 The filetypes Vent can support are entirely based on the
