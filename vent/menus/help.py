@@ -22,7 +22,7 @@ class HelpForm(npyscreen.ActionFormWithMenus):
 
         For a detailed explanation of Vent Concepts, check out the General
         section in our Help Menu. Topics include: Vent Plugins, Tools, Filetypes,
-        Core, and Statuses!
+        Core, and Statuses! Use ^X to access the menu and ESC to close it.
 
         Select CANCEL or ^Q to return to the Main Menu. Select OK or ^T to return
         to your previous menu.
@@ -105,8 +105,7 @@ class HelpForm(npyscreen.ActionFormWithMenus):
                 info_str = """
                 The filetypes Vent can support are entirely based on the
                 installed Plugins. Each plugin is ultimately responsible for doing
-                some form of processing. Vent currently supports only PCAP files
-                out of the box."""
+                some form of processing."""
             elif page == 'Core':
                 info_str = """
                 Core Tools are tools that Vent comes with out of the box. For
