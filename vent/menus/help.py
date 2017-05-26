@@ -9,26 +9,29 @@ class HelpForm(npyscreen.ActionFormWithMenus):
                                  labelColor='DEFAULT', editable=False)
         self.multifield1 = self.add(npyscreen.MultiLineEdit, editable=False,
                                     value="""
-        About Vent:
-            Vent is a library that includes a CLI designed to serve as a general
-            platform for analyzing network traffic. Built with some basic
-            functionality, Vent serves as a user-friendly platform to build custom
-            plugins on to perform user-defined processing on incoming network data.
-            Vent supports any filetype, but only processes ones based on the types
-            of plugins installed for that instance of Vent. Simply create your
-            plugins, point vent to them & install them, and drop a file in vent to
-            begin processing!
+        About Vent
 
-            For a detailed explanation of Vent Concepts, check out the General
-            section in our Help Menu. Topics include: Vent Plugins, Tools, Filetypes,
-            Core, and Statuses!
+        Vent is a library that includes a CLI designed to serve as a general
+        platform for analyzing network traffic. Built with some basic
+        functionality, Vent serves as a user-friendly platform to build custom
+        plugins on to perform user-defined processing on incoming network data.
+        Vent supports any filetype, but only processes ones based on the types
+        of plugins installed for that instance of Vent. Simply create your
+        plugins, point vent to them & install them, and drop a file in vent to
+        begin processing!
 
-            Select CANCEL or ^Q to return to the Main Menu. Select OK or ^T to return
-            to your previous menu.
+        For a detailed explanation of Vent Concepts, check out the General
+        section in our Help Menu. Topics include: Vent Plugins, Tools, Filetypes,
+        Core, and Statuses!
 
-            PRO TIP: You can use TAB to cycle through options.
+        Select CANCEL or ^Q to return to the Main Menu. Select OK or ^T to return
+        to your previous menu.
+
+        PRO TIP: You can use TAB to cycle through options.
         """)
-        self.m2 = self.add_menu(name="Vent Help", shortcut='g')
+        self.m2 = self.add_menu(name="Vent Basics", shortcut='b')
+        self.m2.addItem(text="Menu Interactions", onSelect=self.switch,
+                        arguments=['Menu'], shortcut='m')
         self.m2.addItem(text="Plugins", onSelect=self.switch,
                         arguments=['Plugins'], shortcut='p')
         self.m2.addItem(text="Tools", onSelect=self.switch,
@@ -39,6 +42,11 @@ class HelpForm(npyscreen.ActionFormWithMenus):
                         arguments=['Core'], shortcut='c')
         self.m2.addItem(text="Statuses", onSelect=self.switch,
                         arguments=['Status'], shortcut='s')
+        self.m3 = self.add_menu(name="Working with Plugins", shortcut='p')
+        self.m3.addItem(text="Adding a Plugin", onSelect=self.switch,
+                        arguments=['Plugin Adding'], shortcut='a')
+        self.m3.addItem(text="Building a Plugin", onSelect=self.switch,
+                        arguments=['Plugin Building'], shortcut='b')
 
     def exit(self, *args, **keywords):
         self.parentApp.switchForm('MAIN')
@@ -60,7 +68,24 @@ class HelpForm(npyscreen.ActionFormWithMenus):
     def switch(self, page):
         def popup(page):
             info_str=""
-            if page == 'Plugins':
+            if page == 'Menu':
+                info_str = """
+                Menu interactions are simple! Here is a quick guide to get you
+                familiar.
+
+                Navigation of a page: Up, Down, Left, Right, or TAB. Note that
+                SHIFT+TAB can be used to reverse cycle!
+
+                Editing a page: Simply navigating to an editable field and typing
+                should be enough to edit most pages. ENTER can you be used to
+                select or deselect options, or to open drop down menus.
+
+                CTRL+T: Will toggle between two pages.
+                CTRL+Q: Will take you back to main. Or from main, will exit the
+                application.
+                CTRL+X: Can be used to open up menus on certain pages.
+                """
+            elif page == 'Plugins':
                 info_str = """
                 Plugins are user created software hosted on GitHub that Vent
                 can install and run. Plugins are developed following a hybrid of requirements
@@ -95,5 +120,23 @@ class HelpForm(npyscreen.ActionFormWithMenus):
                     installed to the Vent filesystem. No Docker image has been created yet.
                     Running means that a Docker container has successfully been created from
                     the corresponding Docker image for a specific tool in a Plugin."""
+            elif page == 'Plugin Adding':
+                info_str = """
+                    To add a plugin that you've created, simply open up the Menu from the main page
+                    using ^X. After, press "p" to open up the Plugin menu and then "a" to drop down
+                    into our Plugin installation screen. To add a Plugin, we require a valid GitHub
+                    repository. If your repository is private, you will need to enter a username and
+                    password. Once you have finished that, select OK. If we are successfully able to
+                    connect, you should see your repositories branches listed in our Plugin options menu.
+                    From here, press TAB to cycle between the options, and ENTER to select different
+                    branches to install and build from. You can even choose a specific commit if you like!
+                    Once you've selected those tools and selected OK, Vent will notify you about all tools
+                    it has detected. For more information about how Vent detects tools, see our "Building a
+                    Plugin" section. You may select or deselect the tools you wish to install as part of your
+                    Plugin. When you are done, select OK. If everything works you should get a successful
+                    Add. Select OK, to be returned to the main screen!"""
+            elif page == 'Plugin Building':
+                # !! TODO
+                info_str = """Stay tuned!"""
             npyscreen.notify_confirm(info_str, title='About Vent '+page, wide=True)
         popup(page)
