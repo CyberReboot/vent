@@ -3,8 +3,8 @@ import os
 import sys
 import threading
 import time
+import docker
 
-from docker.errors import DockerException
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
@@ -221,7 +221,20 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     def system_commands(self, action):
         """ Perform system commands """
         if action == "reset":
-            # !! TODO
+            okay = npyscreen.notify_ok_cancel("This will remove ALL of Vent's containers and images. Are you sure?",
+                                        title="Confirm system command")
+            if okay:
+                # remove containers
+                d_cli = docker.from_env()
+                list = d_cli.containers.list(filters={'label':'vent'})
+                for c in list:
+                    c.remove(force=True)
+
+                # remove images
+                list = d_cli.images.list(filters={'label':'vent'})
+                for i in list:
+                    d_cli.images.remove(image=i.id, force=True)
+                npyscreen.notify_confirm("Finished removing all Vent containers and images.")
             pass
         elif action == "upgrade":
             # !! TODO
@@ -328,9 +341,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Services Running', onSelect=self.services_form,
                         arguments=[])
         self.m4 = self.add_menu(name="Logs (To Be Implemented...)", shortcut="l")
-        self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="s")
-        self.m5.addItem(text='Reset (To Be Implemented...)',
-                        onSelect=self.system_commands,
+        self.m5 = self.add_menu(name="System Commands", shortcut="s")
+        self.m5.addItem(text='Reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
         self.m5.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
