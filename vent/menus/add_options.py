@@ -9,16 +9,22 @@ class AddOptionsForm(npyscreen.ActionForm):
     build_tc = {}
     branches = []
     commits = {}
+    error = False
     def repo_values(self):
         """ Set the appropriate repo dir and get the branches and commits of it """
         branches = []
         commits = {}
         plugin = Plugin()
-        branches = plugin.repo_branches(self.parentApp.repo_value['repo'])[1]
+        branches = plugin.repo_branches(self.parentApp.repo_value['repo'])
         c = plugin.repo_commits(self.parentApp.repo_value['repo'])
-        for commit in c:
-            commits[commit[0]] = commit[1]
-        return branches, commits
+        # branches and commits must both be retrieved successfully
+        if branches[0] and c[0]:
+            for commit in c[1]:
+                commits[commit[0]] = commit[1]
+        else:
+            commits = c[1]
+            self.error = True
+        return branches[1], commits
 
     def create(self):
         self.add_handlers({"^Q": self.quit})
@@ -43,6 +49,17 @@ class AddOptionsForm(npyscreen.ActionForm):
                                                  values=[True, False])
                 self.build_tc[branch].display()
                 i += 3
+                # self.error_msg = self.add(npyscreen.MultiLineEdit, name="Errors", rely=3,
+                # relx=5, max_width= 25, editable=False,
+                #                           value="""
+                #                           There was an error.
+                #                           Please make sure you entered a valid repo url/credentials.
+                #                           """)
+                # self.branch_error = self.add(npyscreen.TitleText, name="Branch Errors: ", value=str(self.branches))
+                # self.commits_error = self.add(npyscreen.TitleText, name="Commits Errors: ", value=str(self.commits))
+                # self.error_msg.display()
+                # self.branch_error.display()
+                # self.commits_error.display()
 
     def quit(self, *args, **kwargs):
         self.parentApp.switchForm(None)
@@ -53,12 +70,15 @@ class AddOptionsForm(npyscreen.ActionForm):
         """
         self.parentApp.repo_value['versions'] = {}
         self.parentApp.repo_value['build'] = {}
-        for branch in self.branch_cb:
-            if self.branch_cb[branch].value:
-                # process checkboxes
-                self.parentApp.repo_value['versions'][branch] = self.commit_tc[branch].values[self.commit_tc[branch].value]
-                self.parentApp.repo_value['build'][branch] = self.build_tc[branch].values[self.build_tc[branch].value]
-        self.parentApp.change_form("CHOOSETOOLS")
+        if not self.error:
+            for branch in self.branch_cb:
+                if self.branch_cb[branch].value:
+                    # process checkboxes
+                    self.parentApp.repo_value['versions'][branch] = self.commit_tc[branch].values[self.commit_tc[branch].value]
+                    self.parentApp.repo_value['build'][branch] = self.build_tc[branch].values[self.build_tc[branch].value]
+            self.parentApp.change_form("CHOOSETOOLS")
+        else:
+            self.quit()
 
     def on_cancel(self):
         self.quit()
