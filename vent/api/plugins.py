@@ -47,7 +47,7 @@ class Plugin:
         if cwd[0]:
             cwd = cwd[1]
         else:
-            return (False, branches)
+            return cwd
         try:
             junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT, close_fds=True)
             branch_output = subprocess.check_output(shlex.split("git branch -a"), stderr=subprocess.STDOUT, close_fds=True)
@@ -85,7 +85,7 @@ class Plugin:
         if cwd[0]:
             cwd = cwd[1]
         else:
-            return (False, commits)
+            return cwd
         if branches[0]:
             try:
                 for branch in branches[1]:
@@ -95,7 +95,7 @@ class Plugin:
             except Exception as e:
                 return (False, e)
         else:
-            return (False, commits)
+            return branches
         try:
             os.chdir(cwd)
         except Exception as e:
@@ -110,13 +110,15 @@ class Plugin:
         if cwd[0]:
             cwd = cwd[1]
         else:
-            return (False, tools)
+            return cwd
         self.branch = branch
         self.version = version
         response = self.checkout()
         self.logger.info(str(response))
         if response[0]:
             tools = self._available_tools()
+        else:
+            return response
         try:
             os.chdir(cwd)
         except Exception as e:
