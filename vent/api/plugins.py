@@ -47,22 +47,28 @@ class Plugin:
         if cwd[0]:
             cwd = cwd[1]
         else:
-            return branches
-        junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT, close_fds=True)
-        branch_output = subprocess.check_output(shlex.split("git branch -a"), stderr=subprocess.STDOUT, close_fds=True)
-        branch_output = branch_output.split("\n")
-        for branch in branch_output:
-            b = branch.strip()
-            if b.startswith('*'):
-                b = b[2:]
-            if "/" in b:
-                branches.append(b.rsplit('/', 1)[1])
-            elif b:
-                branches.append(b)
+            return cwd
+        try:
+            junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT, close_fds=True)
+            branch_output = subprocess.check_output(shlex.split("git branch -a"), stderr=subprocess.STDOUT, close_fds=True)
+            branch_output = branch_output.split("\n")
+            for branch in branch_output:
+                b = branch.strip()
+                if b.startswith('*'):
+                    b = b[2:]
+                if "/" in b:
+                    branches.append(b.rsplit('/', 1)[1])
+                elif b:
+                    branches.append(b)
+        except Exception as e:
+            return (False, e)
 
         branches = list(set(branches))
         for branch in branches:
-            junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
+            try:
+                junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
+            except Exception as e:
+                return (False, e)
         try:
             os.chdir(cwd)
         except Exception as e:
@@ -79,17 +85,23 @@ class Plugin:
         if cwd[0]:
             cwd = cwd[1]
         else:
-            return commits
-        for branch in branches[1]:
-            branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT, close_fds=True)
-            branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
-            commits.append((branch, branch_output))
+            return cwd
+        if branches[0]:
+            try:
+                for branch in branches[1]:
+                    branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT, close_fds=True)
+                    branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
+                    commits.append((branch, branch_output))
+            except Exception as e:
+                return (False, e)
+        else:
+            return branches
         try:
             os.chdir(cwd)
         except Exception as e:
             pass
 
-        return commits
+        return (True, commits)
 
     def repo_tools(self, repo, branch, version):
         """ Get available tools for a repository branch at a version """
@@ -98,19 +110,21 @@ class Plugin:
         if cwd[0]:
             cwd = cwd[1]
         else:
-            return tools
+            return cwd
         self.branch = branch
         self.version = version
         response = self.checkout()
         self.logger.info(str(response))
         if response[0]:
             tools = self._available_tools()
+        else:
+            return response
         try:
             os.chdir(cwd)
         except Exception as e:
             pass
 
-        return tools
+        return (True, tools)
 
     def clone(self, repo, user=None, pw=None):
         """ Clone the repository """
