@@ -15,6 +15,7 @@ from vent.menus.clean_core_tools import CleanCoreToolsForm
 from vent.menus.clean_tools import CleanToolsForm
 from vent.menus.help import HelpForm
 from vent.menus.inventory import InventoryForm
+from vent.menus.logs import LogsForm
 from vent.menus.main import MainForm
 from vent.menus.services import ServicesForm
 from vent.menus.start_core_tools import StartCoreToolsForm
@@ -62,6 +63,7 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("STARTCORETOOLS", StartCoreToolsForm, name="Start core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("STOPCORETOOLS", StopCoreToolsForm, name="Stop core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("CLEANCORETOOLS", CleanCoreToolsForm, name="Clean core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
+        self.addForm("LOGS", LogsForm, name="Logs\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("TUTORIALINTRO", TutorialIntroForm, name="Vent Tutorial"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
         self.addForm("TUTORIALBACKGROUND", TutorialBackgroundForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
         self.addForm("TUTORIALTERMINOLOGY", TutorialTerminologyForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
