@@ -464,8 +464,22 @@ class Action:
         # reset, upgrade, etc.
         return
 
-    @staticmethod
-    def logs():
+
+    def logs(self, grep_list=None):
+        """ generically filter logs stored in log containers """
+        if not grep_list:
+            grep_list = {"core"}
+        containers = self.d_client.containers.list()
+        cores = [c for c in containers if ("core" in c.name)]
+        for expression in grep_list:
+                for core in cores:
+                    try:
+                        # 'logs' stores each line which contains the expression
+                        logs  = [log for log in core.logs().split("\n") if expression in log]
+                        for log in logs:
+                            self.logger.info(log)
+                    except Exception as e:
+                        pass
         return
 
     @staticmethod
