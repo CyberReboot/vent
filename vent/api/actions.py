@@ -203,11 +203,20 @@ class Action:
                         if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == link:
                             tool_dict[container]['links'][tool_dict[c]['name']] = tool_dict[container]['links'].pop(link)
             if 'volumes_from' in tool_dict[container]:
-                # !! TODO update volumes_from
-                pass
+                tmp_volumes_from = tool_dict[container]['volumes_from']
+                tool_dict[container]['volumes_from'] = []
+                for volumes_from in list(tmp_volumes_from):
+                    for c in tool_dict.keys():
+                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == volumes_from:
+                            tool_dict[container]['volumes_from'].append(tool_dict[c]['name'])
+                            tmp_volumes_from.remove(volumes_from)
+                tool_dict[container]['volumes_from'] += tmp_volumes_from
             if 'network_mode' in tool_dict[container]:
-                # !! TODO update network_mode
-                pass
+                if tool_dict[container]['network_mode'].startswith('container:'):
+                    network_c_name = tool_dict[container]['network_mode'].split('container:')[1]
+                    for c in tool_dict.keys():
+                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == network_c_name:
+                            tool_dict[container]['network_mode'] = 'container:'+tool_dict[c]['name']
 
         # remove tmp_names
         for c in tool_dict.keys():
