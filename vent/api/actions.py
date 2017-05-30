@@ -73,13 +73,13 @@ class Action:
         return status
 
     def prep_start(self,
-              repo=None,
-              name=None,
-              groups=None,
-              enabled="yes",
-              branch="master",
-              version="HEAD",
-              run_build=False):
+                   repo=None,
+                   name=None,
+                   groups=None,
+                   enabled="yes",
+                   branch="master",
+                   version="HEAD",
+                   run_build=False):
         """
         Start a set of tools that match the parameters given, if no parameters
         are given, start all installed tools on the master branch at verison
@@ -155,7 +155,7 @@ class Action:
 
             # add extra labels
             if 'labels' not in tool_dict[container_name]:
-               tool_dict[container_name]['labels'] = {}
+                tool_dict[container_name]['labels'] = {}
             tool_dict[container_name]['labels']['vent'] = Version()
             tool_dict[container_name]['labels']['vent.namespace'] = sections[section]['namespace']
             tool_dict[container_name]['labels']['vent.branch'] = branch
@@ -372,9 +372,9 @@ class Action:
         for section in sections:
             self.logger.info("Building "+str(section)+" ...")
             template = self.plugin.builder(template, sections[section]['path'],
-                                         sections[section]['image_name'],
-                                         section, build=True, branch=branch,
-                                         version=version)
+                                           sections[section]['image_name'],
+                                           section, build=True, branch=branch,
+                                           version=version)
         template.write_config()
         return status
 
