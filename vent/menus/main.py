@@ -351,8 +351,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['clean'], shortcut='c')
         self.m3.addItem(text='Services Running', onSelect=self.services_form,
                         arguments=[])
-        self.m4 = self.add_menu(name="Logs (To Be Implemented...)", shortcut="l")
-        self.m5 = self.add_menu(name="System Commands", shortcut="s")
+        self.m4 = self.add_menu(name="Logs", shortcut="l")
+        self.m4.addItem(text='Get container logs', arguments=[],
+                        onSelect=self.logs_form)
+        self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="s")
         self.m5.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
         self.m5.addItem(text='Upgrade (To Be Implemented...)',
@@ -383,6 +385,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def services_form(self, *args, **keywords):
         self.parentApp.change_form("SERVICES")
+
+    def logs_form(self, *args, **keywords):
+        self.parentApp.change_form("LOGS")
 
     def change_forms(self, *args, **keywords):
         """ Toggles back and forth between help """

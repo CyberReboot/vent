@@ -19,40 +19,47 @@ class Action:
         self.plugin = Plugin(**kargs)
         self.d_client = self.plugin.d_client
         self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
-                                       "vent.cfg")
+                                        "vent.cfg")
         self.logger = Logger(__name__)
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
             version_alias=None, wild=None, remove_old=True, disable_old=True):
         """ Add a new set of tool(s) """
+        self.logger.info("Starting: add")
         status = (True, None)
-        status = self.plugin.add(repo,
-                                tools=tools,
-                                overrides=overrides,
-                                version=version,
-                                branch=branch,
-                                build=build,
-                                user=user,
-                                pw=pw,
-                                groups=groups,
-                                version_alias=version_alias,
-                                wild=wild,
-                                remove_old=remove_old,
-                                disable_old=disable_old)
+        try:
+            status = self.plugin.add(repo,
+                                     tools=tools,
+                                     overrides=overrides,
+                                     version=version,
+                                     branch=branch,
+                                     build=build,
+                                     user=user,
+                                     pw=pw,
+                                     groups=groups,
+                                     version_alias=version_alias,
+                                     wild=wild,
+                                     remove_old=remove_old,
+                                     disable_old=disable_old)
+        except Exception as e:
+            self.logger.error(str(e))
+            status = (False, e)
+        self.logger.info(status)
+        self.logger.info("Finished: add")
         return status
 
     def remove(self, repo=None, namespace=None, name=None, groups=None,
-              enabled="yes", branch="master", version="HEAD", built="yes"):
+               enabled="yes", branch="master", version="HEAD", built="yes"):
         """ Remove tools or a repo """
         args = locals()
         options = ['name',
-                  'namespace',
-                  'groups',
-                  'enabled',
-                  'branch',
-                  'built',
-                  'version']
+                   'namespace',
+                   'groups',
+                   'enabled',
+                   'branch',
+                   'built',
+                   'version']
         status = (True, None)
 
         if not repo and not name and not groups and not namespace:
@@ -66,13 +73,13 @@ class Action:
         return status
 
     def prep_start(self,
-             repo=None,
-             name=None,
-             groups=None,
-             enabled="yes",
-             branch="master",
-             version="HEAD",
-             run_build=False):
+                   repo=None,
+                   name=None,
+                   groups=None,
+                   enabled="yes",
+                   branch="master",
+                   version="HEAD",
+                   run_build=False):
         """
         Start a set of tools that match the parameters given, if no parameters
         are given, start all installed tools on the master branch at verison
@@ -81,13 +88,13 @@ class Action:
         args = locals()
         del args['run_build']
         options = ['name',
-                  'namespace',
-                  'built',
-                  'groups',
-                  'path',
-                  'image_name',
-                  'branch',
-                  'version']
+                   'namespace',
+                   'built',
+                   'groups',
+                   'path',
+                   'image_name',
+                   'branch',
+                   'version']
         vent_config = Template(template=self.vent_config)
         files = vent_config.option('main', 'files')
         sections, template = self.plugin.constraint_options(args, options)
@@ -110,10 +117,10 @@ class Action:
 
             if run_build:
                 status = self.build(name=sections[section]['name'],
-                                   groups=groups,
-                                   enabled=enabled,
-                                   branch=branch,
-                                   version=version)
+                                    groups=groups,
+                                    enabled=enabled,
+                                    branch=branch,
+                                    version=version)
                 self.logger.info(status)
 
             # set docker settings for container
@@ -295,13 +302,13 @@ class Action:
         # !! TODO need to account for plugin containers that have random names, use labels perhaps
         args = locals()
         options = ['name',
-                  'namespace',
-                  'built',
-                  'groups',
-                  'path',
-                  'image_name',
-                  'branch',
-                  'version']
+                   'namespace',
+                   'built',
+                   'groups',
+                   'path',
+                   'image_name',
+                   'branch',
+                   'version']
         sections, template = self.plugin.constraint_options(args, options)
         status = (True, None)
         for section in sections:
@@ -316,12 +323,12 @@ class Action:
         return status
 
     def clean(self,
-             repo=None,
-             name=None,
-             groups=None,
-             enabled="yes",
-             branch="master",
-             version="HEAD"):
+              repo=None,
+              name=None,
+              groups=None,
+              enabled="yes",
+              branch="master",
+              version="HEAD"):
         """
         Clean (stop and remove) a set of tools that match the parameters given,
         if no parameters are given, clean all installed tools on the master
@@ -330,13 +337,13 @@ class Action:
         # !! TODO need to account for plugin containers that have random names, use labels perhaps
         args = locals()
         options = ['name',
-                  'namespace',
-                  'built',
-                  'groups',
-                  'path',
-                  'image_name',
-                  'branch',
-                  'version']
+                   'namespace',
+                   'built',
+                   'groups',
+                   'path',
+                   'image_name',
+                   'branch',
+                   'version']
         sections, template = self.plugin.constraint_options(args, options)
         status = (True, None)
         for section in sections:
@@ -351,12 +358,12 @@ class Action:
         return status
 
     def build(self,
-             repo=None,
-             name=None,
-             groups=None,
-             enabled="yes",
-             branch="master",
-             version="HEAD"):
+              repo=None,
+              name=None,
+              groups=None,
+              enabled="yes",
+              branch="master",
+              version="HEAD"):
         """ Build a set of tools that match the parameters given """
         args = locals()
         options = ['image_name', 'path']
@@ -365,9 +372,9 @@ class Action:
         for section in sections:
             self.logger.info("Building "+str(section)+" ...")
             template = self.plugin.builder(template, sections[section]['path'],
-                                        sections[section]['image_name'],
-                                        section, build=True, branch=branch,
-                                        version=version)
+                                           sections[section]['image_name'],
+                                           section, build=True, branch=branch,
+                                           version=version)
         template.write_config()
         return status
 
@@ -464,23 +471,48 @@ class Action:
         # reset, upgrade, etc.
         return
 
-
-    def logs(self, grep_list=None):
+    def logs(self, container_type=None, grep_list=None):
         """ generically filter logs stored in log containers """
-        if not grep_list:
-            grep_list = {"core"}
-        containers = self.d_client.containers.list()
-        cores = [c for c in containers if ("core" in c.name)]
-        for expression in grep_list:
-                for core in cores:
+        log_entries = {}
+        containers = self.d_client.containers.list(all=True, filters={'label':'vent'})
+        if grep_list:
+            compare_containers = containers
+            if container_type:
+                try:
+                    compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
+                except Exception as e:
+                    self.logger.warn("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
+
+            for expression in grep_list:
+                for container in compare_containers:
                     try:
                         # 'logs' stores each line which contains the expression
-                        logs  = [log for log in core.logs().split("\n") if expression in log]
+                        logs  = [log for log in container.logs().split("\n") if expression in log]
                         for log in logs:
-                            self.logger.info(log)
+                            if str(container.name) in log_entries:
+                                log_entries[str(container.name)].append(log)
+                            else:
+                                log_entries[str(container.name)] = [log]
                     except Exception as e:
-                        pass
-        return
+                        self.logger.warn("Unable to get logs for "+str(container.name)+" because: "+str(e))
+        else:
+            compare_containers = containers
+            if container_type:
+                try:
+                    compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
+                except Exception as e:
+                    self.logger.warn("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
+            for container in compare_containers:
+                try:
+                    logs = container.logs().split("\n")
+                    for log in logs:
+                        if str(container.name) in log_entries:
+                            log_entries[str(container.name)].append(log)
+                        else:
+                            log_entries[str(container.name)] = [log]
+                except Exception as e:
+                    self.logger.warn("Unable to get logs for "+str(container.name)+" because: "+str(e))
+        return log_entries
 
     @staticmethod
     def help():
@@ -491,7 +523,7 @@ class Action:
         """ Return a dictionary of the inventory items and status """
         # choices: repos, core, tools, images, built, running, enabled
         items = {'repos':[], 'core':[], 'tools':[], 'images':[],
-                'built':[], 'running':[], 'enabled':[]}
+                 'built':[], 'running':[], 'enabled':[]}
 
         tools = self.plugin.tools()
         for choice in choices:
