@@ -109,10 +109,12 @@ def test_repo_commits():
     """ Test the repo_commits function """
     instance = Plugin()
     commits = instance.repo_commits('https://github.com/cyberreboot/vent')
-    assert type(commits) == list
+    assert commits[0] == True
+    assert type(commits[1]) == list
 
 def test_repo_tools():
     """ Test the repo_tools function """
     instance = Plugin()
     tools = instance.repo_tools('https://github.com/cyberreboot/vent', 'experimental', 'HEAD')
-    assert type(tools) == list
+    assert tools[0] == True
+    assert type(tools[1]) == list

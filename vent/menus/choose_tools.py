@@ -15,8 +15,9 @@ class ChooseToolsForm(npyscreen.ActionForm):
         tools = []
         plugin = Plugin()
         t = plugin.repo_tools(self.parentApp.repo_value['repo'], branch, self.parentApp.repo_value['versions'][branch])
-        for tool in t:
-            tools.append(tool[0])
+        if t[0]:
+            for tool in t:
+                tools.append(tool[0])
         return tools
 
     def create(self):
