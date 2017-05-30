@@ -1,9 +1,10 @@
+import docker
 import npyscreen
 import os
+import shutil
 import sys
 import threading
 import time
-import docker
 
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
@@ -221,20 +222,30 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     def system_commands(self, action):
         """ Perform system commands """
         if action == "reset":
-            okay = npyscreen.notify_ok_cancel("This will remove ALL of Vent's containers and images. Are you sure?",
-                                        title="Confirm system command")
+            okay = npyscreen.notify_ok_cancel(
+                    "This factory reset will remove ALL of Vent's user data, "
+                    "containers, and images. Are you sure?",
+                    title="Confirm system command")
             if okay:
-                # remove containers
                 d_cli = docker.from_env()
-                list = d_cli.containers.list(filters={'label':'vent'})
+                # remove containers
+                list = d_cli.containers.list(filters={'label':'vent'}, all=True)
                 for c in list:
                     c.remove(force=True)
-
                 # remove images
-                list = d_cli.images.list(filters={'label':'vent'})
+                list = d_cli.images.list(filters={'label':'vent'}, all=True)
                 for i in list:
                     d_cli.images.remove(image=i.id, force=True)
-                npyscreen.notify_confirm("Finished removing all Vent containers and images.")
+                # remove .vent folder
+                #try:
+                #    shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
+                #except Exception as e:
+                #    npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
+                #else:
+                    npyscreen.notify_confirm("Vent reset complete. "
+                            "Press OK to exit Vent Manager console.")
+                    self.exit()
+
             pass
         elif action == "upgrade":
             # !! TODO
@@ -342,7 +353,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=[])
         self.m4 = self.add_menu(name="Logs (To Be Implemented...)", shortcut="l")
         self.m5 = self.add_menu(name="System Commands", shortcut="s")
-        self.m5.addItem(text='Reset', onSelect=self.system_commands,
+        self.m5.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
         self.m5.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
