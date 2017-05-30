@@ -471,22 +471,48 @@ class Action:
         # reset, upgrade, etc.
         return
 
-    def logs(self, grep_list=None):
+    def logs(self, container_type=None, grep_list=None):
         """ generically filter logs stored in log containers """
-        if not grep_list:
-            grep_list = {"core"}
-        containers = self.d_client.containers.list()
-        cores = [c for c in containers if ("core" in c.name)]
-        for expression in grep_list:
-                for core in cores:
+        log_entries = {}
+        containers = self.d_client.containers.list(all=True, filters={'label':'vent'})
+        if grep_list:
+            compare_containers = containers
+            if container_type:
+                try:
+                    compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
+                except Exception as e:
+                    self.logger.warn("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
+
+            for expression in grep_list:
+                for container in compare_containers:
                     try:
                         # 'logs' stores each line which contains the expression
-                        logs  = [log for log in core.logs().split("\n") if expression in log]
+                        logs  = [log for log in container.logs().split("\n") if expression in log]
                         for log in logs:
-                            self.logger.info(log)
+                            if str(container.name) in log_entries:
+                                log_entries[str(container.name)].append(log)
+                            else:
+                                log_entries[str(container.name)] = [log]
                     except Exception as e:
-                        pass
-        return
+                        self.logger.warn("Unable to get logs for "+str(container.name)+" because: "+str(e))
+        else:
+            compare_containers = containers
+            if container_type:
+                try:
+                    compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
+                except Exception as e:
+                    self.logger.warn("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
+            for container in compare_containers:
+                try:
+                    logs = container.logs().split("\n")
+                    for log in logs:
+                        if str(container.name) in log_entries:
+                            log_entries[str(container.name)].append(log)
+                        else:
+                            log_entries[str(container.name)] = [log]
+                except Exception as e:
+                    self.logger.warn("Unable to get logs for "+str(container.name)+" because: "+str(e))
+        return log_entries
 
     @staticmethod
     def help():
