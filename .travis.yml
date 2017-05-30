@@ -13,3 +13,6 @@ before_script:
 script:
   - make test
   - bash <(curl -s https://codecov.io/bash)
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install docker-engine
