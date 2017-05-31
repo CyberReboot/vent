@@ -51,7 +51,7 @@ class CleanCoreToolsForm(npyscreen.ActionForm):
         return
 
     def quit(self, *args, **kwargs):
-        self.parentApp.switchForm(None)
+        self.parentApp.switchForm("MAIN")
 
     def on_ok(self):
         """
