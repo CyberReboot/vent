@@ -46,6 +46,7 @@ class VentApp(npyscreen.NPSAppManaged):
         npyscreen.NPSAppManaged.STARTING_FORM = "MAIN"
 
     def add_forms(self):
+        """ Add in forms that will have dynamic data """
         self.addForm("COREINVENTORY", CoreInventoryForm, name="Inventory of core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("INVENTORY", InventoryForm, name="Inventory of plugins\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("ADD", AddForm, name="Add\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
@@ -65,6 +66,7 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("REMOVECORETOOLS", RemoveCoreToolsForm, name="Remove core tools\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
 
     def remove_forms(self):
+        """ Remove forms that will have dynamic data """
         self.removeForm("COREINVENTORY")
         self.removeForm("INVENTORY")
         self.removeForm("ADD")
