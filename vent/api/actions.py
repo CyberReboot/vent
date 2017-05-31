@@ -52,6 +52,7 @@ class Action:
     def remove(self, repo=None, namespace=None, name=None, groups=None,
                enabled="yes", branch="master", version="HEAD", built="yes"):
         """ Remove tools or a repo """
+        self.logger.info("Starting: remove")
         args = locals()
         options = ['name',
                    'namespace',
@@ -70,6 +71,8 @@ class Action:
             # !! TODO if repo, remove the git clone too
             pass
 
+        self.logger.info(status)
+        self.logger.info("Finished: remove")
         return status
 
     def prep_start(self,
@@ -130,10 +133,25 @@ class Action:
             tool_dict[container_name] = {'image':image_name, 'name':container_name}
             if status[0]:
                 for option in status[1]:
+                    options = option[1]
+                    # check for commands to evaluate
+                    if '`' in options:
+                        cmds = options.split('`')
+                        # TODO this probably needs better error checking to handle mismatched ``
+                        if len(cmds) > 2:
+                            i = 1
+                            while i < len(cmds):
+                                try:
+                                    cmds[i] = subprocess.check_output(shlex.split(cmds[i]), stderr=subprocess.STDOUT, close_fds=True).strip()
+                                except Exception as e:
+                                    self.logger.warn("Unable to evaluate command specified in vent.template: "+str(e))
+                                i += 2
+                        options = "".join(cmds)
+                    # store options set for docker
                     try:
-                        tool_dict[container_name][option[0]] = ast.literal_eval(option[1])
-                    except Exception as e: # pragma: no cover
-                        tool_dict[container_name][option[0]] = option[1]
+                        tool_dict[container_name][option[0]] = ast.literal_eval(options)
+                    except Exception as e:
+                        tool_dict[container_name][option[0]] = options
 
             # get temporary name for links, etc.
             status = vent_template.section('info')
@@ -203,11 +221,20 @@ class Action:
                         if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == link:
                             tool_dict[container]['links'][tool_dict[c]['name']] = tool_dict[container]['links'].pop(link)
             if 'volumes_from' in tool_dict[container]:
-                # !! TODO update volumes_from
-                pass
+                tmp_volumes_from = tool_dict[container]['volumes_from']
+                tool_dict[container]['volumes_from'] = []
+                for volumes_from in list(tmp_volumes_from):
+                    for c in tool_dict.keys():
+                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == volumes_from:
+                            tool_dict[container]['volumes_from'].append(tool_dict[c]['name'])
+                            tmp_volumes_from.remove(volumes_from)
+                tool_dict[container]['volumes_from'] += tmp_volumes_from
             if 'network_mode' in tool_dict[container]:
-                # !! TODO update network_mode
-                pass
+                if tool_dict[container]['network_mode'].startswith('container:'):
+                    network_c_name = tool_dict[container]['network_mode'].split('container:')[1]
+                    for c in tool_dict.keys():
+                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == network_c_name:
+                            tool_dict[container]['network_mode'] = 'container:'+tool_dict[c]['name']
 
         # remove tmp_names
         for c in tool_dict.keys():
