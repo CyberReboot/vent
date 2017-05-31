@@ -52,6 +52,7 @@ class Action:
     def remove(self, repo=None, namespace=None, name=None, groups=None,
                enabled="yes", branch="master", version="HEAD", built="yes"):
         """ Remove tools or a repo """
+        self.logger.info("Starting: remove")
         args = locals()
         options = ['name',
                    'namespace',
@@ -70,6 +71,7 @@ class Action:
             # !! TODO if repo, remove the git clone too
             pass
 
+        self.logger.info(status)
         return status
 
     def prep_start(self,
