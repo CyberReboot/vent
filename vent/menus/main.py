@@ -241,10 +241,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 #    shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
                 #except Exception as e:
                 #    npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
-                #else:
-                    npyscreen.notify_confirm("Vent reset complete. "
-                            "Press OK to exit Vent Manager console.")
-                    self.exit()
+                #else:  # don't forget to indent the thing below when you uncomment code....
+                npyscreen.notify_confirm("Vent reset complete. "
+                        "Press OK to exit Vent Manager console.")
+                self.exit()
 
             pass
         elif action == "upgrade":
