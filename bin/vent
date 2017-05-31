@@ -6,9 +6,8 @@ import sys
 from vent.menu import VentApp
 
 try:
-    while True:
-        app = VentApp()
-        app.run()
+    app = VentApp()
+    app.run()
 except KeyboardInterrupt:
     os.system('reset')
     os.system('stty sane')
