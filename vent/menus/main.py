@@ -43,6 +43,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # give a little extra time for file descriptors to close
         time.sleep(0.1)
 
+        try:
+            current_path = os.getcwd()
+        except:
+            self.exit()
         self.addfield.value = Timestamp()
         self.addfield.display()
         self.addfield2.value = Uptime()
@@ -94,6 +98,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5.labelColor = color
         self.addfield5.display()
         # !! TODO update fields such as health status, jobs, etc.
+        os.chdir(current_path)
         return
 
     def core_tools(self, action):
@@ -237,13 +242,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 for i in list:
                     d_cli.images.remove(image=i.id, force=True)
                 # remove .vent folder
-                #try:
-                #    shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
-                #except Exception as e:
-                #    npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
-                #else:  # don't forget to indent the thing below when you uncomment code....
-                npyscreen.notify_confirm("Vent reset complete. "
-                        "Press OK to exit Vent Manager console.")
+                try:
+                    shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
+                except Exception as e:
+                    npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
+                else:  # don't forget to indent the thing below when you uncomment code....
+                    npyscreen.notify_confirm("Vent reset complete. "
+                            "Press OK to exit Vent Manager console.")
                 self.exit()
 
             pass
