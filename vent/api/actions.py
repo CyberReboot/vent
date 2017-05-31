@@ -53,24 +53,15 @@ class Action:
                enabled="yes", branch="master", version="HEAD", built="yes"):
         """ Remove tools or a repo """
         self.logger.info("Starting: remove")
-        args = locals()
-        options = ['name',
-                   'namespace',
-                   'groups',
-                   'enabled',
-                   'branch',
-                   'built',
-                   'version']
         status = (True, None)
-
-        if not repo and not name and not groups and not namespace:
-            # at least one of these needs to be specified
-            status = (False, None)
-        else:
-            # !! TODO
-            # !! TODO if repo, remove the git clone too
-            pass
-
+        status = self.plugin.remove(name=name,
+                                    repo=repo,
+                                    namespace=namespace,
+                                    groups=groups,
+                                    enabled=enabled,
+                                    branch=branch,
+                                    version=version,
+                                    built=built)
         self.logger.info(status)
         self.logger.info("Finished: remove")
         return status

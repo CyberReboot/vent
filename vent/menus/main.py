@@ -6,6 +6,8 @@ import sys
 import threading
 import time
 
+from docker.errors import DockerException
+
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
@@ -32,6 +34,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         def popup(message):
             npyscreen.notify_confirm(str(message), title="Docker Error", form_color='DANGER', wrap=True)
             self.exit()
+
+        # clean up forms with dynamic data
+        self.parentApp.remove_forms()
+        self.parentApp.add_forms()
 
         if not self.triggered:
             self.triggered = True
@@ -155,8 +161,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # !! TODO
             pass
         elif action == 'remove':
-            # !! TODO
-            pass
+            self.parentApp.change_form('REMOVECORETOOLS')
         return
 
     def perform_action(self, action):
@@ -203,8 +208,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # !! TODO
             pass
         elif action == "remove":
-            # !! TODO
-            pass
+            self.parentApp.change_form('REMOVETOOLS')
         # tutorial forms
         elif action == "background":
             self.parentApp.change_form('TUTORIALBACKGROUND')
@@ -326,7 +330,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Clean core tools',
                         onSelect=self.core_tools,
                         arguments=['clean'], shortcut='c')
-        self.m2.addItem(text='Remove all core tools (To Be Implemented...)',
+        self.m2.addItem(text='Remove core tools',
                         onSelect=self.core_tools,
                         arguments=['remove'], shortcut='r')
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
@@ -339,7 +343,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Update plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
-        self.m3.addItem(text='Remove plugins (To Be Implemented...)',
+        self.m3.addItem(text='Remove plugins',
                         onSelect=self.perform_action,
                         arguments=['remove'], shortcut='r')
         self.m3.addItem(text='Build plugin tools',
@@ -359,7 +363,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m4 = self.add_menu(name="Logs", shortcut="l")
         self.m4.addItem(text='Get container logs', arguments=[],
                         onSelect=self.logs_form)
-        self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="s")
+        self.m5 = self.add_menu(name="System Commands", shortcut="s")
         self.m5.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
         self.m5.addItem(text='Upgrade (To Be Implemented...)',
