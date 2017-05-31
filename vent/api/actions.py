@@ -130,10 +130,25 @@ class Action:
             tool_dict[container_name] = {'image':image_name, 'name':container_name}
             if status[0]:
                 for option in status[1]:
+                    options = option[1]
+                    # check for commands to evaluate
+                    if '`' in options:
+                        cmds = options.split('`')
+                        # TODO this probably needs better error checking to handle mismatched ``
+                        if len(cmds) > 2:
+                            i = 1
+                            while i < len(cmds):
+                                try:
+                                    cmds[i] = subprocess.check_output(shlex.split(cmds[i]), stderr=subprocess.STDOUT, close_fds=True).strip()
+                                except Exception as e:
+                                    self.logger.warn("Unable to evaluate command specified in vent.template: "+str(e))
+                                i += 2
+                        options = "".join(cmds)
+                    # store options set for docker
                     try:
-                        tool_dict[container_name][option[0]] = ast.literal_eval(option[1])
-                    except Exception as e: # pragma: no cover
-                        tool_dict[container_name][option[0]] = option[1]
+                        tool_dict[container_name][option[0]] = ast.literal_eval(options)
+                    except Exception as e:
+                        tool_dict[container_name][option[0]] = options
 
             # get temporary name for links, etc.
             status = vent_template.section('info')

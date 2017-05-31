@@ -30,7 +30,7 @@ class LogsForm(npyscreen.FormBaseNew):
                                       values=['Checking for container logs, please wait...'])
 
     def exit(self, *args, **keywords):
-        self.parentApp.switchForm(None)
+        self.parentApp.switchForm("MAIN")
 
     def change_forms(self, *args, **keywords):
         """ Toggles back to main """
