@@ -69,8 +69,10 @@ class TutorialIntroForm(npyscreen.ActionFormWithMenus):
 
     def on_cancel(self):
         """ When user clicks cancel, will return to MAIN """
+        npyscreen.NPSAppManaged.STARTING_FORM = "MAIN"
         self.quit()
 
     def on_ok(self):
         """ When user clicks ok, will proceed to next tutorial """
+        npyscreen.NPSAppManaged.STARTING_FORM = "MAIN"
         self.switch("TUTORIALBACKGROUND")
