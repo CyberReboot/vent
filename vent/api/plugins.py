@@ -582,16 +582,18 @@ class Plugin:
                 tools.append(options)
         return tools
 
-    def remove(self, name=None, repo=None, namespace=None, branch=None, groups=None):
+    def remove(self, name=None, repo=None, namespace=None, branch="master",
+               groups=None, enabled="yes", version="HEAD", built="yes"):
         """
         Remove tool (name) or repository, repository is the url. If no
-        arguments are specified, all tools will be removed
+        arguments are specified, all tools will be removed for the defaults.
         """
         # initialize
         args = locals()
-        status = (False, None)
+        status = (True, None)
 
         # get resulting dictionary of sections with options that match constraints
+        self.logger.info(args)
         results, template = self.constraint_options(args, [])
         for result in results:
             response, image_name = template.option(result, 'image_name')
@@ -601,8 +603,11 @@ class Plugin:
             try:
                 container = self.d_client.containers.get(container_name)
                 response = container.remove(v=True, force=True)
+                self.logger.info(response)
+                self.logger.info("Removing plugin container: "+container_name)
             except Exception as e:
-                pass
+                self.logger.warn("Unable to remove the plugin container: " + 
+                                 container_name + " because: " + str(e))
 
             # check for image and remove
             try:
@@ -610,7 +615,8 @@ class Plugin:
                 self.logger.info(response)
                 self.logger.info("Removing plugin image: "+image_name)
             except Exception as e:
-                pass
+                self.logger.warn("Unable to remove the plugin image: " + 
+                                 image_name + " because: " + str(e))
 
             # remove tool from the manifest
             status = template.del_section(result)

@@ -17,6 +17,7 @@ from vent.menus.help import HelpForm
 from vent.menus.inventory import InventoryForm
 from vent.menus.logs import LogsForm
 from vent.menus.main import MainForm
+from vent.menus.remove_tools import RemoveToolsForm
 from vent.menus.services import ServicesForm
 from vent.menus.start_core_tools import StartCoreToolsForm
 from vent.menus.start_tools import StartToolsForm
@@ -43,12 +44,7 @@ class VentApp(npyscreen.NPSAppManaged):
     else:
         npyscreen.NPSAppManaged.STARTING_FORM = "MAIN"
 
-    def onStart(self):
-        """ Override onStart method for npyscreen """
-        self.paths.host_config()
-        version = Version()
-        self.addForm("MAIN", MainForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="IMPORTANT")
-        self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle previous\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+    def add_forms(self):
         self.addForm("COREINVENTORY", CoreInventoryForm, name="Inventory of core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("INVENTORY", InventoryForm, name="Inventory of plugins\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("ADD", AddForm, name="Add\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
@@ -64,6 +60,32 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("STOPCORETOOLS", StopCoreToolsForm, name="Stop core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("CLEANCORETOOLS", CleanCoreToolsForm, name="Clean core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("LOGS", LogsForm, name="Logs\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
+        self.addForm("REMOVETOOLS", RemoveToolsForm, name="Remove tools\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
+
+    def remove_forms(self):
+        self.removeForm("COREINVENTORY")
+        self.removeForm("INVENTORY")
+        self.removeForm("ADD")
+        self.removeForm("ADDOPTIONS")
+        self.removeForm("CHOOSETOOLS")
+        self.removeForm("SERVICES")
+        self.removeForm("BUILDTOOLS")
+        self.removeForm("STARTTOOLS")
+        self.removeForm("STOPTOOLS")
+        self.removeForm("CLEANTOOLS")
+        self.removeForm("BUILDCORETOOLS")
+        self.removeForm("STARTCORETOOLS")
+        self.removeForm("STOPCORETOOLS")
+        self.removeForm("CLEANCORETOOLS")
+        self.removeForm("LOGS")
+        self.removeForm("REMOVETOOLS")
+
+    def onStart(self):
+        """ Override onStart method for npyscreen """
+        self.paths.host_config()
+        version = Version()
+        self.addForm("MAIN", MainForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="IMPORTANT")
+        self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle previous\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
         self.addForm("TUTORIALINTRO", TutorialIntroForm, name="Vent Tutorial"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
         self.addForm("TUTORIALBACKGROUND", TutorialBackgroundForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
         self.addForm("TUTORIALTERMINOLOGY", TutorialTerminologyForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
@@ -73,6 +95,7 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("TUTORIALADDINGPLUGINS", TutorialAddingPluginsForm, name="Working with Plugins"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
         self.addForm("TUTORIALADDINGFILES", TutorialAddingFilesForm, name="Files"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
         self.addForm("TUTORIALSETTINGUPSERVICES", TutorialSettingUpServicesForm, name="Services"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        self.add_forms()
 
     def change_form(self, name):
         """ Changes the form (window) that is displayed """

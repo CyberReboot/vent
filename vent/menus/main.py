@@ -6,6 +6,8 @@ import sys
 import threading
 import time
 
+from docker.errors import DockerException
+
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
@@ -32,6 +34,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         def popup(message):
             npyscreen.notify_confirm(str(message), title="Docker Error", form_color='DANGER', wrap=True)
             self.exit()
+
+        # clean up forms with dynamic data
+        self.parentApp.remove_forms()
+        self.parentApp.add_forms()
 
         if not self.triggered:
             self.triggered = True
@@ -203,8 +209,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # !! TODO
             pass
         elif action == "remove":
-            # !! TODO
-            pass
+            self.parentApp.change_form('REMOVETOOLS')
         # tutorial forms
         elif action == "background":
             self.parentApp.change_form('TUTORIALBACKGROUND')
