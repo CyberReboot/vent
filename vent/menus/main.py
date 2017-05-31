@@ -1,10 +1,11 @@
+import docker
 import npyscreen
 import os
+import shutil
 import sys
 import threading
 import time
 
-from docker.errors import DockerException
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
@@ -42,6 +43,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # give a little extra time for file descriptors to close
         time.sleep(0.1)
 
+        try:
+            current_path = os.getcwd()
+        except:
+            self.exit()
         self.addfield.value = Timestamp()
         self.addfield.display()
         self.addfield2.value = Uptime()
@@ -93,6 +98,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5.labelColor = color
         self.addfield5.display()
         # !! TODO update fields such as health status, jobs, etc.
+        os.chdir(current_path)
         return
 
     def core_tools(self, action):
@@ -221,7 +227,30 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     def system_commands(self, action):
         """ Perform system commands """
         if action == "reset":
-            # !! TODO
+            okay = npyscreen.notify_ok_cancel(
+                    "This factory reset will remove ALL of Vent's user data, "
+                    "containers, and images. Are you sure?",
+                    title="Confirm system command")
+            if okay:
+                d_cli = docker.from_env()
+                # remove containers
+                list = d_cli.containers.list(filters={'label':'vent'}, all=True)
+                for c in list:
+                    c.remove(force=True)
+                # remove images
+                list = d_cli.images.list(filters={'label':'vent'}, all=True)
+                for i in list:
+                    d_cli.images.remove(image=i.id, force=True)
+                # remove .vent folder
+                try:
+                    shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
+                except Exception as e:
+                    npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
+                else:  # don't forget to indent the thing below when you uncomment code....
+                    npyscreen.notify_confirm("Vent reset complete. "
+                            "Press OK to exit Vent Manager console.")
+                self.exit()
+
             pass
         elif action == "upgrade":
             # !! TODO
@@ -331,8 +360,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m4.addItem(text='Get container logs', arguments=[],
                         onSelect=self.logs_form)
         self.m5 = self.add_menu(name="System Commands (To Be Implemented...)", shortcut="s")
-        self.m5.addItem(text='Reset (To Be Implemented...)',
-                        onSelect=self.system_commands,
+        self.m5.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
         self.m5.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
