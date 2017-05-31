@@ -17,6 +17,7 @@ from vent.menus.help import HelpForm
 from vent.menus.inventory import InventoryForm
 from vent.menus.logs import LogsForm
 from vent.menus.main import MainForm
+from vent.menus.remove_core_tools import RemoveCoreToolsForm
 from vent.menus.remove_tools import RemoveToolsForm
 from vent.menus.services import ServicesForm
 from vent.menus.start_core_tools import StartCoreToolsForm
@@ -61,6 +62,7 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("CLEANCORETOOLS", CleanCoreToolsForm, name="Clean core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("LOGS", LogsForm, name="Logs\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("REMOVETOOLS", RemoveToolsForm, name="Remove tools\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
+        self.addForm("REMOVECORETOOLS", RemoveCoreToolsForm, name="Remove core tools\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
 
     def remove_forms(self):
         self.removeForm("COREINVENTORY")
@@ -79,6 +81,7 @@ class VentApp(npyscreen.NPSAppManaged):
         self.removeForm("CLEANCORETOOLS")
         self.removeForm("LOGS")
         self.removeForm("REMOVETOOLS")
+        self.removeForm("REMOVECORETOOLS")
 
     def onStart(self):
         """ Override onStart method for npyscreen """

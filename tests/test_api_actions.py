@@ -14,7 +14,7 @@ def test_remove():
     """ Test the remove function """
     instance = Action()
     status = instance.remove()
-    assert status[0] == False
+    assert status[0] == True
     status = instance.remove(repo='https://github.com/cyberreboot/vent')
     assert status[0] == True
 

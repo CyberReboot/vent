@@ -593,7 +593,6 @@ class Plugin:
         status = (True, None)
 
         # get resulting dictionary of sections with options that match constraints
-        self.logger.info(args)
         results, template = self.constraint_options(args, [])
         for result in results:
             response, image_name = template.option(result, 'image_name')
