@@ -72,6 +72,7 @@ class Action:
             pass
 
         self.logger.info(status)
+        self.logger.info("Finished: remove")
         return status
 
     def prep_start(self,
