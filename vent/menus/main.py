@@ -264,6 +264,11 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     def create(self):
         """ Override method for creating FormBaseNewWithMenu form """
         self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
+
+        #######################
+        # MAIN SCREEN WIDGETS #
+        #######################
+
         self.addfield = self.add(npyscreen.TitleFixedText, name='Date:',
                                  labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
@@ -280,8 +285,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5 = self.add(npyscreen.TitleFixedText,
                                   name='Core Tools:', labelColor='DANGER',
                                   value="Not built")
-        #self.addfield6 = self.add(npyscreen.TitleFixedText, name='Clustered:',
-        #                          value="No", labelColor='DEFAULT')
         self.addfield7 = self.add(npyscreen.TitleFixedText, name='Jobs:',
                                   value="To Be Implemented...", labelColor='DEFAULT')
         self.multifield1 =  self.add(npyscreen.MultiLineEdit, max_height=22,
@@ -308,92 +311,120 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
        \ V /  __/ | | | |_
         \_/ \___|_| |_|\__|
                            """)
+
+        ################
+        # MENU OPTIONS #
+        ################
+
+        # Core Tools Menu Items
         self.m2 = self.add_menu(name="Core Tools", shortcut="c")
-        self.m2.addItem(text='Install all latest core tools',
+        self.m2.addItem(text='Add all latest core tools',
                         onSelect=self.core_tools,
                         arguments=['install'], shortcut='i')
-        self.m2.addItem(text='Inventory of core tools',
-                        onSelect=self.core_tools,
-                        arguments=['inventory'], shortcut='v')
         self.m2.addItem(text='Build core tools',
                         onSelect=self.core_tools,
                         arguments=['build'], shortcut='b')
-        self.m2.addItem(text='Update all core tools (To Be Implemented...)',
+        self.m2.addItem(text='Clean core tools',
                         onSelect=self.core_tools,
-                        arguments=['update'], shortcut='u')
+                        arguments=['clean'], shortcut='c')
+        self.m2.addItem(text='Inventory of core tools',
+                        onSelect=self.core_tools,
+                        arguments=['inventory'], shortcut='v')
+        self.m2.addItem(text='Remove core tools',
+                        onSelect=self.core_tools,
+                        arguments=['remove'], shortcut='r')
         self.m2.addItem(text='Start core tools',
                         onSelect=self.core_tools,
                         arguments=['start'], shortcut='s')
         self.m2.addItem(text='Stop core tools',
                         onSelect=self.core_tools,
                         arguments=['stop'], shortcut='p')
-        self.m2.addItem(text='Clean core tools',
+        self.m2.addItem(text='Update all core tools (To Be Implemented...)',
                         onSelect=self.core_tools,
-                        arguments=['clean'], shortcut='c')
-        self.m2.addItem(text='Remove core tools',
-                        onSelect=self.core_tools,
-                        arguments=['remove'], shortcut='r')
+                        arguments=['update'], shortcut='u')
+
+        # Plugin Menu Items
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
         self.m3.addItem(text='Add new plugin',
                         onSelect=self.perform_action,
                         arguments=['add'], shortcut='a')
-        self.m3.addItem(text='Inventory of installed plugins',
-                        onSelect=self.perform_action,
-                        arguments=['inventory'], shortcut='i')
-        self.m3.addItem(text='Update plugins (To Be Implemented...)',
-                        onSelect=self.perform_action,
-                        arguments=['update'], shortcut='u')
-        self.m3.addItem(text='Remove plugins',
-                        onSelect=self.perform_action,
-                        arguments=['remove'], shortcut='r')
         self.m3.addItem(text='Build plugin tools',
                         onSelect=self.perform_action,
                         arguments=['build'], shortcut='b')
+        self.m3.addItem(text='Clean plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['clean'], shortcut='c')
+        self.m3.addItem(text='Inventory of installed plugins',
+                        onSelect=self.perform_action,
+                        arguments=['inventory'], shortcut='i')
+        self.m3.addItem(text='Remove plugins',
+                        onSelect=self.perform_action,
+                        arguments=['remove'], shortcut='r')
         self.m3.addItem(text='Start plugin tools',
                         onSelect=self.perform_action,
                         arguments=['start'], shortcut='s')
         self.m3.addItem(text='Stop plugin tools',
                         onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
-        self.m3.addItem(text='Clean plugin tools',
+        self.m3.addItem(text='Update plugins (To Be Implemented...)',
                         onSelect=self.perform_action,
-                        arguments=['clean'], shortcut='c')
-        self.m3.addItem(text='Services Running', onSelect=self.services_form,
-                        arguments=[])
+                        arguments=['update'], shortcut='u')
+
+        # Log Menu Items
         self.m4 = self.add_menu(name="Logs", shortcut="l")
         self.m4.addItem(text='Get container logs', arguments=[],
                         onSelect=self.logs_form)
-        self.m5 = self.add_menu(name="System Commands", shortcut="s")
-        self.m5.addItem(text='Factory reset', onSelect=self.system_commands,
+
+        # Services Menu Items
+        self.m5 = self.add_menu(name="Services Running", shortcut='s')
+        self.m5.addItem(text='Core Services', onSelect=self.services_form,
+                        arguments=['core'], shortcut='c')
+        self.m5.addItem(text='Plugin Services (To be implemented...)',
+                        onSelect=self.services_form,
+                        arguments=['plugins'], shortcut='p')
+
+        # System Commands Menu Items
+        self.m6 = self.add_menu(name="System Commands")
+        self.m6.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
-        self.m5.addItem(text='Upgrade (To Be Implemented...)',
+        self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
-        self.m6 = self.add_menu(name="Tutorials", shortcut="t")
-        self.s1 = self.m6.addNewSubmenu(name="About Vent", shortcut='v')
+
+        # Tutorial Menu Items
+        self.m7 = self.add_menu(name="Tutorials", shortcut="t")
+        self.s1 = self.m7.addNewSubmenu(name="About Vent", shortcut='v')
         self.s1.addItem(text="Background", onSelect=self.perform_action,
                         arguments=['background'], shortcut='b')
         self.s1.addItem(text="Terminology", onSelect=self.perform_action,
                         arguments=['terminology'], shortcut='t')
         self.s1.addItem(text="Getting Setup", onSelect=self.perform_action,
                         arguments=['setup'], shortcut='s')
-        self.s2 = self.m6.addNewSubmenu(name="Working with Cores", shortcut='c')
+        self.s2 = self.m7.addNewSubmenu(name="Working with Cores",
+                                        shortcut='c')
         self.s2.addItem(text="Building Cores", onSelect=self.perform_action,
                         arguments=['building_cores'], shortcut='b')
         self.s2.addItem(text="Starting Cores", onSelect=self.perform_action,
                         arguments=['starting_cores'], shortcut='c')
-        self.s3 = self.m6.addNewSubmenu(name="Working with Plugins", shortcut='p')
+        self.s3 = self.m7.addNewSubmenu(name="Working with Plugins",
+                                        shortcut='p')
         self.s3.addItem(text="Adding Plugins", onSelect=self.perform_action,
                         arguments=['adding_plugins'], shortcut='a')
-        self.s4 = self.m6.addNewSubmenu(name="Files", shortcut='f')
+        self.s4 = self.m7.addNewSubmenu(name="Files", shortcut='f')
         self.s4.addItem(text="Adding Files", onSelect=self.perform_action,
                         arguments=['adding_files'], shortcut='a')
-        self.s5 = self.m6.addNewSubmenu(name="Services", shortcut='s')
-        self.s5.addItem(text="Setting up Services", onSelect=self.perform_action,
+        self.s5 = self.m7.addNewSubmenu(name="Services", shortcut='s')
+        self.s5.addItem(text="Setting up Services",
+                        onSelect=self.perform_action,
                         arguments=['setting_up_services'], shortcut='s')
 
-    def services_form(self, *args, **keywords):
-        self.parentApp.change_form("SERVICES")
+    def services_form(self, service_type):
+        """ Change to the services form for core or plugins """
+        # TODO break out services and add services from plugins
+        if service_type == 'core':
+            self.parentApp.change_form("SERVICES")
+        elif service_type == 'plugins':
+            self.parentApp.change_form("SERVICES")
 
     def logs_form(self, *args, **keywords):
         self.parentApp.change_form("LOGS")
