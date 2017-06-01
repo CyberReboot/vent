@@ -198,8 +198,6 @@ class Action:
                     if option[0] == 'priority':
                         tool_dict[container_name]['labels']['vent.priority'] = option[1]
 
-            # !! TODO check for `<command>` and store executed result
-
             # only start tools that have been built
             if sections[section]['built'] != 'yes':
                 del tool_dict[container_name]
@@ -300,8 +298,11 @@ class Action:
 
     @staticmethod
     def update():
+        # get existing containers and images and states
         # if repo, pull and build
         # if registry image, pull
+        # stop and remove old containers and images
+        # start containers if they were running
         # !! TODO
         return
 
