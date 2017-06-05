@@ -49,6 +49,7 @@ def file_queue(path, template_path="/vent/"):
         # TODO get syslog address rather than hardcode
         # TODO get group and name for tag
         # TODO add rw volume for plugin output to be plugin input
+        labels = {'vent-plugin':'', 'file':path}
         log_config = {'type':'syslog',
                       'config': {'syslog-address':'tcp://0.0.0.0:514',
                                  'syslog-facility':'daemon',
@@ -59,6 +60,7 @@ def file_queue(path, template_path="/vent/"):
         for image in images:
             d_client.containers.run(image=image,
                                     command=path,
+                                    labels=labels,
                                     detach=True,
                                     log_config=log_config,
                                     volumes=volumes)

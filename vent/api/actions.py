@@ -320,23 +320,26 @@ class Action:
         # if repo, pull and build
         # if registry image, pull
         for section in sections:
-            cwd = os.getcwd()
-            os.chdir(sections[section]['path'])
-            self.plugin.version = version
-            self.plugin.branch = branch
-            self.plugin.checkout()
             try:
-                os.chdir(cwd)
+                cwd = os.getcwd()
+                os.chdir(sections[section]['path'])
+                self.plugin.version = version
+                self.plugin.branch = branch
+                self.plugin.checkout()
+                try:
+                    os.chdir(cwd)
+                except Exception as e:
+                    pass
+                template = self.plugin.builder(template, sections[section]['path'], sections[section]['image_name'], section, build=True, branch=branch, version=version)
+                # stop and remove old containers and images if image_id updated
+                # !! TODO
+
+                # start containers if they were running
+                # !! TODO
+
+                # TODO logging
             except Exception as e:
-                pass
-            template = self.plugin.builder(template, sections[section]['path'], sections[section]['image_name'], section, build=True, branch=branch, version=version)
-            # stop and remove old containers and images if image_id updated
-            # !! TODO
-
-            # start containers if they were running
-            # !! TODO
-
-            # TODO logging
+                self.logger.error("Unable to update: "+str(section))
 
         template.write_config()
         return status
