@@ -1,103 +1,54 @@
-all: vent
+OS=`uname -s`
 
-all-no-cache: no-cache
-
-latest: pull vent
-
-test:
+build: clean
 	@echo
 	@echo "checking dependencies"
 	@echo
+	env
+	docker version
 	pip -V
 	pip install -r tests/requirements.txt
-	py.test -v --cov=. -k 'not vendor' --cov-report term-missing
+	python setup.py install
 
-pull:
-	docker pull boot2docker/boot2docker
-
-vent: depends
-	rm -rf images/*.tar
-	docker build -t vent .
-	docker run --rm vent > vent.iso
-	rm -rf vendor/tinycore-python2/python2.tar
-	rm -rf vent/management/vent-management.tar
-.PHONY: vent
-
-prebuilt: depends-prebuilt
-	docker build -t vent .
-	docker run --rm vent > vent.iso
-	rm -rf vendor/tinycore-python2/python2.tar
-	rm -rf vent/management/vent-management.tar
-
-no-cache: depends-no-cache
-	rm -rf images/*.tar
-	docker build --no-cache -t vent .
-	docker run --rm vent > vent.iso
-	rm -rf vendor/tinycore-python2/python2.tar
-	rm -rf vent/management/vent-management.tar
-
-prebuilt-no-cache: depends-prebuilt-no-cache
-	docker build --no-cache -t vent .
-	docker run --rm vent > vent.iso
-	rm -rf vendor/tinycore-python2/python2.tar
-	rm -rf vent/management/vent-management.tar
-	rm -rf images/*.tar
-
-depends:
-	@echo
-	@echo "checking dependencies"
-	@echo
-	docker -v
-	./scripts/build.sh
-
-depends-no-cache:
-	@echo
-	@echo "checking dependencies"
-	@echo
-	docker -v
-	./scripts/build.sh --no-cache
-
-depends-prebuilt:
-	@echo
-	@echo "checking dependencies"
-	@echo
-	docker -v
-	./scripts/build.sh --build-plugins
-
-depends-prebuilt-no-cache:
-	@echo
-	@echo "checking dependencies"
-	@echo
-	docker -v
-	./scripts/build.sh --build-plugins --no-cache
-
-install:
-	@echo
-	@echo "installing vent and vent-generic to /usr/local/bin/"
-	@echo "------"
-	cp scripts/vent /usr/local/bin/vent
-	cp scripts/vent-generic /usr/local/bin/vent-generic
-	@echo "------"
-	@echo
-.PHONY: install
-
-images: depends-prebuilt
-	@echo
-	@echo "checking dependencies"
-	@echo
-	zip -v
-	zip -r images images/
-	@echo
-	@echo "------"
-	@echo "run this to inject the container images into the vent instance once it's been created:"
-	@echo "unzip images.zip; cd images; vent <name_of_vent_machine> tar"
-	@echo "------"
-	@echo
+gpu: build
+	@if hash nvidia-docker 2>/dev/null; then \
+		echo "nvidia-docker found"; \
+		docker pull nvidia/cuda:8.0-runtime; \
+	else \
+		if [ "${OS}" = "Linux" ] ; then \
+			if [ -f /etc/redhat-release ] ; then \
+				wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker-1.0.1-1.x86_64.rpm && \
+				sudo rpm -i /tmp/nvidia-docker*.rpm && rm /tmp/nvidia-docker*.rpm; \
+				sudo systemctl start nvidia-docker; \
+				docker pull nvidia/cuda:8.0-runtime; \
+			elif [ -f /etc/debian_version ] ; then \
+				wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb && \
+				sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb; \
+				docker pull nvidia/cuda:8.0-runtime; \
+			else \
+				wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1_amd64.tar.xz && \
+				sudo tar --strip-components=1 -C /usr/bin -xvf /tmp/nvidia-docker*.tar.xz && rm /tmp/nvidia-docker*.tar.xz && \
+				sudo -b nohup nvidia-docker-plugin > /tmp/nvidia-docker.log; \
+				docker pull nvidia/cuda:8.0-runtime; \
+			fi \
+		else \
+			echo "unable to install nvidia-docker on this host"; \
+		fi \
+	fi
 
 clean:
-	rm -rf images
-	rm -rf images.zip
-	rm -rf vendor/tinycore-python2/python2.tar
-	rm -rf vent/management/vent-management.tar
-	rm -vf vent.iso
-.PHONY: clean
+	rm -rf .cache
+	rm -rf .coverage
+	rm -rf .vent
+	rm -rf vent.egg-info
+	rm -rf vent.iso
+	rm -rf dist
+	rm -rf build
+	rm -rf plugins
+	rm -rf core
+	pip uninstall -y vent || true
+
+test: build
+	py.test -v --cov=. -k 'not vendor' --cov-report term-missing
+
+.PHONY: build test
