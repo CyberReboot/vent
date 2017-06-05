@@ -14,6 +14,7 @@ from vent.helpers.meta import Core
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
+from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 
@@ -58,6 +59,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield2.value = Uptime()
         self.addfield2.display()
         self.addfield3.value = str(len(Containers()))+" running"
+        if len(Containers()) > 0:
+            self.addfield3.labelColor = "GOOD"
+        else:
+            self.addfield3.labelColor = "DEFAULT"
         self.addfield3.display()
 
         # set core value string
@@ -97,13 +102,34 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5.value = core_str
         if running+custom_running == 0:
             color = "DANGER"
+            self.addfield4.labelColor = "CAUTION"
+            self.addfield4.value = "Idle"
         elif running >= int(normal):
             color = "GOOD"
+            self.addfield4.labelColor = color
+            self.addfield4.value = "Ready to start jobs"
         else:
             color = "CAUTION"
+            self.addfield4.labelColor = color
+            self.addfield4.value = "Ready to start jobs"
         self.addfield5.labelColor = color
+
+        # get jobs
+        jobs = Jobs()
+        # number of jobs, number of tool containers
+        self.addfield6.value = str(jobs[0])+" jobs running ("+str(jobs[1])+" tool containers), "+str(jobs[2])+" completed jobs"
+
+        # TODO check if there are jobs running and update addfield4
+        if jobs[0] > 0:
+            self.addfield4.labelColor = "GOOD"
+            self.addfield4.value = "Processing jobs"
+            self.addfield6.labelColor = "GOOD"
+        else:
+            self.addfield6.labelColor = "DEFAULT"
+        self.addfield4.display()
         self.addfield5.display()
-        # !! TODO update fields such as health status, jobs, etc.
+        self.addfield6.display()
+
         os.chdir(current_path)
         return
 
@@ -279,12 +305,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
         self.addfield4 = self.add(npyscreen.TitleFixedText, name='Status:',
-                                  value="To Be Implemented...")
+                                  labelColor='CAUTION',
+                                  value="Idle")
         self.addfield5 = self.add(npyscreen.TitleFixedText,
                                   name='Core Tools:', labelColor='DANGER',
                                   value="Not built")
-        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Jobs:',
-                                  value="To Be Implemented...", labelColor='DEFAULT')
+        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Jobs:',
+                                  value="0 jobs running (0 tool containers), 0 completed jobs", labelColor='DEFAULT')
         self.multifield1 =  self.add(npyscreen.MultiLineEdit, max_height=22,
                                      editable=False, value = """
 
