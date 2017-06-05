@@ -158,8 +158,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         elif action == "inventory":
             self.parentApp.change_form('COREINVENTORY')
         elif action == 'update':
-            # !! TODO
-            pass
+            self.parentApp.change_form('UPDATECORETOOLS')
         elif action == 'remove':
             self.parentApp.change_form('REMOVECORETOOLS')
         return
@@ -205,8 +204,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         elif action == "inventory":
             self.parentApp.change_form('INVENTORY')
         elif action == "update":
-            # !! TODO
-            pass
+            self.parentApp.change_form('UPDATETOOLS')
         elif action == "remove":
             self.parentApp.change_form('REMOVETOOLS')
         # tutorial forms
@@ -339,7 +337,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Stop core tools',
                         onSelect=self.core_tools,
                         arguments=['stop'], shortcut='p')
-        self.m2.addItem(text='Update all core tools (To Be Implemented...)',
+        self.m2.addItem(text='Update core tools',
                         onSelect=self.core_tools,
                         arguments=['update'], shortcut='u')
 
@@ -366,7 +364,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Stop plugin tools',
                         onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
-        self.m3.addItem(text='Update plugins (To Be Implemented...)',
+        self.m3.addItem(text='Update plugins',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
 

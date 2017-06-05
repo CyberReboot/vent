@@ -296,15 +296,53 @@ class Action:
 
         return status
 
-    @staticmethod
-    def update():
+    def update(self,
+               repo=None,
+               name=None,
+               groups=None,
+               enabled="yes",
+               branch="master",
+               version="HEAD"):
+        """
+        Update a set of tools that match the parameters given, if no parameters
+        are given, updated all installed tools on the master branch at verison
+        HEAD that are enabled
+        """
+        args = locals()
+        options = ['path', 'image_name', 'image_id']
+        sections, template = self.plugin.constraint_options(args, options)
+        status = (True, None)
+
         # get existing containers and images and states
+        running_containers = Containers()
+        built_images = Images()
+
         # if repo, pull and build
         # if registry image, pull
-        # stop and remove old containers and images
-        # start containers if they were running
-        # !! TODO
-        return
+        for section in sections:
+            try:
+                cwd = os.getcwd()
+                os.chdir(sections[section]['path'])
+                self.plugin.version = version
+                self.plugin.branch = branch
+                self.plugin.checkout()
+                try:
+                    os.chdir(cwd)
+                except Exception as e:
+                    pass
+                template = self.plugin.builder(template, sections[section]['path'], sections[section]['image_name'], section, build=True, branch=branch, version=version)
+                # stop and remove old containers and images if image_id updated
+                # !! TODO
+
+                # start containers if they were running
+                # !! TODO
+
+                # TODO logging
+            except Exception as e:
+                self.logger.error("Unable to update: "+str(section))
+
+        template.write_config()
+        return status
 
     def stop(self,
              repo=None,

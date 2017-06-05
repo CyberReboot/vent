@@ -24,6 +24,8 @@ from vent.menus.start_core_tools import StartCoreToolsForm
 from vent.menus.start_tools import StartToolsForm
 from vent.menus.stop_core_tools import StopCoreToolsForm
 from vent.menus.stop_tools import StopToolsForm
+from vent.menus.update_core_tools import UpdateCoreToolsForm
+from vent.menus.update_tools import UpdateToolsForm
 from vent.menus.tutorials.adding_files import TutorialAddingFilesForm
 from vent.menus.tutorials.adding_plugins import TutorialAddingPluginsForm
 from vent.menus.tutorials.background import TutorialBackgroundForm
@@ -64,6 +66,8 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("LOGS", LogsForm, name="Logs\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("REMOVETOOLS", RemoveToolsForm, name="Remove tools\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("REMOVECORETOOLS", RemoveCoreToolsForm, name="Remove core tools\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
+        self.addForm("UPDATETOOLS", UpdateToolsForm, name="Update tools\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
+        self.addForm("UPDATECORETOOLS", UpdateCoreToolsForm, name="Update core tools\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
 
     def remove_forms(self):
         """ Remove forms that will have dynamic data """
@@ -84,6 +88,8 @@ class VentApp(npyscreen.NPSAppManaged):
         self.removeForm("LOGS")
         self.removeForm("REMOVETOOLS")
         self.removeForm("REMOVECORETOOLS")
+        self.removeForm("UPDATETOOLS")
+        self.removeForm("UPDATECORETOOLS")
 
     def onStart(self):
         """ Override onStart method for npyscreen """

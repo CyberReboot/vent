@@ -470,6 +470,7 @@ class Plugin:
                     try:
                         self.logger.info("Trying to pull "+image_name)
                         output = subprocess.check_output(shlex.split("docker pull "+image_name), stderr=subprocess.STDOUT, close_fds=True)
+                        self.logger.info("Pulling "+name[1]+"\n"+str(output))
                         for line in output.split('\n'):
                             if line.startswith("Digest: sha256:"):
                                 image_id = line.split("Digest: sha256:")[1][:12]
@@ -489,16 +490,20 @@ class Plugin:
                         self.logger.warning("Failed to pull image, going to build instead: "+str(e))
                 if not pull:
                     output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT, close_fds=True)
+                    self.logger.info("Building "+name[1]+"\n"+str(output))
                     image_id = ""
                     for line in output.split("\n"):
                         if line.startswith("Successfully built "):
                             image_id = line.split("Successfully built ")[1].strip()
                     template.set_option(section, "built", "yes")
                     template.set_option(section, "image_id", image_id)
+                    template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
             except Exception as e:
                 template.set_option(section, "built", "failed")
+                template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
         else:
             template.set_option(section, "built", "no")
+            template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
         return template
 
     def _available_tools(self, groups=None):

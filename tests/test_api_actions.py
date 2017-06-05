@@ -65,7 +65,8 @@ def test_clean():
 
 def test_update():
     """ Test the update function """
-    Action.update()
+    instance = Action()
+    status = instance.update(name='elasticsearch', branch='experimental')
 
 def test_backup():
     """ Test the backup function """
