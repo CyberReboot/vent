@@ -117,6 +117,44 @@ def Images(vent=True):
 
     return images
 
+def Jobs():
+    """
+    Get the number of jobs that are running and finished, and the number of
+    total tools running and finished for those jobs
+    """
+    jobs = [0, 0, 0, 0]
+
+    # get running jobs
+    try:
+        d_client = docker.from_env()
+        c = d_client.containers.list(all=False, filters={'label':'vent-plugin'})
+        files = []
+        for container in c:
+            jobs[1] += 1
+            if 'file' in container.attrs['Config']['Labels']:
+                if container.attrs['Config']['Labels']['file'] not in files:
+                    files.append(container.attrs['Config']['Labels']['file'])
+        jobs[0] = len(files)
+    except Exception as e: #pragma: no cover
+        pass
+
+    # get finished jobs
+    try:
+        d_client = docker.from_env()
+        c = d_client.containers.list(all=True, filters={'label':'vent-plugin'})
+        files = []
+        for container in c:
+            jobs[3] += 1
+            if 'file' in container.attrs['Config']['Labels']:
+                if container.attrs['Config']['Labels']['file'] not in files:
+                    files.append(container.attrs['Config']['Labels']['file'])
+        jobs[2] = len(files)-jobs[0]
+        jobs[3] = jobs[3]-jobs[1]
+    except Exception as e: #pragma: no cover
+        pass
+
+    return tuple(jobs)
+
 def Tools(**kargs):
     """ Get tools that exist in the manifest """
     path_dirs = PathDirs(**kargs)
