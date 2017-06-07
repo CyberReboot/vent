@@ -3,7 +3,7 @@ vent
 
 > Network Visibility (an anagram)
 
-[![Build Status](https://travis-ci.org/CyberReboot/vent.svg?branch=experimental)](https://travis-ci.org/CyberReboot/vent)
+[![Build Status](https://travis-ci.org/CyberReboot/vent.svg?branch=master)](https://travis-ci.org/CyberReboot/vent)
 [![Documentation Status](https://readthedocs.org/projects/vent/badge/?version=latest)](http://vent.readthedocs.io/en/latest/?badge=latest)
 [![GitHub Release](https://badge.fury.io/gh/cyberreboot%2Fvent.svg)](https://github.com/CyberReboot/vent/releases)
 [![codecov](https://codecov.io/gh/CyberReboot/vent/branch/master/graph/badge.svg)](https://codecov.io/gh/CyberReboot/vent)

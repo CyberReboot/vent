@@ -66,8 +66,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield3.display()
 
         # set core value string
-        # !! TODO remove hardcoded experimental
-        core = Core(branch='experimental')
+        core = Core()
         installed = 0
         custom_installed = 0
         built = 0
@@ -163,12 +162,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 time.sleep(1)
             return
 
-        # !! TODO remove hardcoded experimental branch
         if action == 'install':
             original_images = Images()
             thr = threading.Thread(target=self.api_action.cores, args=(),
-                                   kwargs={"action":"install",
-                                           "branch":"experimental"})
+                                   kwargs={"action":"install"})
             popup(original_images, "images", thr,
                   'Please wait, installing core containers...')
             npyscreen.notify_confirm("Done installing core containers.",
