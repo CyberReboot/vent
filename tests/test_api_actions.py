@@ -22,29 +22,29 @@ def test_build():
     """ Test the build function """
     instance = Action()
     status = instance.add('https://github.com/cyberreboot/vent-plugins',
-                          branch='experimental',
+                          branch='master',
                           tools=[('kibana','')],
                           build=False)
-    status = instance.build(branch='experimental')
+    status = instance.build(branch='master')
     assert status[0] == True
 
 def test_prep_start():
     """ Test the prep_start function """
     instance = Action()
     status = instance.add('https://github.com/cyberreboot/vent-plugins',
-                          branch='experimental',
+                          branch='master',
                           tools=[('kibana','')],
                           groups='foo')
     assert status[0] == True
-    status = instance.prep_start(name='kibana', branch='experimental')
+    status = instance.prep_start(name='kibana', branch='master')
     assert type(status) == dict
     status = instance.add('https://github.com/cyberreboot/vent',
-                          branch='experimental',
+                          branch='master',
                           tools=[('vent/core/file-drop',''),
                                  ('vent/core/redis', ''),
                                  ('vent/core/syslog', '')])
     assert status[0] == True
-    status = instance.prep_start(groups='core', branch='experimental')
+    status = instance.prep_start(groups='core', branch='master')
     assert type(status) == dict
 
 def test_start():
@@ -66,7 +66,7 @@ def test_clean():
 def test_update():
     """ Test the update function """
     instance = Action()
-    status = instance.update(name='elasticsearch', branch='experimental')
+    status = instance.update(name='elasticsearch', branch='master')
 
 def test_backup():
     """ Test the backup function """

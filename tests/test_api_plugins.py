@@ -61,33 +61,33 @@ def test_remove():
 def test_versions():
     """ Test the versions function """
     instance = Plugin()
-    status = instance.add('https://github.com/cyberreboot/vent', build=False, branch='experimental')
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, branch='master')
     assert status[0] == True
-    versions = instance.versions('elasticsearch', branch='experimental')
-    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', ['HEAD'])]
+    versions = instance.versions('elasticsearch', branch='master')
+    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', ['HEAD'])]
 
 def test_current_version():
     """ Test the current_version function """
     instance = Plugin()
-    versions = instance.current_version('elasticsearch', branch='experimental')
-    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', 'HEAD')]
+    versions = instance.current_version('elasticsearch', branch='master')
+    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'HEAD')]
 
 def test_state():
     """ Test the state function """
     instance = Plugin()
-    states = instance.state('elasticsearch', branch='experimental')
-    assert states == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', 'enabled')]
+    states = instance.state('elasticsearch', branch='master')
+    assert states == [('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'enabled')]
 
 def test_enable():
     """ Test the enable function """
     instance = Plugin()
-    status = instance.enable('elasticsearch', branch='experimental')
+    status = instance.enable('elasticsearch', branch='master')
     assert status[0] == True
 
 def test_disable():
     """ Test the disable function """
     instance = Plugin()
-    status = instance.disable('elasticsearch', branch='experimental')
+    status = instance.disable('elasticsearch', branch='master')
     assert status[0] == True
 
 def test_apply_path():
@@ -115,6 +115,6 @@ def test_repo_commits():
 def test_repo_tools():
     """ Test the repo_tools function """
     instance = Plugin()
-    tools = instance.repo_tools('https://github.com/cyberreboot/vent', 'experimental', 'HEAD')
+    tools = instance.repo_tools('https://github.com/cyberreboot/vent', 'master', 'HEAD')
     assert tools[0] == True
     assert type(tools[1]) == list
