@@ -1,3 +1,9 @@
+# v0.4.0 (2017-06-08)
+
+improvements:
+ - complete rewrite to make things more flexible and efficient
+ - wrote an API that the CLI menu leverages
+
 # v0.3.1 (2016-12-29)
 
 improvements:

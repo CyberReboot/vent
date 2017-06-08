@@ -41,9 +41,15 @@ simply create your `plugins`, point vent to them & install them, and drop a file
 
 ```
 docker>=1.13.1
-make
+make (if building from source)
 pip
 python2.7.x
+```
+
+### installing
+
+```
+pip install vent
 ```
 
 ### getting the bits and building
@@ -61,17 +67,6 @@ _Note - If you already have `docker-py` installed on your machine, you may need 
 ```
 vent
 ```
-
-getting started
-====
-
-TODO
-
-documentation
-====
-
-- [Docs](https://github.com/CyberReboot/vent/tree/master/docs)
-- [Diagrams](https://github.com/CyberReboot/vent/tree/master/docs/images)
 
 contributing to vent
 ====
