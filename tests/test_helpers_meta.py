@@ -1,3 +1,5 @@
+import docker
+
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
 from vent.helpers.meta import Cpu
@@ -11,6 +13,11 @@ from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Tools
 from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
+
+def test_run_containers():
+    """ Run some containers for testing purposes """
+    d_client = docker.from_env()
+    d_client.containers.run("alpine:latest", "tail -f /etc/passwd", detach=True, labels=["vent", "vent-plugins"])
 
 def test_version():
     """ Test the version function """
@@ -27,6 +34,14 @@ def test_docker():
     docker = Docker()
     assert type(docker) == dict
     assert type(docker['server']) == dict
+    os.environ['DOCKER_MACHINE_NAME'] == 'foo'
+    assert type(docker) == dict
+    assert docker['type']) == 'docker-machine'
+    del os.environ['DOCKER_MACHINE_NAME']
+    os.environ['DOCKER_HOST'] == 'foo'
+    assert type(docker) == dict
+    assert docker['type']) == 'remote'
+    del os.environ['DOCKER_HOST']
 
 def test_containers():
     """ Test the containers function """
