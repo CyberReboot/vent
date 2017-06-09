@@ -81,7 +81,7 @@ def test_inventory():
     instance = Action()
     status = instance.inventory(choices=[])
     assert type(status) == dict
-    status = instance.inventory(choices=['repo', 'core', 'tools', 'images', 'built', 'running', 'enabled', 'foo'])
+    status = instance.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled', 'foo'])
     assert type(status) == dict
 
 def test_configure():
@@ -96,6 +96,8 @@ def test_logs():
     """ Test the logs function """
     instance = Action()
     logs = instance.logs()
+    logs = instance.logs(grep_list=['foo'])
+    logs = instance.logs(container_type="core")
 
 def test_help():
     """ Test the help function """
