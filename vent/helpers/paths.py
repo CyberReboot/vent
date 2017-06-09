@@ -24,7 +24,7 @@ class PathDirs:
         """ Tries to create directory, if fails, checks if path already exists """
         try:
             os.makedirs(path)
-        except OSError as e:
+        except OSError as e: # pragma: no cover
             if e.errno == errno.EEXIST and os.path.isdir(path):
                 return (True, "exists")
             else:
@@ -41,7 +41,7 @@ class PathDirs:
                     fname.write("initialized")
                 return (True, path)
             return (True, "exists")
-        except OSError as e:
+        except OSError as e: # pragma: no cover
             return (False, e)
 
     def host_config(self):

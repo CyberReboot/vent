@@ -55,7 +55,7 @@ class RmqEs():
         index = method.routing_key.split(".")[1]
         try:
             doc = ast.literal_eval(body)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             try:
                 body = body.strip().replace('"', '\"')
                 body = '{"log":"'+body+'"}'
@@ -64,7 +64,7 @@ class RmqEs():
                 pass
         try:
             res = self.es_conn.index(index=index, doc_type=method.routing_key.split(".")[1], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
 
     def start(self):

@@ -135,7 +135,7 @@ def Jobs():
                 if container.attrs['Config']['Labels']['file'] not in files:
                     files.append(container.attrs['Config']['Labels']['file'])
         jobs[0] = len(files)
-    except Exception as e: #pragma: no cover
+    except Exception as e: # pragma: no cover
         pass
 
     # get finished jobs
@@ -150,7 +150,7 @@ def Jobs():
                     files.append(container.attrs['Config']['Labels']['file'])
         jobs[2] = len(files)-jobs[0]
         jobs[3] = jobs[3]-jobs[1]
-    except Exception as e: #pragma: no cover
+    except Exception as e: # pragma: no cover
         pass
 
     return tuple(jobs)
@@ -252,7 +252,7 @@ def Timestamp():
     timestamp = ""
     try:
         timestamp = str(datetime.datetime.now())+" UTC"
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
     return timestamp
 
@@ -261,6 +261,6 @@ def Uptime():
     uptime = ""
     try:
         uptime = str(subprocess.check_output(["uptime"], close_fds=True))[1:]
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
     return uptime

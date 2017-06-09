@@ -29,7 +29,7 @@ class Plugin:
         try:
             org, name = repo.split("/")[-2:]
             self.path = os.path.join(self.path_dirs.plugins_dir, org, name)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             return (False, str(e))
 
         # save current path
@@ -60,18 +60,18 @@ class Plugin:
                     branches.append(b.rsplit('/', 1)[1])
                 elif b:
                     branches.append(b)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             return (False, e)
 
         branches = list(set(branches))
         for branch in branches:
             try:
                 junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 return (False, e)
         try:
             os.chdir(cwd)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
 
         return (True, branches)
@@ -92,13 +92,13 @@ class Plugin:
                     branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT, close_fds=True)
                     branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
                     commits.append((branch, branch_output))
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 return (False, e)
         else:
             return branches
         try:
             os.chdir(cwd)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
 
         return (True, commits)
@@ -121,7 +121,7 @@ class Plugin:
             return response
         try:
             os.chdir(cwd)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
 
         return (True, tools)
@@ -143,7 +143,7 @@ class Plugin:
         try:
             self.org, self.name = self.repo.split("/")[-2:]
             self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             return -1, cwd
 
 
@@ -159,7 +159,7 @@ class Plugin:
             try:
                 status = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT, close_fds=True)
                 return 0, cwd
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 return -1, cwd
 
         # ensure cloning still works even if ssl is broken...probably should be improved
@@ -177,7 +177,7 @@ class Plugin:
         try:
             status = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
             status_code = 0
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError as e: # pragma: no cover
             status_code = e.returncode
 
         return status_code, cwd
@@ -264,7 +264,7 @@ class Plugin:
         # set back to original path
         try:
             os.chdir(cwd)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
         return response
 
@@ -286,7 +286,7 @@ class Plugin:
         template = self._build_image(template, match_path, image_name, section)
         try:
             os.chdir(cwd)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
         return template
 
@@ -486,7 +486,7 @@ class Plugin:
                             status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
                             self.logger.warning(str(status))
                         pull = True
-                    except Exception as e:
+                    except Exception as e: # pragma: no cover
                         self.logger.warning("Failed to pull image, going to build instead: "+str(e))
                 if not pull:
                     output = subprocess.check_output(shlex.split("docker build --label vent --label vent.name="+name[1]+" --label vent.groups="+groups[1]+" -t " + image_name + " ."), stderr=subprocess.STDOUT, close_fds=True)
@@ -498,7 +498,7 @@ class Plugin:
                     template.set_option(section, "built", "yes")
                     template.set_option(section, "image_id", image_id)
                     template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
         else:
@@ -609,7 +609,7 @@ class Plugin:
                 response = container.remove(v=True, force=True)
                 self.logger.info(response)
                 self.logger.info("Removing plugin container: "+container_name)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 self.logger.warn("Unable to remove the plugin container: " + 
                                  container_name + " because: " + str(e))
 
@@ -618,7 +618,7 @@ class Plugin:
                 response = self.d_client.images.remove(image_name)
                 self.logger.info(response)
                 self.logger.info("Removing plugin image: "+image_name)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 self.logger.warn("Unable to remove the plugin image: " + 
                                  image_name + " because: " + str(e))
 
@@ -647,7 +647,7 @@ class Plugin:
             try:
                 container = self.d_client.containers.get(container_name)
                 response = container.remove(v=True, force=True)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 pass
 
             # TODO git pull
