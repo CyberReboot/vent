@@ -643,7 +643,7 @@ class Plugin:
         results, template = self.constraint_options(args, options)
         for result in results:
             # check for container and remove
-            container_name = image_name.replace(':', '-').replace('/', '-')
+            container_name = result['image_name'].replace(':', '-').replace('/', '-')
             try:
                 container = self.d_client.containers.get(container_name)
                 response = container.remove(v=True, force=True)
