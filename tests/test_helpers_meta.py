@@ -36,11 +36,11 @@ def test_docker():
     assert type(docker['server']) == dict
     os.environ['DOCKER_MACHINE_NAME'] == 'foo'
     assert type(docker) == dict
-    assert docker['type']) == 'docker-machine'
+    assert docker['type'] == 'docker-machine'
     del os.environ['DOCKER_MACHINE_NAME']
     os.environ['DOCKER_HOST'] == 'foo'
     assert type(docker) == dict
-    assert docker['type']) == 'remote'
+    assert docker['type'] == 'remote'
     del os.environ['DOCKER_HOST']
 
 def test_containers():
