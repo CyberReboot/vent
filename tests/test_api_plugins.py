@@ -118,3 +118,10 @@ def test_repo_tools():
     tools = instance.repo_tools('https://github.com/cyberreboot/vent', 'master', 'HEAD')
     assert tools[0] == True
     assert type(tools[1]) == list
+
+def test_update():
+    """ Test the update function """
+    instance = Plugin()
+    status = instance.update()
+    assert type(status) == tuple
+    assert status[0] == False
