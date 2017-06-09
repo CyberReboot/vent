@@ -1,7 +1,10 @@
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Core
+from vent.helpers.meta import Cpu
 from vent.helpers.meta import Docker
+from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
+from vent.helpers.meta import Jobs
 from vent.helpers.meta import Services
 from vent.helpers.meta import System
 from vent.helpers.meta import Timestamp
@@ -63,3 +66,18 @@ def test_uptime():
     """ Test the uptime function """
     uptime = Uptime()
     assert type(uptime) == str
+
+def test_cpu():
+    """ Test the cpu function """
+    cpu = Cpu()
+    assert type(cpu) == str
+
+def test_gpu():
+    """ Test the gpu function """
+    gpu = Gpu()
+    assert type(gpu) == str
+
+def test_jobs():
+    """ Test the jobs function """
+    jobs = Jobs()
+    assert type(jobs) == tuple
