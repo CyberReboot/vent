@@ -65,7 +65,7 @@ def file_queue(path, template_path="/vent/"):
                                     log_config=log_config,
                                     volumes=volumes)
         status = (True, images)
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         status = (False, None)
 
     return status

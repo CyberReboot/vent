@@ -15,7 +15,7 @@ def Version():
     version = ''
     try:
         version = "v"+pkg_resources.require("vent")[0].version
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
     return version
 
@@ -31,7 +31,7 @@ def Docker():
     try:
         d_client = docker.from_env()
         docker_info['server'] = d_client.version()
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
 
     # get operating system
@@ -67,7 +67,7 @@ def Containers(vent=True, running=True):
             c = d_client.containers.list(all=not running)
         for container in c:
             containers.append((container.name, container.status))
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
 
     return containers
@@ -76,7 +76,7 @@ def Cpu():
     cpu = "Unknown"
     try:
         cpu = str(multiprocessing.cpu_count())
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
     return cpu
 
@@ -96,7 +96,7 @@ def Gpu():
                 gpu = "None"
         else:
             gpu = "None"
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         gpu = "Unknown"
     return gpu
 
@@ -112,7 +112,7 @@ def Images(vent=True):
             i = d_client.images.list()
         for image in i:
             images.append((image.tags[0], image.short_id))
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
 
     return images
@@ -135,7 +135,7 @@ def Jobs():
                 if container.attrs['Config']['Labels']['file'] not in files:
                     files.append(container.attrs['Config']['Labels']['file'])
         jobs[0] = len(files)
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
 
     # get finished jobs
@@ -150,7 +150,7 @@ def Jobs():
                     files.append(container.attrs['Config']['Labels']['file'])
         jobs[2] = len(files)-jobs[0]
         jobs[3] = jobs[3]-jobs[1]
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
 
     return tuple(jobs)
@@ -186,7 +186,7 @@ def Services(vent=True):
                     p.append(ports[port][0]['HostIp']+":"+ports[port][0]['HostPort'])
             if p:
                 services.append((name, p))
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
     return services
 
@@ -233,7 +233,7 @@ def Core(branch="master", **kargs):
                 if "vent.groups" in image.attrs['Labels'] and 'core' in image.attrs['Labels']['vent.groups']:
                     if 'vent.name' in image.attrs['Labels']:
                         core['built'].append(image.attrs['Labels']['vent.name'])
-            except Exception as err: # pragma: no cover
+            except Exception as err:  # pragma: no cover
                 pass
         containers = d_client.containers.list()
         for container in containers:
@@ -241,9 +241,9 @@ def Core(branch="master", **kargs):
                 if "vent.groups" in container.attrs['Config']['Labels'] and 'core' in container.attrs['Config']['Labels']['vent.groups']:
                     if 'vent.name' in container.attrs['Config']['Labels']:
                         core['running'].append(container.attrs['Config']['Labels']['vent.name'])
-            except Exception as err: # pragma: no cover
+            except Exception as err:  # pragma: no cover
                 pass
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
     return core
 
@@ -252,7 +252,7 @@ def Timestamp():
     timestamp = ""
     try:
         timestamp = str(datetime.datetime.now())+" UTC"
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
     return timestamp
 
@@ -261,6 +261,6 @@ def Uptime():
     uptime = ""
     try:
         uptime = str(subprocess.check_output(["uptime"], close_fds=True))[1:]
-    except Exception as e: # pragma: no cover
+    except Exception as e:  # pragma: no cover
         pass
     return uptime

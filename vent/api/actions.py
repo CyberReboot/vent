@@ -42,7 +42,7 @@ class Action:
                                      wild=wild,
                                      remove_old=remove_old,
                                      disable_old=disable_old)
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             self.logger.error(str(e))
             status = (False, e)
         self.logger.info(status)
@@ -134,14 +134,14 @@ class Action:
                             while i < len(cmds):
                                 try:
                                     cmds[i] = subprocess.check_output(shlex.split(cmds[i]), stderr=subprocess.STDOUT, close_fds=True).strip()
-                                except Exception as e: # pragma: no cover
+                                except Exception as e:  # pragma: no cover
                                     self.logger.warn("Unable to evaluate command specified in vent.template: "+str(e))
                                 i += 2
                         options = "".join(cmds)
                     # store options set for docker
                     try:
                         tool_dict[container_name][option[0]] = ast.literal_eval(options)
-                    except Exception as e: # pragma: no cover
+                    except Exception as e:  # pragma: no cover
                         tool_dict[container_name][option[0]] = options
 
             # get temporary name for links, etc.
@@ -275,10 +275,10 @@ class Action:
                                 container = self.d_client.containers.get(container_tuple[1])
                                 container.start()
                                 self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container.short_id))
-                            except Exception as err: # pragma: no cover
+                            except Exception as err:  # pragma: no cover
                                 container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
                                 self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
-                        except Exception as e: # pragma: no cover
+                        except Exception as e:  # pragma: no cover
                             self.logger.warning("failed to start "+str(container_tuple[1])+" because: "+str(e))
 
         # start the rest of the containers that didn't have any priorities set
@@ -288,10 +288,10 @@ class Action:
                     c = self.d_client.containers.get(container)
                     c.start()
                     self.logger.info("started "+str(container)+" with ID: "+str(c.short_id))
-                except Exception as err: # pragma: no cover
+                except Exception as err:  # pragma: no cover
                     container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
                     self.logger.info("started "+str(container)+" with ID: "+str(container_id))
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 self.logger.warning("failed to start "+str(container)+" because: "+str(e))
 
         return status
@@ -328,7 +328,7 @@ class Action:
                 self.plugin.checkout()
                 try:
                     os.chdir(cwd)
-                except Exception as e: # pragma: no cover
+                except Exception as e:  # pragma: no cover
                     pass
                 template = self.plugin.builder(template, sections[section]['path'], sections[section]['image_name'], section, build=True, branch=branch, version=version)
                 # stop and remove old containers and images if image_id updated
@@ -338,7 +338,7 @@ class Action:
                 # !! TODO
 
                 # TODO logging
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 self.logger.error("Unable to update: "+str(section))
 
         template.write_config()
@@ -375,7 +375,7 @@ class Action:
                 container = self.d_client.containers.get(container_name)
                 container.stop()
                 self.logger.info("stopped "+str(container_name))
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 self.logger.warning("failed to stop "+str(container_name)+" because: "+str(e))
         return status
 
@@ -410,7 +410,7 @@ class Action:
                 container = self.d_client.containers.get(container_name)
                 container.remove(force=True)
                 self.logger.info("cleaned "+str(container_name))
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 self.logger.warning("failed to clean "+str(container_name)+" because: "+str(e))
         return status
 
@@ -490,12 +490,12 @@ class Action:
                                     plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
                                     status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
                                     self.logger.warning(str(status))
-                            except Exception as e: # pragma: no cover
+                            except Exception as e:  # pragma: no cover
                                 plugin_config.set_option(section, "built", "failed")
                                 plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
                                 status = (False, "Failed to pull image "+str(e))
                                 self.logger.warning(str(status))
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 status = (False, "Failed to pull images "+str(e))
                 self.logger.warning(str(status))
             plugin_config.write_config()
@@ -537,7 +537,7 @@ class Action:
             if container_type:
                 try:
                     compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
-                except Exception as e: # pragma: no cover
+                except Exception as e:  # pragma: no cover
                     self.logger.warn("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
 
             for expression in grep_list:
@@ -550,14 +550,14 @@ class Action:
                                 log_entries[str(container.name)].append(log)
                             else:
                                 log_entries[str(container.name)] = [log]
-                    except Exception as e: # pragma: no cover
+                    except Exception as e:  # pragma: no cover
                         self.logger.warn("Unable to get logs for "+str(container.name)+" because: "+str(e))
         else:
             compare_containers = containers
             if container_type:
                 try:
                     compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
-                except Exception as e: # pragma: no cover
+                except Exception as e:  # pragma: no cover
                     self.logger.warn("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
             for container in compare_containers:
                 try:
@@ -567,7 +567,7 @@ class Action:
                             log_entries[str(container.name)].append(log)
                         else:
                             log_entries[str(container.name)] = [log]
-                except Exception as e: # pragma: no cover
+                except Exception as e:  # pragma: no cover
                     self.logger.warn("Unable to get logs for "+str(container.name)+" because: "+str(e))
         return log_entries
 
@@ -617,7 +617,7 @@ class Action:
                     else:
                         # unknown choice
                         pass
-                except Exception as e: # pragma: no cover
+                except Exception as e:  # pragma: no cover
                     pass
 
         return items
