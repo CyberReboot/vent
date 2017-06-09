@@ -27,7 +27,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         os.system('stty sane')
         try:
             sys.exit(0)
-        except SystemExit:
+        except SystemExit:  # pragma: no cover
             os._exit(0)
 
     def while_waiting(self):
@@ -44,7 +44,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.triggered = True
             try:
                 self.api_action = Action()
-            except DockerException as de:
+            except DockerException as de:  # pragma: no cover
                 popup(de)
 
         # give a little extra time for file descriptors to close
@@ -52,7 +52,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         try:
             current_path = os.getcwd()
-        except:
+        except Exception as e:  # pragma: no cover
             self.exit()
         self.addfield.value = Timestamp()
         self.addfield.display()
@@ -269,9 +269,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 # remove .vent folder
                 try:
                     shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
-                except Exception as e:
+                except Exception as e:  # pragma: no cover
                     npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
-                else:  # don't forget to indent the thing below when you uncomment code....
+                else:
                     npyscreen.notify_confirm("Vent reset complete. "
                             "Press OK to exit Vent Manager console.")
                 self.exit()

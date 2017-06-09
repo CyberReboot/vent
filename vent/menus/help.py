@@ -62,7 +62,7 @@ class HelpForm(npyscreen.ActionFormWithMenus):
         # Returns to previous Form in history if there is a previous Form
         try:
             self.parentApp.switchFormPrevious()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.parentApp.switchForm('MAIN')
 
     def switch(self, page):

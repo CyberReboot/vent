@@ -58,13 +58,13 @@ class GZHandler(PatternMatchingEventHandler):
                     # let jobs be queued for up to 30 days
                     result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
                 print(uid+" end "+event.src_path)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             print(str(e))
 
     def on_created(self, event):
         self.process(event, 'redis')
 
-if __name__ == '__main__': # pragma: no cover
+if __name__ == '__main__':  # pragma: no cover
     args = None
     if len(sys.argv) > 1:
         args = sys.argv[1:]
@@ -76,7 +76,7 @@ if __name__ == '__main__': # pragma: no cover
     try:
         while True:
             time.sleep(1)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # pragma: no cover
         observer.stop()
 
     observer.join()
