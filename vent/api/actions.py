@@ -500,7 +500,8 @@ class Action:
                 self.logger.warning(str(status))
             plugin_config.write_config()
         elif action == "start":
-            status = self.start(groups="core", branch=branch)
+            tool_dict = self.prep_start(groups="core", branch=branch)
+            status = self.start(tool_dict)
         elif action == "stop":
             status = self.stop(groups="core", branch=branch)
         elif action == "clean":
