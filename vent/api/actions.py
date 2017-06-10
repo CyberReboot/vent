@@ -275,57 +275,80 @@ class Action:
         are given, start all installed tools on the master branch at verison
         HEAD that are enabled
         """
+        self.logger.info("Starting: start")
         status = (True, None)
-        # check start priorities (priority of groups is alphabetical for now)
-        group_orders = {}
-        groups = []
-        containers_remaining = []
-        for container in tool_dict:
-            containers_remaining.append(container)
-            if 'labels' in tool_dict[container]:
-                if 'vent.groups' in tool_dict[container]['labels']:
-                    groups += tool_dict[container]['labels']['vent.groups'].split(',')
-                    if 'vent.priority' in tool_dict[container]['labels']:
-                        priorities = tool_dict[container]['labels']['vent.priority'].split(',')
-                        container_groups = tool_dict[container]['labels']['vent.groups'].split(',')
-                        for i, priority in enumerate(priorities):
-                            if container_groups[i] not in group_orders:
-                                group_orders[container_groups[i]] = []
-                            group_orders[container_groups[i]].append((int(priority), container))
-                        containers_remaining.remove(container)
+        try:
+            # check start priorities (priority of groups is alphabetical for now)
+            group_orders = {}
+            groups = []
+            containers_remaining = []
+            for container in tool_dict:
+                containers_remaining.append(container)
+                if 'labels' in tool_dict[container]:
+                    if 'vent.groups' in tool_dict[container]['labels']:
+                        groups += tool_dict[container]['labels']['vent.groups'].split(',')
+                        if 'vent.priority' in tool_dict[container]['labels']:
+                            priorities = tool_dict[container]['labels']['vent.priority'].split(',')
+                            container_groups = tool_dict[container]['labels']['vent.groups'].split(',')
+                            for i, priority in enumerate(priorities):
+                                if container_groups[i] not in group_orders:
+                                    group_orders[container_groups[i]] = []
+                                group_orders[container_groups[i]].append((int(priority), container))
+                            containers_remaining.remove(container)
 
-        # start containers based on priorities
-        groups = sorted(set(groups))
-        started_containers = []
-        for group in groups:
-            if group in group_orders:
-                for container_tuple in sorted(group_orders[group]):
-                    if container_tuple[1] not in started_containers:
-                        started_containers.append(container_tuple[1])
-                        try:
+            self.logger.info(group_orders)
+            self.logger.info(groups)
+            self.logger.info(containers_remaining)
+
+            # start containers based on priorities
+            groups = sorted(set(groups))
+            started_containers = []
+            for group in groups:
+                if group in group_orders:
+                    for container_tuple in sorted(group_orders[group]):
+                        if container_tuple[1] not in started_containers:
+                            started_containers.append(container_tuple[1])
                             try:
-                                container = self.d_client.containers.get(container_tuple[1])
-                                container.start()
-                                self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container.short_id))
-                            except Exception as err:  # pragma: no cover
-                                container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
-                                self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
-                        except Exception as e:  # pragma: no cover
-                            self.logger.warning("failed to start "+str(container_tuple[1])+" because: "+str(e))
+                                try:
+                                    container = self.d_client.containers.get(container_tuple[1])
+                                    container.start()
+                                    self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container.short_id))
+                                except Exception as err:  # pragma: no cover
+                                    self.logger.warn(str(err))
+                                    container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
+                                    self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
+                            except Exception as e:  # pragma: no cover
+                                self.logger.error("failed to start "+str(container_tuple[1])+" because: "+str(e))
 
-        # start the rest of the containers that didn't have any priorities set
-        for container in containers_remaining:
-            try:
+            self.logger.info(group_orders)
+            self.logger.info(groups)
+            self.logger.info(containers_remaining)
+            self.logger.info(started_containers)
+
+            # start the rest of the containers that didn't have any priorities set
+            for container in containers_remaining:
                 try:
-                    c = self.d_client.containers.get(container)
-                    c.start()
-                    self.logger.info("started "+str(container)+" with ID: "+str(c.short_id))
-                except Exception as err:  # pragma: no cover
-                    container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
-                    self.logger.info("started "+str(container)+" with ID: "+str(container_id))
-            except Exception as e:  # pragma: no cover
-                self.logger.warning("failed to start "+str(container)+" because: "+str(e))
+                    try:
+                        c = self.d_client.containers.get(container)
+                        c.start()
+                        self.logger.info("started "+str(container)+" with ID: "+str(c.short_id))
+                    except Exception as err:  # pragma: no cover
+                        self.logger.warn(str(err))
+                        container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
+                        self.logger.info("started "+str(container)+" with ID: "+str(container_id))
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("failed to start "+str(container)+" because: "+str(e))
 
+            self.logger.info(group_orders)
+            self.logger.info(groups)
+            self.logger.info(containers_remaining)
+            self.logger.info(started_containers)
+        except Exception as e:
+            self.logger.error(str(e))
+            status = (False, e)
+
+        self.logger.info(status)
+        self.logger.info("Finished: start")
         return status
 
     def update(self,
