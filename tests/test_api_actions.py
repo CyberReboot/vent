@@ -37,7 +37,7 @@ def test_prep_start():
                           groups='foo')
     assert status[0] == True
     status = instance.prep_start(name='kibana', branch='master')
-    assert type(status) == dict
+    assert type(status) == tuple
     status = instance.add('https://github.com/cyberreboot/vent',
                           branch='master',
                           tools=[('vent/core/file-drop',''),
@@ -45,7 +45,7 @@ def test_prep_start():
                                  ('vent/core/syslog', '')])
     assert status[0] == True
     status = instance.prep_start(groups='core', branch='master')
-    assert type(status) == dict
+    assert type(status) == tuple
 
 def test_start():
     """ Test the start function """

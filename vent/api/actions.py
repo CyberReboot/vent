@@ -79,163 +79,191 @@ class Action:
         are given, start all installed tools on the master branch at verison
         HEAD that are enabled
         """
-        args = locals()
-        del args['run_build']
-        options = ['name',
-                   'namespace',
-                   'built',
-                   'groups',
-                   'path',
-                   'image_name',
-                   'branch',
-                   'version']
-        vent_config = Template(template=self.vent_config)
-        files = vent_config.option('main', 'files')
-        sections, template = self.plugin.constraint_options(args, options)
+        self.logger.info("Starting: prep_start")
+        status = (True, None)
         tool_dict = {}
-        for section in sections:
-            # initialize needed vars
-            template_path = os.path.join(sections[section]['path'], 'vent.template')
-            container_name = sections[section]['image_name'].replace(':','-')
-            container_name = container_name.replace('/','-')
-            image_name = sections[section]['image_name']
+        try:
+            args = locals()
+            self.logger.info(args)
+            del args['run_build']
+            options = ['name',
+                       'namespace',
+                       'built',
+                       'groups',
+                       'path',
+                       'image_name',
+                       'branch',
+                       'version']
+            vent_config = Template(template=self.vent_config)
+            files = vent_config.option('main', 'files')
+            sections, template = self.plugin.constraint_options(args, options)
+            self.logger.info(sections)
+            self.logger.info(template)
+            for section in sections:
+                # initialize needed vars
+                template_path = os.path.join(sections[section]['path'], 'vent.template')
+                container_name = sections[section]['image_name'].replace(':','-')
+                container_name = container_name.replace('/','-')
+                image_name = sections[section]['image_name']
 
-            # checkout the right version and branch of the repo
-            self.plugin.branch = branch
-            self.plugin.version = version
-            cwd = os.getcwd()
-            os.chdir(os.path.join(sections[section]['path']))
-            status = self.plugin.checkout()
-            self.logger.info(status)
-            os.chdir(cwd)
-
-            if run_build:
-                status = self.build(name=sections[section]['name'],
-                                    groups=groups,
-                                    enabled=enabled,
-                                    branch=branch,
-                                    version=version)
+                # checkout the right version and branch of the repo
+                self.plugin.branch = branch
+                self.plugin.version = version
+                cwd = os.getcwd()
+                self.logger.info(cwd)
+                os.chdir(os.path.join(sections[section]['path']))
+                status = self.plugin.checkout()
                 self.logger.info(status)
+                os.chdir(cwd)
 
-            # set docker settings for container
-            vent_template = Template(template_path)
-            status = vent_template.section('docker')
-            self.logger.info(status)
-            tool_dict[container_name] = {'image':image_name, 'name':container_name}
-            if status[0]:
-                for option in status[1]:
-                    options = option[1]
-                    # check for commands to evaluate
-                    if '`' in options:
-                        cmds = options.split('`')
-                        # TODO this probably needs better error checking to handle mismatched ``
-                        if len(cmds) > 2:
-                            i = 1
-                            while i < len(cmds):
-                                try:
-                                    cmds[i] = subprocess.check_output(shlex.split(cmds[i]), stderr=subprocess.STDOUT, close_fds=True).strip()
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.warn("Unable to evaluate command specified in vent.template: "+str(e))
-                                i += 2
-                        options = "".join(cmds)
-                    # store options set for docker
-                    try:
-                        tool_dict[container_name][option[0]] = ast.literal_eval(options)
-                    except Exception as e:  # pragma: no cover
-                        tool_dict[container_name][option[0]] = options
+                if run_build:
+                    status = self.build(name=sections[section]['name'],
+                                        groups=groups,
+                                        enabled=enabled,
+                                        branch=branch,
+                                        version=version)
+                    self.logger.info(status)
 
-            # get temporary name for links, etc.
-            status = vent_template.section('info')
-            self.logger.info(status)
-            plugin_config = Template(template=self.plugin.manifest)
-            status, plugin_sections = plugin_config.sections()
-            self.logger.info(status)
-            for plugin_section in plugin_sections:
-                status = plugin_config.option(plugin_section, "link_name")
+                # set docker settings for container
+                vent_template = Template(template_path)
+                status = vent_template.section('docker')
                 self.logger.info(status)
-                image_status = plugin_config.option(plugin_section, "image_name")
-                self.logger.info(image_status)
-                if status[0] and image_status[0]:
-                    cont_name = image_status[1].replace(':','-')
-                    cont_name = cont_name.replace('/','-')
-                    if cont_name not in tool_dict:
-                        tool_dict[cont_name] = {'image':image_status[1], 'name':cont_name, 'start':False}
-                    tool_dict[cont_name]['tmp_name'] = status[1]
+                tool_dict[container_name] = {'image':image_name, 'name':container_name}
+                self.logger.info(tool_dict)
+                if status[0]:
+                    for option in status[1]:
+                        options = option[1]
+                        # check for commands to evaluate
+                        if '`' in options:
+                            cmds = options.split('`')
+                            # TODO this probably needs better error checking to handle mismatched ``
+                            if len(cmds) > 2:
+                                i = 1
+                                while i < len(cmds):
+                                    try:
+                                        cmds[i] = subprocess.check_output(shlex.split(cmds[i]), stderr=subprocess.STDOUT, close_fds=True).strip()
+                                    except Exception as e:  # pragma: no cover
+                                        self.logger.error("Unable to evaluate command specified in vent.template: "+str(e))
+                                    i += 2
+                            options = "".join(cmds)
+                        # store options set for docker
+                        try:
+                            tool_dict[container_name][option[0]] = ast.literal_eval(options)
+                        except Exception as e:  # pragma: no cover
+                            self.logger.error(str(e))
+                            tool_dict[container_name][option[0]] = options
+                self.logger.info(tool_dict)
 
-            # add extra labels
-            if 'labels' not in tool_dict[container_name]:
-                tool_dict[container_name]['labels'] = {}
-            tool_dict[container_name]['labels']['vent'] = Version()
-            tool_dict[container_name]['labels']['vent.namespace'] = sections[section]['namespace']
-            tool_dict[container_name]['labels']['vent.branch'] = branch
-            tool_dict[container_name]['labels']['vent.version'] = version
-            tool_dict[container_name]['labels']['vent.name'] = sections[section]['name']
+                # get temporary name for links, etc.
+                status = vent_template.section('info')
+                self.logger.info(status)
+                plugin_config = Template(template=self.plugin.manifest)
+                status, plugin_sections = plugin_config.sections()
+                self.logger.info(status)
+                self.logger.info(plugin_sections)
+                for plugin_section in plugin_sections:
+                    status = plugin_config.option(plugin_section, "link_name")
+                    self.logger.info(status)
+                    image_status = plugin_config.option(plugin_section, "image_name")
+                    self.logger.info(image_status)
+                    if status[0] and image_status[0]:
+                        cont_name = image_status[1].replace(':','-')
+                        cont_name = cont_name.replace('/','-')
+                        if cont_name not in tool_dict:
+                            tool_dict[cont_name] = {'image':image_status[1], 'name':cont_name, 'start':False}
+                        tool_dict[cont_name]['tmp_name'] = status[1]
+                self.logger.info(tool_dict)
 
-            if 'groups' in sections[section]:
-                # add labels for groups
-                tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
-                # send logs to syslog
-                if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
-                    tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
-                if 'syslog' not in sections[section]['groups']:
+                # add extra labels
+                if 'labels' not in tool_dict[container_name]:
+                    tool_dict[container_name]['labels'] = {}
+                tool_dict[container_name]['labels']['vent'] = Version()
+                tool_dict[container_name]['labels']['vent.namespace'] = sections[section]['namespace']
+                tool_dict[container_name]['labels']['vent.branch'] = branch
+                tool_dict[container_name]['labels']['vent.version'] = version
+                tool_dict[container_name]['labels']['vent.name'] = sections[section]['name']
+
+                self.logger.info(tool_dict)
+
+                if 'groups' in sections[section]:
+                    # add labels for groups
+                    tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
+                    # send logs to syslog
+                    if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
+                        tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
+                    if 'syslog' not in sections[section]['groups']:
+                        tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
+                    # mount necessary directories
+                    if 'files' in sections[section]['groups']:
+                        if 'volumes' in tool_dict[container_name]:
+                            tool_dict[container_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
+                        else:
+                            tool_dict[container_name]['volumes'] = {self.plugin.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
+                        if files[0]:
+                            tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
+                else:
                     tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
-                # mount necessary directories
-                if 'files' in sections[section]['groups']:
-                    if 'volumes' in tool_dict[container_name]:
-                        tool_dict[container_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
-                    else:
-                        tool_dict[container_name]['volumes'] = {self.plugin.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
-                    if files[0]:
-                        tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
-            else:
-                tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
 
-            # add label for priority
-            status = vent_template.section('settings')
-            self.logger.info(status)
-            if status[0]:
-                for option in status[1]:
-                    if option[0] == 'priority':
-                        tool_dict[container_name]['labels']['vent.priority'] = option[1]
+                self.logger.info(tool_dict)
 
-            # only start tools that have been built
-            if sections[section]['built'] != 'yes':
-                del tool_dict[container_name]
+                # add label for priority
+                status = vent_template.section('settings')
+                self.logger.info(status)
+                if status[0]:
+                    for option in status[1]:
+                        if option[0] == 'priority':
+                            tool_dict[container_name]['labels']['vent.priority'] = option[1]
 
-        # check and update links, volumes_from, network_mode
-        for container in tool_dict.keys():
-            if 'links' in tool_dict[container]:
-                for link in tool_dict[container]['links']:
-                    for c in tool_dict.keys():
-                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == link:
-                            tool_dict[container]['links'][tool_dict[c]['name']] = tool_dict[container]['links'].pop(link)
-            if 'volumes_from' in tool_dict[container]:
-                tmp_volumes_from = tool_dict[container]['volumes_from']
-                tool_dict[container]['volumes_from'] = []
-                for volumes_from in list(tmp_volumes_from):
-                    for c in tool_dict.keys():
-                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == volumes_from:
-                            tool_dict[container]['volumes_from'].append(tool_dict[c]['name'])
-                            tmp_volumes_from.remove(volumes_from)
-                tool_dict[container]['volumes_from'] += tmp_volumes_from
-            if 'network_mode' in tool_dict[container]:
-                if tool_dict[container]['network_mode'].startswith('container:'):
-                    network_c_name = tool_dict[container]['network_mode'].split('container:')[1]
-                    for c in tool_dict.keys():
-                        if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == network_c_name:
-                            tool_dict[container]['network_mode'] = 'container:'+tool_dict[c]['name']
+                # only start tools that have been built
+                if sections[section]['built'] != 'yes':
+                    del tool_dict[container_name]
 
-        # remove tmp_names
-        for c in tool_dict.keys():
-            if 'tmp_name' in tool_dict[c]:
-                del tool_dict[c]['tmp_name']
+                self.logger.info(tool_dict)
 
-        # remove containers that shouldn't be started
-        for c in tool_dict.keys():
-            if 'start' in tool_dict[c] and not tool_dict[c]['start']:
-                del tool_dict[c]
+            # check and update links, volumes_from, network_mode
+            for container in tool_dict.keys():
+                if 'links' in tool_dict[container]:
+                    for link in tool_dict[container]['links']:
+                        for c in tool_dict.keys():
+                            if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == link:
+                                tool_dict[container]['links'][tool_dict[c]['name']] = tool_dict[container]['links'].pop(link)
+                if 'volumes_from' in tool_dict[container]:
+                    tmp_volumes_from = tool_dict[container]['volumes_from']
+                    tool_dict[container]['volumes_from'] = []
+                    for volumes_from in list(tmp_volumes_from):
+                        for c in tool_dict.keys():
+                            if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == volumes_from:
+                                tool_dict[container]['volumes_from'].append(tool_dict[c]['name'])
+                                tmp_volumes_from.remove(volumes_from)
+                    tool_dict[container]['volumes_from'] += tmp_volumes_from
+                if 'network_mode' in tool_dict[container]:
+                    if tool_dict[container]['network_mode'].startswith('container:'):
+                        network_c_name = tool_dict[container]['network_mode'].split('container:')[1]
+                        for c in tool_dict.keys():
+                            if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == network_c_name:
+                                tool_dict[container]['network_mode'] = 'container:'+tool_dict[c]['name']
 
-        return tool_dict
+            self.logger.info(tool_dict)
+
+            # remove tmp_names
+            for c in tool_dict.keys():
+                if 'tmp_name' in tool_dict[c]:
+                    del tool_dict[c]['tmp_name']
+
+            # remove containers that shouldn't be started
+            for c in tool_dict.keys():
+                if 'start' in tool_dict[c] and not tool_dict[c]['start']:
+                    del tool_dict[c]
+
+            self.logger.info(tool_dict)
+        except Exception as e:
+            self.logger.error(str(e))
+            status = (False, e)
+
+        status = (True, tool_dict)
+        self.logger.info(status)
+        self.logger.info("Finished: prep_start")
+        return status
 
     def start(self, tool_dict):
         """
@@ -500,8 +528,10 @@ class Action:
                 self.logger.warning(str(status))
             plugin_config.write_config()
         elif action == "start":
-            tool_dict = self.prep_start(groups="core", branch=branch)
-            status = self.start(tool_dict)
+            status = self.prep_start(groups="core", branch=branch)
+            if status[0]:
+              tool_dict = status[1]
+              status = self.start(tool_dict)
         elif action == "stop":
             status = self.stop(groups="core", branch=branch)
         elif action == "clean":
