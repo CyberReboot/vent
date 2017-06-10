@@ -643,9 +643,9 @@ class Plugin:
         results, template = self.constraint_options(args, options)
         for result in results:
             # check for container and remove
-            container_name = results['image_name'].replace(':', '-') \
-                                                  .replace('/', '-')
             try:
+                container_name = results['image_name'].replace(':', '-') \
+                                                      .replace('/', '-')
                 container = self.d_client.containers.get(container_name)
                 response = container.remove(v=True, force=True)
             except Exception as e:  # pragma: no cover
