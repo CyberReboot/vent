@@ -513,17 +513,27 @@ class Action:
               branch="master",
               version="HEAD"):
         """ Build a set of tools that match the parameters given """
-        args = locals()
-        options = ['image_name', 'path']
+        self.logger.info("Starting: build")
         status = (True, None)
-        sections, template = self.plugin.constraint_options(args, options)
-        for section in sections:
-            self.logger.info("Building "+str(section)+" ...")
-            template = self.plugin.builder(template, sections[section]['path'],
-                                           sections[section]['image_name'],
-                                           section, build=True, branch=branch,
-                                           version=version)
-        template.write_config()
+        try:
+            args = locals()
+            self.logger.info(args)
+            options = ['image_name', 'path']
+            sections, template = self.plugin.constraint_options(args, options)
+            self.logger.info(sections)
+            self.logger.info(template)
+            for section in sections:
+                self.logger.info("Building "+str(section)+" ...")
+                template = self.plugin.builder(template, sections[section]['path'],
+                                               sections[section]['image_name'],
+                                               section, build=True, branch=branch,
+                                               version=version)
+            template.write_config()
+        except Exception as e:
+            self.logger.error(str(e))
+            status = (False, e)
+        self.logger.info(status)
+        self.logger.info("Finished: build")
         return status
 
     def cores(self, action, branch="master"):
