@@ -79,6 +79,7 @@ def test_update():
     """ Test the update function """
     instance = Action()
     status = instance.update(name='elasticsearch', branch='master')
+    assert type(status) == tuple
 
 def test_backup():
     """ Test the backup function """

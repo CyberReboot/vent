@@ -363,40 +363,56 @@ class Action:
         are given, updated all installed tools on the master branch at verison
         HEAD that are enabled
         """
-        args = locals()
-        options = ['path', 'image_name', 'image_id']
-        sections, template = self.plugin.constraint_options(args, options)
+        self.logger.info("Starting: update")
         status = (True, None)
+        try:
+            args = locals()
+            self.logger.info(args)
+            options = ['path', 'image_name', 'image_id']
+            sections, template = self.plugin.constraint_options(args, options)
+            self.logger.info(sections)
+            self.logger.info(template)
 
-        # get existing containers and images and states
-        running_containers = Containers()
-        built_images = Images()
+            # get existing containers and images and states
+            running_containers = Containers()
+            built_images = Images()
+            self.logger.info(running_containers)
+            self.logger.info(built_images)
 
-        # if repo, pull and build
-        # if registry image, pull
-        for section in sections:
-            try:
-                cwd = os.getcwd()
-                os.chdir(sections[section]['path'])
-                self.plugin.version = version
-                self.plugin.branch = branch
-                self.plugin.checkout()
+            # if repo, pull and build
+            # if registry image, pull
+            for section in sections:
                 try:
-                    os.chdir(cwd)
+                    cwd = os.getcwd()
+                    self.logger.info(cwd)
+                    os.chdir(sections[section]['path'])
+                    self.plugin.version = version
+                    self.plugin.branch = branch
+                    self.plugin.checkout()
+                    try:
+                        os.chdir(cwd)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error(str(e))
+                        pass
+                    template = self.plugin.builder(template, sections[section]['path'], sections[section]['image_name'], section, build=True, branch=branch, version=version)
+                    self.logger.info(template)
+                    # stop and remove old containers and images if image_id updated
+                    # !! TODO
+
+                    # start containers if they were running
+                    # !! TODO
+
+                    # TODO logging
                 except Exception as e:  # pragma: no cover
-                    pass
-                template = self.plugin.builder(template, sections[section]['path'], sections[section]['image_name'], section, build=True, branch=branch, version=version)
-                # stop and remove old containers and images if image_id updated
-                # !! TODO
+                    self.logger.error("Unable to update: "+str(section)+" because: "+str(e))
 
-                # start containers if they were running
-                # !! TODO
+            template.write_config()
+        except Exception as e:
+            self.logger.error(str(e))
+            status = (False, e)
 
-                # TODO logging
-            except Exception as e:  # pragma: no cover
-                self.logger.error("Unable to update: "+str(section))
-
-        template.write_config()
+        self.logger.info(status)
+        self.logger.info("Finished: update")
         return status
 
     def stop(self,
