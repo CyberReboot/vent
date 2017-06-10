@@ -530,8 +530,8 @@ class Action:
         elif action == "start":
             status = self.prep_start(groups="core", branch=branch)
             if status[0]:
-              tool_dict = status[1]
-              status = self.start(tool_dict)
+                tool_dict = status[1]
+                status = self.start(tool_dict)
         elif action == "stop":
             status = self.stop(groups="core", branch=branch)
         elif action == "clean":
