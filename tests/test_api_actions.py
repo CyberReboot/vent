@@ -69,6 +69,7 @@ def test_stop():
     """ Test the stop function """
     instance = Action()
     status = instance.stop()
+    assert type(status) == tuple
 
 def test_clean():
     """ Test the clean function """
