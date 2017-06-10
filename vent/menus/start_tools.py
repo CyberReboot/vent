@@ -110,7 +110,9 @@ class StartToolsForm(npyscreen.ActionForm):
                     if t.startswith('/:'):
                         t = " "+t[1:]
                     t = t.split(":")
-                    tool_dict.update(api_action.prep_start(name=t[0], branch=t[1], version=t[2]))
+                    status = api_action.prep_start(name=t[0], branch=t[1], version=t[2])
+                    if status[0]:
+                        tool_dict.update(status[1])
         thr = threading.Thread(target=api_action.start, args=(), kwargs={'tool_dict':tool_dict})
         popup(original_containers, "containers", thr,
               'Please wait, starting containers...')
