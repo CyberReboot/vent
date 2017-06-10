@@ -75,6 +75,7 @@ def test_clean():
     """ Test the clean function """
     instance = Action()
     status = instance.clean()
+    assert type(status) == tuple
 
 def test_update():
     """ Test the update function """

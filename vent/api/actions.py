@@ -472,27 +472,37 @@ class Action:
         if no parameters are given, clean all installed tools on the master
         branch at verison HEAD that are enabled
         """
-        # !! TODO need to account for plugin containers that have random names, use labels perhaps
-        args = locals()
-        options = ['name',
-                   'namespace',
-                   'built',
-                   'groups',
-                   'path',
-                   'image_name',
-                   'branch',
-                   'version']
-        sections, template = self.plugin.constraint_options(args, options)
+        self.logger.info("Starting: clean")
         status = (True, None)
-        for section in sections:
-            container_name = sections[section]['image_name'].replace(':','-')
-            container_name = container_name.replace('/','-')
-            try:
-                container = self.d_client.containers.get(container_name)
-                container.remove(force=True)
-                self.logger.info("cleaned "+str(container_name))
-            except Exception as e:  # pragma: no cover
-                self.logger.warning("failed to clean "+str(container_name)+" because: "+str(e))
+        try:
+            # !! TODO need to account for plugin containers that have random names, use labels perhaps
+            args = locals()
+            self.logger.info(args)
+            options = ['name',
+                       'namespace',
+                       'built',
+                       'groups',
+                       'path',
+                       'image_name',
+                       'branch',
+                       'version']
+            sections, template = self.plugin.constraint_options(args, options)
+            self.logger.info(sections)
+            self.logger.info(template)
+            for section in sections:
+                container_name = sections[section]['image_name'].replace(':','-')
+                container_name = container_name.replace('/','-')
+                try:
+                    container = self.d_client.containers.get(container_name)
+                    container.remove(force=True)
+                    self.logger.info("cleaned "+str(container_name))
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("failed to clean "+str(container_name)+" because: "+str(e))
+        except Exception as e:
+            self.logger.error(str(e))
+            status = (False, e)
+        self.logger.info(status)
+        self.logger.info("Finished: clean")
         return status
 
     def build(self,
