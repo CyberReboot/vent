@@ -637,7 +637,7 @@ class Plugin:
         # initialize
         args = locals()
         status = (False, None)
-        options = ['branch', 'groups']
+        options = ['branch', 'groups', 'image_name']
 
         # get resulting dictionary of sections with options that match constraints
         results, template = self.constraint_options(args, options)
