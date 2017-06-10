@@ -54,14 +54,18 @@ class Action:
         """ Remove tools or a repo """
         self.logger.info("Starting: remove")
         status = (True, None)
-        status = self.plugin.remove(name=name,
-                                    repo=repo,
-                                    namespace=namespace,
-                                    groups=groups,
-                                    enabled=enabled,
-                                    branch=branch,
-                                    version=version,
-                                    built=built)
+        try:
+            status = self.plugin.remove(name=name,
+                                        repo=repo,
+                                        namespace=namespace,
+                                        groups=groups,
+                                        enabled=enabled,
+                                        branch=branch,
+                                        version=version,
+                                        built=built)
+        except Exception as e:
+            self.logger.error(str(e))
+            status = (False, e)
         self.logger.info(status)
         self.logger.info("Finished: remove")
         return status
