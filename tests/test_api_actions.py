@@ -62,6 +62,7 @@ def test_start():
     """ Test the start function """
     instance = Action()
     status = instance.start({})
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_stop():
