@@ -7,20 +7,26 @@ def test_add():
     """ Test the add function """
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False)
+    assert type(status) == tuple
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent.git', build=False)
+    assert type(status) == tuple
     assert status[0] == True
     bad_instance = Plugin()
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
+    assert type(status) == tuple
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
+    assert type(status) == tuple
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')])
+    assert type(status) == tuple
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, tools=[('vent/', 'HEAD')], overrides=[('vent', 'HEAD')])
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_get_tool_matches():
@@ -94,8 +100,10 @@ def test_apply_path():
     """ Test the apply_path function """
     instance = Plugin()
     status = instance.apply_path('https://github.com/cyberreboot/vent')
+    assert type(status) == tuple
     assert status[0] == True
     status = instance.apply_path('https://github.com/cyberreboot/vent.git')
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_repo_branches():

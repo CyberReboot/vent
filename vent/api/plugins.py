@@ -21,23 +21,30 @@ class Plugin:
 
     def apply_path(self, repo):
         """ Set path to where the repo is and return original path """
-        # rewrite repo for consistency
-        if repo.endswith(".git"):
-            repo = repo.split(".git")[0]
-
-        # get org and repo name and path repo will be cloned to
+        self.logger.info("Starting: apply_path")
+        self.logger.info("repo given: "+str(repo))
+        status = (True, None)
         try:
+            # rewrite repo for consistency
+            if repo.endswith(".git"):
+                repo = repo.split(".git")[0]
+
+            # get org and repo name and path repo will be cloned to
             org, name = repo.split("/")[-2:]
             self.path = os.path.join(self.path_dirs.plugins_dir, org, name)
-        except Exception as e:  # pragma: no cover
-            return (False, str(e))
+            self.logger.info("cloning to path: "+str(self.path))
 
-        # save current path
-        cwd = os.getcwd()
-        # set to new repo path
-        os.chdir(self.path)
-
-        return (True, cwd)
+            # save current path
+            cwd = os.getcwd()
+            # set to new repo path
+            os.chdir(self.path)
+            status = (True, cwd)
+        except Exception as e:
+            self.logger.error("apply_path failed with error: "+str(e))
+            status = (False, e)
+        self.logger.info("Status of apply_path: "+str(status))
+        self.logger.info("Finished: apply_path")
+        return status
 
     def repo_branches(self, repo):
         """ Get the branches of a repository """
@@ -610,7 +617,7 @@ class Plugin:
                 self.logger.info(response)
                 self.logger.info("Removing plugin container: "+container_name)
             except Exception as e:  # pragma: no cover
-                self.logger.warn("Unable to remove the plugin container: " + 
+                self.logger.warn("Unable to remove the plugin container: " +
                                  container_name + " because: " + str(e))
 
             # check for image and remove
@@ -619,7 +626,7 @@ class Plugin:
                 self.logger.info(response)
                 self.logger.info("Removing plugin image: "+image_name)
             except Exception as e:  # pragma: no cover
-                self.logger.warn("Unable to remove the plugin image: " + 
+                self.logger.warn("Unable to remove the plugin image: " +
                                  image_name + " because: " + str(e))
 
             # remove tool from the manifest
