@@ -23,7 +23,8 @@ class LogsForm(npyscreen.FormBaseNew):
                 self.logs_mle.display()
             else:
                 self.logs_mle.values=["There was an issue retrieving logs for Vent containers: ",
-                                      str(response[1])]
+                                      str(response[1]),
+                                      "Please see vent.log for more details."]
                 self.logs_mle.display()
         return
 

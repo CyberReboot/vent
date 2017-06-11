@@ -670,46 +670,57 @@ class Action:
 
     def inventory(self, choices=None):
         """ Return a dictionary of the inventory items and status """
-        # choices: repos, core, tools, images, built, running, enabled
-        items = {'repos':[], 'core':[], 'tools':[], 'images':[],
-                 'built':[], 'running':[], 'enabled':[]}
+        self.logger.info("Starting: inventory")
+        status = (True, None)
+        self.logger.info("choices specified: "+str(choices))
+        try:
+            # choices: repos, core, tools, images, built, running, enabled
+            items = {'repos':[], 'core':[], 'tools':[], 'images':[],
+                     'built':[], 'running':[], 'enabled':[]}
 
-        tools = self.plugin.tools()
-        for choice in choices:
-            for tool in tools:
-                try:
-                    if choice == 'repos':
-                        if 'repo' in tool:
-                            if tool['repo'] and tool['repo'] not in items[choice]:
-                                items[choice].append(tool['repo'])
-                    elif choice == 'core':
-                        if 'groups' in tool:
-                            if 'core' in tool['groups']:
-                                items[choice].append((tool['section'], tool['name']))
-                    elif choice == 'tools':
-                        items[choice].append((tool['section'], tool['name']))
-                    elif choice == 'images':
-                        # TODO also check against docker
-                        images = Images()
-                        items[choice].append((tool['section'], tool['name'], tool['image_name']))
-                    elif choice == 'built':
-                        items[choice].append((tool['section'], tool['name'], tool['built']))
-                    elif choice == 'running':
-                        containers = Containers()
-                        status = 'not running'
-                        for container in containers:
-                            image_name = tool['image_name'].rsplit(":"+tool['version'], 1)[0]
-                            image_name = image_name.replace(':', '-')
-                            image_name = image_name.replace('/', '-')
-                            if container[0] == image_name:
-                                status = container[1]
-                        items[choice].append((tool['section'], tool['name'], status))
-                    elif choice == 'enabled':
-                        items[choice].append((tool['section'], tool['name'], tool['enabled']))
-                    else:
-                        # unknown choice
+            tools = self.plugin.tools()
+            self.logger.info("found tools: "+str(tools))
+            for choice in choices:
+                for tool in tools:
+                    try:
+                        if choice == 'repos':
+                            if 'repo' in tool:
+                                if tool['repo'] and tool['repo'] not in items[choice]:
+                                    items[choice].append(tool['repo'])
+                        elif choice == 'core':
+                            if 'groups' in tool:
+                                if 'core' in tool['groups']:
+                                    items[choice].append((tool['section'], tool['name']))
+                        elif choice == 'tools':
+                            items[choice].append((tool['section'], tool['name']))
+                        elif choice == 'images':
+                            # TODO also check against docker
+                            images = Images()
+                            items[choice].append((tool['section'], tool['name'], tool['image_name']))
+                        elif choice == 'built':
+                            items[choice].append((tool['section'], tool['name'], tool['built']))
+                        elif choice == 'running':
+                            containers = Containers()
+                            status = 'not running'
+                            for container in containers:
+                                image_name = tool['image_name'].rsplit(":"+tool['version'], 1)[0]
+                                image_name = image_name.replace(':', '-')
+                                image_name = image_name.replace('/', '-')
+                                if container[0] == image_name:
+                                    status = container[1]
+                            items[choice].append((tool['section'], tool['name'], status))
+                        elif choice == 'enabled':
+                            items[choice].append((tool['section'], tool['name'], tool['enabled']))
+                        else:
+                            # unknown choice
+                            pass
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error("unable to grab information about tool: "+str(tool)+" because: "+str(e))
                         pass
-                except Exception as e:  # pragma: no cover
-                    pass
-
-        return items
+            status = (True, items)
+        except Exception as e:
+            self.logger.error("inventory failed with error: "+str(e))
+            status = (False, e)
+        self.logger.info("Status of inventory: "+str(status))
+        self.logger.info("Finished: inventory")
+        return status

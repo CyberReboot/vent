@@ -95,9 +95,13 @@ def test_inventory():
     """ Test the inventory function """
     instance = Action()
     status = instance.inventory(choices=[])
-    assert type(status) == dict
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == dict
     status = instance.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled', 'foo'])
-    assert type(status) == dict
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == dict
 
 def test_configure():
     """ Test the configure function """

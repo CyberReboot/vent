@@ -12,35 +12,40 @@ class CoreInventoryForm(npyscreen.FormBaseNew):
         if self.action is None:
             self.action = Action()
         # include only core tools in this inventory
-        inventory = self.action.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled'])
-        value = "Tools for each plugin found:\n"
-        for repo in inventory['repos']:
-            value += "\n  Plugin: "+repo+"\n"
-            repo_name = repo.rsplit("/", 2)[1:]
-            for tool in inventory['tools']:
-                is_core = False
-                for core in inventory['core']:
-                    if core[0] == tool[0]:
-                        is_core = True
-                if is_core:
-                    r_name = tool[0].split(":")
-                    if repo_name[0] == r_name[0] and repo_name[1] == r_name[1]:
-                        value += "    "+tool[1]+"\n"
-                        for built in inventory['built']:
-                            if built[0] == tool[0]:
-                                value += "      Built: "+built[2]+"\n"
-                        for enabled in inventory['enabled']:
-                            if enabled[0] == tool[0]:
-                                value += "      Enabled: "+enabled[2]+"\n"
-                        for image in inventory['images']:
-                            if image[0] == tool[0]:
-                                value += "      Image name: "+image[2]+"\n"
-                        for running in inventory['running']:
-                            if running[0] == tool[0]:
-                                value += "      Status: "+running[2]+"\n"
-            tmp_value = value.split("\n")
-            if "Plugin: " in tmp_value[-2]:
-                value = "\n".join(value.split("\n")[:-2])
+        response = self.action.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled'])
+        if response[0]:
+            inventory = response[1]
+            value = "Tools for each plugin found:\n"
+            for repo in inventory['repos']:
+                value += "\n  Plugin: "+repo+"\n"
+                repo_name = repo.rsplit("/", 2)[1:]
+                for tool in inventory['tools']:
+                    is_core = False
+                    for core in inventory['core']:
+                        if core[0] == tool[0]:
+                            is_core = True
+                    if is_core:
+                        r_name = tool[0].split(":")
+                        if repo_name[0] == r_name[0] and repo_name[1] == r_name[1]:
+                            value += "    "+tool[1]+"\n"
+                            for built in inventory['built']:
+                                if built[0] == tool[0]:
+                                    value += "      Built: "+built[2]+"\n"
+                            for enabled in inventory['enabled']:
+                                if enabled[0] == tool[0]:
+                                    value += "      Enabled: "+enabled[2]+"\n"
+                            for image in inventory['images']:
+                                if image[0] == tool[0]:
+                                    value += "      Image name: "+image[2]+"\n"
+                            for running in inventory['running']:
+                                if running[0] == tool[0]:
+                                    value += "      Status: "+running[2]+"\n"
+                tmp_value = value.split("\n")
+                if "Plugin: " in tmp_value[-2]:
+                    value = "\n".join(value.split("\n")[:-2])
+        else:
+            value = "There was an issue with core inventory retrieval:\n"+str(response[1])+
+                    "\nPlease see vent.log for more details."
         self.inventory_mle.values=value.split("\n")
         self.inventory_mle.display()
         return
