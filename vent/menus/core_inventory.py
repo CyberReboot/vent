@@ -44,8 +44,7 @@ class CoreInventoryForm(npyscreen.FormBaseNew):
                 if "Plugin: " in tmp_value[-2]:
                     value = "\n".join(value.split("\n")[:-2])
         else:
-            value = "There was an issue with core inventory retrieval:\n"+str(response[1])+
-                    "\nPlease see vent.log for more details."
+            value = "There was an issue with core inventory retrieval:\n"+str(response[1])+"\nPlease see vent.log for more details."
         self.inventory_mle.values=value.split("\n")
         self.inventory_mle.display()
         return

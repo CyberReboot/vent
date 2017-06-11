@@ -42,8 +42,7 @@ class InventoryForm(npyscreen.FormBaseNew):
                                     if running[0] == tool[0]:
                                         value += "      Status: "+running[2]+"\n"
         else:
-            value = "There was an issue with inventory retrieval:\n"+str(response[1])+
-                    "\nPlease see vent.log for more details.""
+            value = "There was an issue with inventory retrieval:\n"+str(response[1])+"\nPlease see vent.log for more details.""
         self.inventory_mle.values=value.split("\n")
         self.inventory_mle.display()
         return
