@@ -110,9 +110,15 @@ def test_system_commands():
 def test_logs():
     """ Test the logs function """
     instance = Action()
-    logs = instance.logs()
-    logs = instance.logs(grep_list=['foo'])
-    logs = instance.logs(container_type="core")
+    status = instance.logs()
+    assert type(status) == tuple
+    assert status[0] == True
+    status = instance.logs(grep_list=['foo'])
+    assert type(status) == tuple
+    assert status[0] == True
+    status = instance.logs(container_type="core")
+    assert type(status) == tuple
+    assert status[0] == True
 
 def test_help():
     """ Test the help function """

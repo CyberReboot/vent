@@ -504,77 +504,88 @@ class Action:
 
     def cores(self, action, branch="master"):
         """ Supply action (install, build, start, stop, clean) for core tools """
+        self.logger.info("Starting: cores")
         status = (True, None)
-        core = Core(branch=branch)
-        if action in ["install", "build"]:
-            tools = []
-            plugins = Plugin(plugins_dir=".internals/plugins")
-            plugins.version = 'HEAD'
-            plugins.branch = branch
-            plugins.apply_path('https://github.com/cyberreboot/vent')
-            response = plugins.checkout()
-            matches = plugins._available_tools(groups='core')
-            for match in matches:
-                tools.append((match[0], ''))
-            status = plugins.add('https://github.com/cyberreboot/vent', tools=tools, branch=branch, build=False)
-            plugin_config = Template(template=self.plugin.manifest)
-            sections = plugin_config.sections()
-            for tool in core['normal']:
-                for section in sections[1]:
-                    name = plugin_config.option(section, "name")
-                    orig_branch = plugin_config.option(section, "branch")
-                    namespace = plugin_config.option(section, "namespace")
-                    version = plugin_config.option(section, "version")
-                    if name[1] == tool and orig_branch[1] == branch and namespace[1] == "cyberreboot/vent" and version[1] == "HEAD":
-                        plugin_config.set_option(section, "image_name", "cyberreboot/vent-"+tool+":"+branch)
-            plugin_config.write_config()
-        if action == "build":
-            plugin_config = Template(template=self.plugin.manifest)
-            sections = plugin_config.sections()
-            try:
+        try:
+            self.logger.info("action provided: "+str(action))
+            core = Core(branch=branch)
+            if action in ["install", "build"]:
+                tools = []
+                plugins = Plugin(plugins_dir=".internals/plugins")
+                plugins.version = 'HEAD'
+                plugins.branch = branch
+                plugins.apply_path('https://github.com/cyberreboot/vent')
+                response = plugins.checkout()
+                self.logger.info("status of plugin checkout "+str(response))
+                matches = plugins._available_tools(groups='core')
+                for match in matches:
+                    tools.append((match[0], ''))
+                status = plugins.add('https://github.com/cyberreboot/vent', tools=tools, branch=branch, build=False)
+                self.logger.info("status of plugin add: "+str(status))
+                plugin_config = Template(template=self.plugin.manifest)
+                sections = plugin_config.sections()
                 for tool in core['normal']:
                     for section in sections[1]:
-                        image_name = plugin_config.option(section, "image_name")
-                        if image_name[1] == "cyberreboot/vent-"+tool+":"+branch:
-                            try:
-                                # currently can't use docker-py because it
-                                # returns a 404 on pull so no way to valid if it
-                                # worked or didn't
-                                #image_id = self.d_client.images.pull('cyberreboot/vent-'+tool, tag=branch)
-                                image_id = None
-                                output = subprocess.check_output(shlex.split("docker pull cyberreboot/vent-"+tool+":"+branch), stderr=subprocess.STDOUT)
-                                for line in output.split('\n'):
-                                    if line.startswith("Digest: sha256:"):
-                                        image_id = line.split("Digest: sha256:")[1][:12]
-                                if image_id:
-                                    plugin_config.set_option(section, "built", "yes")
-                                    plugin_config.set_option(section, "image_id", image_id)
-                                    plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                                    status = (True, "Pulled "+tool)
-                                    self.logger.info(str(status))
-                                else:
+                        name = plugin_config.option(section, "name")
+                        orig_branch = plugin_config.option(section, "branch")
+                        namespace = plugin_config.option(section, "namespace")
+                        version = plugin_config.option(section, "version")
+                        if name[1] == tool and orig_branch[1] == branch and namespace[1] == "cyberreboot/vent" and version[1] == "HEAD":
+                            plugin_config.set_option(section, "image_name", "cyberreboot/vent-"+tool+":"+branch)
+                plugin_config.write_config()
+            if action == "build":
+                plugin_config = Template(template=self.plugin.manifest)
+                sections = plugin_config.sections()
+                try:
+                    for tool in core['normal']:
+                        for section in sections[1]:
+                            image_name = plugin_config.option(section, "image_name")
+                            if image_name[1] == "cyberreboot/vent-"+tool+":"+branch:
+                                try:
+                                    # currently can't use docker-py because it
+                                    # returns a 404 on pull so no way to valid if it
+                                    # worked or didn't
+                                    #image_id = self.d_client.images.pull('cyberreboot/vent-'+tool, tag=branch)
+                                    image_id = None
+                                    output = subprocess.check_output(shlex.split("docker pull cyberreboot/vent-"+tool+":"+branch), stderr=subprocess.STDOUT)
+                                    for line in output.split('\n'):
+                                        if line.startswith("Digest: sha256:"):
+                                            image_id = line.split("Digest: sha256:")[1][:12]
+                                    if image_id:
+                                        plugin_config.set_option(section, "built", "yes")
+                                        plugin_config.set_option(section, "image_id", image_id)
+                                        plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                                        status = (True, "Pulled "+tool)
+                                        self.logger.info(str(status))
+                                    else:
+                                        plugin_config.set_option(section, "built", "failed")
+                                        plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
+                                        status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
+                                        self.logger.error(str(status))
+                                except Exception as e:  # pragma: no cover
                                     plugin_config.set_option(section, "built", "failed")
                                     plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                                    status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
-                                    self.logger.warning(str(status))
-                            except Exception as e:  # pragma: no cover
-                                plugin_config.set_option(section, "built", "failed")
-                                plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                                status = (False, "Failed to pull image "+str(e))
-                                self.logger.warning(str(status))
-            except Exception as e:  # pragma: no cover
-                status = (False, "Failed to pull images "+str(e))
-                self.logger.warning(str(status))
-            plugin_config.write_config()
-        elif action == "start":
-            status = self.prep_start(groups="core", branch=branch)
-            if status[0]:
-                tool_dict = status[1]
-                status = self.start(tool_dict)
-        elif action == "stop":
-            status = self.stop(groups="core", branch=branch)
-        elif action == "clean":
-            status = self.clean(groups="core", branch=branch)
+                                    status = (False, "Failed to pull image "+str(e))
+                                    self.logger.error(str(status))
+                except Exception as e:  # pragma: no cover
+                    status = (False, "Failed to pull images "+str(e))
+                    self.logger.error(str(status))
+                plugin_config.write_config()
+            elif action == "start":
+                status = self.prep_start(groups="core", branch=branch)
+                if status[0]:
+                    tool_dict = status[1]
+                    status = self.start(tool_dict)
+            elif action == "stop":
+                status = self.stop(groups="core", branch=branch)
+            elif action == "clean":
+                status = self.clean(groups="core", branch=branch)
+        except Exception as e:
+            self.logger.info("core failed with error: "+str(e))
+            status = (False, e)
+
+        self.logger.info("Status of core: "+str(status))
+        self.logger.info("Finished: core")
         return status
 
     @staticmethod
@@ -600,46 +611,57 @@ class Action:
 
     def logs(self, container_type=None, grep_list=None):
         """ generically filter logs stored in log containers """
+        self.logger.info("Starting: logs")
+        status = (True, None)
         log_entries = {}
-        containers = self.d_client.containers.list(all=True, filters={'label':'vent'})
-        if grep_list:
-            compare_containers = containers
-            if container_type:
-                try:
-                    compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
-                except Exception as e:  # pragma: no cover
-                    self.logger.warn("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
+        try:
+            containers = self.d_client.containers.list(all=True, filters={'label':'vent'})
+            self.logger.info("containers found: "+str(containers))
+            if grep_list:
+                compare_containers = containers
+                if container_type:
+                    try:
+                        compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
 
-            for expression in grep_list:
+                for expression in grep_list:
+                    for container in compare_containers:
+                        try:
+                            # 'logs' stores each line which contains the expression
+                            logs  = [log for log in container.logs().split("\n") if expression in log]
+                            for log in logs:
+                                if str(container.name) in log_entries:
+                                    log_entries[str(container.name)].append(log)
+                                else:
+                                    log_entries[str(container.name)] = [log]
+                        except Exception as e:  # pragma: no cover
+                            self.logger.error("Unable to get logs for "+str(container.name)+" because: "+str(e))
+            else:
+                compare_containers = containers
+                if container_type:
+                    try:
+                        compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
                 for container in compare_containers:
                     try:
-                        # 'logs' stores each line which contains the expression
-                        logs  = [log for log in container.logs().split("\n") if expression in log]
+                        logs = container.logs().split("\n")
                         for log in logs:
                             if str(container.name) in log_entries:
                                 log_entries[str(container.name)].append(log)
                             else:
                                 log_entries[str(container.name)] = [log]
                     except Exception as e:  # pragma: no cover
-                        self.logger.warn("Unable to get logs for "+str(container.name)+" because: "+str(e))
-        else:
-            compare_containers = containers
-            if container_type:
-                try:
-                    compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
-                except Exception as e:  # pragma: no cover
-                    self.logger.warn("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
-            for container in compare_containers:
-                try:
-                    logs = container.logs().split("\n")
-                    for log in logs:
-                        if str(container.name) in log_entries:
-                            log_entries[str(container.name)].append(log)
-                        else:
-                            log_entries[str(container.name)] = [log]
-                except Exception as e:  # pragma: no cover
-                    self.logger.warn("Unable to get logs for "+str(container.name)+" because: "+str(e))
-        return log_entries
+                        self.logger.error("Unable to get logs for "+str(container.name)+" because: "+str(e))
+            status = (True, log_entries)
+        except Exception as e:
+            self.logger.error("logs failed with error: "+str(e))
+            status = (False, e)
+
+        self.logger.info("Status of logs: "+str(status))
+        self.logger.info("Finished: logs")
+        return status
 
     @staticmethod
     def help():
