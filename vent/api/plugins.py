@@ -242,8 +242,11 @@ class Plugin:
 
             # clone repo and build tools
             response = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
-
-            status = (True, cwd)
+            if response not in [0, 128]:
+                self.logger.error("Git was unable to clone: "+str(repo)+" because of error: "+str(response))
+                status = (False, str(response))
+            else:
+                status = (True, cwd)
         except Exception as e:
             self.logger.error("clone failed with error: "+str(e))
             status = (False, e)
