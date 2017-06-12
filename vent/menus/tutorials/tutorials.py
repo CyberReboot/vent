@@ -1,7 +1,14 @@
 import npyscreen
 
-class TutorialAddingPluginsForm(npyscreen.ActionFormWithMenus):
-    """ Tutorial Adding Plugins form for the Vent CLI """
+
+class TutorialForm(npyscreen.ActionFormWithMenus):
+    """ Tutorial form for the Vent CLI """
+    def __init__(self, title="", text="", next_tutorial="", *args, **keywords):
+        """ Initialize tutorial form fields """
+        self.title = title
+        self.text = text
+        self.next_tutorial = next_tutorial
+        super(TutorialForm, self).__init__(*args, **keywords)
 
     def switch(self, name):
         """ Wrapper that switches to provided form """
@@ -14,7 +21,8 @@ class TutorialAddingPluginsForm(npyscreen.ActionFormWithMenus):
     def create(self):
         """ Overridden to add handlers and content """
         self.add_handlers({"^Q": self.quit})
-        self.add(npyscreen.TitleText, name="Adding Plugins", editable=False)
+        self.add(npyscreen.TitleText, name=self.title, editable=False)
+        self.add(npyscreen.MultiLineEdit, editable=False, value=self.text)
         self.m2 = self.add_menu(name="About Vent", shortcut='v')
         self.m2.addItem(text="Background", onSelect=self.switch,
                         arguments=['TUTORIALBACKGROUND'], shortcut='b')
@@ -43,4 +51,4 @@ class TutorialAddingPluginsForm(npyscreen.ActionFormWithMenus):
 
     def on_ok(self):
         """ When user clicks ok, will proceed to next tutorial """
-        self.switch("TUTORIALADDINGFILES")
+        self.switch(self.next_tutorial)
