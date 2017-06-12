@@ -201,7 +201,7 @@ def Core(branch="master", **kargs):
     # get normal core tools
     plugins = Plugin(plugins_dir=".internals/plugins")
     status, cwd = plugins.clone('https://github.com/cyberreboot/vent')
-    if status == 0:
+    if status:
         plugins.version = 'HEAD'
         plugins.branch = branch
         response = plugins.checkout()

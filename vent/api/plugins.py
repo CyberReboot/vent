@@ -140,7 +140,7 @@ class Plugin:
             status = (False, e)
 
         self.logger.info("Status of repo_commits: "+str(status))
-        self.logger.info("Finished repo_commits")
+        self.logger.info("Finished: repo_commits")
         return status
 
     def repo_tools(self, repo, branch, version):
@@ -179,64 +179,77 @@ class Plugin:
             status = (False, e)
 
         self.logger.info("Status of repo_tools: "+str(status))
-        self.logger.info("Finished repo_tools")
+        self.logger.info("Finished: repo_tools")
         return status
 
     def clone(self, repo, user=None, pw=None):
         """ Clone the repository """
-        self.org = None
-        self.name = None
-        self.repo = repo
-
-        # save current path
-        cwd = os.getcwd()
-
-        # rewrite repo for consistency
-        if self.repo.endswith(".git"):
-            self.repo = self.repo.split(".git")[0]
-
-        # get org and repo name and path repo will be cloned to
+        self.logger.info("Starting: clone")
+        self.logger.info("repo given: "+str(repo))
+        self.logger.info("user given: "+str(user))
+        status = (True, None)
         try:
+            self.org = None
+            self.name = None
+            self.repo = repo
+
+            # save current path
+            cwd = os.getcwd()
+            self.logger.info("current working directory: "+str(cwd))
+
+            # rewrite repo for consistency
+            if self.repo.endswith(".git"):
+                self.repo = self.repo.split(".git")[0]
+
+            # get org and repo name and path repo will be cloned to
             self.org, self.name = self.repo.split("/")[-2:]
+            self.logger.info("org name found: "+str(self.org))
+            self.logger.info("repo name found: "+str(self.name))
             self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
-        except Exception as e:  # pragma: no cover
-            return -1, cwd
+            self.logger.info("path to clone to: "+str(self.path))
 
+            # check if the directory exists, if so return now
+            status = self.path_dirs.ensure_dir(self.path)
+            if not status[0]:
+                self.logger.info("ensure_dir failed. Exiting clone with status: "+str(status))
+                return status
 
-        # check if the directory exists, if so return now
-        response = self.path_dirs.ensure_dir(self.path)
-        if not response[0]:
-            return -1, cwd
+            # set to new repo path
+            os.chdir(self.path)
 
-        # set to new repo path
-        os.chdir(self.path)
+            # if path already exists, try git checkout to update
+            if status[0] and status[1] == 'exists':
+                try:
+                    response = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT, close_fds=True)
+                    self.logger.info("path already exists: "+str(self.path))
+                    status = (True, cwd)
+                    self.logger.info("Status of clone: "+str(status))
+                    self.logger.info("Finished: clone")
+                    return status
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("unable to checkout: "+str(path)+" because: "+str(e))
+                    status = (False, e)
+                    self.logger.info("Exiting clone with status: "+str(status))
+                    return status
 
-        if response[0] and response[1] == 'exists':
-            try:
-                status = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT, close_fds=True)
-                return 0, cwd
-            except Exception as e:  # pragma: no cover
-                return -1, cwd
+            # ensure cloning still works even if ssl is broken...probably should be improved
+            response = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT, close_fds=True)
 
-        # ensure cloning still works even if ssl is broken...probably should be improved
-        try:
-            status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT, close_fds=True)
-        except Exception as e:  # pragma: no cover
-            return -1, cwd
+            # check if user and pw were supplied, typically for private repos
+            if user and pw:
+                # only https is supported when using user/pw
+                repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
 
-        # check if user and pw were supplied, typically for private repos
-        if user and pw:
-            # only https is supported when using user/pw
-            repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
+            # clone repo and build tools
+            response = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
 
-        # clone repo and build tools
-        try:
-            status = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
-            status_code = 0
-        except subprocess.CalledProcessError as e:  # pragma: no cover
-            status_code = e.returncode
-
-        return status_code, cwd
+            status = (True, cwd)
+        except Exception as e:
+            self.logger.error("clone failed with error: "+str(e))
+            status = (False, e)
+        self.logger.info("Status of clone: "+str(status))
+        self.logger.info("Finished: clone")
+        return status
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
@@ -311,18 +324,16 @@ class Plugin:
         self.disable_old = disable_old
         self.limit_groups = limit_groups
 
-        response = (True, None)
-
+        status = (True, None)
         status_code, cwd = self.clone(repo, user=user, pw=pw)
-
-        response = self._build_tools(status_code)
+        status = self._build_tools(status_code)
 
         # set back to original path
         try:
             os.chdir(cwd)
         except Exception as e:  # pragma: no cover
             pass
-        return response
+        return status
 
     @ErrorHandler
     def builder(self, template, match_path, image_name, section, build=None,
@@ -355,7 +366,7 @@ class Plugin:
         # !! TODO implement features: wild, remove_old, disable_old, limit_groups
 
         # check result of clone, ensure successful or that it already exists
-        if status in [0, 128]:
+        if status:
             response = self.checkout()
             if response[0]:
                 matches = []
