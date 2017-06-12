@@ -58,6 +58,7 @@ class Plugin:
             if status[0]:
                 cwd = status[1]
             else:
+                self.logger.info("apply_path failed. Exiting repo_branches with status "+str(status))
                 return status
 
             junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT, close_fds=True)
@@ -80,6 +81,7 @@ class Plugin:
                 except Exception as e: # pragma: no cover
                     self.logger.error("repo_branches failed with error: "+str(e)+" on branch: "+str(branch))
                     status = (False, e)
+                    self.logger.info("Exiting repo_branches with status: "+str(status))
                     return status
 
             try:
@@ -98,30 +100,48 @@ class Plugin:
 
     def repo_commits(self, repo):
         """ Get the commit IDs for all of the branches of a repository """
+        self.logger.info("Starting: repo_commits")
+        self.logger.info("repo given: "+str(repo))
+        status = (True, None)
         commits = []
-
-        branches = self.repo_branches(repo)
-        cwd = self.apply_path(repo)
-        if cwd[0]:
-            cwd = cwd[1]
-        else:
-            return cwd
-        if branches[0]:
-            try:
-                for branch in branches[1]:
-                    branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT, close_fds=True)
-                    branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
-                    commits.append((branch, branch_output))
-            except Exception as e:  # pragma: no cover
-                return (False, e)
-        else:
-            return branches
         try:
-            os.chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            pass
+            status = self.apply_path(repo)
+            # switch to directory where repo will be cloned to
+            if status[0]:
+                cwd = status[1]
+            else:
+                self.logger.info("apply_path failed. Exiting repo_commits with status: "+str(status))
+                return status
 
-        return (True, commits)
+            status = self.repo_branches(repo)
+            if status[0]:
+                branches = status[1]
+                for branch in branches:
+                    try:
+                        branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT, close_fds=True)
+                        branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
+                        commits.append((branch, branch_output))
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error("repo_commits failed with error: "+str(e)+" on branch: "+str(branch))
+                        status = (False, e)
+                        self.logger.info("Exiting repo_commits with status: "+str(status))
+                        return status
+            else:
+                self.logger.info("repo_branches failed. Exiting repo_commits with status: "+str(status))
+                return status
+            try:
+                os.chdir(cwd)
+            except Exception as e:  # pragma: no cover
+                self.logger.error("unable to change directory to: "+str(cwd)+" because: "+str(e))
+
+            status = (True, commits)
+        except Exception as e:
+            self.logger.error("repo_commits failed with error: "+str(e))
+            status = (False, e)
+
+        self.logger.info("Status of repo_commits: "+str(status))
+        self.logger.info("Finished repo_commits")
+        return status
 
     def repo_tools(self, repo, branch, version):
         """ Get available tools for a repository branch at a version """

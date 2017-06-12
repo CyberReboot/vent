@@ -117,9 +117,10 @@ def test_repo_branches():
 def test_repo_commits():
     """ Test the repo_commits function """
     instance = Plugin()
-    commits = instance.repo_commits('https://github.com/cyberreboot/vent')
-    assert commits[0] == True
-    assert type(commits[1]) == list
+    status = instance.repo_commits('https://github.com/cyberreboot/vent')
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == list
 
 def test_repo_tools():
     """ Test the repo_tools function """

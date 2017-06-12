@@ -15,21 +15,23 @@ class AddOptionsForm(npyscreen.ActionForm):
         branches = []
         commits = {}
         plugin = Plugin()
-        branches = plugin.repo_branches(self.parentApp.repo_value['repo'])
-        c = plugin.repo_commits(self.parentApp.repo_value['repo'])
+        status = plugin.repo_branches(self.parentApp.repo_value['repo'])
         # branches and commits must both be retrieved successfully
-        if branches[0]:
-            if c[0]:
-                for commit in c[1]:
+        if status[0]:
+            branches = status[1]
+            status = plugin.repo_commits(self.parentApp.repo_value['repo'])
+            if status[0]:
+                r_commits = status[1]
+                for commit in r_commits:
                     commits[commit[0]] = commit[1]
             else:
                 # if commits failed, return commit errors
-                return c
+                return status
         else:
             # if branch failed, return branch errors
-            return branches
+            return status
         # if everything is good, return branches with commits
-        return branches[1], commits
+        return branches, commits
 
     def create(self):
         self.add_handlers({"^Q": self.quit})
