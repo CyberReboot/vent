@@ -26,15 +26,15 @@ from vent.menus.stop_core_tools import StopCoreToolsForm
 from vent.menus.stop_tools import StopToolsForm
 from vent.menus.update_core_tools import UpdateCoreToolsForm
 from vent.menus.update_tools import UpdateToolsForm
-from vent.menus.tutorials.adding_files import TutorialAddingFilesForm
-from vent.menus.tutorials.adding_plugins import TutorialAddingPluginsForm
-from vent.menus.tutorials.background import TutorialBackgroundForm
-from vent.menus.tutorials.building_cores import TutorialBuildingCoresForm
-from vent.menus.tutorials.getting_setup import TutorialGettingSetupForm
-from vent.menus.tutorials.intro import TutorialIntroForm
-from vent.menus.tutorials.setting_up_services import TutorialSettingUpServicesForm
-from vent.menus.tutorials.starting_cores import TutorialStartingCoresForm
-from vent.menus.tutorials.terminology import TutorialTerminologyForm
+from vent.menus.tutorials.tutorial_forms import TutorialAddingFilesForm
+from vent.menus.tutorials.tutorial_forms import TutorialAddingPluginsForm
+from vent.menus.tutorials.tutorial_forms import TutorialBackgroundForm
+from vent.menus.tutorials.tutorial_forms import TutorialBuildingCoresForm
+from vent.menus.tutorials.tutorial_forms import TutorialGettingSetupForm
+from vent.menus.tutorials.tutorial_forms import TutorialIntroForm
+from vent.menus.tutorials.tutorial_forms import TutorialSettingUpServicesForm
+from vent.menus.tutorials.tutorial_forms import TutorialStartingCoresForm
+from vent.menus.tutorials.tutorial_forms import TutorialTerminologyForm
 
 class VentApp(npyscreen.NPSAppManaged):
     """ Main menu app for vent CLI """
