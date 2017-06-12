@@ -1,5 +1,6 @@
 from vent.menus.tutorials.tutorials import TutorialForm
 
+
 class TutorialAddingFilesForm(TutorialForm):
     """ Tutorial Adding Files form for the Vent CLI """
     def __init__(self, *args, **keywords):
@@ -7,7 +8,13 @@ class TutorialAddingFilesForm(TutorialForm):
         title = "Adding Files"
         text = """TODO"""
         next_tutorial = "TUTORIALSETTINGUPSERVICES"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
+
 
 class TutorialIntroForm(TutorialForm):
     """ Tutorial introduction landing form for the Vent CLI """
@@ -43,7 +50,13 @@ class TutorialIntroForm(TutorialForm):
         NEXT UP: About Vent - Background
         """
         next_tutorial = "TUTORIALBACKGROUND"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
+
 
 class TutorialAddingPluginsForm(TutorialForm):
     """ Tutorial Adding Plugins form for the Vent CLI """
@@ -52,7 +65,13 @@ class TutorialAddingPluginsForm(TutorialForm):
         title = "Adding Plugins"
         text = """TODO"""
         next_tutorial = "TUTORIALADDINGFILES"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
+
 
 class TutorialBackgroundForm(TutorialForm):
     """ Tutorial Background form for the Vent CLI """
@@ -61,7 +80,13 @@ class TutorialBackgroundForm(TutorialForm):
         title = "Vent Background"
         text = """TODO"""
         next_tutorial = "TUTORIALTERMINOLOGY"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
+
 
 class TutorialBuildingCoresForm(TutorialForm):
     """ Tutorial Building Cores form for the Vent CLI """
@@ -70,7 +95,13 @@ class TutorialBuildingCoresForm(TutorialForm):
         title = "Building Cores"
         text = """TODO"""
         next_tutorial = "TUTORIALSTARTINGCORES"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
+
 
 class TutorialGettingSetupForm(TutorialForm):
     """ Tutorial Getting Setup form for the Vent CLI """
@@ -79,7 +110,13 @@ class TutorialGettingSetupForm(TutorialForm):
         title = "Getting Setup"
         text = """TODO"""
         next_tutorial = "TUTORIALBUILDINGCORES"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
+
 
 class TutorialSettingUpServicesForm(TutorialForm):
     """ Tutorial Setting up Services form for the Vent CLI """
@@ -88,7 +125,13 @@ class TutorialSettingUpServicesForm(TutorialForm):
         title = "Setting up Services"
         text = """TODO"""
         next_tutorial = "MAIN"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
+
 
 class TutorialStartingCoresForm(TutorialForm):
     """ Tutorial Starting Cores form for the Vent CLI """
@@ -97,7 +140,13 @@ class TutorialStartingCoresForm(TutorialForm):
         title = "Starting Cores"
         text = """TODO"""
         next_tutorial = "TUTORIALADDINGPLUGINS"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
+
 
 class TutorialTerminologyForm(TutorialForm):
     """ Tutorial terminology form for the Vent CLI """
@@ -106,4 +155,9 @@ class TutorialTerminologyForm(TutorialForm):
         title = "Vent Terminology"
         text = """TODO"""
         next_tutorial = "TUTORIALGETTINGSETUP"
-        TutorialForm.__init__(self, title, text, next_tutorial, *args, **keywords)
+        TutorialForm.__init__(self,
+                              title,
+                              text,
+                              next_tutorial,
+                              *args,
+                              **keywords)
