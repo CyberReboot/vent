@@ -129,3 +129,10 @@ def test_repo_tools():
     assert type(status) == tuple
     assert status[0] == True
     assert type(status[1]) == list
+
+def test_update():
+    """ Test the update function """
+    instance = Plugin()
+    status = instance.update()
+    assert type(status) == tuple
+    assert status[0] == False
