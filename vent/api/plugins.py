@@ -78,7 +78,7 @@ class Plugin:
             for branch in branches:
                 try:
                     junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
-                except Exception as e: # pragma: no cover
+                except Exception as e:  # pragma: no cover
                     self.logger.error("repo_branches failed with error: "+str(e)+" on branch: "+str(branch))
                     status = (False, e)
                     self.logger.info("Exiting repo_branches with status: "+str(status))
