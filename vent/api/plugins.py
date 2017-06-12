@@ -145,26 +145,42 @@ class Plugin:
 
     def repo_tools(self, repo, branch, version):
         """ Get available tools for a repository branch at a version """
-        tools = []
-        cwd = self.apply_path(repo)
-        if cwd[0]:
-            cwd = cwd[1]
-        else:
-            return cwd
-        self.branch = branch
-        self.version = version
-        response = self.checkout()
-        self.logger.info(str(response))
-        if response[0]:
-            tools = self._available_tools()
-        else:
-            return response
+        self.logger.info("Starting: repo_tools")
+        self.logger.info("repo given: "+str(repo))
+        self.logger.info("branch given: "+str(branch))
+        self.logger.info("version given: "+str(version))
+        status = (True, None)
         try:
-            os.chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            pass
+            tools = []
+            status = self.apply_path(repo)
+            # switch to directory where repo will be cloned to
+            if status[0]:
+                cwd = status[1]
+            else:
+                self.logger.info("apply_path failed. Exiting repo_tools with status: "+str(status))
+                return status
+            self.branch = branch
+            self.version = version
 
-        return (True, tools)
+            status = self.checkout()
+            if status[0]:
+                tools = self._available_tools()
+            else:
+                self.logger.info("checkout failed. Exiting repo_tools with status: "+str(status))
+                return status
+            try:
+                os.chdir(cwd)
+            except Exception as e:  # pragma: no cover
+                self.logger.error("unable to change directory to: "+str(cwd)+" because: "+str(e))
+
+            status = (True, tools)
+        except Exception as e:
+            self.logger.error("repo_tools failed with error: "+str(e))
+            status = (False, e)
+
+        self.logger.info("Status of repo_tools: "+str(status))
+        self.logger.info("Finished repo_tools")
+        return status
 
     def clone(self, repo, user=None, pw=None):
         """ Clone the repository """

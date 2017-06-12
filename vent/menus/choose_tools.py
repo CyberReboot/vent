@@ -14,9 +14,10 @@ class ChooseToolsForm(npyscreen.ActionForm):
         """ Set the appropriate repo dir and get the tools available of it """
         tools = []
         plugin = Plugin()
-        t = plugin.repo_tools(self.parentApp.repo_value['repo'], branch, self.parentApp.repo_value['versions'][branch])
-        if t[0]:
-            for tool in t[1]:
+        status = plugin.repo_tools(self.parentApp.repo_value['repo'], branch, self.parentApp.repo_value['versions'][branch])
+        if status[0]:
+            r_tools = status[1]
+            for tool in r_tools:
                 tools.append(tool[0])
         return tools
 

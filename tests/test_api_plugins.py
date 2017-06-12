@@ -125,6 +125,7 @@ def test_repo_commits():
 def test_repo_tools():
     """ Test the repo_tools function """
     instance = Plugin()
-    tools = instance.repo_tools('https://github.com/cyberreboot/vent', 'master', 'HEAD')
-    assert tools[0] == True
-    assert type(tools[1]) == list
+    status = instance.repo_tools('https://github.com/cyberreboot/vent', 'master', 'HEAD')
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == list
