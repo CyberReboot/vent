@@ -50,7 +50,7 @@ def test_builder():
 def test_build_tools():
     """ Test the _build_tools function """
     instance = Plugin()
-    status = instance._build_tools(256)
+    status = instance._build_tools(False)
     assert status[0] == False
 
 def test_tools():
