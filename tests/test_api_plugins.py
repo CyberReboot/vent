@@ -110,6 +110,7 @@ def test_repo_branches():
     """ Test the repo_branches function """
     instance = Plugin()
     status = instance.repo_branches('https://github.com/cyberreboot/vent')
+    assert type(status) == tuple
     assert status[0] == True
     assert type(status[1]) == list
 

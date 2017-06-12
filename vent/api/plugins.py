@@ -48,14 +48,18 @@ class Plugin:
 
     def repo_branches(self, repo):
         """ Get the branches of a repository """
+        self.logger.info("Starting: repo_branches")
+        self.logger.info("repo given: "+str(repo))
+        status = (True, None)
         branches = []
-
-        cwd = self.apply_path(repo)
-        if cwd[0]:
-            cwd = cwd[1]
-        else:
-            return cwd
         try:
+            # switch to directory where repo will be cloned to
+            status = self.apply_path(repo)
+            if status[0]:
+                cwd = status[1]
+            else:
+                return status
+
             junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT, close_fds=True)
             branch_output = subprocess.check_output(shlex.split("git branch -a"), stderr=subprocess.STDOUT, close_fds=True)
             branch_output = branch_output.split("\n")
@@ -67,21 +71,30 @@ class Plugin:
                     branches.append(b.rsplit('/', 1)[1])
                 elif b:
                     branches.append(b)
-        except Exception as e:  # pragma: no cover
-            return (False, e)
 
-        branches = list(set(branches))
-        for branch in branches:
+            branches = list(set(branches))
+            self.logger.info("branches found: "+str(branches))
+            for branch in branches:
+                try:
+                    junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
+                except Exception as e: # pragma: no cover
+                    self.logger.error("repo_branches failed with error: "+str(e)+" on branch: "+str(branch))
+                    status = (False, e)
+                    return status
+
             try:
-                junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
+                os.chdir(cwd)
             except Exception as e:  # pragma: no cover
-                return (False, e)
-        try:
-            os.chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            pass
+                self.logger.error("unable to change directory to: "+str(cwd)+"because: "+str(e))
 
-        return (True, branches)
+            status = (True, branches)
+        except Exception as e:
+            self.logger.error("repo_branches failed with error: "+str(e))
+            status = (False, e)
+
+        self.logger.info("Status of repo_branches: "+str(status))
+        self.logger.info("Finished: repo_branches")
+        return status
 
     def repo_commits(self, repo):
         """ Get the commit IDs for all of the branches of a repository """
