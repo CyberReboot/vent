@@ -1,5 +1,6 @@
 import npyscreen
 
+
 class TutorialForm(npyscreen.ActionFormWithMenus):
     """ Tutorial form for the Vent CLI """
     def __init__(self, title="", text="", next_tutorial="", *args, **keywords):
