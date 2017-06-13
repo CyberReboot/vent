@@ -11,15 +11,21 @@ class LogsForm(npyscreen.FormBaseNew):
         """ Update the text with the logs from containers not logging to syslog """
         if self.action is None:
             self.action = Action()
-            logs = self.action.logs()
-            value = "Logs for each Vent container found:\n"
-            for container in logs:
-                value += "\n Container: "+container+"\n"
-                for log in logs[container]:
-                    value += "    "+log+"\n"
-                value += "\n"
-            self.logs_mle.values=value.split("\n")
-            self.logs_mle.display()
+            response = self.action.logs()
+            if response[0]:
+                value = "Logs for each Vent container found:\n"
+                for container in logs:
+                    value += "\n Container: "+container+"\n"
+                    for log in logs[container]:
+                        value += "    "+log+"\n"
+                    value += "\n"
+                self.logs_mle.values=value.split("\n")
+                self.logs_mle.display()
+            else:
+                self.logs_mle.values=["There was an issue retrieving logs for Vent containers: ",
+                                      str(response[1]),
+                                      "Please see vent.log for more details."]
+                self.logs_mle.display()
         return
 
     def create(self):

@@ -21,34 +21,46 @@ class Plugin:
 
     def apply_path(self, repo):
         """ Set path to where the repo is and return original path """
-        # rewrite repo for consistency
-        if repo.endswith(".git"):
-            repo = repo.split(".git")[0]
-
-        # get org and repo name and path repo will be cloned to
+        self.logger.info("Starting: apply_path")
+        self.logger.info("repo given: "+str(repo))
+        status = (True, None)
         try:
+            # rewrite repo for consistency
+            if repo.endswith(".git"):
+                repo = repo.split(".git")[0]
+
+            # get org and repo name and path repo will be cloned to
             org, name = repo.split("/")[-2:]
             self.path = os.path.join(self.path_dirs.plugins_dir, org, name)
-        except Exception as e:  # pragma: no cover
-            return (False, str(e))
+            self.logger.info("cloning to path: "+str(self.path))
 
-        # save current path
-        cwd = os.getcwd()
-        # set to new repo path
-        os.chdir(self.path)
-
-        return (True, cwd)
+            # save current path
+            cwd = os.getcwd()
+            # set to new repo path
+            os.chdir(self.path)
+            status = (True, cwd)
+        except Exception as e:
+            self.logger.error("apply_path failed with error: "+str(e))
+            status = (False, e)
+        self.logger.info("Status of apply_path: "+str(status))
+        self.logger.info("Finished: apply_path")
+        return status
 
     def repo_branches(self, repo):
         """ Get the branches of a repository """
+        self.logger.info("Starting: repo_branches")
+        self.logger.info("repo given: "+str(repo))
+        status = (True, None)
         branches = []
-
-        cwd = self.apply_path(repo)
-        if cwd[0]:
-            cwd = cwd[1]
-        else:
-            return cwd
         try:
+            # switch to directory where repo will be cloned to
+            status = self.apply_path(repo)
+            if status[0]:
+                cwd = status[1]
+            else:
+                self.logger.info("apply_path failed. Exiting repo_branches with status "+str(status))
+                return status
+
             junk = subprocess.check_output(shlex.split("git pull --all"), stderr=subprocess.STDOUT, close_fds=True)
             branch_output = subprocess.check_output(shlex.split("git branch -a"), stderr=subprocess.STDOUT, close_fds=True)
             branch_output = branch_output.split("\n")
@@ -60,127 +72,184 @@ class Plugin:
                     branches.append(b.rsplit('/', 1)[1])
                 elif b:
                     branches.append(b)
-        except Exception as e:  # pragma: no cover
-            return (False, e)
 
-        branches = list(set(branches))
-        for branch in branches:
+            branches = list(set(branches))
+            self.logger.info("branches found: "+str(branches))
+            for branch in branches:
+                try:
+                    junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("repo_branches failed with error: "+str(e)+" on branch: "+str(branch))
+                    status = (False, e)
+                    self.logger.info("Exiting repo_branches with status: "+str(status))
+                    return status
+
             try:
-                junk = subprocess.check_output(shlex.split("git checkout " + branch), stderr=subprocess.STDOUT, close_fds=True)
+                os.chdir(cwd)
             except Exception as e:  # pragma: no cover
-                return (False, e)
-        try:
-            os.chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            pass
+                self.logger.error("unable to change directory to: "+str(cwd)+"because: "+str(e))
 
-        return (True, branches)
+            status = (True, branches)
+        except Exception as e:
+            self.logger.error("repo_branches failed with error: "+str(e))
+            status = (False, e)
+
+        self.logger.info("Status of repo_branches: "+str(status))
+        self.logger.info("Finished: repo_branches")
+        return status
 
     def repo_commits(self, repo):
         """ Get the commit IDs for all of the branches of a repository """
+        self.logger.info("Starting: repo_commits")
+        self.logger.info("repo given: "+str(repo))
+        status = (True, None)
         commits = []
-
-        branches = self.repo_branches(repo)
-        cwd = self.apply_path(repo)
-        if cwd[0]:
-            cwd = cwd[1]
-        else:
-            return cwd
-        if branches[0]:
-            try:
-                for branch in branches[1]:
-                    branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT, close_fds=True)
-                    branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
-                    commits.append((branch, branch_output))
-            except Exception as e:  # pragma: no cover
-                return (False, e)
-        else:
-            return branches
         try:
-            os.chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            pass
+            status = self.apply_path(repo)
+            # switch to directory where repo will be cloned to
+            if status[0]:
+                cwd = status[1]
+            else:
+                self.logger.info("apply_path failed. Exiting repo_commits with status: "+str(status))
+                return status
 
-        return (True, commits)
+            status = self.repo_branches(repo)
+            if status[0]:
+                branches = status[1]
+                for branch in branches:
+                    try:
+                        branch_output = subprocess.check_output(shlex.split("git rev-list " + branch), stderr=subprocess.STDOUT, close_fds=True)
+                        branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
+                        commits.append((branch, branch_output))
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error("repo_commits failed with error: "+str(e)+" on branch: "+str(branch))
+                        status = (False, e)
+                        self.logger.info("Exiting repo_commits with status: "+str(status))
+                        return status
+            else:
+                self.logger.info("repo_branches failed. Exiting repo_commits with status: "+str(status))
+                return status
+            try:
+                os.chdir(cwd)
+            except Exception as e:  # pragma: no cover
+                self.logger.error("unable to change directory to: "+str(cwd)+" because: "+str(e))
+
+            status = (True, commits)
+        except Exception as e:
+            self.logger.error("repo_commits failed with error: "+str(e))
+            status = (False, e)
+
+        self.logger.info("Status of repo_commits: "+str(status))
+        self.logger.info("Finished: repo_commits")
+        return status
 
     def repo_tools(self, repo, branch, version):
         """ Get available tools for a repository branch at a version """
-        tools = []
-        cwd = self.apply_path(repo)
-        if cwd[0]:
-            cwd = cwd[1]
-        else:
-            return cwd
-        self.branch = branch
-        self.version = version
-        response = self.checkout()
-        self.logger.info(str(response))
-        if response[0]:
-            tools = self._available_tools()
-        else:
-            return response
+        self.logger.info("Starting: repo_tools")
+        self.logger.info("repo given: "+str(repo))
+        self.logger.info("branch given: "+str(branch))
+        self.logger.info("version given: "+str(version))
+        status = (True, None)
         try:
-            os.chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            pass
+            tools = []
+            status = self.apply_path(repo)
+            # switch to directory where repo will be cloned to
+            if status[0]:
+                cwd = status[1]
+            else:
+                self.logger.info("apply_path failed. Exiting repo_tools with status: "+str(status))
+                return status
+            self.branch = branch
+            self.version = version
 
-        return (True, tools)
+            status = self.checkout()
+            if status[0]:
+                tools = self._available_tools()
+            else:
+                self.logger.info("checkout failed. Exiting repo_tools with status: "+str(status))
+                return status
+            try:
+                os.chdir(cwd)
+            except Exception as e:  # pragma: no cover
+                self.logger.error("unable to change directory to: "+str(cwd)+" because: "+str(e))
+
+            status = (True, tools)
+        except Exception as e:
+            self.logger.error("repo_tools failed with error: "+str(e))
+            status = (False, e)
+
+        self.logger.info("Status of repo_tools: "+str(status))
+        self.logger.info("Finished: repo_tools")
+        return status
 
     def clone(self, repo, user=None, pw=None):
         """ Clone the repository """
-        self.org = None
-        self.name = None
-        self.repo = repo
-
-        # save current path
-        cwd = os.getcwd()
-
-        # rewrite repo for consistency
-        if self.repo.endswith(".git"):
-            self.repo = self.repo.split(".git")[0]
-
-        # get org and repo name and path repo will be cloned to
+        self.logger.info("Starting: clone")
+        self.logger.info("repo given: "+str(repo))
+        self.logger.info("user given: "+str(user))
+        status = (True, None)
         try:
+            self.org = None
+            self.name = None
+            self.repo = repo
+
+            # save current path
+            cwd = os.getcwd()
+            self.logger.info("current working directory: "+str(cwd))
+
+            # rewrite repo for consistency
+            if self.repo.endswith(".git"):
+                self.repo = self.repo.split(".git")[0]
+
+            # get org and repo name and path repo will be cloned to
             self.org, self.name = self.repo.split("/")[-2:]
+            self.logger.info("org name found: "+str(self.org))
+            self.logger.info("repo name found: "+str(self.name))
             self.path = os.path.join(self.path_dirs.plugins_dir, self.org, self.name)
-        except Exception as e:  # pragma: no cover
-            return -1, cwd
+            self.logger.info("path to clone to: "+str(self.path))
 
+            # check if the directory exists, if so return now
+            status = self.path_dirs.ensure_dir(self.path)
+            if not status[0]:
+                self.logger.info("ensure_dir failed. Exiting clone with status: "+str(status))
+                return status
 
-        # check if the directory exists, if so return now
-        response = self.path_dirs.ensure_dir(self.path)
-        if not response[0]:
-            return -1, cwd
+            # set to new repo path
+            os.chdir(self.path)
 
-        # set to new repo path
-        os.chdir(self.path)
+            # if path already exists, try git checkout to update
+            if status[0] and status[1] == 'exists':
+                try:
+                    response = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT, close_fds=True)
+                    self.logger.info("path already exists: "+str(self.path))
+                    status = (True, cwd)
+                    self.logger.info("Status of clone: "+str(status))
+                    self.logger.info("Finished: clone")
+                    return status
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("unable to checkout: "+str(path)+" because: "+str(e))
+                    status = (False, e)
+                    self.logger.info("Exiting clone with status: "+str(status))
+                    return status
 
-        if response[0] and response[1] == 'exists':
-            try:
-                status = subprocess.check_output(shlex.split("git -C "+self.path+" rev-parse"), stderr=subprocess.STDOUT, close_fds=True)
-                return 0, cwd
-            except Exception as e:  # pragma: no cover
-                return -1, cwd
+            # ensure cloning still works even if ssl is broken...probably should be improved
+            response = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT, close_fds=True)
 
-        # ensure cloning still works even if ssl is broken...probably should be improved
-        try:
-            status = subprocess.check_output(shlex.split("git config --global http.sslVerify false"), stderr=subprocess.STDOUT, close_fds=True)
-        except Exception as e:  # pragma: no cover
-            return -1, cwd
+            # check if user and pw were supplied, typically for private repos
+            if user and pw:
+                # only https is supported when using user/pw
+                repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
 
-        # check if user and pw were supplied, typically for private repos
-        if user and pw:
-            # only https is supported when using user/pw
-            repo = 'https://'+user+':'+pw+'@'+self.repo.split("https://")[-1]
+            # clone repo and build tools
+            response = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
 
-        # clone repo and build tools
-        try:
-            status = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
-            status_code = 0
-        except subprocess.CalledProcessError as e:  # pragma: no cover
-            status_code = e.returncode
-
-        return status_code, cwd
+            status = (True, cwd)
+        except Exception as e:
+            self.logger.error("clone failed with error: "+str(e))
+            status = (False, e)
+        self.logger.info("Status of clone: "+str(status))
+        self.logger.info("Finished: clone")
+        return status
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
@@ -255,23 +324,27 @@ class Plugin:
         self.disable_old = disable_old
         self.limit_groups = limit_groups
 
-        response = (True, None)
-
+        status = (True, None)
         status_code, cwd = self.clone(repo, user=user, pw=pw)
-
-        response = self._build_tools(status_code)
+        status = self._build_tools(status_code)
 
         # set back to original path
         try:
             os.chdir(cwd)
         except Exception as e:  # pragma: no cover
             pass
-        return response
+        return status
 
     @ErrorHandler
     def builder(self, template, match_path, image_name, section, build=None,
               branch=None, version=None):
         """ Build tools """
+        self.logger.info("Starting: builder")
+        self.logger.info("install path: "+str(match_path))
+        self.logger.info("image name: "+str(image_name))
+        self.logger.info("build: "+str(build))
+        self.logger.info("branch: "+str(branch))
+        self.logger.info("version: "+str(version))
         if build:
             self.build = build
         elif not hasattr(self, 'build'): self.build = True
@@ -282,12 +355,19 @@ class Plugin:
             self.version = version
         elif not hasattr(self, 'version'): self.version = 'HEAD'
         cwd = os.getcwd()
-        os.chdir(match_path)
+        self.logger.info("current working directory: "+str(cwd))
+        try:
+            os.chdir(match_path)
+        except Exception as e:
+            self.logger.error("unable to change to directory: "+str(match_path)+" because: "+str(e))
+            return None
         template = self._build_image(template, match_path, image_name, section)
         try:
             os.chdir(cwd)
         except Exception as e:  # pragma: no cover
-            pass
+            self.logger.error("unable to change to directory: "+str(cwd)+" because: "+str(e))
+        self.logger.info("template of builder: "+str(template))
+        self.logger.info("Finished: builder")
         return template
 
     def _build_tools(self, status):
@@ -299,7 +379,7 @@ class Plugin:
         # !! TODO implement features: wild, remove_old, disable_old, limit_groups
 
         # check result of clone, ensure successful or that it already exists
-        if status in [0, 128]:
+        if status:
             response = self.checkout()
             if response[0]:
                 matches = []
@@ -499,6 +579,7 @@ class Plugin:
                     template.set_option(section, "image_id", image_id)
                     template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
             except Exception as e:  # pragma: no cover
+                self.logger.error("unable to build image: "+str(image_name)+" because: "+str(e))
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
         else:
@@ -610,7 +691,7 @@ class Plugin:
                 self.logger.info(response)
                 self.logger.info("Removing plugin container: "+container_name)
             except Exception as e:  # pragma: no cover
-                self.logger.warn("Unable to remove the plugin container: " + 
+                self.logger.warn("Unable to remove the plugin container: " +
                                  container_name + " because: " + str(e))
 
             # check for image and remove
@@ -619,7 +700,7 @@ class Plugin:
                 self.logger.info(response)
                 self.logger.info("Removing plugin image: "+image_name)
             except Exception as e:  # pragma: no cover
-                self.logger.warn("Unable to remove the plugin image: " + 
+                self.logger.warn("Unable to remove the plugin image: " +
                                  image_name + " because: " + str(e))
 
             # remove tool from the manifest

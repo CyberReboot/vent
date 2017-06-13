@@ -6,16 +6,20 @@ def test_add():
     """ Test the add function """
     instance = Action()
     status = instance.add('bad')
+    assert type(status) == tuple
     assert status[0] == False
     status = instance.add('https://github.com/cyberreboot/vent', build=False)
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_remove():
     """ Test the remove function """
     instance = Action()
     status = instance.remove()
+    assert type(status) == tuple
     assert status[0] == True
     status = instance.remove(repo='https://github.com/cyberreboot/vent')
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_build():
@@ -25,7 +29,10 @@ def test_build():
                           branch='master',
                           tools=[('kibana','')],
                           build=False)
+    assert type(status) == tuple
+    assert status[0] ==  True
     status = instance.build(branch='master')
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_prep_start():
@@ -35,38 +42,46 @@ def test_prep_start():
                           branch='master',
                           tools=[('kibana','')],
                           groups='foo')
+    assert type(status) == tuple
     assert status[0] == True
     status = instance.prep_start(name='kibana', branch='master')
-    assert type(status) == dict
+    assert type(status) == tuple
+    assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent',
                           branch='master',
                           tools=[('vent/core/file-drop',''),
                                  ('vent/core/redis', ''),
                                  ('vent/core/syslog', '')])
+    assert type(status) == tuple
     assert status[0] == True
     status = instance.prep_start(groups='core', branch='master')
-    assert type(status) == dict
+    assert type(status) == tuple
+    assert status[0] == True
 
 def test_start():
     """ Test the start function """
     instance = Action()
     status = instance.start({})
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_stop():
     """ Test the stop function """
     instance = Action()
     status = instance.stop()
+    assert type(status) == tuple
 
 def test_clean():
     """ Test the clean function """
     instance = Action()
     status = instance.clean()
+    assert type(status) == tuple
 
 def test_update():
     """ Test the update function """
     instance = Action()
     status = instance.update(name='elasticsearch', branch='master')
+    assert type(status) == tuple
 
 def test_backup():
     """ Test the backup function """
@@ -80,9 +95,13 @@ def test_inventory():
     """ Test the inventory function """
     instance = Action()
     status = instance.inventory(choices=[])
-    assert type(status) == dict
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == dict
     status = instance.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled', 'foo'])
-    assert type(status) == dict
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == dict
 
 def test_configure():
     """ Test the configure function """
@@ -95,9 +114,15 @@ def test_system_commands():
 def test_logs():
     """ Test the logs function """
     instance = Action()
-    logs = instance.logs()
-    logs = instance.logs(grep_list=['foo'])
-    logs = instance.logs(container_type="core")
+    status = instance.logs()
+    assert type(status) == tuple
+    assert status[0] == True
+    status = instance.logs(grep_list=['foo'])
+    assert type(status) == tuple
+    assert status[0] == True
+    status = instance.logs(container_type="core")
+    assert type(status) == tuple
+    assert status[0] == True
 
 def test_help():
     """ Test the help function """

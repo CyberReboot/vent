@@ -7,20 +7,26 @@ def test_add():
     """ Test the add function """
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False)
+    assert type(status) == tuple
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent.git', build=False)
+    assert type(status) == tuple
     assert status[0] == True
     bad_instance = Plugin()
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
+    assert type(status) == tuple
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
+    assert type(status) == tuple
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')])
+    assert type(status) == tuple
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, tools=[('vent/', 'HEAD')], overrides=[('vent', 'HEAD')])
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_get_tool_matches():
@@ -44,7 +50,7 @@ def test_builder():
 def test_build_tools():
     """ Test the _build_tools function """
     instance = Plugin()
-    status = instance._build_tools(256)
+    status = instance._build_tools(False)
     assert status[0] == False
 
 def test_tools():
@@ -94,30 +100,35 @@ def test_apply_path():
     """ Test the apply_path function """
     instance = Plugin()
     status = instance.apply_path('https://github.com/cyberreboot/vent')
+    assert type(status) == tuple
     assert status[0] == True
     status = instance.apply_path('https://github.com/cyberreboot/vent.git')
+    assert type(status) == tuple
     assert status[0] == True
 
 def test_repo_branches():
     """ Test the repo_branches function """
     instance = Plugin()
     status = instance.repo_branches('https://github.com/cyberreboot/vent')
+    assert type(status) == tuple
     assert status[0] == True
     assert type(status[1]) == list
 
 def test_repo_commits():
     """ Test the repo_commits function """
     instance = Plugin()
-    commits = instance.repo_commits('https://github.com/cyberreboot/vent')
-    assert commits[0] == True
-    assert type(commits[1]) == list
+    status = instance.repo_commits('https://github.com/cyberreboot/vent')
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == list
 
 def test_repo_tools():
     """ Test the repo_tools function """
     instance = Plugin()
-    tools = instance.repo_tools('https://github.com/cyberreboot/vent', 'master', 'HEAD')
-    assert tools[0] == True
-    assert type(tools[1]) == list
+    status = instance.repo_tools('https://github.com/cyberreboot/vent', 'master', 'HEAD')
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == list
 
 def test_update():
     """ Test the update function """
