@@ -25,22 +25,15 @@ def test_integration():
     # leave help menu
     npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['\n']
 
-    A = VentApp()
-    try:
-        A.run(fork=False)
-    except npyscreen.ExhaustedTestInput as e:
-        pass
-    else:
-        raise npyscreen.ExhaustedTestInput
-
-    # run a second time without the tutorial
-    A = VentApp()
-    try:
-        A.run(fork=False)
-    except npyscreen.ExhaustedTestInput as e:
-        pass
-    else:
-        raise npyscreen.ExhaustedTestInput
+    # run twice, once with tutorial, once without
+    for x in xrange(2):
+        A = VentApp()
+        try:
+            A.run(fork=False)
+        except npyscreen.ExhaustedTestInput as e:
+            pass
+        else:
+            raise npyscreen.ExhaustedTestInput
 
     # add a repo, build it, remove it
     # add a tool in a repo, build it, remove it
