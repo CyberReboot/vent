@@ -14,6 +14,7 @@ class LogsForm(npyscreen.FormBaseNew):
             response = self.action.logs()
             if response[0]:
                 value = "Logs for each Vent container found:\n"
+                logs = response[1]
                 for container in logs:
                     value += "\n Container: "+container+"\n"
                     for log in logs[container]:
