@@ -17,7 +17,7 @@ def test_integration():
     # initialize tutorial
     paths = PathDirs()
     first_time = paths.ensure_file(paths.init_file)
-    assert first_time == True
+    assert first_time[0] == True
 
     # leave the tutorial menu
     npyscreen.TEST_SETTINGS['TEST_INPUT'] = [ENTER]
@@ -48,6 +48,6 @@ def test_integration():
 
     A = VentApp()
     try:
-        A.run(fork=True)
+        A.run(fork=False)
     except npyscreen.ExhaustedTestInput as e:
         pass
