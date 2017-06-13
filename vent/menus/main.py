@@ -275,7 +275,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         try:
             api_action = Action()
         except DockerException as de:  # pragma: no cover
-            npyscreen.notify_confirm(str(de), title="Docker Error", form_color='DANGER', wrap=True)
+            npyscreen.notify_confirm(str(de),
+                                     title="Docker Error",
+                                     form_color='DANGER',
+                                     wrap=True)
             self.exit()
 
         self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
