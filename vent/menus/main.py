@@ -273,7 +273,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     def create(self):
         """ Override method for creating FormBaseNewWithMenu form """
         try:
-            api_action = Action()
+            self.api_action = Action()
         except DockerException as de:  # pragma: no cover
             npyscreen.notify_confirm(str(de),
                                      title="Docker Error",
