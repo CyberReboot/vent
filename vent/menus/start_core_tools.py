@@ -17,7 +17,7 @@ class StartCoreToolsForm(npyscreen.ActionForm):
 
     def create(self):
         self.add_handlers({"^T": self.change_forms, "^Q": self.quit})
-        self.add(npyscreen.TitleText, name='Select which tools to start (only enabled, built, non-running core tools are shown):', editable=False)
+        self.add(npyscreen.FixedText, name='Select which tools to start (only enabled, built, non-running core tools are shown):', editable=False, wrap=True)
 
     def while_waiting(self):
         """ Update with current tools that are cores """
