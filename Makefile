@@ -49,6 +49,6 @@ clean:
 	pip uninstall -y vent || true
 
 test: build
-	py.test -v --cov=. -k 'not vendor' --cov-report term-missing
+	py.test -s -v --cov=. -k 'not vendor' --cov-report term-missing
 
 .PHONY: build test
