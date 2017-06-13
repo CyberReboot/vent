@@ -114,15 +114,3 @@ class VentApp(npyscreen.NPSAppManaged):
     def change_form(self, name):
         """ Changes the form (window) that is displayed """
         self.switchForm(name)
-
-if __name__ == "__main__":
-    try:
-        app = VentApp()
-        app.run()
-    except KeyboardInterrupt:
-        os.system('reset')
-        os.system('stty sane')
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
