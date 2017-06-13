@@ -56,7 +56,7 @@ def test_menu():
     # TODO
 
     # go through the logs menus
-    run_menu([ENTER, CTRL_X, 'l', DOWN, CTRL_T])
+    run_menu([ENTER, CTRL_X, 'l', DOWN, ENTER, CTRL_T])
 
     # go through the services running menus
     run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
