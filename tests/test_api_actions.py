@@ -31,7 +31,7 @@ def test_build():
                           build=False)
     assert type(status) == tuple
     assert status[0] ==  True
-    status = instance.build(branch='master')
+    status = instance.build(branch='master', name='kibana')
     assert type(status) == tuple
     assert status[0] == True
 
