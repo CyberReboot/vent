@@ -1,5 +1,4 @@
 import npyscreen
-import time
 
 from vent.menu import VentApp
 
@@ -26,9 +25,6 @@ def test_integration():
     # leave help menu
     npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['\n']
 
-    # to go through main menus
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', '\033']
-
     A = VentApp()
     try:
         A.run(fork=False)
@@ -36,17 +32,16 @@ def test_integration():
         pass
     else:
         raise npyscreen.ExhaustedTestInput
-    # add a repo, build it, remove it
-    # add a tool in a repo, build it, remove it
-    # add a set of tools at a specific version in a repo, build them, and remove them
 
-def test_second_run():
-    """ Run a second time """
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] = []
+    # run a second time without the tutorial
     A = VentApp()
     try:
         A.run(fork=False)
     except npyscreen.ExhaustedTestInput as e:
-        time.sleep(10)
+        pass
     else:
         raise npyscreen.ExhaustedTestInput
+
+    # add a repo, build it, remove it
+    # add a tool in a repo, build it, remove it
+    # add a set of tools at a specific version in a repo, build them, and remove them
