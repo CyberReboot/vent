@@ -7,6 +7,7 @@ import threading
 import time
 
 from docker.errors import DockerException
+from npyscreen import notify_confirm
 
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
@@ -156,8 +157,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                    kwargs={"action":"install"})
             popup(original_images, "images", thr,
                   'Please wait, installing core containers...')
-            npyscreen.notify_confirm("Done installing core containers.",
-                                     title='Installed core containers')
+            notify_confirm("Done installing core containers.",
+                           title='Installed core containers')
         elif action == 'build':
             self.parentApp.change_form('BUILDCORETOOLS')
         elif action == 'start':
@@ -245,26 +246,46 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     "containers, and images. Are you sure?",
                     title="Confirm system command")
             if okay:
-                d_cli = docker.from_env()
+                failed = False
+                try:
+                    d_cli = docker.from_env()
+                except Exception as e:  # pragma: no cover
+                    notify_confirm("Error connecting to Docker: " + repr(e))
+                    self.exit()
+
                 # remove containers
-                list = d_cli.containers.list(filters={'label':'vent'}, all=True)
-                for c in list:
-                    c.remove(force=True)
+                try:
+                    list = d_cli.containers.list(filters={'label':'vent'},
+                                                 all=True)
+                    for c in list:
+                        c.remove(force=True)
+                except Exception as e:  # pragma: no cover
+                    notify_confirm("Error deleting Vent containers: " +
+                                   repr(e))
+                    failed = True
+
                 # remove images
-                list = d_cli.images.list(filters={'label':'vent'}, all=True)
-                for i in list:
-                    d_cli.images.remove(image=i.id, force=True)
+                try:
+                    list = d_cli.images.list(filters={'label':'vent'},
+                                             all=True)
+                    for i in list:
+                        d_cli.images.remove(image=i.id, force=True)
+                except Exception as e:  # pragma: no cover
+                    notify_confirm("Error deleting Vent images: " + repr(e))
+                    failed = True
+
                 # remove .vent folder
                 try:
-                    shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
+                    shutil.rmtree(os.path.join(os.path.expanduser('~'),
+                                               '.vent'))
                 except Exception as e:  # pragma: no cover
-                    npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
-                else:
-                    npyscreen.notify_confirm("Vent reset complete. "
-                            "Press OK to exit Vent Manager console.")
-                self.exit()
+                    notify_confirm("Error deleting Vent data: " + repr(e))
+                    failed = True
 
-            pass
+                if not failed:
+                    notify_confirm("Vent reset complete. "
+                                   "Press OK to exit Vent Manager console.")
+                self.exit()
         elif action == "upgrade":
             # !! TODO
             pass
@@ -275,10 +296,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         try:
             self.api_action = Action()
         except DockerException as de:  # pragma: no cover
-            npyscreen.notify_confirm(str(de),
-                                     title="Docker Error",
-                                     form_color='DANGER',
-                                     wrap=True)
+            notify_confirm(str(de),
+                           title="Docker Error",
+                           form_color='DANGER',
+                           wrap=True)
             self.exit()
 
         self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
