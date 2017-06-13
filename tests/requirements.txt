@@ -1,7 +1,7 @@
 docker
 elasticsearch
 npyscreen
-pexpect
+pexpect>4.2
 pika
 pytest
 pytest-cov
