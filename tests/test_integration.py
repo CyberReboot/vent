@@ -10,17 +10,17 @@ def test_integration():
     npyscreen.TEST_SETTINGS['TEST_INPUT'] = ['\n']
 
     # go to help
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^T']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^T"]
 
     # go through help menus
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', 'b', 'm', '\n', '\n']
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', 'b', 'p', '\n', '\n']
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', 'b', 't', '\n', '\n']
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', 'b', 'f', '\n', '\n']
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', 'b', 'c', '\n', '\n']
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', 'b', 's', '\n', '\n']
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', 'p', 'a', '\n', '\n']
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['^X', 'p', 'b', '\n', '\n']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^X", 'b', 'm', '\n', '\n']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^X", 'b', 'p', '\n', '\n']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^X", 'b', 't', '\n', '\n']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^X", 'b', 'f', '\n', '\n']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^X", 'b', 'c', '\n', '\n']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^X", 'b', 's', '\n', '\n']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^X", 'p', 'a', '\n', '\n']
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += ["^X", 'p', 'b', '\n', '\n']
 
     # leave help menu
     npyscreen.TEST_SETTINGS['TEST_INPUT'] += ['\n']
