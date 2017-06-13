@@ -95,9 +95,13 @@ def test_inventory():
     """ Test the inventory function """
     instance = Action()
     status = instance.inventory(choices=[])
-    assert type(status) == dict
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == dict
     status = instance.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled', 'foo'])
-    assert type(status) == dict
+    assert type(status) == tuple
+    assert status[0] == True
+    assert type(status[1]) == dict
 
 def test_configure():
     """ Test the configure function """
@@ -110,9 +114,15 @@ def test_system_commands():
 def test_logs():
     """ Test the logs function """
     instance = Action()
-    logs = instance.logs()
-    logs = instance.logs(grep_list=['foo'])
-    logs = instance.logs(container_type="core")
+    status = instance.logs()
+    assert type(status) == tuple
+    assert status[0] == True
+    status = instance.logs(grep_list=['foo'])
+    assert type(status) == tuple
+    assert status[0] == True
+    status = instance.logs(container_type="core")
+    assert type(status) == tuple
+    assert status[0] == True
 
 def test_help():
     """ Test the help function """
