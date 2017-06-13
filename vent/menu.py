@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import npyscreen
+import os
+import sys
 
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
@@ -35,6 +37,7 @@ from vent.menus.tutorials.tutorial_forms import TutorialIntroForm
 from vent.menus.tutorials.tutorial_forms import TutorialSettingUpServicesForm
 from vent.menus.tutorials.tutorial_forms import TutorialStartingCoresForm
 from vent.menus.tutorials.tutorial_forms import TutorialTerminologyForm
+
 
 class VentApp(npyscreen.NPSAppManaged):
     """ Main menu app for vent CLI """
@@ -111,3 +114,15 @@ class VentApp(npyscreen.NPSAppManaged):
     def change_form(self, name):
         """ Changes the form (window) that is displayed """
         self.switchForm(name)
+
+if __name__ == "__main__":
+    try:
+        app = VentApp()
+        app.run()
+    except KeyboardInterrupt:
+        os.system('reset')
+        os.system('stty sane')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
