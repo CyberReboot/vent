@@ -242,11 +242,8 @@ class Plugin:
 
             # clone repo and build tools
             response = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
-            if response not in [0, 128]:
-                self.logger.error("Git was unable to clone: "+str(repo)+" because of error: "+str(response))
-                status = (False, str(response))
-            else:
-                status = (True, cwd)
+
+            status = (True, cwd)
         except Exception as e:
             self.logger.error("clone failed with error: "+str(e))
             status = (False, e)
@@ -342,6 +339,12 @@ class Plugin:
     def builder(self, template, match_path, image_name, section, build=None,
               branch=None, version=None):
         """ Build tools """
+        self.logger.info("Starting: builder")
+        self.logger.info("install path: "+str(match_path))
+        self.logger.info("image name: "+str(image_name))
+        self.logger.info("build: "+str(build))
+        self.logger.info("branch: "+str(branch))
+        self.logger.info("version: "+str(version))
         if build:
             self.build = build
         elif not hasattr(self, 'build'): self.build = True
@@ -352,12 +355,19 @@ class Plugin:
             self.version = version
         elif not hasattr(self, 'version'): self.version = 'HEAD'
         cwd = os.getcwd()
-        os.chdir(match_path)
+        self.logger.info("current working directory: "+str(cwd))
+        try:
+            os.chdir(match_path)
+        except Exception as e:
+            self.logger.error("unable to change to directory: "+str(match_path)+" because: "+str(e))
+            return None
         template = self._build_image(template, match_path, image_name, section)
         try:
             os.chdir(cwd)
         except Exception as e:  # pragma: no cover
-            pass
+            self.logger.error("unable to change to directory: "+str(cwd)+" because: "+str(e))
+        self.logger.info("template of builder: "+str(template))
+        self.logger.info("Finished: builder")
         return template
 
     def _build_tools(self, status):
@@ -569,6 +579,7 @@ class Plugin:
                     template.set_option(section, "image_id", image_id)
                     template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
             except Exception as e:  # pragma: no cover
+                self.logger.error("unable to build image: "+str(image_name)+" because: "+str(e))
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
         else:
