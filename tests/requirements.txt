@@ -1,8 +1,7 @@
 docker
 elasticsearch
 npyscreen
-pexpect>4.2
-pika
+eika
 pytest
 pytest-cov
 python-magic
