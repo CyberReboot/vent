@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import curses
 import npyscreen
 
 from vent.helpers.paths import PathDirs
@@ -11,14 +12,18 @@ def test_integration():
     """ Run integration tests """
     CTRL_T = '^T'
     CTRL_X = '^X'
-    ENTER = '\n'
+    ENTER = curses.ascii.CR
 
     # initialize tutorial
     paths = PathDirs()
     first_time = paths.ensure_file(paths.init_file)
+    assert first_time == True
+
+    # leave the tutorial menu
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] = [ENTER]
 
     # go to help
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] = [CTRL_T]
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] += [CTRL_T]
 
     # go through help menus
     npyscreen.TEST_SETTINGS['TEST_INPUT'] += [CTRL_X, 'b', 'm', ENTER,
