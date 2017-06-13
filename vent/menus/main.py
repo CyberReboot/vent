@@ -18,10 +18,9 @@ from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 
+
 class MainForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
-    triggered = False
-
     def exit(self, *args, **keywords):
         os.system('reset')
         os.system('stty sane')
@@ -32,20 +31,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
-        def popup(message):
-            npyscreen.notify_confirm(str(message), title="Docker Error", form_color='DANGER', wrap=True)
-            self.exit()
-
         # clean up forms with dynamic data
         self.parentApp.remove_forms()
         self.parentApp.add_forms()
-
-        if not self.triggered:
-            self.triggered = True
-            try:
-                self.api_action = Action()
-            except DockerException as de:  # pragma: no cover
-                popup(de)
 
         # give a little extra time for file descriptors to close
         time.sleep(0.1)
@@ -284,6 +272,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def create(self):
         """ Override method for creating FormBaseNewWithMenu form """
+        try:
+            api_action = Action()
+        except DockerException as de:  # pragma: no cover
+            npyscreen.notify_confirm(str(de), title="Docker Error", form_color='DANGER', wrap=True)
+            self.exit()
+
         self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
 
         #######################
