@@ -249,32 +249,39 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 try:
                     d_cli = docker.from_env()
                 except Exception as e:  # pragma: no cover
-                    npyscreen.notify_confirm("Error connecting to Docker: "+repr(e))
+                    npyscreen.notify_confirm("Error connecting to Docker: "
+                                             + repr(e))
                     self.exit()
 
                 # remove containers
                 try:
-                    list = d_cli.containers.list(filters={'label':'vent'}, all=True)
+                    list = d_cli.containers.list(filters={'label':'vent'},
+                                                 all=True)
                     for c in list:
                         c.remove(force=True)
-                except Exception as e:  #pragma: no cover
-                    npyscreen.notify_confirm("Error deleting Vent containers: "+repr(e))
+                except Exception as e:  # pragma: no cover
+                    npyscreen.notify_confirm("Error deleting Vent containers: "
+                                             + repr(e))
                     failed = True
 
                 # remove images
                 try:
-                    list = d_cli.images.list(filters={'label':'vent'}, all=True)
+                    list = d_cli.images.list(filters={'label':'vent'},
+                                             all=True)
                     for i in list:
                         d_cli.images.remove(image=i.id, force=True)
-                except Exception as e:  #pragma: no cover
-                    npyscreen.notify_confirm("Error deleting Vent images: "+repr(e))
+                except Exception as e:  # pragma: no cover
+                    npyscreen.notify_confirm("Error deleting Vent images: "
+                                             + repr(e))
                     failed = True
 
                 # remove .vent folder
                 try:
-                    shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
+                    shutil.rmtree(os.path.join(os.path.expanduser('~'),
+                                               '.vent'))
                 except Exception as e:  # pragma: no cover
-                    npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
+                    npyscreen.notify_confirm("Error deleting Vent data: "
+                                             + repr(e))
                     failed = True
 
                 if not failed:
