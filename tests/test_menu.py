@@ -101,9 +101,8 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
 
     # go through the system commands menus
-    # commenting out for now as this removes the coverage report, it seems
-    #run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'r', TAB, RIGHT,
-    #          ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'r', TAB, RIGHT,
+              ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'u'])
 
     # go through the tutorials menus
