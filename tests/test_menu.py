@@ -48,17 +48,23 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'c', 'i', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'b', RIGHT, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'b', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'c', RIGHT, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'r', RIGHT, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 's', RIGHT, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'p', RIGHT, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'p', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'p', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'u', RIGHT, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'u', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'u', CTRL_T])
 
     # go through the plugins menus
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, RIGHT, ENTER, TAB, TAB,
@@ -66,17 +72,23 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'b', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'b', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'b', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'c', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'c', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'i', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 's', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 's', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 's', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'p', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'p', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'p', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'u', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'u', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'u', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'r', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'r', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'r', CTRL_T])
 
     # go through the logs menus
     run_menu([ENTER, CTRL_X, 'l', DOWN, ENTER, CTRL_T])
@@ -92,8 +104,11 @@ def test_menu():
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'u'])
 
     # go through the tutorials menus
-    run_menu([ENTER, CTRL_X, 't', 'v', 'b', RIGHT, ENTER, CTRL_X, 't', 'v',
-              't', RIGHT, ENTER, CTRL_X, 't', 'v', 's', RIGHT, ENTER, CTRL_X,
-              't', 'c', 'b', RIGHT, ENTER, CTRL_X, 't', 'c', 'c', RIGHT, ENTER,
-              CTRL_X, 't', 'p', 'a', RIGHT, ENTER, CTRL_X, 't', 'f', 'a',
-              RIGHT, ENTER, CTRL_X, 't', 's', 's', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 'v', 'b', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 'v', 't', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 'v', 's', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 'c', 'b', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 'c', 'c', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 'p', 'a', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 'f', 'a', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 's', 's', RIGHT, ENTER])
