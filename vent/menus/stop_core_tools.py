@@ -11,49 +11,43 @@ from vent.helpers.meta import Tools
 
 class StopCoreToolsForm(npyscreen.ActionForm):
     """ For picking which tools to stop """
+    api_action = Action()
     tools_tc = {}
-    triggered = 0
     logger = Logger(__name__)
 
     def create(self):
+        """ Update with current tools that are cores """
         self.add_handlers({"^T": self.change_forms, "^Q": self.quit})
         self.add(npyscreen.TitleText, name='Select which tools to stop (only running core tools are shown):', editable=False)
 
-    def while_waiting(self):
-        """ Update with current tools that are not cores """
-        if not self.triggered:
-            i = 4
-            api_action = Action()
-            response = api_action.inventory(choices=['repos', 'tools', 'running', 'core'])
-            if response[0]:
-                inventory = response[1]
-                for repo in inventory['repos']:
-                    repo_name = repo.rsplit("/", 2)[1:]
-                    self.tools_tc[repo] = {}
-                    title_text = self.add(npyscreen.TitleText, name='Plugin: '+repo, editable=False, rely=i, relx=5)
-                    title_text.display()
-                    i += 1
-                    for tool in inventory['tools']:
-                        r_name = tool[0].split(":")
-                        if repo_name[0] == r_name[0] and repo_name[1] == r_name[1]:
-                            core = False
-                            running = False
-                            for item in inventory['core']:
-                                if tool[0] == item[0]:
-                                    core = True
-                            for item in inventory['running']:
-                                if tool[0] == item[0] and item[2] == 'running':
-                                    running = True
-                            t = tool[1]
-                            if t == "":
-                                t = "/"
-                            if running and core:
-                                t += ":" + ":".join(tool[0].split(":")[-2:])
-                                self.tools_tc[repo][t] = self.add(npyscreen.CheckBox, name=t, value=True, relx=10)
-                                self.tools_tc[repo][t].display()
-                                i += 1
-                    i += 2
-                self.triggered = 1
+        i = 4
+        response = self.api_action.inventory(choices=['repos', 'tools', 'running', 'core'])
+        if response[0]:
+            inventory = response[1]
+            for repo in inventory['repos']:
+                repo_name = repo.rsplit("/", 2)[1:]
+                self.tools_tc[repo] = {}
+                title_text = self.add(npyscreen.TitleText, name='Plugin: '+repo, editable=False, rely=i, relx=5)
+                i += 1
+                for tool in inventory['tools']:
+                    r_name = tool[0].split(":")
+                    if repo_name[0] == r_name[0] and repo_name[1] == r_name[1]:
+                        core = False
+                        running = False
+                        for item in inventory['core']:
+                            if tool[0] == item[0]:
+                                core = True
+                        for item in inventory['running']:
+                            if tool[0] == item[0] and item[2] == 'running':
+                                running = True
+                        t = tool[1]
+                        if t == "":
+                            t = "/"
+                        if running and core:
+                            t += ":" + ":".join(tool[0].split(":")[-2:])
+                            self.tools_tc[repo][t] = self.add(npyscreen.CheckBox, name=t, value=True, relx=10)
+                            i += 1
+                i += 2
         return
 
     def quit(self, *args, **kwargs):
@@ -93,7 +87,6 @@ class StopCoreToolsForm(npyscreen.ActionForm):
 
         original_containers = Containers()
 
-        api_action = Action()
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
                 self.logger.info(tool)
@@ -102,7 +95,7 @@ class StopCoreToolsForm(npyscreen.ActionForm):
                     if t.startswith('/:'):
                         t = " "+t[1:]
                     t = t.split(":")
-                    thr = threading.Thread(target=api_action.stop, args=(),
+                    thr = threading.Thread(target=self.api_action.stop, args=(),
                                            kwargs={'name':t[0],
                                                    'branch':t[1],
                                                    'version':t[2]})
