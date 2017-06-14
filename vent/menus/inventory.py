@@ -4,18 +4,28 @@ import sys
 
 from vent.api.actions import Action
 
+
 class InventoryForm(npyscreen.FormBaseNew):
     """ Inventory form for the Vent CLI """
-    action = None
-    def while_waiting(self):
-        """ Update the text with the plugins in the inventory when nothing is happening """
-        if self.action is None:
-            self.action = Action()
-        # don't include core tools in this inventory
-        response = self.action.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled'])
+
+    def create(self):
+        """ Override method for creating FormBaseNew form """
+        self.add_handlers({"^T": self.change_forms,"^Q": self.exit})
+        self.add(npyscreen.TitleFixedText, name='Inventory items:', value='')
+        self.action = Action()
+        response = self.action.inventory(choices=['repos',
+                                                  'core',
+                                                  'tools',
+                                                  'images',
+                                                  'built',
+                                                  'running',
+                                                  'enabled'])
         if response[0]:
             inventory = response[1]
-            value = "Tools for each plugin found:\n"
+            if len(inventory['repos']) == 0:
+                value = "No tools were found.\n"
+            else:
+                value = "Tools for each plugin found:\n"
             for repo in inventory['repos']:
                 if repo != "https://github.com/cyberreboot/vent":
                     value += "\n  Plugin: "+repo+"\n"
@@ -42,17 +52,10 @@ class InventoryForm(npyscreen.FormBaseNew):
                                     if running[0] == tool[0]:
                                         value += "      Status: "+running[2]+"\n"
         else:
-            value = "There was an issue with inventory retrieval:\n"+str(response[1])+"\nPlease see vent.log for more details."
-        self.inventory_mle.values=value.split("\n")
-        self.inventory_mle.display()
-        return
-
-    def create(self):
-        """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms,"^Q": self.exit})
-        self.add(npyscreen.TitleFixedText, name='Inventory items:', value='')
-        self.inventory_mle = self.add(npyscreen.Pager,
-                                      values=['Checking for plugins in the inventory, please wait...'])
+            value = "There was an issue with inventory retrieval:\n" + \
+                    str(response[1]) + \
+                    "\nPlease see vent.log for more details."
+        self.add(npyscreen.Pager, values=value.split("\n"))
 
     def exit(self, *args, **keywords):
         self.parentApp.switchForm("MAIN")
