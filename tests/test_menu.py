@@ -25,6 +25,7 @@ def run_menu(test_input):
 
 def test_menu():
     """ Run menu tests """
+    CTRL_Q = '^Q'
     CTRL_T = '^T'
     CTRL_X = '^X'
     ENTER = curses.ascii.CR
@@ -92,6 +93,7 @@ def test_menu():
 
     # go through the logs menus
     run_menu([ENTER, CTRL_X, 'l', DOWN, ENTER, CTRL_T])
+    run_menu([ENTER, CTRL_X, 'l', DOWN, ENTER, CTRL_Q])
 
     # go through the services running menus
     run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
