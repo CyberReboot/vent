@@ -101,8 +101,9 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
 
     # go through the system commands menus
-    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'r', TAB, RIGHT,
-              ENTER, ENTER, ENTER])
+    # causes .coverage file to not exist
+    # run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'r', TAB, RIGHT,
+    #           ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'u'])
 
     # go through the tutorials menus
@@ -116,4 +117,5 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 't', 's', 's', RIGHT, ENTER])
 
     # exit
-    run_menu([ENTER, CTRL_Q])
+    # causes .coverage file to not exist
+    # run_menu([ENTER, CTRL_Q])
