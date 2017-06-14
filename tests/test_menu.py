@@ -69,7 +69,7 @@ def test_menu():
 
     # go through the plugins menus
     run_menu([ENTER, CTRL_X, 'p', 'a', CTRL_T, CTRL_T, TAB, TAB, TAB, RIGHT,
-              ENTER, TAB, TAB, SPACE, LEFT, ENTER, RIGHT, ENTER, ENTER, ENTER])
+              ENTER, RIGHT, ENTER, RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'a', CTRL_T, CTRL_T, TAB, TAB, TAB, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'b', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'b', ENTER])
