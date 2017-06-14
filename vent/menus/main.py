@@ -177,32 +177,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
-        def diff(first, second):
-            """
-            Get the elements that exist in the first list and not in the second
-            """
-            second = set(second)
-            return [item for item in first if item not in second]
-
-        def popup(original_containers, thr, title):
-            """
-            Start the thread and display a popup of the running containers
-            until the thread is finished
-            """
-            thr.start()
-            container_str = ""
-            while thr.is_alive():
-                containers = diff(Containers(), original_containers)
-                if containers:
-                    container_str = ""
-                for container in containers:
-                    # TODO limit length of container_str to fit box
-                    container_str += container[0]+": "+container[1]+"\n"
-                npyscreen.notify_wait(container_str, title=title)
-                time.sleep(1)
-            return
-
-        original_containers = Containers()
         if action == 'add':
             self.parentApp.change_form('ADD')
         elif action == "build":
