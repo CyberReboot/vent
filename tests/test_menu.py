@@ -115,3 +115,6 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 't', 'p', 'a', RIGHT, ENTER])
     run_menu([ENTER, CTRL_X, 't', 'f', 'a', RIGHT, ENTER])
     run_menu([ENTER, CTRL_X, 't', 's', 's', RIGHT, ENTER])
+
+    # exit
+    run_menu([ENTER, CTRL_Q])
