@@ -29,8 +29,10 @@ def test_menu():
     CTRL_X = '^X'
     ENTER = curses.ascii.CR
     TAB = curses.ascii.TAB
+    LEFT = curses.KEY_LEFT
     RIGHT = curses.KEY_RIGHT
     DOWN = curses.KEY_DOWN
+    SPACE = curses.ascii.SP
 
     # go through help menus
     run_menu([ENTER, CTRL_T, CTRL_X, 'b', 'm', ENTER, ENTER, CTRL_X, 'b', 'p',
@@ -45,15 +47,36 @@ def test_menu():
     # go through the core tools menus
     run_menu([ENTER, CTRL_X, 'c', 'i', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'b', RIGHT, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'b', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', RIGHT, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'c', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'r', RIGHT, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', RIGHT, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 's', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'p', RIGHT, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'p', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'u', RIGHT, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'u', ENTER])
 
     # go through the plugins menus
-    # TODO
+    run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, RIGHT, ENTER, TAB, TAB,
+              SPACE, LEFT, ENTER, RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'b', RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'b', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'c', RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'c', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'i', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'p', 's', RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 's', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'p', RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'p', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'u', RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'u', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'r', RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'r', ENTER])
 
     # go through the logs menus
     run_menu([ENTER, CTRL_X, 'l', DOWN, ENTER, CTRL_T])
