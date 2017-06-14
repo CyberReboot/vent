@@ -1,7 +1,7 @@
 try:
     # python2
     import ConfigParser
-except ImportError:
+except ImportError:  # pragma: no cover
     # python3
     import configparser as ConfigParser
 

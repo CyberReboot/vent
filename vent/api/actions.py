@@ -45,7 +45,7 @@ class Action:
         except Exception as e:  # pragma: no cover
             self.logger.error("add failed with error: "+str(e))
             status = (False, e)
-        self.logger.info("Status of add: "+str(status))
+        self.logger.info("Status of add: "+str(status[0]))
         self.logger.info("Finished: add")
         return status
 
@@ -63,10 +63,10 @@ class Action:
                                         branch=branch,
                                         version=version,
                                         built=built)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("remove failed with error: "+str(e))
             status = (False, e)
-        self.logger.info("Status of remove: " + str(status))
+        self.logger.info("Status of remove: " + str(status[0]))
         self.logger.info("Finished: remove")
         return status
 
@@ -244,12 +244,12 @@ class Action:
             for c in tool_dict.keys():
                 if 'start' in tool_dict[c] and not tool_dict[c]['start']:
                     del tool_dict[c]
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("prep_start failed with error: "+str(e))
             status = (False, e)
 
         status = (True, tool_dict)
-        self.logger.info("Status of prep_start: "+str(status))
+        self.logger.info("Status of prep_start: "+str(status[0]))
         self.logger.info("Finished: prep_start")
         return status
 
@@ -313,11 +313,11 @@ class Action:
                         self.logger.info("started "+str(container)+" with ID: "+str(container_id))
                 except Exception as e:  # pragma: no cover
                     self.logger.error("failed to start "+str(container)+" because: "+str(e))
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("start failed with error: "+str(e))
             status = (False, e)
 
-        self.logger.info("Status of start: "+str(status))
+        self.logger.info("Status of start: "+str(status[0]))
         self.logger.info("Finished: start")
         return status
 
@@ -376,11 +376,11 @@ class Action:
                     self.logger.error("unable to update: "+str(section)+" because: "+str(e))
 
             template.write_config()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("update failed with error: "+str(e))
             status = (False, e)
 
-        self.logger.info("Status of update: "+str(status))
+        self.logger.info("Status of update: "+str(status[0]))
         self.logger.info("Finished: update")
         return status
 
@@ -421,10 +421,10 @@ class Action:
                     self.logger.info("stopped "+str(container_name))
                 except Exception as e:  # pragma: no cover
                     self.logger.error("failed to stop "+str(container_name)+" because: "+str(e))
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("stop failed with error: "+str(e))
             status = (False, e)
-        self.logger.info("Status of stop: "+str(status))
+        self.logger.info("Status of stop: "+str(status[0]))
         self.logger.info("Finished: stop")
         return status
 
@@ -465,10 +465,10 @@ class Action:
                     self.logger.info("cleaned "+str(container_name))
                 except Exception as e:  # pragma: no cover
                     self.logger.error("failed to clean "+str(container_name)+" because: "+str(e))
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("clean failed with error: "+str(e))
             status = (False, e)
-        self.logger.info("Status of clean: "+ str(status))
+        self.logger.info("Status of clean: "+ str(status[0]))
         self.logger.info("Finished: clean")
         return status
 
@@ -495,10 +495,10 @@ class Action:
                                                section, build=True, branch=branch,
                                                version=version)
             template.write_config()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("build failed with error: "+str(e))
             status = (False, e)
-        self.logger.info("Status of build: "+str(status))
+        self.logger.info("Status of build: "+str(status[0]))
         self.logger.info("Finished: build")
         return status
 
@@ -580,11 +580,11 @@ class Action:
                 status = self.stop(groups="core", branch=branch)
             elif action == "clean":
                 status = self.clean(groups="core", branch=branch)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.info("core failed with error: "+str(e))
             status = (False, e)
 
-        self.logger.info("Status of core: "+str(status))
+        self.logger.info("Status of core: "+str(status[0]))
         self.logger.info("Finished: core")
         return status
 
@@ -655,11 +655,11 @@ class Action:
                     except Exception as e:  # pragma: no cover
                         self.logger.error("Unable to get logs for "+str(container.name)+" because: "+str(e))
             status = (True, log_entries)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("logs failed with error: "+str(e))
             status = (False, e)
 
-        self.logger.info("Status of logs: "+str(status))
+        self.logger.info("Status of logs: "+str(status[0]))
         self.logger.info("Finished: logs")
         return status
 
@@ -718,9 +718,9 @@ class Action:
                         self.logger.error("unable to grab information about tool: "+str(tool)+" because: "+str(e))
                         pass
             status = (True, items)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("inventory failed with error: "+str(e))
             status = (False, e)
-        self.logger.info("Status of inventory: "+str(status))
+        self.logger.info("Status of inventory: "+str(status[0]))
         self.logger.info("Finished: inventory")
         return status

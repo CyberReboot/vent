@@ -39,7 +39,7 @@ class Plugin:
             # set to new repo path
             os.chdir(self.path)
             status = (True, cwd)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("apply_path failed with error: "+str(e))
             status = (False, e)
         self.logger.info("Status of apply_path: "+str(status))
@@ -90,7 +90,7 @@ class Plugin:
                 self.logger.error("unable to change directory to: "+str(cwd)+"because: "+str(e))
 
             status = (True, branches)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("repo_branches failed with error: "+str(e))
             status = (False, e)
 
@@ -135,7 +135,7 @@ class Plugin:
                 self.logger.error("unable to change directory to: "+str(cwd)+" because: "+str(e))
 
             status = (True, commits)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("repo_commits failed with error: "+str(e))
             status = (False, e)
 
@@ -174,7 +174,7 @@ class Plugin:
                 self.logger.error("unable to change directory to: "+str(cwd)+" because: "+str(e))
 
             status = (True, tools)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("repo_tools failed with error: "+str(e))
             status = (False, e)
 
@@ -244,7 +244,7 @@ class Plugin:
             response = subprocess.check_output(shlex.split("git clone --recursive " + repo + " ."), stderr=subprocess.STDOUT, close_fds=True)
 
             status = (True, cwd)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("clone failed with error: "+str(e))
             status = (False, e)
         self.logger.info("Status of clone: "+str(status))
@@ -358,7 +358,7 @@ class Plugin:
         self.logger.info("current working directory: "+str(cwd))
         try:
             os.chdir(match_path)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("unable to change to directory: "+str(match_path)+" because: "+str(e))
             return None
         template = self._build_image(template, match_path, image_name, section)
