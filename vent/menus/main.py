@@ -18,6 +18,7 @@ from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
+from vent.menus.add import AddForm
 
 
 class MainForm(npyscreen.FormBaseNewWithMenus):
@@ -178,6 +179,17 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
         if action == 'add':
+            forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
+            for form in forms:
+                try:
+                    self.parentApp.removeForm('ADD')
+                except Exception as e:  # pragma: no cover
+                    pass
+            self.parentApp.addForm("ADD",
+                                   AddForm,
+                                   color="CONTROL",
+                                   name="Add\t\t\t\t\t\t\t\tPress ^T to toggle " + \
+                                        "help\t\t\t\t\t\tPress ^Q to quit")
             self.parentApp.change_form('ADD')
         elif action == "build":
             self.parentApp.change_form('BUILDTOOLS')
