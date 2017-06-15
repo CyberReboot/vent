@@ -112,7 +112,7 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'p', 'u', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'u', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'r', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'r', TAB, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'r', ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'r', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'r', CTRL_T])
 
