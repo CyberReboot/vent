@@ -188,8 +188,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.parentApp.addForm("ADD",
                                    AddForm,
                                    color="CONTROL",
-                                   name="Add\t\t\t\t\t\t\t\tPress ^T to toggle " + \
-                                        "help\t\t\t\t\t\tPress ^Q to quit")
+                                   name="Add\t\t\t\t\t\t\t\tPress ^T to toggle"
+                                        " help\t\t\t\t\t\tPress ^Q to quit")
             self.parentApp.change_form('ADD')
         elif action == "build":
             self.parentApp.change_form('BUILDTOOLS')
