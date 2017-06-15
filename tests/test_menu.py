@@ -58,20 +58,31 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_Q])
-    run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'r', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 's', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 's', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'p', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'p', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'p', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'p', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'u', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'u', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'u', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'u', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'u', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'u', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'c', 'r', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_Q])
+    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_T])
 
     # go through the plugins menus
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, RIGHT, ENTER, SPACE, TAB,
