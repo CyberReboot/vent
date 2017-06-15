@@ -47,51 +47,73 @@ def test_menu():
 
     # go through the core tools menus
     run_menu([ENTER, CTRL_X, 'c', 'i', ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'b', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'b', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'c', ENTER])
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'r', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 's', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 's', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'p', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'p', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'p', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'p', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'u', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'u', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'u', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'u', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'u', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'u', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'c', 'r', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_Q])
+    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_T])
 
     # go through the plugins menus
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, RIGHT, ENTER, SPACE, TAB,
               TAB, TAB, TAB, TAB, TAB, TAB, ENTER, SPACE, TAB, SPACE, TAB,
               SPACE, TAB, TAB, SPACE, TAB, TAB, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'a', CTRL_T, CTRL_T, TAB, TAB, TAB, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'b', RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'b', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'b', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'b', TAB, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'b', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'b', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'p', 'c', RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'c', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'c', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'c', TAB, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'i', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'p', 's', RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 's', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'p', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'p', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'p', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'p', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'p', 'u', RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'u', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'u', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'u', TAB, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'u', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'u', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'p', 'r', RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'r', ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'r', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'r', TAB, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 'r', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'r', CTRL_T])
 
     # go through the logs menus
