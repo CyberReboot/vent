@@ -47,12 +47,16 @@ def test_menu():
 
     # go through the core tools menus
     run_menu([ENTER, CTRL_X, 'c', 'i', ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'b', RIGHT, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'b', ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'c', ENTER])
+              RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
