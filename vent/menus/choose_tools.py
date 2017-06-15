@@ -9,7 +9,7 @@ from vent.helpers.meta import Tools
 class ChooseToolsForm(npyscreen.ActionForm):
     """ For picking which tools to add """
     tools_tc = {}
-    triggered = 0
+
     def repo_tools(self, branch):
         """ Set the appropriate repo dir and get the tools available of it """
         tools = []
@@ -22,30 +22,25 @@ class ChooseToolsForm(npyscreen.ActionForm):
         return tools
 
     def create(self):
+        """ Update with current tools for each branch at the version chosen """
         self.add_handlers({"^Q": self.quit})
         self.add(npyscreen.TitleText, name='Select which tools to add from each branch selected:', editable=False)
 
-    def while_waiting(self):
-        """ Update with current tools for each branch at the version chosen """
-        if not self.triggered:
-            i = 4
-            for branch in self.parentApp.repo_value['versions']:
-                self.tools_tc[branch] = {}
-                title_text = self.add(npyscreen.TitleText, name='Branch: '+branch, editable=False, rely=i, relx=5, max_width=25)
-                title_text.display()
-                tools = self.repo_tools(branch)
+        i = 4
+        for branch in self.parentApp.repo_value['versions']:
+            self.tools_tc[branch] = {}
+            title_text = self.add(npyscreen.TitleText, name='Branch: '+branch, editable=False, rely=i, relx=5, max_width=25)
+            tools = self.repo_tools(branch)
+            i += 1
+            for tool in tools:
+                value = True
+                if tool.startswith("/dev"):
+                    value = False
+                if tool == "":
+                    tool = "/"
+                self.tools_tc[branch][tool] = self.add(npyscreen.CheckBox, name=tool, value=value, relx=10)
                 i += 1
-                for tool in tools:
-                    value = True
-                    if tool.startswith("/dev"):
-                        value = False
-                    if tool == "":
-                        tool = "/"
-                    self.tools_tc[branch][tool] = self.add(npyscreen.CheckBox, name=tool, value=value, relx=10)
-                    self.tools_tc[branch][tool].display()
-                    i += 1
-                i += 2
-            self.triggered = 1
+            i += 2
 
     def quit(self, *args, **kwargs):
         self.parentApp.switchForm("MAIN")

@@ -3,6 +3,8 @@ import threading
 import time
 
 from vent.api.plugins import Plugin
+from vent.menus.add_options import AddOptionsForm
+
 
 class AddForm(npyscreen.ActionForm):
     """ For for adding a new repo """
@@ -40,6 +42,7 @@ class AddForm(npyscreen.ActionForm):
                                        'user':self.user.value,
                                        'pw':self.pw.value})
         popup(thr, 'Please wait, adding repository...')
+        self.parentApp.addForm("ADDOPTIONS", AddOptionsForm, name="Set options for new plugin\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.parentApp.change_form('ADDOPTIONS')
 
     def on_cancel(self):
