@@ -14,7 +14,9 @@ def Version():
     """ Get Vent version """
     version = ''
     try:
-        version = "v"+pkg_resources.require("vent")[0].version
+        version = pkg_resources.require("vent")[0].version
+        if not version.startswith('v'):
+            version = 'v' + version
     except Exception as e:  # pragma: no cover
         pass
     return version

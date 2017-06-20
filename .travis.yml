@@ -1,4 +1,6 @@
 sudo: required
+dist: trusty
+group: edge
 
 services:
   - docker
@@ -15,4 +17,4 @@ script:
   - bash <(curl -s https://codecov.io/bash)
 before_install:
   - sudo apt-get update
-  - sudo apt-get install docker-engine
+  - sudo apt-get install docker-ce
