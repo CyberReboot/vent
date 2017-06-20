@@ -10,13 +10,14 @@ class BuildToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.build,
-                  'present_tense':'building images',
+                  'present_tense': 'building images',
                   'past_tense': 'Built images',
                   'type': 'images',
                   'action': 'build (only plugin tools are shown)',
                   'cores': False}
         logger = Logger(__name__)
         ToolForm.__init__(self, action, logger)
+
 
 class BuildCoreToolsForm(ToolForm):
     """ Build Core Tools form for the Vent CLI """
@@ -25,7 +26,7 @@ class BuildCoreToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.build,
-                  'present_tense':'building core images',
+                  'present_tense': 'building core images',
                   'past_tense': 'Built core images',
                   'type': 'images',
                   'action': 'build (only core tools are shown)',

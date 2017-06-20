@@ -38,8 +38,8 @@ class ToolForm(npyscreen.ActionForm):
             inventory = response[1]
             for repo in inventory['repos']:
                 if (self.action['cores'] or
-                     (not self.action['cores'] and
-                      repo != 'https://github.com/cyberreboot/vent')):
+                   (not self.action['cores'] and
+                   repo != 'https://github.com/cyberreboot/vent')):
                     repo_name = repo.rsplit("/", 2)[1:]
                     self.tools_tc[repo] = {}
                     title_text = self.add(npyscreen.TitleText,
@@ -49,7 +49,7 @@ class ToolForm(npyscreen.ActionForm):
                     for tool in inventory['tools']:
                         r_name = tool[0].split(":")
                         if (repo_name[0] == r_name[0] and
-                            repo_name[1] == r_name[1]):
+                           repo_name[1] == r_name[1]):
                             core = False
                             for item in inventory['core']:
                                 if tool[0] == item[0]:
@@ -58,7 +58,7 @@ class ToolForm(npyscreen.ActionForm):
                             if t == "":
                                 t = "/"
                             if ((core and self.action['cores']) or
-                                (not core and not self.action['cores'])):
+                               (not core and not self.action['cores'])):
                                 t += ":" + ":".join(tool[0].split(":")[-2:])
                                 self.tools_tc[repo][t] = self.add(npyscreen.CheckBox, name=t, value=True, relx=10)
                                 i += 1
@@ -112,9 +112,9 @@ class ToolForm(npyscreen.ActionForm):
                     t = t.split(":")
                     thr = threading.Thread(target=self.action['action_object'],
                                            args=(),
-                                           kwargs={'name':t[0],
-                                                   'branch':t[1],
-                                                   'version':t[2]})
+                                           kwargs={'name': t[0],
+                                                   'branch': t[1],
+                                                   'version': t[2]})
                     popup(originals, self.action['type'], thr,
                           'Please wait, ' + self.action['present_tense'] + '...')
         npyscreen.notify_confirm('Done ' + self.action['present_tense'] + '.',
