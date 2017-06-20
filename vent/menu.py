@@ -8,21 +8,23 @@ import sys
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
 from vent.menus.core_inventory import CoreInventoryForm
-from vent.menus.clean_core_tools import CleanCoreToolsForm
-from vent.menus.clean_tools import CleanToolsForm
 from vent.menus.help import HelpForm
 from vent.menus.inventory import InventoryForm
 from vent.menus.logs import LogsForm
 from vent.menus.main import MainForm
-from vent.menus.remove_core_tools import RemoveCoreToolsForm
-from vent.menus.remove_tools import RemoveToolsForm
 from vent.menus.services import ServicesForm
 from vent.menus.start_core_tools import StartCoreToolsForm
 from vent.menus.start_tools import StartToolsForm
-from vent.menus.stop_core_tools import StopCoreToolsForm
-from vent.menus.stop_tools import StopToolsForm
 from vent.menus.tools.tool_forms import BuildCoreToolsForm
 from vent.menus.tools.tool_forms import BuildToolsForm
+from vent.menus.tools.tool_forms import CleanCoreToolsForm
+from vent.menus.tools.tool_forms import CleanToolsForm
+from vent.menus.tools.tool_forms import RemoveCoreToolsForm
+from vent.menus.tools.tool_forms import RemoveToolsForm
+from vent.menus.tools.tool_forms import StopCoreToolsForm
+from vent.menus.tools.tool_forms import StopToolsForm
+from vent.menus.tools.tool_forms import UpdateCoreToolsForm
+from vent.menus.tools.tool_forms import UpdateToolsForm
 from vent.menus.tutorials.tutorial_forms import TutorialAddingFilesForm
 from vent.menus.tutorials.tutorial_forms import TutorialAddingPluginsForm
 from vent.menus.tutorials.tutorial_forms import TutorialBackgroundForm
@@ -32,8 +34,6 @@ from vent.menus.tutorials.tutorial_forms import TutorialIntroForm
 from vent.menus.tutorials.tutorial_forms import TutorialSettingUpServicesForm
 from vent.menus.tutorials.tutorial_forms import TutorialStartingCoresForm
 from vent.menus.tutorials.tutorial_forms import TutorialTerminologyForm
-from vent.menus.update_core_tools import UpdateCoreToolsForm
-from vent.menus.update_tools import UpdateToolsForm
 
 
 class VentApp(npyscreen.NPSAppManaged):
