@@ -15,7 +15,7 @@ class ToolForm(npyscreen.ActionForm):
         self.tools_tc = {}
         super(ToolForm, self).__init__(*args, **keywords)
 
-    def switch(self):
+    def switch(self, *args, **kwargs):
         """ Wrapper that switches to MAIN form """
         self.parentApp.change_form("MAIN")
 
