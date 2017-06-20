@@ -13,6 +13,7 @@ from vent.helpers.meta import Core
 from vent.helpers.meta import Images
 from vent.helpers.meta import Version
 
+
 class Action:
     """ Handle actions in menu """
     def __init__(self, **kargs):
@@ -710,7 +711,9 @@ class Action:
                                     status = container[1]
                             items[choice].append((tool['section'], tool['name'], status))
                         elif choice == 'enabled':
-                            items[choice].append((tool['section'], tool['name'], tool['enabled']))
+                            items[choice].append((tool['section'],
+                                                  tool['name'],
+                                                  tool['enabled']))
                         else:
                             # unknown choice
                             pass
