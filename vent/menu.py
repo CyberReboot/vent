@@ -7,8 +7,6 @@ import sys
 
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
-from vent.menus.build_core_tools import BuildCoreToolsForm
-from vent.menus.build_tools import BuildToolsForm
 from vent.menus.core_inventory import CoreInventoryForm
 from vent.menus.clean_core_tools import CleanCoreToolsForm
 from vent.menus.clean_tools import CleanToolsForm
@@ -23,8 +21,8 @@ from vent.menus.start_core_tools import StartCoreToolsForm
 from vent.menus.start_tools import StartToolsForm
 from vent.menus.stop_core_tools import StopCoreToolsForm
 from vent.menus.stop_tools import StopToolsForm
-from vent.menus.update_core_tools import UpdateCoreToolsForm
-from vent.menus.update_tools import UpdateToolsForm
+from vent.menus.tools.tool_forms import BuildCoreToolsForm
+from vent.menus.tools.tool_forms import BuildToolsForm
 from vent.menus.tutorials.tutorial_forms import TutorialAddingFilesForm
 from vent.menus.tutorials.tutorial_forms import TutorialAddingPluginsForm
 from vent.menus.tutorials.tutorial_forms import TutorialBackgroundForm
@@ -34,6 +32,8 @@ from vent.menus.tutorials.tutorial_forms import TutorialIntroForm
 from vent.menus.tutorials.tutorial_forms import TutorialSettingUpServicesForm
 from vent.menus.tutorials.tutorial_forms import TutorialStartingCoresForm
 from vent.menus.tutorials.tutorial_forms import TutorialTerminologyForm
+from vent.menus.update_core_tools import UpdateCoreToolsForm
+from vent.menus.update_tools import UpdateToolsForm
 
 
 class VentApp(npyscreen.NPSAppManaged):
