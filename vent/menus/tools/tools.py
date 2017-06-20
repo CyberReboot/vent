@@ -2,37 +2,54 @@ import npyscreen
 import threading
 import time
 
-from vent.api.actions import Action
-from vent.api.plugins import Plugin
-from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
-from vent.helpers.meta import Tools
 
-class BuildToolsForm(npyscreen.ActionForm):
-    """ For picking which tools to build """
-    api_action = Action()
-    tools_tc = {}
-    logger = Logger(__name__)
+
+class ToolForm(npyscreen.ActionForm):
+    """ Tools form for teh Vent CLI """
+    def __init__(self, action=None, logger=None, *args, **keywords):
+        """ Initialize tool form objects """
+        self.action = action
+        self.logger = logger
+        self.tools_tc = {}
+        super(ToolForm, self).__init__(*args, **keywords)
+
+    def switch(self):
+        """ Wrapper that switches to MAIN form """
+        self.parentApp.change_form("MAIN")
+
+    def quit(self, *args, **kwargs):
+        """ Overridden to switch back to MAIN form """
+        self.parentApp.switchForm('MAIN')
 
     def create(self):
-        """ Update with current tools that are not cores """
-        self.add_handlers({"^T": self.change_forms, "^Q": self.quit})
-        self.add(npyscreen.TitleText, name='Select which tools to build (only plugin tools are shown):', editable=False)
+        """ Update with current tools """
+        self.add_handlers({"^T": self.switch, "^Q": self.quit})
+        self.add(npyscreen.TitleText,
+                 name='Select which tools to ' + self.action['action'] + ':',
+                 editable=False)
 
         i = 4
-        response = self.api_action.inventory(choices=['repos', 'tools', 'core'])
+        response = self.action['api_action'].inventory(choices=['core',
+                                                                'repos',
+                                                                'tools'])
         if response[0]:
             inventory = response[1]
             for repo in inventory['repos']:
-                if repo != 'https://github.com/cyberreboot/vent':
+                if (self.action['cores'] or
+                     (not self.action['cores'] and
+                      repo != 'https://github.com/cyberreboot/vent')):
                     repo_name = repo.rsplit("/", 2)[1:]
                     self.tools_tc[repo] = {}
-                    title_text = self.add(npyscreen.TitleText, name='Plugin: '+repo, editable=False, rely=i, relx=5)
+                    title_text = self.add(npyscreen.TitleText,
+                                          name='Plugin: '+repo,
+                                          editable=False, rely=i, relx=5)
                     i += 1
                     for tool in inventory['tools']:
                         r_name = tool[0].split(":")
-                        if repo_name[0] == r_name[0] and repo_name[1] == r_name[1]:
+                        if (repo_name[0] == r_name[0] and
+                            repo_name[1] == r_name[1]):
                             core = False
                             for item in inventory['core']:
                                 if tool[0] == item[0]:
@@ -40,19 +57,17 @@ class BuildToolsForm(npyscreen.ActionForm):
                             t = tool[1]
                             if t == "":
                                 t = "/"
-                            if not core:
+                            if ((core and self.action['cores']) or
+                                (not core and not self.action['cores'])):
                                 t += ":" + ":".join(tool[0].split(":")[-2:])
                                 self.tools_tc[repo][t] = self.add(npyscreen.CheckBox, name=t, value=True, relx=10)
                                 i += 1
                     i += 2
         return
 
-    def quit(self, *args, **kwargs):
-        self.parentApp.switchForm("MAIN")
-
     def on_ok(self):
         """
-        Take the tool selections and build them
+        Take the tool selections and perform the provided action on them
         """
         def diff(first, second):
             """
@@ -82,7 +97,10 @@ class BuildToolsForm(npyscreen.ActionForm):
                 time.sleep(1)
             return
 
-        original_images = Images()
+        if self.action['type'] == 'images':
+            originals = Images()
+        else:
+            originals = Containers()
 
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
@@ -92,22 +110,17 @@ class BuildToolsForm(npyscreen.ActionForm):
                     if t.startswith('/:'):
                         t = " "+t[1:]
                     t = t.split(":")
-                    thr = threading.Thread(target=self.api_action.build, args=(),
+                    thr = threading.Thread(target=self.action['action_object'],
+                                           args=(),
                                            kwargs={'name':t[0],
                                                    'branch':t[1],
                                                    'version':t[2]})
-                    popup(original_images, "images", thr,
-                          'Please wait, building images...')
-        npyscreen.notify_confirm("Done building images.",
-                                 title='Built images')
+                    popup(originals, self.action['type'], thr,
+                          'Please wait, ' + self.action['present_tense'] + '...')
+        npyscreen.notify_confirm('Done ' + self.action['present_tense'] + '.',
+                                 title=self.action['past_tense'])
         self.quit()
 
     def on_cancel(self):
+        """ When user clicks cancel, will return to MAIN """
         self.quit()
-
-    def change_forms(self, *args, **keywords):
-        """ Toggles back and forth between main """
-        change_to = "MAIN"
-
-        # Tell the VentApp object to change forms.
-        self.parentApp.change_form(change_to)
