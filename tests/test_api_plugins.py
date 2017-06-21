@@ -38,7 +38,13 @@ def test_get_tool_matches():
 
 def test_add_image():
     """ Test the add_image function """
-    Plugin.add_image('foo')
+    instance = Plugin()
+    status = instance.add_image('quay/redis', registry='quay.io')
+    assert type(status) == tuple
+    assert status[0] == True
+    status = instance.add_image('alpine', tag='latest')
+    assert type(status) == tuple
+    assert status[0] == True
 
 def test_builder():
     """ Test the builder function """
