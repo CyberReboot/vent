@@ -336,6 +336,42 @@ class Plugin:
         return status
 
     @ErrorHandler
+    def add_image(self, image, tag=None, registry=None):
+        """
+        Add an image with a tag from a Docker registry, defaults to the Docker
+        Hub if not specified
+        """
+        status = (True, None)
+        try:
+            if not tag:
+                tag = "latest"
+            full_image = image + ":" + tag
+            if registry:
+                full_image = registry + "/" + full_image
+            image = self.d_client.images.pull(full_image)
+
+            # !! TODO
+            # section name: ?
+            # image_id: image.attrs['Id']
+            # image_name: image.attrs['RepoTags']
+            # last_updated: image.attrs['Created']
+            # name: split out tag and registry if there
+            # namespace: split out org from image name otherwise set to empty
+            # enabled: yes
+            # version: split out tag
+            # link_name: ?
+            # built: yes
+            # groups: ?
+            # blank out the values for the remaining fields
+            # type: registry
+
+            # TODO add label to the image
+
+        except Exception as e:  # pragma: no cover
+            status = (False, str(e))
+        return status
+
+    @ErrorHandler
     def builder(self, template, match_path, image_name, section, build=None,
               branch=None, version=None):
         """ Build tools """
@@ -489,6 +525,7 @@ class Plugin:
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
                 template.set_option(section, "image_name", image_name)
+                template.set_option(section, "type", "repository")
                 vent_template = Template(template=os.path.join(match_path, 'vent.template'))
                 vent_status, response = vent_template.option("info", "name")
                 if vent_status:
@@ -624,15 +661,6 @@ class Plugin:
         except Exception as e:  # pragma: no cover
             response = (False, os.getcwd()+str(e))
         return response
-
-    @staticmethod
-    def add_image(image, tag="latest"):
-        """
-        Add an image from a registry/hub rather than building from a
-        repository
-        """
-        # !! TODO
-        return
 
     def constraint_options(self, constraint_dict, options):
         """ Return result of constraints and options against a template """
