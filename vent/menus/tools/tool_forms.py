@@ -112,7 +112,7 @@ class StartToolsForm(BaseForm):
                        'present_tense': 'starting containers',
                        'past_tense': 'Started containers',
                        'type': 'containers',
-                       'action': 'start (only enabled, built, non-running plugin tools are shown)',
+                       'action': 'start (only enabled and built core tools are shown)',
                        'cores': False}
         BaseForm.__init__(self, action_dict, names)
 
@@ -126,7 +126,7 @@ class StartCoreToolsForm(BaseForm):
                        'present_tense': 'starting core containers',
                        'past_tense': 'Started core containers',
                        'type': 'containers',
-                       'action': 'start (only enabled, built, non-running plugin tools are shown)',
+                       'action': 'start (only enabled and built plugin tools are shown)',
                        'cores': True}
         BaseForm.__init__(self, action_dict, names)
 
