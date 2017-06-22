@@ -10,6 +10,7 @@ class BuildToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.build,
+                  'action_name': 'build',
                   'present_tense': 'building images',
                   'past_tense': 'Built images',
                   'type': 'images',
@@ -26,6 +27,7 @@ class BuildCoreToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.build,
+                  'action_name': 'build',
                   'present_tense': 'building core images',
                   'past_tense': 'Built core images',
                   'type': 'images',
@@ -42,6 +44,7 @@ class CleanToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.clean,
+                  'action_name': 'clean',
                   'present_tense': 'cleaning containers',
                   'past_tense': 'Cleaned containers',
                   'type': 'containers',
@@ -58,6 +61,7 @@ class CleanCoreToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.clean,
+                  'action_name': 'clean',
                   'present_tense': 'cleaning core containers',
                   'past_tense': 'Cleaned core containers',
                   'type': 'containers',
@@ -74,6 +78,7 @@ class RemoveToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.remove,
+                  'action_name': 'remove',
                   'present_tense': 'removing containers',
                   'past_tense': 'Removed containers',
                   'type': 'containers',
@@ -90,10 +95,47 @@ class RemoveCoreToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.remove,
+                  'action_name': 'remove',
                   'present_tense': 'removing core containers',
                   'past_tense': 'Removed core containers',
                   'type': 'containers',
                   'action': 'remove (only core tools are shown)',
+                  'cores': True}
+        logger = Logger(__name__)
+        ToolForm.__init__(self, action, logger)
+
+
+class StartToolsForm(ToolForm):
+    """ Start Tools form for the Vent CLI """
+    def __init__(self, *args, **keywords):
+        """ Initialize starting tools form objects """
+        api_action = Action()
+        action = {'api_action': api_action,
+                  'action_object': api_action.start,
+                  'action_object2': api_action.prep_start,
+                  'action_name': 'start',
+                  'present_tense': 'starting containers',
+                  'past_tense': 'Started containers',
+                  'type': 'containers',
+                  'action': 'start (only enabled, built, non-running plugin tools are shown)',
+                  'cores': False}
+        logger = Logger(__name__)
+        ToolForm.__init__(self, action, logger)
+
+
+class StartCoreToolsForm(ToolForm):
+    """ Start Core Tools form for the Vent CLI """
+    def __init__(self, *args, **keywords):
+        """ Initialize starting core tools form objects """
+        api_action = Action()
+        action = {'api_action': api_action,
+                  'action_object': api_action.start,
+                  'action_object2': api_action.prep_start,
+                  'action_name': 'start',
+                  'present_tense': 'starting core containers',
+                  'past_tense': 'Started core containers',
+                  'type': 'containers',
+                  'action': 'start (only enabled, built, non-running plugin tools are shown)',
                   'cores': True}
         logger = Logger(__name__)
         ToolForm.__init__(self, action, logger)
@@ -106,6 +148,7 @@ class StopToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.stop,
+                  'action_name': 'stop',
                   'present_tense': 'stopping containers',
                   'past_tense': 'Stopped containers',
                   'type': 'containers',
@@ -122,6 +165,7 @@ class StopCoreToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.stop,
+                  'action_name': 'stop',
                   'present_tense': 'stopping core containers',
                   'past_tense': 'Stopped core containers',
                   'type': 'containers',
@@ -138,6 +182,7 @@ class UpdateToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.update,
+                  'action_name': 'update',
                   'present_tense': 'updating containers',
                   'past_tense': 'Updated containers',
                   'type': 'containers',
@@ -154,6 +199,7 @@ class UpdateCoreToolsForm(ToolForm):
         api_action = Action()
         action = {'api_action': api_action,
                   'action_object': api_action.update,
+                  'action_name': 'update',
                   'present_tense': 'updating core containers',
                   'past_tense': 'Updated core containers',
                   'type': 'containers',
