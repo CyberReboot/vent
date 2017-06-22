@@ -222,8 +222,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             forms = ['INVENTORY']
             form_args = {'color': "STANDOUT",
                          'name': "Inventory of tools\t\t\t\t\t\t\t\tPress ^T"
-                                 " to toggle main"
-                        }
+                                 " to toggle main"}
         elif action == "update":
             form = UpdateToolsForm
             forms = ['UPDATETOOLS']
@@ -253,8 +252,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             forms = ['COREINVENTORY']
             form_args = {'color': "STANDOUT",
                          'name': "Inventory of core tools\t\t\t\t\t\t\t\tPress"
-                                 " ^T to toggle main"
-                        }
+                                 " ^T to toggle main"}
         elif action == 'update_core':
             form = UpdateCoreToolsForm
             forms = ['UPDATECORETOOLS']
