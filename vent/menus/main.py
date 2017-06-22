@@ -21,6 +21,8 @@ from vent.helpers.meta import Uptime
 from vent.menus.add import AddForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
+from vent.menus.logs import LogsForm
+from vent.menus.services import ServicesForm
 from vent.menus.tool_forms import BuildCoreToolsForm
 from vent.menus.tool_forms import BuildToolsForm
 from vent.menus.tool_forms import CleanCoreToolsForm
@@ -47,10 +49,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
-        # clean up forms with dynamic data
-        self.parentApp.remove_forms()
-        self.parentApp.add_forms()
-
         # give a little extra time for file descriptors to close
         time.sleep(0.1)
 
@@ -231,6 +229,16 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form = RemoveToolsForm
             forms = ['REMOVETOOLS']
             form_args['name'] = "Remove tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == 'logs':
+            form = LogsForm
+            forms = ['LOGS']
+            form_args = {'color': "STANDOUT",
+                         'name': "Logs\t\t\t\t\t\t\t\tPress ^T to toggle main"}
+        elif action == 'services':
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "Services\t\t\t\t\t\t\t\tPress ^T to toggle main"}
         elif action == 'build_core':
             form = BuildCoreToolsForm
             forms = ['BUILDCORETOOLS']
@@ -261,9 +269,22 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form = RemoveCoreToolsForm
             forms = ['REMOVECORETOOLS']
             form_args['name'] = "Remove core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == 'services_core':
+            # TODO update with servicescoreform
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "Core services\t\t\t\t\t\t\t\tPress ^T to toggle main"}
         try:
             self.remove_forms(forms)
-            self.add_form(form, forms[0], form_args)
+            thr = threading.Thread(target=self.add_form, args=(),
+                                   kwargs={'form': form,
+                                           'form_name': forms[0],
+                                           'form_args': form_args})
+            thr.start()
+            while thr.is_alive():
+                npyscreen.notify('Please wait, loading form...', title='Loading')
+                time.sleep(1)
         except Exception as e:  # pragma: no cover
             pass
         return
@@ -462,16 +483,16 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # Log Menu Items
         self.m4 = self.add_menu(name="Logs", shortcut="l")
-        self.m4.addItem(text='Get container logs', arguments=[],
-                        onSelect=self.logs_form)
+        self.m4.addItem(text='Get container logs', arguments=['logs'],
+                        onSelect=self.perform_action)
 
         # Services Menu Items
         self.m5 = self.add_menu(name="Services Running", shortcut='s')
-        self.m5.addItem(text='Core Services', onSelect=self.services_form,
-                        arguments=['core'], shortcut='c')
-        self.m5.addItem(text='Plugin Services (To be implemented...)',
-                        onSelect=self.services_form,
-                        arguments=['plugins'], shortcut='p')
+        self.m5.addItem(text='Core Services', onSelect=self.perform_action,
+                        arguments=['services_core'], shortcut='c')
+        self.m5.addItem(text='Plugin Services',
+                        onSelect=self.perform_action,
+                        arguments=['services'], shortcut='p')
 
         # System Commands Menu Items
         self.m6 = self.add_menu(name="System Commands")
@@ -507,18 +528,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.s5.addItem(text="Setting up Services",
                         onSelect=self.switch_tutorial,
                         arguments=['setting_up_services'], shortcut='s')
-
-    def services_form(self, service_type):
-        """ Change to the services form for core or plugins """
-        # TODO break out services and add services from plugins
-        if service_type == 'core':
-            self.parentApp.change_form("SERVICES")
-        elif service_type == 'plugins':
-            self.parentApp.change_form("SERVICES")
-
-    def logs_form(self, *args, **keywords):
-        """ Toggles to logs """
-        self.parentApp.change_form("LOGS")
 
     def help_form(self, *args, **keywords):
         """ Toggles to help """

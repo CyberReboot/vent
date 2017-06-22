@@ -1,8 +1,7 @@
 import npyscreen
-import os
-import sys
 
 from vent.api.actions import Action
+
 
 class LogsForm(npyscreen.FormBaseNew):
     """ Logs form for the Vent CLI """
