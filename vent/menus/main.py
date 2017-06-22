@@ -288,7 +288,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                            wrap=True)
             self.exit()
 
-        self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
+        self.add_handlers({"^T": self.help_form, "^Q": self.exit})
 
         #######################
         # MAIN SCREEN WIDGETS #
@@ -453,11 +453,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.parentApp.change_form("SERVICES")
 
     def logs_form(self, *args, **keywords):
+        """ Toggles to logs """
         self.parentApp.change_form("LOGS")
 
-    def change_forms(self, *args, **keywords):
-        """ Toggles back and forth between help """
-        change_to = "HELP"
-
-        # Tell the VentApp object to change forms.
-        self.parentApp.change_form(change_to)
+    def help_form(self, *args, **keywords):
+        """ Toggles to help """
+        self.parentApp.change_form("HELP")

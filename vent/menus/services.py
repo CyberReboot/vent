@@ -26,17 +26,11 @@ class ServicesForm(npyscreen.FormBaseNew):
                                           value=value[:-2])
                     title_text.display()
 
+    def quit(self, *args, **kwargs):
+        """ Overridden to switch back to MAIN form """
+        self.parentApp.switchForm('MAIN')
+
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms,"^Q": self.exit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.services_tft = self.add(npyscreen.TitleFixedText, name='No services running.', value="")
-
-    def exit(self, *args, **keywords):
-        self.parentApp.switchForm("MAIN")
-
-    def change_forms(self, *args, **keywords):
-        """ Toggles back to main """
-        change_to = "MAIN"
-
-        # Tell the VentApp object to change forms.
-        self.parentApp.change_form(change_to)
