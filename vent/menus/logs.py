@@ -14,7 +14,7 @@ class LogsForm(npyscreen.FormBaseNew):
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.TitleFixedText, name='Logs:', value='')
         self.logs_mle = self.add(npyscreen.Pager,
-                                      values=['Checking for container logs, please wait...'])
+                                 values=['Checking for container logs, please wait...'])
         self.action = Action()
         response = self.action.logs()
         if response[0]:

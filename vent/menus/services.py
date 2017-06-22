@@ -12,8 +12,10 @@ class ServicesForm(npyscreen.FormBaseNew):
     def create(self):
         """ Override method for creating FormBaseNew form """
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.services_tft = self.add(npyscreen.TitleFixedText, name='No services running.', value="")
         services = Services()
         if services:
+            self.services_tft.hidden = True
             for service in services:
                 value = ""
                 for val in service[1]:
