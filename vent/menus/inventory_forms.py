@@ -19,7 +19,7 @@ class InventoryToolsForm(BaseInventoryForm):
     def __init__(self, *args, **keywords):
         """ Initialize inventory tools form objects """
         action_name = 'inventory'
-        action_dict = {'title': 'asdfInventory of tools:',
+        action_dict = {'title': 'Inventory of tools:',
                        'name': 'inventory',
                        'cores': False}
         BaseInventoryForm.__init__(self,

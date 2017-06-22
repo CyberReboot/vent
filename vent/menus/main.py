@@ -19,6 +19,22 @@ from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 from vent.menus.add import AddForm
+from vent.menus.inventory_forms import InventoryCoreToolsForm
+from vent.menus.inventory_forms import InventoryToolsForm
+from vent.menus.logs import LogsForm
+from vent.menus.services import ServicesForm
+from vent.menus.tool_forms import BuildCoreToolsForm
+from vent.menus.tool_forms import BuildToolsForm
+from vent.menus.tool_forms import CleanCoreToolsForm
+from vent.menus.tool_forms import CleanToolsForm
+from vent.menus.tool_forms import RemoveCoreToolsForm
+from vent.menus.tool_forms import RemoveToolsForm
+from vent.menus.tool_forms import StartCoreToolsForm
+from vent.menus.tool_forms import StartToolsForm
+from vent.menus.tool_forms import StopCoreToolsForm
+from vent.menus.tool_forms import StopToolsForm
+from vent.menus.tool_forms import UpdateCoreToolsForm
+from vent.menus.tool_forms import UpdateToolsForm
 
 
 class MainForm(npyscreen.FormBaseNewWithMenus):
@@ -33,10 +49,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
-        # clean up forms with dynamic data
-        self.parentApp.remove_forms()
-        self.parentApp.add_forms()
-
         # give a little extra time for file descriptors to close
         time.sleep(0.1)
 
@@ -160,53 +172,126 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                   'Please wait, installing core containers...')
             notify_confirm("Done installing core containers.",
                            title='Installed core containers')
-        elif action == 'build':
-            self.parentApp.change_form('BUILDCORETOOLS')
-        elif action == 'start':
-            self.parentApp.change_form('STARTCORETOOLS')
-        elif action == 'stop':
-            self.parentApp.change_form('STOPCORETOOLS')
-        elif action == 'clean':
-            self.parentApp.change_form('CLEANCORETOOLS')
-        elif action == "inventory":
-            self.parentApp.change_form('COREINVENTORY')
-        elif action == 'update':
-            self.parentApp.change_form('UPDATECORETOOLS')
-        elif action == 'remove':
-            self.parentApp.change_form('REMOVECORETOOLS')
+        return
+
+    def add_form(self, form, form_name, form_args):
+        """ Add new form and switch to it """
+        self.parentApp.addForm(form_name,
+                               form,
+                               **form_args)
+        self.parentApp.change_form(form_name)
+        return
+
+    def remove_forms(self, form_names):
+        """ Remove all forms supplied """
+        for form in form_names:
+            try:
+                self.parentApp.removeForm(form)
+            except Exception as e:  # pragma: no cover
+                pass
         return
 
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
+        forms = []
+        form_args = {'color': 'CONTROL'}
         if action == 'add':
+            form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
-            for form in forms:
-                try:
-                    self.parentApp.removeForm('ADD')
-                except Exception as e:  # pragma: no cover
-                    pass
-            self.parentApp.addForm("ADD",
-                                   AddForm,
-                                   color="CONTROL",
-                                   name="Add\t\t\t\t\t\t\t\tPress ^T to toggle"
-                                        " help\t\t\t\t\t\tPress ^Q to quit")
-            self.parentApp.change_form('ADD')
+            form_args['name'] = "Add plugins\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit"
         elif action == "build":
-            self.parentApp.change_form('BUILDTOOLS')
+            form = BuildToolsForm
+            forms = ['BUILDTOOLS']
+            form_args['name'] = "Build tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
         elif action == 'start':
-            self.parentApp.change_form('STARTTOOLS')
+            form = StartToolsForm
+            forms = ['STARTTOOLS']
+            form_args['name'] = "Start tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
         elif action == 'stop':
-            self.parentApp.change_form('STOPTOOLS')
+            form = StopToolsForm
+            forms = ['STOPTOOLS']
+            form_args['name'] = "Stop tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
         elif action == 'clean':
-            self.parentApp.change_form('CLEANTOOLS')
+            form = CleanToolsForm
+            forms = ['CLEANTOOLS']
+            form_args['name'] = "Clean tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
         elif action == "inventory":
-            self.parentApp.change_form('INVENTORY')
+            form = InventoryToolsForm
+            forms = ['INVENTORY']
+            form_args = {'color': "STANDOUT",
+                         'name': "Inventory of tools\t\t\t\t\t\t\t\tPress ^T"
+                                 " to toggle main"}
         elif action == "update":
-            self.parentApp.change_form('UPDATETOOLS')
+            form = UpdateToolsForm
+            forms = ['UPDATETOOLS']
+            form_args['name'] = "Update tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
         elif action == "remove":
-            self.parentApp.change_form('REMOVETOOLS')
-        # tutorial forms
-        elif action == "background":
+            form = RemoveToolsForm
+            forms = ['REMOVETOOLS']
+            form_args['name'] = "Remove tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == 'logs':
+            form = LogsForm
+            forms = ['LOGS']
+            form_args = {'color': "STANDOUT",
+                         'name': "Logs\t\t\t\t\t\t\t\tPress ^T to toggle main"}
+        elif action == 'services':
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "Services\t\t\t\t\t\t\t\tPress ^T to toggle main"}
+        elif action == 'build_core':
+            form = BuildCoreToolsForm
+            forms = ['BUILDCORETOOLS']
+            form_args['name'] = "Build core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == 'start_core':
+            form = StartCoreToolsForm
+            forms = ['STARTCORETOOLS']
+            form_args['name'] = "Start core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == 'stop_core':
+            form = StopCoreToolsForm
+            forms = ['STOPCORETOOLS']
+            form_args['name'] = "Stop core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == 'clean_core':
+            form = CleanCoreToolsForm
+            forms = ['CLEANCORETOOLS']
+            form_args['name'] = "Clean core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == "inventory_core":
+            form = InventoryCoreToolsForm
+            forms = ['COREINVENTORY']
+            form_args = {'color': "STANDOUT",
+                         'name': "Inventory of core tools\t\t\t\t\t\t\t\tPress"
+                                 " ^T to toggle main"}
+        elif action == 'update_core':
+            form = UpdateCoreToolsForm
+            forms = ['UPDATECORETOOLS']
+            form_args['name'] = "Update core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == 'remove_core':
+            form = RemoveCoreToolsForm
+            forms = ['REMOVECORETOOLS']
+            form_args['name'] = "Remove core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+        elif action == 'services_core':
+            # TODO update with servicescoreform
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "Core services\t\t\t\t\t\t\t\tPress ^T to toggle main"}
+        try:
+            self.remove_forms(forms)
+            thr = threading.Thread(target=self.add_form, args=(),
+                                   kwargs={'form': form,
+                                           'form_name': forms[0],
+                                           'form_args': form_args})
+            thr.start()
+            while thr.is_alive():
+                npyscreen.notify('Please wait, loading form...', title='Loading')
+                time.sleep(1)
+        except Exception as e:  # pragma: no cover
+            pass
+        return
+
+    def switch_tutorial(self, action):
+        """ Tutorial forms """
+        if action == "background":
             self.parentApp.change_form('TUTORIALBACKGROUND')
         elif action == "terminology":
             self.parentApp.change_form('TUTORIALTERMINOLOGY')
@@ -348,26 +433,26 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         onSelect=self.core_tools,
                         arguments=['install'], shortcut='i')
         self.m2.addItem(text='Build core tools',
-                        onSelect=self.core_tools,
-                        arguments=['build'], shortcut='b')
+                        onSelect=self.perform_action,
+                        arguments=['build_core'], shortcut='b')
         self.m2.addItem(text='Clean core tools',
-                        onSelect=self.core_tools,
-                        arguments=['clean'], shortcut='c')
+                        onSelect=self.perform_action,
+                        arguments=['clean_core'], shortcut='c')
         self.m2.addItem(text='Inventory of core tools',
-                        onSelect=self.core_tools,
-                        arguments=['inventory'], shortcut='v')
+                        onSelect=self.perform_action,
+                        arguments=['inventory_core'], shortcut='v')
         self.m2.addItem(text='Remove core tools',
-                        onSelect=self.core_tools,
-                        arguments=['remove'], shortcut='r')
+                        onSelect=self.perform_action,
+                        arguments=['remove_core'], shortcut='r')
         self.m2.addItem(text='Start core tools',
-                        onSelect=self.core_tools,
-                        arguments=['start'], shortcut='s')
+                        onSelect=self.perform_action,
+                        arguments=['start_core'], shortcut='s')
         self.m2.addItem(text='Stop core tools',
-                        onSelect=self.core_tools,
-                        arguments=['stop'], shortcut='p')
+                        onSelect=self.perform_action,
+                        arguments=['stop_core'], shortcut='p')
         self.m2.addItem(text='Update core tools',
-                        onSelect=self.core_tools,
-                        arguments=['update'], shortcut='u')
+                        onSelect=self.perform_action,
+                        arguments=['update_core'], shortcut='u')
 
         # Plugin Menu Items
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
@@ -398,16 +483,16 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # Log Menu Items
         self.m4 = self.add_menu(name="Logs", shortcut="l")
-        self.m4.addItem(text='Get container logs', arguments=[],
-                        onSelect=self.logs_form)
+        self.m4.addItem(text='Get container logs', arguments=['logs'],
+                        onSelect=self.perform_action)
 
         # Services Menu Items
         self.m5 = self.add_menu(name="Services Running", shortcut='s')
-        self.m5.addItem(text='Core Services', onSelect=self.services_form,
-                        arguments=['core'], shortcut='c')
-        self.m5.addItem(text='Plugin Services (To be implemented...)',
-                        onSelect=self.services_form,
-                        arguments=['plugins'], shortcut='p')
+        self.m5.addItem(text='Core Services', onSelect=self.perform_action,
+                        arguments=['services_core'], shortcut='c')
+        self.m5.addItem(text='Plugin Services',
+                        onSelect=self.perform_action,
+                        arguments=['services'], shortcut='p')
 
         # System Commands Menu Items
         self.m6 = self.add_menu(name="System Commands")
@@ -420,41 +505,29 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # Tutorial Menu Items
         self.m7 = self.add_menu(name="Tutorials", shortcut="t")
         self.s1 = self.m7.addNewSubmenu(name="About Vent", shortcut='v')
-        self.s1.addItem(text="Background", onSelect=self.perform_action,
+        self.s1.addItem(text="Background", onSelect=self.switch_tutorial,
                         arguments=['background'], shortcut='b')
-        self.s1.addItem(text="Terminology", onSelect=self.perform_action,
+        self.s1.addItem(text="Terminology", onSelect=self.switch_tutorial,
                         arguments=['terminology'], shortcut='t')
-        self.s1.addItem(text="Getting Setup", onSelect=self.perform_action,
+        self.s1.addItem(text="Getting Setup", onSelect=self.switch_tutorial,
                         arguments=['setup'], shortcut='s')
         self.s2 = self.m7.addNewSubmenu(name="Working with Cores",
                                         shortcut='c')
-        self.s2.addItem(text="Building Cores", onSelect=self.perform_action,
+        self.s2.addItem(text="Building Cores", onSelect=self.switch_tutorial,
                         arguments=['building_cores'], shortcut='b')
-        self.s2.addItem(text="Starting Cores", onSelect=self.perform_action,
+        self.s2.addItem(text="Starting Cores", onSelect=self.switch_tutorial,
                         arguments=['starting_cores'], shortcut='c')
         self.s3 = self.m7.addNewSubmenu(name="Working with Plugins",
                                         shortcut='p')
-        self.s3.addItem(text="Adding Plugins", onSelect=self.perform_action,
+        self.s3.addItem(text="Adding Plugins", onSelect=self.switch_tutorial,
                         arguments=['adding_plugins'], shortcut='a')
         self.s4 = self.m7.addNewSubmenu(name="Files", shortcut='f')
-        self.s4.addItem(text="Adding Files", onSelect=self.perform_action,
+        self.s4.addItem(text="Adding Files", onSelect=self.switch_tutorial,
                         arguments=['adding_files'], shortcut='a')
         self.s5 = self.m7.addNewSubmenu(name="Services", shortcut='s')
         self.s5.addItem(text="Setting up Services",
-                        onSelect=self.perform_action,
+                        onSelect=self.switch_tutorial,
                         arguments=['setting_up_services'], shortcut='s')
-
-    def services_form(self, service_type):
-        """ Change to the services form for core or plugins """
-        # TODO break out services and add services from plugins
-        if service_type == 'core':
-            self.parentApp.change_form("SERVICES")
-        elif service_type == 'plugins':
-            self.parentApp.change_form("SERVICES")
-
-    def logs_form(self, *args, **keywords):
-        """ Toggles to logs """
-        self.parentApp.change_form("LOGS")
 
     def help_form(self, *args, **keywords):
         """ Toggles to help """
