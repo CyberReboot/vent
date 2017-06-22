@@ -143,7 +143,7 @@ class ToolForm(npyscreen.ActionForm):
                         if status[0]:
                             tool_dict.update(status[1])
                     else:
-                        thr = Thread(target=self.action['action_object'],
+                        thr = Thread(target=self.action['action_object1'],
                                      args=(),
                                      kwargs={'name': t[0],
                                              'branch': t[1],
@@ -151,7 +151,7 @@ class ToolForm(npyscreen.ActionForm):
                         popup(originals, self.action['type'], thr,
                               'Please wait, ' + self.action['present_tense'] + '...')
         if self.action['action_name'] == 'start':
-            thr = Thread(target=self.action['action_object'],
+            thr = Thread(target=self.action['action_object1'],
                          args=(),
                          kwargs={'tool_dict': tool_dict})
             popup(originals, self.action['type'], thr,
