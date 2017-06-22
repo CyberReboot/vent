@@ -1,6 +1,6 @@
 from vent.api.actions import Action
 from vent.helpers.logs import Logger
-from vent.menus.tools.tools import ToolForm
+from vent.menus.tools import ToolForm
 
 
 class BaseForm(ToolForm):
@@ -16,7 +16,7 @@ class BaseForm(ToolForm):
                 action['action_object'+str(i)] = getattr(api_action, name)
                 i += 1
         logger = Logger(name[0])
-        ToolForm.__init__(self, action, logger)
+        ToolForm.__init__(self, action, logger, *args, **keywords)
 
 
 class BuildToolsForm(BaseForm):
@@ -30,7 +30,7 @@ class BuildToolsForm(BaseForm):
                        'type': 'images',
                        'action': 'build (only plugin tools are shown)',
                        'cores': False}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class BuildCoreToolsForm(BaseForm):
@@ -44,7 +44,7 @@ class BuildCoreToolsForm(BaseForm):
                        'type': 'images',
                        'action': 'build (only core tools are shown)',
                        'cores': True}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class CleanToolsForm(BaseForm):
@@ -58,7 +58,7 @@ class CleanToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'clean (only plugin tools are shown)',
                        'cores': False}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class CleanCoreToolsForm(BaseForm):
@@ -72,7 +72,7 @@ class CleanCoreToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'clean (only core tools are shown)',
                        'cores': True}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class RemoveToolsForm(BaseForm):
@@ -86,7 +86,7 @@ class RemoveToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'remove (only plugin tools are shown)',
                        'cores': False}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class RemoveCoreToolsForm(BaseForm):
@@ -100,7 +100,7 @@ class RemoveCoreToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'remove (only core tools are shown)',
                        'cores': True}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class StartToolsForm(BaseForm):
@@ -114,7 +114,7 @@ class StartToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'start (only enabled and built core tools are shown)',
                        'cores': False}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class StartCoreToolsForm(BaseForm):
@@ -128,7 +128,7 @@ class StartCoreToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'start (only enabled and built plugin tools are shown)',
                        'cores': True}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class StopToolsForm(BaseForm):
@@ -142,7 +142,7 @@ class StopToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'stop (only plugin tools are shown)',
                        'cores': False}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class StopCoreToolsForm(BaseForm):
@@ -156,7 +156,7 @@ class StopCoreToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'stop (only core tools are shown)',
                        'cores': True}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class UpdateToolsForm(BaseForm):
@@ -170,7 +170,7 @@ class UpdateToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'update (only plugin tools are shown)',
                        'cores': False}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
 
 
 class UpdateCoreToolsForm(BaseForm):
@@ -184,4 +184,4 @@ class UpdateCoreToolsForm(BaseForm):
                        'type': 'containers',
                        'action': 'update (only core tools are shown)',
                        'cores': True}
-        BaseForm.__init__(self, action_dict, names)
+        BaseForm.__init__(self, action_dict, names, *args, **keywords)
