@@ -5,7 +5,6 @@ setup(
     version='v0.4.1.dev',
     packages=['vent', 'vent.core', 'vent.core.file-drop',
               'vent.core.rq-worker', 'vent.core.rq-dashboard', 'vent.menus',
-              'vent.menus.tools', 'vent.menus.tutorials',
               'vent.core.rmq-es-connector', 'vent.helpers', 'vent.api'],
     install_requires=['docker', 'npyscreen'],
     scripts=['bin/vent'],

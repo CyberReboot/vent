@@ -2,38 +2,36 @@
 # -*- coding: utf-8 -*-
 
 import npyscreen
-import os
-import sys
 
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
-from vent.menus.core_inventory import CoreInventoryForm
 from vent.menus.help import HelpForm
-from vent.menus.inventory import InventoryForm
+from vent.menus.inventory_forms import InventoryCoreToolsForm
+from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
 from vent.menus.main import MainForm
 from vent.menus.services import ServicesForm
-from vent.menus.tools.tool_forms import BuildCoreToolsForm
-from vent.menus.tools.tool_forms import BuildToolsForm
-from vent.menus.tools.tool_forms import CleanCoreToolsForm
-from vent.menus.tools.tool_forms import CleanToolsForm
-from vent.menus.tools.tool_forms import RemoveCoreToolsForm
-from vent.menus.tools.tool_forms import RemoveToolsForm
-from vent.menus.tools.tool_forms import StartCoreToolsForm
-from vent.menus.tools.tool_forms import StartToolsForm
-from vent.menus.tools.tool_forms import StopCoreToolsForm
-from vent.menus.tools.tool_forms import StopToolsForm
-from vent.menus.tools.tool_forms import UpdateCoreToolsForm
-from vent.menus.tools.tool_forms import UpdateToolsForm
-from vent.menus.tutorials.tutorial_forms import TutorialAddingFilesForm
-from vent.menus.tutorials.tutorial_forms import TutorialAddingPluginsForm
-from vent.menus.tutorials.tutorial_forms import TutorialBackgroundForm
-from vent.menus.tutorials.tutorial_forms import TutorialBuildingCoresForm
-from vent.menus.tutorials.tutorial_forms import TutorialGettingSetupForm
-from vent.menus.tutorials.tutorial_forms import TutorialIntroForm
-from vent.menus.tutorials.tutorial_forms import TutorialSettingUpServicesForm
-from vent.menus.tutorials.tutorial_forms import TutorialStartingCoresForm
-from vent.menus.tutorials.tutorial_forms import TutorialTerminologyForm
+from vent.menus.tool_forms import BuildCoreToolsForm
+from vent.menus.tool_forms import BuildToolsForm
+from vent.menus.tool_forms import CleanCoreToolsForm
+from vent.menus.tool_forms import CleanToolsForm
+from vent.menus.tool_forms import RemoveCoreToolsForm
+from vent.menus.tool_forms import RemoveToolsForm
+from vent.menus.tool_forms import StartCoreToolsForm
+from vent.menus.tool_forms import StartToolsForm
+from vent.menus.tool_forms import StopCoreToolsForm
+from vent.menus.tool_forms import StopToolsForm
+from vent.menus.tool_forms import UpdateCoreToolsForm
+from vent.menus.tool_forms import UpdateToolsForm
+from vent.menus.tutorial_forms import TutorialAddingFilesForm
+from vent.menus.tutorial_forms import TutorialAddingPluginsForm
+from vent.menus.tutorial_forms import TutorialBackgroundForm
+from vent.menus.tutorial_forms import TutorialBuildingCoresForm
+from vent.menus.tutorial_forms import TutorialGettingSetupForm
+from vent.menus.tutorial_forms import TutorialIntroForm
+from vent.menus.tutorial_forms import TutorialSettingUpServicesForm
+from vent.menus.tutorial_forms import TutorialStartingCoresForm
+from vent.menus.tutorial_forms import TutorialTerminologyForm
 
 
 class VentApp(npyscreen.NPSAppManaged):
@@ -49,8 +47,8 @@ class VentApp(npyscreen.NPSAppManaged):
 
     def add_forms(self):
         """ Add in forms that will have dynamic data """
-        self.addForm("COREINVENTORY", CoreInventoryForm, name="Inventory of core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
-        self.addForm("INVENTORY", InventoryForm, name="Inventory of plugins\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
+        self.addForm("COREINVENTORY", InventoryCoreToolsForm, name="Inventory of core tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
+        self.addForm("INVENTORY", InventoryToolsForm, name="Inventory of plugins\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("SERVICES", ServicesForm, name="Services\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="STANDOUT")
         self.addForm("BUILDTOOLS", BuildToolsForm, name="Build tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
         self.addForm("STARTTOOLS", StartToolsForm, name="Start tools\t\t\t\t\t\t\t\tPress ^T to toggle main\t\t\t\t\t\tPress ^Q to quit", color="CONTROL")
