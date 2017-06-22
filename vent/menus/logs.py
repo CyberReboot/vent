@@ -29,19 +29,13 @@ class LogsForm(npyscreen.FormBaseNew):
                 self.logs_mle.display()
         return
 
+    def quit(self, *args, **kwargs):
+        """ Overridden to switch back to MAIN form """
+        self.parentApp.switchForm('MAIN')
+
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms,"^Q": self.exit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.TitleFixedText, name='Logs:', value='')
         self.logs_mle = self.add(npyscreen.Pager,
                                       values=['Checking for container logs, please wait...'])
-
-    def exit(self, *args, **keywords):
-        self.parentApp.switchForm("MAIN")
-
-    def change_forms(self, *args, **keywords):
-        """ Toggles back to main """
-        change_to = "MAIN"
-
-        # Tell the VentApp object to change forms.
-        self.parentApp.change_form(change_to)

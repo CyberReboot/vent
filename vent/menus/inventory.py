@@ -11,17 +11,13 @@ class InventoryForm(npyscreen.FormBaseNew):
         self.logger = logger
         super(InventoryForm, self).__init__(*args, **keywords)
 
-    def switch(self, *args, **kwargs):
-        """ Wrapper that switches to MAIN form """
-        self.parentApp.change_form("MAIN")
-
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm('MAIN')
 
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.switch,"^Q": self.quit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.TitleFixedText, name=self.action['title'], value='')
         response = self.action['api_action'].inventory(choices=['repos',
                                                                 'core',

@@ -16,17 +16,13 @@ class ToolForm(npyscreen.ActionForm):
         self.tools_tc = {}
         super(ToolForm, self).__init__(*args, **keywords)
 
-    def switch(self, *args, **kwargs):
-        """ Wrapper that switches to MAIN form """
-        self.parentApp.change_form("MAIN")
-
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm('MAIN')
 
     def create(self):
         """ Update with current tools """
-        self.add_handlers({"^T": self.switch, "^Q": self.quit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.TitleText,
                  name='Select which tools to ' + self.action['action'] + ':',
                  editable=False)
