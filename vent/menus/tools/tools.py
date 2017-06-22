@@ -1,6 +1,7 @@
 import npyscreen
-import threading
 import time
+
+from threading import Thread
 
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
@@ -31,9 +32,17 @@ class ToolForm(npyscreen.ActionForm):
                  editable=False)
 
         i = 4
-        response = self.action['api_action'].inventory(choices=['core',
-                                                                'repos',
-                                                                'tools'])
+        if self.action['action_name'] == 'start':
+            response = self.action['api_action'].inventory(choices=['repos',
+                                                                    'tools',
+                                                                    'built',
+                                                                    'enabled',
+                                                                    'running',
+                                                                    'core'])
+        else:
+            response = self.action['api_action'].inventory(choices=['core',
+                                                                    'repos',
+                                                                    'tools'])
         if response[0]:
             inventory = response[1]
             for repo in inventory['repos']:
@@ -51,6 +60,20 @@ class ToolForm(npyscreen.ActionForm):
                         if (repo_name[0] == r_name[0] and
                            repo_name[1] == r_name[1]):
                             core = False
+                            if self.action['action_name'] == 'start':
+                                running = False
+                                built = False
+                                enabled = False
+                                for item in inventory['running']:
+                                    if (tool[0] == item[0] and
+                                       item[2] == 'running'):
+                                        running = True
+                                for item in inventory['built']:
+                                    if tool[0] == item[0] and item[2] == 'yes':
+                                        built = True
+                                for item in inventory['enabled']:
+                                    if tool[0] == item[0] and item[2] == 'yes':
+                                        enabled = True
                             for item in inventory['core']:
                                 if tool[0] == item[0]:
                                     core = True
@@ -59,9 +82,12 @@ class ToolForm(npyscreen.ActionForm):
                                 t = "/"
                             if ((core and self.action['cores']) or
                                (not core and not self.action['cores'])):
-                                t += ":" + ":".join(tool[0].split(":")[-2:])
-                                self.tools_tc[repo][t] = self.add(npyscreen.CheckBox, name=t, value=True, relx=10)
-                                i += 1
+                                if ((self.action['action_name'] == 'start' and
+                                   not running and built and enabled) or
+                                   self.action['action_name'] != 'start'):
+                                    t += ":" + ":".join(tool[0].split(":")[-2:])
+                                    self.tools_tc[repo][t] = self.add(npyscreen.CheckBox, name=t, value=True, relx=10)
+                                    i += 1
                     i += 2
         return
 
@@ -91,8 +117,7 @@ class ToolForm(npyscreen.ActionForm):
                 if info:
                     info_str = ""
                 for entry in info:
-                    # TODO limit length of info_str to fit box
-                    info_str += entry[0]+": "+entry[1]+"\n"
+                    info_str = entry[0] + ": " + entry[1] + "\n" + info_str
                 npyscreen.notify_wait(info_str, title=title)
                 time.sleep(1)
             return
@@ -102,6 +127,7 @@ class ToolForm(npyscreen.ActionForm):
         else:
             originals = Containers()
 
+        tool_dict = {}
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
                 self.logger.info(tool)
@@ -110,13 +136,27 @@ class ToolForm(npyscreen.ActionForm):
                     if t.startswith('/:'):
                         t = " "+t[1:]
                     t = t.split(":")
-                    thr = threading.Thread(target=self.action['action_object'],
-                                           args=(),
-                                           kwargs={'name': t[0],
-                                                   'branch': t[1],
-                                                   'version': t[2]})
-                    popup(originals, self.action['type'], thr,
-                          'Please wait, ' + self.action['present_tense'] + '...')
+                    if self.action['action_name'] == 'start':
+                        status = self.action['action_object2'](name=t[0],
+                                                               branch=t[1],
+                                                               version=t[2])
+                        if status[0]:
+                            tool_dict.update(status[1])
+                    else:
+                        thr = Thread(target=self.action['action_object1'],
+                                     args=(),
+                                     kwargs={'name': t[0],
+                                             'branch': t[1],
+                                             'version': t[2]})
+                        popup(originals, self.action['type'], thr,
+                              'Please wait, ' + self.action['present_tense'] + '...')
+        if self.action['action_name'] == 'start':
+            thr = Thread(target=self.action['action_object1'],
+                         args=(),
+                         kwargs={'tool_dict': tool_dict})
+            popup(originals, self.action['type'], thr,
+                  'Please wait, ' + self.action['present_tense'] + '...')
+
         npyscreen.notify_confirm('Done ' + self.action['present_tense'] + '.',
                                  title=self.action['past_tense'])
         self.quit()

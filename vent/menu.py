@@ -13,14 +13,14 @@ from vent.menus.inventory import InventoryForm
 from vent.menus.logs import LogsForm
 from vent.menus.main import MainForm
 from vent.menus.services import ServicesForm
-from vent.menus.start_core_tools import StartCoreToolsForm
-from vent.menus.start_tools import StartToolsForm
 from vent.menus.tools.tool_forms import BuildCoreToolsForm
 from vent.menus.tools.tool_forms import BuildToolsForm
 from vent.menus.tools.tool_forms import CleanCoreToolsForm
 from vent.menus.tools.tool_forms import CleanToolsForm
 from vent.menus.tools.tool_forms import RemoveCoreToolsForm
 from vent.menus.tools.tool_forms import RemoveToolsForm
+from vent.menus.tools.tool_forms import StartCoreToolsForm
+from vent.menus.tools.tool_forms import StartToolsForm
 from vent.menus.tools.tool_forms import StopCoreToolsForm
 from vent.menus.tools.tool_forms import StopToolsForm
 from vent.menus.tools.tool_forms import UpdateCoreToolsForm
