@@ -124,6 +124,16 @@ class ToolForm(npyscreen.ActionForm):
             originals = Containers()
 
         tool_dict = {}
+        if self.action['action_name'] in ['clean', 'remove', 'stop', 'update']:
+            reconfirmation_str = ""
+            if self.action['cores']:
+                reconfirmation_str = "Are you sure you want to " + self.action['action_name'] + " core containers?"
+            else:
+                reconfirmation_str = "Are you sure you want to " + self.action['action_name'] + " plugin containers?"
+            
+            perform = npyscreen.notify_ok_cancel(reconfirmation_str, title="Confirm command")
+            if not perform:
+                return
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
                 self.logger.info(tool)
