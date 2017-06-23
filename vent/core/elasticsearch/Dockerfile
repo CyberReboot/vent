@@ -1,5 +1,4 @@
-FROM elasticsearch:2-alpine
-RUN plugin install mobz/elasticsearch-head
+FROM blacktop/elasticsearch:latest
 LABEL vent="" \
       vent.name="elasticsearch" \
       vent.groups="core,search"
