@@ -4,6 +4,7 @@ import platform
 
 from vent.api.templates import Template
 
+
 class PathDirs:
     """ Global path directories for vent """
     def __init__(self,
@@ -22,7 +23,9 @@ class PathDirs:
 
     @staticmethod
     def ensure_dir(path):
-        """ Tries to create directory, if fails, checks if path already exists """
+        """
+        Tries to create directory, if fails, checks if path already exists
+        """
         try:
             os.makedirs(path)
         except OSError as e:  # pragma: no cover
@@ -48,7 +51,8 @@ class PathDirs:
     def host_config(self):
         """ Ensure the host configuration file exists """
         if platform.system() == 'Darwin':
-            default_file_dir = os.path.join(os.path.expanduser("~"), "vent_files")
+            default_file_dir = os.path.join(os.path.expanduser("~"),
+                                            "vent_files")
         else:
             default_file_dir = "/tmp/vent_files"
         config = Template(template=os.path.join(self.base_dir, "vent.cfg"))
