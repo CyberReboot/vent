@@ -1,5 +1,6 @@
 import errno
 import os
+import platform
 
 from vent.api.templates import Template
 
@@ -46,7 +47,10 @@ class PathDirs:
 
     def host_config(self):
         """ Ensure the host configuration file exists """
-        default_file_dir = "/tmp/vent_files"
+        if platform.system() == 'Darwin':
+            default_file_dir = os.path.join(os.path.expanduser("~"), "vent_files")
+        else:
+            default_file_dir = "/tmp/vent_files"
         config = Template(template=os.path.join(self.base_dir, "vent.cfg"))
         resp = config.section("main")
         if resp[0]:
