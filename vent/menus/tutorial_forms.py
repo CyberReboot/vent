@@ -1,4 +1,4 @@
-from vent.menus.tutorials.tutorials import TutorialForm
+from vent.menus.tutorials import TutorialForm
 
 
 class TutorialAddingFilesForm(TutorialForm):

@@ -11,14 +11,19 @@ class AddForm(npyscreen.ActionForm):
     def create(self):
         """ Create widgets for AddForm """
         # !! TODO have option for image to pull from a registry with tag
-        self.add_handlers({"^T": self.change_forms, "^Q": self.quit})
+        self.add_handlers({"^T": self.switch, "^Q": self.quit})
         self.repo = self.add(npyscreen.TitleText, name='Repository',
                              value='https://github.com/cyberreboot/vent-plugins')
         self.user = self.add(npyscreen.TitleText, name='Username')
         self.pw = self.add(npyscreen.TitlePassword, name='Password')
         self.repo.when_value_edited()
 
+    def switch(self, *args, **kwargs):
+        """ Wrapper that switches to HELP form """
+        self.parentApp.change_form("HELP")
+
     def quit(self, *args, **kwargs):
+        """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm("MAIN")
 
     def on_ok(self):
@@ -46,11 +51,5 @@ class AddForm(npyscreen.ActionForm):
         self.parentApp.change_form('ADDOPTIONS')
 
     def on_cancel(self):
+        """ When user clicks cancel, will return to MAIN """
         self.quit()
-
-    def change_forms(self, *args, **keywords):
-        """ Toggles back and forth between help """
-        change_to = "HELP"
-
-        # Tell the VentApp object to change forms.
-        self.parentApp.change_form(change_to)
