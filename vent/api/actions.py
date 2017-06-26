@@ -65,7 +65,7 @@ class Action:
                                            tag=tag,
                                            registry=registry,
                                            groups=groups)
-        except Exception as e:
+        except Exception as e:  #pragma: no cover
             self.logger.error("add image failed with error: " + str(e))
             status = (False, e)
         self.logger.info("Status of add image: " + str(status[0]))
