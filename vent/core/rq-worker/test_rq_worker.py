@@ -17,5 +17,6 @@ def test_file_queue():
     images = file_watch.file_queue('/tmp/foo')
     assert images[0] == False
     images = file_watch.file_queue('host_/tmp/foo', template_path=path_dirs.base_dir)
+    assert images[1] == None
     assert images[0] == True
     assert type(images[1]) == list
