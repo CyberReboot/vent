@@ -9,37 +9,40 @@ def file_queue(path, template_path="/vent/"):
     import os
     import time
 
-    d_client = docker.from_env()
-
+    status = (True, None)
     images = []
 
-    status = (True, None)
-    # get the correct path for binding
-    vent_config = ConfigParser.RawConfigParser()
-    vent_config.optionxform=str
-    vent_config.read(template_path+'vent.cfg')
-    if vent_config.has_section('main') and vent_config.has_option('main', 'files'):
-        files = vent_config.get('main', 'files')
-    else:
-        files = '/'
-
     try:
+        d_client = docker.from_env()
+
+        # get the correct path for binding
+        vent_config = ConfigParser.RawConfigParser()
+        vent_config.optionxform=str
+        vent_config.read(template_path+'vent.cfg')
+        if (vent_config.has_section('main') and
+           vent_config.has_option('main', 'files')):
+            files = vent_config.get('main', 'files')
+        else:
+            files = '/'
+
         hostname, path = path.split('_', 1)
         path = path.replace('/files', files, 1)
 
-        # read in configuration of plugins to get the ones that should run against the path.
-        # TODO error checking and catching...
+        # read in configuration of plugins to get the ones that should run
+        # against the path.
         config = ConfigParser.RawConfigParser()
         config.optionxform=str
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         for section in sections:
             t_path = config.get(section, 'path')
-            t_path = template_path+'plugins/' + t_path.split('/plugins/')[1] + "/vent.template"
+            t_path = template_path + 'plugins/' + t_path.split('/plugins/')[1]
+            t_path += "/vent.template"
             t_config = ConfigParser.RawConfigParser()
             t_config.optionxform=str
             t_config.read(t_path)
-            if t_config.has_section('settings') and t_config.has_option('settings', 'ext_types'):
+            if (t_config.has_section('settings') and
+               t_config.has_option('settings', 'ext_types')):
                 ext_types = t_config.get('settings', 'ext_types').split(',')
                 for ext_type in ext_types:
                     if path.endswith(ext_type):
