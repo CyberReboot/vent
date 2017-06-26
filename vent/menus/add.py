@@ -78,7 +78,9 @@ class AddForm(npyscreen.ActionForm):
             until the thread is finished
             """
             thr.start()
-            tool_str = add_type
+            tool_str = 'Cloning repository...'
+            if add_type == 'image':
+                tool_str = 'Pulling image...'
             npyscreen.notify_wait(tool_str, title=title)
             while thr.is_alive():
                 time.sleep(1)
@@ -92,7 +94,8 @@ class AddForm(npyscreen.ActionForm):
                                            'tag': self.tag.value,
                                            'registry': self.registry.value,
                                            'groups': self.groups.value})
-            popup(thr, 'Pulling image...', 'Please wait, adding image...')
+            popup(thr, 'image', 'Please wait, adding image...')
+            npyscreen.notify_confirm('Done adding image.', title='Added image')
             self.quit()
         elif self.image.value:
             npyscreen.notify_confirm("A name needs to be supplied for "
@@ -106,9 +109,7 @@ class AddForm(npyscreen.ActionForm):
                                    kwargs={'repo': self.repo.value,
                                            'user': self.user.value,
                                            'pw': self.pw.value})
-            popup(thr,
-                  'Clonging repository...',
-                  'Please wait, adding repository...')
+            popup(thr, 'repository', 'Please wait, adding repository...')
             self.parentApp.addForm("ADDOPTIONS",
                                    AddOptionsForm,
                                    name="Set options for new plugin"
