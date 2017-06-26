@@ -44,10 +44,32 @@ class Action:
                                      remove_old=remove_old,
                                      disable_old=disable_old)
         except Exception as e:  # pragma: no cover
-            self.logger.error("add failed with error: "+str(e))
+            self.logger.error("add failed with error: " + str(e))
             status = (False, e)
-        self.logger.info("Status of add: "+str(status[0]))
+        self.logger.info("Status of add: " + str(status[0]))
         self.logger.info("Finished: add")
+        return status
+
+    def add_image(self,
+                  image,
+                  link_name,
+                  tag=None,
+                  registry=None,
+                  groups=None):
+        """ Add a new image from a Docker registry """
+        self.logger.info("Starting: add image")
+        status = (True, None)
+        try:
+            status = self.plugin.add_image(image,
+                                           link_name,
+                                           tag=tag,
+                                           registry=registry,
+                                           groups=groups)
+        except Exception as e:
+            self.logger.error("add image failed with error: " + str(e))
+            status = (False, e)
+        self.logger.info("Status of add image: " + str(status[0]))
+        self.logger.info("Finished: add image")
         return status
 
     def remove(self, repo=None, namespace=None, name=None, groups=None,
@@ -65,7 +87,7 @@ class Action:
                                         version=version,
                                         built=built)
         except Exception as e:  # pragma: no cover
-            self.logger.error("remove failed with error: "+str(e))
+            self.logger.error("remove failed with error: " + str(e))
             status = (False, e)
         self.logger.info("Status of remove: " + str(status[0]))
         self.logger.info("Finished: remove")
@@ -674,6 +696,8 @@ class Action:
         self.logger.info("Starting: inventory")
         status = (True, None)
         self.logger.info("choices specified: "+str(choices))
+        if not choices:
+            return (False, "No choices made")
         try:
             # choices: repos, core, tools, images, built, running, enabled
             items = {'repos':[], 'core':[], 'tools':[], 'images':[],
@@ -723,7 +747,7 @@ class Action:
             status = (True, items)
         except Exception as e:  # pragma: no cover
             self.logger.error("inventory failed with error: "+str(e))
-            status = (False, e)
+            status = (False, str(e))
         self.logger.info("Status of inventory: "+str(status[0]))
         self.logger.info("Finished: inventory")
         return status
