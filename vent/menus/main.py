@@ -359,6 +359,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 self.exit()
         elif action == "upgrade":
             # !! TODO
+            # add notify_cancel_ok popup once implemented
             pass
         return
 
