@@ -38,6 +38,8 @@ class InventoryForm(npyscreen.FormBaseNew):
                    repo != "https://github.com/cyberreboot/vent")):
                     value += "\n  Plugin: "+repo+"\n"
                     repo_name = repo.rsplit("/", 2)[1:]
+                    if len(repo_name) == 1:
+                        repo_name = repo.split('/')
                     for tool in inventory['tools']:
                         is_core = False
                         for core in inventory['core']:

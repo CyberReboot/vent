@@ -46,6 +46,8 @@ class ToolForm(npyscreen.ActionForm):
                    (not self.action['cores'] and
                    repo != 'https://github.com/cyberreboot/vent')):
                     repo_name = repo.rsplit("/", 2)[1:]
+                    if len(repo_name) == 1:
+                        repo_name = repo.split('/')
                     self.tools_tc[repo] = {}
                     title_text = self.add(npyscreen.TitleText,
                                           name='Plugin: '+repo,

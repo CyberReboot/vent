@@ -39,10 +39,10 @@ def test_get_tool_matches():
 def test_add_image():
     """ Test the add_image function """
     instance = Plugin()
-    status = instance.add_image('quay/redis', registry='quay.io')
+    status = instance.add_image('quay/redis', 'redis',  registry='quay.io')
     assert type(status) == tuple
     assert status[0] == True
-    status = instance.add_image('alpine', tag='latest')
+    status = instance.add_image('alpine', 'alpine', tag='latest')
     assert type(status) == tuple
     assert status[0] == True
 
