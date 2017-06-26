@@ -227,7 +227,7 @@ class Plugin:
                     self.logger.info("Finished: clone")
                     return status
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("unable to checkout: "+str(path)+" because: "+str(e))
+                    self.logger.error("unable to checkout: "+str(self.path)+" because: "+str(e))
                     status = (False, e)
                     self.logger.info("Exiting clone with status: "+str(status))
                     return status
@@ -336,37 +336,59 @@ class Plugin:
         return status
 
     @ErrorHandler
-    def add_image(self, image, tag=None, registry=None):
+    def add_image(self,
+                  image,
+                  link_name,
+                  tag=None,
+                  registry=None,
+                  groups=None):
         """
         Add an image with a tag from a Docker registry, defaults to the Docker
         Hub if not specified
         """
         status = (True, None)
         try:
+            org = ''
+            name = image
+            if '/' in image:
+                org, name = image.split('/')
+            else:
+                org = "official"
             if not tag:
                 tag = "latest"
-            full_image = image + ":" + tag
-            if registry:
-                full_image = registry + "/" + full_image
+            if not registry:
+                registry = "docker.io"
+            full_image = registry + "/" + image + ":" + tag
             image = self.d_client.images.pull(full_image)
+            section = ':'.join([registry, org, name, '', tag])
+            namespace = org + '/' + name
 
-            # !! TODO
-            # section name: ?
-            # image_id: image.attrs['Id']
-            # image_name: image.attrs['RepoTags']
-            # last_updated: image.attrs['Created']
-            # name: split out tag and registry if there
-            # namespace: split out org from image name otherwise set to empty
-            # enabled: yes
-            # version: split out tag
-            # link_name: ?
-            # built: yes
-            # groups: ?
-            # blank out the values for the remaining fields
-            # type: registry
+            # set template section and options for tool at version and branch
+            template = Template(template=self.manifest)
+            template.add_section(section)
+            template.set_option(section, "name", name)
+            template.set_option(section, "namespace", namespace)
+            template.set_option(section, "path", "")
+            template.set_option(section, "repo", registry + '/' + org)
+            template.set_option(section, "enabled", "yes")
+            template.set_option(section, "branch", "")
+            template.set_option(section, "version", tag)
+            template.set_option(section, "last_updated",
+                                image.attrs['Created'])
+            template.set_option(section, "image_name",
+                                image.attrs['RepoTags'][0])
+            template.set_option(section, "type", "registry")
+            template.set_option(section, "link_name", link_name)
+            template.set_option(section, "commit_id", "")
+            template.set_option(section, "built", "yes")
+            template.set_option(section, "image_id",
+                                image.attrs['Id'].split(':')[1][:12])
+            if groups:
+                template.set_option(section, "groups", groups)
 
-            # TODO add label to the image
-
+            # write out configuration to the manifest file
+            template.write_config()
+            status = (True, "Successfully added " + full_image)
         except Exception as e:  # pragma: no cover
             status = (False, str(e))
         return status
