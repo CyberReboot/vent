@@ -296,6 +296,9 @@ class Action:
                                     self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container.short_id))
                                 except Exception as err:  # pragma: no cover
                                     self.logger.error(str(err))
+                                    # add restart=always for core containers
+                                    if tool_dict[container_tuple[1]]['labels']['vent.groups'].find('core') != -1 and container_tuple[1].find('rmq-es-connector') == -1:
+                                        tool_dict[container_tuple[1]]['restart_policy'] = {"Name":"always"}
                                     container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
                                     self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
                             except Exception as e:  # pragma: no cover
