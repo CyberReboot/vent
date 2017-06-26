@@ -46,6 +46,8 @@ clean:
 	rm -rf build
 	rm -rf plugins
 	rm -rf core
+	find . -name "*.pyc" -type f -delete
+	find . -name "__pycache__" -delete
 	pip uninstall -y vent || true
 
 test: build

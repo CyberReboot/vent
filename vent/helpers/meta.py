@@ -115,6 +115,8 @@ def Images(vent=True):
     """ Get images that are build, by default limit to vent images """
     images = []
 
+    # TODO needs to also check images in the manifest that couldn't have the
+    #      label added
     try:
         d_client = docker.from_env()
         if vent:

@@ -96,8 +96,7 @@ def test_inventory():
     instance = Action()
     status = instance.inventory(choices=[])
     assert type(status) == tuple
-    assert status[0] == True
-    assert type(status[1]) == dict
+    assert status[0] == False
     status = instance.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled', 'foo'])
     assert type(status) == tuple
     assert status[0] == True

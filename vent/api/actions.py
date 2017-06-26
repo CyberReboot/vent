@@ -3,7 +3,8 @@ import datetime
 import json
 import os
 import shlex
-import subprocess
+
+from subprocess import check_output, STDOUT
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
@@ -44,10 +45,32 @@ class Action:
                                      remove_old=remove_old,
                                      disable_old=disable_old)
         except Exception as e:  # pragma: no cover
-            self.logger.error("add failed with error: "+str(e))
+            self.logger.error("add failed with error: " + str(e))
             status = (False, e)
-        self.logger.info("Status of add: "+str(status[0]))
+        self.logger.info("Status of add: " + str(status[0]))
         self.logger.info("Finished: add")
+        return status
+
+    def add_image(self,
+                  image,
+                  link_name,
+                  tag=None,
+                  registry=None,
+                  groups=None):
+        """ Add a new image from a Docker registry """
+        self.logger.info("Starting: add image")
+        status = (True, None)
+        try:
+            status = self.plugin.add_image(image,
+                                           link_name,
+                                           tag=tag,
+                                           registry=registry,
+                                           groups=groups)
+        except Exception as e:  # pragma: no cover
+            self.logger.error("add image failed with error: " + str(e))
+            status = (False, e)
+        self.logger.info("Status of add image: " + str(status[0]))
+        self.logger.info("Finished: add image")
         return status
 
     def remove(self, repo=None, namespace=None, name=None, groups=None,
@@ -65,7 +88,7 @@ class Action:
                                         version=version,
                                         built=built)
         except Exception as e:  # pragma: no cover
-            self.logger.error("remove failed with error: "+str(e))
+            self.logger.error("remove failed with error: " + str(e))
             status = (False, e)
         self.logger.info("Status of remove: " + str(status[0]))
         self.logger.info("Finished: remove")
@@ -104,16 +127,18 @@ class Action:
             sections, template = self.plugin.constraint_options(args, options)
             for section in sections:
                 # initialize needed vars
-                template_path = os.path.join(sections[section]['path'], 'vent.template')
-                container_name = sections[section]['image_name'].replace(':','-')
-                container_name = container_name.replace('/','-')
+                template_path = os.path.join(sections[section]['path'],
+                                             'vent.template')
+                container_name = sections[section]['image_name'].replace(':',
+                                                                         '-')
+                container_name = container_name.replace('/', '-')
                 image_name = sections[section]['image_name']
 
                 # checkout the right version and branch of the repo
                 self.plugin.branch = branch
                 self.plugin.version = version
                 cwd = os.getcwd()
-                self.logger.info("current directory is: "+str(cwd))
+                self.logger.info("current directory is: " + str(cwd))
                 os.chdir(os.path.join(sections[section]['path']))
                 status = self.plugin.checkout()
                 self.logger.info(status)
@@ -131,28 +156,30 @@ class Action:
                 vent_template = Template(template_path)
                 status = vent_template.section('docker')
                 self.logger.info(status)
-                tool_dict[container_name] = {'image':image_name, 'name':container_name}
+                tool_dict[container_name] = {'image': image_name,
+                                             'name': container_name}
                 if status[0]:
                     for option in status[1]:
                         options = option[1]
                         # check for commands to evaluate
                         if '`' in options:
                             cmds = options.split('`')
-                            # TODO this probably needs better error checking to handle mismatched ``
                             if len(cmds) > 2:
                                 i = 1
                                 while i < len(cmds):
                                     try:
-                                        cmds[i] = subprocess.check_output(shlex.split(cmds[i]), stderr=subprocess.STDOUT, close_fds=True).strip()
+                                        cmds[i] = check_output(shlex.split(cmds[i]),
+                                                               stderr=STDOUT,
+                                                               close_fds=True).strip()
                                     except Exception as e:  # pragma: no cover
-                                        self.logger.error("unable to evaluate command specified in vent.template: "+str(e))
+                                        self.logger.error("unable to evaluate command specified in vent.template: " + str(e))
                                     i += 2
                             options = "".join(cmds)
                         # store options set for docker
                         try:
                             tool_dict[container_name][option[0]] = ast.literal_eval(options)
                         except Exception as e:  # pragma: no cover
-                            self.logger.error("unable to store the options set for docker: "+str(e))
+                            self.logger.error("unable to store the options set for docker: " + str(e))
                             tool_dict[container_name][option[0]] = options
 
                 # get temporary name for links, etc.
@@ -164,13 +191,16 @@ class Action:
                 for plugin_section in plugin_sections:
                     status = plugin_config.option(plugin_section, "link_name")
                     self.logger.info(status)
-                    image_status = plugin_config.option(plugin_section, "image_name")
+                    image_status = plugin_config.option(plugin_section,
+                                                        "image_name")
                     self.logger.info(image_status)
                     if status[0] and image_status[0]:
-                        cont_name = image_status[1].replace(':','-')
-                        cont_name = cont_name.replace('/','-')
+                        cont_name = image_status[1].replace(':', '-')
+                        cont_name = cont_name.replace('/', '-')
                         if cont_name not in tool_dict:
-                            tool_dict[cont_name] = {'image':image_status[1], 'name':cont_name, 'start':False}
+                            tool_dict[cont_name] = {'image': image_status[1],
+                                                    'name': cont_name,
+                                                    'start': False}
                         tool_dict[cont_name]['tmp_name'] = status[1]
 
                 # add extra labels
@@ -187,9 +217,15 @@ class Action:
                     tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
                     # send logs to syslog
                     if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
-                        tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'core'}}
+                        tool_dict[container_name]['log_config'] = {'type': 'syslog',
+                                                                   'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                                              'syslog-facility': 'daemon',
+                                                                              'tag': 'core'}}
                     if 'syslog' not in sections[section]['groups']:
-                        tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
+                        tool_dict[container_name]['log_config'] = {'type': 'syslog',
+                                                                   'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                                              'syslog-facility': 'daemon',
+                                                                              'tag': 'plugin'}}
                     # mount necessary directories
                     if 'files' in sections[section]['groups']:
                         if 'volumes' in tool_dict[container_name]:
@@ -199,7 +235,10 @@ class Action:
                         if files[0]:
                             tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
                 else:
-                    tool_dict[container_name]['log_config'] = {'type':'syslog', 'config': {'syslog-address':'tcp://0.0.0.0:514', 'syslog-facility':'daemon', 'tag':'plugin'}}
+                    tool_dict[container_name]['log_config'] = {'type': 'syslog',
+                                                               'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                                          'syslog-facility': 'daemon',
+                                                                          'tag': 'plugin'}}
 
                 # add label for priority
                 status = vent_template.section('settings')
@@ -218,14 +257,16 @@ class Action:
                 if 'links' in tool_dict[container]:
                     for link in tool_dict[container]['links']:
                         for c in tool_dict.keys():
-                            if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == link:
+                            if ('tmp_name' in tool_dict[c] and
+                               tool_dict[c]['tmp_name'] == link):
                                 tool_dict[container]['links'][tool_dict[c]['name']] = tool_dict[container]['links'].pop(link)
                 if 'volumes_from' in tool_dict[container]:
                     tmp_volumes_from = tool_dict[container]['volumes_from']
                     tool_dict[container]['volumes_from'] = []
                     for volumes_from in list(tmp_volumes_from):
                         for c in tool_dict.keys():
-                            if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == volumes_from:
+                            if ('tmp_name' in tool_dict[c] and
+                               tool_dict[c]['tmp_name'] == volumes_from):
                                 tool_dict[container]['volumes_from'].append(tool_dict[c]['name'])
                                 tmp_volumes_from.remove(volumes_from)
                     tool_dict[container]['volumes_from'] += tmp_volumes_from
@@ -233,8 +274,9 @@ class Action:
                     if tool_dict[container]['network_mode'].startswith('container:'):
                         network_c_name = tool_dict[container]['network_mode'].split('container:')[1]
                         for c in tool_dict.keys():
-                            if 'tmp_name' in tool_dict[c] and tool_dict[c]['tmp_name'] == network_c_name:
-                                tool_dict[container]['network_mode'] = 'container:'+tool_dict[c]['name']
+                            if ('tmp_name' in tool_dict[c] and
+                               tool_dict[c]['tmp_name'] == network_c_name):
+                                tool_dict[container]['network_mode'] = 'container:' + tool_dict[c]['name']
 
             # remove tmp_names
             for c in tool_dict.keys():
@@ -263,7 +305,7 @@ class Action:
         self.logger.info("Starting: start")
         status = (True, None)
         try:
-            # check start priorities (priority of groups is alphabetical for now)
+            # check start priorities (priority of groups alphabetical for now)
             group_orders = {}
             groups = []
             containers_remaining = []
@@ -293,35 +335,53 @@ class Action:
                                 try:
                                     container = self.d_client.containers.get(container_tuple[1])
                                     container.start()
-                                    self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container.short_id))
+                                    self.logger.info("started " +
+                                                     str(container_tuple[1]) +
+                                                     " with ID: " +
+                                                     str(container.short_id))
                                 except Exception as err:  # pragma: no cover
                                     self.logger.error(str(err))
+<<<<<<< HEAD
                                     # add restart=always for core containers
                                     if tool_dict[container_tuple[1]]['labels']['vent.groups'].find('core') != -1 and container_tuple[1].find('rmq-es-connector') == -1:
                                         tool_dict[container_tuple[1]]['restart_policy'] = {"Name":"always"}
                                     container_id = self.d_client.containers.run(detach=True, **tool_dict[container_tuple[1]])
                                     self.logger.info("started "+str(container_tuple[1])+" with ID: "+str(container_id))
+=======
+                                    container_id = self.d_client.containers.run(detach=True,
+                                                                                **tool_dict[container_tuple[1]])
+                                    self.logger.info("started " +
+                                                     str(container_tuple[1]) +
+                                                     " with ID: " +
+                                                     str(container_id))
+>>>>>>> 2298d4822500e63db6c249521a3461775af9f9d3
                             except Exception as e:  # pragma: no cover
-                                self.logger.error("failed to start "+str(container_tuple[1])+" because: "+str(e))
+                                self.logger.error("failed to start " +
+                                                  str(container_tuple[1]) +
+                                                  " because: " + str(e))
 
-            # start the rest of the containers that didn't have any priorities set
+            # start the rest of the containers that didn't have any priorities
             for container in containers_remaining:
                 try:
                     try:
                         c = self.d_client.containers.get(container)
                         c.start()
-                        self.logger.info("started "+str(container)+" with ID: "+str(c.short_id))
+                        self.logger.info("started " + str(container) +
+                                         " with ID: " + str(c.short_id))
                     except Exception as err:  # pragma: no cover
                         self.logger.error(str(err))
-                        container_id = self.d_client.containers.run(detach=True, **tool_dict[container])
-                        self.logger.info("started "+str(container)+" with ID: "+str(container_id))
+                        container_id = self.d_client.containers.run(detach=True,
+                                                                    **tool_dict[container])
+                        self.logger.info("started " + str(container) +
+                                         " with ID: " + str(container_id))
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("failed to start "+str(container)+" because: "+str(e))
+                    self.logger.error("failed to start " + str(container) +
+                                      " because: " + str(e))
         except Exception as e:  # pragma: no cover
-            self.logger.error("start failed with error: "+str(e))
+            self.logger.error("start failed with error: " + str(e))
             status = (False, e)
 
-        self.logger.info("Status of start: "+str(status[0]))
+        self.logger.info("Status of start: " + str(status[0]))
         self.logger.info("Finished: start")
         return status
 
@@ -348,15 +408,16 @@ class Action:
             # get existing containers and images and states
             running_containers = Containers()
             built_images = Images()
-            self.logger.info("running docker containers: "+str(running_containers))
-            self.logger.info("built docker images: "+str(built_images))
+            self.logger.info("running docker containers: " +
+                             str(running_containers))
+            self.logger.info("built docker images: " + str(built_images))
 
             # if repo, pull and build
             # if registry image, pull
             for section in sections:
                 try:
                     cwd = os.getcwd()
-                    self.logger.info("current working directory: "+str(cwd))
+                    self.logger.info("current working directory: " + str(cwd))
                     os.chdir(sections[section]['path'])
                     self.plugin.version = version
                     self.plugin.branch = branch
@@ -365,11 +426,18 @@ class Action:
                     try:
                         os.chdir(cwd)
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("unable to change directory: "+str(e))
+                        self.logger.error("unable to change directory: " +
+                                          str(e))
                         pass
-                    template = self.plugin.builder(template, sections[section]['path'], sections[section]['image_name'], section, build=True, branch=branch, version=version)
+                    template = self.plugin.builder(template,
+                                                   sections[section]['path'],
+                                                   sections[section]['image_name'],
+                                                   section,
+                                                   build=True,
+                                                   branch=branch,
+                                                   version=version)
                     self.logger.info(template)
-                    # stop and remove old containers and images if image_id updated
+                    # stop & remove old containers & images if image_id updated
                     # !! TODO
 
                     # start containers if they were running
@@ -377,14 +445,15 @@ class Action:
 
                     # TODO logging
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("unable to update: "+str(section)+" because: "+str(e))
+                    self.logger.error("unable to update: " + str(section) +
+                                      " because: " + str(e))
 
             template.write_config()
         except Exception as e:  # pragma: no cover
-            self.logger.error("update failed with error: "+str(e))
+            self.logger.error("update failed with error: " + str(e))
             status = (False, e)
 
-        self.logger.info("Status of update: "+str(status[0]))
+        self.logger.info("Status of update: " + str(status[0]))
         self.logger.info("Finished: update")
         return status
 
@@ -405,7 +474,8 @@ class Action:
         self.logger.info(args)
         status = (True, None)
         try:
-            # !! TODO need to account for plugin containers that have random names, use labels perhaps
+            # !! TODO need to account for plugin containers that have random
+            #         names, use labels perhaps
             options = ['name',
                        'namespace',
                        'built',
@@ -417,18 +487,20 @@ class Action:
             sections, template = self.plugin.constraint_options(args, options)
             self.logger.info(sections)
             for section in sections:
-                container_name = sections[section]['image_name'].replace(':','-')
-                container_name = container_name.replace('/','-')
+                container_name = sections[section]['image_name'].replace(':',
+                                                                         '-')
+                container_name = container_name.replace('/', '-')
                 try:
                     container = self.d_client.containers.get(container_name)
                     container.stop()
-                    self.logger.info("stopped "+str(container_name))
+                    self.logger.info("stopped " + str(container_name))
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("failed to stop "+str(container_name)+" because: "+str(e))
+                    self.logger.error("failed to stop " + str(container_name) +
+                                      " because: " + str(e))
         except Exception as e:  # pragma: no cover
-            self.logger.error("stop failed with error: "+str(e))
+            self.logger.error("stop failed with error: " + str(e))
             status = (False, e)
-        self.logger.info("Status of stop: "+str(status[0]))
+        self.logger.info("Status of stop: " + str(status[0]))
         self.logger.info("Finished: stop")
         return status
 
@@ -449,7 +521,8 @@ class Action:
         self.logger.info(args)
         status = (True, None)
         try:
-            # !! TODO need to account for plugin containers that have random names, use labels perhaps
+            # !! TODO need to account for plugin containers that have random
+            #         names, use labels perhaps
             options = ['name',
                        'namespace',
                        'built',
@@ -461,18 +534,21 @@ class Action:
             sections, template = self.plugin.constraint_options(args, options)
             self.logger.info(sections)
             for section in sections:
-                container_name = sections[section]['image_name'].replace(':','-')
-                container_name = container_name.replace('/','-')
+                container_name = sections[section]['image_name'].replace(':',
+                                                                         '-')
+                container_name = container_name.replace('/', '-')
                 try:
                     container = self.d_client.containers.get(container_name)
                     container.remove(force=True)
-                    self.logger.info("cleaned "+str(container_name))
+                    self.logger.info("cleaned " + str(container_name))
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("failed to clean "+str(container_name)+" because: "+str(e))
+                    self.logger.error("failed to clean " +
+                                      str(container_name) +
+                                      " because: " + str(e))
         except Exception as e:  # pragma: no cover
-            self.logger.error("clean failed with error: "+str(e))
+            self.logger.error("clean failed with error: " + str(e))
             status = (False, e)
-        self.logger.info("Status of clean: "+ str(status[0]))
+        self.logger.info("Status of clean: " + str(status[0]))
         self.logger.info("Finished: clean")
         return status
 
@@ -493,25 +569,30 @@ class Action:
             sections, template = self.plugin.constraint_options(args, options)
             self.logger.info(sections)
             for section in sections:
-                self.logger.info("Building "+str(section)+" ...")
-                template = self.plugin.builder(template, sections[section]['path'],
+                self.logger.info("Building " + str(section) + " ...")
+                template = self.plugin.builder(template,
+                                               sections[section]['path'],
                                                sections[section]['image_name'],
-                                               section, build=True, branch=branch,
+                                               section,
+                                               build=True,
+                                               branch=branch,
                                                version=version)
             template.write_config()
         except Exception as e:  # pragma: no cover
-            self.logger.error("build failed with error: "+str(e))
+            self.logger.error("build failed with error: " + str(e))
             status = (False, e)
-        self.logger.info("Status of build: "+str(status[0]))
+        self.logger.info("Status of build: " + str(status[0]))
         self.logger.info("Finished: build")
         return status
 
     def cores(self, action, branch="master"):
-        """ Supply action (install, build, start, stop, clean) for core tools """
+        """
+        Supply action (install, build, start, stop, clean) for core tools
+        """
         self.logger.info("Starting: cores")
         status = (True, None)
         try:
-            self.logger.info("action provided: "+str(action))
+            self.logger.info("action provided: " + str(action))
             core = Core(branch=branch)
             if action in ["install", "build"]:
                 tools = []
@@ -520,12 +601,15 @@ class Action:
                 plugins.branch = branch
                 plugins.apply_path('https://github.com/cyberreboot/vent')
                 response = plugins.checkout()
-                self.logger.info("status of plugin checkout "+str(response))
+                self.logger.info("status of plugin checkout " + str(response))
                 matches = plugins._available_tools(groups='core')
                 for match in matches:
                     tools.append((match[0], ''))
-                status = plugins.add('https://github.com/cyberreboot/vent', tools=tools, branch=branch, build=False)
-                self.logger.info("status of plugin add: "+str(status))
+                status = plugins.add('https://github.com/cyberreboot/vent',
+                                     tools=tools,
+                                     branch=branch,
+                                     build=False)
+                self.logger.info("status of plugin add: " + str(status))
                 plugin_config = Template(template=self.plugin.manifest)
                 sections = plugin_config.sections()
                 for tool in core['normal']:
@@ -534,8 +618,14 @@ class Action:
                         orig_branch = plugin_config.option(section, "branch")
                         namespace = plugin_config.option(section, "namespace")
                         version = plugin_config.option(section, "version")
-                        if name[1] == tool and orig_branch[1] == branch and namespace[1] == "cyberreboot/vent" and version[1] == "HEAD":
-                            plugin_config.set_option(section, "image_name", "cyberreboot/vent-"+tool+":"+branch)
+                        if (name[1] == tool and
+                           orig_branch[1] == branch and
+                           namespace[1] == "cyberreboot/vent" and
+                           version[1] == "HEAD"):
+                            plugin_config.set_option(section,
+                                                     "image_name",
+                                                     "cyberreboot/vent-" +
+                                                     tool + ":" + branch)
                 plugin_config.write_config()
             if action == "build":
                 plugin_config = Template(template=self.plugin.manifest)
@@ -543,36 +633,54 @@ class Action:
                 try:
                     for tool in core['normal']:
                         for section in sections[1]:
-                            image_name = plugin_config.option(section, "image_name")
-                            if image_name[1] == "cyberreboot/vent-"+tool+":"+branch:
+                            image_name = plugin_config.option(section,
+                                                              "image_name")
+                            if image_name[1] == "cyberreboot/vent-" + tool + ":" + branch:
                                 try:
                                     # currently can't use docker-py because it
                                     # returns a 404 on pull so no way to valid if it
                                     # worked or didn't
                                     #image_id = self.d_client.images.pull('cyberreboot/vent-'+tool, tag=branch)
                                     image_id = None
-                                    output = subprocess.check_output(shlex.split("docker pull cyberreboot/vent-"+tool+":"+branch), stderr=subprocess.STDOUT)
+                                    output = check_output(shlex.split("docker pull cyberreboot/vent-" + tool + ":" + branch), stderr=STDOUT)
                                     for line in output.split('\n'):
                                         if line.startswith("Digest: sha256:"):
                                             image_id = line.split("Digest: sha256:")[1][:12]
                                     if image_id:
-                                        plugin_config.set_option(section, "built", "yes")
-                                        plugin_config.set_option(section, "image_id", image_id)
-                                        plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                                        status = (True, "Pulled "+tool)
+                                        plugin_config.set_option(section,
+                                                                 "built",
+                                                                 "yes")
+                                        plugin_config.set_option(section,
+                                                                 "image_id",
+                                                                 image_id)
+                                        plugin_config.set_option(section,
+                                                                 "last_updated",
+                                                                 str(datetime.datetime.utcnow()) + " UTC")
+                                        status = (True, "Pulled " + tool)
                                         self.logger.info(str(status))
                                     else:
-                                        plugin_config.set_option(section, "built", "failed")
-                                        plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                                        status = (False, "Failed to pull image "+str(output.split('\n')[-1]))
+                                        plugin_config.set_option(section,
+                                                                 "built",
+                                                                 "failed")
+                                        plugin_config.set_option(section,
+                                                                 "last_updated",
+                                                                 str(datetime.datetime.utcnow()) + " UTC")
+                                        status = (False,
+                                                  "Failed to pull image " +
+                                                  str(output.split('\n')[-1]))
                                         self.logger.error(str(status))
                                 except Exception as e:  # pragma: no cover
-                                    plugin_config.set_option(section, "built", "failed")
-                                    plugin_config.set_option(section, "last_updated", str(datetime.datetime.utcnow()) + " UTC")
-                                    status = (False, "Failed to pull image "+str(e))
+                                    plugin_config.set_option(section,
+                                                             "built",
+                                                             "failed")
+                                    plugin_config.set_option(section,
+                                                             "last_updated",
+                                                             str(datetime.datetime.utcnow()) + " UTC")
+                                    status = (False,
+                                              "Failed to pull image " + str(e))
                                     self.logger.error(str(status))
                 except Exception as e:  # pragma: no cover
-                    status = (False, "Failed to pull images "+str(e))
+                    status = (False, "Failed to pull images " + str(e))
                     self.logger.error(str(status))
                 plugin_config.write_config()
             elif action == "start":
@@ -585,10 +693,10 @@ class Action:
             elif action == "clean":
                 status = self.clean(groups="core", branch=branch)
         except Exception as e:  # pragma: no cover
-            self.logger.info("core failed with error: "+str(e))
+            self.logger.info("core failed with error: " + str(e))
             status = (False, e)
 
-        self.logger.info("Status of core: "+str(status[0]))
+        self.logger.info("Status of core: " + str(status[0]))
         self.logger.info("Finished: core")
         return status
 
@@ -619,20 +727,21 @@ class Action:
         status = (True, None)
         log_entries = {}
         try:
-            containers = self.d_client.containers.list(all=True, filters={'label':'vent'})
-            self.logger.info("containers found: "+str(containers))
+            containers = self.d_client.containers.list(all=True,
+                                                       filters={'label': 'vent'})
+            self.logger.info("containers found: " + str(containers))
             if grep_list:
                 compare_containers = containers
                 if container_type:
                     try:
                         compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
+                        self.logger.error("Unable to limit containers by container_type: " + str(container_type) + " because: " + str(e))
 
                 for expression in grep_list:
                     for container in compare_containers:
                         try:
-                            # 'logs' stores each line which contains the expression
+                            # 'logs' stores each line containing the expression
                             logs  = [log for log in container.logs().split("\n") if expression in log]
                             for log in logs:
                                 if str(container.name) in log_entries:
@@ -640,14 +749,16 @@ class Action:
                                 else:
                                     log_entries[str(container.name)] = [log]
                         except Exception as e:  # pragma: no cover
-                            self.logger.error("Unable to get logs for "+str(container.name)+" because: "+str(e))
+                            self.logger.error("Unable to get logs for " +
+                                              str(container.name) +
+                                              " because: " + str(e))
             else:
                 compare_containers = containers
                 if container_type:
                     try:
                         compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("Unable to limit containers by container_type: "+str(container_type)+" because: "+str(e))
+                        self.logger.error("Unable to limit containers by container_type: " + str(container_type) + " because: " + str(e))
                 for container in compare_containers:
                     try:
                         logs = container.logs().split("\n")
@@ -657,13 +768,15 @@ class Action:
                             else:
                                 log_entries[str(container.name)] = [log]
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("Unable to get logs for "+str(container.name)+" because: "+str(e))
+                        self.logger.error("Unable to get logs for " +
+                                          str(container.name) +
+                                          " because: " + str(e))
             status = (True, log_entries)
         except Exception as e:  # pragma: no cover
-            self.logger.error("logs failed with error: "+str(e))
+            self.logger.error("logs failed with error: " + str(e))
             status = (False, e)
 
-        self.logger.info("Status of logs: "+str(status[0]))
+        self.logger.info("Status of logs: " + str(status[0]))
         self.logger.info("Finished: logs")
         return status
 
@@ -676,43 +789,54 @@ class Action:
         """ Return a dictionary of the inventory items and status """
         self.logger.info("Starting: inventory")
         status = (True, None)
-        self.logger.info("choices specified: "+str(choices))
+        self.logger.info("choices specified: " + str(choices))
+        if not choices:
+            return (False, "No choices made")
         try:
             # choices: repos, core, tools, images, built, running, enabled
-            items = {'repos':[], 'core':[], 'tools':[], 'images':[],
-                     'built':[], 'running':[], 'enabled':[]}
+            items = {'repos': [], 'core': [], 'tools': [], 'images': [],
+                     'built': [], 'running': [], 'enabled': []}
 
             tools = self.plugin.tools()
-            self.logger.info("found tools: "+str(tools))
+            self.logger.info("found tools: " + str(tools))
             for choice in choices:
                 for tool in tools:
                     try:
                         if choice == 'repos':
                             if 'repo' in tool:
-                                if tool['repo'] and tool['repo'] not in items[choice]:
+                                if (tool['repo'] and
+                                   tool['repo'] not in items[choice]):
                                     items[choice].append(tool['repo'])
                         elif choice == 'core':
                             if 'groups' in tool:
                                 if 'core' in tool['groups']:
-                                    items[choice].append((tool['section'], tool['name']))
+                                    items[choice].append((tool['section'],
+                                                          tool['name']))
                         elif choice == 'tools':
-                            items[choice].append((tool['section'], tool['name']))
+                            items[choice].append((tool['section'],
+                                                  tool['name']))
                         elif choice == 'images':
                             # TODO also check against docker
                             images = Images()
-                            items[choice].append((tool['section'], tool['name'], tool['image_name']))
+                            items[choice].append((tool['section'],
+                                                  tool['name'],
+                                                  tool['image_name']))
                         elif choice == 'built':
-                            items[choice].append((tool['section'], tool['name'], tool['built']))
+                            items[choice].append((tool['section'],
+                                                  tool['name'],
+                                                  tool['built']))
                         elif choice == 'running':
                             containers = Containers()
                             status = 'not running'
                             for container in containers:
-                                image_name = tool['image_name'].rsplit(":"+tool['version'], 1)[0]
+                                image_name = tool['image_name'].rsplit(":" + tool['version'], 1)[0]
                                 image_name = image_name.replace(':', '-')
                                 image_name = image_name.replace('/', '-')
                                 if container[0] == image_name:
                                     status = container[1]
-                            items[choice].append((tool['section'], tool['name'], status))
+                            items[choice].append((tool['section'],
+                                                  tool['name'],
+                                                  status))
                         elif choice == 'enabled':
                             items[choice].append((tool['section'],
                                                   tool['name'],
@@ -721,12 +845,12 @@ class Action:
                             # unknown choice
                             pass
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("unable to grab information about tool: "+str(tool)+" because: "+str(e))
-                        pass
+                        self.logger.error("unable to grab info about tool: " +
+                                          str(tool) + " because: " + str(e))
             status = (True, items)
         except Exception as e:  # pragma: no cover
-            self.logger.error("inventory failed with error: "+str(e))
-            status = (False, e)
-        self.logger.info("Status of inventory: "+str(status[0]))
+            self.logger.error("inventory failed with error: " + str(e))
+            status = (False, str(e))
+        self.logger.info("Status of inventory: " + str(status[0]))
         self.logger.info("Finished: inventory")
         return status
