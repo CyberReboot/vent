@@ -9,6 +9,7 @@ from rq import Queue
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
+
 class GZHandler(PatternMatchingEventHandler):
     """
     Handles when an event on the directory being watched happens that matches
@@ -34,8 +35,9 @@ class GZHandler(PatternMatchingEventHandler):
         # let jobs run for up to one day
         try:
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
-            # TODO should directories be treated as bulk paths to send to a plugin?
-            if event.event_type == "created" and event.is_directory == False:
+            # TODO should directories be treated as bulk paths to send to a
+            #      plugin?
+            if event.event_type == "created" and not event.is_directory:
                 # check if the file was already queued and ignore
                 time.sleep(15)
                 exists = False
@@ -43,21 +45,28 @@ class GZHandler(PatternMatchingEventHandler):
                 r = StrictRedis(host=r_host, port=6379, db=0)
                 jobs = r.keys(pattern="rq:job*")
                 for job in jobs:
-                    print(uid+" ***")
+                    print(uid + " ***")
                     description = r.hget(job, 'description')
-                    print(uid+" "+description)
-                    print(uid+" "+description.split("file_watch.file_queue('"+hostname+"_")[1][:-2])
-                    print(uid+" "+event.src_path)
-                    if description.split("file_watch.file_queue('"+hostname+"_")[1][:-2] == event.src_path:
-                        print(uid+" true")
+                    print(uid + " " + description)
+                    print(uid + " " +
+                          description.split("file_watch.file_queue('" +
+                                            hostname + "_")[1][:-2])
+                    print(uid + " " + event.src_path)
+                    if description.split("file_watch.file_queue('" +
+                                         hostname +
+                                         "_")[1][:-2] == event.src_path:
+                        print(uid + " true")
                         exists = True
-                    print(uid+" ***")
+                    print(uid + " ***")
                 if not exists:
-                    # !! TODO this should be a configuration option in the vent.template
-                    print(uid+" let's queue it "+event.src_path)
+                    # !! TODO this should be a configuration option in the
+                    #         vent.template
+                    print(uid + " let's queue it " + event.src_path)
                     # let jobs be queued for up to 30 days
-                    result = q.enqueue('file_watch.file_queue', hostname+"_"+event.src_path, ttl=2592000)
-                print(uid+" end "+event.src_path)
+                    result = q.enqueue('file_watch.file_queue',
+                                       hostname + "_" + event.src_path,
+                                       ttl=2592000)
+                print(uid + " end " + event.src_path)
         except Exception as e:  # pragma: no cover
             print(str(e))
 
