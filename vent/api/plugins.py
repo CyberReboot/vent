@@ -745,8 +745,7 @@ class Plugin:
                             template_groups = template.option("info", "groups")
                             if (template_groups[0] and
                                group in template_groups[1]):
-                                matches.append((root.split(self.path)[1],
-                                                           self.version))
+                                matches.append((root.split(self.path)[1], self.version))
                     except Exception as e:  # pragma: no cover
                         pass
                 else:
