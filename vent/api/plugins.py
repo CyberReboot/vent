@@ -432,8 +432,14 @@ class Plugin:
         return status
 
     @ErrorHandler
-    def builder(self, template, match_path, image_name, section, build=None,
-              branch=None, version=None):
+    def builder(self,
+                template,
+                match_path,
+                image_name,
+                section,
+                build=None,
+                branch=None,
+                version=None):
         """ Build tools """
         self.logger.info("Starting: builder")
         self.logger.info("install path: " + str(match_path))
@@ -441,15 +447,22 @@ class Plugin:
         self.logger.info("build: " + str(build))
         self.logger.info("branch: " + str(branch))
         self.logger.info("version: " + str(version))
+
         if build:
             self.build = build
-        elif not hasattr(self, 'build'): self.build = True
+        elif not hasattr(self, 'build'):
+            self.build = True
+
         if branch:
             self.branch = branch
-        elif not hasattr(self, 'branch'): self.branch = 'master'
+        elif not hasattr(self, 'branch'):
+            self.branch = 'master'
+
         if version:
             self.version = version
-        elif not hasattr(self, 'version'): self.version = 'HEAD'
+        elif not hasattr(self, 'version'):
+            self.version = 'HEAD'
+
         cwd = os.getcwd()
         self.logger.info("current working directory: " + str(cwd))
         try:
@@ -520,8 +533,10 @@ class Plugin:
         self.version
         """
         matches = []
-        if not hasattr(self, 'tools'): self.tools = []
-        if not hasattr(self, 'version'): self.version = 'HEAD'
+        if not hasattr(self, 'tools'):
+            self.tools = []
+        if not hasattr(self, 'version'):
+            self.version = 'HEAD'
         for tool in self.tools:
             match_version = self.version
             if tool[1] != '':
@@ -731,7 +746,8 @@ class Plugin:
         Return list of possible tools in repo for the given version and branch
         """
         matches = []
-        if not hasattr(self, 'path'): return matches
+        if not hasattr(self, 'path'):
+            return matches
         if groups:
             groups = groups.split(",")
         for root, dirnames, filenames in os.walk(self.path):
@@ -754,8 +770,10 @@ class Plugin:
 
     def checkout(self):
         """ Checkout a specific version and branch of a repo """
-        if not hasattr(self, 'branch'): self.branch = 'master'
-        if not hasattr(self, 'version'): self.version = 'HEAD'
+        if not hasattr(self, 'branch'):
+            self.branch = 'master'
+        if not hasattr(self, 'version'):
+            self.version = 'HEAD'
         response = (True, None)
         try:
             status = check_output(shlex.split("git checkout " + self.branch),
@@ -793,15 +811,15 @@ class Plugin:
         exists, sections = template.sections()
         if exists:
             for section in sections:
-                options = {'section':section,
-                           'enabled':None,
-                           'built':None,
-                           'version':None,
-                           'repo':None,
-                           'branch':None,
-                           'name':None,
-                           'groups':None,
-                           'image_name':None}
+                options = {'section': section,
+                           'enabled': None,
+                           'built': None,
+                           'version': None,
+                           'repo': None,
+                           'branch': None,
+                           'name': None,
+                           'groups': None,
+                           'image_name': None}
                 for option in options.keys():
                     exists, value = template.option(section, option)
                     if exists:
