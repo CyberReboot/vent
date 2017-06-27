@@ -1,5 +1,6 @@
 import npyscreen
 
+
 class HelpForm(npyscreen.ActionFormWithMenus):
     """ Help form for the Vent CLI """
     def create(self):

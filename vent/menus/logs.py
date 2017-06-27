@@ -25,8 +25,8 @@ class LogsForm(npyscreen.FormBaseNew):
                 for log in logs[container]:
                     value += "    "+log+"\n"
                 value += "\n"
-            self.logs_mle.values=value.split("\n")
+            self.logs_mle.values = value.split("\n")
         else:
-            self.logs_mle.values=["There was an issue retrieving logs for Vent containers: ",
-                                  str(response[1]),
-                                  "Please see vent.log for more details."]
+            self.logs_mle.values = ["There was an issue retrieving logs for Vent containers: ",
+                                    str(response[1]),
+                                    "Please see vent.log for more details."]

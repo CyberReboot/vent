@@ -10,6 +10,7 @@ from vent.api.plugins import Plugin
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
 
+
 def Version():
     """ Get Vent version """
     version = ''
@@ -21,13 +22,15 @@ def Version():
         pass
     return version
 
+
 def System():
     """ Get system operating system """
     return platform.system()
 
+
 def Docker():
     """ Get Docker setup information """
-    docker_info = {'server':{}, 'env':'', 'type':'', 'os':''}
+    docker_info = {'server': {}, 'env': '', 'type': '', 'os': ''}
 
     # get docker server version
     try:
@@ -54,6 +57,7 @@ def Docker():
         docker_info['type'] = 'native'
     return docker_info
 
+
 def Containers(vent=True, running=True):
     """
     Get containers that are created, by default limit to vent containers that
@@ -64,7 +68,8 @@ def Containers(vent=True, running=True):
     try:
         d_client = docker.from_env()
         if vent:
-            c = d_client.containers.list(all=not running, filters={'label':'vent'})
+            c = d_client.containers.list(all=not running,
+                                         filters={'label': 'vent'})
         else:
             c = d_client.containers.list(all=not running)
         for container in c:
@@ -74,6 +79,7 @@ def Containers(vent=True, running=True):
 
     return containers
 
+
 def Cpu():
     cpu = "Unknown"
     try:
@@ -81,6 +87,7 @@ def Cpu():
     except Exception as e:  # pragma: no cover
         pass
     return cpu
+
 
 def Gpu():
     gpu = ""
@@ -97,7 +104,13 @@ def Gpu():
         #        pass
 
         if len(nvidia_image) > 0:
-            proc = subprocess.Popen(['nvidia-docker run --rm nvidia/cuda:8.0-runtime nvidia-smi -L'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, close_fds=True)
+            cmd = 'nvidia-docker run --rm '
+            cmd += 'nvidia/cuda:8.0-runtime nvidia-smi -L'
+            proc = subprocess.Popen([cmd],
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE,
+                                    shell=True,
+                                    close_fds=True)
             gpus = proc.stdout.read()
             if gpus:
                 for line in gpus.strip().split("\n"):
@@ -111,6 +124,7 @@ def Gpu():
         gpu = "Unknown"
     return gpu
 
+
 def Images(vent=True):
     """ Get images that are build, by default limit to vent images """
     images = []
@@ -120,7 +134,7 @@ def Images(vent=True):
     try:
         d_client = docker.from_env()
         if vent:
-            i = d_client.images.list(filters={'label':'vent'})
+            i = d_client.images.list(filters={'label': 'vent'})
         else:
             i = d_client.images.list()
         for image in i:
@@ -129,6 +143,7 @@ def Images(vent=True):
         pass
 
     return images
+
 
 def Jobs():
     """
@@ -140,7 +155,8 @@ def Jobs():
     # get running jobs
     try:
         d_client = docker.from_env()
-        c = d_client.containers.list(all=False, filters={'label':'vent-plugin'})
+        c = d_client.containers.list(all=False,
+                                     filters={'label': 'vent-plugin'})
         files = []
         for container in c:
             jobs[1] += 1
@@ -154,19 +170,21 @@ def Jobs():
     # get finished jobs
     try:
         d_client = docker.from_env()
-        c = d_client.containers.list(all=True, filters={'label':'vent-plugin'})
+        c = d_client.containers.list(all=True,
+                                     filters={'label': 'vent-plugin'})
         files = []
         for container in c:
             jobs[3] += 1
             if 'file' in container.attrs['Config']['Labels']:
                 if container.attrs['Config']['Labels']['file'] not in files:
                     files.append(container.attrs['Config']['Labels']['file'])
-        jobs[2] = len(files)-jobs[0]
-        jobs[3] = jobs[3]-jobs[1]
+        jobs[2] = len(files) - jobs[0]
+        jobs[3] = jobs[3] - jobs[1]
     except Exception as e:  # pragma: no cover
         pass
 
     return tuple(jobs)
+
 
 def Tools(**kargs):
     """ Get tools that exist in the manifest """
@@ -176,6 +194,7 @@ def Tools(**kargs):
     tools = template.sections()
     return tools[1]
 
+
 def Services(vent=True):
     """
     Get services that have exposed ports, by default limit to vent containers
@@ -184,7 +203,7 @@ def Services(vent=True):
     try:
         d_client = docker.from_env()
         if vent:
-            containers = d_client.containers.list(filters={'label':'vent'})
+            containers = d_client.containers.list(filters={'label': 'vent'})
         else:
             containers = d_client.containers.list()
         for container in containers:
@@ -196,12 +215,15 @@ def Services(vent=True):
             p = []
             for port in ports:
                 if ports[port]:
-                    p.append(ports[port][0]['HostIp']+":"+ports[port][0]['HostPort'])
+                    p.append(ports[port][0]['HostIp'] +
+                             ":" +
+                             ports[port][0]['HostPort'])
             if p:
                 services.append((name, p))
     except Exception as e:  # pragma: no cover
         pass
     return services
+
 
 def Core(branch="master", **kargs):
     """
@@ -209,7 +231,7 @@ def Core(branch="master", **kargs):
     including custom core services
     """
     # !! TODO this might need to store namespaces/branches/versions
-    core = {'built':[], 'running':[], 'installed':[], 'normal':[]}
+    core = {'built': [], 'running': [], 'installed': [], 'normal': []}
 
     # get normal core tools
     plugins = Plugin(plugins_dir=".internals/plugins")
@@ -243,7 +265,8 @@ def Core(branch="master", **kargs):
         images = d_client.images.list()
         for image in images:
             try:
-                if "vent.groups" in image.attrs['Labels'] and 'core' in image.attrs['Labels']['vent.groups']:
+                if ("vent.groups" in image.attrs['Labels'] and
+                   'core' in image.attrs['Labels']['vent.groups']):
                     if 'vent.name' in image.attrs['Labels']:
                         core['built'].append(image.attrs['Labels']['vent.name'])
             except Exception as err:  # pragma: no cover
@@ -251,7 +274,8 @@ def Core(branch="master", **kargs):
         containers = d_client.containers.list()
         for container in containers:
             try:
-                if "vent.groups" in container.attrs['Config']['Labels'] and 'core' in container.attrs['Config']['Labels']['vent.groups']:
+                if ("vent.groups" in container.attrs['Config']['Labels'] and
+                   'core' in container.attrs['Config']['Labels']['vent.groups']):
                     if 'vent.name' in container.attrs['Config']['Labels']:
                         core['running'].append(container.attrs['Config']['Labels']['vent.name'])
             except Exception as err:  # pragma: no cover
@@ -259,6 +283,7 @@ def Core(branch="master", **kargs):
     except Exception as e:  # pragma: no cover
         pass
     return core
+
 
 def Timestamp():
     """ Get the current datetime in UTC """
@@ -268,6 +293,7 @@ def Timestamp():
     except Exception as e:  # pragma: no cover
         pass
     return timestamp
+
 
 def Uptime():
     """ Get the current uptime information """
