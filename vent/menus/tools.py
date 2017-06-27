@@ -3,17 +3,29 @@ import time
 
 from threading import Thread
 
+from vent.api.actions import Action
+from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 
 
 class ToolForm(npyscreen.ActionForm):
     """ Tools form for teh Vent CLI """
-    def __init__(self, action=None, logger=None, *args, **keywords):
+    def __init__(self, *args, **keywords):
         """ Initialize tool form objects """
-        self.action = action
-        self.logger = logger
+        self.logger = Logger(__name__)
+        self.logger.info(str(keywords['names']))
+        api_action = Action()
+        action = {'api_action': api_action}
         self.tools_tc = {}
+        if keywords['action_dict']:
+            action.update(keywords['action_dict'])
+        if keywords['names']:
+            i = 1
+            for name in keywords['names']:
+                action['action_object'+str(i)] = getattr(api_action, name)
+                i += 1
+        self.action = action
         super(ToolForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):
@@ -129,11 +141,16 @@ class ToolForm(npyscreen.ActionForm):
         if self.action['action_name'] in ['clean', 'remove', 'stop', 'update']:
             reconfirmation_str = ""
             if self.action['cores']:
-                reconfirmation_str = "Are you sure you want to " + self.action['action_name'] + " core containers?"
+                reconfirmation_str = "Are you sure you want to "
+                reconfirmation_str += self.action['action_name']
+                reconfirmation_str += " core containers?"
             else:
-                reconfirmation_str = "Are you sure you want to " + self.action['action_name'] + " plugin containers?"
+                reconfirmation_str = "Are you sure you want to "
+                reconfirmation_str += self.action['action_name']
+                reconfirmation_str += " plugin containers?"
 
-            perform = npyscreen.notify_ok_cancel(reconfirmation_str, title="Confirm command")
+            perform = npyscreen.notify_ok_cancel(reconfirmation_str,
+                                                 title="Confirm command")
             if not perform:
                 return
         for repo in self.tools_tc:
@@ -157,16 +174,17 @@ class ToolForm(npyscreen.ActionForm):
                                              'branch': t[1],
                                              'version': t[2]})
                         popup(originals, self.action['type'], thr,
-                              'Please wait, ' + self.action['present_tense'] + '...')
+                              'Please wait, ' + self.action['present_t'] +
+                              '...')
         if self.action['action_name'] == 'start':
             thr = Thread(target=self.action['action_object1'],
                          args=(),
                          kwargs={'tool_dict': tool_dict})
             popup(originals, self.action['type'], thr,
-                  'Please wait, ' + self.action['present_tense'] + '...')
+                  'Please wait, ' + self.action['present_t'] + '...')
 
-        npyscreen.notify_confirm('Done ' + self.action['present_tense'] + '.',
-                                 title=self.action['past_tense'])
+        npyscreen.notify_confirm('Done ' + self.action['present_t'] + '.',
+                                 title=self.action['past_t'])
         self.quit()
 
     def on_cancel(self):
