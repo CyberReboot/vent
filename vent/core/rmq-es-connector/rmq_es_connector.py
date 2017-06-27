@@ -8,6 +8,7 @@ import uuid
 
 from elasticsearch import Elasticsearch
 
+
 class RmqEs():
     """
     opens a connection to rabbitmq and receives messages based on the provided
@@ -35,7 +36,8 @@ class RmqEs():
             try:
                 connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.rmq_host))
                 self.channel = connection.channel()
-                self.channel.exchange_declare(exchange='topic_recs', type='topic')
+                self.channel.exchange_declare(exchange='topic_recs',
+                                              type='topic')
 
                 result = self.channel.queue_declare(exclusive=True)
                 self.queue_name = result.method.queue
@@ -58,12 +60,16 @@ class RmqEs():
         except Exception as e:  # pragma: no cover
             try:
                 body = body.strip().replace('"', '\"')
-                body = '{"log":"'+body+'"}'
+                body = '{"log":"' + body + '"}'
                 doc = ast.literal_eval(body)
             except Exception as e:  # pragma: no cover
                 pass
         try:
-            res = self.es_conn.index(index=index, doc_type=method.routing_key.split(".")[1], id=method.routing_key+"."+str(uuid.uuid4()), body=doc)
+            res = self.es_conn.index(index=index,
+                                     doc_type=method.routing_key.split(".")[1],
+                                     id=method.routing_key + "." +
+                                     str(uuid.uuid4()),
+                                     body=doc)
         except Exception as e:  # pragma: no cover
             pass
 
@@ -73,7 +79,8 @@ class RmqEs():
 
         binding_keys = sys.argv[1:]
         if not binding_keys:
-            print(sys.stderr, "Usage: {0!s} [binding_key]...".format(sys.argv[0]))
+            print(sys.stderr,
+                  "Usage: {0!s} [binding_key]...".format(sys.argv[0]))
             sys.exit(0)
 
         for binding_key in binding_keys:
@@ -85,8 +92,8 @@ class RmqEs():
         """ start consuming rabbitmq messages """
         print(' [*] Waiting for logs. To exit press CTRL+C')
         self.channel.basic_consume(self.callback,
-                              queue=self.queue_name,
-                              no_ack=True)
+                                   queue=self.queue_name,
+                                   no_ack=True)
         self.channel.start_consuming()
 
 if __name__ == "__main__":  # pragma: no cover

@@ -7,6 +7,7 @@ except ImportError:  # pragma: no cover
 
 from vent.helpers.errors import ErrorHandler
 
+
 class Template:
     """ Handle parsing templates """
     def __init__(self, template=None):
@@ -77,8 +78,10 @@ class Template:
                 else:
                     self.config.set(section, option)
                 return (True, self.config.options(section))
-            return (False, "Option: " + option + " already exists in " + section)
-        return (False, "Section: " + section + " does not exist. Did you want to force it?")
+            return (False, "Option: " + option + " already exists in " +
+                    section)
+        return (False, "Section: " + section +
+                " does not exist. Did you want to force it?")
 
     @ErrorHandler
     def del_section(self, section):
@@ -136,7 +139,9 @@ class Template:
                 if not result[0] or result[1] != constraints[constraint]:
                     include = False
                 # handle group membership
-                if result[0] and constraint == 'groups' and constraints[constraint] in result[1]:
+                if (result[0] and
+                   constraint == 'groups' and
+                   constraints[constraint] in result[1]):
                     include = True
             if include:
                 sections[a_section] = {}

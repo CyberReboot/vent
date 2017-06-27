@@ -3,6 +3,7 @@ import pytest
 
 import file_drop
 
+
 def test_file_drop_GZHandler():
     """ Tests the GZZHandler for file drop """
     a = file_drop.GZHandler()
