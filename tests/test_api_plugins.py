@@ -76,7 +76,11 @@ def test_versions():
     status = instance.add('https://github.com/cyberreboot/vent', build=False, branch='master')
     assert status[0] == True
     versions = instance.versions('elasticsearch', branch='master')
-    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', ['HEAD'])]
+    assert type(versions) == list
+    assert type(versions[0]) == tuple
+    assert type(versions[0][1]) == list
+    assert versions[0][0] == 'cyberreboot:vent:/vent/core/elasticsearch:master:HEAD'
+    assert 'HEAD' in versions[0][1]
 
 def test_current_version():
     """ Test the current_version function """
