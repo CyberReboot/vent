@@ -70,8 +70,7 @@ class AddOptionsForm(npyscreen.ActionForm):
                                       editable=False, labelColor='DANGER',
                                       rely=i, relx=5, color='DANGER', value="""
                 Errors were found...
-                """ + str(repo_vals[1]) +
-                """
+                """ + str(repo_vals[1]) + """
 
                 Please confirm the repo url and credentials are valid!
                 Vent will return to the main screen.
@@ -92,15 +91,14 @@ class AddOptionsForm(npyscreen.ActionForm):
                 # process checkboxes
                 self.parentApp.repo_value['versions'][branch] = self.commit_tc[branch].values[self.commit_tc[branch].value]
                 self.parentApp.repo_value['build'][branch] = self.build_tc[branch].values[self.build_tc[branch].value]
-        if self.error == None:
-            self.parentApp.addForm("CHOOSETOOLS",
-                                   ChooseToolsForm,
-                                   name="Choose tools to add for new plugin"
-                                   "\t\t\t\t\t\tPress ^Q to quit",
-                                   color="CONTROL")
-            self.parentApp.change_form("CHOOSETOOLS")
-        else:
+        if self.error:
             self.quit()
+        self.parentApp.addForm("CHOOSETOOLS",
+                               ChooseToolsForm,
+                               name="Choose tools to add for new plugin"
+                               "\t\t\t\t\t\tPress ^Q to quit",
+                               color="CONTROL")
+        self.parentApp.change_form("CHOOSETOOLS")
 
     def on_cancel(self):
         self.quit()
