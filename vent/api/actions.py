@@ -215,6 +215,9 @@ class Action:
                 if 'groups' in sections[section]:
                     # add labels for groups
                     tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
+                    # add restart=always to core containers
+                    if 'core' in sections[section]['groups']:
+                        tool_dict[container_name]['restart_policy'] = {"Name": "always"}
                     # send logs to syslog
                     if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
                         tool_dict[container_name]['log_config'] = {'type': 'syslog',
