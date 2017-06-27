@@ -365,8 +365,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield6 = self.add(npyscreen.TitleFixedText, name='Jobs:',
                                   value="0 jobs running (0 tool containers),"
                                   " 0 completed jobs", labelColor='DEFAULT')
-        self.multifield1 =  self.add(npyscreen.MultiLineEdit, max_height=22,
-                                     editable=False, value = """
+        self.multifield1 = self.add(npyscreen.MultiLineEdit, max_height=22,
+                                    editable=False, value="""
 
             '.,
               'b      *
