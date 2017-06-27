@@ -363,7 +363,7 @@ class Plugin:
         self.limit_groups = limit_groups
 
         status = (True, None)
-        status_code, cwd = self.clone(repo, user=user, pw=pw)
+        status_code, cwd = self.clone(repo.lower(), user=user, pw=pw)
         status = self._build_tools(status_code)
 
         # set back to original path
