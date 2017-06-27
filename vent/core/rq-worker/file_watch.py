@@ -17,7 +17,7 @@ def file_queue(path, template_path="/vent/"):
 
         # get the correct path for binding
         vent_config = ConfigParser.RawConfigParser()
-        vent_config.optionxform=str
+        vent_config.optionxform = str
         vent_config.read(template_path+'vent.cfg')
         if (vent_config.has_section('main') and
            vent_config.has_option('main', 'files')):
@@ -31,7 +31,7 @@ def file_queue(path, template_path="/vent/"):
         # read in configuration of plugins to get the ones that should run
         # against the path.
         config = ConfigParser.RawConfigParser()
-        config.optionxform=str
+        config.optionxform = str
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         for section in sections:
@@ -41,7 +41,7 @@ def file_queue(path, template_path="/vent/"):
                 t_path = template_path + 'plugins/'
                 t_path += t_path.split('/plugins/')[1] + "/vent.template"
                 t_config = ConfigParser.RawConfigParser()
-                t_config.optionxform=str
+                t_config.optionxform = str
                 t_config.read(t_path)
                 if (t_config.has_section('settings') and
                    t_config.has_option('settings', 'ext_types')):
@@ -58,12 +58,12 @@ def file_queue(path, template_path="/vent/"):
         # TODO get syslog address rather than hardcode
         # TODO get group and name for tag
         # TODO add rw volume for plugin output to be plugin input
-        labels = {'vent-plugin':'', 'file':path}
-        log_config = {'type':'syslog',
-                      'config': {'syslog-address':'tcp://0.0.0.0:514',
-                                 'syslog-facility':'daemon',
-                                 'tag':path.rsplit('.', 1)[-1]}}
-        volumes = {path:{'bind':path, 'mode':'ro'}}
+        labels = {'vent-plugin': '', 'file': path}
+        log_config = {'type': 'syslog',
+                      'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                 'syslog-facility': 'daemon',
+                                 'tag': path.rsplit('.', 1)[-1]}}
+        volumes = {path: {'bind': path, 'mode': 'ro'}}
 
         # start containers
         for image in images:
