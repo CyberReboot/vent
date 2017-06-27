@@ -215,6 +215,9 @@ class Action:
                 if 'groups' in sections[section]:
                     # add labels for groups
                     tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
+                    # add restart=always to core containers
+                    if 'core' in sections[section]['groups']:
+                        tool_dict[container_name]['restart_policy'] = {"Name": "always"}
                     # send logs to syslog
                     if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
                         tool_dict[container_name]['log_config'] = {'type': 'syslog',
@@ -341,9 +344,6 @@ class Action:
                                                      str(container.short_id))
                                 except Exception as err:  # pragma: no cover
                                     self.logger.error(str(err))
-                                    # add restart=always for core containers
-                                    if tool_dict[container_tuple[1]]['labels']['vent.groups'].find('core') != -1 and container_tuple[1].find('rmq-es-connector') == -1:
-                                        tool_dict[container_tuple[1]]['restart_policy'] = {"Name":"always"}
                                     container_id = self.d_client.containers.run(detach=True,
                                                                                 **tool_dict[container_tuple[1]])
                                     self.logger.info("started " +
