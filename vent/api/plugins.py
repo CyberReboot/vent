@@ -2,7 +2,7 @@ import docker
 import fnmatch
 import shlex
 
-from datetime.datetime import utcnow
+from datetime import datetime
 from os import chdir, getcwd, walk
 from os.path import exists, join
 from subprocess import check_output, STDOUT
@@ -609,7 +609,7 @@ class Plugin:
                 template.set_option(section, "branch", self.branch)
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
-                                    str(utcnow()) + " UTC")
+                                    str(datetime.utcnow()) + " UTC")
                 template.set_option(section, "image_name", image_name)
                 template.set_option(section, "type", "repository")
                 vent_template = Template(template=join(match_path,
@@ -703,13 +703,15 @@ class Plugin:
                             template.set_option(section, "built", "yes")
                             template.set_option(section, "image_id", image_id)
                             template.set_option(section, "last_updated",
-                                                str(utcnow()) + " UTC")
+                                                str(datetime.utcnow()) +
+                                                " UTC")
                             status = (True, "Pulled " + image_name)
                             self.logger.info(str(status))
                         else:
                             template.set_option(section, "built", "failed")
                             template.set_option(section, "last_updated",
-                                                str(utcnow()) + " UTC")
+                                                str(datetime.utcnow()) +
+                                                " UTC")
                             status = (False, "Failed to pull image " +
                                       str(output.split('\n')[-1]))
                             self.logger.warning(str(status))
@@ -737,18 +739,18 @@ class Plugin:
                     template.set_option(section, "built", "yes")
                     template.set_option(section, "image_id", image_id)
                     template.set_option(section, "last_updated",
-                                        str(utcnow()) +
+                                        str(datetime.utcnow()) +
                                         " UTC")
             except Exception as e:  # pragma: no cover
                 self.logger.error("unable to build image: " + str(image_name) +
                                   " because: " + str(e))
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
-                                    str(utcnow()) + " UTC")
+                                    str(datetime.utcnow()) + " UTC")
         else:
             template.set_option(section, "built", "no")
             template.set_option(section, "last_updated",
-                                str(utcnow()) + " UTC")
+                                str(datetime.utcnow()) + " UTC")
         return template
 
     def _available_tools(self, groups=None):
@@ -772,7 +774,7 @@ class Plugin:
                             if (template_groups[0] and
                                group in template_groups[1]):
                                 matches.append((root.split(self.path)[1],
-                                                           self.version))
+                                                self.version))
                     except Exception as e:  # pragma: no cover
                         pass
                 else:
