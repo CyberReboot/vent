@@ -1,4 +1,3 @@
-import docker
 import npyscreen
 import os
 import shutil
@@ -281,45 +280,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     "containers, and images. Are you sure?",
                     title="Confirm system command")
             if okay:
-                failed = False
-                try:
-                    d_cli = docker.from_env()
-                except Exception as e:  # pragma: no cover
-                    notify_confirm("Error connecting to Docker: " + repr(e))
-                    self.exit()
-
-                # remove containers
-                try:
-                    list = d_cli.containers.list(filters={'label': 'vent'},
-                                                 all=True)
-                    for c in list:
-                        c.remove(force=True)
-                except Exception as e:  # pragma: no cover
-                    notify_confirm("Error deleting Vent containers: " +
-                                   repr(e))
-                    failed = True
-
-                # remove images
-                try:
-                    list = d_cli.images.list(filters={'label': 'vent'},
-                                             all=True)
-                    for i in list:
-                        d_cli.images.remove(image=i.id, force=True)
-                except Exception as e:  # pragma: no cover
-                    notify_confirm("Error deleting Vent images: " + repr(e))
-                    failed = True
-
-                # remove .vent folder
-                try:
-                    shutil.rmtree(os.path.join(os.path.expanduser('~'),
-                                               '.vent'))
-                except Exception as e:  # pragma: no cover
-                    notify_confirm("Error deleting Vent data: " + repr(e))
-                    failed = True
-
-                if not failed:
+                status = self.api_action.reset()
+                if status[0]:
                     notify_confirm("Vent reset complete. "
                                    "Press OK to exit Vent Manager console.")
+                else:
+                    notify_confirm(status[1])
                 self.exit()
         elif action == "upgrade":
             # !! TODO

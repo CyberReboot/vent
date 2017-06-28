@@ -679,7 +679,12 @@ class Plugin:
         chdir(self.path)
         return
 
-    def _build_image(self, template, match_path, image_name, section):
+    def _build_image(self,
+                     template,
+                     match_path,
+                     image_name,
+                     section,
+                     build_local=False):
         """ Build docker images and store results in template """
         # !! TODO return status of whether it built successfully or not
         if self.build:
@@ -695,7 +700,7 @@ class Plugin:
                     name = (True, image_name)
                 # pull if '/' in image_name, fallback to build
                 pull = False
-                if '/' in image_name:
+                if '/' in image_name and not build_local:
                     try:
                         self.logger.info("Trying to pull " + image_name)
                         output = check_output(shlex.split("docker pull " +

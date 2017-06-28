@@ -106,9 +106,16 @@ def test_configure():
     """ Test the configure function """
     Action.configure()
 
-def test_system_commands():
-    """ Test the system_commands function """
-    Action.system_commands()
+def test_upgrade():
+    """ Test the upgrade function """
+    Action.upgrade()
+
+def test_reset():
+    """ Test the reset function """
+    instance = Action()
+    status = instance.reset()
+    assert type(status) == tuple
+    assert status[0] == False
 
 def test_logs():
     """ Test the logs function """

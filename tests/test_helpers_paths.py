@@ -10,5 +10,4 @@ def test_ensure_file():
     paths = PathDirs()
     status = paths.ensure_file(paths.init_file)
     assert type(status) == tuple
-    assert status[1] == 'exists'
     assert status[0] == True
