@@ -720,7 +720,7 @@ class Action:
     def reset(self):
         """ Factory reset all of Vent's user data, containers, and images """
         status = (True, None)
-        error_message = None
+        error_message = ''
 
         # remove containers
         try:
