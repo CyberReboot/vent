@@ -13,8 +13,9 @@ class LogsForm(npyscreen.FormBaseNew):
         """ Override method for creating FormBaseNew form """
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.TitleFixedText, name='Logs:', value='')
+        msg = 'Checking for container logs, please wait...'
         self.logs_mle = self.add(npyscreen.Pager,
-                                 values=['Checking for container logs, please wait...'])
+                                 values=[msg])
         self.action = Action()
         response = self.action.logs()
         if response[0]:
@@ -27,6 +28,6 @@ class LogsForm(npyscreen.FormBaseNew):
                 value += "\n"
             self.logs_mle.values = value.split("\n")
         else:
-            self.logs_mle.values = ["There was an issue retrieving logs for Vent containers: ",
-                                    str(response[1]),
+            msg = "There was an issue retrieving logs for Vent containers: "
+            self.logs_mle.values = [msg, str(response[1]),
                                     "Please see vent.log for more details."]

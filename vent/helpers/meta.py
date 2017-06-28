@@ -89,23 +89,23 @@ def Cpu():
     return cpu
 
 
-def Gpu():
+def Gpu(pull=False):
     gpu = ""
     try:
+        image = 'nvidia/cuda:8.0-runtime'
+        image_name, tag = image.split(":")
         d_client = docker.from_env()
-        nvidia_image = d_client.images.list(name='nvidia/cuda:8.0-runtime')
+        nvidia_image = d_client.images.list(name=image)
 
-        # creates an undesirable user experience, so commenting out for now
-        #if len(nvidia_image) == 0:
-        #    try:
-        #        d_client.images.pull('nvidia/cuda', tag='8.0-runtime')
-        #        nvidia_image = d_client.images.list(name='nvidia/cuda:8.0-runtime')
-        #    except Exception as e:
-        #        pass
+        if pull and len(nvidia_image) == 0:
+            try:
+                d_client.images.pull(image_name, tag=tag)
+                nvidia_image = d_client.images.list(name=image)
+            except Exception as e:
+                pass
 
         if len(nvidia_image) > 0:
-            cmd = 'nvidia-docker run --rm '
-            cmd += 'nvidia/cuda:8.0-runtime nvidia-smi -L'
+            cmd = 'nvidia-docker run --rm ' + image + ' nvidia-smi -L'
             proc = subprocess.Popen([cmd],
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE,

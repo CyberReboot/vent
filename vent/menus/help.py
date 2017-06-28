@@ -5,7 +5,7 @@ class HelpForm(npyscreen.ActionFormWithMenus):
     """ Help form for the Vent CLI """
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms,"^Q": self.exit})
+        self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
         self.addfield = self.add(npyscreen.TitleFixedText, name="Vent",
                                  labelColor='DEFAULT', editable=False)
         self.multifield1 = self.add(npyscreen.MultiLineEdit, editable=False,

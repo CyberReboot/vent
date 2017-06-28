@@ -9,15 +9,15 @@ from vent.helpers.meta import Tools
 
 class ChooseToolsForm(npyscreen.ActionForm):
     """ For picking which tools to add """
+    repo = self.parentApp.repo_value['repo']
     tools_tc = {}
 
     def repo_tools(self, branch):
         """ Set the appropriate repo dir and get the tools available of it """
         tools = []
         plugin = Plugin()
-        status = plugin.repo_tools(self.parentApp.repo_value['repo'],
-                                   branch,
-                                   self.parentApp.repo_value['versions'][branch])
+        version = self.parentApp.repo_value['versions'][branch]
+        status = plugin.repo_tools(self.repo, branch, version)
         if status[0]:
             r_tools = status[1]
             for tool in r_tools:
@@ -82,8 +82,8 @@ class ChooseToolsForm(npyscreen.ActionForm):
                 if tools:
                     tool_str = ""
                 for tool in tools:
-                    # TODO limit length of tool_str to fit box
-                    tool_str = "Added: " + branch + "/" + tool + "\n" + tool_str
+                    pre_tool = "Added: " + branch + "/" + tool + "\n"
+                    tool_str = pre_tool + tool_str
                 npyscreen.notify_wait(tool_str, title=title)
                 time.sleep(1)
             return
@@ -98,12 +98,14 @@ class ChooseToolsForm(npyscreen.ActionForm):
                         tools.append(('.', ''))
                     else:
                         tools.append((tool, ''))
+            version = self.parentApp.repo_value['versions'][branch]
+            build = self.parentApp.repo_value['build'][branch]
             thr = threading.Thread(target=api_action.add, args=(),
-                                   kwargs={'repo': self.parentApp.repo_value['repo'],
+                                   kwargs={'repo': self.repo,
                                            'branch': branch,
                                            'tools': tools,
-                                           'version': self.parentApp.repo_value['versions'][branch],
-                                           'build': self.parentApp.repo_value['build'][branch]})
+                                           'version': version,
+                                           'build': build})
             popup(original_tools, branch, thr,
                   'Please wait, adding tools for the ' + branch + ' branch...')
         npyscreen.notify_confirm("Done adding repository: " +
