@@ -484,11 +484,13 @@ class Plugin:
             self.logger.error("unable to change to directory: " + str(cwd) +
                               " because: " + str(e))
         # remove untagged images
-        deleted_dict = self.d_client.images.prune({"dangling":"true"})
-        if deleted_dict['ImagesDeleted']:
+        untagged = self.d_client.images.list(filters={"label" : "vent",
+                                                      "dangling" : "true"})
+        if untagged:
             deleted_images = ""
-            for deletion in deleted_dict['ImagesDeleted']:
-                deleted_images = '\n'.join([deleted_images, deletion['Deleted']])
+            for image in untagged:
+                deleted_images = '\n'.join([deleted_images, image.id])
+                self.d_client.images.remove(image.id, force=True)
             self.logger.info("removed dangling images:" + deleted_images)
 
         self.logger.info("template of builder: " + str(template))
@@ -738,14 +740,16 @@ class Plugin:
                     if image_name.endswith('HEAD'):
                         commit_id = template.option(section, "commit_id")
                         if commit_id[0]:
-                            commit_tag = " -t " + image_name[:-4] + str(commit_id[1])
+                            commit_tag = (" -t " + image_name[:-4] +
+                                         str(commit_id[1]))
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.name=" +
                                                       name[1] + " --label "
                                                       "vent.groups=" +
                                                       groups[1] + " -t " +
-                                                      image_name + commit_tag + " ."),
+                                                      image_name +
+                                                      commit_tag + " ."),
                                           stderr=STDOUT,
                                           close_fds=True)
                     self.logger.info("Building " + name[1] + "\n" +
