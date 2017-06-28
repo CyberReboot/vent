@@ -720,6 +720,7 @@ class Action:
     def reset(self):
         """ Factory reset all of Vent's user data, containers, and images """
         status = (True, None)
+        error_message = None
 
         # remove containers
         try:
@@ -728,7 +729,7 @@ class Action:
             for c in c_list:
                 c.remove(force=True)
         except Exception as e:  # pragma: no cover
-            status = (False, "Error removing Vent containers: " + repr(e))
+            error_message += "Error removing Vent containers: " + repr(e)
 
         # remove images
         try:
@@ -737,13 +738,16 @@ class Action:
             for i in i_list:
                 self.d_client.images.remove(image=i.id, force=True)
         except Exception as e:  # pragma: no cover
-            status = (False, "Error deleting Vent images: " + repr(e))
+            error_message += "Error deleting Vent images: " + repr(e)
 
         # remove .vent folder
         try:
             shutil.rmtree(os.path.join(os.path.expanduser('~'), '.vent'))
         except Exception as e:  # pragma: no cover
-            status = (False, "Error deleting Vent data: " + repr(e))
+            error_message += "Error deleting Vent data: " + repr(e)
+
+        if error_message:
+            status = (False, error_message)
 
         return status
 
