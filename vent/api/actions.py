@@ -764,7 +764,7 @@ class Action:
                 self.logger.error("Unable to get logs for " +
                                   str(container.name) +
                                   " because: " + str(e))
-        return log_entries
+            return log_entries
 
         self.logger.info("Starting: logs")
         status = (True, None)
