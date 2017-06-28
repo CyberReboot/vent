@@ -9,15 +9,15 @@ from vent.helpers.meta import Tools
 
 class ChooseToolsForm(npyscreen.ActionForm):
     """ For picking which tools to add """
-    repo = self.parentApp.repo_value['repo']
     tools_tc = {}
 
     def repo_tools(self, branch):
         """ Set the appropriate repo dir and get the tools available of it """
         tools = []
         plugin = Plugin()
+        repo = self.parentApp.repo_value['repo']
         version = self.parentApp.repo_value['versions'][branch]
-        status = plugin.repo_tools(self.repo, branch, version)
+        status = plugin.repo_tools(repo, branch, version)
         if status[0]:
             r_tools = status[1]
             for tool in r_tools:
@@ -98,10 +98,11 @@ class ChooseToolsForm(npyscreen.ActionForm):
                         tools.append(('.', ''))
                     else:
                         tools.append((tool, ''))
+            repo = self.parentApp.repo_value['repo']
             version = self.parentApp.repo_value['versions'][branch]
             build = self.parentApp.repo_value['build'][branch]
             thr = threading.Thread(target=api_action.add, args=(),
-                                   kwargs={'repo': self.repo,
+                                   kwargs={'repo': repo,
                                            'branch': branch,
                                            'tools': tools,
                                            'version': version,
