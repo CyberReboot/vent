@@ -1,10 +1,11 @@
 import docker
 import fnmatch
+import os
 import shlex
 
 from datetime import datetime
 from os import chdir, getcwd, walk
-from os.path import exists, join
+from os.path import join
 from subprocess import check_output, STDOUT
 
 from vent.api.templates import Template
@@ -653,7 +654,7 @@ class Plugin:
                     template.set_option(section, "groups", self.groups)
                 else:
                     vent_template = join(match_path, 'vent.template')
-                    if exists(vent_template):
+                    if os.path.exists(vent_template):
                         v_template = Template(template=vent_template)
                         groups = v_template.option("info", "groups")
                         if groups[0]:
