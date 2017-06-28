@@ -9,6 +9,8 @@ from vent.menus.add_options import AddOptionsForm
 
 class AddForm(npyscreen.ActionForm):
     """ For for adding a new repo """
+    default_repo = 'https://github.com/cyberreboot/vent-plugins'
+
     def create(self):
         """ Create widgets for AddForm """
         self.add_handlers({"^T": self.switch, "^Q": self.quit})
@@ -43,7 +45,7 @@ class AddForm(npyscreen.ActionForm):
         self.nextrely += 1
         self.repo = self.add(npyscreen.TitleText,
                              name='Repository',
-                             value='https://github.com/cyberreboot/vent-plugins')
+                             value=self.default_repo)
         self.user = self.add(npyscreen.TitleText, name='Username')
         self.pw = self.add(npyscreen.TitlePassword, name='Password')
         self.nextrely += 1

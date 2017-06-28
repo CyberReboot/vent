@@ -34,7 +34,8 @@ class RmqEs():
         """
         while wait:
             try:
-                connection = pika.BlockingConnection(pika.ConnectionParameters(host=self.rmq_host))
+                params = pika.ConnectionParameters(host=self.rmq_host)
+                connection = pika.BlockingConnection(params)
                 self.channel = connection.channel()
                 self.channel.exchange_declare(exchange='topic_recs',
                                               type='topic')

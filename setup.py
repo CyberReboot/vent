@@ -13,7 +13,9 @@ setup(
     author_email='',
     maintainer='Charlie Lewis',
     maintainer_email='clewis@iqt.org',
-    description='A library that includes a CLI designed to serve as a platform to collect and analyze data across a flexible set of tools and technologies.',
+    description=('A library that includes a CLI designed to serve as a'
+                 ' platform to collect and analyze data across a flexible set'
+                 ' of tools and technologies.'),
     keywords='docker containers platform collection analysis tools devops',
     url='https://github.com/CyberReboot/vent',
 )

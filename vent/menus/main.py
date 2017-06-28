@@ -3,11 +3,11 @@ import npyscreen
 import os
 import shutil
 import sys
-import threading
 import time
 
 from docker.errors import DockerException
 from npyscreen import notify_confirm
+from threading import Thread
 
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
@@ -23,18 +23,7 @@ from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
 from vent.menus.services import ServicesForm
-from vent.menus.tool_forms import BuildCoreToolsForm
-from vent.menus.tool_forms import BuildToolsForm
-from vent.menus.tool_forms import CleanCoreToolsForm
-from vent.menus.tool_forms import CleanToolsForm
-from vent.menus.tool_forms import RemoveCoreToolsForm
-from vent.menus.tool_forms import RemoveToolsForm
-from vent.menus.tool_forms import StartCoreToolsForm
-from vent.menus.tool_forms import StartToolsForm
-from vent.menus.tool_forms import StopCoreToolsForm
-from vent.menus.tool_forms import StopToolsForm
-from vent.menus.tool_forms import UpdateCoreToolsForm
-from vent.menus.tool_forms import UpdateToolsForm
+from vent.menus.tools import ToolForm
 
 
 class MainForm(npyscreen.FormBaseNewWithMenus):
@@ -91,15 +80,16 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 installed += 1
             else:
                 custom_installed += 1
-        core_str = str(running+custom_running)+"/"+normal+" running"
+        core_str = str(running + custom_running) + "/" + normal + " running"
         if custom_running > 0:
-            core_str += " ("+str(custom_running)+" custom)"
-        core_str += ", "+str(built+custom_built)+"/"+normal+" built"
+            core_str += " (" + str(custom_running) + " custom)"
+        core_str += ", " + str(built + custom_built) + "/" + normal + " built"
         if custom_built > 0:
-            core_str += " ("+str(custom_built)+" custom)"
-        core_str += ", "+str(installed+custom_installed)+"/"+normal+" installed"
+            core_str += " (" + str(custom_built) + " custom)"
+        core_str += ", " + str(installed + custom_installed) + "/" + normal
+        core_str += " installed"
         if custom_built > 0:
-            core_str += " ("+str(custom_installed)+" custom)"
+            core_str += " (" + str(custom_installed) + " custom)"
         self.addfield5.value = core_str
         if running+custom_running == 0:
             color = "DANGER"
@@ -118,7 +108,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # get jobs
         jobs = Jobs()
         # number of jobs, number of tool containers
-        self.addfield6.value = str(jobs[0])+" jobs running ("+str(jobs[1])+" tool containers), "+str(jobs[2])+" completed jobs"
+        self.addfield6.value = str(jobs[0]) + " jobs running (" + str(jobs[1])
+        self.addfield6.value += " tool containers), " + str(jobs[2])
+        self.addfield6.value += " completed jobs"
 
         # TODO check if there are jobs running and update addfield4
         if jobs[0] > 0:
@@ -166,8 +158,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         if action == 'install':
             original_images = Images()
-            thr = threading.Thread(target=self.api_action.cores, args=(),
-                                   kwargs={"action":"install"})
+            thr = Thread(target=self.api_action.cores, args=(),
+                         kwargs={"action": "install"})
             popup(original_images, "images", thr,
                   'Please wait, installing core containers...')
             notify_confirm("Done installing core containers.",
@@ -193,97 +185,69 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
-        forms = []
-        form_args = {'color': 'CONTROL'}
+        form = ToolForm
+        s_action = action.split("_")[0]
+        if 'core' in action:
+            form_action = s_action + ' (only core tools are shown)'
+            form_name = s_action.title() + " core tools"
+            cores = True
+        else:
+            form_action = s_action + ' (only plugin tools are shown)'
+            form_name = s_action.title() + " tools"
+            cores = False
+        a_type = 'containers'
+        if s_action in ['build']:
+            a_type = 'images'
+        forms = [action.upper() + 'TOOLS']
+        form_args = {'color': 'CONTROL',
+                     'names': [s_action],
+                     'name': form_name,
+                     'action_dict': {'action_name': s_action,
+                                     'present_t': s_action + 'ing ' + a_type,
+                                     'past_t': s_action.title() + ' ' + a_type,
+                                     'action': form_action,
+                                     'type': a_type,
+                                     'cores': cores}}
+        if s_action == 'start':
+            form_args['names'].append('prep_start')
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
-            form_args['name'] = "Add plugins\t\t\t\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit"
-        elif action == "build":
-            form = BuildToolsForm
-            forms = ['BUILDTOOLS']
-            form_args['name'] = "Build tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
-        elif action == 'start':
-            form = StartToolsForm
-            forms = ['STARTTOOLS']
-            form_args['name'] = "Start tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
-        elif action == 'stop':
-            form = StopToolsForm
-            forms = ['STOPTOOLS']
-            form_args['name'] = "Stop tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
-        elif action == 'clean':
-            form = CleanToolsForm
-            forms = ['CLEANTOOLS']
-            form_args['name'] = "Clean tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+            form_args['name'] = "Add plugins"
+            form_args['name'] += " help" + "\t"*6 + "Press ^Q to quit"
         elif action == "inventory":
             form = InventoryToolsForm
             forms = ['INVENTORY']
-            form_args = {'color': "STANDOUT",
-                         'name': "Inventory of tools\t\t\t\t\t\t\t\tPress ^T"
-                                 " to toggle main"}
-        elif action == "update":
-            form = UpdateToolsForm
-            forms = ['UPDATETOOLS']
-            form_args['name'] = "Update tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
-        elif action == "remove":
-            form = RemoveToolsForm
-            forms = ['REMOVETOOLS']
-            form_args['name'] = "Remove tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+            form_args = {'color': "STANDOUT", 'name': "Inventory of tools"}
         elif action == 'logs':
             form = LogsForm
             forms = ['LOGS']
-            form_args = {'color': "STANDOUT",
-                         'name': "Logs\t\t\t\t\t\t\t\tPress ^T to toggle main"}
+            form_args = {'color': "STANDOUT", 'name': "Logs"}
         elif action == 'services':
             form = ServicesForm
             forms = ['SERVICES']
-            form_args = {'color': "STANDOUT",
-                         'name': "Services\t\t\t\t\t\t\t\tPress ^T to toggle main"}
-        elif action == 'build_core':
-            form = BuildCoreToolsForm
-            forms = ['BUILDCORETOOLS']
-            form_args['name'] = "Build core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
-        elif action == 'start_core':
-            form = StartCoreToolsForm
-            forms = ['STARTCORETOOLS']
-            form_args['name'] = "Start core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
-        elif action == 'stop_core':
-            form = StopCoreToolsForm
-            forms = ['STOPCORETOOLS']
-            form_args['name'] = "Stop core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
-        elif action == 'clean_core':
-            form = CleanCoreToolsForm
-            forms = ['CLEANCORETOOLS']
-            form_args['name'] = "Clean core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+            form_args = {'color': "STANDOUT", 'name': "Services"}
         elif action == "inventory_core":
             form = InventoryCoreToolsForm
             forms = ['COREINVENTORY']
             form_args = {'color': "STANDOUT",
-                         'name': "Inventory of core tools\t\t\t\t\t\t\t\tPress"
-                                 " ^T to toggle main"}
-        elif action == 'update_core':
-            form = UpdateCoreToolsForm
-            forms = ['UPDATECORETOOLS']
-            form_args['name'] = "Update core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
-        elif action == 'remove_core':
-            form = RemoveCoreToolsForm
-            forms = ['REMOVECORETOOLS']
-            form_args['name'] = "Remove core tools\t\t\t\t\t\t\t\tPress ^T to toggle main"
+                         'name': "Inventory of core tools"}
         elif action == 'services_core':
             # TODO update with servicescoreform
             form = ServicesForm
             forms = ['SERVICES']
-            form_args = {'color': "STANDOUT",
-                         'name': "Core services\t\t\t\t\t\t\t\tPress ^T to toggle main"}
+            form_args = {'color': "STANDOUT", 'name': "Core services"}
+        form_args['name'] += "\t"*8 + "Press ^T to toggle main"
         try:
             self.remove_forms(forms)
-            thr = threading.Thread(target=self.add_form, args=(),
-                                   kwargs={'form': form,
-                                           'form_name': forms[0],
-                                           'form_args': form_args})
+            thr = Thread(target=self.add_form, args=(),
+                         kwargs={'form': form,
+                                 'form_name': forms[0],
+                                 'form_args': form_args})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify('Please wait, loading form...', title='Loading')
+                npyscreen.notify('Please wait, loading form...',
+                                 title='Loading')
                 time.sleep(1)
         except Exception as e:  # pragma: no cover
             pass
@@ -326,7 +290,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
                 # remove containers
                 try:
-                    list = d_cli.containers.list(filters={'label':'vent'},
+                    list = d_cli.containers.list(filters={'label': 'vent'},
                                                  all=True)
                     for c in list:
                         c.remove(force=True)
@@ -337,7 +301,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
                 # remove images
                 try:
-                    list = d_cli.images.list(filters={'label':'vent'},
+                    list = d_cli.images.list(filters={'label': 'vent'},
                                              all=True)
                     for i in list:
                         d_cli.images.remove(image=i.id, force=True)
@@ -384,7 +348,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
                                   labelColor='DEFAULT', value=Uptime())
-        self.cpufield = self.add(npyscreen.TitleFixedText, name='Logical CPUs:',
+        self.cpufield = self.add(npyscreen.TitleFixedText,
+                                 name='Logical CPUs:',
                                  labelColor='DEFAULT', value=Cpu())
         self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
                                  labelColor='DEFAULT', value=Gpu())
@@ -398,9 +363,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                   name='Core Tools:', labelColor='DANGER',
                                   value="Not built")
         self.addfield6 = self.add(npyscreen.TitleFixedText, name='Jobs:',
-                                  value="0 jobs running (0 tool containers), 0 completed jobs", labelColor='DEFAULT')
-        self.multifield1 =  self.add(npyscreen.MultiLineEdit, max_height=22,
-                                     editable=False, value = """
+                                  value="0 jobs running (0 tool containers),"
+                                  " 0 completed jobs", labelColor='DEFAULT')
+        self.multifield1 = self.add(npyscreen.MultiLineEdit, max_height=22,
+                                    editable=False, value="""
 
             '.,
               'b      *

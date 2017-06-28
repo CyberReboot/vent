@@ -24,7 +24,7 @@ class VentApp(npyscreen.NPSAppManaged):
     repo_value = {}
     paths = PathDirs()
     first_time = paths.ensure_file(paths.init_file)
-    if first_time[0] == True and first_time[1] != "exists":
+    if first_time[0] and first_time[1] != "exists":
         npyscreen.NPSAppManaged.STARTING_FORM = "TUTORIALINTRO"
     else:
         npyscreen.NPSAppManaged.STARTING_FORM = "MAIN"
@@ -33,17 +33,53 @@ class VentApp(npyscreen.NPSAppManaged):
         """ Override onStart method for npyscreen """
         self.paths.host_config()
         version = Version()
-        self.addForm("MAIN", MainForm, name="Vent "+version+"\t\t\t\t\tPress ^T to toggle help\t\t\t\t\t\tPress ^Q to quit", color="IMPORTANT")
-        self.addForm("HELP", HelpForm, name="Help\t\t\t\t\t\t\t\tPress ^T to toggle previous\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALINTRO", TutorialIntroForm, name="Vent Tutorial"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALBACKGROUND", TutorialBackgroundForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALTERMINOLOGY", TutorialTerminologyForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALGETTINGSETUP", TutorialGettingSetupForm, name="About Vent"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALBUILDINGCORES", TutorialBuildingCoresForm, name="Working with Cores"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALSTARTINGCORES", TutorialStartingCoresForm, name="Working with Cores"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALADDINGPLUGINS", TutorialAddingPluginsForm, name="Working with Plugins"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALADDINGFILES", TutorialAddingFilesForm, name="Files"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
-        self.addForm("TUTORIALSETTINGUPSERVICES", TutorialSettingUpServicesForm, name="Services"+"\t\t\t\t\t\tPress ^Q to quit", color="DANGER")
+        quit_s = "\t"*6 + "Press ^Q to quit"
+        self.addForm("MAIN",
+                     MainForm,
+                     name="Vent " + version +
+                     "\t\t\t\t\tPress ^T to toggle help" + quit_s,
+                     color="IMPORTANT")
+        self.addForm("HELP",
+                     HelpForm,
+                     name="Help\t\t\t\t\t\t\t\tPress ^T to toggle previous" +
+                     quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALINTRO",
+                     TutorialIntroForm,
+                     name="Vent Tutorial" + quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALBACKGROUND",
+                     TutorialBackgroundForm,
+                     name="About Vent" + quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALTERMINOLOGY",
+                     TutorialTerminologyForm,
+                     name="About Vent" + quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALGETTINGSETUP",
+                     TutorialGettingSetupForm,
+                     name="About Vent" + quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALBUILDINGCORES",
+                     TutorialBuildingCoresForm,
+                     name="Working with Cores" + quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALSTARTINGCORES",
+                     TutorialStartingCoresForm,
+                     name="Working with Cores" + quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALADDINGPLUGINS",
+                     TutorialAddingPluginsForm,
+                     name="Working with Plugins" + quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALADDINGFILES",
+                     TutorialAddingFilesForm,
+                     name="Files" + quit_s,
+                     color="DANGER")
+        self.addForm("TUTORIALSETTINGUPSERVICES",
+                     TutorialSettingUpServicesForm,
+                     name="Services" + quit_s,
+                     color="DANGER")
 
     def change_form(self, name):
         """ Changes the form (window) that is displayed """

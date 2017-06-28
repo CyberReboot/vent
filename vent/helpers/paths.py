@@ -41,7 +41,7 @@ class PathDirs:
         try:
             exists = os.path.isfile(path)
             if not exists:
-                with open (path, 'w+') as fname:
+                with open(path, 'w+') as fname:
                     fname.write("initialized")
                 return (True, path)
             return (True, "exists")

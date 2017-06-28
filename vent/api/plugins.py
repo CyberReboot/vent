@@ -1,9 +1,11 @@
-import datetime
 import docker
 import fnmatch
 import os
 import shlex
 
+from datetime import datetime
+from os import chdir, getcwd, walk
+from os.path import join
 from subprocess import check_output, STDOUT
 
 from vent.api.templates import Template
@@ -16,8 +18,8 @@ class Plugin:
     """ Handle Plugins """
     def __init__(self, **kargs):
         self.path_dirs = PathDirs(**kargs)
-        self.manifest = os.path.join(self.path_dirs.meta_dir,
-                                     "plugin_manifest.cfg")
+        self.manifest = join(self.path_dirs.meta_dir,
+                             "plugin_manifest.cfg")
         self.d_client = docker.from_env()
         self.logger = Logger(__name__)
 
@@ -33,13 +35,13 @@ class Plugin:
 
             # get org and repo name and path repo will be cloned to
             org, name = repo.split("/")[-2:]
-            self.path = os.path.join(self.path_dirs.plugins_dir, org, name)
+            self.path = join(self.path_dirs.plugins_dir, org, name)
             self.logger.info("cloning to path: " + str(self.path))
 
             # save current path
-            cwd = os.getcwd()
+            cwd = getcwd()
             # set to new repo path
-            os.chdir(self.path)
+            chdir(self.path)
             status = (True, cwd)
         except Exception as e:  # pragma: no cover
             self.logger.error("apply_path failed with error: " + str(e))
@@ -96,7 +98,7 @@ class Plugin:
                     return status
 
             try:
-                os.chdir(cwd)
+                chdir(cwd)
             except Exception as e:  # pragma: no cover
                 self.logger.error("unable to change directory to: " +
                                   str(cwd) + "because: " + str(e))
@@ -131,10 +133,13 @@ class Plugin:
                 branches = status[1]
                 for branch in branches:
                     try:
-                        branch_output = check_output(shlex.split("git rev-list " + branch),
+                        branch_output = check_output(shlex
+                                                     .split("git rev-list " +
+                                                            branch),
                                                      stderr=STDOUT,
                                                      close_fds=True)
-                        branch_output = ['HEAD'] + branch_output.split("\n")[:-1]
+                        branch_output = branch_output.split("\n")[:-1]
+                        branch_output += ['HEAD']
                         commits.append((branch, branch_output))
                     except Exception as e:  # pragma: no cover
                         self.logger.error("repo_commits failed with error: " +
@@ -149,7 +154,7 @@ class Plugin:
                                  " with status: " + str(status))
                 return status
             try:
-                os.chdir(cwd)
+                chdir(cwd)
             except Exception as e:  # pragma: no cover
                 self.logger.error("unable to change directory to: " +
                                   str(cwd) + " because: " + str(e))
@@ -191,7 +196,7 @@ class Plugin:
                                  " status: " + str(status))
                 return status
             try:
-                os.chdir(cwd)
+                chdir(cwd)
             except Exception as e:  # pragma: no cover
                 self.logger.error("unable to change directory to: " +
                                   str(cwd) + " because: " + str(e))
@@ -217,7 +222,7 @@ class Plugin:
             self.repo = repo
 
             # save current path
-            cwd = os.getcwd()
+            cwd = getcwd()
             self.logger.info("current working directory: " + str(cwd))
 
             # rewrite repo for consistency
@@ -228,9 +233,9 @@ class Plugin:
             self.org, self.name = self.repo.split("/")[-2:]
             self.logger.info("org name found: " + str(self.org))
             self.logger.info("repo name found: " + str(self.name))
-            self.path = os.path.join(self.path_dirs.plugins_dir,
-                                     self.org,
-                                     self.name)
+            self.path = join(self.path_dirs.plugins_dir,
+                             self.org,
+                             self.name)
             self.logger.info("path to clone to: " + str(self.path))
 
             # check if the directory exists, if so return now
@@ -241,7 +246,7 @@ class Plugin:
                 return status
 
             # set to new repo path
-            os.chdir(self.path)
+            chdir(self.path)
 
             # if path already exists, try git checkout to update
             if status[0] and status[1] == 'exists':
@@ -265,7 +270,8 @@ class Plugin:
                     return status
 
             # ensure cloning still works even if ssl is broken
-            response = check_output(shlex.split("git config --global http.sslVerify false"),
+            cmd = "git config --global http.sslVerify false"
+            response = check_output(shlex.split(cmd),
                                     stderr=STDOUT,
                                     close_fds=True)
 
@@ -368,7 +374,7 @@ class Plugin:
 
         # set back to original path
         try:
-            os.chdir(cwd)
+            chdir(cwd)
         except Exception as e:  # pragma: no cover
             pass
         return status
@@ -463,17 +469,17 @@ class Plugin:
         elif not hasattr(self, 'version'):
             self.version = 'HEAD'
 
-        cwd = os.getcwd()
+        cwd = getcwd()
         self.logger.info("current working directory: " + str(cwd))
         try:
-            os.chdir(match_path)
+            chdir(match_path)
         except Exception as e:  # pragma: no cover
             self.logger.error("unable to change to directory: " +
                               str(match_path) + " because: " + str(e))
             return None
         template = self._build_image(template, match_path, image_name, section)
         try:
-            os.chdir(cwd)
+            chdir(cwd)
         except Exception as e:  # pragma: no cover
             self.logger.error("unable to change to directory: " + str(cwd) +
                               " because: " + str(e))
@@ -604,11 +610,11 @@ class Plugin:
                 template.set_option(section, "branch", self.branch)
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
-                                    str(datetime.datetime.utcnow()) + " UTC")
+                                    str(datetime.utcnow()) + " UTC")
                 template.set_option(section, "image_name", image_name)
                 template.set_option(section, "type", "repository")
-                vent_template = Template(template=os.path.join(match_path,
-                                                               'vent.template'))
+                vent_template = Template(template=join(match_path,
+                                                       'vent.template'))
                 vent_status, response = vent_template.option("info", "name")
                 if vent_status:
                     template.set_option(section, "link_name", response)
@@ -618,8 +624,9 @@ class Plugin:
                                         match[0].split('/')[-1])
                 commit_id = None
                 if self.version == 'HEAD':
-                    os.chdir(match_path)
-                    commit_id = check_output(shlex.split("git rev-parse --short HEAD"),
+                    chdir(match_path)
+                    cmd = "git rev-parse --short HEAD"
+                    commit_id = check_output(shlex.split(cmd),
                                              stderr=STDOUT,
                                              close_fds=True).strip()
                     template.set_option(section, "commit_id", commit_id)
@@ -629,7 +636,9 @@ class Plugin:
                     if previous_commit and previous_commit != commit_id:
                         if (previous_commits and
                            previous_commit not in previous_commits):
-                            previous_commits = previous_commit + ',' + previous_commits
+                            previous_commits = (previous_commit +
+                                                ',' +
+                                                previous_commits)
                         elif not previous_commits:
                             previous_commits = previous_commit
                     if previous_commits and previous_commits != commit_id:
@@ -644,7 +653,7 @@ class Plugin:
                 if self.groups:
                     template.set_option(section, "groups", self.groups)
                 else:
-                    vent_template = os.path.join(match_path, 'vent.template')
+                    vent_template = join(match_path, 'vent.template')
                     if os.path.exists(vent_template):
                         v_template = Template(template=vent_template)
                         groups = v_template.option("info", "groups")
@@ -659,7 +668,7 @@ class Plugin:
             template.write_config()
 
         # reset to repo directory
-        os.chdir(self.path)
+        chdir(self.path)
         return
 
     def _build_image(self, template, match_path, image_name, section):
@@ -667,7 +676,7 @@ class Plugin:
         # !! TODO return status of whether it built successfully or not
         if self.build:
             try:
-                os.chdir(match_path)
+                chdir(match_path)
                 # currently can't use docker-py because it doesn't support
                 # labels on images yet
                 name = template.option(section, "name")
@@ -687,20 +696,23 @@ class Plugin:
                                               close_fds=True)
                         self.logger.info("Pulling " + name[1] + "\n" +
                                          str(output))
+                        sha_str = "Digest: sha256:"
                         for line in output.split('\n'):
-                            if line.startswith("Digest: sha256:"):
-                                image_id = line.split("Digest: sha256:")[1][:12]
+                            if line.startswith(sha_str):
+                                image_id = line.split(sha_str)[1][:12]
                         if image_id:
                             template.set_option(section, "built", "yes")
                             template.set_option(section, "image_id", image_id)
                             template.set_option(section, "last_updated",
-                                                str(datetime.datetime.utcnow()) + " UTC")
+                                                str(datetime.utcnow()) +
+                                                " UTC")
                             status = (True, "Pulled " + image_name)
                             self.logger.info(str(status))
                         else:
                             template.set_option(section, "built", "failed")
                             template.set_option(section, "last_updated",
-                                                str(datetime.datetime.utcnow()) + " UTC")
+                                                str(datetime.utcnow()) +
+                                                " UTC")
                             status = (False, "Failed to pull image " +
                                       str(output.split('\n')[-1]))
                             self.logger.warning(str(status))
@@ -722,23 +734,24 @@ class Plugin:
                                      str(output))
                     image_id = ""
                     for line in output.split("\n"):
-                        if line.startswith("Successfully built "):
-                            image_id = line.split("Successfully built ")[1].strip()
+                        suc_str = "Successfully built "
+                        if line.startswith(suc_str):
+                            image_id = line.split(suc_str)[1].strip()
                     template.set_option(section, "built", "yes")
                     template.set_option(section, "image_id", image_id)
                     template.set_option(section, "last_updated",
-                                        str(datetime.datetime.utcnow()) +
+                                        str(datetime.utcnow()) +
                                         " UTC")
             except Exception as e:  # pragma: no cover
                 self.logger.error("unable to build image: " + str(image_name) +
                                   " because: " + str(e))
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
-                                    str(datetime.datetime.utcnow()) + " UTC")
+                                    str(datetime.utcnow()) + " UTC")
         else:
             template.set_option(section, "built", "no")
             template.set_option(section, "last_updated",
-                                str(datetime.datetime.utcnow()) + " UTC")
+                                str(datetime.utcnow()) + " UTC")
         return template
 
     def _available_tools(self, groups=None):
@@ -750,18 +763,19 @@ class Plugin:
             return matches
         if groups:
             groups = groups.split(",")
-        for root, dirnames, filenames in os.walk(self.path):
+        for root, dirnames, filenames in walk(self.path):
             for filename in fnmatch.filter(filenames, 'Dockerfile'):
                 # !! TODO deal with wild/etc.?
                 if groups:
                     try:
-                        template = Template(template=os.path.join(root,
-                                                                  'vent.template'))
+                        template = Template(template=join(root,
+                                                          'vent.template'))
                         for group in groups:
                             template_groups = template.option("info", "groups")
                             if (template_groups[0] and
                                group in template_groups[1]):
-                                matches.append((root.split(self.path)[1], self.version))
+                                matches.append((root.split(self.path)[1],
+                                                self.version))
                     except Exception as e:  # pragma: no cover
                         pass
                 else:
@@ -788,7 +802,7 @@ class Plugin:
                                   close_fds=True)
             response = (True, status)
         except Exception as e:  # pragma: no cover
-            response = (False, os.getcwd() + str(e))
+            response = (False, getcwd() + str(e))
         return response
 
     def constraint_options(self, constraint_dict, options):
@@ -919,7 +933,8 @@ class Plugin:
         for result in results:
             version_list = [results[result]['version']]
             if 'previous_versions' in results[result]:
-                version_list += (results[result]['previous_versions']).split(',')
+                version_list += (results[result]['previous_versions']) \
+                                .split(',')
             versions.append((result, version_list))
         return versions
 
