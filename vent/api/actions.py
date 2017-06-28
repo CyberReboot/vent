@@ -737,7 +737,7 @@ class Action:
                     for container in compare_containers:
                         try:
                             # 'logs' stores each line containing the expression
-                            logs  = [log for log in container.logs().split("\n") if expression in log]
+                            logs = [log for log in container.logs().split("\n") if expression in log]
                             for log in logs:
                                 if str(container.name) in log_entries:
                                     log_entries[str(container.name)].append(log)
