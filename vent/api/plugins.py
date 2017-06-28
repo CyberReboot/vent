@@ -483,6 +483,14 @@ class Plugin:
         except Exception as e:  # pragma: no cover
             self.logger.error("unable to change to directory: " + str(cwd) +
                               " because: " + str(e))
+        # remove untagged images
+        deleted_dict = self.d_client.images.prune({"dangling":"true"})
+        if deleted_dict['ImagesDeleted']:
+            deleted_images = ""
+            for deletion in deleted_dict['ImagesDeleted']:
+                deleted_images = '\n'.join([deleted_images, deletion['Deleted']])
+            self.logger.info("removed dangling images:" + deleted_images)
+
         self.logger.info("template of builder: " + str(template))
         self.logger.info("Finished: builder")
         return template
