@@ -3,6 +3,7 @@ import datetime
 import json
 import os
 import shlex
+import shutil
 
 from subprocess import check_output, STDOUT
 
@@ -712,12 +713,46 @@ class Action:
         return
 
     @staticmethod
-    def system_commands():
-        # reset, upgrade, etc.
+    def upgrade():
+        # TODO
         return
 
+    def reset(self):
+        """ Factory reset all of Vent's user data, containers, and images """
+        status = (True, None)
+        error_message = ''
+
+        # remove containers
+        try:
+            c_list = self.d_client.containers.list(filters={'label': 'vent'},
+                                                   all=True)
+            for c in c_list:
+                c.remove(force=True)
+        except Exception as e:  # pragma: no cover
+            error_message += "Error removing Vent containers: " + str(e) + "\n"
+
+        # remove images
+        try:
+            i_list = self.d_client.images.list(filters={'label': 'vent'},
+                                               all=True)
+            for i in i_list:
+                self.d_client.images.remove(image=i.id, force=True)
+        except Exception as e:  # pragma: no cover
+            error_message += "Error deleting Vent images: " + str(e) + "\n"
+
+        # remove .vent folder
+        try:
+            shutil.rmtree(os.path.join(os.path.expanduser('~'), '.vent'))
+        except Exception as e:  # pragma: no cover
+            error_message += "Error deleting Vent data: " + str(e) + "\n"
+
+        if error_message:
+            status = (False, error_message)
+
+        return status
+
     def logs(self, container_type=None, grep_list=None):
-        """ generically filter logs stored in log containers """
+        """ Generically filter logs stored in log containers """
         self.logger.info("Starting: logs")
         status = (True, None)
         log_entries = {}
