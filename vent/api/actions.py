@@ -729,7 +729,7 @@ class Action:
             for c in c_list:
                 c.remove(force=True)
         except Exception as e:  # pragma: no cover
-            error_message += "Error removing Vent containers: " + repr(e) + "\n"
+            error_message += "Error removing Vent containers: " + str(e) + "\n"
 
         # remove images
         try:
@@ -738,13 +738,13 @@ class Action:
             for i in i_list:
                 self.d_client.images.remove(image=i.id, force=True)
         except Exception as e:  # pragma: no cover
-            error_message += "Error deleting Vent images: " + repr(e) + "\n"
+            error_message += "Error deleting Vent images: " + str(e) + "\n"
 
         # remove .vent folder
         try:
             shutil.rmtree(os.path.join(os.path.expanduser('~'), '.vent'))
         except Exception as e:  # pragma: no cover
-            error_message += "Error deleting Vent data: " + repr(e) + "\n"
+            error_message += "Error deleting Vent data: " + str(e) + "\n"
 
         if error_message:
             status = (False, error_message)
