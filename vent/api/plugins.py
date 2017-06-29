@@ -484,8 +484,8 @@ class Plugin:
             self.logger.error("unable to change to directory: " + str(cwd) +
                               " because: " + str(e))
         # remove untagged images
-        untagged = self.d_client.images.list(filters={"label" : "vent",
-                                                      "dangling" : "true"})
+        untagged = self.d_client.images.list(filters={"label": "vent",
+                                                      "dangling": "true"})
         if untagged:
             deleted_images = ""
             for image in untagged:
@@ -741,7 +741,7 @@ class Plugin:
                         commit_id = template.option(section, "commit_id")
                         if commit_id[0]:
                             commit_tag = (" -t " + image_name[:-4] +
-                                         str(commit_id[1]))
+                                          str(commit_id[1]))
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.name=" +
@@ -899,7 +899,8 @@ class Plugin:
                     response = self.d_client.images.remove(image_name)
                 else:
                     image_id = template.option(result, 'image_id')[1]
-                    response = self.d_client.images.remove(image_id, force=True)
+                    response = self.d_client.images.remove(image_id,
+                                                           force=True)
                 self.logger.info(response)
                 self.logger.info("Removing plugin image: " + image_name)
             except Exception as e:  # pragma: no cover
