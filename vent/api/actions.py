@@ -162,8 +162,7 @@ class Action:
             for plugin_section in plugin_sections:
                 status = plugin_c.option(plugin_section, "link_name")
                 self.logger.info(status)
-                image_status = plugin_c.option(plugin_section,
-                                                   "image_name")
+                image_status = plugin_c.option(plugin_section, "image_name")
                 self.logger.info(image_status)
                 if status[0] and image_status[0]:
                     cont_name = image_status[1].replace(':', '-')
