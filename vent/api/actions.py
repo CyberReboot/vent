@@ -785,14 +785,24 @@ class Action:
         if grep_list:
             for expression in grep_list:
                 for container in comp_c:
-                    # 'logs' stores each line containing the expression
-                    logs = [log for log in container.logs().split("\n")
-                            if expression in log]
-                    log_entries = get_logs(logs, log_entries)
+                    try:
+                        # 'logs' stores each line containing the expression
+                        logs = [log for log in container.logs().split("\n")
+                                if expression in log]
+                        log_entries = get_logs(logs, log_entries)
+                    except Exception as e:
+                        self.logger.info("Can't get logs for " +
+                                         str(container) +
+                                         "because: " + str(e))
         else:
             for container in comp_c:
-                logs = container.logs().split("\n")
-                log_entries = get_logs(logs, log_entries)
+                try:
+                    logs = container.logs().split("\n")
+                    log_entries = get_logs(logs, log_entries)
+                except Exception as e:
+                    self.logger.info("Can't get logs for " +
+                                     str(container) +
+                                     "because: " + str(e))
 
         status = (True, log_entries)
         self.logger.info("Status of logs: " + str(status[0]))
