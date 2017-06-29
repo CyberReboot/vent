@@ -95,6 +95,138 @@ class Action:
         self.logger.info("Finished: remove")
         return status
 
+    def start_sections(self, s, files):
+        """ Run through sections for prep_start """
+        for section in s:
+            # initialize needed vars
+            template_path = os.path.join(s[section]['path'],
+                                         'vent.template')
+            c_name = s[section]['image_name'].replace(':', '-')
+            c_name = c_name.replace('/', '-')
+            image_name = s[section]['image_name']
+
+            # checkout the right version and branch of the repo
+            self.plugin.branch = branch
+            self.plugin.version = version
+            cwd = os.getcwd()
+            self.logger.info("current directory is: " + str(cwd))
+            os.chdir(os.path.join(s[section]['path']))
+            status = self.plugin.checkout()
+            self.logger.info(status)
+            os.chdir(cwd)
+
+            if run_build:
+                status = self.build(name=s[section]['name'],
+                                    groups=groups,
+                                    enabled=enabled,
+                                    branch=branch,
+                                    version=version)
+                self.logger.info(status)
+
+            # set docker settings for container
+            vent_template = Template(template_path)
+            status = vent_template.section('docker')
+            self.logger.info(status)
+            tool_d[c_name] = {'image': image_name,
+                              'name': c_name}
+            if status[0]:
+                for option in status[1]:
+                    options = option[1]
+                    # check for commands to evaluate
+                    if '`' in options:
+                        cmds = options.split('`')
+                        if len(cmds) > 2:
+                            i = 1
+                            while i < len(cmds):
+                                try:
+                                    cmds[i] = check_output(shlex.split(cmds[i]),
+                                                           stderr=STDOUT,
+                                                           close_fds=True).strip()
+                                except Exception as e:  # pragma: no cover
+                                    self.logger.error("unable to evaluate command specified in vent.template: " + str(e))
+                                i += 2
+                        options = "".join(cmds)
+                    # store options set for docker
+                    try:
+                        tool_d[c_name][option[0]] = literal_eval(options)
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error("unable to store the options set for docker: " + str(e))
+                        tool_d[c_name][option[0]] = options
+
+            # get temporary name for links, etc.
+            status = vent_template.section('info')
+            self.logger.info(status)
+            plugin_c = Template(template=self.plugin.manifest)
+            status, plugin_sections = plugin_c.sections()
+            self.logger.info(status)
+            for plugin_section in plugin_sections:
+                status = plugin_c.option(plugin_section, "link_name")
+                self.logger.info(status)
+                image_status = plugin_c.option(plugin_section,
+                                                   "image_name")
+                self.logger.info(image_status)
+                if status[0] and image_status[0]:
+                    cont_name = image_status[1].replace(':', '-')
+                    cont_name = cont_name.replace('/', '-')
+                    if cont_name not in tool_d:
+                        tool_d[cont_name] = {'image': image_status[1],
+                                             'name': cont_name,
+                                             'start': False}
+                    tool_d[cont_name]['tmp_name'] = status[1]
+
+            # add extra labels
+            if 'labels' not in tool_d[c_name]:
+                tool_d[c_name]['labels'] = {}
+            tool_d[c_name]['labels']['vent'] = Version()
+            tool_d[c_name]['labels']['vent.namespace'] = s[section]['namespace']
+            tool_d[c_name]['labels']['vent.branch'] = branch
+            tool_d[c_name]['labels']['vent.version'] = version
+            tool_d[c_name]['labels']['vent.name'] = s[section]['name']
+
+            if 'groups' in s[section]:
+                # add labels for groups
+                tool_d[c_name]['labels']['vent.groups'] = s[section]['groups']
+                # add restart=always to core containers
+                if 'core' in s[section]['groups']:
+                    tool_d[c_name]['restart_policy'] = {"Name": "always"}
+                # send logs to syslog
+                if 'syslog' not in s[section]['groups'] and 'core' in s[section]['groups']:
+                    tool_d[c_name]['log_config'] = {'type': 'syslog',
+                                                    'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                               'syslog-facility': 'daemon',
+                                                               'tag': 'core'}}
+                if 'syslog' not in s[section]['groups']:
+                    tool_d[c_name]['log_config'] = {'type': 'syslog',
+                                                    'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                               'syslog-facility': 'daemon',
+                                                               'tag': 'plugin'}}
+                # mount necessary directories
+                if 'files' in s[section]['groups']:
+                    if 'volumes' in tool_d[c_name]:
+                        tool_d[c_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
+                    else:
+                        tool_d[c_name]['volumes'] = {self.plugin.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
+                    if files[0]:
+                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
+            else:
+                tool_d[c_name]['log_config'] = {'type': 'syslog',
+                                                'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                           'syslog-facility': 'daemon',
+                                                           'tag': 'plugin'}}
+
+            # add label for priority
+            status = vent_template.section('settings')
+            self.logger.info(status)
+            if status[0]:
+                for option in status[1]:
+                    if option[0] == 'priority':
+                        tool_d[c_name]['labels']['vent.priority'] = option[1]
+
+            # only start tools that have been built
+            if s[section]['built'] != 'yes':
+                del tool_d[c_name]
+        return status, tool_d
+
     def prep_start(self,
                    repo=None,
                    name=None,
@@ -112,7 +244,6 @@ class Action:
         self.logger.info("Starting: prep_start")
         self.logger.info("Arguments: "+str(args))
         status = (True, None)
-        tool_d = {}
         try:
             del args['run_build']
             options = ['name',
@@ -126,134 +257,7 @@ class Action:
             vent_config = Template(template=self.vent_config)
             files = vent_config.option('main', 'files')
             s, template = self.plugin.constraint_options(args, options)
-            for section in s:
-                # initialize needed vars
-                template_path = os.path.join(s[section]['path'],
-                                             'vent.template')
-                c_name = s[section]['image_name'].replace(':', '-')
-                c_name = c_name.replace('/', '-')
-                image_name = s[section]['image_name']
-
-                # checkout the right version and branch of the repo
-                self.plugin.branch = branch
-                self.plugin.version = version
-                cwd = os.getcwd()
-                self.logger.info("current directory is: " + str(cwd))
-                os.chdir(os.path.join(s[section]['path']))
-                status = self.plugin.checkout()
-                self.logger.info(status)
-                os.chdir(cwd)
-
-                if run_build:
-                    status = self.build(name=s[section]['name'],
-                                        groups=groups,
-                                        enabled=enabled,
-                                        branch=branch,
-                                        version=version)
-                    self.logger.info(status)
-
-                # set docker settings for container
-                vent_template = Template(template_path)
-                status = vent_template.section('docker')
-                self.logger.info(status)
-                tool_d[c_name] = {'image': image_name,
-                                  'name': c_name}
-                if status[0]:
-                    for option in status[1]:
-                        options = option[1]
-                        # check for commands to evaluate
-                        if '`' in options:
-                            cmds = options.split('`')
-                            if len(cmds) > 2:
-                                i = 1
-                                while i < len(cmds):
-                                    try:
-                                        cmds[i] = check_output(shlex.split(cmds[i]),
-                                                               stderr=STDOUT,
-                                                               close_fds=True).strip()
-                                    except Exception as e:  # pragma: no cover
-                                        self.logger.error("unable to evaluate command specified in vent.template: " + str(e))
-                                    i += 2
-                            options = "".join(cmds)
-                        # store options set for docker
-                        try:
-                            tool_d[c_name][option[0]] = literal_eval(options)
-                        except Exception as e:  # pragma: no cover
-                            self.logger.error("unable to store the options set for docker: " + str(e))
-                            tool_d[c_name][option[0]] = options
-
-                # get temporary name for links, etc.
-                status = vent_template.section('info')
-                self.logger.info(status)
-                plugin_c = Template(template=self.plugin.manifest)
-                status, plugin_sections = plugin_c.sections()
-                self.logger.info(status)
-                for plugin_section in plugin_sections:
-                    status = plugin_c.option(plugin_section, "link_name")
-                    self.logger.info(status)
-                    image_status = plugin_c.option(plugin_section,
-                                                   "image_name")
-                    self.logger.info(image_status)
-                    if status[0] and image_status[0]:
-                        cont_name = image_status[1].replace(':', '-')
-                        cont_name = cont_name.replace('/', '-')
-                        if cont_name not in tool_d:
-                            tool_d[cont_name] = {'image': image_status[1],
-                                                 'name': cont_name,
-                                                 'start': False}
-                        tool_d[cont_name]['tmp_name'] = status[1]
-
-                # add extra labels
-                if 'labels' not in tool_d[c_name]:
-                    tool_d[c_name]['labels'] = {}
-                tool_d[c_name]['labels']['vent'] = Version()
-                tool_d[c_name]['labels']['vent.namespace'] = s[section]['namespace']
-                tool_d[c_name]['labels']['vent.branch'] = branch
-                tool_d[c_name]['labels']['vent.version'] = version
-                tool_d[c_name]['labels']['vent.name'] = s[section]['name']
-
-                if 'groups' in s[section]:
-                    # add labels for groups
-                    tool_d[c_name]['labels']['vent.groups'] = s[section]['groups']
-                    # add restart=always to core containers
-                    if 'core' in s[section]['groups']:
-                        tool_d[c_name]['restart_policy'] = {"Name": "always"}
-                    # send logs to syslog
-                    if 'syslog' not in s[section]['groups'] and 'core' in s[section]['groups']:
-                        tool_d[c_name]['log_config'] = {'type': 'syslog',
-                                                        'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                                   'syslog-facility': 'daemon',
-                                                                   'tag': 'core'}}
-                    if 'syslog' not in s[section]['groups']:
-                        tool_d[c_name]['log_config'] = {'type': 'syslog',
-                                                        'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                                   'syslog-facility': 'daemon',
-                                                                   'tag': 'plugin'}}
-                    # mount necessary directories
-                    if 'files' in s[section]['groups']:
-                        if 'volumes' in tool_d[c_name]:
-                            tool_d[c_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
-                        else:
-                            tool_d[c_name]['volumes'] = {self.plugin.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
-                        if files[0]:
-                            tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
-                else:
-                    tool_d[c_name]['log_config'] = {'type': 'syslog',
-                                                    'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                               'syslog-facility': 'daemon',
-                                                               'tag': 'plugin'}}
-
-                # add label for priority
-                status = vent_template.section('settings')
-                self.logger.info(status)
-                if status[0]:
-                    for option in status[1]:
-                        if option[0] == 'priority':
-                            tool_d[c_name]['labels']['vent.priority'] = option[1]
-
-                # only start tools that have been built
-                if s[section]['built'] != 'yes':
-                    del tool_d[c_name]
+            status, tool_d = self.start_sections(s, files)
 
             # check and update links, volumes_from, network_mode
             for container in tool_d.keys():
@@ -628,18 +632,22 @@ class Action:
                         for section in sections[1]:
                             image_name = plugin_c.option(section,
                                                          "image_name")
-                            if image_name[1] == "cyberreboot/vent-" + tool + ":" + branch:
+                            check_image = "cyberreboot/vent-"
+                            check_image += tool + ":" + branch
+                            if image_name[1] == check_image:
                                 timestamp = str(datetime.utcnow()) + " UTC"
                                 try:
                                     # currently can't use docker-py because it
-                                    # returns a 404 on pull so no way to valid if it
-                                    # worked or didn't
-                                    #image_id = self.d_client.images.pull('cyberreboot/vent-'+tool, tag=branch)
+                                    # returns a 404 on pull so no way to valid
+                                    # if it worked or didn't
                                     image_id = None
-                                    output = check_output(shlex.split("docker pull cyberreboot/vent-" + tool + ":" + branch), stderr=STDOUT)
+                                    cmd = "docker pull " + check_image
+                                    output = check_output(shlex.split(cmd),
+                                                          stderr=STDOUT)
+                                    sha = "Digest: sha256:"
                                     for line in output.split('\n'):
-                                        if line.startswith("Digest: sha256:"):
-                                            image_id = line.split("Digest: sha256:")[1][:12]
+                                        if line.startswith(sha):
+                                            image_id = line.split(sha)[1][:12]
                                     if image_id:
                                         plugin_c.set_option(section,
                                                             "built",
