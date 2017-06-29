@@ -482,8 +482,7 @@ class Action:
             s, template = self.plugin.constraint_options(args, options)
             self.logger.info(s)
             for section in s:
-                container_name = s[section]['image_name'].replace(':',
-                                                                         '-')
+                container_name = s[section]['image_name'].replace(':', '-')
                 container_name = container_name.replace('/', '-')
                 try:
                     container = self.d_client.containers.get(container_name)
