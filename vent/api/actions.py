@@ -104,6 +104,7 @@ class Action:
                         version,
                         run_build):
         """ Run through sections for prep_start """
+        tool_d = {}
         for section in s:
             # initialize needed vars
             template_path = os.path.join(s[section]['path'],
@@ -249,7 +250,7 @@ class Action:
         args = locals()
         self.logger.info("Starting: prep_start")
         self.logger.info("Arguments: "+str(args))
-        status = (True, None)
+        status = (False, None)
         try:
             del args['run_build']
             options = ['name',

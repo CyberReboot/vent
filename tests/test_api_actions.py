@@ -46,7 +46,6 @@ def test_prep_start():
     assert status[0] == True
     status = instance.prep_start(name='kibana', branch='master')
     assert type(status) == tuple
-    assert status[1] == None
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent',
                           branch='master',
@@ -143,7 +142,6 @@ def test_cores():
     cores = instance.cores('build')
     assert cores[0] == True
     cores = instance.cores('start')
-    assert cores[1] == None
     assert cores[0] == True
     cores = instance.cores('stop')
     assert cores[0] == True
