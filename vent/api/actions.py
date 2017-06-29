@@ -130,9 +130,8 @@ class Action:
                 # initialize needed vars
                 template_path = os.path.join(sections[section]['path'],
                                              'vent.template')
-                container_name = sections[section]['image_name'].replace(':',
-                                                                         '-')
-                container_name = container_name.replace('/', '-')
+                c_name = sections[section]['image_name'].replace(':', '-')
+                c_name = c_name.replace('/', '-')
                 image_name = sections[section]['image_name']
 
                 # checkout the right version and branch of the repo
@@ -157,8 +156,8 @@ class Action:
                 vent_template = Template(template_path)
                 status = vent_template.section('docker')
                 self.logger.info(status)
-                tool_dict[container_name] = {'image': image_name,
-                                             'name': container_name}
+                tool_dict[c_name] = {'image': image_name,
+                                     'name': c_name}
                 if status[0]:
                     for option in status[1]:
                         options = option[1]
@@ -178,10 +177,10 @@ class Action:
                             options = "".join(cmds)
                         # store options set for docker
                         try:
-                            tool_dict[container_name][option[0]] = ast.literal_eval(options)
+                            tool_dict[c_name][option[0]] = ast.literal_eval(options)
                         except Exception as e:  # pragma: no cover
                             self.logger.error("unable to store the options set for docker: " + str(e))
-                            tool_dict[container_name][option[0]] = options
+                            tool_dict[c_name][option[0]] = options
 
                 # get temporary name for links, etc.
                 status = vent_template.section('info')
@@ -205,44 +204,44 @@ class Action:
                         tool_dict[cont_name]['tmp_name'] = status[1]
 
                 # add extra labels
-                if 'labels' not in tool_dict[container_name]:
-                    tool_dict[container_name]['labels'] = {}
-                tool_dict[container_name]['labels']['vent'] = Version()
-                tool_dict[container_name]['labels']['vent.namespace'] = sections[section]['namespace']
-                tool_dict[container_name]['labels']['vent.branch'] = branch
-                tool_dict[container_name]['labels']['vent.version'] = version
-                tool_dict[container_name]['labels']['vent.name'] = sections[section]['name']
+                if 'labels' not in tool_dict[c_name]:
+                    tool_dict[c_name]['labels'] = {}
+                tool_dict[c_name]['labels']['vent'] = Version()
+                tool_dict[c_name]['labels']['vent.namespace'] = sections[section]['namespace']
+                tool_dict[c_name]['labels']['vent.branch'] = branch
+                tool_dict[c_name]['labels']['vent.version'] = version
+                tool_dict[c_name]['labels']['vent.name'] = sections[section]['name']
 
                 if 'groups' in sections[section]:
                     # add labels for groups
-                    tool_dict[container_name]['labels']['vent.groups'] = sections[section]['groups']
+                    tool_dict[c_name]['labels']['vent.groups'] = sections[section]['groups']
                     # add restart=always to core containers
                     if 'core' in sections[section]['groups']:
-                        tool_dict[container_name]['restart_policy'] = {"Name": "always"}
+                        tool_dict[c_name]['restart_policy'] = {"Name": "always"}
                     # send logs to syslog
                     if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
-                        tool_dict[container_name]['log_config'] = {'type': 'syslog',
-                                                                   'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                                              'syslog-facility': 'daemon',
-                                                                              'tag': 'core'}}
+                        tool_dict[c_name]['log_config'] = {'type': 'syslog',
+                                                           'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                                      'syslog-facility': 'daemon',
+                                                                      'tag': 'core'}}
                     if 'syslog' not in sections[section]['groups']:
-                        tool_dict[container_name]['log_config'] = {'type': 'syslog',
-                                                                   'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                                              'syslog-facility': 'daemon',
-                                                                              'tag': 'plugin'}}
+                        tool_dict[c_name]['log_config'] = {'type': 'syslog',
+                                                           'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                                      'syslog-facility': 'daemon',
+                                                                      'tag': 'plugin'}}
                     # mount necessary directories
                     if 'files' in sections[section]['groups']:
-                        if 'volumes' in tool_dict[container_name]:
-                            tool_dict[container_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
+                        if 'volumes' in tool_dict[c_name]:
+                            tool_dict[c_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
                         else:
-                            tool_dict[container_name]['volumes'] = {self.plugin.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
+                            tool_dict[c_name]['volumes'] = {self.plugin.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
                         if files[0]:
-                            tool_dict[container_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
+                            tool_dict[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
                 else:
-                    tool_dict[container_name]['log_config'] = {'type': 'syslog',
-                                                               'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                                          'syslog-facility': 'daemon',
-                                                                          'tag': 'plugin'}}
+                    tool_dict[c_name]['log_config'] = {'type': 'syslog',
+                                                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                                                  'syslog-facility': 'daemon',
+                                                                  'tag': 'plugin'}}
 
                 # add label for priority
                 status = vent_template.section('settings')
@@ -250,11 +249,11 @@ class Action:
                 if status[0]:
                     for option in status[1]:
                         if option[0] == 'priority':
-                            tool_dict[container_name]['labels']['vent.priority'] = option[1]
+                            tool_dict[c_name]['labels']['vent.priority'] = option[1]
 
                 # only start tools that have been built
                 if sections[section]['built'] != 'yes':
-                    del tool_dict[container_name]
+                    del tool_dict[c_name]
 
             # check and update links, volumes_from, network_mode
             for container in tool_dict.keys():
