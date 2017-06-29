@@ -2,7 +2,6 @@ import docker
 import os
 
 from vent.helpers.meta import Containers
-from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Docker
 from vent.helpers.meta import Gpu
@@ -12,6 +11,7 @@ from vent.helpers.meta import Services
 from vent.helpers.meta import System
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Tools
+from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
 

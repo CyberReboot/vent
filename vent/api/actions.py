@@ -11,8 +11,8 @@ from vent.api.plugins import Plugin
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
-from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Images
+from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Version
 
 
@@ -603,7 +603,7 @@ class Action:
         status = (True, None)
         try:
             self.logger.info("action provided: " + str(action))
-            core = Tools_Status(True, branch=branch)
+            core = Tools_Status(True, branch=branch)[1]
             if action in ["install", "build"]:
                 tools = []
                 plugins = Plugin(plugins_dir=".internals/plugins")
