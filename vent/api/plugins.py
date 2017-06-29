@@ -483,6 +483,16 @@ class Plugin:
         except Exception as e:  # pragma: no cover
             self.logger.error("unable to change to directory: " + str(cwd) +
                               " because: " + str(e))
+        # remove untagged images
+        untagged = self.d_client.images.list(filters={"label": "vent",
+                                                      "dangling": "true"})
+        if untagged:
+            deleted_images = ""
+            for image in untagged:
+                deleted_images = '\n'.join([deleted_images, image.id])
+                self.d_client.images.remove(image.id, force=True)
+            self.logger.info("removed dangling images:" + deleted_images)
+
         self.logger.info("template of builder: " + str(template))
         self.logger.info("Finished: builder")
         return template
@@ -726,13 +736,20 @@ class Plugin:
                         self.logger.warning("Failed to pull image, going to"
                                             " build instead: " + str(e))
                 if not pull:
+                    commit_tag = ""
+                    if image_name.endswith('HEAD'):
+                        commit_id = template.option(section, "commit_id")
+                        if commit_id[0]:
+                            commit_tag = (" -t " + image_name[:-4] +
+                                          str(commit_id[1]))
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.name=" +
                                                       name[1] + " --label "
                                                       "vent.groups=" +
                                                       groups[1] + " -t " +
-                                                      image_name + " ."),
+                                                      image_name +
+                                                      commit_tag + " ."),
                                           stderr=STDOUT,
                                           close_fds=True)
                     self.logger.info("Building " + name[1] + "\n" +
@@ -875,7 +892,15 @@ class Plugin:
 
             # check for image and remove
             try:
-                response = self.d_client.images.remove(image_name)
+                response = None
+                # due to problems with core image_id value in manifest file
+                groups = template.option(result, 'groups')
+                if groups[0] and "core" in groups[1]:
+                    response = self.d_client.images.remove(image_name)
+                else:
+                    image_id = template.option(result, 'image_id')[1]
+                    response = self.d_client.images.remove(image_id,
+                                                           force=True)
                 self.logger.info(response)
                 self.logger.info("Removing plugin image: " + image_name)
             except Exception as e:  # pragma: no cover
