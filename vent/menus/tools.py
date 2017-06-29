@@ -137,7 +137,7 @@ class ToolForm(npyscreen.ActionForm):
         else:
             originals = Containers()
 
-        tool_dict = {}
+        tool_d = {}
         if self.action['action_name'] in ['clean', 'remove', 'stop', 'update']:
             reconfirmation_str = ""
             if self.action['cores']:
@@ -166,7 +166,7 @@ class ToolForm(npyscreen.ActionForm):
                                                                branch=t[1],
                                                                version=t[2])
                         if status[0]:
-                            tool_dict.update(status[1])
+                            tool_d.update(status[1])
                     else:
                         thr = Thread(target=self.action['action_object1'],
                                      args=(),
@@ -179,7 +179,7 @@ class ToolForm(npyscreen.ActionForm):
         if self.action['action_name'] == 'start':
             thr = Thread(target=self.action['action_object1'],
                          args=(),
-                         kwargs={'tool_dict': tool_dict})
+                         kwargs={'tool_d': tool_d})
             popup(originals, self.action['type'], thr,
                   'Please wait, ' + self.action['present_t'] + '...')
 

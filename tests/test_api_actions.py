@@ -126,7 +126,7 @@ def test_logs():
     status = instance.logs(grep_list=['foo'])
     assert type(status) == tuple
     assert status[0] == True
-    status = instance.logs(container_type="core")
+    status = instance.logs(c_type="core")
     assert type(status) == tuple
     assert status[0] == True
 
