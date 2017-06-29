@@ -125,27 +125,27 @@ class Action:
                        'version']
             vent_config = Template(template=self.vent_config)
             files = vent_config.option('main', 'files')
-            sections, template = self.plugin.constraint_options(args, options)
-            for section in sections:
+            s, template = self.plugin.constraint_options(args, options)
+            for section in s:
                 # initialize needed vars
-                template_path = os.path.join(sections[section]['path'],
+                template_path = os.path.join(s[section]['path'],
                                              'vent.template')
-                c_name = sections[section]['image_name'].replace(':', '-')
+                c_name = s[section]['image_name'].replace(':', '-')
                 c_name = c_name.replace('/', '-')
-                image_name = sections[section]['image_name']
+                image_name = s[section]['image_name']
 
                 # checkout the right version and branch of the repo
                 self.plugin.branch = branch
                 self.plugin.version = version
                 cwd = os.getcwd()
                 self.logger.info("current directory is: " + str(cwd))
-                os.chdir(os.path.join(sections[section]['path']))
+                os.chdir(os.path.join(s[section]['path']))
                 status = self.plugin.checkout()
                 self.logger.info(status)
                 os.chdir(cwd)
 
                 if run_build:
-                    status = self.build(name=sections[section]['name'],
+                    status = self.build(name=s[section]['name'],
                                         groups=groups,
                                         enabled=enabled,
                                         branch=branch,
@@ -207,30 +207,30 @@ class Action:
                 if 'labels' not in tool_d[c_name]:
                     tool_d[c_name]['labels'] = {}
                 tool_d[c_name]['labels']['vent'] = Version()
-                tool_d[c_name]['labels']['vent.namespace'] = sections[section]['namespace']
+                tool_d[c_name]['labels']['vent.namespace'] = s[section]['namespace']
                 tool_d[c_name]['labels']['vent.branch'] = branch
                 tool_d[c_name]['labels']['vent.version'] = version
-                tool_d[c_name]['labels']['vent.name'] = sections[section]['name']
+                tool_d[c_name]['labels']['vent.name'] = s[section]['name']
 
-                if 'groups' in sections[section]:
+                if 'groups' in s[section]:
                     # add labels for groups
-                    tool_d[c_name]['labels']['vent.groups'] = sections[section]['groups']
+                    tool_d[c_name]['labels']['vent.groups'] = s[section]['groups']
                     # add restart=always to core containers
-                    if 'core' in sections[section]['groups']:
+                    if 'core' in s[section]['groups']:
                         tool_d[c_name]['restart_policy'] = {"Name": "always"}
                     # send logs to syslog
-                    if 'syslog' not in sections[section]['groups'] and 'core' in sections[section]['groups']:
+                    if 'syslog' not in s[section]['groups'] and 'core' in s[section]['groups']:
                         tool_d[c_name]['log_config'] = {'type': 'syslog',
                                                         'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                                                    'syslog-facility': 'daemon',
                                                                    'tag': 'core'}}
-                    if 'syslog' not in sections[section]['groups']:
+                    if 'syslog' not in s[section]['groups']:
                         tool_d[c_name]['log_config'] = {'type': 'syslog',
                                                         'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                                                    'syslog-facility': 'daemon',
                                                                    'tag': 'plugin'}}
                     # mount necessary directories
-                    if 'files' in sections[section]['groups']:
+                    if 'files' in s[section]['groups']:
                         if 'volumes' in tool_d[c_name]:
                             tool_d[c_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
                         else:
@@ -252,7 +252,7 @@ class Action:
                             tool_d[c_name]['labels']['vent.priority'] = option[1]
 
                 # only start tools that have been built
-                if sections[section]['built'] != 'yes':
+                if s[section]['built'] != 'yes':
                     del tool_d[c_name]
 
             # check and update links, volumes_from, network_mode
@@ -398,7 +398,7 @@ class Action:
         status = (True, None)
         try:
             options = ['path', 'image_name', 'image_id']
-            sections, template = self.plugin.constraint_options(args, options)
+            s, template = self.plugin.constraint_options(args, options)
 
             # get existing containers and images and states
             running_containers = Containers()
@@ -409,11 +409,11 @@ class Action:
 
             # if repo, pull and build
             # if registry image, pull
-            for section in sections:
+            for section in s:
                 try:
                     cwd = os.getcwd()
                     self.logger.info("current working directory: " + str(cwd))
-                    os.chdir(sections[section]['path'])
+                    os.chdir(s[section]['path'])
                     self.plugin.version = version
                     self.plugin.branch = branch
                     c_status = self.plugin.checkout()
@@ -425,8 +425,8 @@ class Action:
                                           str(e))
                         pass
                     template = self.plugin.builder(template,
-                                                   sections[section]['path'],
-                                                   sections[section]['image_name'],
+                                                   s[section]['path'],
+                                                   s[section]['image_name'],
                                                    section,
                                                    build=True,
                                                    branch=branch,
@@ -479,10 +479,10 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            sections, template = self.plugin.constraint_options(args, options)
-            self.logger.info(sections)
-            for section in sections:
-                container_name = sections[section]['image_name'].replace(':',
+            s, template = self.plugin.constraint_options(args, options)
+            self.logger.info(s)
+            for section in s:
+                container_name = s[section]['image_name'].replace(':',
                                                                          '-')
                 container_name = container_name.replace('/', '-')
                 try:
@@ -526,11 +526,10 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            sections, template = self.plugin.constraint_options(args, options)
-            self.logger.info(sections)
-            for section in sections:
-                container_name = sections[section]['image_name'].replace(':',
-                                                                         '-')
+            s, template = self.plugin.constraint_options(args, options)
+            self.logger.info(s)
+            for section in s:
+                container_name = s[section]['image_name'].replace(':', '-')
                 container_name = container_name.replace('/', '-')
                 try:
                     container = self.d_client.containers.get(container_name)
@@ -561,13 +560,13 @@ class Action:
         status = (True, None)
         try:
             options = ['image_name', 'path']
-            sections, template = self.plugin.constraint_options(args, options)
-            self.logger.info(sections)
-            for section in sections:
+            s, template = self.plugin.constraint_options(args, options)
+            self.logger.info(s)
+            for section in s:
                 self.logger.info("Building " + str(section) + " ...")
                 template = self.plugin.builder(template,
-                                               sections[section]['path'],
-                                               sections[section]['image_name'],
+                                               s[section]['path'],
+                                               s[section]['image_name'],
                                                section,
                                                build=True,
                                                branch=branch,
