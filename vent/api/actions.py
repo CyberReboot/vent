@@ -751,61 +751,51 @@ class Action:
 
         return status
 
-    def logs(self, container_type=None, grep_list=None):
+    def logs(self, c_type=None, grep_list=None):
         """ Generically filter logs stored in log containers """
+        def get_logs(logs, log_entries):
+            try:
+                for log in logs:
+                    if str(container.name) in log_entries:
+                        log_entries[str(container.name)].append(log)
+                    else:
+                        log_entries[str(container.name)] = [log]
+            except Exception as e:  # pragma: no cover
+                self.logger.error("Unable to get logs for " +
+                                  str(container.name) +
+                                  " because: " + str(e))
+            return log_entries
+
         self.logger.info("Starting: logs")
         status = (True, None)
         log_entries = {}
-        try:
-            containers = self.d_client.containers.list(all=True,
-                                                       filters={'label': 'vent'})
-            self.logger.info("containers found: " + str(containers))
-            if grep_list:
-                compare_containers = containers
-                if container_type:
-                    try:
-                        compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
-                    except Exception as e:  # pragma: no cover
-                        self.logger.error("Unable to limit containers by container_type: " + str(container_type) + " because: " + str(e))
+        containers = self.d_client.containers.list(all=True,
+                                                   filters={'label': 'vent'})
+        self.logger.info("containers found: " + str(containers))
+        comp_c = containers
+        if c_type:
+            try:
+                comp_c = [c for c in containers
+                          if (c_type
+                              in c.attrs['Config']['Labels']['vent.groups'])]
+            except Exception as e:  # pragma: no cover
+                self.logger.error("Unable to limit containers by: " +
+                                  str(c_type) + " because: " +
+                                  str(e))
 
-                for expression in grep_list:
-                    for container in compare_containers:
-                        try:
-                            # 'logs' stores each line containing the expression
-                            logs = [log for log in container.logs().split("\n") if expression in log]
-                            for log in logs:
-                                if str(container.name) in log_entries:
-                                    log_entries[str(container.name)].append(log)
-                                else:
-                                    log_entries[str(container.name)] = [log]
-                        except Exception as e:  # pragma: no cover
-                            self.logger.error("Unable to get logs for " +
-                                              str(container.name) +
-                                              " because: " + str(e))
-            else:
-                compare_containers = containers
-                if container_type:
-                    try:
-                        compare_containers = [c for c in containers if (container_type in c.attrs['Config']['Labels']['vent.groups'])]
-                    except Exception as e:  # pragma: no cover
-                        self.logger.error("Unable to limit containers by container_type: " + str(container_type) + " because: " + str(e))
-                for container in compare_containers:
-                    try:
-                        logs = container.logs().split("\n")
-                        for log in logs:
-                            if str(container.name) in log_entries:
-                                log_entries[str(container.name)].append(log)
-                            else:
-                                log_entries[str(container.name)] = [log]
-                    except Exception as e:  # pragma: no cover
-                        self.logger.error("Unable to get logs for " +
-                                          str(container.name) +
-                                          " because: " + str(e))
-            status = (True, log_entries)
-        except Exception as e:  # pragma: no cover
-            self.logger.error("logs failed with error: " + str(e))
-            status = (False, e)
+        if grep_list:
+            for expression in grep_list:
+                for container in comp_c:
+                    # 'logs' stores each line containing the expression
+                    logs = [log for log in container.logs().split("\n")
+                            if expression in log]
+                    log_entries = get_logs(logs, log_entries)
+        else:
+            for container in comp_c:
+                logs = container.logs().split("\n")
+                log_entries = get_logs(logs, log_entries)
 
+        status = (True, log_entries)
         self.logger.info("Status of logs: " + str(status[0]))
         self.logger.info("Finished: logs")
         return status
