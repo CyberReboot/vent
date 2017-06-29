@@ -46,7 +46,7 @@ def test_prep_start():
     assert status[0] == True
     status = instance.prep_start(name='kibana', branch='master')
     assert type(status) == tuple
-    assert status[1] = None
+    assert status[1] == None
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent',
                           branch='master',
