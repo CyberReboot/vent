@@ -95,7 +95,14 @@ class Action:
         self.logger.info("Finished: remove")
         return status
 
-    def start_sections(self, s, files):
+    def _start_sections(self,
+                        s,
+                        files,
+                        groups,
+                        enabled,
+                        branch,
+                        version,
+                        run_build):
         """ Run through sections for prep_start """
         for section in s:
             # initialize needed vars
@@ -256,7 +263,13 @@ class Action:
             vent_config = Template(template=self.vent_config)
             files = vent_config.option('main', 'files')
             s, template = self.plugin.constraint_options(args, options)
-            status, tool_d = self.start_sections(s, files)
+            status, tool_d = self._start_sections(s,
+                                                  files,
+                                                  groups,
+                                                  enabled,
+                                                  branch,
+                                                  version,
+                                                  run_build)
 
             # check and update links, volumes_from, network_mode
             for container in tool_d.keys():
