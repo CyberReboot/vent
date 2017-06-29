@@ -13,7 +13,7 @@ def test_add():
     assert type(status) == tuple
     assert status[0] == True
     bad_instance = Plugin()
-    status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
+    status = bad_instance.add('https://github.com/cyberreboot/vent', build=True)
     assert type(status) == tuple
     assert status[0] == True
     instance = Plugin()
