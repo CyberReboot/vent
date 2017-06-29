@@ -306,11 +306,11 @@ class Action:
             for c in tool_d.keys():
                 if 'start' in tool_d[c] and not tool_d[c]['start']:
                     del tool_d[c]
+            status = (True, tool_d)
         except Exception as e:  # pragma: no cover
             self.logger.error("prep_start failed with error: "+str(e))
             status = (False, e)
 
-        status = (True, tool_d)
         self.logger.info("Status of prep_start: "+str(status[0]))
         self.logger.info("Finished: prep_start")
         return status
