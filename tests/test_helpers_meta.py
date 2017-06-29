@@ -2,7 +2,7 @@ import docker
 import os
 
 from vent.helpers.meta import Containers
-from vent.helpers.meta import Core
+from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Docker
 from vent.helpers.meta import Gpu
@@ -70,10 +70,12 @@ def test_services():
     services = Services(vent=False)
     assert type(services) == list
 
-def test_core():
-    """ Test the core function """
-    core = Core()
-    assert type(core) == dict
+def test_tools_status():
+    """ Test the tools_status function """
+    core = Tools_Status(True)
+    assert type(core) == tuple
+    plugins = Tools_Status(False)
+    assert type(plugins) == tuple
 
 def test_timestamp():
     """ Test the timestamp function """

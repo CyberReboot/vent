@@ -225,66 +225,6 @@ def Services(vent=True):
     return services
 
 
-def Core(branch="master", **kargs):
-    """
-    Get the normal core tools, and the currently installed/built/running ones,
-    including custom core services
-    """
-    # !! TODO this might need to store namespaces/branches/versions
-    core = {'built': [], 'running': [], 'installed': [], 'normal': []}
-
-    # get normal core tools
-    plugins = Plugin(plugins_dir=".internals/plugins")
-    status, cwd = plugins.clone('https://github.com/cyberreboot/vent')
-    if status:
-        plugins.version = 'HEAD'
-        plugins.branch = branch
-        response = plugins.checkout()
-        matches = plugins._available_tools(groups='core')
-        for match in matches:
-            core['normal'].append(match[0].split('/')[-1])
-    else:
-        core['normal'] = 'failed'
-
-    # get core tools that have been installed
-    path_dirs = PathDirs(**kargs)
-    manifest = os.path.join(path_dirs.meta_dir, "plugin_manifest.cfg")
-    template = Template(template=manifest)
-    tools = template.sections()
-    if tools[0]:
-        for tool in tools[1]:
-            groups = template.option(tool, "groups")
-            if groups[0] and "core" in groups[1]:
-                name = template.option(tool, "name")
-                if name[0]:
-                    core['installed'].append(name[1])
-
-    # get core tools that have been built and/or are running
-    try:
-        d_client = docker.from_env()
-        images = d_client.images.list()
-        for image in images:
-            try:
-                if ("vent.groups" in image.attrs['Labels'] and
-                   'core' in image.attrs['Labels']['vent.groups']):
-                    if 'vent.name' in image.attrs['Labels']:
-                        core['built'].append(image.attrs['Labels']['vent.name'])
-            except Exception as err:  # pragma: no cover
-                pass
-        containers = d_client.containers.list()
-        for container in containers:
-            try:
-                if ("vent.groups" in container.attrs['Config']['Labels'] and
-                   'core' in container.attrs['Config']['Labels']['vent.groups']):
-                    if 'vent.name' in container.attrs['Config']['Labels']:
-                        core['running'].append(container.attrs['Config']['Labels']['vent.name'])
-            except Exception as err:  # pragma: no cover
-                pass
-    except Exception as e:  # pragma: no cover
-        pass
-    return core
-
-
 def Tools_Status(core, branch="master", **kargs):
     """
     Get tools that are currently installed/built/running and also the number of
@@ -295,22 +235,24 @@ def Tools_Status(core, branch="master", **kargs):
     all_tools = {'built': [], 'running': [], 'installed': [], 'normal': []}
     core_repo = 'https://github.com/cyberreboot/vent'
     repos = set()
+    tools = Tools(**kargs)
 
-    # get list of tools
+    # get manifest file
     path_dirs = PathDirs(**kargs)
     manifest = os.path.join(path_dirs.meta_dir, "plugin_manifest.cfg")
     template = Template(template=manifest)
     tools = template.sections()
 
-    # get normal tools
+    # get repos
     if core:
         repos.add(core_repo)
     else:
-        if tools[0]:
-            for tool in tools[1]:
-                repo = template.option(tool, 'repo')
-                if repo[0] and repo[1] != core_repo:
-                    repos.add(repo[1])
+        for tool in tools[1]:
+            repo = template.option(tool, 'repo')
+            if repo[0] and repo[1] != core_repo:
+                repos.add(repo[1])
+
+    # get normal tools
     plugins = Plugin(plugins_dir=".internals/plugins")
     for repo in repos:
         status, cwd = plugins.clone(repo)
@@ -329,13 +271,12 @@ def Tools_Status(core, branch="master", **kargs):
             all_tools['normal'] = 'failed'
 
     # get tools that have been installed
-    if tools[0]:
-        for tool in tools[1]:
-            repo = template.option(tool, "repo")
-            if repo[0] and repo[1] in repos:
-                name = template.option(tool, "name")
-                if name[0]:
-                    all_tools['installed'].append(name[1])
+    for tool in tools[1]:
+        repo = template.option(tool, "repo")
+        if repo[0] and repo[1] in repos:
+            name = template.option(tool, "name")
+            if name[0]:
+                all_tools['installed'].append(name[1])
 
     # get core tools that have been built and/or are running
     try:

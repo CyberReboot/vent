@@ -10,7 +10,6 @@ from threading import Thread
 
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
-from vent.helpers.meta import Core
 from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Gpu
@@ -57,7 +56,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield3.display()
 
         # set core value string
-        core = Core()
+        repos, core = Tools_Status(True)
         installed = 0
         custom_installed = 0
         built = 0
