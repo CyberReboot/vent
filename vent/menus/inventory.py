@@ -1,7 +1,5 @@
 import npyscreen
 
-from vent.api.actions import Action
-
 
 class InventoryForm(npyscreen.FormBaseNew):
     """ Inventory form for the Vent CLI """

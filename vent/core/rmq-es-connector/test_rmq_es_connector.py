@@ -1,7 +1,5 @@
-import os
 import pytest
 import sys
-import time
 
 import rmq_es_connector
 

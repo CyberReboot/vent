@@ -34,12 +34,12 @@ class ChooseToolsForm(npyscreen.ActionForm):
         i = 4
         for branch in self.parentApp.repo_value['versions']:
             self.tools_tc[branch] = {}
-            title_text = self.add(npyscreen.TitleText,
-                                  name='Branch: ' + branch,
-                                  editable=False,
-                                  rely=i,
-                                  relx=5,
-                                  max_width=25)
+            self.add(npyscreen.TitleText,
+                     name='Branch: ' + branch,
+                     editable=False,
+                     rely=i,
+                     relx=5,
+                     max_width=25)
             tools = self.repo_tools(branch)
             i += 1
             for tool in tools:

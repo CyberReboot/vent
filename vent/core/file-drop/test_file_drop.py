@@ -1,6 +1,3 @@
-import os
-import pytest
-
 import file_drop
 
 

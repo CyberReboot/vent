@@ -1,7 +1,5 @@
 import file_watch
 import os
-import pytest
-import time
 
 from vent.helpers.paths import PathDirs
 

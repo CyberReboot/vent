@@ -5,9 +5,6 @@ def file_queue(path, template_path="/vent/"):
     """
     import ConfigParser
     import docker
-    import magic
-    import os
-    import time
 
     status = (True, None)
     images = []
