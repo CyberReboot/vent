@@ -10,12 +10,12 @@ from threading import Thread
 
 from vent.api.actions import Action
 from vent.helpers.meta import Containers
-from vent.helpers.meta import Core
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
+from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Uptime
 from vent.menus.add import AddForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
@@ -56,7 +56,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield3.display()
 
         # set core value string
-        core = Core()
+        repos, core = Tools_Status(True)
         installed = 0
         custom_installed = 0
         built = 0
@@ -104,23 +104,61 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.addfield4.value = "Ready to start jobs"
         self.addfield5.labelColor = color
 
+        # set plugin value string
+        repos, plugins = Tools_Status(False)
+        installed = 0
+        custom_installed = 0
+        built = 0
+        custom_built = 0
+        running = 0
+        custom_running = 0
+        normal = str(len(plugins['normal']))
+        for tool in plugins['running']:
+            if tool in plugins['normal']:
+                running += 1
+            else:
+                custom_running += 1
+        for tool in plugins['built']:
+            if tool in plugins['normal']:
+                built += 1
+            else:
+                custom_built += 1
+        for tool in plugins['installed']:
+            if tool in plugins['normal']:
+                installed += 1
+            else:
+                custom_installed += 1
+        plugin_str = str(running + custom_running) + "/" + normal + " tools running"
+        if custom_running > 0:
+            plugin_str += " (" + str(custom_running) + " tools custom)"
+        plugin_str += ", " + str(built + custom_built) + "/" + normal + " tools built"
+        if custom_built > 0:
+            plugin_str += " (" + str(custom_built) + " tools custom)"
+        plugin_str += ", " + str(installed + custom_installed) + "/" + normal
+        plugin_str += " tools installed"
+        if custom_built > 0:
+            plugin_str += " (" + str(custom_installed) + " tools custom)"
+        plugin_str += ", " + str(repos) + " plugin(s) installed"
+        self.addfield6.value = plugin_str
+
         # get jobs
         jobs = Jobs()
         # number of jobs, number of tool containers
-        self.addfield6.value = str(jobs[0]) + " jobs running (" + str(jobs[1])
-        self.addfield6.value += " tool containers), " + str(jobs[2])
-        self.addfield6.value += " completed jobs"
+        self.addfield7.value = str(jobs[0]) + " jobs running (" + str(jobs[1])
+        self.addfield7.value += " tool containers), " + str(jobs[2])
+        self.addfield7.value += " completed jobs"
 
         # TODO check if there are jobs running and update addfield4
         if jobs[0] > 0:
             self.addfield4.labelColor = "GOOD"
             self.addfield4.value = "Processing jobs"
-            self.addfield6.labelColor = "GOOD"
+            self.addfield7.labelColor = "GOOD"
         else:
-            self.addfield6.labelColor = "DEFAULT"
+            self.addfield7.labelColor = "DEFAULT"
         self.addfield4.display()
         self.addfield5.display()
         self.addfield6.display()
+        self.addfield7.display()
 
         os.chdir(current_path)
         return
@@ -328,7 +366,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5 = self.add(npyscreen.TitleFixedText,
                                   name='Core Tools:', labelColor='DANGER',
                                   value="Not built")
-        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Jobs:',
+        self.addfield6 = self.add(npyscreen.TitleFixedText,
+                                  name='Plugin Tools:', labelColor='DEFAULT',
+                                  value="Not built")
+        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Jobs:',
                                   value="0 jobs running (0 tool containers),"
                                   " 0 completed jobs", labelColor='DEFAULT')
         self.multifield1 = self.add(npyscreen.MultiLineEdit, max_height=22,
