@@ -13,7 +13,7 @@ class AddForm(npyscreen.ActionForm):
 
     def create(self):
         """ Create widgets for AddForm """
-        self.add_handlers({"^T": self.switch, "^Q": self.quit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.Textfield,
                  value='Add a plugin from a Git repository or an image from a '
                        'Docker registry.',
@@ -63,10 +63,6 @@ class AddForm(npyscreen.ActionForm):
                                  value='docker.io')
         self.groups = self.add(npyscreen.TitleText, name='Groups')
         self.repo.when_value_edited()
-
-    def switch(self, *args, **kwargs):
-        """ Wrapper that switches to HELP form """
-        self.parentApp.change_form("HELP")
 
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """

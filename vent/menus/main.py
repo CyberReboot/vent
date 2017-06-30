@@ -26,7 +26,9 @@ from vent.menus.tools import ToolForm
 
 class MainForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
-    def exit(self, *args, **keywords):
+
+    @staticmethod
+    def exit(*args, **kwargs):
         os.system('reset')
         os.system('stty sane')
         try:
@@ -42,7 +44,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         try:
             current_path = os.getcwd()
         except Exception as e:  # pragma: no cover
-            self.exit()
+            MainForm.exit()
         self.addfield.value = Timestamp()
         self.addfield.display()
         self.addfield2.value = Uptime()
@@ -250,7 +252,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
             form_args['name'] = "Add plugins"
-            form_args['name'] += " help" + "\t"*6 + "Press ^Q to quit"
+            form_args['name'] += "\t"*6 + "Press ^Q to quit"
         elif action == "inventory":
             form = InventoryToolsForm
             forms = ['INVENTORY']
@@ -323,7 +325,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                    "Press OK to exit Vent Manager console.")
                 else:
                     notify_confirm(status[1])
-                self.exit()
+                MainForm.exit()
         elif action == "upgrade":
             # !! TODO
             # add notify_cancel_ok popup once implemented
@@ -339,9 +341,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                            title="Docker Error",
                            form_color='DANGER',
                            wrap=True)
-            self.exit()
+            MainForm.exit()
 
-        self.add_handlers({"^T": self.help_form, "^Q": self.exit})
+        self.add_handlers({"^T": self.help_form, "^Q": MainForm.exit})
 
         #######################
         # MAIN SCREEN WIDGETS #

@@ -47,7 +47,8 @@ class AddOptionsForm(npyscreen.ActionForm):
             repo_vals = self.repo_values()
             i = 3
             # check if repo_values returned successfully
-            if type(repo_vals[0]) == list and type(repo_vals[1]) == dict:
+            if (isinstance(repo_vals[0], list) and
+               isinstance(repo_vals[1], dict)):
                 self.branches, self.commits = repo_vals
                 for branch in self.branches:
                     self.branch_cb[branch] = self.add(npyscreen.CheckBox,
