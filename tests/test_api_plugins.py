@@ -13,7 +13,7 @@ def test_add():
     assert type(status) == tuple
     assert status[0] == True
     bad_instance = Plugin()
-    status = bad_instance.add('https://github.com/cyberreboot/vent', build=True)
+    status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
     assert type(status) == tuple
     assert status[0] == True
     instance = Plugin()
@@ -67,7 +67,7 @@ def test_tools():
 def test_remove():
     """ Test the remove function """
     instance = Plugin()
-    status = instance.remove()
+    status = instance.remove(groups='core', built='no')
     assert status[0] == True
 
 def test_versions():
