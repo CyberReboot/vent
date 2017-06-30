@@ -315,6 +315,7 @@ def Tools_Status(core, branch="master", **kargs):
         pass
     return (len(repos), all_tools)
 
+
 def Timestamp():
     """ Get the current datetime in UTC """
     timestamp = ""
