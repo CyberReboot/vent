@@ -6,7 +6,7 @@ RUN apk add --update \
     py2-pip \
     && rm -rf /var/cache/apk/*
 
-ADD . /file-drop
+COPY . /file-drop
 RUN pip install -r /file-drop/requirements.txt
 
 WORKDIR /file-drop

@@ -5,7 +5,7 @@ RUN apk add --update \
     syslog-ng \
     && rm -rf /var/cache/apk/*
 
-ADD syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
+COPY syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 EXPOSE 514
 
 LABEL vent="" \

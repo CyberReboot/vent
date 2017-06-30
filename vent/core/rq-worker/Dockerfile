@@ -9,9 +9,9 @@ RUN apk add --update \
     && rm -rf /var/cache/apk/*
 
 RUN pip install rq
-ADD requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
-ADD *.py /
+COPY *.py /
 
 LABEL vent="" \
       vent.name="rq-worker" \

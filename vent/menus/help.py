@@ -3,73 +3,9 @@ import npyscreen
 
 class HelpForm(npyscreen.ActionFormWithMenus):
     """ Help form for the Vent CLI """
-    def create(self):
-        """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
-        self.addfield = self.add(npyscreen.TitleFixedText, name="Vent",
-                                 labelColor='DEFAULT', editable=False)
-        self.multifield1 = self.add(npyscreen.MultiLineEdit, editable=False,
-                                    value="""
-        About Vent
 
-        Vent is a library that includes a CLI designed to serve as a general
-        platform for analyzing network traffic. Built with some basic
-        functionality, Vent serves as a user-friendly platform to build custom
-        plugins on to perform user-defined processing on incoming network data.
-        Vent supports any filetype, but only processes ones based on the types
-        of plugins installed for that instance of Vent. Simply create your
-        plugins, point vent to them & install them, and drop a file in vent to
-        begin processing!
-
-        For a detailed explanation of Vent Concepts, check out the General
-        section in our Help Menu. Topics include: Vent Plugins, Tools,
-        Filetypes, Core, and Statuses! Use ^X to access the menu and ESC to
-        close it.
-
-        Select CANCEL or ^Q to return to the Main Menu. Select OK or ^T to
-        return to your previous menu.
-
-        PRO TIP: You can use TAB to cycle through options.
-        """)
-        self.m2 = self.add_menu(name="Vent Basics", shortcut='b')
-        self.m2.addItem(text="Menu Interactions", onSelect=self.switch,
-                        arguments=['Menu'], shortcut='m')
-        self.m2.addItem(text="Plugins", onSelect=self.switch,
-                        arguments=['Plugins'], shortcut='p')
-        self.m2.addItem(text="Tools", onSelect=self.switch,
-                        arguments=['Tools'], shortcut='t')
-        self.m2.addItem(text="Filetypes", onSelect=self.switch,
-                        arguments=['Filetypes'], shortcut='f')
-        self.m2.addItem(text="Core", onSelect=self.switch,
-                        arguments=['Core'], shortcut='c')
-        self.m2.addItem(text="Statuses", onSelect=self.switch,
-                        arguments=['Status'], shortcut='s')
-        self.m3 = self.add_menu(name="Working with Plugins", shortcut='p')
-        self.m3.addItem(text="Adding a Plugin", onSelect=self.switch,
-                        arguments=['Plugin Adding'], shortcut='a')
-        self.m3.addItem(text="Building a Plugin", onSelect=self.switch,
-                        arguments=['Plugin Building'], shortcut='b')
-
-    def exit(self, *args, **keywords):
-        self.parentApp.switchForm('MAIN')
-
-    def on_cancel(self):
-        self.exit()
-
-    def on_ok(self):
-        self.change_forms()
-
-    def change_forms(self, *args, **keywords):
-        """
-        Checks which form is currently displayed and toggles to the other one
-        """
-        # Returns to previous Form in history if there is a previous Form
-        try:
-            self.parentApp.switchFormPrevious()
-        except Exception as e:  # pragma: no cover
-            self.parentApp.switchForm('MAIN')
-
-    def switch(self, page):
+    @staticmethod
+    def switch(page):
         def popup(page):
             info_str = ""
             if page == 'Menu':
@@ -154,3 +90,69 @@ class HelpForm(npyscreen.ActionFormWithMenus):
                                      title='About Vent ' + page,
                                      wide=True)
         popup(page)
+
+    def create(self):
+        """ Override method for creating FormBaseNew form """
+        self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
+        self.addfield = self.add(npyscreen.TitleFixedText, name="Vent",
+                                 labelColor='DEFAULT', editable=False)
+        self.multifield1 = self.add(npyscreen.MultiLineEdit, editable=False,
+                                    value="""
+        About Vent
+
+        Vent is a library that includes a CLI designed to serve as a general
+        platform for analyzing network traffic. Built with some basic
+        functionality, Vent serves as a user-friendly platform to build custom
+        plugins on to perform user-defined processing on incoming network data.
+        Vent supports any filetype, but only processes ones based on the types
+        of plugins installed for that instance of Vent. Simply create your
+        plugins, point vent to them & install them, and drop a file in vent to
+        begin processing!
+
+        For a detailed explanation of Vent Concepts, check out the General
+        section in our Help Menu. Topics include: Vent Plugins, Tools,
+        Filetypes, Core, and Statuses! Use ^X to access the menu and ESC to
+        close it.
+
+        Select CANCEL or ^Q to return to the Main Menu. Select OK or ^T to
+        return to your previous menu.
+
+        PRO TIP: You can use TAB to cycle through options.
+        """)
+        self.m2 = self.add_menu(name="Vent Basics", shortcut='b')
+        self.m2.addItem(text="Menu Interactions", onSelect=HelpForm.switch,
+                        arguments=['Menu'], shortcut='m')
+        self.m2.addItem(text="Plugins", onSelect=HelpForm.switch,
+                        arguments=['Plugins'], shortcut='p')
+        self.m2.addItem(text="Tools", onSelect=HelpForm.switch,
+                        arguments=['Tools'], shortcut='t')
+        self.m2.addItem(text="Filetypes", onSelect=HelpForm.switch,
+                        arguments=['Filetypes'], shortcut='f')
+        self.m2.addItem(text="Core", onSelect=HelpForm.switch,
+                        arguments=['Core'], shortcut='c')
+        self.m2.addItem(text="Statuses", onSelect=HelpForm.switch,
+                        arguments=['Status'], shortcut='s')
+        self.m3 = self.add_menu(name="Working with Plugins", shortcut='p')
+        self.m3.addItem(text="Adding a Plugin", onSelect=HelpForm.switch,
+                        arguments=['Plugin Adding'], shortcut='a')
+        self.m3.addItem(text="Building a Plugin", onSelect=HelpForm.switch,
+                        arguments=['Plugin Building'], shortcut='b')
+
+    def exit(self, *args, **keywords):
+        self.parentApp.switchForm('MAIN')
+
+    def on_cancel(self):
+        self.exit()
+
+    def on_ok(self):
+        self.change_forms()
+
+    def change_forms(self, *args, **keywords):
+        """
+        Checks which form is currently displayed and toggles to the other one
+        """
+        # Returns to previous Form in history if there is a previous Form
+        try:
+            self.parentApp.switchFormPrevious()
+        except Exception as e:  # pragma: no cover
+            self.parentApp.switchForm('MAIN')

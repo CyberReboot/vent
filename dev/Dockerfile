@@ -1,4 +1,4 @@
-FROM boot2docker/boot2docker
+FROM boot2docker/boot2docker:17.06.0-ce
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 # install perl5 for git submodules
@@ -32,7 +32,7 @@ RUN tar xf python.tar \
     && mv python2.7 "$ROOTFS"/usr/local/lib/python2.7
 RUN tar xf python-include.tar \
     && mv python2.7 "$ROOTFS"/usr/local/include/python2.7
-RUN rm -rf $ROOTFS/vendor/tinycore-python2
+RUN rm -rf "$ROOTFS"/vendor/tinycore-python2
 
 RUN /tmp/make_iso.sh
 CMD ["cat", "/boot2docker.iso"]
