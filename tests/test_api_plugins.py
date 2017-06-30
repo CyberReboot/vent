@@ -59,10 +59,10 @@ def test_build_tools():
     status = instance._build_tools(False)
     assert status[0] == False
 
-def test_tools():
+def test_list_tools():
     """ Test the tools function """
     instance = Plugin()
-    tools = instance.tools()
+    tools = instance.list_tools()
 
 def test_remove():
     """ Test the remove function """

@@ -439,7 +439,6 @@ class Action:
                     except Exception as e:  # pragma: no cover
                         self.logger.error("unable to change directory: " +
                                           str(e))
-                        pass
                     template = self.plugin.builder(template,
                                                    s[section]['path'],
                                                    s[section]['image_name'],
@@ -845,7 +844,7 @@ class Action:
             items = {'repos': [], 'core': [], 'tools': [], 'images': [],
                      'built': [], 'running': [], 'enabled': []}
 
-            tools = self.plugin.tools()
+            tools = self.plugin.list_tools()
             self.logger.info("found tools: " + str(tools))
             for choice in choices:
                 for tool in tools:
