@@ -840,7 +840,7 @@ class Plugin:
                                                 options=options)
         return results, template
 
-    def tools(self):
+    def list_tools(self):
         """ Return list of tuples of all tools """
         tools = []
         template = Template(template=self.manifest)
