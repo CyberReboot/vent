@@ -1,4 +1,3 @@
-import json
 import os
 import shlex
 import shutil
@@ -866,7 +865,6 @@ class Action:
                                                   tool['name']))
                         elif choice == 'images':
                             # TODO also check against docker
-                            images = Images()
                             items[choice].append((tool['section'],
                                                   tool['name'],
                                                   tool['image_name']))

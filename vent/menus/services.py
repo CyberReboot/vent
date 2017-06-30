@@ -22,6 +22,6 @@ class ServicesForm(npyscreen.FormBaseNew):
                 value = ""
                 for val in service[1]:
                     value += val+", "
-                title_text = self.add(npyscreen.TitleFixedText,
-                                      name=service[0],
-                                      value=value[:-2])
+                self.add(npyscreen.TitleFixedText,
+                         name=service[0],
+                         value=value[:-2])

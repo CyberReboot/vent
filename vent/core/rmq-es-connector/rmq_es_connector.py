@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import ast
-import datetime
 import pika
 import sys
 import time

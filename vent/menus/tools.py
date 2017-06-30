@@ -61,9 +61,9 @@ class ToolForm(npyscreen.ActionForm):
                     if len(repo_name) == 1:
                         repo_name = repo.split('/')
                     self.tools_tc[repo] = {}
-                    title_text = self.add(npyscreen.TitleText,
-                                          name='Plugin: '+repo,
-                                          editable=False, rely=i, relx=5)
+                    self.add(npyscreen.TitleText,
+                             name='Plugin: '+repo,
+                             editable=False, rely=i, relx=5)
                     i += 1
                     for tool in inventory['tools']:
                         r_name = tool[0].split(":")
