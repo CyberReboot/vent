@@ -262,7 +262,7 @@ class Action:
                        'version']
             vent_config = Template(template=self.vent_config)
             files = vent_config.option('main', 'files')
-            s, template = self.plugin.constraint_options(args, options)
+            s, _ = self.plugin.constraint_options(args, options)
             status, tool_d = self._start_sections(s,
                                                   files,
                                                   groups,

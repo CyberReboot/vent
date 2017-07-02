@@ -83,6 +83,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             current_path = os.getcwd()
         except Exception as e:  # pragma: no cover
             MainForm.exit()
+
         self.addfield.value = Timestamp()
         self.addfield.display()
         self.addfield2.value = Uptime()

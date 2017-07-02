@@ -66,9 +66,9 @@ class Plugin:
                                  " with status " + str(status))
                 return status
 
-            junk = check_output(shlex.split("git pull --all"),
-                                stderr=STDOUT,
-                                close_fds=True)
+            check_output(shlex.split("git pull --all"),
+                         stderr=STDOUT,
+                         close_fds=True)
             branch_output = check_output(shlex.split("git branch -a"),
                                          stderr=STDOUT,
                                          close_fds=True)
@@ -251,11 +251,11 @@ class Plugin:
             # if path already exists, try git checkout to update
             if status[0] and status[1] == 'exists':
                 try:
-                    response = check_output(shlex.split("git -C " +
-                                                        self.path +
-                                                        " rev-parse"),
-                                            stderr=STDOUT,
-                                            close_fds=True)
+                    check_output(shlex.split("git -C " +
+                                             self.path +
+                                             " rev-parse"),
+                                 stderr=STDOUT,
+                                 close_fds=True)
                     self.logger.info("path already exists: " + str(self.path))
                     status = (True, cwd)
                     self.logger.info("Status of clone: " + str(status))
@@ -376,7 +376,8 @@ class Plugin:
         try:
             chdir(cwd)
         except Exception as e:  # pragma: no cover
-            pass
+            self.logger.info("unable to change directory to: " + cwd +
+                             " because: " + str(e))
         return status
 
     @ErrorHandler
@@ -785,8 +786,8 @@ class Plugin:
             return matches
         if groups:
             groups = groups.split(",")
-        for root, dirnames, filenames in walk(self.path):
-            for filename in fnmatch.filter(filenames, 'Dockerfile'):
+        for root, _, filenames in walk(self.path):
+            for _ in fnmatch.filter(filenames, 'Dockerfile'):
                 # !! TODO deal with wild/etc.?
                 if groups:
                     try:
@@ -937,9 +938,10 @@ class Plugin:
                 container_name = results['image_name'].replace(':', '-') \
                                                       .replace('/', '-')
                 container = self.d_client.containers.get(container_name)
-                response = container.remove(v=True, force=True)
+                container.remove(v=True, force=True)
             except Exception as e:  # pragma: no cover
-                pass
+                self.logger.info("Error updating: " + str(result) +
+                                 " because: " + str(e))
 
             # TODO git pull
             # TODO build
