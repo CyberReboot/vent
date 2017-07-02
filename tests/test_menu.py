@@ -26,10 +26,9 @@ def run_menu(test_input):
 
 def test_tools_status():
     """ Test the staticmethod tools_status """
-    a = MainForm()
-    b, c = MainForm.tools_status(True)
-    assert isinstance(b, str)
-    assert isinstance(c, tuple)
+    a, b = MainForm.tools_status(True)
+    assert isinstance(a, str)
+    assert isinstance(b, tuple)
 
 def test_menu():
     """ Run menu tests """
