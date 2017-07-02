@@ -36,6 +36,44 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         except SystemExit:  # pragma: no cover
             os._exit(0)
 
+    @staticmethod
+    def tools_status(core):
+        """ Get status of tools for either plugins or core """
+        repos, tools = Tools_Status(core)
+        installed = 0
+        custom_installed = 0
+        built = 0
+        custom_built = 0
+        running = 0
+        custom_running = 0
+        normal = str(len(tools['normal']))
+        for tool in tools['running']:
+            if tool in tools['normal']:
+                running += 1
+            else:
+                custom_running += 1
+        for tool in tools['built']:
+            if tool in tools['normal']:
+                built += 1
+            else:
+                custom_built += 1
+        for tool in tools['installed']:
+            if tool in tools['normal']:
+                installed += 1
+            else:
+                custom_installed += 1
+        tools_str = str(running + custom_running) + "/" + normal + " running"
+        if custom_running > 0:
+            tools_str += " (" + str(custom_running) + " custom)"
+        tools_str += ", " + str(built + custom_built) + "/" + normal + " built"
+        if custom_built > 0:
+            tools_str += " (" + str(custom_built) + " custom)"
+        tools_str += ", " + str(installed + custom_installed) + "/" + normal
+        tools_str += " installed"
+        if custom_built > 0:
+            tools_str += " (" + str(custom_installed) + " custom)"
+        return tools_str, (running, custom_running, normal, repos)
+
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
         # give a little extra time for file descriptors to close
@@ -56,46 +94,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.addfield3.labelColor = "DEFAULT"
         self.addfield3.display()
 
-        # set core value string
-        repos, core = Tools_Status(True)
-        installed = 0
-        custom_installed = 0
-        built = 0
-        custom_built = 0
-        running = 0
-        custom_running = 0
-        normal = str(len(core['normal']))
-        for tool in core['running']:
-            if tool in core['normal']:
-                running += 1
-            else:
-                custom_running += 1
-        for tool in core['built']:
-            if tool in core['normal']:
-                built += 1
-            else:
-                custom_built += 1
-        for tool in core['installed']:
-            if tool in core['normal']:
-                installed += 1
-            else:
-                custom_installed += 1
-        core_str = str(running + custom_running) + "/" + normal + " running"
-        if custom_running > 0:
-            core_str += " (" + str(custom_running) + " custom)"
-        core_str += ", " + str(built + custom_built) + "/" + normal + " built"
-        if custom_built > 0:
-            core_str += " (" + str(custom_built) + " custom)"
-        core_str += ", " + str(installed + custom_installed) + "/" + normal
-        core_str += " installed"
-        if custom_built > 0:
-            core_str += " (" + str(custom_installed) + " custom)"
-        self.addfield5.value = core_str
-        if running+custom_running == 0:
+        # update core tool status
+        self.addfield5.value, values = MainForm.tools_status(True)
+        if values[0] + values[1] == 0:
             color = "DANGER"
             self.addfield4.labelColor = "CAUTION"
             self.addfield4.value = "Idle"
-        elif running >= int(normal):
+        elif values[0] >= int(values[2]):
             color = "GOOD"
             self.addfield4.labelColor = color
             self.addfield4.value = "Ready to start jobs"
@@ -105,51 +110,19 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.addfield4.value = "Ready to start jobs"
         self.addfield5.labelColor = color
 
-        # set plugin value string
-        repos, plugins = Tools_Status(False)
-        installed = 0
-        custom_installed = 0
-        built = 0
-        custom_built = 0
-        running = 0
-        custom_running = 0
-        normal = str(len(plugins['normal']))
-        for tool in plugins['running']:
-            if tool in plugins['normal']:
-                running += 1
-            else:
-                custom_running += 1
-        for tool in plugins['built']:
-            if tool in plugins['normal']:
-                built += 1
-            else:
-                custom_built += 1
-        for tool in plugins['installed']:
-            if tool in plugins['normal']:
-                installed += 1
-            else:
-                custom_installed += 1
-        plugin_str = str(running + custom_running) + "/" + normal + " tools running"
-        if custom_running > 0:
-            plugin_str += " (" + str(custom_running) + " tools custom)"
-        plugin_str += ", " + str(built + custom_built) + "/" + normal + " tools built"
-        if custom_built > 0:
-            plugin_str += " (" + str(custom_built) + " tools custom)"
-        plugin_str += ", " + str(installed + custom_installed) + "/" + normal
-        plugin_str += " tools installed"
-        if custom_built > 0:
-            plugin_str += " (" + str(custom_installed) + " tools custom)"
-        plugin_str += ", " + str(repos) + " plugin(s) installed"
+        # update plugin tool status
+        plugin_str, values = MainForm.tools_status(False)
+        plugin_str += ", " + str(values[3]) + " plugin(s) installed"
         self.addfield6.value = plugin_str
 
         # get jobs
         jobs = Jobs()
+
         # number of jobs, number of tool containers
         self.addfield7.value = str(jobs[0]) + " jobs running (" + str(jobs[1])
         self.addfield7.value += " tool containers), " + str(jobs[2])
         self.addfield7.value += " completed jobs"
 
-        # TODO check if there are jobs running and update addfield4
         if jobs[0] > 0:
             self.addfield4.labelColor = "GOOD"
             self.addfield4.value = "Processing jobs"

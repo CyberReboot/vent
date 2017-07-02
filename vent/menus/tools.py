@@ -53,7 +53,10 @@ class ToolForm(npyscreen.ActionForm):
                                                                     'tools'])
         if response[0]:
             inventory = response[1]
-            for repo in inventory['repos']:
+
+            # TODO refactor this
+            repos = inventory['repos']
+            for repo in repos:
                 if (self.action['cores'] or
                    (not self.action['cores'] and
                    repo != 'https://github.com/cyberreboot/vent')):
