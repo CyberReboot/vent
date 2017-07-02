@@ -5,6 +5,7 @@ import npyscreen
 
 from vent.helpers.paths import PathDirs
 from vent.menu import VentApp
+from vent.menus.main import MainForm
 
 npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = False
 
@@ -22,6 +23,13 @@ def run_menu(test_input):
         A.run(fork=False)
     except npyscreen.ExhaustedTestInput as e:
         pass
+
+def test_tools_status():
+    """ Test the staticmethod tools_status """
+    a = MainForm()
+    b, c = MainForm.tools_status(True)
+    assert isinstance(b, str)
+    assert isinstance(c, tuple)
 
 def test_menu():
     """ Run menu tests """
