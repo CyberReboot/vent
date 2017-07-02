@@ -101,7 +101,7 @@ def Gpu(pull=False):
             try:
                 d_client.images.pull(image_name, tag=tag)
                 nvidia_image = d_client.images.list(name=image)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 pass
 
         if len(nvidia_image) > 0:

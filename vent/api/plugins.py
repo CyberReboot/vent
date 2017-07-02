@@ -86,9 +86,9 @@ class Plugin:
             self.logger.info("branches found: " + str(branches))
             for branch in branches:
                 try:
-                    junk = check_output(shlex.split("git checkout " + branch),
-                                        stderr=STDOUT,
-                                        close_fds=True)
+                    check_output(shlex.split("git checkout " + branch),
+                                 stderr=STDOUT,
+                                 close_fds=True)
                 except Exception as e:  # pragma: no cover
                     self.logger.error("repo_branches failed with error: " +
                                       str(e) + " on branch: " + str(branch))
@@ -271,9 +271,7 @@ class Plugin:
 
             # ensure cloning still works even if ssl is broken
             cmd = "git config --global http.sslVerify false"
-            response = check_output(shlex.split(cmd),
-                                    stderr=STDOUT,
-                                    close_fds=True)
+            check_output(shlex.split(cmd), stderr=STDOUT, close_fds=True)
 
             # check if user and pw were supplied, typically for private repos
             if user and pw:
@@ -800,7 +798,7 @@ class Plugin:
                                 matches.append((root.split(self.path)[1],
                                                 self.version))
                     except Exception as e:  # pragma: no cover
-                        pass
+                        self.logger.info("error: " + str(e))
                 else:
                     matches.append((root.split(self.path)[1], self.version))
         return matches
