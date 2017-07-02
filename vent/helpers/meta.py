@@ -255,11 +255,11 @@ def Tools_Status(core, branch="master", **kargs):
     # get normal tools
     plugins = Plugin(plugins_dir=".internals/plugins")
     for repo in repos:
-        status, cwd = plugins.clone(repo)
+        status, _ = plugins.clone(repo)
         if status:
             plugins.version = 'HEAD'
             plugins.branch = branch
-            response = plugins.checkout()
+            plugins.checkout()
             matches = None
             if core:
                 matches = plugins._available_tools(groups='core')
