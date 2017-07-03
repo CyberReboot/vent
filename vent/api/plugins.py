@@ -214,10 +214,9 @@ class Plugin:
                 repo += self.repo.split("https://")[-1]
 
             # clone repo and build tools
-            response = check_output(shlex.split("git clone --recursive " +
-                                                repo + " ."),
-                                    stderr=STDOUT,
-                                    close_fds=True)
+            check_output(shlex.split("git clone --recursive " + repo + " ."),
+                         stderr=STDOUT,
+                         close_fds=True)
 
             status = (True, cwd)
         except Exception as e:  # pragma: no cover

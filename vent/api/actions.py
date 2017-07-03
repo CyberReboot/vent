@@ -539,7 +539,7 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            s, template = self.plugin.constraint_options(args, options)
+            s, _ = self.plugin.constraint_options(args, options)
             self.logger.info(s)
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
