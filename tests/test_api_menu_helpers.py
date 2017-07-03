@@ -6,5 +6,5 @@ def test_repo_tools():
     instance = MenuHelper()
     status = instance.repo_tools('https://github.com/cyberreboot/vent', 'master', 'HEAD')
     assert isinstance(status, tuple)
-    assert status[0] == True
+    assert status[0] == False
     assert isinstance(status[1], list)
