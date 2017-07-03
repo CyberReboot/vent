@@ -133,17 +133,3 @@ def test_logs():
 def test_help():
     """ Test the help function """
     Action.help()
-
-def test_cores():
-    """ Test the cores function """
-    instance = Action()
-    cores = instance.cores('install')
-    assert cores[0] == True
-    cores = instance.cores('build')
-    assert cores[0] == True
-    cores = instance.cores('start')
-    assert cores[0] == True
-    cores = instance.cores('stop')
-    assert cores[0] == True
-    cores = instance.cores('clean')
-    assert cores[0] == True

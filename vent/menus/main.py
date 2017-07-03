@@ -8,6 +8,7 @@ from npyscreen import notify_confirm
 from threading import Thread
 
 from vent.api.actions import Action
+from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Gpu
@@ -138,7 +139,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         os.chdir(current_path)
         return
 
-    def core_tools(self, action):
+    @staticmethod
+    def core_tools(action):
         """ Perform actions for core tools """
         def diff(first, second):
             """
@@ -170,7 +172,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         if action == 'install':
             original_images = Images()
-            thr = Thread(target=self.api_action.cores, args=(),
+            m_helper = MenuHelper()
+            thr = Thread(target=m_helper.cores, args=(),
                          kwargs={"action": "install"})
             popup(original_images, "images", thr,
                   'Please wait, installing core containers...')
@@ -377,7 +380,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # Core Tools Menu Items
         self.m2 = self.add_menu(name="Core Tools", shortcut="c")
         self.m2.addItem(text='Add all latest core tools',
-                        onSelect=self.core_tools,
+                        onSelect=MainForm.core_tools,
                         arguments=['install'], shortcut='i')
         self.m2.addItem(text='Build core tools',
                         onSelect=self.perform_action,

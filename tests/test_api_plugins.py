@@ -106,22 +106,6 @@ def test_disable():
     status = instance.disable('elasticsearch', branch='master')
     assert status[0] == True
 
-def test_repo_branches():
-    """ Test the repo_branches function """
-    instance = Plugin()
-    status = instance.repo_branches('https://github.com/cyberreboot/vent')
-    assert isinstance(status, tuple)
-    assert status[0] == True
-    assert isinstance(status[1], list)
-
-def test_repo_commits():
-    """ Test the repo_commits function """
-    instance = Plugin()
-    status = instance.repo_commits('https://github.com/cyberreboot/vent')
-    assert isinstance(status, tuple)
-    assert status[0] == True
-    assert isinstance(status[1], list)
-
 def test_update():
     """ Test the update function """
     instance = Plugin()
