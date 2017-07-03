@@ -3,7 +3,6 @@ import shlex
 import shutil
 
 from ast import literal_eval
-from datetime import datetime
 from subprocess import check_output, STDOUT
 
 from vent.api.plugins import Plugin
@@ -12,7 +11,6 @@ from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
-from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Version
 
 
@@ -586,128 +584,6 @@ class Action:
             status = (False, e)
         self.logger.info("Status of build: " + str(status[0]))
         self.logger.info("Finished: build")
-        return status
-
-    def cores(self, action, branch="master", version='HEAD'):
-        """
-        Supply action (install, build, start, stop, clean) for core tools
-        """
-        self.logger.info("Starting: cores")
-        status = (True, None)
-        try:
-            self.logger.info("action provided: " + str(action))
-            core = Tools_Status(True, branch=branch, version=version)[1]
-            if action in ["install", "build"]:
-                tools = []
-                plugins = Plugin(plugins_dir=".internals/plugins/")
-                self.p_helper.apply_path('https://github.com/cyberreboot/vent')
-                path = os.path.join(plugins.path_dirs.plugins_dir,
-                                    'cyberreboot/vent')
-                response = self.p_helper.checkout(branch=branch,
-                                                  version=version)
-                self.logger.info("status of plugin checkout " + str(response))
-                matches = self.p_helper.available_tools(path, version=version,
-                                                        groups='core')
-                for match in matches:
-                    tools.append((match[0], ''))
-                status = plugins.add('https://github.com/cyberreboot/vent',
-                                     tools=tools,
-                                     branch=branch,
-                                     build=False)
-                self.logger.info("status of plugin add: " + str(status))
-                plugin_c = Template(template=self.plugin.manifest)
-                sections = plugin_c.sections()
-                for tool in core['normal']:
-                    for section in sections[1]:
-                        name = plugin_c.option(section, "name")
-                        orig_branch = plugin_c.option(section, "branch")
-                        namespace = plugin_c.option(section, "namespace")
-                        version = plugin_c.option(section, "version")
-                        if (name[1] == tool and
-                           orig_branch[1] == branch and
-                           namespace[1] == "cyberreboot/vent" and
-                           version[1] == "HEAD"):
-                            plugin_c.set_option(section,
-                                                "image_name",
-                                                "cyberreboot/vent-" +
-                                                tool + ":" + branch)
-                plugin_c.write_config()
-            if action == "build":
-                plugin_c = Template(template=self.plugin.manifest)
-                sections = plugin_c.sections()
-                try:
-                    for tool in core['normal']:
-                        for section in sections[1]:
-                            image_name = plugin_c.option(section,
-                                                         "image_name")
-                            check_image = "cyberreboot/vent-"
-                            check_image += tool + ":" + branch
-                            if image_name[1] == check_image:
-                                timestamp = str(datetime.utcnow()) + " UTC"
-                                try:
-                                    # currently can't use docker-py because it
-                                    # returns a 404 on pull so no way to valid
-                                    # if it worked or didn't
-                                    image_id = None
-                                    cmd = "docker pull " + check_image
-                                    output = check_output(shlex.split(cmd),
-                                                          stderr=STDOUT)
-                                    sha = "Digest: sha256:"
-                                    for line in output.split('\n'):
-                                        if line.startswith(sha):
-                                            image_id = line.split(sha)[1][:12]
-                                    if image_id:
-                                        plugin_c.set_option(section,
-                                                            "built",
-                                                            "yes")
-                                        plugin_c.set_option(section,
-                                                            "image_id",
-                                                            image_id)
-                                        plugin_c.set_option(section,
-                                                            "last_updated",
-                                                            timestamp)
-                                        status = (True, "Pulled " + tool)
-                                        self.logger.info(str(status))
-                                    else:
-                                        plugin_c.set_option(section,
-                                                            "built",
-                                                            "failed")
-                                        plugin_c.set_option(section,
-                                                            "last_updated",
-                                                            timestamp)
-                                        status = (False,
-                                                  "Failed to pull image " +
-                                                  str(output.split('\n')[-1]))
-                                        self.logger.error(str(status))
-                                except Exception as e:  # pragma: no cover
-                                    plugin_c.set_option(section,
-                                                        "built",
-                                                        "failed")
-                                    plugin_c.set_option(section,
-                                                        "last_updated",
-                                                        timestamp)
-                                    status = (False,
-                                              "Failed to pull image " + str(e))
-                                    self.logger.error(str(status))
-                except Exception as e:  # pragma: no cover
-                    status = (False, "Failed to pull images " + str(e))
-                    self.logger.error(str(status))
-                plugin_c.write_config()
-            elif action == "start":
-                status = self.prep_start(groups="core", branch=branch)
-                if status[0]:
-                    tool_d = status[1]
-                    status = self.start(tool_d)
-            elif action == "stop":
-                status = self.stop(groups="core", branch=branch)
-            elif action == "clean":
-                status = self.clean(groups="core", branch=branch)
-        except Exception as e:  # pragma: no cover
-            self.logger.info("core failed with error: " + str(e))
-            status = (False, e)
-
-        self.logger.info("Status of core: " + str(status[0]))
-        self.logger.info("Finished: core")
         return status
 
     @staticmethod

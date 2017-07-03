@@ -8,6 +8,7 @@ from npyscreen import notify_confirm
 from threading import Thread
 
 from vent.api.actions import Action
+from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Gpu
@@ -170,7 +171,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         if action == 'install':
             original_images = Images()
-            thr = Thread(target=self.api_action.cores, args=(),
+            m_helper = MenuHelper()
+            thr = Thread(target=self.m_helper.cores, args=(),
                          kwargs={"action": "install"})
             popup(original_images, "images", thr,
                   'Please wait, installing core containers...')
