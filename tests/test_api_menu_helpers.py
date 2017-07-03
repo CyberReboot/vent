@@ -5,15 +5,15 @@ def test_cores():
     """ Test the cores function """
     instance = MenuHelper()
     cores = instance.cores('install')
-    assert cores[0] == True
+    assert cores[0] == False
     cores = instance.cores('build')
-    assert cores[0] == True
+    assert cores[0] == False
     cores = instance.cores('start')
-    assert cores[0] == True
+    assert cores[0] == False
     cores = instance.cores('stop')
-    assert cores[0] == True
+    assert cores[0] == False
     cores = instance.cores('clean')
-    assert cores[0] == True
+    assert cores[0] == False
 
 def test_repo_branches():
     """ Test the repo_branches function """
