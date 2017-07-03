@@ -96,6 +96,7 @@ def test_gpu():
     """ Test the gpu function """
     gpu = Gpu()
     assert isinstance(gpu, str)
+    gpu = Gpu(pull=True)
 
 def test_jobs():
     """ Test the jobs function """

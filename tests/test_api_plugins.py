@@ -28,6 +28,10 @@ def test_add():
     status = instance.add('https://github.com/cyberreboot/vent', build=False, tools=[('vent/', 'HEAD')], overrides=[('vent', 'HEAD')])
     assert isinstance(status, tuple)
     assert status[0] == True
+    instance = Plugin()
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')], user='foo', pw='foo')
+    assert isinstance(status, tuple)
+    assert status[0] == False
 
 def test_get_tool_matches():
     """ Test the get_tool_matches function """
@@ -42,7 +46,7 @@ def test_add_image():
     status = instance.add_image('quay/redis', 'redis',  registry='quay.io')
     assert isinstance(status, tuple)
     assert status[0] == True
-    status = instance.add_image('alpine', 'alpine', tag='latest')
+    status = instance.add_image('alpine', 'alpine', tag='latest', groups='alpine')
     assert isinstance(status, tuple)
     assert status[0] == True
 
