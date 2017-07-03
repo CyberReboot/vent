@@ -1,13 +1,13 @@
 import docker
-import fnmatch
 import os
 import shlex
 
 from datetime import datetime
-from os import chdir, getcwd, walk
+from os import chdir, getcwd
 from os.path import join
 from subprocess import check_output, STDOUT
 
+from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.errors import ErrorHandler
 from vent.helpers.logs import Logger
@@ -20,35 +20,9 @@ class Plugin:
         self.path_dirs = PathDirs(**kargs)
         self.manifest = join(self.path_dirs.meta_dir,
                              "plugin_manifest.cfg")
+        self.p_helper = PluginHelper(**kargs)
         self.d_client = docker.from_env()
         self.logger = Logger(__name__)
-
-    def apply_path(self, repo):
-        """ Set path to where the repo is and return original path """
-        self.logger.info("Starting: apply_path")
-        self.logger.info("repo given: " + str(repo))
-        status = (True, None)
-        try:
-            # rewrite repo for consistency
-            if repo.endswith(".git"):
-                repo = repo.split(".git")[0]
-
-            # get org and repo name and path repo will be cloned to
-            org, name = repo.split("/")[-2:]
-            self.path = join(self.path_dirs.plugins_dir, org, name)
-            self.logger.info("cloning to path: " + str(self.path))
-
-            # save current path
-            cwd = getcwd()
-            # set to new repo path
-            chdir(self.path)
-            status = (True, cwd)
-        except Exception as e:  # pragma: no cover
-            self.logger.error("apply_path failed with error: " + str(e))
-            status = (False, e)
-        self.logger.info("Status of apply_path: " + str(status))
-        self.logger.info("Finished: apply_path")
-        return status
 
     def repo_branches(self, repo):
         """ Get the branches of a repository """
@@ -58,9 +32,10 @@ class Plugin:
         branches = []
         try:
             # switch to directory where repo will be cloned to
-            status = self.apply_path(repo)
+            status = self.p_helper.apply_path(repo)
             if status[0]:
                 cwd = status[1]
+                self.path = status[2]
             else:
                 self.logger.info("apply_path failed. Exiting repo_branches"
                                  " with status " + str(status))
@@ -119,10 +94,11 @@ class Plugin:
         status = (True, None)
         commits = []
         try:
-            status = self.apply_path(repo)
+            status = self.p_helper.apply_path(repo)
             # switch to directory where repo will be cloned to
             if status[0]:
                 cwd = status[1]
+                self.path = status[2]
             else:
                 self.logger.info("apply_path failed. Exiting repo_commits with"
                                  " status: " + str(status))
@@ -166,48 +142,6 @@ class Plugin:
 
         self.logger.info("Status of repo_commits: " + str(status))
         self.logger.info("Finished: repo_commits")
-        return status
-
-    def repo_tools(self, repo, branch, version):
-        """ Get available tools for a repository branch at a version """
-        self.logger.info("Starting: repo_tools")
-        self.logger.info("repo given: " + str(repo))
-        self.logger.info("branch given: " + str(branch))
-        self.logger.info("version given: " + str(version))
-        status = (True, None)
-        try:
-            tools = []
-            status = self.apply_path(repo)
-            # switch to directory where repo will be cloned to
-            if status[0]:
-                cwd = status[1]
-            else:
-                self.logger.info("apply_path failed. Exiting repo_tools with"
-                                 " status: " + str(status))
-                return status
-            self.branch = branch
-            self.version = version
-
-            status = self.checkout()
-            if status[0]:
-                tools = self._available_tools()
-            else:
-                self.logger.info("checkout failed. Exiting repo_tools with"
-                                 " status: " + str(status))
-                return status
-            try:
-                chdir(cwd)
-            except Exception as e:  # pragma: no cover
-                self.logger.error("unable to change directory to: " +
-                                  str(cwd) + " because: " + str(e))
-
-            status = (True, tools)
-        except Exception as e:  # pragma: no cover
-            self.logger.error("repo_tools failed with error: " + str(e))
-            status = (False, e)
-
-        self.logger.info("Status of repo_tools: " + str(status))
-        self.logger.info("Finished: repo_tools")
         return status
 
     def clone(self, repo, user=None, pw=None):
@@ -506,16 +440,17 @@ class Plugin:
 
         # check result of clone, ensure successful or that it already exists
         if status:
-            response = self.checkout()
+            response = self.p_helper.checkout(branch=self.branch,
+                                              version=self.version)
             if response[0]:
                 matches = []
                 if self.tools is None and self.overrides is None:
                     # get all tools
-                    matches = self._available_tools()
+                    matches = self.p_helper.available_tools(self.path, version=self.version)
                 elif self.tools is None:
                     # there's only something in overrides
                     # grab all the tools then apply overrides
-                    matches = self._available_tools()
+                    matches = self.p_helper.available_tools(self.path, version=self.version)
                     # !! TODO apply overrides to matches
                 elif self.overrides is None:
                     # there's only something in tools
@@ -574,7 +509,8 @@ class Plugin:
             template = Template(template=self.manifest)
             # TODO check for special settings here first for the specific match
             self.version = match[1]
-            response = self.checkout()
+            response = self.p_helper.checkout(branch=self.branch,
+                                              version=self.version)
             if response[0]:
                 section = self.org + ":" + self.name + ":" + match[0] + ":"
                 section += self.branch + ":" + self.version
@@ -774,57 +710,6 @@ class Plugin:
             template.set_option(section, "last_updated",
                                 str(datetime.utcnow()) + " UTC")
         return template
-
-    def _available_tools(self, groups=None):
-        """
-        Return list of possible tools in repo for the given version and branch
-        """
-        matches = []
-        if not hasattr(self, 'path'):
-            return matches
-        if groups:
-            groups = groups.split(",")
-        for root, _, filenames in walk(self.path):
-            for _ in fnmatch.filter(filenames, 'Dockerfile'):
-                # !! TODO deal with wild/etc.?
-                if groups:
-                    try:
-                        template = Template(template=join(root,
-                                                          'vent.template'))
-                        for group in groups:
-                            template_groups = template.option("info", "groups")
-                            if (template_groups[0] and
-                               group in template_groups[1]):
-                                matches.append((root.split(self.path)[1],
-                                                self.version))
-                    except Exception as e:  # pragma: no cover
-                        self.logger.info("error: " + str(e))
-                else:
-                    matches.append((root.split(self.path)[1], self.version))
-        return matches
-
-    def checkout(self):
-        """ Checkout a specific version and branch of a repo """
-        if not hasattr(self, 'branch'):
-            self.branch = 'master'
-        if not hasattr(self, 'version'):
-            self.version = 'HEAD'
-        response = (True, None)
-        try:
-            status = check_output(shlex.split("git checkout " + self.branch),
-                                  stderr=STDOUT,
-                                  close_fds=True)
-            status = check_output(shlex.split("git pull"),
-                                  stderr=STDOUT,
-                                  close_fds=True)
-            status = check_output(shlex.split("git reset --hard " +
-                                              self.version),
-                                  stderr=STDOUT,
-                                  close_fds=True)
-            response = (True, status)
-        except Exception as e:  # pragma: no cover
-            response = (False, getcwd() + str(e))
-        return response
 
     def constraint_options(self, constraint_dict, options):
         """ Return result of constraints and options against a template """
