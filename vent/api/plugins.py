@@ -1,10 +1,9 @@
 import docker
-import fnmatch
 import os
 import shlex
 
 from datetime import datetime
-from os import chdir, getcwd, walk
+from os import chdir, getcwd
 from os.path import join
 from subprocess import check_output, STDOUT
 
