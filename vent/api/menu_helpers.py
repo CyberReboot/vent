@@ -17,6 +17,7 @@ class MenuHelper:
     """ Handle helper functions in the API for the Menu """
     def __init__(self, **kargs):
         self.api_action = Action(**kargs)
+        self.plugin = Plugin(**kargs)
         self.p_helper = PluginHelper(**kargs)
         self.logger = Logger(__name__)
 
