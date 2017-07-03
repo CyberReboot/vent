@@ -189,6 +189,10 @@ class Action:
             tool_d[c_name]['labels']['vent.version'] = version
             tool_d[c_name]['labels']['vent.name'] = s[section]['name']
 
+            log_config = {'type': 'syslog',
+                          'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                     'syslog-facility': 'daemon',
+                                     'tag': 'plugin'}}
             if 'groups' in s[section]:
                 # add labels for groups
                 tool_d[c_name]['labels']['vent.groups'] = s[section]['groups']
@@ -197,15 +201,10 @@ class Action:
                     tool_d[c_name]['restart_policy'] = {"Name": "always"}
                 # send logs to syslog
                 if 'syslog' not in s[section]['groups'] and 'core' in s[section]['groups']:
-                    tool_d[c_name]['log_config'] = {'type': 'syslog',
-                                                    'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                               'syslog-facility': 'daemon',
-                                                               'tag': 'core'}}
+                    log_config['config']['tag'] = 'core'
+                    tool_d[c_name]['log_config'] = log_config
                 if 'syslog' not in s[section]['groups']:
-                    tool_d[c_name]['log_config'] = {'type': 'syslog',
-                                                    'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                               'syslog-facility': 'daemon',
-                                                               'tag': 'plugin'}}
+                    tool_d[c_name]['log_config'] = log_config
                 # mount necessary directories
                 if 'files' in s[section]['groups']:
                     if 'volumes' in tool_d[c_name]:
@@ -215,10 +214,7 @@ class Action:
                     if files[0]:
                         tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
             else:
-                tool_d[c_name]['log_config'] = {'type': 'syslog',
-                                                'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                                           'syslog-facility': 'daemon',
-                                                           'tag': 'plugin'}}
+                tool_d[c_name]['log_config'] = log_config
 
             # add label for priority
             status = vent_template.section('settings')
