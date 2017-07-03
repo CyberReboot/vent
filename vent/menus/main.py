@@ -172,7 +172,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         if action == 'install':
             original_images = Images()
             m_helper = MenuHelper()
-            thr = Thread(target=self.m_helper.cores, args=(),
+            thr = Thread(target=m_helper.cores, args=(),
                          kwargs={"action": "install"})
             popup(original_images, "images", thr,
                   'Please wait, installing core containers...')
