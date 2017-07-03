@@ -255,7 +255,7 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
                 repos.add(repo[1])
 
     # get normal tools
-    plugins = Plugin(plugins_dir=path_dirs.plugins_dir)
+    plugins = Plugin(plugins_dir='.internals/plugins/')
     for repo in repos:
         status, _ = plugins.clone(repo)
         if status:

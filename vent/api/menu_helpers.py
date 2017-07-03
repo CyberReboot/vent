@@ -1,3 +1,5 @@
+from os import chdir
+
 from vent.api.plugin_helpers import PluginHelper
 from vent.helpers.logs import Logger
 
