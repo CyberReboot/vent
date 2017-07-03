@@ -9,11 +9,11 @@ def test_cores():
     cores = instance.cores('build')
     assert cores[0] == False
     cores = instance.cores('start')
-    assert cores[0] == False
+    assert cores[0] == True
     cores = instance.cores('stop')
-    assert cores[0] == False
+    assert cores[0] == True
     cores = instance.cores('clean')
-    assert cores[0] == False
+    assert cores[0] == True
 
 def test_repo_branches():
     """ Test the repo_branches function """
