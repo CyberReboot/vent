@@ -7,6 +7,7 @@ from datetime import datetime
 from subprocess import check_output, STDOUT
 
 from vent.api.plugins import Plugin
+from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
@@ -22,6 +23,7 @@ class Action:
         self.d_client = self.plugin.d_client
         self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
                                         "vent.cfg")
+        self.p_helper = PluginHelper(**kargs)
         self.logger = Logger(__name__)
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
@@ -113,12 +115,10 @@ class Action:
             image_name = s[section]['image_name']
 
             # checkout the right version and branch of the repo
-            self.plugin.branch = branch
-            self.plugin.version = version
             cwd = os.getcwd()
             self.logger.info("current directory is: " + str(cwd))
             os.chdir(os.path.join(s[section]['path']))
-            status = self.plugin.checkout()
+            status = self.p_helper.checkout(branch=branch, version=version)
             self.logger.info(status)
             os.chdir(cwd)
 
@@ -430,9 +430,8 @@ class Action:
                     cwd = os.getcwd()
                     self.logger.info("current working directory: " + str(cwd))
                     os.chdir(s[section]['path'])
-                    self.plugin.version = version
-                    self.plugin.branch = branch
-                    c_status = self.plugin.checkout()
+                    c_status = self.p_helper.checkout(branch=branch,
+                                                      version=version)
                     self.logger.info(c_status)
                     try:
                         os.chdir(cwd)
@@ -593,7 +592,7 @@ class Action:
         self.logger.info("Finished: build")
         return status
 
-    def cores(self, action, branch="master"):
+    def cores(self, action, branch="master", version='HEAD'):
         """
         Supply action (install, build, start, stop, clean) for core tools
         """
@@ -601,16 +600,18 @@ class Action:
         status = (True, None)
         try:
             self.logger.info("action provided: " + str(action))
-            core = Tools_Status(True, branch=branch)[1]
+            core = Tools_Status(True, branch=branch, version=version)[1]
             if action in ["install", "build"]:
                 tools = []
-                plugins = Plugin(plugins_dir=".internals/plugins")
-                plugins.version = 'HEAD'
-                plugins.branch = branch
-                plugins.apply_path('https://github.com/cyberreboot/vent')
-                response = plugins.checkout()
+                plugins = Plugin(plugins_dir=".internals/plugins/")
+                self.p_helper.apply_path('https://github.com/cyberreboot/vent')
+                path = os.path.join(plugins.path_dirs.plugins_dir,
+                                    'cyberreboot/vent')
+                response = self.p_helper.checkout(branch=branch,
+                                                  version=version)
                 self.logger.info("status of plugin checkout " + str(response))
-                matches = plugins._available_tools(groups='core')
+                matches = self.p_helper.available_tools(path, version=version,
+                                                        groups='core')
                 for match in matches:
                     tools.append((match[0], ''))
                 status = plugins.add('https://github.com/cyberreboot/vent',

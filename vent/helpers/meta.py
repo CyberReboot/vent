@@ -7,6 +7,7 @@ import platform
 import subprocess
 
 from vent.api.plugins import Plugin
+from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
 
@@ -225,7 +226,7 @@ def Services(vent=True):
     return services
 
 
-def Tools_Status(core, branch="master", **kargs):
+def Tools_Status(core, branch="master", version="HEAD", **kargs):
     """
     Get tools that are currently installed/built/running and also the number of
     repos that those tools come from; can toggle whether looking for core tools
@@ -236,6 +237,7 @@ def Tools_Status(core, branch="master", **kargs):
     core_repo = 'https://github.com/cyberreboot/vent'
     repos = set()
     tools = Tools(**kargs)
+    p_helper = PluginHelper(**kargs)
 
     # get manifest file
     path_dirs = PathDirs(**kargs)
@@ -253,18 +255,18 @@ def Tools_Status(core, branch="master", **kargs):
                 repos.add(repo[1])
 
     # get normal tools
-    plugins = Plugin(plugins_dir=".internals/plugins")
+    plugins = Plugin(plugins_dir=path_dirs.plugins_dir)
     for repo in repos:
         status, _ = plugins.clone(repo)
         if status:
-            plugins.version = 'HEAD'
-            plugins.branch = branch
-            plugins.checkout()
+            p_helper.checkout(branch=branch, version=version)
+            path = p_helper.get_path(repo)
             matches = None
             if core:
-                matches = plugins._available_tools(groups='core')
+                matches = p_helper.available_tools(path, version=version,
+                                                   groups='core')
             else:
-                matches = plugins._available_tools()
+                matches = p_helper.available_tools(path, version=version)
             for match in matches:
                 all_tools['normal'].append(match[0].split('/')[-1])
         else:

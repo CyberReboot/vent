@@ -180,9 +180,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def add_form(self, form, form_name, form_args):
         """ Add new form and switch to it """
-        self.parentApp.addForm(form_name,
-                               form,
-                               **form_args)
+        self.parentApp.addForm(form_name, form, **form_args)
         self.parentApp.change_form(form_name)
         return
 
