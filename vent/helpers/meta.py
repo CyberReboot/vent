@@ -6,7 +6,6 @@ import pkg_resources
 import platform
 import subprocess
 
-from vent.api.plugins import Plugin
 from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
@@ -237,7 +236,7 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
     core_repo = 'https://github.com/cyberreboot/vent'
     repos = set()
     tools = Tools(**kargs)
-    p_helper = PluginHelper(**kargs)
+    p_helper = PluginHelper(plugins_dir='.internals/plugins/')
 
     # get manifest file
     path_dirs = PathDirs(**kargs)
@@ -255,12 +254,12 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
                 repos.add(repo[1])
 
     # get normal tools
-    plugins = Plugin(plugins_dir='.internals/plugins/')
     for repo in repos:
-        status, _ = plugins.clone(repo)
+        status, _ = p_helper.clone(repo)
         if status:
+            p_helper.apply_path(repo)
             p_helper.checkout(branch=branch, version=version)
-            path = p_helper.get_path(repo)
+            path, _, _ = p_helper.get_path(repo, core=core)
             matches = None
             if core:
                 matches = p_helper.available_tools(path, version=version,
@@ -269,8 +268,6 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
                 matches = p_helper.available_tools(path, version=version)
             for match in matches:
                 all_tools['normal'].append(match[0].split('/')[-1])
-        else:
-            all_tools['normal'] = 'failed'
 
     # get tools that have been installed
     for tool in tools[1]:

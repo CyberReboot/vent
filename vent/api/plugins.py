@@ -24,92 +24,10 @@ class Plugin:
         self.d_client = docker.from_env()
         self.logger = Logger(__name__)
 
-    def clone(self, repo, user=None, pw=None):
-        """ Clone the repository """
-        self.logger.info("Starting: clone")
-        self.logger.info("repo given: " + str(repo))
-        self.logger.info("user given: " + str(user))
-        status = (True, None)
-        try:
-            self.org = None
-            self.name = None
-            self.repo = repo
-
-            # save current path
-            cwd = getcwd()
-            self.logger.info("current working directory: " + str(cwd))
-
-            # rewrite repo for consistency
-            if self.repo.endswith(".git"):
-                self.repo = self.repo.split(".git")[0]
-
-            # get org and repo name and path repo will be cloned to
-            self.org, self.name = self.repo.split("/")[-2:]
-            self.logger.info("org name found: " + str(self.org))
-            self.logger.info("repo name found: " + str(self.name))
-            self.path = join(self.path_dirs.plugins_dir,
-                             self.org,
-                             self.name)
-            self.logger.info("path to clone to: " + str(self.path))
-
-            # check if the directory exists, if so return now
-            status = self.path_dirs.ensure_dir(self.path)
-            if not status[0]:
-                self.logger.info("ensure_dir failed. Exiting clone with"
-                                 " status: " + str(status))
-                return status
-
-            # set to new repo path
-            chdir(self.path)
-
-            # if path already exists, try git checkout to update
-            if status[0] and status[1] == 'exists':
-                try:
-                    check_output(shlex.split("git -C " +
-                                             self.path +
-                                             " rev-parse"),
-                                 stderr=STDOUT,
-                                 close_fds=True)
-                    self.logger.info("path already exists: " + str(self.path))
-                    status = (True, cwd)
-                    self.logger.info("Status of clone: " + str(status))
-                    self.logger.info("Finished: clone")
-                    return status
-                except Exception as e:  # pragma: no cover
-                    self.logger.error("unable to checkout: " + str(self.path) +
-                                      " because: " + str(e))
-                    status = (False, e)
-                    self.logger.info("Exiting clone with status: " +
-                                     str(status))
-                    return status
-
-            # ensure cloning still works even if ssl is broken
-            cmd = "git config --global http.sslVerify false"
-            check_output(shlex.split(cmd), stderr=STDOUT, close_fds=True)
-
-            # check if user and pw were supplied, typically for private repos
-            if user and pw:
-                # only https is supported when using user/pw
-                repo = 'https://' + user + ':' + pw + '@'
-                repo += self.repo.split("https://")[-1]
-
-            # clone repo and build tools
-            check_output(shlex.split("git clone --recursive " + repo + " ."),
-                         stderr=STDOUT,
-                         close_fds=True)
-
-            status = (True, cwd)
-        except Exception as e:  # pragma: no cover
-            self.logger.error("clone failed with error: " + str(e))
-            status = (False, e)
-        self.logger.info("Status of clone: " + str(status))
-        self.logger.info("Finished: clone")
-        return status
-
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
             version_alias=None, wild=None, remove_old=True, disable_old=True,
-            limit_groups=None):
+            limit_groups=None, core=False):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -165,12 +83,15 @@ class Plugin:
             'master', ignore all other tools)
         """
         # initialize and store class objects
+        self.repo = repo.lower()
         self.tools = tools
         self.overrides = overrides
         self.version = version
         self.branch = branch
         self.build = build
         self.groups = groups
+        self.path, self.org, self.name = self.p_helper.get_path(repo,
+                                                                core=core)
 
         # TODO these need to be implemented
         self.version_alias = version_alias
@@ -180,15 +101,10 @@ class Plugin:
         self.limit_groups = limit_groups
 
         status = (True, None)
-        status_code, cwd = self.clone(repo.lower(), user=user, pw=pw)
+        status_code, _ = self.p_helper.clone(self.repo, user=user, pw=pw)
+        self.p_helper.apply_path(self.repo)
         status = self._build_tools(status_code)
 
-        # set back to original path
-        try:
-            chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            self.logger.info("unable to change directory to: " + cwd +
-                             " because: " + str(e))
         return status
 
     @ErrorHandler
@@ -289,12 +205,10 @@ class Plugin:
             self.logger.error("unable to change to directory: " +
                               str(match_path) + " because: " + str(e))
             return None
+
         template = self._build_image(template, match_path, image_name, section)
-        try:
-            chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            self.logger.error("unable to change to directory: " + str(cwd) +
-                              " because: " + str(e))
+        chdir(cwd)
+
         # remove untagged images
         untagged = self.d_client.images.list(filters={"label": "vent",
                                                       "dangling": "true"})
@@ -334,19 +248,21 @@ class Plugin:
                 elif self.overrides is None:
                     # there's only something in tools
                     # only grab the tools specified
-                    matches = self.get_tool_matches()
+                    matches = PluginHelper.tool_matches(tools=self.tools,
+                                                        version=self.version)
                 else:
                     # both tools and overrides were specified
                     # grab only the tools specified, with the overrides applied
-                    orig_matches = self.get_tool_matches()
-                    matches = orig_matches
+                    o_matches = PluginHelper.tool_matches(tools=self.tools,
+                                                          version=self.version)
+                    matches = o_matches
                     for override in self.overrides:
                         override_t = None
                         if override[0] == '.':
                             override_t = ('', override[1])
                         else:
                             override_t = override
-                        for match in orig_matches:
+                        for match in o_matches:
                             if override_t[0] == match[0]:
                                 matches.remove(match)
                                 matches.append(override_t)
@@ -355,30 +271,6 @@ class Plugin:
         else:
             response = (False, status)
         return response
-
-    def get_tool_matches(self):
-        """
-        Get the tools paths and versions that were specified by self.tools and
-        self.version
-        """
-        matches = []
-        if not hasattr(self, 'tools'):
-            self.tools = []
-        if not hasattr(self, 'version'):
-            self.version = 'HEAD'
-        for tool in self.tools:
-            match_version = self.version
-            if tool[1] != '':
-                match_version = tool[1]
-            match = ''
-            if tool[0].endswith('/'):
-                match = tool[0][:-1]
-            elif tool[0] != '.':
-                match = tool[0]
-            if not match.startswith('/') and match != '':
-                match = '/'+match
-            matches.append((match, match_version))
-        return matches
 
     def _build_manifest(self, matches):
         """ Builds and writes the manifest for the tools being added """
@@ -504,8 +396,9 @@ class Plugin:
         """ Build docker images and store results in template """
         # !! TODO return status of whether it built successfully or not
         if self.build:
+            cwd = getcwd()
+            chdir(match_path)
             try:
-                chdir(match_path)
                 # currently can't use docker-py because it doesn't support
                 # labels on images yet
                 name = template.option(section, "name")
@@ -584,6 +477,7 @@ class Plugin:
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
+            chdir(cwd)
         else:
             template.set_option(section, "built", "no")
             template.set_option(section, "last_updated",

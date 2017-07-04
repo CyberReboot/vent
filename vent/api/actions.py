@@ -6,7 +6,6 @@ from ast import literal_eval
 from subprocess import check_output, STDOUT
 
 from vent.api.plugins import Plugin
-from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
@@ -21,7 +20,7 @@ class Action:
         self.d_client = self.plugin.d_client
         self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
                                         "vent.cfg")
-        self.p_helper = PluginHelper(**kargs)
+        self.p_helper = self.plugin.p_helper
         self.logger = Logger(__name__)
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
@@ -46,7 +45,7 @@ class Action:
                                      disable_old=disable_old)
         except Exception as e:  # pragma: no cover
             self.logger.error("add failed with error: " + str(e))
-            status = (False, e)
+            status = (False, str(e))
         self.logger.info("Status of add: " + str(status[0]))
         self.logger.info("Finished: add")
         return status
@@ -68,7 +67,7 @@ class Action:
                                            groups=groups)
         except Exception as e:  # pragma: no cover
             self.logger.error("add image failed with error: " + str(e))
-            status = (False, e)
+            status = (False, str(e))
         self.logger.info("Status of add image: " + str(status[0]))
         self.logger.info("Finished: add image")
         return status
@@ -427,11 +426,7 @@ class Action:
                     c_status = self.p_helper.checkout(branch=branch,
                                                       version=version)
                     self.logger.info(c_status)
-                    try:
-                        os.chdir(cwd)
-                    except Exception as e:  # pragma: no cover
-                        self.logger.error("unable to change directory: " +
-                                          str(e))
+                    os.chdir(cwd)
                     template = self.plugin.builder(template,
                                                    s[section]['path'],
                                                    s[section]['image_name'],
@@ -632,6 +627,9 @@ class Action:
 
         # remove .vent folder
         try:
+            cwd = os.getcwd()
+            if cwd.startswith(os.path.join(os.path.expanduser('~'), '.vent')):
+                os.chdir(os.path.expanduser('~'))
             shutil.rmtree(os.path.join(os.path.expanduser('~'), '.vent'))
         except Exception as e:  # pragma: no cover
             error_message += "Error deleting Vent data: " + str(e) + "\n"

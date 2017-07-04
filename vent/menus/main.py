@@ -80,11 +80,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # give a little extra time for file descriptors to close
         time.sleep(0.1)
 
-        try:
-            current_path = os.getcwd()
-        except Exception as e:  # pragma: no cover
-            MainForm.exit()
-
         self.addfield.value = Timestamp()
         self.addfield.display()
         self.addfield2.value = Uptime()
@@ -136,7 +131,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield6.display()
         self.addfield7.display()
 
-        os.chdir(current_path)
         return
 
     @staticmethod

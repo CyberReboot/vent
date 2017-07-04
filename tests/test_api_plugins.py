@@ -33,13 +33,6 @@ def test_add():
     assert isinstance(status, tuple)
     assert status[0] == True
 
-def test_get_tool_matches():
-    """ Test the get_tool_matches function """
-    instance = Plugin()
-    instance.tools = []
-    matches = instance.get_tool_matches()
-    assert matches == []
-
 def test_add_image():
     """ Test the add_image function """
     instance = Plugin()
