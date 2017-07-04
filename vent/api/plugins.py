@@ -83,12 +83,14 @@ class Plugin:
             'master', ignore all other tools)
         """
         # initialize and store class objects
+        self.repo = repo.lower()
         self.tools = tools
         self.overrides = overrides
         self.version = version
         self.branch = branch
         self.build = build
         self.groups = groups
+        self.path, self.org, self.name = self.p_helper.get_path(repo)
 
         # TODO these need to be implemented
         self.version_alias = version_alias
@@ -98,7 +100,7 @@ class Plugin:
         self.limit_groups = limit_groups
 
         status = (True, None)
-        status_code, cwd = self.p_helper.clone(repo.lower(), user=user, pw=pw)
+        status_code, cwd = self.p_helper.clone(self.repo, user=user, pw=pw)
         status = self._build_tools(status_code)
 
         # set back to original path

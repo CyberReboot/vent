@@ -279,7 +279,7 @@ class MenuHelper:
 
             status = self.p_helper.checkout(branch=branch, version=version)
             if status[0]:
-                path = self.p_helper.get_path(repo)
+                path, _, _ = self.p_helper.get_path(repo)
                 tools = self.p_helper.available_tools(path, version=version)
             else:
                 self.logger.info("checkout failed. Exiting repo_tools with"

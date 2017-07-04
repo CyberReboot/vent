@@ -28,7 +28,7 @@ class PluginHelper:
         else:
             path = self.path_dirs.plugins_dir
         path = join(path, org, name)
-        return path
+        return path, org, name
 
     def apply_path(self, repo):
         """ Set path to where the repo is and return original path """

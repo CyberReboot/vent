@@ -4,9 +4,9 @@ from vent.api.plugin_helpers import PluginHelper
 def test_get_path():
     """ Test the get_path function """
     instance = PluginHelper()
-    path = instance.get_path('https://github.com/cyberreboot/vent')
+    path, _, _ = instance.get_path('https://github.com/cyberreboot/vent')
     assert path.endswith('.internals/plugins/cyberreboot/vent')
-    path = instance.get_path('https://github.com/cyberreboot/vent-plugins')
+    path, _, _ = instance.get_path('https://github.com/cyberreboot/vent-plugins')
     assert '.internals' not in path
 
 def test_apply_path():
@@ -29,7 +29,7 @@ def test_checkout():
 def test_available_tools():
     """ Test the available_tools function """
     instance = PluginHelper()
-    path = instance.get_path('https://github.com/cyberreboot/vent')
+    path, _, _ = instance.get_path('https://github.com/cyberreboot/vent')
     matches = instance.available_tools(path)
     assert isinstance(matches, list)
 
