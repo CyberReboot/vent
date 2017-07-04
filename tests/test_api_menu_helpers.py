@@ -5,6 +5,7 @@ def test_cores():
     """ Test the cores function """
     instance = MenuHelper()
     cores = instance.cores('install')
+    assert cores == False
     assert cores[0] == True
     cores = instance.cores('build')
     assert cores[0] == True

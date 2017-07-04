@@ -8,6 +8,7 @@ def test_add():
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False)
     assert isinstance(status, tuple)
+    assert status == False
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent.git', build=False)
     assert isinstance(status, tuple)
