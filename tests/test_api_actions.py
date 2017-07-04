@@ -54,7 +54,8 @@ def test_prep_start():
                                  ('vent/core/syslog', '')])
     assert isinstance(status, tuple)
     assert status[0] == True
-    status = instance.prep_start(groups='core', branch='master')
+    status = instance.prep_start(groups='core', branch='master',
+                                 run_build=True)
     assert isinstance(status, tuple)
     assert status[0] == True
 
@@ -97,7 +98,14 @@ def test_inventory():
     status = instance.inventory(choices=[])
     assert isinstance(status, tuple)
     assert status[0] == False
-    status = instance.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled', 'foo'])
+    status = instance.inventory(choices=['repos',
+                                         'core',
+                                         'tools',
+                                         'images',
+                                         'built',
+                                         'running',
+                                         'enabled',
+                                         'foo'])
     assert isinstance(status, tuple)
     assert status[0] == True
     assert isinstance(status[1], dict)
