@@ -24,7 +24,7 @@ def test_checkout():
     instance = PluginHelper()
     status = instance.checkout()
     assert isinstance(status, tuple)
-    assert status[0] == True
+    assert status[0] == False
 
 def test_available_tools():
     """ Test the available_tools function """

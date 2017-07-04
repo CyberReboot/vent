@@ -627,6 +627,9 @@ class Action:
 
         # remove .vent folder
         try:
+            cwd = os.getcwd()
+            if cwd.startswith(os.path.join(os.path.expanduser('~'), '.vent')):
+                os.chdir(os.path.expanduser('~'))
             shutil.rmtree(os.path.join(os.path.expanduser('~'), '.vent'))
         except Exception as e:  # pragma: no cover
             error_message += "Error deleting Vent data: " + str(e) + "\n"
