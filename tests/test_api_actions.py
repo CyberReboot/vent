@@ -53,6 +53,7 @@ def test_prep_start():
                                  ('vent/core/redis', ''),
                                  ('vent/core/syslog', '')])
     assert isinstance(status, tuple)
+    assert status == False
     assert status[0] == True
     status = instance.prep_start(groups='core', branch='master',
                                  run_build=True)
@@ -123,6 +124,7 @@ def test_reset():
     instance = Action()
     status = instance.reset()
     assert isinstance(status, tuple)
+    assert status == False
     assert status[0] == False
 
 def test_logs():
