@@ -63,12 +63,10 @@ class PluginHelper:
         self.logger.info("Starting: checkout")
         self.logger.info("branch given: " + str(branch))
         self.logger.info("version given: " + str(version))
-        self.logger.info(getcwd())
         try:
             status = check_output(shlex.split("git checkout " + branch),
                                   stderr=STDOUT,
                                   close_fds=True)
-            self.logger.info(status)
             status = check_output(shlex.split("git pull"),
                                   stderr=STDOUT,
                                   close_fds=True)
