@@ -3,7 +3,7 @@ import threading
 import time
 
 from vent.api.actions import Action
-from vent.api.plugins import Plugin
+from vent.api.plugin_helpers import PluginHelper
 from vent.menus.add_options import AddOptionsForm
 
 
@@ -102,8 +102,8 @@ class AddForm(npyscreen.ActionForm):
                                      form_color='CAUTION')
         elif self.repo.value:
             self.parentApp.repo_value['repo'] = self.repo.value
-            api_plugin = Plugin()
-            thr = threading.Thread(target=api_plugin.clone, args=(),
+            p_helper = PluginHelper()
+            thr = threading.Thread(target=p_helper.clone, args=(),
                                    kwargs={'repo': self.repo.value,
                                            'user': self.user.value,
                                            'pw': self.pw.value})

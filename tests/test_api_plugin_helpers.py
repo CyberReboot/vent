@@ -32,3 +32,9 @@ def test_available_tools():
     path = instance.get_path('https://github.com/cyberreboot/vent')
     matches = instance.available_tools(path)
     assert isinstance(matches, list)
+
+def test_tool_matches():
+    """ Test the tool_matches function """
+    instance = PluginHelper()
+    matches = instance.tool_matches(tools=[])
+    assert matches == []
