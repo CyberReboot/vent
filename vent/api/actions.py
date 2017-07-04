@@ -46,7 +46,7 @@ class Action:
                                      disable_old=disable_old)
         except Exception as e:  # pragma: no cover
             self.logger.error("add failed with error: " + str(e))
-            status = (False, e)
+            status = (False, str(e))
         self.logger.info("Status of add: " + str(status[0]))
         self.logger.info("Finished: add")
         return status
@@ -68,7 +68,7 @@ class Action:
                                            groups=groups)
         except Exception as e:  # pragma: no cover
             self.logger.error("add image failed with error: " + str(e))
-            status = (False, e)
+            status = (False, str(e))
         self.logger.info("Status of add image: " + str(status[0]))
         self.logger.info("Finished: add image")
         return status

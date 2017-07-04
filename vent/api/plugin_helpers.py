@@ -103,6 +103,7 @@ class PluginHelper:
                     self.logger.info("path already exists: " + str(status[2]))
                     self.logger.info("Status of clone: " + str(status[0]))
                     self.logger.info("Finished: clone")
+                    self.path_dirs.ensure_dir(status[1])
                     chdir(status[1])
                     return (True, status[1])
                 except Exception as e:  # pragma: no cover
@@ -127,6 +128,7 @@ class PluginHelper:
                          stderr=STDOUT,
                          close_fds=True)
 
+            self.path_dirs.ensure_dir(status[1])
             chdir(status[1])
             status = (True, status[1])
         except Exception as e:  # pragma: no cover
