@@ -268,8 +268,6 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
                 matches = p_helper.available_tools(path, version=version)
             for match in matches:
                 all_tools['normal'].append(match[0].split('/')[-1])
-        else:
-            all_tools['normal'] = 'failed'
 
     # get tools that have been installed
     for tool in tools[1]:
