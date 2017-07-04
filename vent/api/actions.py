@@ -6,7 +6,6 @@ from ast import literal_eval
 from subprocess import check_output, STDOUT
 
 from vent.api.plugins import Plugin
-from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
@@ -21,7 +20,7 @@ class Action:
         self.d_client = self.plugin.d_client
         self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
                                         "vent.cfg")
-        self.p_helper = PluginHelper(**kargs)
+        self.p_helper = self.plugin.p_helper
         self.logger = Logger(__name__)
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",

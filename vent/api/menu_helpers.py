@@ -7,7 +7,6 @@ from subprocess import check_output, STDOUT
 
 from vent.api.actions import Action
 from vent.api.plugins import Plugin
-from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Tools_Status
@@ -17,8 +16,8 @@ class MenuHelper:
     """ Handle helper functions in the API for the Menu """
     def __init__(self, **kargs):
         self.api_action = Action(**kargs)
-        self.plugin = Plugin(**kargs)
-        self.p_helper = PluginHelper(**kargs)
+        self.plugin = self.api_action.plugin
+        self.p_helper = self.api_action.p_helper
         self.logger = Logger(__name__)
 
     def cores(self, action, branch="master", version='HEAD'):
