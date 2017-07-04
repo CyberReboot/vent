@@ -96,12 +96,12 @@ class PluginHelper:
                 self.logger.info("path to clone to: " + str(status[2]))
                 try:
                     check_output(shlex.split("git -C " +
-                                             path +
+                                             status[2] +
                                              " rev-parse"),
                                  stderr=STDOUT,
                                  close_fds=True)
-                    self.logger.info("path already exists: " + str(path))
-                    self.logger.info("Status of clone: " + str(status))
+                    self.logger.info("path already exists: " + str(status[2]))
+                    self.logger.info("Status of clone: " + str(status[0]))
                     self.logger.info("Finished: clone")
                     return (True, status[1])
                 except Exception as e:  # pragma: no cover

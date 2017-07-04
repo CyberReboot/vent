@@ -237,7 +237,7 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
     core_repo = 'https://github.com/cyberreboot/vent'
     repos = set()
     tools = Tools(**kargs)
-    p_helper = PluginHelper(**kargs)
+    p_helper = PluginHelper(plugins_dir='.internals/plugins/')
 
     # get manifest file
     path_dirs = PathDirs(**kargs)
@@ -255,7 +255,6 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
                 repos.add(repo[1])
 
     # get normal tools
-    plugins = Plugin(plugins_dir='.internals/plugins/')
     for repo in repos:
         status, _ = p_helper.clone(repo)
         if status:
