@@ -31,7 +31,7 @@ def test_add():
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')], user='foo', pw='foo')
     assert isinstance(status, tuple)
-    assert status[0] == False
+    assert status[0] == True
 
 def test_get_tool_matches():
     """ Test the get_tool_matches function """
