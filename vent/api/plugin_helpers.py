@@ -18,12 +18,12 @@ class PluginHelper:
                              "plugin_manifest.cfg")
         self.logger = Logger(__name__)
 
-    def get_path(self, repo):
+    def get_path(self, repo, core=False):
         """ Return the path for the repo """
         if repo.endswith(".git"):
             repo = repo.split(".git")[0]
         org, name = repo.split("/")[-2:]
-        if repo == 'https://github.com/cyberreboot/vent':
+        if core:
             path = join(self.path_dirs.base_dir, '.internals/plugins/')
         else:
             path = self.path_dirs.plugins_dir
@@ -103,7 +103,6 @@ class PluginHelper:
                     self.logger.info("path already exists: " + str(status[2]))
                     self.logger.info("Status of clone: " + str(status[0]))
                     self.logger.info("Finished: clone")
-                    self.path_dirs.ensure_dir(status[1])
                     chdir(status[1])
                     return (True, status[1])
                 except Exception as e:  # pragma: no cover
@@ -128,7 +127,6 @@ class PluginHelper:
                          stderr=STDOUT,
                          close_fds=True)
 
-            self.path_dirs.ensure_dir(status[1])
             chdir(status[1])
             status = (True, status[1])
         except Exception as e:  # pragma: no cover

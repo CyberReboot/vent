@@ -55,7 +55,7 @@ class MenuHelper:
                 status = plugins.add('https://github.com/cyberreboot/vent',
                                      tools=tools,
                                      branch=branch,
-                                     build=False)
+                                     build=False, core=True)
                 self.logger.info("status of plugin add: " + str(status))
                 plugin_c = Template(template=self.plugin.manifest)
                 sections = plugin_c.sections()

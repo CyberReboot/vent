@@ -27,7 +27,7 @@ class Plugin:
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
             version_alias=None, wild=None, remove_old=True, disable_old=True,
-            limit_groups=None):
+            limit_groups=None, core=False):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -90,7 +90,8 @@ class Plugin:
         self.branch = branch
         self.build = build
         self.groups = groups
-        self.path, self.org, self.name = self.p_helper.get_path(repo)
+        self.path, self.org, self.name = self.p_helper.get_path(repo,
+                                                                core=core)
 
         # TODO these need to be implemented
         self.version_alias = version_alias

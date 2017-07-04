@@ -259,7 +259,7 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
         if status:
             p_helper.apply_path(repo)
             p_helper.checkout(branch=branch, version=version)
-            path, _, _ = p_helper.get_path(repo)
+            path, _, _ = p_helper.get_path(repo, core=core)
             matches = None
             if core:
                 matches = p_helper.available_tools(path, version=version,
