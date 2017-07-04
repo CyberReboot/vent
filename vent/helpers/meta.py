@@ -6,7 +6,6 @@ import pkg_resources
 import platform
 import subprocess
 
-from vent.api.plugins import Plugin
 from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
