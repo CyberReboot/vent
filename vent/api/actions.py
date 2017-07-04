@@ -427,11 +427,7 @@ class Action:
                     c_status = self.p_helper.checkout(branch=branch,
                                                       version=version)
                     self.logger.info(c_status)
-                    try:
-                        os.chdir(cwd)
-                    except Exception as e:  # pragma: no cover
-                        self.logger.error("unable to change directory: " +
-                                          str(e))
+                    os.chdir(cwd)
                     template = self.plugin.builder(template,
                                                    s[section]['path'],
                                                    s[section]['image_name'],

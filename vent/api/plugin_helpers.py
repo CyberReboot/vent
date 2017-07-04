@@ -63,10 +63,12 @@ class PluginHelper:
         self.logger.info("Starting: checkout")
         self.logger.info("branch given: " + str(branch))
         self.logger.info("version given: " + str(version))
+        self.logger.info(getcwd())
         try:
             status = check_output(shlex.split("git checkout " + branch),
                                   stderr=STDOUT,
                                   close_fds=True)
+            self.logger.info(status)
             status = check_output(shlex.split("git pull"),
                                   stderr=STDOUT,
                                   close_fds=True)
@@ -103,6 +105,7 @@ class PluginHelper:
                     self.logger.info("path already exists: " + str(status[2]))
                     self.logger.info("Status of clone: " + str(status[0]))
                     self.logger.info("Finished: clone")
+                    chdir(status[1])
                     return (True, status[1])
                 except Exception as e:  # pragma: no cover
                     self.logger.info("repo doesn't exist, attempting to " +
@@ -126,6 +129,7 @@ class PluginHelper:
                          stderr=STDOUT,
                          close_fds=True)
 
+            chdir(status[1])
             status = (True, status[1])
         except Exception as e:  # pragma: no cover
             self.logger.error("clone failed with error: " + str(e))

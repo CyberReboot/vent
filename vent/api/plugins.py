@@ -100,15 +100,10 @@ class Plugin:
         self.limit_groups = limit_groups
 
         status = (True, None)
-        status_code, cwd = self.p_helper.clone(self.repo, user=user, pw=pw)
+        status_code, _ = self.p_helper.clone(self.repo, user=user, pw=pw)
+        self.p_helper.apply_path(self.repo)
         status = self._build_tools(status_code)
 
-        # set back to original path
-        try:
-            chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            self.logger.info("unable to change directory to: " + cwd +
-                             " because: " + str(e))
         return status
 
     @ErrorHandler
@@ -209,12 +204,10 @@ class Plugin:
             self.logger.error("unable to change to directory: " +
                               str(match_path) + " because: " + str(e))
             return None
+
         template = self._build_image(template, match_path, image_name, section)
-        try:
-            chdir(cwd)
-        except Exception as e:  # pragma: no cover
-            self.logger.error("unable to change to directory: " + str(cwd) +
-                              " because: " + str(e))
+        chdir(cwd)
+
         # remove untagged images
         untagged = self.d_client.images.list(filters={"label": "vent",
                                                       "dangling": "true"})
@@ -402,8 +395,9 @@ class Plugin:
         """ Build docker images and store results in template """
         # !! TODO return status of whether it built successfully or not
         if self.build:
+            cwd = getcwd()
+            chdir(match_path)
             try:
-                chdir(match_path)
                 # currently can't use docker-py because it doesn't support
                 # labels on images yet
                 name = template.option(section, "name")
@@ -482,6 +476,7 @@ class Plugin:
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
+            chdir(cwd)
         else:
             template.set_option(section, "built", "no")
             template.set_option(section, "last_updated",

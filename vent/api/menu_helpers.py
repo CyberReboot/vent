@@ -33,13 +33,23 @@ class MenuHelper:
             if action in ["install", "build"]:
                 tools = []
                 plugins = Plugin(plugins_dir=".internals/plugins/")
-                self.p_helper.apply_path('https://github.com/cyberreboot/vent')
+                resp = self.p_helper.apply_path('https://github.com/cyberreboot/vent')
+
+                if resp[0]:
+                    cwd = resp[1]
+                else:
+                    self.logger.info("apply_path failed. Exiting cores"
+                                     " with status " + str(resp))
+                    return resp
+
                 path = os.path.join(plugins.path_dirs.plugins_dir,
                                     'cyberreboot/vent')
                 response = self.p_helper.checkout(branch=branch,
                                                   version=version)
-                self.logger.info("status of plugin checkout " + str(response))
-                matches = self.p_helper.available_tools(path, version=version,
+                self.logger.info("status of plugin checkout " +
+                                 str(response))
+                matches = self.p_helper.available_tools(path,
+                                                        version=version,
                                                         groups='core')
                 for match in matches:
                     tools.append((match[0], ''))
@@ -65,6 +75,7 @@ class MenuHelper:
                                                 "cyberreboot/vent-" +
                                                 tool + ":" + branch)
                 plugin_c.write_config()
+                chdir(cwd)
             if action == "build":
                 plugin_c = Template(template=self.plugin.manifest)
                 sections = plugin_c.sections()
@@ -190,12 +201,7 @@ class MenuHelper:
                                      str(status))
                     return status
 
-            try:
-                chdir(cwd)
-            except Exception as e:  # pragma: no cover
-                self.logger.error("unable to change directory to: " +
-                                  str(cwd) + "because: " + str(e))
-
+            chdir(cwd)
             status = (True, branches)
         except Exception as e:  # pragma: no cover
             self.logger.error("repo_branches failed with error: " + str(e))
@@ -245,12 +251,8 @@ class MenuHelper:
                 self.logger.info("repo_branches failed. Exiting repo_commits"
                                  " with status: " + str(status))
                 return status
-            try:
-                chdir(cwd)
-            except Exception as e:  # pragma: no cover
-                self.logger.error("unable to change directory to: " +
-                                  str(cwd) + " because: " + str(e))
 
+            chdir(cwd)
             status = (True, commits)
         except Exception as e:  # pragma: no cover
             self.logger.error("repo_commits failed with error: " + str(e))
@@ -285,12 +287,8 @@ class MenuHelper:
                 self.logger.info("checkout failed. Exiting repo_tools with"
                                  " status: " + str(status))
                 return status
-            try:
-                chdir(cwd)
-            except Exception as e:  # pragma: no cover
-                self.logger.error("unable to change directory to: " +
-                                  str(cwd) + " because: " + str(e))
 
+            chdir(cwd)
             status = (True, tools)
         except Exception as e:  # pragma: no cover
             self.logger.error("repo_tools failed with error: " + str(e))

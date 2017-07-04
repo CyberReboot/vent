@@ -258,6 +258,7 @@ def Tools_Status(core, branch="master", version="HEAD", **kargs):
     for repo in repos:
         status, _ = p_helper.clone(repo)
         if status:
+            p_helper.apply_path(repo)
             p_helper.checkout(branch=branch, version=version)
             path, _, _ = p_helper.get_path(repo)
             matches = None
