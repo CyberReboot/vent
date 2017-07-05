@@ -21,6 +21,7 @@ from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
 from vent.menus.services import ServicesForm
+from vent.menus.template import TemplateForm
 from vent.menus.tools import ToolForm
 
 
@@ -217,6 +218,11 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'cores': cores}}
         if s_action == 'start':
             form_args['names'].append('prep_start')
+        # Blake
+        elif s_action == 'template':
+            form = TemplateForm
+            forms = ['TEMPLATE']
+            form_args['name'] = 'Change vent.template'
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
@@ -397,6 +403,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Update core tools',
                         onSelect=self.perform_action,
                         arguments=['update_core'], shortcut='u')
+        self.m2.addItem(text='Update core vent.template',
+                        onSelect=self.perform_action,
+                        arguments=['template_core'], shortcut='t')
 
         # Plugin Menu Items
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
@@ -424,6 +433,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Update plugins',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
+        self.m3.addItem(text='Update plugin vent.template',
+                        onSelect=self.perform_action,
+                        arguments=['template'], shortcut='t')
 
         # Log Menu Items
         self.m4 = self.add_menu(name="Logs", shortcut="l")
