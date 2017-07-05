@@ -201,8 +201,7 @@ class PluginHelper:
                        groups,
                        enabled,
                        branch,
-                       version,
-                       run_build):
+                       version):
         """ Run through sections for prep_start """
         tool_d = {}
         for section in s:
@@ -219,15 +218,6 @@ class PluginHelper:
             status = self.checkout(branch=branch, version=version)
             self.logger.info(status)
             chdir(cwd)
-
-            if run_build:
-                api_action = Action()
-                status = api_action.build(name=s[section]['name'],
-                                          groups=groups,
-                                          enabled=enabled,
-                                          branch=branch,
-                                          version=version)
-                self.logger.info(status)
 
             # set docker settings for container
             vent_template = Template(template_path)
@@ -334,8 +324,7 @@ class PluginHelper:
                    groups=None,
                    enabled="yes",
                    branch="master",
-                   version="HEAD",
-                   run_build=False):
+                   version="HEAD"):
         """
         Start a set of tools that match the parameters given, if no parameters
         are given, start all installed tools on the master branch at verison
@@ -346,7 +335,6 @@ class PluginHelper:
         self.logger.info("Arguments: "+str(args))
         status = (False, None)
         try:
-            del args['run_build']
             options = ['name',
                        'namespace',
                        'built',
@@ -364,8 +352,7 @@ class PluginHelper:
                                                  groups,
                                                  enabled,
                                                  branch,
-                                                 version,
-                                                 run_build)
+                                                 version)
 
             # check and update links, volumes_from, network_mode
             for container in tool_d.keys():

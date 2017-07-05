@@ -54,8 +54,7 @@ def test_prep_start():
                                  ('vent/core/syslog', '')])
     assert isinstance(status, tuple)
     assert status[0] == True
-    status = instance.prep_start(groups='core', branch='master',
-                                 run_build=True)
+    status = instance.prep_start(groups='core', branch='master')
     assert isinstance(status, tuple)
     assert status[0] == True
 

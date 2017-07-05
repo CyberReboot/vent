@@ -93,8 +93,7 @@ class Action:
                    groups=None,
                    enabled="yes",
                    branch="master",
-                   version="HEAD",
-                   run_build=False):
+                   version="HEAD"):
         """ Prep a bunch of containers to be started to they can be ordered """
         args = locals()
         del args['self']
