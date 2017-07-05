@@ -36,3 +36,11 @@ def test_repo_tools():
                                  'master', 'HEAD')
     assert isinstance(status, tuple)
     assert status[0] == False
+
+def test_tools_status():
+    """ Test the tools_status function """
+    instance = MenuHelper()
+    core = instance.tools_status(True)
+    assert isinstance(core, tuple)
+    plugins = instance.tools_status(False)
+    assert isinstance(plugins, tuple)

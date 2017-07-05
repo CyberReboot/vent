@@ -11,7 +11,6 @@ from vent.helpers.meta import Services
 from vent.helpers.meta import System
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Tools
-from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
 
@@ -69,13 +68,6 @@ def test_services():
     assert isinstance(services, list)
     services = Services(vent=False)
     assert isinstance(services, list)
-
-def test_tools_status():
-    """ Test the tools_status function """
-    core = Tools_Status(True)
-    assert isinstance(core, tuple)
-    plugins = Tools_Status(False)
-    assert isinstance(plugins, tuple)
 
 def test_timestamp():
     """ Test the timestamp function """
