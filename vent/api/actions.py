@@ -568,3 +568,6 @@ class Action:
         self.logger.info("Status of inventory: " + str(status[0]))
         self.logger.info("Finished: inventory")
         return status
+
+    def template():
+        return

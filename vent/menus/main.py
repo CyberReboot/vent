@@ -220,9 +220,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args['names'].append('prep_start')
         # Blake
         elif s_action == 'template':
-            form = TemplateForm
-            forms = ['TEMPLATE']
-            form_args['name'] = 'Change vent.template'
+            form_args['action_dict']['action'] = 'change vent.template for'
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']

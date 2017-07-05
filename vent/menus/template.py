@@ -30,12 +30,16 @@ class TemplateForm(npyscreen.ActionForm):
         self.add(npyscreen.TitleText, name="Select which tools' template(s) to update",
                  editable=False)
         if self.core:
-            status, inventory = self.api_action.inventory(choices=['core'])
-            if status:
+            successful, inventory = self.api_action.inventory(choices=['core'])
+            if successful:
                 for tool in inventory['core']:
-                    self.tools[tool[0]] = self.add(npyscreen.CheckBox, name=tool[1], value=True)
+                    self.tools[tool[0]] = self.add(npyscreen.CheckBox, name=tool[0].split('/')[-1], value=True)
         else:
-            self.add(npyscreen.TitleFixedText, name='a', value='a')
+            successful, inventory = self.api_action.inventory(choices=['core', 'tools'])
+            if successful:
+                for tool in inventory['tools']:
+                    if tool not in inventory['core']:
+                        self.tools[tool[0]] = self.add(npyscreen.CheckBox, name=tool[1], value=True)
 
     def on_cancel(self):
         """ When user clicks cancel, will return to MAIN """
