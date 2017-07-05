@@ -70,13 +70,6 @@ def test_services():
     services = Services(vent=False)
     assert isinstance(services, list)
 
-def test_tools_status():
-    """ Test the tools_status function """
-    core = Tools_Status(True)
-    assert isinstance(core, tuple)
-    plugins = Tools_Status(False)
-    assert isinstance(plugins, tuple)
-
 def test_timestamp():
     """ Test the timestamp function """
     timestamp = Timestamp()
