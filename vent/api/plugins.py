@@ -484,19 +484,6 @@ class Plugin:
                                 str(datetime.utcnow()) + " UTC")
         return template
 
-    def constraint_options(self, constraint_dict, options):
-        """ Return result of constraints and options against a template """
-        constraints = {}
-        template = Template(template=self.manifest)
-        for constraint in constraint_dict:
-            if constraint != 'self':
-                if (constraint_dict[constraint] or
-                   constraint_dict[constraint] == ''):
-                    constraints[constraint] = constraint_dict[constraint]
-        results = template.constrained_sections(constraints=constraints,
-                                                options=options)
-        return results, template
-
     def list_tools(self):
         """ Return list of tuples of all tools """
         tools = []
@@ -531,7 +518,7 @@ class Plugin:
         status = (True, None)
 
         # get resulting dict of sections with options that match constraints
-        results, template = self.constraint_options(args, [])
+        results, template = self.p_helper.constraint_options(args, [])
         for result in results:
             response, image_name = template.option(result, 'image_name')
 
@@ -587,7 +574,7 @@ class Plugin:
         options = ['branch', 'groups', 'image_name']
 
         # get resulting dict of sections with options that match constraints
-        results, template = self.constraint_options(args, options)
+        results, template = self.p_helper.constraint_options(args, options)
         for result in results:
             # check for container and remove
             try:
@@ -617,7 +604,7 @@ class Plugin:
         options = ['version', 'previous_versions']
 
         # get resulting dict of sections with options that match constraints
-        results, _ = self.constraint_options(args, options)
+        results, _ = self.p_helper.constraint_options(args, options)
         for result in results:
             version_list = [results[result]['version']]
             if 'previous_versions' in results[result]:
@@ -635,7 +622,7 @@ class Plugin:
         options = ['version']
 
         # get resulting dict of sections with options that match constraints
-        results, _ = self.constraint_options(args, options)
+        results, _ = self.p_helper.constraint_options(args, options)
         for result in results:
             versions.append((result, results[result]['version']))
         return versions
@@ -649,7 +636,7 @@ class Plugin:
         options = ['enabled']
 
         # get resulting dict of sections with options that match constraints
-        results, _ = self.constraint_options(args, options)
+        results, _ = self.p_helper.constraint_options(args, options)
         for result in results:
             if results[result]['enabled'] == 'yes':
                 states.append((result, 'enabled'))
@@ -665,7 +652,7 @@ class Plugin:
         status = (False, None)
 
         # get resulting dict of sections with options that match constraints
-        results, template = self.constraint_options(args, [])
+        results, template = self.p_helper.constraint_options(args, [])
         for result in results:
             status = template.set_option(result, 'enabled', 'yes')
         template.write_config()
@@ -679,7 +666,7 @@ class Plugin:
         status = (False, None)
 
         # get resulting dict of sections with options that match constraints
-        results, template = self.constraint_options(args, [])
+        results, template = self.p_helper.constraint_options(args, [])
         for result in results:
             status = template.set_option(result, 'enabled', 'no')
         template.write_config()

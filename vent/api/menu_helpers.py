@@ -1,3 +1,4 @@
+import docker
 import os
 import shlex
 
@@ -7,9 +8,10 @@ from subprocess import check_output, STDOUT
 
 from vent.api.actions import Action
 from vent.api.plugins import Plugin
+from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
-from vent.helpers.meta import Tools_Status
+from vent.helpers.meta import Tools
 
 
 class MenuHelper:
@@ -28,7 +30,7 @@ class MenuHelper:
         status = (False, None)
         try:
             self.logger.info("action provided: " + str(action))
-            core = Tools_Status(True, branch=branch, version=version)[1]
+            core = self.tools_status(True, branch=branch, version=version)[1]
             if action in ["install", "build"]:
                 tools = []
                 plugins = Plugin(plugins_dir=".internals/plugins/")
@@ -296,3 +298,92 @@ class MenuHelper:
         self.logger.info("Status of repo_tools: " + str(status))
         self.logger.info("Finished: repo_tools")
         return status
+
+    def tools_status(self, core, branch="master", version="HEAD", **kargs):
+        """
+        Get tools that are currently installed/built/running and also the
+        number of repos that those tools come from; can toggle whether looking
+        for core tools or plugin tools
+        """
+        # !! TODO this might need to store namespaces/branches/versions
+        all_tools = {'built': [], 'running': [], 'installed': [], 'normal': []}
+        core_repo = 'https://github.com/cyberreboot/vent'
+        repos = set()
+        tools = Tools(**kargs)
+        p_helper = PluginHelper(plugins_dir='.internals/plugins/')
+
+        # get manifest file
+        manifest = os.path.join(self.api_action.plugin.path_dirs.meta_dir,
+                                "plugin_manifest.cfg")
+        template = Template(template=manifest)
+        tools = template.sections()
+
+        # get repos
+        if core:
+            repos.add(core_repo)
+        else:
+            for tool in tools[1]:
+                repo = template.option(tool, 'repo')
+                if repo[0] and repo[1] != core_repo:
+                    repos.add(repo[1])
+
+        # get normal tools
+        for repo in repos:
+            status, _ = p_helper.clone(repo)
+            if status:
+                p_helper.apply_path(repo)
+                p_helper.checkout(branch=branch, version=version)
+                path, _, _ = p_helper.get_path(repo, core=core)
+                matches = None
+                if core:
+                    matches = p_helper.available_tools(path, version=version,
+                                                       groups='core')
+                else:
+                    matches = p_helper.available_tools(path, version=version)
+                for match in matches:
+                    all_tools['normal'].append(match[0].split('/')[-1])
+
+        # get tools that have been installed
+        for tool in tools[1]:
+            repo = template.option(tool, "repo")
+            if repo[0] and repo[1] in repos:
+                name = template.option(tool, "name")
+                if name[0]:
+                    all_tools['installed'].append(name[1])
+
+        # get core tools that have been built and/or are running
+        try:
+            d_client = docker.from_env()
+            images = d_client.images.list(filters={'label': 'vent'})
+            for image in images:
+                try:
+                    core_check = ("vent.groups" in image.attrs['Labels'] and
+                                  'core' in image.attrs['Labels']['vent.groups'])
+                    image_check = None
+                    if core:
+                        image_check = core_check
+                    else:
+                        image_check = not core_check
+                    if image_check:
+                        if 'vent.name' in image.attrs['Labels']:
+                            all_tools['built'].append(image.attrs['Labels']['vent.name'])
+                except Exception as err:  # pragma: no cover
+                    pass
+            containers = d_client.containers.list(filters={'label': 'vent'})
+            for container in containers:
+                try:
+                    core_check = ("vent.groups" in container.attrs['Config']['Labels'] and
+                                  'core' in container.attrs['Config']['Labels']['vent.groups'])
+                    container_check = None
+                    if core:
+                        container_check = core_check
+                    else:
+                        container_check = not core_check
+                    if container_check:
+                        if 'vent.name' in container.attrs['Config']['Labels']:
+                            all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'])
+                except Exception as err:  # pragma: no cover
+                    pass
+        except Exception as e:  # pragma: no cover
+            pass
+        return (len(repos), all_tools)

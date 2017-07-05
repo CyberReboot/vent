@@ -15,7 +15,6 @@ from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
-from vent.helpers.meta import Tools_Status
 from vent.helpers.meta import Uptime
 from vent.menus.add import AddForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
@@ -38,9 +37,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             os._exit(0)
 
     @staticmethod
-    def tools_status(core):
+    def t_status(core):
         """ Get status of tools for either plugins or core """
-        repos, tools = Tools_Status(core)
+        m_helper = MenuHelper()
+        repos, tools = m_helper.tools_status(core)
         installed = 0
         custom_installed = 0
         built = 0
@@ -92,7 +92,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield3.display()
 
         # update core tool status
-        self.addfield5.value, values = MainForm.tools_status(True)
+        self.addfield5.value, values = MainForm.t_status(True)
         if values[0] + values[1] == 0:
             color = "DANGER"
             self.addfield4.labelColor = "CAUTION"
@@ -108,7 +108,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5.labelColor = color
 
         # update plugin tool status
-        plugin_str, values = MainForm.tools_status(False)
+        plugin_str, values = MainForm.t_status(False)
         plugin_str += ", " + str(values[3]) + " plugin(s) installed"
         self.addfield6.value = plugin_str
 

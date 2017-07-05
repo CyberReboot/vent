@@ -1,16 +1,10 @@
 import os
-import shlex
 import shutil
 
-from ast import literal_eval
-from subprocess import check_output, STDOUT
-
 from vent.api.plugins import Plugin
-from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
-from vent.helpers.meta import Version
 
 
 class Action:
@@ -93,139 +87,6 @@ class Action:
         self.logger.info("Finished: remove")
         return status
 
-    def _start_sections(self,
-                        s,
-                        files,
-                        groups,
-                        enabled,
-                        branch,
-                        version,
-                        run_build):
-        """ Run through sections for prep_start """
-        tool_d = {}
-        for section in s:
-            # initialize needed vars
-            template_path = os.path.join(s[section]['path'],
-                                         'vent.template')
-            c_name = s[section]['image_name'].replace(':', '-')
-            c_name = c_name.replace('/', '-')
-            image_name = s[section]['image_name']
-
-            # checkout the right version and branch of the repo
-            cwd = os.getcwd()
-            self.logger.info("current directory is: " + str(cwd))
-            os.chdir(os.path.join(s[section]['path']))
-            status = self.p_helper.checkout(branch=branch, version=version)
-            self.logger.info(status)
-            os.chdir(cwd)
-
-            if run_build:
-                status = self.build(name=s[section]['name'],
-                                    groups=groups,
-                                    enabled=enabled,
-                                    branch=branch,
-                                    version=version)
-                self.logger.info(status)
-
-            # set docker settings for container
-            vent_template = Template(template_path)
-            status = vent_template.section('docker')
-            self.logger.info(status)
-            tool_d[c_name] = {'image': image_name,
-                              'name': c_name}
-            if status[0]:
-                for option in status[1]:
-                    options = option[1]
-                    # check for commands to evaluate
-                    if '`' in options:
-                        cmds = options.split('`')
-                        if len(cmds) > 2:
-                            i = 1
-                            while i < len(cmds):
-                                try:
-                                    cmds[i] = check_output(shlex.split(cmds[i]),
-                                                           stderr=STDOUT,
-                                                           close_fds=True).strip()
-                                except Exception as e:  # pragma: no cover
-                                    self.logger.error("unable to evaluate command specified in vent.template: " + str(e))
-                                i += 2
-                        options = "".join(cmds)
-                    # store options set for docker
-                    try:
-                        tool_d[c_name][option[0]] = literal_eval(options)
-                    except Exception as e:  # pragma: no cover
-                        self.logger.error("unable to store the options set for docker: " + str(e))
-                        tool_d[c_name][option[0]] = options
-
-            # get temporary name for links, etc.
-            status = vent_template.section('info')
-            self.logger.info(status)
-            plugin_c = Template(template=self.plugin.manifest)
-            status, plugin_sections = plugin_c.sections()
-            self.logger.info(status)
-            for plugin_section in plugin_sections:
-                status = plugin_c.option(plugin_section, "link_name")
-                self.logger.info(status)
-                image_status = plugin_c.option(plugin_section, "image_name")
-                self.logger.info(image_status)
-                if status[0] and image_status[0]:
-                    cont_name = image_status[1].replace(':', '-')
-                    cont_name = cont_name.replace('/', '-')
-                    if cont_name not in tool_d:
-                        tool_d[cont_name] = {'image': image_status[1],
-                                             'name': cont_name,
-                                             'start': False}
-                    tool_d[cont_name]['tmp_name'] = status[1]
-
-            # add extra labels
-            if 'labels' not in tool_d[c_name]:
-                tool_d[c_name]['labels'] = {}
-            tool_d[c_name]['labels']['vent'] = Version()
-            tool_d[c_name]['labels']['vent.namespace'] = s[section]['namespace']
-            tool_d[c_name]['labels']['vent.branch'] = branch
-            tool_d[c_name]['labels']['vent.version'] = version
-            tool_d[c_name]['labels']['vent.name'] = s[section]['name']
-
-            log_config = {'type': 'syslog',
-                          'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                     'syslog-facility': 'daemon',
-                                     'tag': 'plugin'}}
-            if 'groups' in s[section]:
-                # add labels for groups
-                tool_d[c_name]['labels']['vent.groups'] = s[section]['groups']
-                # add restart=always to core containers
-                if 'core' in s[section]['groups']:
-                    tool_d[c_name]['restart_policy'] = {"Name": "always"}
-                # send logs to syslog
-                if 'syslog' not in s[section]['groups'] and 'core' in s[section]['groups']:
-                    log_config['config']['tag'] = 'core'
-                    tool_d[c_name]['log_config'] = log_config
-                if 'syslog' not in s[section]['groups']:
-                    tool_d[c_name]['log_config'] = log_config
-                # mount necessary directories
-                if 'files' in s[section]['groups']:
-                    if 'volumes' in tool_d[c_name]:
-                        tool_d[c_name]['volumes'][self.plugin.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
-                    else:
-                        tool_d[c_name]['volumes'] = {self.plugin.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
-                    if files[0]:
-                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
-            else:
-                tool_d[c_name]['log_config'] = log_config
-
-            # add label for priority
-            status = vent_template.section('settings')
-            self.logger.info(status)
-            if status[0]:
-                for option in status[1]:
-                    if option[0] == 'priority':
-                        tool_d[c_name]['labels']['vent.priority'] = option[1]
-
-            # only start tools that have been built
-            if s[section]['built'] != 'yes':
-                del tool_d[c_name]
-        return status, tool_d
-
     def prep_start(self,
                    repo=None,
                    name=None,
@@ -234,77 +95,12 @@ class Action:
                    branch="master",
                    version="HEAD",
                    run_build=False):
-        """
-        Start a set of tools that match the parameters given, if no parameters
-        are given, start all installed tools on the master branch at verison
-        HEAD that are enabled
-        """
+        """ Prep a bunch of containers to be started to they can be ordered """
         args = locals()
+        del args['self']
         self.logger.info("Starting: prep_start")
-        self.logger.info("Arguments: "+str(args))
-        status = (False, None)
-        try:
-            del args['run_build']
-            options = ['name',
-                       'namespace',
-                       'built',
-                       'groups',
-                       'path',
-                       'image_name',
-                       'branch',
-                       'version']
-            vent_config = Template(template=self.vent_config)
-            files = vent_config.option('main', 'files')
-            s, _ = self.plugin.constraint_options(args, options)
-            status, tool_d = self._start_sections(s,
-                                                  files,
-                                                  groups,
-                                                  enabled,
-                                                  branch,
-                                                  version,
-                                                  run_build)
-
-            # check and update links, volumes_from, network_mode
-            for container in tool_d.keys():
-                if 'links' in tool_d[container]:
-                    for link in tool_d[container]['links']:
-                        for c in tool_d.keys():
-                            if ('tmp_name' in tool_d[c] and
-                               tool_d[c]['tmp_name'] == link):
-                                tool_d[container]['links'][tool_d[c]['name']] = tool_d[container]['links'].pop(link)
-                if 'volumes_from' in tool_d[container]:
-                    tmp_volumes_from = tool_d[container]['volumes_from']
-                    tool_d[container]['volumes_from'] = []
-                    for volumes_from in list(tmp_volumes_from):
-                        for c in tool_d.keys():
-                            if ('tmp_name' in tool_d[c] and
-                               tool_d[c]['tmp_name'] == volumes_from):
-                                tool_d[container]['volumes_from'].append(tool_d[c]['name'])
-                                tmp_volumes_from.remove(volumes_from)
-                    tool_d[container]['volumes_from'] += tmp_volumes_from
-                if 'network_mode' in tool_d[container]:
-                    if tool_d[container]['network_mode'].startswith('container:'):
-                        network_c_name = tool_d[container]['network_mode'].split('container:')[1]
-                        for c in tool_d.keys():
-                            if ('tmp_name' in tool_d[c] and
-                               tool_d[c]['tmp_name'] == network_c_name):
-                                tool_d[container]['network_mode'] = 'container:' + tool_d[c]['name']
-
-            # remove tmp_names
-            for c in tool_d.keys():
-                if 'tmp_name' in tool_d[c]:
-                    del tool_d[c]['tmp_name']
-
-            # remove containers that shouldn't be started
-            for c in tool_d.keys():
-                if 'start' in tool_d[c] and not tool_d[c]['start']:
-                    del tool_d[c]
-            status = (True, tool_d)
-        except Exception as e:  # pragma: no cover
-            self.logger.error("prep_start failed with error: "+str(e))
-            status = (False, e)
-
-        self.logger.info("Status of prep_start: "+str(status[0]))
+        status = self.p_helper.prep_start(**args)
+        self.logger.info("Status of prep_start: " + str(status[0]))
         self.logger.info("Finished: prep_start")
         return status
 
@@ -407,7 +203,7 @@ class Action:
         status = (True, None)
         try:
             options = ['path', 'image_name', 'image_id']
-            s, template = self.plugin.constraint_options(args, options)
+            s, template = self.p_helper.constraint_options(args, options)
 
             # get existing containers and images and states
             running_containers = Containers()
@@ -482,7 +278,7 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            s, _ = self.plugin.constraint_options(args, options)
+            s, _ = self.p_helper.constraint_options(args, options)
             self.logger.info(s)
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
@@ -528,7 +324,7 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            s, _ = self.plugin.constraint_options(args, options)
+            s, _ = self.p_helper.constraint_options(args, options)
             self.logger.info(s)
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
@@ -562,7 +358,7 @@ class Action:
         status = (True, None)
         try:
             options = ['image_name', 'path']
-            s, template = self.plugin.constraint_options(args, options)
+            s, template = self.p_helper.constraint_options(args, options)
             self.logger.info(s)
             for section in s:
                 self.logger.info("Building " + str(section) + " ...")
