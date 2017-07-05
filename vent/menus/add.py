@@ -3,7 +3,7 @@ import threading
 import time
 
 from vent.api.actions import Action
-from vent.api.plugins import Plugin
+from vent.api.plugin_helpers import PluginHelper
 from vent.menus.add_options import AddOptionsForm
 
 
@@ -13,7 +13,7 @@ class AddForm(npyscreen.ActionForm):
 
     def create(self):
         """ Create widgets for AddForm """
-        self.add_handlers({"^T": self.switch, "^Q": self.quit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.Textfield,
                  value='Add a plugin from a Git repository or an image from a '
                        'Docker registry.',
@@ -64,10 +64,6 @@ class AddForm(npyscreen.ActionForm):
         self.groups = self.add(npyscreen.TitleText, name='Groups')
         self.repo.when_value_edited()
 
-    def switch(self, *args, **kwargs):
-        """ Wrapper that switches to HELP form """
-        self.parentApp.change_form("HELP")
-
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm("MAIN")
@@ -106,8 +102,8 @@ class AddForm(npyscreen.ActionForm):
                                      form_color='CAUTION')
         elif self.repo.value:
             self.parentApp.repo_value['repo'] = self.repo.value
-            api_plugin = Plugin()
-            thr = threading.Thread(target=api_plugin.clone, args=(),
+            p_helper = PluginHelper()
+            thr = threading.Thread(target=p_helper.clone, args=(),
                                    kwargs={'repo': self.repo.value,
                                            'user': self.user.value,
                                            'pw': self.pw.value})

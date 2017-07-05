@@ -3,7 +3,7 @@ import threading
 import time
 
 from vent.api.actions import Action
-from vent.api.plugins import Plugin
+from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Tools
 
 
@@ -14,10 +14,10 @@ class ChooseToolsForm(npyscreen.ActionForm):
     def repo_tools(self, branch):
         """ Set the appropriate repo dir and get the tools available of it """
         tools = []
-        plugin = Plugin()
+        m_helper = MenuHelper()
         repo = self.parentApp.repo_value['repo']
         version = self.parentApp.repo_value['versions'][branch]
-        status = plugin.repo_tools(repo, branch, version)
+        status = m_helper.repo_tools(repo, branch, version)
         if status[0]:
             r_tools = status[1]
             for tool in r_tools:
@@ -34,12 +34,12 @@ class ChooseToolsForm(npyscreen.ActionForm):
         i = 4
         for branch in self.parentApp.repo_value['versions']:
             self.tools_tc[branch] = {}
-            title_text = self.add(npyscreen.TitleText,
-                                  name='Branch: ' + branch,
-                                  editable=False,
-                                  rely=i,
-                                  relx=5,
-                                  max_width=25)
+            self.add(npyscreen.TitleText,
+                     name='Branch: ' + branch,
+                     editable=False,
+                     rely=i,
+                     relx=5,
+                     max_width=25)
             tools = self.repo_tools(branch)
             i += 1
             for tool in tools:

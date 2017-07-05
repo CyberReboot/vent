@@ -63,9 +63,9 @@ class GZHandler(PatternMatchingEventHandler):
                     #         vent.template
                     print(uid + " let's queue it " + event.src_path)
                     # let jobs be queued for up to 30 days
-                    result = q.enqueue('file_watch.file_queue',
-                                       hostname + "_" + event.src_path,
-                                       ttl=2592000)
+                    q.enqueue('file_watch.file_queue',
+                              hostname + "_" + event.src_path,
+                              ttl=2592000)
                 print(uid + " end " + event.src_path)
         except Exception as e:  # pragma: no cover
             print(str(e))

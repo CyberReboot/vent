@@ -5,9 +5,6 @@ def file_queue(path, template_path="/vent/"):
     """
     import ConfigParser
     import docker
-    import magic
-    import os
-    import time
 
     status = (True, None)
     images = []
@@ -25,7 +22,7 @@ def file_queue(path, template_path="/vent/"):
         else:
             files = '/'
 
-        hostname, path = path.split('_', 1)
+        _, path = path.split('_', 1)
         path = path.replace('/files', files, 1)
 
         # read in configuration of plugins to get the ones that should run

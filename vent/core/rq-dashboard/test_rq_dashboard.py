@@ -1,5 +1,4 @@
 import os
-import pytest
 
 
 def test_rq_dash_settings():

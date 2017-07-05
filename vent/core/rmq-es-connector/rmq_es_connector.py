@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import ast
-import datetime
 import pika
 import sys
 import time
@@ -46,7 +45,7 @@ class RmqEs():
                 wait = False
                 print("connected to rabbitmq...")
             except Exception as e:  # pragma: no cover
-                print("waiting for connection to rabbitmq...")
+                print("waiting for connection to rabbitmq..." + str(e))
                 time.sleep(2)
                 wait = True
 
@@ -66,13 +65,14 @@ class RmqEs():
             except Exception as e:  # pragma: no cover
                 pass
         try:
-            res = self.es_conn.index(index=index,
-                                     doc_type=method.routing_key.split(".")[1],
-                                     id=method.routing_key + "." +
-                                     str(uuid.uuid4()),
-                                     body=doc)
+            self.es_conn.index(index=index,
+                               doc_type=method.routing_key.split(".")[1],
+                               id=method.routing_key + "." +
+                               str(uuid.uuid4()),
+                               body=doc)
         except Exception as e:  # pragma: no cover
-            pass
+            print("unable to index record: " + str(doc) +
+                  " because: " + str(e))
 
     def start(self):
         """ start the channel listener and start consuming messages """

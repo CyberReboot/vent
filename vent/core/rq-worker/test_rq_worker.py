@@ -1,7 +1,5 @@
 import file_watch
 import os
-import pytest
-import time
 
 from vent.helpers.paths import PathDirs
 
@@ -20,6 +18,6 @@ def test_file_queue():
     assert not images[0]
     images = file_watch.file_queue('host_/tmp/foo',
                                    template_path=path_dirs.base_dir)
-    assert type(images) == tuple
+    assert isinstance(images, tuple)
     assert images[0]
-    assert type(images[1]) == list
+    assert isinstance(images[1], list)

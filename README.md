@@ -3,6 +3,7 @@ vent
 
 > Network Visibility (an anagram)
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/792bc7e54645427581da66cd6847cc31)](https://www.codacy.com/app/clewis/vent?utm_source=github.com&utm_medium=referral&utm_content=CyberReboot/vent&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/CyberReboot/vent.svg?branch=master)](https://travis-ci.org/CyberReboot/vent)
 [![Documentation Status](https://readthedocs.org/projects/vent/badge/?version=latest)](http://vent.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/vent.svg)](https://badge.fury.io/py/vent)

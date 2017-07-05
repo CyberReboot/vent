@@ -1,7 +1,5 @@
-import os
 import pytest
 import sys
-import time
 
 import rmq_es_connector
 
@@ -19,10 +17,6 @@ def test_rmq_es_connector_connections():
     rmq_es = rmq_es_connector.RmqEs()
     rmq_es.connections(False)
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
-    # !! TODO not currently working...
-    #os.system("service rabbitmq-server stop")
-    #time.sleep(15)
-    #os.system("service rabbitmq-server start &")
     rmq_es.connections(True)
 
 

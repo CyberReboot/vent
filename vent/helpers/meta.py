@@ -6,7 +6,6 @@ import pkg_resources
 import platform
 import subprocess
 
-from vent.api.plugins import Plugin
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
 
@@ -101,7 +100,7 @@ def Gpu(pull=False):
             try:
                 d_client.images.pull(image_name, tag=tag)
                 nvidia_image = d_client.images.list(name=image)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 pass
 
         if len(nvidia_image) > 0:
@@ -224,96 +223,6 @@ def Services(vent=True):
         pass
     return services
 
-
-def Tools_Status(core, branch="master", **kargs):
-    """
-    Get tools that are currently installed/built/running and also the number of
-    repos that those tools come from; can toggle whether looking for core tools
-    or plugin tools
-    """
-    # !! TODO this might need to store namespaces/branches/versions
-    all_tools = {'built': [], 'running': [], 'installed': [], 'normal': []}
-    core_repo = 'https://github.com/cyberreboot/vent'
-    repos = set()
-    tools = Tools(**kargs)
-
-    # get manifest file
-    path_dirs = PathDirs(**kargs)
-    manifest = os.path.join(path_dirs.meta_dir, "plugin_manifest.cfg")
-    template = Template(template=manifest)
-    tools = template.sections()
-
-    # get repos
-    if core:
-        repos.add(core_repo)
-    else:
-        for tool in tools[1]:
-            repo = template.option(tool, 'repo')
-            if repo[0] and repo[1] != core_repo:
-                repos.add(repo[1])
-
-    # get normal tools
-    plugins = Plugin(plugins_dir=".internals/plugins")
-    for repo in repos:
-        status, cwd = plugins.clone(repo)
-        if status:
-            plugins.version = 'HEAD'
-            plugins.branch = branch
-            response = plugins.checkout()
-            matches = None
-            if core:
-                matches = plugins._available_tools(groups='core')
-            else:
-                matches = plugins._available_tools()
-            for match in matches:
-                all_tools['normal'].append(match[0].split('/')[-1])
-        else:
-            all_tools['normal'] = 'failed'
-
-    # get tools that have been installed
-    for tool in tools[1]:
-        repo = template.option(tool, "repo")
-        if repo[0] and repo[1] in repos:
-            name = template.option(tool, "name")
-            if name[0]:
-                all_tools['installed'].append(name[1])
-
-    # get core tools that have been built and/or are running
-    try:
-        d_client = docker.from_env()
-        images = d_client.images.list(filters={'label': 'vent'})
-        for image in images:
-            try:
-                core_check = ("vent.groups" in image.attrs['Labels'] and
-                              'core' in image.attrs['Labels']['vent.groups'])
-                image_check = None
-                if core:
-                    image_check = core_check
-                else:
-                    image_check = not core_check
-                if image_check:
-                    if 'vent.name' in image.attrs['Labels']:
-                        all_tools['built'].append(image.attrs['Labels']['vent.name'])
-            except Exception as err:  # pragma: no cover
-                pass
-        containers = d_client.containers.list(filters={'label': 'vent'})
-        for container in containers:
-            try:
-                core_check = ("vent.groups" in container.attrs['Config']['Labels'] and
-                              'core' in container.attrs['Config']['Labels']['vent.groups'])
-                container_check = None
-                if core:
-                    container_check = core_check
-                else:
-                    container_check = not core_check
-                if container_check:
-                    if 'vent.name' in container.attrs['Config']['Labels']:
-                        all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'])
-            except Exception as err:  # pragma: no cover
-                pass
-    except Exception as e:  # pragma: no cover
-        pass
-    return (len(repos), all_tools)
 
 def Timestamp():
     """ Get the current datetime in UTC """
