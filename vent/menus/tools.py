@@ -131,8 +131,9 @@ class ToolForm(npyscreen.ActionForm):
                     info_str = ""
                 for entry in info:
                     info_str = entry[0] + ": " + entry[1] + "\n" + info_str
-                npyscreen.notify_wait(info_str, title=title)
-                time.sleep(1)
+                if self.action['action_name'] != 'template':
+                    npyscreen.notify_wait(info_str, title=title)
+                    time.sleep(1)
             return
 
         if self.action['type'] == 'images':

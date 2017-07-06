@@ -4,7 +4,7 @@ import subprocess
 import time
 
 from vent.api.plugins import Plugin
-from vent.api.plugin_helpers import PluginHelper
+from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
@@ -580,12 +580,33 @@ class Action:
                  version="HEAD"):
         """ Test """
         # Get files
+        self.logger.info('Template test')
         constraints = locals()
         del constraints['self']
         options = ['path']
-        p = PluginHelper()
-        tools, template = p.constraint_options(constraints, options)
+        tools, manifest = self.p_helper.constraint_options(constraints, options)
         for tool in tools:
             template_path = os.path.join(tools[tool]['path'], 'vent.template')
-            pipe = subprocess.Popen(["suplemon", template_path])
+            pipe = subprocess.Popen(["vim", template_path])
             pipe.communicate()
+            # TODO better error handling that allows users to retry changing template
+            try:
+                additions_dict = {}
+                vent_template = Template(template_path)
+                sections = vent_template.sections()
+                if sections[0]:
+                    for section in sections[1]:
+                        options = vent_template.options(section)
+                        if options[0]:
+                            for option in options[1]:
+                                option_name = option
+                                if option == 'name':
+                                    option_name = 'link_name'
+                                option_val = vent_template.option(section, option)[1]
+                                additions_dict[option_name] = option_val
+                if additions_dict:
+                    for option_name in additions_dict:
+                        manifest.set_option(tool, option_name, additions_dict[option_name])
+                    manifest.write_config()
+            except Exception as e:
+                self.logger.error(str(e))
