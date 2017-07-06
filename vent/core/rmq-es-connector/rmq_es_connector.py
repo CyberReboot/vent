@@ -71,7 +71,7 @@ class RmqEs():
                                str(uuid.uuid4()),
                                body=doc)
         except Exception as e:  # pragma: no cover
-            print("unable to index record: " + str(doc) +
+            print("unable to index record: " + str(body) +
                   " because: " + str(e))
 
     def start(self):

@@ -6,7 +6,6 @@ build: depends
 	docker build -t vent .
 	docker run --rm vent > vent.iso
 	rm -rf vendor/tinycore-python2/python2.tar
-	rm -rf vent/core/management/vent-management.tar
 
 clean:
 	find . -name "*.pyc" -type f -delete
