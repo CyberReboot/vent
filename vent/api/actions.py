@@ -1,11 +1,13 @@
 import os
 import shutil
+import subprocess
+import time
 
 from vent.api.plugins import Plugin
+from vent.api.plugin_helpers import PluginHelper
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
-
 
 class Action:
     """ Handle actions in menu """
@@ -569,5 +571,21 @@ class Action:
         self.logger.info("Finished: inventory")
         return status
 
-    def template():
-        return
+    def template(self,
+                 repo=None,
+                 name=None,
+                 groups=None,
+                 enabled="yes",
+                 branch="master",
+                 version="HEAD"):
+        """ Test """
+        # Get files
+        constraints = locals()
+        del constraints['self']
+        options = ['path']
+        p = PluginHelper()
+        tools, template = p.constraint_options(constraints, options)
+        for tool in tools:
+            template_path = os.path.join(tools[tool]['path'], 'vent.template')
+            pipe = subprocess.Popen(["suplemon", template_path])
+            pipe.communicate()

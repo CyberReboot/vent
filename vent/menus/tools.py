@@ -171,11 +171,15 @@ class ToolForm(npyscreen.ActionForm):
                         if status[0]:
                             tool_d.update(status[1])
                     else:
+                        kargs = {'name': t[0],
+                                 'branch': t[1],
+                                 'version': t[2]}
+                        # add core recognition
+                        if self.action['cores']:
+                            kargs.update({'groups': 'core'})
                         thr = Thread(target=self.action['action_object1'],
                                      args=(),
-                                     kwargs={'name': t[0],
-                                             'branch': t[1],
-                                             'version': t[2]})
+                                     kwargs=kargs)
                         popup(originals, self.action['type'], thr,
                               'Please wait, ' + self.action['present_t'] +
                               '...')
