@@ -35,8 +35,8 @@ def file_queue(path, template_path="/vent/"):
             t_type = config.get(section, 'type')
             if t_type == 'repository':
                 t_path = config.get(section, 'path')
-                t_path = template_path + 'plugins/'
-                t_path += t_path.split('/plugins/')[1] + "/vent.template"
+                t_p = template_path + 'plugins/'
+                t_path += t_p.split('/plugins/')[1] + "/vent.template"
                 t_config = ConfigParser.RawConfigParser()
                 t_config.optionxform = str
                 t_config.read(t_path)
