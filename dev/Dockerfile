@@ -6,16 +6,11 @@ RUN curl -L -o /tmp/perl5.tcz "$TCL_REPO_BASE"/tcz/perl5.tcz \
     && unsquashfs -f -d "$ROOTFS" /tmp/perl5.tcz \
     && rm -rf /tmp/perl5.tcz
 
-COPY vent $ROOTFS/vent/
 COPY scripts $ROOTFS/scripts/
-COPY scripts/vent-cli $ROOTFS/usr/local/bin/vent-cli
 COPY vendor $ROOTFS/vendor/
 COPY motd $ROOTFS/etc/motd
-RUN echo "built on $(date)" >> "$ROOTFS"/vent/VERSION
-RUN echo "echo \"vent \$(cat /vent/VERSION)\"" >> "$ROOTFS"/etc/profile.d/boot2docker.sh
+RUN echo "echo \"vent built on $(date)\"" >> "$ROOTFS"/etc/profile.d/boot2docker.sh
 RUN sed -i "67i cp /scripts/bootsync.sh /var/lib/boot2docker/bootsync.sh" "$ROOTFS"/opt/bootscript.sh
-RUN sed -i "67i cp /scripts/bootlocal.sh /var/lib/boot2docker/bootlocal.sh" "$ROOTFS"/opt/bootscript.sh
-RUN echo "vent-cli" >> "$ROOTFS"/root/.profile
 
 # install dependencies
 WORKDIR /tmp
@@ -28,6 +23,7 @@ RUN mv libpython2.7.so "$ROOTFS"/usr/local/lib/libpython2.7.so
 RUN mv python-2.7.pc "$ROOTFS"/usr/local/lib/pkgconfig/python-2.7.pc
 RUN mv python2.7-config "$ROOTFS"/usr/local/bin/python2.7-config
 RUN mv python2.7 "$ROOTFS"/usr/local/bin/python2.7
+RUN mv vent "$ROOTFS"/usr/local/bin/vent
 RUN tar xf python.tar \
     && mv python2.7 "$ROOTFS"/usr/local/lib/python2.7
 RUN tar xf python-include.tar \

@@ -93,7 +93,7 @@ RUN tce-load -wic \
     && rm -rf /tmp/tce/optional/* \
     && curl -SL 'https://bootstrap.pypa.io/get-pip.py' | sudo python2 \
     && sudo pip install --no-cache-dir --upgrade pip==$PYTHON_PIP_VERSION \
-    && sudo pip install --no-cache-dir docker npyscreen \
+    && sudo pip install --no-cache-dir docker npyscreen vent \
     && sudo pip uninstall -y pip \
     && sudo find /usr/local \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + \
     && find /usr/local \( -type d -a -name test -o -name tests \) | sudo xargs rm -rf \
@@ -106,6 +106,7 @@ RUN cp -R /usr/local/lib/python2.7 . && tar cf python.tar python2.7 && rm -rf py
 RUN cp -R /usr/local/include/python2.7 . && tar cf python-include.tar python2.7 && rm -rf python2.7
 RUN cp -R /usr/local/bin/python2.7 .
 RUN cp -R /usr/local/bin/python2.7-config .
+RUN cp -R /usr/local/bin/vent .
 RUN cp -R /usr/local/lib/libpython2.7.so .
 RUN cp -R /usr/local/lib/libpython2.7.so.1.0 .
 RUN cp -R /usr/local/lib/pkgconfig/python-2.7.pc .
