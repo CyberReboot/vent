@@ -249,9 +249,17 @@ class PluginHelper:
                         self.logger.error("unable to store the options set for docker: " + str(e))
                         tool_d[c_name][option[0]] = options
 
-            # get temporary name for links, etc.
-            status = vent_template.section('info')
+            if 'labels' not in tool_d[c_name]:
+                tool_d[c_name]['labels'] = {}
+
+            # get the service uri info
+            status = vent_template.section('service')
             self.logger.info(status)
+            if status[0]:
+                for option in status[1]:
+                    tool_d[c_name]['labels'][option[0]] = option[1]
+
+            # get temporary name for links, etc.
             plugin_c = Template(template=self.manifest)
             status, plugin_sections = plugin_c.sections()
             self.logger.info(status)
@@ -270,8 +278,6 @@ class PluginHelper:
                     tool_d[cont_name]['tmp_name'] = status[1]
 
             # add extra labels
-            if 'labels' not in tool_d[c_name]:
-                tool_d[c_name]['labels'] = {}
             tool_d[c_name]['labels']['vent'] = Version()
             tool_d[c_name]['labels']['vent.namespace'] = s[section]['namespace']
             tool_d[c_name]['labels']['vent.branch'] = branch

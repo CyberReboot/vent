@@ -2,6 +2,9 @@
 name = Syslog
 groups = core,logging,syslog
 
+[service]
+uri_prefix = tcp://
+
 [settings]
 #public_ip = 192.168.99.100
 instances = 1

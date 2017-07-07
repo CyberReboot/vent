@@ -64,9 +64,11 @@ def test_tools():
 
 def test_services():
     """ Test the services function """
-    services = Services()
+    services = Services(True)
     assert isinstance(services, list)
-    services = Services(vent=False)
+    services = Services(False)
+    assert isinstance(services, list)
+    services = Services(True, vent=False)
     assert isinstance(services, list)
 
 def test_timestamp():
