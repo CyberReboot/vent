@@ -98,8 +98,10 @@ class MenuHelper:
                                     output = check_output(shlex.split(cmd),
                                                           stderr=STDOUT)
 
-                                    image_attrs = d_client.images.get(image_name).attrs
-                                    image_id = image_attrs['Id'].split(':')[1][:12]
+                                    image_attrs = d_client.images.get(
+                                            image_name).attrs
+                                    image_id = image_attrs['Id'].split(':')
+                                    image_id = image_id[1][:12]
 
                                     if image_id:
                                         plugin_c.set_option(section,
