@@ -33,7 +33,7 @@ class MenuHelper:
             core = self.tools_status(True, branch=branch, version=version)[1]
             if action in ["install", "build"]:
                 tools = []
-                plugins = Plugin(plugins_dir=".internals/plugins/")
+                plugins = Plugin(plugins_dir="plugins/")
                 resp = self.p_helper.apply_path('https://github.com/cyberreboot/vent')
 
                 if resp[0]:

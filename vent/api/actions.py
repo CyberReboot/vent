@@ -589,10 +589,12 @@ class Action:
             template_path = os.path.join(tools[tool]['path'], 'vent.template')
             pipe = subprocess.Popen(["vim", template_path])
             pipe.communicate()
+            self.logger.info('Template changed')
             # TODO better error handling that allows users to retry changing template
             try:
-                additions_dict = {}
+                # save changes in plugin_manifest
                 vent_template = Template(template_path)
+                additions_dict = {}
                 sections = vent_template.sections()
                 if sections[0]:
                     for section in sections[1]:
@@ -605,8 +607,10 @@ class Action:
                                 option_val = vent_template.option(section, option)[1]
                                 additions_dict[option_name] = option_val
                 if additions_dict:
+                    self.logger.info('Template adding to manifest')
                     for option_name in additions_dict:
                         manifest.set_option(tool, option_name, additions_dict[option_name])
                     manifest.write_config()
+                    self.logger.info('Information added to manifest')
             except Exception as e:
                 self.logger.error(str(e))
