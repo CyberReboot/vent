@@ -420,7 +420,7 @@ class Plugin:
                                          str(output))
 
                         image_attrs = d_client.images.get(image_name).attrs
-                        image_id    = image_attrs['Id'].split(':')[1][:12]
+                        image_id = image_attrs['Id'].split(':')[1][:12]
 
                         if image_id:
                             template.set_option(section, "built", "yes")
