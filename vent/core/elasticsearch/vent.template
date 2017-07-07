@@ -2,6 +2,10 @@
 name = Elasticsearch
 groups = core,search
 
+[service]
+uri_prefix = http://
+uri_postfix = /_plugin/head
+
 [settings]
 #public_ip = 192.168.99.100
 instances = 1
