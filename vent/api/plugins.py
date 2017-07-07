@@ -422,6 +422,11 @@ class Plugin:
                         image_attrs = d_client.images.get(image_name).attrs
                         image_id = image_attrs['Id'].split(':')[1][:12]
 
+                        #  sha_str = "Digest: sha256:"
+                        #  for line in output.split('\n'):
+                            #  if line.startswith(sha_str):
+                        #          image_id = line.split(sha_str)[1][:12]
+
                         if image_id:
                             template.set_option(section, "built", "yes")
                             template.set_option(section, "image_id", image_id)
