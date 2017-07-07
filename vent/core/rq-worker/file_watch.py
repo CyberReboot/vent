@@ -25,6 +25,7 @@ def file_queue(path, template_path="/vent/"):
         _, path = path.split('_', 1)
         path = path.replace('/files', files, 1)
 
+        labels = {'vent-plugin': '', 'file': path}
         # read in configuration of plugins to get the ones that should run
         # against the path.
         config = ConfigParser.RawConfigParser()
@@ -40,6 +41,11 @@ def file_queue(path, template_path="/vent/"):
                 t_config = ConfigParser.RawConfigParser()
                 t_config.optionxform = str
                 t_config.read(t_path)
+                if t_config.has_section('service'):
+                    options = t_config.options('service')
+                    for option in options:
+                        value = t_config.get('service', option)
+                        labels[option] = value
                 if (t_config.has_section('settings') and
                    t_config.has_option('settings', 'ext_types')):
                     ext_types = t_config.get('settings',
@@ -55,7 +61,6 @@ def file_queue(path, template_path="/vent/"):
         # TODO get syslog address rather than hardcode
         # TODO get group and name for tag
         # TODO add rw volume for plugin output to be plugin input
-        labels = {'vent-plugin': '', 'file': path}
         log_config = {'type': 'syslog',
                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                  'syslog-facility': 'daemon',

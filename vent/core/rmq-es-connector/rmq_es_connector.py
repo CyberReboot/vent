@@ -55,6 +55,7 @@ class RmqEs():
         an elasticsearch index
         """
         index = method.routing_key.split(".")[1]
+        failed = False
         try:
             doc = ast.literal_eval(body)
         except Exception as e:  # pragma: no cover
@@ -63,16 +64,17 @@ class RmqEs():
                 body = '{"log":"' + body + '"}'
                 doc = ast.literal_eval(body)
             except Exception as e:  # pragma: no cover
+                failed = True
+
+        if not failed:
+            try:
+                self.es_conn.index(index=index,
+                                   doc_type=method.routing_key.split(".")[1],
+                                   id=method.routing_key + "." +
+                                   str(uuid.uuid4()),
+                                   body=doc)
+            except Exception as e:  # pragma: no cover
                 pass
-        try:
-            self.es_conn.index(index=index,
-                               doc_type=method.routing_key.split(".")[1],
-                               id=method.routing_key + "." +
-                               str(uuid.uuid4()),
-                               body=doc)
-        except Exception as e:  # pragma: no cover
-            print("unable to index record: " + str(body) +
-                  " because: " + str(e))
 
     def start(self):
         """ start the channel listener and start consuming messages """

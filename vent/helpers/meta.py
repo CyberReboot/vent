@@ -194,9 +194,11 @@ def Tools(**kargs):
     return tools[1]
 
 
-def Services(vent=True):
+def Services(core, vent=True):
     """
-    Get services that have exposed ports, by default limit to vent containers
+    Get services that have exposed ports, expects param core to be True or
+    False based on which type of services to return, by default limit to vent
+    containers
     """
     services = []
     try:

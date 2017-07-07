@@ -15,7 +15,7 @@ class ServicesForm(npyscreen.FormBaseNew):
         self.services_tft = self.add(npyscreen.TitleFixedText,
                                      name='No services running.',
                                      value="")
-        services = Services()
+        services = Services(True)
         if services:
             self.services_tft.hidden = True
             for service in services:
