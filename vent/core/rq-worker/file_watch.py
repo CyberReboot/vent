@@ -41,10 +41,11 @@ def file_queue(path, template_path="/vent/"):
                 t_config = ConfigParser.RawConfigParser()
                 t_config.optionxform = str
                 t_config.read(t_path)
-                options = t_config.section('service')
-                if options[0]:
-                    for option in options[1]:
-                        labels[option[0]] = option[1]
+                if t_config.has_section('service'):
+                    options = t_config.options('service')
+                    for option in options:
+                        value = t_config.get('service', option)
+                        labels[option] = value
                 if (t_config.has_section('settings') and
                    t_config.has_option('settings', 'ext_types')):
                     ext_types = t_config.get('settings',
