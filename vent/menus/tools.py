@@ -10,7 +10,7 @@ from vent.helpers.meta import Images
 
 
 class ToolForm(npyscreen.ActionForm):
-    """ Tools form for teh Vent CLI """
+    """ Tools form for the Vent CLI """
     def __init__(self, *args, **keywords):
         """ Initialize tool form objects """
         self.logger = Logger(__name__)

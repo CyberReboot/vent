@@ -5,6 +5,11 @@ from vent.helpers.meta import Services
 
 class ServicesForm(npyscreen.FormBaseNew):
     """ Services form for the Vent CLI """
+    def __init__(self, *args, **keywords):
+        """ Initialize service form objects """
+        self.core = keywords['core']
+        super(ServicesForm, self).__init__(*args, **keywords)
+
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm('MAIN')
@@ -15,7 +20,7 @@ class ServicesForm(npyscreen.FormBaseNew):
         self.services_tft = self.add(npyscreen.TitleFixedText,
                                      name='No services running.',
                                      value="")
-        services = Services(True)
+        services = Services(self.core)
         if services:
             self.services_tft.hidden = True
             for service in services:
