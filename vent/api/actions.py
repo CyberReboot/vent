@@ -9,6 +9,7 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 
+
 class Action:
     """ Handle actions in menu """
     def __init__(self, **kargs):

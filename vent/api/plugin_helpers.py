@@ -39,11 +39,6 @@ class PluginHelper:
             repo = repo.split(".git")[0]
         org, name = repo.split("/")[-2:]
         path = self.path_dirs.plugins_dir
-        # commenting out in case this may cause bugs
-        #if core:
-        #    path = join(self.path_dirs.base_dir, '.internals/plugins/')
-        #else:
-        #    path = self.path_dirs.plugins_dir
         path = join(path, org, name)
         return path, org, name
 
