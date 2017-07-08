@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import subprocess
@@ -591,6 +592,7 @@ class Action:
             self.logger.info('Template changed')
             # TODO better error handling that allows users to retry changing template
             try:
+                # TODO worry about deletion of sections in vent.template?
                 # save changes in plugin_manifest
                 vent_template = Template(template_path)
                 sections = vent_template.sections()
@@ -607,8 +609,10 @@ class Action:
                                 section_dict[option_name] = option_val
                         if section_dict:
                             self.logger.info('Adding section ' + section + ' to manifest')
-                            manifest.set_option(tool, section, section_dict)
-                            manifest.write_config()
+                            manifest.set_option(tool, section, json.dumps(section_dict))
+                        elif manifest.option(tool, section)[0]:
+                            manifest.del_option(tool, section)
+                    manifest.write_config()
                     self.logger.info('Information added to manifest')
             except Exception as e:
                 self.logger.error(str(e))
