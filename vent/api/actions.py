@@ -572,7 +572,7 @@ class Action:
         self.logger.info("Finished: inventory")
         return status
 
-    def template(self,
+    def configure(self,
                  repo=None,
                  name=None,
                  groups=None,
