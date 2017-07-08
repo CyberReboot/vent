@@ -140,3 +140,13 @@ def test_logs():
 def test_help():
     """ Test the help function """
     Action.help()
+
+def test_configure():
+    instance = Action()
+    status = instance.configure(name='elasticsearch', test=True)
+    assert isinstance(status, tuple)
+    assert status[0] == True
+    template_path = os.path.join(instance.plugin.path_dirs.plugins_dir, 'cyberreboot', 'vent',
+                                 'vent', 'core', 'elasticsearch', 'vent.template')
+    with open(template_path) as f:
+        assert 'testing123' in f.read()

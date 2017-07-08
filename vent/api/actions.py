@@ -578,19 +578,26 @@ class Action:
                  groups=None,
                  enabled="yes",
                  branch="master",
-                 version="HEAD"):
-        """ Test """
+                 version="HEAD",
+                 test=False):
+        """ Configure vent.template files for tools, changes saved in plugin_manifest """
+        self.logger.info('Starting: configure')
+
         # Get files
-        self.logger.info('Template test')
         constraints = locals()
-        del constraints['self']
+        del constraints['test']
+        status = (True, None)
         options = ['path']
         tools, manifest = self.p_helper.constraint_options(constraints, options)
         for tool in tools:
             template_path = os.path.join(tools[tool]['path'], 'vent.template')
-            pipe = subprocess.Popen(["vim", template_path])
-            pipe.communicate()
-            self.logger.info('Template changed')
+            # don't open editor for testing
+            if test:
+                with open(template_path, 'a') as f:
+                    f.write('testing123 = testing123')
+            else:
+                pipe = subprocess.Popen(["vim", template_path])
+                pipe.communicate()
             # TODO better error handling that allows users to retry changing template
             try:
                 # TODO worry about deletion of sections in vent.template?
@@ -609,11 +616,13 @@ class Action:
                                 option_val = vent_template.option(section, option)[1]
                                 section_dict[option_name] = option_val
                         if section_dict:
-                            self.logger.info('Adding section ' + section + ' to manifest')
                             manifest.set_option(tool, section, json.dumps(section_dict))
                         elif manifest.option(tool, section)[0]:
                             manifest.del_option(tool, section)
                     manifest.write_config()
-                    self.logger.info('Information added to manifest')
             except Exception as e:
                 self.logger.error(str(e))
+                status = (False, str(e))
+        self.logger.info('Status of configure: ' + str(status[0]))
+        self.logger.info('Finished: configure')
+        return status
