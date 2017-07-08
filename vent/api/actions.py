@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-import time
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
@@ -594,10 +593,10 @@ class Action:
             try:
                 # save changes in plugin_manifest
                 vent_template = Template(template_path)
-                additions_dict = {}
                 sections = vent_template.sections()
                 if sections[0]:
                     for section in sections[1]:
+                        section_dict = {}
                         options = vent_template.options(section)
                         if options[0]:
                             for option in options[1]:
@@ -605,12 +604,11 @@ class Action:
                                 if option == 'name':
                                     option_name = 'link_name'
                                 option_val = vent_template.option(section, option)[1]
-                                additions_dict[option_name] = option_val
-                if additions_dict:
-                    self.logger.info('Template adding to manifest')
-                    for option_name in additions_dict:
-                        manifest.set_option(tool, option_name, additions_dict[option_name])
-                    manifest.write_config()
+                                section_dict[option_name] = option_val
+                        if section_dict:
+                            self.logger.info('Adding section ' + section + ' to manifest')
+                            manifest.set_option(tool, section, section_dict)
+                            manifest.write_config()
                     self.logger.info('Information added to manifest')
             except Exception as e:
                 self.logger.error(str(e))

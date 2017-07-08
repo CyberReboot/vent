@@ -21,7 +21,6 @@ from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
 from vent.menus.services import ServicesForm
-from vent.menus.template import TemplateForm
 from vent.menus.tools import ToolForm
 
 
