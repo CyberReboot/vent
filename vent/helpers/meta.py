@@ -198,7 +198,7 @@ def Services(core, vent=True):
     """
     Get services that have exposed ports, expects param core to be True or
     False based on which type of services to return, by default limit to vent
-    containers
+    containers, if not limited by vent containers, then core is ignored.
     """
     services = []
     try:
@@ -207,19 +207,43 @@ def Services(core, vent=True):
             containers = d_client.containers.list(filters={'label': 'vent'})
         else:
             containers = d_client.containers.list()
-        for container in containers:
-            if vent:
-                name = container.attrs['Config']['Labels']['vent.name']
+        for c in containers:
+            uri_prefix = ''
+            uri_postfix = ''
+            uri_user = ''
+            uri_pw = ''
+            name = None
+            if vent and 'vent.name' in c.attrs['Config']['Labels']:
+                if ((core and
+                     'vent.groups' in c.attrs['Config']['Labels'] and
+                     'core' in c.attrs['Config']['Labels']['vent.groups']) or
+                    (not core and
+                     'vent.groups' in c.attrs['Config']['Labels'] and
+                     'core' not in c.attrs['Config']['Labels']['vent.groups'])):
+                    name = c.attrs['Config']['Labels']['vent.name']
+                    if 'uri_prefix' in c.attrs['Config']['Labels']:
+                        uri_prefix = c.attrs['Config']['Labels']['uri_prefix']
+                    if 'uri_postfix' in c.attrs['Config']['Labels']:
+                        uri_postfix = c.attrs['Config']['Labels']['uri_postfix']
+                    if 'uri_user' in c.attrs['Config']['Labels']:
+                        uri_user = " user:"
+                        uri_user += c.attrs['Config']['Labels']['uri_user']
+                    if 'uri_pw' in c.attrs['Config']['Labels']:
+                        uri_pw = " pw:"
+                        uri_pw += c.attrs['Config']['Labels']['uri_pw']
             else:
-                name = container.name
-            ports = container.attrs['NetworkSettings']['Ports']
+                name = c.name
+            ports = c.attrs['NetworkSettings']['Ports']
             p = []
             for port in ports:
                 if ports[port]:
-                    p.append(ports[port][0]['HostIp'] +
-                             ":" +
-                             ports[port][0]['HostPort'])
-            if p:
+                    uri_creds = ''
+                    if uri_user or uri_pw:
+                        uri_creds = " - (" + uri_user + uri_pw + " )"
+                    p.append(uri_prefix + ports[port][0]['HostIp'] + ":" +
+                             ports[port][0]['HostPort'] + uri_postfix +
+                             uri_creds)
+            if p and name:
                 services.append((name, p))
     except Exception as e:  # pragma: no cover
         pass

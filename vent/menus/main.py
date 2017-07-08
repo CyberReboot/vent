@@ -232,20 +232,23 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form = LogsForm
             forms = ['LOGS']
             form_args = {'color': "STANDOUT", 'name': "Logs"}
+        elif action == 'services_core':
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "Core Services",
+                         'core': True}
         elif action == 'services':
             form = ServicesForm
             forms = ['SERVICES']
-            form_args = {'color': "STANDOUT", 'name': "Services"}
+            form_args = {'color': "STANDOUT",
+                         'name': "Plugin Services",
+                         'core': False}
         elif action == "inventory_core":
             form = InventoryCoreToolsForm
             forms = ['COREINVENTORY']
             form_args = {'color': "STANDOUT",
                          'name': "Inventory of core tools"}
-        elif action == 'services_core':
-            # TODO update with servicescoreform
-            form = ServicesForm
-            forms = ['SERVICES']
-            form_args = {'color': "STANDOUT", 'name': "Core services"}
         form_args['name'] += "\t"*8 + "Press ^T to toggle main"
         try:
             self.remove_forms(forms)
