@@ -215,11 +215,11 @@ def Services(core, vent=True):
             name = None
             if vent and 'vent.name' in c.attrs['Config']['Labels']:
                 if ((core and
-                    'vent.groups' in c.attrs['Config']['Labels'] and
-                    'core' in c.attrs['Config']['Labels']['vent.groups']) or
+                     'vent.groups' in c.attrs['Config']['Labels'] and
+                     'core' in c.attrs['Config']['Labels']['vent.groups']) or
                     (not core and
-                    'vent.groups' in c.attrs['Config']['Labels'] and
-                    'core' not in c.attrs['Config']['Labels']['vent.groups'])):
+                     'vent.groups' in c.attrs['Config']['Labels'] and
+                     'core' not in c.attrs['Config']['Labels']['vent.groups'])):
                     name = c.attrs['Config']['Labels']['vent.name']
                     if 'uri_prefix' in c.attrs['Config']['Labels']:
                         uri_prefix = c.attrs['Config']['Labels']['uri_prefix']
