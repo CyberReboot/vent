@@ -11,4 +11,3 @@ priority = 20
 command = #
 environment = ["PYTHONUNBUFFERED=0"]
 links = {"RabbitMQ":"rabbitmq", "Elasticsearch":"elasticsearch"}
-restart_policy = {"Name":"on-failure", "MaximumRetryCount":5}
