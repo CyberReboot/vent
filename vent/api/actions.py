@@ -581,8 +581,8 @@ class Action:
                       version="HEAD"):
         """ Get the vent.template file for a given tool """
         self.logger.info("Starting: get_configure")
-
         constraints = locals()
+        status = (True, None)
         options = ['path']
         tools, manifest = self.p_helper.constraint_options(constraints, options)
         if tools:
@@ -590,11 +590,15 @@ class Action:
                 template_path = os.path.join(tools[tool]['path'], 'vent.template')
                 try:
                     with open(template_path) as f:
-                        return (True, f.read())
+                        status = (True, f.read())
                 except Exception as e:
+                    status = (False, str(e))
                     self.logger.error(str(e))
         else:
-            return (False, "Couldn't get vent.template")
+            status = (False, "Couldn't get vent.template")
+        self.logger.info("Status of get_configure: " + str(status[0]))
+        self.logger.info("Finished: get_configure")
+        return status
 
     def save_configure(self,
                        repo=None,
@@ -604,17 +608,16 @@ class Action:
                        branch="master",
                        version="HEAD",
                        config_val=""):
+        """
+        Save changes made to vent.template through npyscreen to the template and to
+        plugin_manifest
+        """
         self.logger.info("Starting: save_configure")
-        self.logger.info("Value: " + config_val)
         constraints = locals()
         del constraints['config_val']
         status = (True, None)
         options = ['path']
-        self.logger.info("Constraints:")
-        self.logger.info(constraints)
         tools, manifest = self.p_helper.constraint_options(constraints, options)
-        self.logger.info("Tools:")
-        self.logger.info(tools)
         if tools:
             for tool in tools:
                 template_path = os.path.join(tools[tool]['path'], 'vent.template')
@@ -625,6 +628,7 @@ class Action:
                 except Exception as e:
                     self.logger.error(str(e))
                     status = (False, str(e))
+                    break
                 # save in plugin_manifest
                 try:
                     vent_template = Template(template_path)
@@ -650,59 +654,6 @@ class Action:
                     status = (False, str(e))
         else:
             status = (False, "Couldn't save configuration")
-        return status
-
-    def configure(self,
-                  repo=None,
-                  name=None,
-                  groups=None,
-                  enabled="yes",
-                  branch="master",
-                  version="HEAD",
-                  test=False):
-        """ Configure vent.template files for tools, changes saved in plugin_manifest """
-        self.logger.info('Starting: configure')
-
-        # Get files
-        constraints = locals()
-        del constraints['test']
-        status = (True, None)
-        options = ['path']
-        tools, manifest = self.p_helper.constraint_options(constraints, options)
-        for tool in tools:
-            template_path = os.path.join(tools[tool]['path'], 'vent.template')
-            # don't open editor for testing
-            if test:
-                with open(template_path, 'a') as f:
-                    f.write('testing123 = testing123')
-            else:
-                subprocess.call(['vim', template_path])
-                # TODO npyscreen editor
-            # TODO better error handling that allows users to retry changing template
-            try:
-                # TODO worry about deletion of sections in vent.template?
-                # save changes in plugin_manifest
-                vent_template = Template(template_path)
-                sections = vent_template.sections()
-                if sections[0]:
-                    for section in sections[1]:
-                        section_dict = {}
-                        options = vent_template.options(section)
-                        if options[0]:
-                            for option in options[1]:
-                                option_name = option
-                                if option == 'name':
-                                    option_name = 'link_name'
-                                option_val = vent_template.option(section, option)[1]
-                                section_dict[option_name] = option_val
-                        if section_dict:
-                            manifest.set_option(tool, section, json.dumps(section_dict))
-                        elif manifest.option(tool, section)[0]:
-                            manifest.del_option(tool, section)
-                    manifest.write_config()
-            except Exception as e:
-                self.logger.error(str(e))
-                status = (False, str(e))
-        self.logger.info('Status of configure: ' + str(status[0]))
-        self.logger.info('Finished: configure')
+        self.logger.info("Status of save_configure: " + str(status[0]))
+        self.logger.info("Finished: save_configure")
         return status
