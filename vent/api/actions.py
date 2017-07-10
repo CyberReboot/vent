@@ -572,14 +572,38 @@ class Action:
         self.logger.info("Finished: inventory")
         return status
 
+    def get_template(self,
+                     repo=None,
+                     name=None,
+                     groups=None,
+                     enabled="yes",
+                     branch="master",
+                     version="HEAD"):
+        """ Get the vent.template file for a given tool """
+        self.logger.info("Starting: get_template")
+
+        constraints = locals()
+        status = (True, None)
+        options = ['path']
+        tools, manifest = self.p_helper.constraint_options(constraints, options)
+        for tool in tools:
+            template_path = os.path.join(tools[tool]['path'], 'vent.template')
+            try:
+                with open(template_path) as f:
+                    status = (True, f.read())
+            except Exception as e:
+                self.logger.error(str(e))
+                status = (False, str(e))
+        return status
+
     def configure(self,
-                 repo=None,
-                 name=None,
-                 groups=None,
-                 enabled="yes",
-                 branch="master",
-                 version="HEAD",
-                 test=False):
+                  repo=None,
+                  name=None,
+                  groups=None,
+                  enabled="yes",
+                  branch="master",
+                  version="HEAD",
+                  test=False):
         """ Configure vent.template files for tools, changes saved in plugin_manifest """
         self.logger.info('Starting: configure')
 

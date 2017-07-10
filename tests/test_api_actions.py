@@ -141,10 +141,3 @@ def test_logs():
 def test_help():
     """ Test the help function """
     Action.help()
-
-def test_configure():
-    """ Test the configure function """
-    instance = Action()
-    status = instance.configure(name='elasticsearch', test=True)
-    assert isinstance(status, tuple)
-    assert status[0] == True

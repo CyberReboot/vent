@@ -174,14 +174,20 @@ class ToolForm(npyscreen.ActionForm):
                         if status[0]:
                             tool_d.update(status[1])
                     elif self.action['action_name'] == 'configure':
-                        tool_name = t[0]
+                        kargs = {'name': 'test ' + t[0],
+                                 'next_tool': None,
+                                 'template_val': None}
                         if tools_to_configure:
-                            self.parentApp.addForm("EDITOR" + tool_name, EditorForm, name='test ' + tool_name,
-                                                   next_tool=tools_to_configure[-1])
+                            kargs['next_tool'] = tools_to_configure[-1]
+                        template = self.action['api_action'].get_template(name=t[0],
+                                                                          branch=t[1],
+                                                                          version=t[2])
+                        if template[0]:
+                            kargs['template_val'] = template[1]
                         else:
-                            self.parentApp.addForm("EDITOR" + tool_name, EditorForm, name='test ' + tool_name,
-                                                   next_tool=None)
-                        tools_to_configure.append("EDITOR" + tool_name)
+                            kargs['template_val'] = ''
+                        self.parentApp.addForm("EDITOR" + t[0], EditorForm, **kargs)
+                        tools_to_configure.append("EDITOR" + t[0])
                     else:
                         kargs = {'name': t[0],
                                  'branch': t[1],
