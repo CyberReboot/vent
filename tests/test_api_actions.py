@@ -148,7 +148,3 @@ def test_configure():
     status = instance.configure(name='elasticsearch', test=True)
     assert isinstance(status, tuple)
     assert status[0] == True
-    manifest = Template(instance.p_helper.manifest)
-    template_path = manifest.option('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'path')[1]
-    with open(template_path) as f:
-        assert 'testing123' in f.read()
