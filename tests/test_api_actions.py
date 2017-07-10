@@ -1,6 +1,7 @@
 import os
 
 from vent.api.actions import Action
+from vent.api.templates import Template
 
 def test_add():
     """ Test the add function """
@@ -142,11 +143,12 @@ def test_help():
     Action.help()
 
 def test_configure():
+    """ Test the configure function """
     instance = Action()
     status = instance.configure(name='elasticsearch', test=True)
     assert isinstance(status, tuple)
     assert status[0] == True
-    template_path = os.path.join(instance.plugin.path_dirs.plugins_dir, 'cyberreboot', 'vent',
-                                 'vent', 'core', 'elasticsearch', 'vent.template')
+    manifest = Template(instance.p_helper.manifest)
+    template_path = manifest.option('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'path')[1]
     with open(template_path) as f:
         assert 'testing123' in f.read()
