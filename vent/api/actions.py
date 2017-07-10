@@ -596,8 +596,8 @@ class Action:
                 with open(template_path, 'a') as f:
                     f.write('testing123 = testing123')
             else:
-                pipe = subprocess.Popen(["vim", template_path])
-                pipe.communicate()
+                subprocess.call(['vim', template_path])
+                # TODO npyscreen editor
             # TODO better error handling that allows users to retry changing template
             try:
                 # TODO worry about deletion of sections in vent.template?

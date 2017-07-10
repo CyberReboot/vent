@@ -217,8 +217,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'cores': cores}}
         if s_action == 'start':
             form_args['names'].append('prep_start')
-        #elif s_action == 'configure':
-        #    form_args['action_dict']['action'] = 'configure vent.template for'
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
