@@ -259,6 +259,13 @@ class PluginHelper:
                 for option in status[1]:
                     tool_d[c_name]['labels'][option[0]] = option[1]
 
+            # check for gpu settings
+            status = vent_template.section('gpu')
+            self.logger.info(status)
+            if status[0]:
+                for option in status[1]:
+                    tool_d[c_name]['labels']['gpu.'+option[0]] = option[1]
+
             # get temporary name for links, etc.
             plugin_c = Template(template=self.manifest)
             status, plugin_sections = plugin_c.sections()

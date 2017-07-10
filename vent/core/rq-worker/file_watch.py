@@ -69,6 +69,11 @@ def file_queue(path, template_path="/vent/"):
 
         # start containers
         for image in images:
+            # TODO case for gpus
+            # TODO check for availability of gpu(s),
+            #      otherwise queue it up until it's
+            #      available
+
             d_client.containers.run(image=image,
                                     command=path,
                                     labels=labels,
