@@ -7,7 +7,7 @@ from vent.api.actions import Action
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
-
+from vent.menus.editor import EditorForm
 
 class ToolForm(npyscreen.ActionForm):
     """ Tools form for the Vent CLI """
@@ -131,8 +131,9 @@ class ToolForm(npyscreen.ActionForm):
                     info_str = ""
                 for entry in info:
                     info_str = entry[0] + ": " + entry[1] + "\n" + info_str
-                npyscreen.notify_wait(info_str, title=title)
-                time.sleep(1)
+                if self.action['action_name'] != 'configure':
+                    npyscreen.notify_wait(info_str, title=title)
+                    time.sleep(1)
             return
 
         if self.action['type'] == 'images':
@@ -156,6 +157,8 @@ class ToolForm(npyscreen.ActionForm):
                                                  title="Confirm command")
             if not perform:
                 return
+
+        tools_to_configure = []
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
                 self.logger.info(tool)
@@ -170,12 +173,28 @@ class ToolForm(npyscreen.ActionForm):
                                                                version=t[2])
                         if status[0]:
                             tool_d.update(status[1])
+                    elif self.action['action_name'] == 'configure':
+                        kargs = {'name': 'Configure ' + t[0],
+                                 'tool_name': t[0],
+                                 'branch': t[1],
+                                 'version': t[2],
+                                 'next_tool': None,
+                                 'get_configure': self.action['action_object1'],
+                                 'save_configure': self.action['action_object2']}
+                        if tools_to_configure:
+                            kargs['next_tool'] = tools_to_configure[-1]
+                        self.parentApp.addForm("EDITOR" + t[0], EditorForm, **kargs)
+                        tools_to_configure.append("EDITOR" + t[0])
                     else:
+                        kargs = {'name': t[0],
+                                 'branch': t[1],
+                                 'version': t[2]}
+                        # add core recognition
+                        if self.action['cores']:
+                            kargs.update({'groups': 'core'})
                         thr = Thread(target=self.action['action_object1'],
                                      args=(),
-                                     kwargs={'name': t[0],
-                                             'branch': t[1],
-                                             'version': t[2]})
+                                     kwargs=kargs)
                         popup(originals, self.action['type'], thr,
                               'Please wait, ' + self.action['present_t'] +
                               '...')
@@ -186,9 +205,12 @@ class ToolForm(npyscreen.ActionForm):
             popup(originals, self.action['type'], thr,
                   'Please wait, ' + self.action['present_t'] + '...')
 
-        npyscreen.notify_confirm('Done ' + self.action['present_t'] + '.',
-                                 title=self.action['past_t'])
-        self.quit()
+        if self.action['action_name'] != 'configure':
+            npyscreen.notify_confirm('Done ' + self.action['present_t'] + '.',
+                                     title=self.action['past_t'])
+            self.quit()
+        else:
+            self.parentApp.change_form(tools_to_configure[-1])
 
     def on_cancel(self):
         """ When user clicks cancel, will return to MAIN """

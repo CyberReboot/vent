@@ -217,6 +217,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'cores': cores}}
         if s_action == 'start':
             form_args['names'].append('prep_start')
+        elif s_action == 'configure':
+            form_args['names'].pop()
+            form_args['names'].append('get_configure')
+            form_args['names'].append('save_configure')
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
@@ -400,6 +404,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Update core tools',
                         onSelect=self.perform_action,
                         arguments=['update_core'], shortcut='u')
+        self.m2.addItem(text='Configure core tools',
+                        onSelect=self.perform_action,
+                        arguments=['configure_core'], shortcut='t')
 
         # Plugin Menu Items
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
@@ -427,6 +434,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Update plugins',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
+        self.m3.addItem(text='Configure plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['configure'], shortcut='t')
 
         # Log Menu Items
         self.m4 = self.add_menu(name="Logs", shortcut="l")
