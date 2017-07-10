@@ -141,3 +141,5 @@ def test_logs():
 def test_help():
     """ Test the help function """
     Action.help()
+
+# TODO need tests for new api acti

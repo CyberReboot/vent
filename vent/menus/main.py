@@ -217,6 +217,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'cores': cores}}
         if s_action == 'start':
             form_args['names'].append('prep_start')
+        elif s_action == 'configure':
+            form_args['names'].pop()
+            form_args['names'].append('get_configure')
+            form_args['names'].append('save_configure')
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']

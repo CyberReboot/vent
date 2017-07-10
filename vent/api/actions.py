@@ -572,28 +572,84 @@ class Action:
         self.logger.info("Finished: inventory")
         return status
 
-    def get_template(self,
-                     repo=None,
-                     name=None,
-                     groups=None,
-                     enabled="yes",
-                     branch="master",
-                     version="HEAD"):
+    def get_configure(self,
+                      repo=None,
+                      name=None,
+                      groups=None,
+                      enabled="yes",
+                      branch="master",
+                      version="HEAD"):
         """ Get the vent.template file for a given tool """
-        self.logger.info("Starting: get_template")
+        self.logger.info("Starting: get_configure")
 
         constraints = locals()
-        status = (True, None)
         options = ['path']
         tools, manifest = self.p_helper.constraint_options(constraints, options)
-        for tool in tools:
-            template_path = os.path.join(tools[tool]['path'], 'vent.template')
-            try:
-                with open(template_path) as f:
-                    status = (True, f.read())
-            except Exception as e:
-                self.logger.error(str(e))
-                status = (False, str(e))
+        if tools:
+            for tool in tools:
+                template_path = os.path.join(tools[tool]['path'], 'vent.template')
+                try:
+                    with open(template_path) as f:
+                        return (True, f.read())
+                except Exception as e:
+                    self.logger.error(str(e))
+        else:
+            return (False, "Couldn't get vent.template")
+
+    def save_configure(self,
+                       repo=None,
+                       name=None,
+                       groups=None,
+                       enabled="yes",
+                       branch="master",
+                       version="HEAD",
+                       config_val=""):
+        self.logger.info("Starting: save_configure")
+        self.logger.info("Value: " + config_val)
+        constraints = locals()
+        del constraints['config_val']
+        status = (True, None)
+        options = ['path']
+        self.logger.info("Constraints:")
+        self.logger.info(constraints)
+        tools, manifest = self.p_helper.constraint_options(constraints, options)
+        self.logger.info("Tools:")
+        self.logger.info(tools)
+        if tools:
+            for tool in tools:
+                template_path = os.path.join(tools[tool]['path'], 'vent.template')
+                # save in vent.template
+                try:
+                    with open(template_path, 'w') as f:
+                        f.write(config_val)
+                except Exception as e:
+                    self.logger.error(str(e))
+                    status = (False, str(e))
+                # save in plugin_manifest
+                try:
+                    vent_template = Template(template_path)
+                    sections = vent_template.sections()
+                    if sections[0]:
+                        for section in sections[1]:
+                            section_dict = {}
+                            options = vent_template.options(section)
+                            if options[0]:
+                                for option in options[1]:
+                                    option_name = option
+                                    if option == 'name':
+                                        option_name = 'link_name'
+                                    option_val = vent_template.option(section, option)[1]
+                                    section_dict[option_name] = option_val
+                            if section_dict:
+                                manifest.set_option(tool, section, json.dumps(section_dict))
+                            elif manifest.option(tool, section)[0]:
+                                manifest.del_option(tool, section)
+                        manifest.write_config()
+                except Exception as e:
+                    self.logger.error(str(e))
+                    status = (False, str(e))
+        else:
+            status = (False, "Couldn't save configuration")
         return status
 
     def configure(self,
