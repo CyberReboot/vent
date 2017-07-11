@@ -86,7 +86,7 @@ class Plugin:
         # initialize and store class objects
         self.repo = repo.lower()
         self.tools = tools
-        if (isinstance(self.tools, list) and 
+        if (isinstance(self.tools, list) and
                 len(self.tools) == 0):
             self.tools = None
         self.overrides = overrides

@@ -236,7 +236,8 @@ class ToolForm(npyscreen.ActionForm):
             if len(tools_to_configure) > 0:
                 self.parentApp.change_form(tools_to_configure[-1])
             else:
-                npyscreen.notify_confirm("No tools selected, returning to main menu",
+                npyscreen.notify_confirm("No tools selected, returning to"
+                                         " main menu",
                                          title="No action taken")
                 self.quit()
 

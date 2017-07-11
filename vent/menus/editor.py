@@ -23,7 +23,8 @@ class EditorForm(npyscreen.ActionForm):
 
     def create(self):
         """ Create multi-line widget for editing """
-        self.edit_space = self.add(npyscreen.MultiLineEdit, value=self.config_val)
+        self.edit_space = self.add(npyscreen.MultiLineEdit,
+                                   value=self.config_val)
 
     def change_screens(self):
         """ Change to the next tool to edit or back to MAIN form """
