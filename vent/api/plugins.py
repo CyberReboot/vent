@@ -1,4 +1,5 @@
 import docker
+import json
 import os
 import shlex
 
@@ -329,8 +330,26 @@ class Plugin:
                                     str(datetime.utcnow()) + " UTC")
                 template.set_option(section, "image_name", image_name)
                 template.set_option(section, "type", "repository")
+                # save settings in vent.template to plugin_manifest
                 vent_template = Template(template=join(match_path,
                                                        'vent.template'))
+                sections = vent_template.sections()
+                if sections[0]:
+                    for header in sections[1]:
+                        section_dict = {}
+                        options = vent_template.options(header)
+                        if options[0]:
+                            for option in options[1]:
+                                option_name = option
+                                if option == 'name':
+                                    option_name = 'link_name'
+                                option_val = vent_template.option(header, option)[1]
+                                section_dict[option_name] = option_val
+                        if section_dict:
+                            template.set_option(section, header, json.dumps(section_dict))
+                        elif template.option(section, header)[0]:
+                            template.del_option(section, header)
+                # TODO do we need this if we save as a dictionary?
                 vent_status, response = vent_template.option("info", "name")
                 if vent_status:
                     template.set_option(section, "link_name", response)
