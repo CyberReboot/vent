@@ -13,6 +13,7 @@ class ServicesForm(npyscreen.FormBaseNew):
 
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
+        curses.mousemask(1)
         self.parentApp.switchForm('MAIN')
 
     def create(self):
