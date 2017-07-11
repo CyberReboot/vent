@@ -8,7 +8,6 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 
-
 class ToolForm(npyscreen.ActionForm):
     """ Tools form for the Vent CLI """
     def __init__(self, *args, **keywords):
@@ -56,52 +55,75 @@ class ToolForm(npyscreen.ActionForm):
 
             # TODO refactor this
             repos = inventory['repos']
+
+            # two dictionaries that have lists as values
+            # represent that repo's core/non-core tools
+            has_core = {}
+            has_non_core = {}
+
+            # find all tools that are in this repo and list them if they are core
             for repo in repos:
-                if (self.action['cores'] or
-                   (not self.action['cores'] and
-                   repo != 'https://github.com/cyberreboot/vent')):
-                    repo_name = repo.rsplit("/", 2)[1:]
-                    if len(repo_name) == 1:
-                        repo_name = repo.split('/')
-                    self.tools_tc[repo] = {}
-                    self.add(npyscreen.TitleText,
-                             name='Plugin: '+repo,
-                             editable=False, rely=i, relx=5)
-                    i += 1
-                    for tool in inventory['tools']:
-                        r_name = tool[0].split(":")
-                        if (repo_name[0] == r_name[0] and
-                           repo_name[1] == r_name[1]):
-                            core = False
-                            if self.action['action_name'] == 'start':
-                                running = False
-                                built = False
-                                enabled = False
-                                for item in inventory['running']:
-                                    if (tool[0] == item[0] and
-                                       item[2] == 'running'):
-                                        running = True
-                                for item in inventory['built']:
-                                    if tool[0] == item[0] and item[2] == 'yes':
-                                        built = True
-                                for item in inventory['enabled']:
-                                    if tool[0] == item[0] and item[2] == 'yes':
-                                        enabled = True
-                            for item in inventory['core']:
-                                if tool[0] == item[0]:
-                                    core = True
-                            t = tool[1]
-                            if t == "":
-                                t = "/"
-                            if ((core and self.action['cores']) or
-                               (not core and not self.action['cores'])):
-                                if ((self.action['action_name'] == 'start' and
-                                   not running and built and enabled) or
-                                   self.action['action_name'] != 'start'):
-                                    t += ":" + ":".join(tool[0].split(":")[-2:])
-                                    self.tools_tc[repo][t] = self.add(npyscreen.CheckBox, name=t, value=True, relx=10)
-                                    i += 1
-                    i += 2
+                core_list = []
+                ncore_list = []
+
+                # splice the repo names for processing
+                repo_name = repo.rsplit("/", 2)[1:]
+
+                # figure out what tools in the repo are core and what are not
+                for tool in inventory['tools']:
+                    tool_repo_name = tool[0].split(":")
+
+                    # cross reference repo names
+                    if (repo_name[0] == tool_repo_name[0] and
+                        repo_name[1] == tool_repo_name[1]):
+
+                        # add the tools to their corresponding list
+                        if tool in inventory['core']:
+                            core_list.append(tool)
+                        else:
+                            ncore_list.append(tool)
+
+                # now add the list as a value for the dictionaries
+                has_core[repo] = core_list
+                has_non_core[repo] = ncore_list
+
+            for repo in repos:
+                self.tools_tc[repo] = {}
+
+                if self.action['cores']:
+                    # make sure only repos with core tools are displayed
+                    if has_core.get(repo):
+                        self.add(npyscreen.TitleText,
+                                 name='Plugin: '+repo,
+                                 editable=False, rely=i, relx=5)
+
+                        for tool in has_core[repo]:
+                            tool_name = tool[1]
+                            if tool_name == "":
+                                tool_name = "/"
+                            tool_name += ":" + ":".join(tool[0].split(":")[-2:])
+                            self.tools_tc[repo][tool_name] = self.add(
+                                    npyscreen.CheckBox, name=tool_name,
+                                    value=True, relx=10)
+                            i += 1
+
+                else:
+                    # make sure only repos with non-core tools are displayed
+                    if has_non_core.get(repo):
+                        self.add(npyscreen.TitleText,
+                                 name='Plugin: '+repo,
+                                 editable=False, rely=i, relx=5)
+
+                        for tool in has_non_core[repo]:
+                            tool_name = tool[1]
+                            if tool_name == "":
+                                tool_name = "/"
+                            tool_name += ":" + ":".join(tool[0].split(":")[-2:])
+                            self.tools_tc[repo][tool_name] = self.add(
+                                    npyscreen.CheckBox, name=tool_name,
+                                    value=True, relx=10)
+                            i += 1
+                i += 2
         return
 
     def on_ok(self):
