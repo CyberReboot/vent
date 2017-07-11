@@ -54,10 +54,10 @@ class ToolForm(npyscreen.ActionForm):
             inventory = response[1]
 
             # TODO refactor this
+            # maybe above message is unnessary now
             repos = inventory['repos']
 
-            # two dictionaries that have lists as values
-            # represent that repo's core/non-core tools
+            # dict has repo as key and list of core/non-core tools as values
             has_core = {}
             has_non_core = {}
 
@@ -83,7 +83,6 @@ class ToolForm(npyscreen.ActionForm):
                         else:
                             ncore_list.append(tool)
 
-                # now add the list as a value for the dictionaries
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
 
