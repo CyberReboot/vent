@@ -1,4 +1,5 @@
 import npyscreen
+import curses
 
 from vent.helpers.meta import Services
 
@@ -16,6 +17,9 @@ class ServicesForm(npyscreen.FormBaseNew):
 
     def create(self):
         """ Override method for creating FormBaseNew form """
+        # track the mouse cursor to allow highlighting
+        curses.mousemask(0)
+
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.services_tft = self.add(npyscreen.TitleFixedText,
                                      name='No services running.',
