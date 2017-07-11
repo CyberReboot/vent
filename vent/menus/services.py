@@ -1,5 +1,5 @@
-import npyscreen
 import curses
+import npyscreen
 
 from vent.helpers.meta import Services
 
