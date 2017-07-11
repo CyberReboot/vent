@@ -23,7 +23,7 @@ def test_save_configure():
     """ Test the save_configure function """
     instance = Action()
     status = instance.save_configure(name='elasticsearch',
-                                     config_val='testing123 = testing123')
+                                     config_val='[info]\ntesting123 = testing123')
     assert status[0]
     template_path = os.path.join(instance.p_helper.path_dirs.plugins_dir,
                                  'cyberreboot', 'vent', 'vent', 'core',
