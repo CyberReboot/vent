@@ -342,21 +342,20 @@ class Plugin:
                 # save settings in vent.template to plugin_manifest
                 vent_template = Template(template=join(match_path,
                                                        'vent.template'))
-                if False:
-                    sections = vent_template.sections()
-                    if sections[0]:
-                        for header in sections[1]:
-                            section_dict = {}
-                            options = vent_template.options(header)
-                            if options[0]:
-                                for option in options[1]:
-                                    option_name = option
-                                    if option == 'name':
-                                        option_name = 'link_name'
-                                    option_val = vent_template.option(header, option)[1]
-                                    section_dict[option_name] = option_val
-                            if section_dict:
-                                template.set_option(section, header, json.dumps(section_dict))
+                sections = vent_template.sections()
+                if sections[0]:
+                    for header in sections[1]:
+                        section_dict = {}
+                        options = vent_template.options(header)
+                        if options[0]:
+                            for option in options[1]:
+                                option_name = option
+                                if option == 'name':
+                                    option_name = 'link_name'
+                                option_val = vent_template.option(header, option)[1]
+                                section_dict[option_name] = option_val
+                        if section_dict:
+                            template.set_option(section, header, json.dumps(section_dict))
                 # TODO do we need this if we save as a dictionary?
                 vent_status, response = vent_template.option("info", "name")
                 if vent_status:
