@@ -60,7 +60,7 @@ class ToolForm(npyscreen.ActionForm):
             has_core = {}
             has_non_core = {}
 
-            # find all tools that are in this repo 
+            # find all tools that are in this repo
             # and list them if they are core
             for repo in repos:
                 core_list = []
