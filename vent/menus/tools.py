@@ -231,7 +231,12 @@ class ToolForm(npyscreen.ActionForm):
                                      title=self.action['past_t'])
             self.quit()
         else:
-            self.parentApp.change_form(tools_to_configure[-1])
+            if len(tools_to_configure) > 0:
+                self.parentApp.change_form(tools_to_configure[-1])
+            else:
+                npyscreen.notify_confirm("No tools selected, returning to main menu",
+                                         title="No action taken")
+                self.quit()
 
     def on_cancel(self):
         """ When user clicks cancel, will return to MAIN """
