@@ -414,98 +414,64 @@ class PluginHelper:
         return status
 
     def start_priority_containers(self, groups, group_orders, tool_d):
-        """ Start containers based on priorities """
+        """ Select containers based on priorities to start """
         groups = sorted(set(groups))
-        started_containers = []
-        failed_containers = []
+        s_conts = []
+        f_conts = []
         for group in groups:
             if group in group_orders:
                 for cont_t in sorted(group_orders[group]):
-                    if cont_t[1] not in started_containers:
-                        try:
-                            gpu = 'gpu.enabled'
-                            if (gpu in tool_d[cont_t[1]]['labels'] and
-                               tool_d[cont_t[1]]['labels'][gpu] == 'yes'):
-                                # TODO check for availability of gpu(s),
-                                #      otherwise queue it up until it's
-                                #      available
-                                try:
-                                    # !! TODO
-                                    started_containers.append(cont_t[1])
-                                    self.logger.info("start " +
-                                                     str(cont_t[1]) +
-                                                     " with ID: " +
-                                                     str(container_id))
-                                except Exception as err:  # pragma: no cover
-                                    # TODO case for running gpu containers
-                                    started_containers.append(cont_t[1])
-                                    pass
-                            else:
-                                try:
-                                    cont = self.d_client.containers.get(cont_t[1])
-                                    cont.start()
-                                    started_containers.append(cont_t[1])
-                                    self.logger.info("started " +
-                                                     str(cont_t[1]) +
-                                                     " with ID: " +
-                                                     str(cont.short_id))
-                                except Exception as err:  # pragma: no cover
-                                    self.logger.error(str(err))
-                                    cont_id = self.d_client.containers.run(detach=True,
-                                                                           **tool_d[cont_t[1]])
-                                    started_containers.append(cont_t[1])
-                                    self.logger.info("started " +
-                                                     str(cont_t[1]) +
-                                                     " with ID: " +
-                                                     str(cont_id))
-                        except Exception as e:  # pragma: no cover
-                            failed_containers.append(cont_t[1])
-                            self.logger.error("failed to start " +
-                                              str(cont_t[1]) +
-                                              " because: " + str(e))
-        return (started_containers, failed_containers)
+                    if cont_t[1] not in s_conts:
+                        s_conts, f_conts = self.start_containers(cont_t[1],
+                                                                 tool_d,
+                                                                 s_conts,
+                                                                 f_conts)
+        return (s_conts, f_conts)
 
     def start_remaining_containers(self, containers_remaining, tool_d):
-        """ Start remaining containers that didn't have priorities """
-        started_containers = []
-        failed_containers = []
-        for cont in containers_remaining:
+        """
+        Select remaining containers that didn't have priorities to start
+        """
+        s_containers = []
+        f_containers = []
+        for container in containers_remaining:
+            s_containers, f_containers = self.start_containers(container,
+                                                               tool_d,
+                                                               s_containers,
+                                                               f_containers)
+        return (s_containers, f_containers)
+
+    def start_containers(self,
+                         container,
+                         tool_d,
+                         s_containers,
+                         f_containers):
+        """ Start container that was passed in and return status """
+        try:
+            c = self.d_client.containers.get(container)
+            c.start()
+            s_containers.append(container)
+            self.logger.info("started " + str(container) +
+                             " with ID: " + str(c.short_id))
+        except Exception as err:  # pragma: no cover
             try:
                 gpu = 'gpu.enabled'
-                if (gpu in tool_d[cont]['labels'] and
-                   tool_d[cont]['labels'][gpu] == 'yes'):
+                if (gpu in tool_d[container]['labels'] and
+                   tool_d[container]['labels'][gpu] == 'yes'):
                     # TODO check for availability of gpu(s),
                     #      otherwise queue it up until it's
                     #      available
-                    try:
-                        # !! TODO
-                        started_containers.append(cont)
-                        self.logger.info("start " +
-                                         str(cont) +
-                                         " with ID: " +
-                                         str(cont_id))
-                    except Exception as err:  # pragma: no cover
-                        # TODO case for running gpu containers
-                        started_containers.append(cont)
-                        pass
+                    # !! TODO
+                    pass
                 else:
-                    try:
-                        # TODO case for gpus
-                        c = self.d_client.containers.get(cont)
-                        c.start()
-                        started_containers.append(cont)
-                        self.logger.info("started " + str(cont) +
-                                         " with ID: " + str(c.short_id))
-                    except Exception as err:  # pragma: no cover
-                        self.logger.error(str(err))
-                        # TODO case for gpus
-                        cont_id = self.d_client.containers.run(detach=True,
-                                                               **tool_d[cont])
-                        started_containers.append(cont)
-                        self.logger.info("started " + str(cont) +
-                                         " with ID: " + str(cont_id))
+                    self.logger.error(str(err))
+                    container_id = self.d_client.containers.run(detach=True,
+                                                                **tool_d[container])
+                s_containers.append(container)
+                self.logger.info("started " + str(container) +
+                                 " with ID: " + str(container_id))
             except Exception as e:  # pragma: no cover
-                failed_containers.append(cont)
-                self.logger.error("failed to start " + str(cont) +
+                f_containers.append(container)
+                self.logger.error("failed to start " + str(container) +
                                   " because: " + str(e))
-        return (started_containers, failed_containers)
+        return s_containers, f_containers
