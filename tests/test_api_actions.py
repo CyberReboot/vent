@@ -12,6 +12,27 @@ def test_add():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+def test_get_configure():
+    """ Test the get_configure function """
+    instance = Action()
+    status = instance.get_configure(name='elasticsearch')
+    assert status[0]
+    assert 'Elasticsearch' in status[1]
+
+def test_save_configure():
+    """ Test the save_configure function """
+    instance = Action()
+    status = instance.save_configure(name='elasticsearch',
+                                     config_val='[info]\ntesting123 = testing123')
+    assert status[0]
+    template_path = os.path.join(instance.p_helper.path_dirs.plugins_dir,
+                                 'cyberreboot', 'vent', 'vent', 'core',
+                                 'elasticsearch', 'vent.template')
+    with open(template_path) as f:
+        assert 'testing123' in f.read()
+    with open(instance.p_helper.manifest) as man:
+        assert 'testing123' in man.read()
+
 def test_remove():
     """ Test the remove function """
     instance = Action()

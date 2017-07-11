@@ -1,7 +1,9 @@
+import json
 import os
 import shutil
 
 from vent.api.plugins import Plugin
+from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
@@ -567,4 +569,95 @@ class Action:
             status = (False, str(e))
         self.logger.info("Status of inventory: " + str(status[0]))
         self.logger.info("Finished: inventory")
+        return status
+
+    def get_configure(self,
+                      repo=None,
+                      name=None,
+                      groups=None,
+                      enabled="yes",
+                      branch="master",
+                      version="HEAD"):
+        """ Get the vent.template file for a given tool """
+        self.logger.info("Starting: get_configure")
+        constraints = locals()
+        status = (True, None)
+        options = ['path']
+        tools = self.p_helper.constraint_options(constraints, options)[0]
+        if tools:
+            for tool in tools:
+                template_path = os.path.join(tools[tool]['path'],
+                                             'vent.template')
+                try:
+                    with open(template_path) as f:
+                        status = (True, f.read())
+                except Exception as e:
+                    status = (False, str(e))
+                    self.logger.error(str(e))
+        else:
+            status = (False, "Couldn't get vent.template")
+        self.logger.info("Status of get_configure: " + str(status[0]))
+        self.logger.info("Finished: get_configure")
+        return status
+
+    def save_configure(self,
+                       repo=None,
+                       name=None,
+                       groups=None,
+                       enabled="yes",
+                       branch="master",
+                       version="HEAD",
+                       config_val=""):
+        """
+        Save changes made to vent.template through npyscreen to the template
+        and to plugin_manifest
+        """
+        self.logger.info("Starting: save_configure")
+        constraints = locals()
+        del constraints['config_val']
+        status = (True, None)
+        options = ['path']
+        tools, manifest = self.p_helper.constraint_options(constraints,
+                                                           options)
+        if tools:
+            for tool in tools:
+                template_path = os.path.join(tools[tool]['path'],
+                                             'vent.template')
+                # save in vent.template
+                try:
+                    with open(template_path, 'w') as f:
+                        f.write(config_val)
+                except Exception as e:
+                    self.logger.error(str(e))
+                    status = (False, str(e))
+                    break
+                # save in plugin_manifest
+                try:
+                    vent_template = Template(template_path)
+                    sections = vent_template.sections()
+                    if sections[0]:
+                        for section in sections[1]:
+                            section_dict = {}
+                            options = vent_template.options(section)
+                            if options[0]:
+                                for option in options[1]:
+                                    option_name = option
+                                    if option == 'name':
+                                        option_name = 'link_name'
+                                    option_val = vent_template.option(section,
+                                                                      option)[1]
+                                    section_dict[option_name] = option_val
+                            if section_dict:
+                                manifest.set_option(tool, section,
+                                                    json.dumps(section_dict))
+                            elif manifest.option(tool, section)[0]:
+                                manifest.del_option(tool, section)
+                        manifest.write_config()
+                except Exception as e:
+                    self.logger.error(str(e))
+                    status = (False, str(e))
+        else:
+            status = (False, "Couldn't save configuration")
+        self.logger.info("Status of save_configure: " + str(status[0]))
+        self.logger.info("Finished: save_configure")
         return status

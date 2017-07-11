@@ -1,4 +1,5 @@
 import docker
+import json
 import os
 import shlex
 
@@ -85,11 +86,15 @@ class Plugin:
         # initialize and store class objects
         self.repo = repo.lower()
         self.tools = tools
+        if (isinstance(self.tools, list) and
+                len(self.tools) == 0):
+            self.tools = None
         self.overrides = overrides
         self.version = version
         self.branch = branch
         self.build = build
         self.groups = groups
+        self.core = core
         self.path, self.org, self.name = self.p_helper.get_path(repo,
                                                                 core=core)
 
@@ -236,14 +241,19 @@ class Plugin:
             response = self.p_helper.checkout(branch=self.branch,
                                               version=self.version)
             if response[0]:
+                search_groups = None
+                if self.core:
+                    search_groups = 'core'
                 matches = []
                 if self.tools is None and self.overrides is None:
                     # get all tools
-                    matches = self.p_helper.available_tools(self.path, version=self.version)
+                    matches = self.p_helper.available_tools(self.path, version=self.version,
+                                                            groups=search_groups)
                 elif self.tools is None:
                     # there's only something in overrides
                     # grab all the tools then apply overrides
-                    matches = self.p_helper.available_tools(self.path, version=self.version)
+                    matches = self.p_helper.available_tools(self.path, version=self.version,
+                                                            groups=search_groups)
                     # !! TODO apply overrides to matches
                 elif self.overrides is None:
                     # there's only something in tools
@@ -329,8 +339,26 @@ class Plugin:
                                     str(datetime.utcnow()) + " UTC")
                 template.set_option(section, "image_name", image_name)
                 template.set_option(section, "type", "repository")
+                # save settings in vent.template to plugin_manifest
                 vent_template = Template(template=join(match_path,
                                                        'vent.template'))
+                sections = vent_template.sections()
+                if sections[0]:
+                    for header in sections[1]:
+                        section_dict = {}
+                        options = vent_template.options(header)
+                        if options[0]:
+                            for option in options[1]:
+                                option_name = option
+                                if option == 'name':
+                                    option_name = 'link_name'
+                                option = vent_template.option(header, option)
+                                option_val = option[1]
+                                section_dict[option_name] = option_val
+                        if section_dict:
+                            template.set_option(section, header,
+                                                json.dumps(section_dict))
+                # TODO do we need this if we save as a dictionary?
                 vent_status, response = vent_template.option("info", "name")
                 if vent_status:
                     template.set_option(section, "link_name", response)
