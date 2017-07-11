@@ -30,9 +30,9 @@ class EditorForm(npyscreen.ActionForm):
     def on_ok(self):
         self.save(name=self.tool_name, branch=self.branch, version=self.version,
                   config_val=self.m.value)
-        npyscreen.notify_confirm("Done configuring this tool")
+        npyscreen.notify_confirm("Done configuring this tool", title="Configurations saved")
         self.change_screens()
 
     def on_cancel(self):
-        npyscreen.notify_confirm("No changes made to this tool")
+        npyscreen.notify_confirm("No changes made to this tool", title="Configurations not saved")
         self.change_screens()
