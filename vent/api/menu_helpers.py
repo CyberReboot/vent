@@ -7,7 +7,6 @@ from os import chdir
 from subprocess import check_output, STDOUT
 
 from vent.api.actions import Action
-from vent.api.plugins import Plugin
 from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
@@ -33,7 +32,6 @@ class MenuHelper:
             core = self.tools_status(True, branch=branch, version=version)[1]
             if action in ["install", "build"]:
                 tools = []
-                plugins = Plugin(plugins_dir=".internals/plugins/")
                 resp = self.p_helper.apply_path('https://github.com/cyberreboot/vent')
 
                 if resp[0]:
@@ -43,7 +41,7 @@ class MenuHelper:
                                      " with status " + str(resp))
                     return resp
 
-                path = os.path.join(plugins.path_dirs.plugins_dir,
+                path = os.path.join(self.plugin.path_dirs.plugins_dir,
                                     'cyberreboot/vent')
                 response = self.p_helper.checkout(branch=branch,
                                                   version=version)
@@ -54,10 +52,10 @@ class MenuHelper:
                                                         groups='core')
                 for match in matches:
                     tools.append((match[0], ''))
-                status = plugins.add('https://github.com/cyberreboot/vent',
-                                     tools=tools,
-                                     branch=branch,
-                                     build=False, core=True)
+                status = self.plugin.add('https://github.com/cyberreboot/vent',
+                                         tools=tools,
+                                         branch=branch,
+                                         build=False, core=True)
                 self.logger.info("status of plugin add: " + str(status))
                 plugin_c = Template(template=self.plugin.manifest)
                 sections = plugin_c.sections()

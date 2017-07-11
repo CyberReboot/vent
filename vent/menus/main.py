@@ -217,6 +217,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'cores': cores}}
         if s_action == 'start':
             form_args['names'].append('prep_start')
+        elif s_action == 'configure':
+            form_args['names'].pop()
+            form_args['names'].append('get_configure')
+            form_args['names'].append('save_configure')
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
@@ -401,6 +405,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Clean core tools',
                         onSelect=self.perform_action,
                         arguments=['clean_core'], shortcut='c')
+        self.m2.addItem(text='Configure core tools',
+                        onSelect=self.perform_action,
+                        arguments=['configure_core'], shortcut='t')
         self.m2.addItem(text='Inventory of core tools',
                         onSelect=self.perform_action,
                         arguments=['inventory_core'], shortcut='v')
@@ -428,6 +435,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Clean plugin tools',
                         onSelect=self.perform_action,
                         arguments=['clean'], shortcut='c')
+        self.m3.addItem(text='Configure plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['configure'], shortcut='t')
         self.m3.addItem(text='Inventory of installed plugins',
                         onSelect=self.perform_action,
                         arguments=['inventory'], shortcut='i')
