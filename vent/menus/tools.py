@@ -8,6 +8,7 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 
+
 class ToolForm(npyscreen.ActionForm):
     """ Tools form for the Vent CLI """
     def __init__(self, *args, **keywords):
@@ -53,15 +54,14 @@ class ToolForm(npyscreen.ActionForm):
         if response[0]:
             inventory = response[1]
 
-            # TODO refactor this
-            # maybe above message is unnessary now
             repos = inventory['repos']
 
             # dict has repo as key and list of core/non-core tools as values
             has_core = {}
             has_non_core = {}
 
-            # find all tools that are in this repo and list them if they are core
+            # find all tools that are in this repo 
+            # and list them if they are core
             for repo in repos:
                 core_list = []
                 ncore_list = []
@@ -75,7 +75,7 @@ class ToolForm(npyscreen.ActionForm):
 
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
-                        repo_name[1] == tool_repo_name[1]):
+                            repo_name[1] == tool_repo_name[1]):
 
                         # add the tools to their corresponding list
                         if tool in inventory['core']:
