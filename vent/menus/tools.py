@@ -9,6 +9,7 @@ from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 from vent.menus.editor import EditorForm
 
+
 class ToolForm(npyscreen.ActionForm):
     """ Tools form for the Vent CLI """
     def __init__(self, *args, **keywords):
@@ -204,7 +205,8 @@ class ToolForm(npyscreen.ActionForm):
                                  'save_configure': self.action['action_object2']}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
-                        self.parentApp.addForm("EDITOR" + t[0], EditorForm, **kargs)
+                        self.parentApp.addForm("EDITOR" + t[0], EditorForm,
+                                               **kargs)
                         tools_to_configure.append("EDITOR" + t[0])
                     else:
                         kargs = {'name': t[0],

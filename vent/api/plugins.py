@@ -86,8 +86,8 @@ class Plugin:
         # initialize and store class objects
         self.repo = repo.lower()
         self.tools = tools
-        if (isinstance(self.tools, list) and
-            len(self.tools) == 0):
+        if (isinstance(self.tools, list) and 
+                len(self.tools) == 0):
             self.tools = None
         self.overrides = overrides
         self.version = version
@@ -352,10 +352,12 @@ class Plugin:
                                 option_name = option
                                 if option == 'name':
                                     option_name = 'link_name'
-                                option_val = vent_template.option(header, option)[1]
+                                option = vent_template.option(header, option)
+                                option_val = option[1]
                                 section_dict[option_name] = option_val
                         if section_dict:
-                            template.set_option(section, header, json.dumps(section_dict))
+                            template.set_option(section, header,
+                                                json.dumps(section_dict))
                 # TODO do we need this if we save as a dictionary?
                 vent_status, response = vent_template.option("info", "name")
                 if vent_status:

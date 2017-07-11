@@ -7,7 +7,6 @@ from os import chdir
 from subprocess import check_output, STDOUT
 
 from vent.api.actions import Action
-from vent.api.plugins import Plugin
 from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
@@ -54,9 +53,9 @@ class MenuHelper:
                 for match in matches:
                     tools.append((match[0], ''))
                 status = self.plugin.add('https://github.com/cyberreboot/vent',
-                                     tools=tools,
-                                     branch=branch,
-                                     build=False, core=True)
+                                         tools=tools,
+                                         branch=branch,
+                                         build=False, core=True)
                 self.logger.info("status of plugin add: " + str(status))
                 plugin_c = Template(template=self.plugin.manifest)
                 sections = plugin_c.sections()

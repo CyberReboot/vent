@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-import subprocess
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
@@ -584,10 +583,11 @@ class Action:
         constraints = locals()
         status = (True, None)
         options = ['path']
-        tools, manifest = self.p_helper.constraint_options(constraints, options)
+        tools = self.p_helper.constraint_options(constraints, options)[0]
         if tools:
             for tool in tools:
-                template_path = os.path.join(tools[tool]['path'], 'vent.template')
+                template_path = os.path.join(tools[tool]['path'],
+                                             'vent.template')
                 try:
                     with open(template_path) as f:
                         status = (True, f.read())
@@ -609,18 +609,20 @@ class Action:
                        version="HEAD",
                        config_val=""):
         """
-        Save changes made to vent.template through npyscreen to the template and to
-        plugin_manifest
+        Save changes made to vent.template through npyscreen to the template
+        and to plugin_manifest
         """
         self.logger.info("Starting: save_configure")
         constraints = locals()
         del constraints['config_val']
         status = (True, None)
         options = ['path']
-        tools, manifest = self.p_helper.constraint_options(constraints, options)
+        tools, manifest = self.p_helper.constraint_options(constraints,
+                                                           options)
         if tools:
             for tool in tools:
-                template_path = os.path.join(tools[tool]['path'], 'vent.template')
+                template_path = os.path.join(tools[tool]['path'],
+                                             'vent.template')
                 # save in vent.template
                 try:
                     with open(template_path, 'w') as f:
@@ -642,10 +644,12 @@ class Action:
                                     option_name = option
                                     if option == 'name':
                                         option_name = 'link_name'
-                                    option_val = vent_template.option(section, option)[1]
+                                    option_val = vent_template.option(section,
+                                                                      option)[1]
                                     section_dict[option_name] = option_val
                             if section_dict:
-                                manifest.set_option(tool, section, json.dumps(section_dict))
+                                manifest.set_option(tool, section,
+                                                    json.dumps(section_dict))
                             elif manifest.option(tool, section)[0]:
                                 manifest.del_option(tool, section)
                         manifest.write_config()

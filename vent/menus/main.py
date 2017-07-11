@@ -389,6 +389,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Clean core tools',
                         onSelect=self.perform_action,
                         arguments=['clean_core'], shortcut='c')
+        self.m2.addItem(text='Configure core tools',
+                        onSelect=self.perform_action,
+                        arguments=['configure_core'], shortcut='t')
         self.m2.addItem(text='Inventory of core tools',
                         onSelect=self.perform_action,
                         arguments=['inventory_core'], shortcut='v')
@@ -404,9 +407,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Update core tools',
                         onSelect=self.perform_action,
                         arguments=['update_core'], shortcut='u')
-        self.m2.addItem(text='Configure core tools',
-                        onSelect=self.perform_action,
-                        arguments=['configure_core'], shortcut='t')
 
         # Plugin Menu Items
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
@@ -419,6 +419,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Clean plugin tools',
                         onSelect=self.perform_action,
                         arguments=['clean'], shortcut='c')
+        self.m3.addItem(text='Configure plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['configure'], shortcut='t')
         self.m3.addItem(text='Inventory of installed plugins',
                         onSelect=self.perform_action,
                         arguments=['inventory'], shortcut='i')
@@ -434,9 +437,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Update plugins',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
-        self.m3.addItem(text='Configure plugin tools',
-                        onSelect=self.perform_action,
-                        arguments=['configure'], shortcut='t')
 
         # Log Menu Items
         self.m4 = self.add_menu(name="Logs", shortcut="l")
