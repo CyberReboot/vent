@@ -136,7 +136,7 @@ class Action:
                                                                 tool_d)
 
             # start the rest of the containers that didn't have any priorities
-            r_results = self.p_helper.start_remaining_conatiners(containers_remaining, tool_d)
+            r_results = self.p_helper.start_remaining_containers(containers_remaining, tool_d)
         except Exception as e:  # pragma: no cover
             self.logger.error("start failed with error: " + str(e))
             status = (False, str(e))
