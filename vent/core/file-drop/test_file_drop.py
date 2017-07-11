@@ -1,11 +1,5 @@
-import os
-import pytest
-
 import file_drop
 
-def test_first_setup():
-    os.system("cp templates/core.template core.backup")
-    os.system("cp templates/modes.template modes.backup")
 
 def test_file_drop_GZHandler():
     """ Tests the GZZHandler for file drop """
@@ -24,5 +18,7 @@ def test_file_drop_GZHandler():
             self.is_directory = is_directory
 
     b = Event("created", "/dev/null", False)
+    a.process(b, "localhost")
+    a.process(b, "localhost")
     a.process(b, "localhost")
     a.on_created(b)

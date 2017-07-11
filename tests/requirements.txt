@@ -1,6 +1,6 @@
-docker-py==1.7.2
+docker
 elasticsearch
-pexpect
+npyscreen
 pika
 pytest
 pytest-cov

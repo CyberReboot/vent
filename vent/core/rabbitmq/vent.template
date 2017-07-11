@@ -1,0 +1,17 @@
+[info]
+name = RabbitMQ
+groups = core,messages,syslog
+
+[service]
+uri_prefix = http://
+uri_user = guest
+uri_pw = guest
+
+[settings]
+instances = 1
+locally_active = on
+#external_host = 0.0.0.0
+priority = 1,1,1
+
+[docker]
+ports = {'15672/tcp': ('0.0.0.0', None)}

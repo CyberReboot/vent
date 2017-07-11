@@ -1,4 +1,4 @@
-FROM alpine:3.5
+FROM alpine:3.6
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
@@ -8,13 +8,17 @@ RUN apk add --update \
     && rm -rf /var/cache/apk/*
 
 # get newer for worker list fix
-RUN pip install git+https://github.com/mredar/rq-dashboard.git
+RUN pip install git+https://github.com/mredar/rq-dashboard.git@bb5c8f93be5f1ac265bddd5d29fb98cf17fb2585
 
-ADD rq_dash_settings.py /rq_dash_settings.py
+COPY rq_dash_settings.py /rq_dash_settings.py
 
-ADD run.sh /run.sh
+COPY run.sh /run.sh
 RUN chmod 755 /run.sh
 
 EXPOSE 9181
+
+LABEL vent="" \
+      vent.name="rq-dashboard" \
+      vent.groups="core"
 
 CMD ["/run.sh"]

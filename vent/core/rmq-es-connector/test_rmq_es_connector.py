@@ -1,26 +1,24 @@
-import os
 import pytest
 import sys
-import time
 
 import rmq_es_connector
+
 
 class Method():
     """ create mock method object """
     routing_key = None
-    def __init__(self, routing_key=""):
+
+    def __init__(self, routing_key="foo.bar"):
         self.routing_key = routing_key
+
 
 def test_rmq_es_connector_connections():
     """ tests the connections function """
     rmq_es = rmq_es_connector.RmqEs()
     rmq_es.connections(False)
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
-    # !! TODO not currently working...
-    #os.system("service rabbitmq-server stop")
-    #time.sleep(15)
-    #os.system("service rabbitmq-server start &")
     rmq_es.connections(True)
+
 
 def test_rmq_es_connector_callback():
     """ tests the callback function """
@@ -37,6 +35,8 @@ def test_rmq_es_connector_callback():
     rmq_es = rmq_es_connector.RmqEs(es_host="localhost", rmq_host="localhost")
     rmq_es.connections(True)
     rmq_es.callback(None, method, None, "[]")
+    rmq_es.callback(None, method, None, "asdf * '[]'")
+
 
 def test_rmq_es_connector_start():
     """ tests the start function """
