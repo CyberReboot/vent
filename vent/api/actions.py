@@ -140,7 +140,7 @@ class Action:
                             started_containers.append(container_tuple[1])
                             try:
                                 if ('gpu.enabled' in tool_d[container_tuple[1]]['labels'] and
-                                    tool_d[container_tuple[1]]['labels']['gpu.enabled'] == 'yes'):
+                                   tool_d[container_tuple[1]]['labels']['gpu.enabled'] == 'yes'):
                                     # TODO check for availability of gpu(s),
                                     #      otherwise queue it up until it's
                                     #      available
@@ -154,7 +154,7 @@ class Action:
                                         cmd += container_id
                                         check_output(shlex.split(cmd),
                                                      stderr=STDOUT,
-                                                     close_fds = True)
+                                                     close_fds=True)
                                         self.logger.info("start " +
                                                          str(container_tuple[1]) +
                                                          " with ID: " +
@@ -187,7 +187,7 @@ class Action:
             for container in containers_remaining:
                 try:
                     if ('gpu.enabled' in tool_d[container_tuple[1]]['labels'] and
-                        tool_d[container_tuple[1]]['labels']['gpu.enabled'] == 'yes'):
+                       tool_d[container_tuple[1]]['labels']['gpu.enabled'] == 'yes'):
                         # TODO check for availability of gpu(s),
                         #      otherwise queue it up until it's
                         #      available
@@ -201,7 +201,7 @@ class Action:
                             cmd += container_id
                             check_output(shlex.split(cmd),
                                          stderr=STDOUT,
-                                         close_fds = True)
+                                         close_fds=True)
                             self.logger.info("start " +
                                              str(container_tuple[1]) +
                                              " with ID: " +
