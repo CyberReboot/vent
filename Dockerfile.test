@@ -1,0 +1,16 @@
+FROM alpine:3.5
+MAINTAINER Charlie Lewis <clewis@iqt.org>
+
+RUN apk add --update \
+    docker \
+    make \
+    python \
+    py2-pip \
+    && rm -rf /var/cache/apk/*
+
+ADD . /vent
+WORKDIR /vent
+RUN pip install -r tests/requirements.txt
+
+ENTRYPOINT ["make"]
+CMD ["test"]
