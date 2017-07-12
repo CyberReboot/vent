@@ -92,9 +92,6 @@ def file_queue(path, template_path="/vent/"):
                                         print("Unable to parse " +
                                               "nvidia-docker option: " +
                                               str(option))
-
-
-
             elif t_type == 'registry':
                 # !! TODO deal with images not from a repo
                 pass
