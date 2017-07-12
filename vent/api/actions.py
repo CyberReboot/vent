@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-import subprocess
 import tempfile
 
 from vent.api.plugins import Plugin
@@ -645,7 +644,7 @@ class Action:
         if from_registry:
             try:
                 os.close(fd)
-                subprocess.call(['rm', template_path])
+                os.remove(template_path)
             except Exception as e:
                 self.logger.error(str(e))
         self.logger.info("Status of save_configure: " + str(status[0]))
