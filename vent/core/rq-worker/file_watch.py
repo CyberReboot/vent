@@ -124,7 +124,7 @@ def file_queue(path, template_path="/vent/"):
                                     **configs[image])
         status = (True, images)
     except Exception as e:  # pragma: no cover
-        print("Failed: " + str(e)
+        print("Failed: " + str(e))
         status = (False, str(e))
 
     print(str(status))
