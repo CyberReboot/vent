@@ -89,9 +89,9 @@ def file_queue(path, template_path="/vent/"):
                                         else:
                                             configs[image_name]['devices'] = [dev + ":" + dev + ":rwm"]
                                     else:
-                                        print("Unable to parse " +
-                                              "nvidia-docker option: " +
-                                              str(option))
+                                        # unable to parse option provided by
+                                        # nvidia-docker-plugin
+                                        pass
             elif t_type == 'registry':
                 # !! TODO deal with images not from a repo
                 pass
@@ -124,7 +124,6 @@ def file_queue(path, template_path="/vent/"):
                                     **configs[image])
         status = (True, images)
     except Exception as e:  # pragma: no cover
-        print("Failed: " + str(e))
         status = (False, str(e))
 
     print(str(status))
