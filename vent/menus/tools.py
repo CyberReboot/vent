@@ -68,7 +68,10 @@ class ToolForm(npyscreen.ActionForm):
                 ncore_list = []
 
                 # splice the repo names for processing
-                repo_name = repo.rsplit("/", 2)[1:]
+                if (repo.startswith("http")):
+                    repo_name = repo.rsplit("/", 2)[1:]
+                else:
+                    repo_name = repo.split("/")
 
                 # figure out what tools in the repo are core and what are not
                 for tool in inventory['tools']:
