@@ -9,7 +9,7 @@ def file_queue(path, template_path="/vent/"):
 
     status = (True, None)
     images = []
-    configs = []
+    configs = {}
 
     try:
         d_client = docker.from_env()
