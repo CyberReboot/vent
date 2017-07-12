@@ -205,7 +205,8 @@ class ToolForm(npyscreen.ActionForm):
                                  'version': t[2],
                                  'next_tool': None,
                                  'get_configure': self.action['action_object1'],
-                                 'save_configure': self.action['action_object2']}
+                                 'save_configure': self.action['action_object2'],
+                                 'from_registry': False}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
                         self.parentApp.addForm("EDITOR" + t[0], EditorForm,
