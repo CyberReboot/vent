@@ -1,5 +1,6 @@
 import docker
 import fnmatch
+import requests
 import shlex
 
 from ast import literal_eval
@@ -453,20 +454,56 @@ class PluginHelper:
         except Exception as err:  # pragma: no cover
             try:
                 gpu = 'gpu.enabled'
+                failed = False
                 if (gpu in tool_d[container]['labels'] and
                    tool_d[container]['labels'][gpu] == 'yes'):
                     # TODO check for availability of gpu(s),
                     #      otherwise queue it up until it's
                     #      available
-                    # !! TODO
-                    pass
-                else:
-                    self.logger.error(str(err))
-                    container_id = self.d_client.containers.run(detach=True,
-                                                                **tool_d[container])
-                s_containers.append(container)
-                self.logger.info("started " + str(container) +
-                                 " with ID: " + str(container_id))
+                    # !! TODO check for device settings in vent.template
+                    nd_url = 'http://localhost:3476/v1.0/docker/cli'
+                    nd_url += '?dev=0+1\&vol=nvidia_driver'
+                    r = requests.get(nd_url)
+                    if r.status_code == 200:
+                        options = r.text.split()
+                        for option in options:
+                            if option.startswith('--volume-driver='):
+                                tool_d[container]['volume_driver'] = option.split("=", 1)[1]
+                            elif option.startswith('--volume='):
+                                vol = option.split("=", 1)[1].split(":")
+                                if 'volumes' in tool_d[container]:
+                                    # !! TODO handle if volumes is a list
+                                    tool_d[container]['volumes'][vol[0]] = {'bind': vol[1],
+                                                                            'mode': vol[2]}
+                                else:
+                                    tool_d[container]['volumes'] = {vol[0]:
+                                                                    {'bind': vol[1],
+                                                                     'mode': vol[2]}}
+                            elif option.startswith('--device='):
+                                dev = option.split("=", 1)[1]
+                                if 'devices' in tool_d[container]:
+                                    tool_d[container]['devices'].append(dev +
+                                                                        ":" +
+                                                                        dev +
+                                                                        ":rwm")
+                                else:
+                                    tool_d[container]['devices'] = [dev + ":" + dev + ":rwm"]
+                            else:
+                                self.logger.error("Unable to parse " +
+                                                  "nvidia-docker option: " +
+                                                  str(option))
+                    else:
+                        failed = True
+                        f_containers.append(container)
+                        self.logger.error("failed to start " + str(container) +
+                                          " because nvidia-docker-plugin " +
+                                          "failed with: " + str(r.status_code))
+                if not failed:
+                    cont_id = self.d_client.containers.run(detach=True,
+                                                           **tool_d[container])
+                    s_containers.append(container)
+                    self.logger.info("started " + str(container) +
+                                     " with ID: " + str(cont_id))
             except Exception as e:  # pragma: no cover
                 f_containers.append(container)
                 self.logger.error("failed to start " + str(container) +
