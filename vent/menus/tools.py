@@ -159,6 +159,16 @@ class ToolForm(npyscreen.ActionForm):
                 if self.action['action_name'] != 'configure':
                     npyscreen.notify_wait(info_str, title=title)
                     time.sleep(1)
+            # !! TODO join only returns None
+            result = thr.join()
+            if isinstance(result, tuple) and isinstance(result[1], tuple):
+                running, failed = result[1]
+                r_str = ''
+                for container in running:
+                    r_str += container + ": successful\n"
+                for container in failed:
+                    r_str += container + ": failed\n"
+                npyscreen.notify_confirm(r_str)
             return
 
         if self.action['type'] == 'images':
