@@ -613,15 +613,11 @@ class Action:
             else:
                 status = (False, "Couldn't save configuration")
         if status[0]:
-            # save in vent.template
             try:
+                # save in vent.template
                 with open(template_path, 'w') as f:
                     f.write(config_val)
-            except Exception as e:
-                self.logger.error(str(e))
-                status = (False, str(e))
-            # save in plugin_manifest
-            try:
+                # save in plugin_manifest
                 vent_template = Template(template_path)
                 sections = vent_template.sections()
                 if sections[0]:

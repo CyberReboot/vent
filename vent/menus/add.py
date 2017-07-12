@@ -99,9 +99,9 @@ class AddForm(npyscreen.ActionForm):
                            'from_registry': True,
                            'tool_name': self.image.value,
                            'version': self.tag.value}
-            self.parentApp.addForm("CONFIGUREIMAGE", EditorForm, name="Specify "
-                                   "vent.template settings for image pulled (optional)",
-                                   **editor_args)
+            self.parentApp.addForm("CONFIGUREIMAGE", EditorForm,
+                                   name="Specify vent.template settings for "
+                                   "image pulled (optional)", **editor_args)
             self.parentApp.change_form("CONFIGUREIMAGE")
         elif self.image.value:
             npyscreen.notify_confirm("A name needs to be supplied for "
