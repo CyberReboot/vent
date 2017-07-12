@@ -126,4 +126,5 @@ def file_queue(path, template_path="/vent/"):
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 
+    print(str(status))
     return status
