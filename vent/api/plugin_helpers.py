@@ -1,4 +1,6 @@
+import docker
 import fnmatch
+import requests
 import shlex
 
 from ast import literal_eval
@@ -15,6 +17,7 @@ from vent.helpers.meta import Version
 class PluginHelper:
     """ Handle helper functions for the Plugin class """
     def __init__(self, **kargs):
+        self.d_client = docker.from_env()
         self.path_dirs = PathDirs(**kargs)
         self.manifest = join(self.path_dirs.meta_dir,
                              "plugin_manifest.cfg")
@@ -256,6 +259,13 @@ class PluginHelper:
                 for option in status[1]:
                     tool_d[c_name]['labels'][option[0]] = option[1]
 
+            # check for gpu settings
+            status = vent_template.section('gpu')
+            self.logger.info(status)
+            if status[0]:
+                for option in status[1]:
+                    tool_d[c_name]['labels']['gpu.'+option[0]] = option[1]
+
             # get temporary name for links, etc.
             plugin_c = Template(template=self.manifest)
             status, plugin_sections = plugin_c.sections()
@@ -400,3 +410,102 @@ class PluginHelper:
         self.logger.info("Status of prep_start: "+str(status[0]))
         self.logger.info("Finished: prep_start")
         return status
+
+    def start_priority_containers(self, groups, group_orders, tool_d):
+        """ Select containers based on priorities to start """
+        groups = sorted(set(groups))
+        s_conts = []
+        f_conts = []
+        for group in groups:
+            if group in group_orders:
+                for cont_t in sorted(group_orders[group]):
+                    if cont_t[1] not in s_conts:
+                        s_conts, f_conts = self.start_containers(cont_t[1],
+                                                                 tool_d,
+                                                                 s_conts,
+                                                                 f_conts)
+        return (s_conts, f_conts)
+
+    def start_remaining_containers(self, containers_remaining, tool_d):
+        """
+        Select remaining containers that didn't have priorities to start
+        """
+        s_containers = []
+        f_containers = []
+        for container in containers_remaining:
+            s_containers, f_containers = self.start_containers(container,
+                                                               tool_d,
+                                                               s_containers,
+                                                               f_containers)
+        return (s_containers, f_containers)
+
+    def start_containers(self,
+                         container,
+                         tool_d,
+                         s_containers,
+                         f_containers):
+        """ Start container that was passed in and return status """
+        try:
+            c = self.d_client.containers.get(container)
+            c.start()
+            s_containers.append(container)
+            self.logger.info("started " + str(container) +
+                             " with ID: " + str(c.short_id))
+        except Exception as err:  # pragma: no cover
+            try:
+                gpu = 'gpu.enabled'
+                failed = False
+                if (gpu in tool_d[container]['labels'] and
+                   tool_d[container]['labels'][gpu] == 'yes'):
+                    # TODO check for availability of gpu(s),
+                    #      otherwise queue it up until it's
+                    #      available
+                    # !! TODO check for device settings in vent.template
+                    nd_url = 'http://localhost:3476/v1.0/docker/cli'
+                    nd_url += '?dev=0+1\&vol=nvidia_driver'
+                    r = requests.get(nd_url)
+                    if r.status_code == 200:
+                        options = r.text.split()
+                        for option in options:
+                            if option.startswith('--volume-driver='):
+                                tool_d[container]['volume_driver'] = option.split("=", 1)[1]
+                            elif option.startswith('--volume='):
+                                vol = option.split("=", 1)[1].split(":")
+                                if 'volumes' in tool_d[container]:
+                                    # !! TODO handle if volumes is a list
+                                    tool_d[container]['volumes'][vol[0]] = {'bind': vol[1],
+                                                                            'mode': vol[2]}
+                                else:
+                                    tool_d[container]['volumes'] = {vol[0]:
+                                                                    {'bind': vol[1],
+                                                                     'mode': vol[2]}}
+                            elif option.startswith('--device='):
+                                dev = option.split("=", 1)[1]
+                                if 'devices' in tool_d[container]:
+                                    tool_d[container]['devices'].append(dev +
+                                                                        ":" +
+                                                                        dev +
+                                                                        ":rwm")
+                                else:
+                                    tool_d[container]['devices'] = [dev + ":" + dev + ":rwm"]
+                            else:
+                                self.logger.error("Unable to parse " +
+                                                  "nvidia-docker option: " +
+                                                  str(option))
+                    else:
+                        failed = True
+                        f_containers.append(container)
+                        self.logger.error("failed to start " + str(container) +
+                                          " because nvidia-docker-plugin " +
+                                          "failed with: " + str(r.status_code))
+                if not failed:
+                    cont_id = self.d_client.containers.run(detach=True,
+                                                           **tool_d[container])
+                    s_containers.append(container)
+                    self.logger.info("started " + str(container) +
+                                     " with ID: " + str(cont_id))
+            except Exception as e:  # pragma: no cover
+                f_containers.append(container)
+                self.logger.error("failed to start " + str(container) +
+                                  " because: " + str(e))
+        return s_containers, f_containers

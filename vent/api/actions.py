@@ -133,54 +133,22 @@ class Action:
                             containers_remaining.remove(container)
 
             # start containers based on priorities
-            groups = sorted(set(groups))
-            started_containers = []
-            for group in groups:
-                if group in group_orders:
-                    for container_tuple in sorted(group_orders[group]):
-                        if container_tuple[1] not in started_containers:
-                            started_containers.append(container_tuple[1])
-                            try:
-                                try:
-                                    container = self.d_client.containers.get(container_tuple[1])
-                                    container.start()
-                                    self.logger.info("started " +
-                                                     str(container_tuple[1]) +
-                                                     " with ID: " +
-                                                     str(container.short_id))
-                                except Exception as err:  # pragma: no cover
-                                    self.logger.error(str(err))
-                                    container_id = self.d_client.containers.run(detach=True,
-                                                                                **tool_d[container_tuple[1]])
-                                    self.logger.info("started " +
-                                                     str(container_tuple[1]) +
-                                                     " with ID: " +
-                                                     str(container_id))
-                            except Exception as e:  # pragma: no cover
-                                self.logger.error("failed to start " +
-                                                  str(container_tuple[1]) +
-                                                  " because: " + str(e))
+            p_results = self.p_helper.start_priority_containers(groups,
+                                                                group_orders,
+                                                                tool_d)
 
             # start the rest of the containers that didn't have any priorities
-            for container in containers_remaining:
-                try:
-                    try:
-                        c = self.d_client.containers.get(container)
-                        c.start()
-                        self.logger.info("started " + str(container) +
-                                         " with ID: " + str(c.short_id))
-                    except Exception as err:  # pragma: no cover
-                        self.logger.error(str(err))
-                        container_id = self.d_client.containers.run(detach=True,
-                                                                    **tool_d[container])
-                        self.logger.info("started " + str(container) +
-                                         " with ID: " + str(container_id))
-                except Exception as e:  # pragma: no cover
-                    self.logger.error("failed to start " + str(container) +
-                                      " because: " + str(e))
+            r_results = self.p_helper.start_remaining_containers(containers_remaining, tool_d)
+            results = (p_results[0] + r_results[0],
+                       p_results[1] + r_results[1])
+
+            if len(results[1]) > 0:
+                status = (False, results)
+            else:
+                status = (True, results)
         except Exception as e:  # pragma: no cover
             self.logger.error("start failed with error: " + str(e))
-            status = (False, e)
+            status = (False, str(e))
 
         self.logger.info("Status of start: " + str(status[0]))
         self.logger.info("Finished: start")

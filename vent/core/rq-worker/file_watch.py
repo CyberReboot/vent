@@ -5,9 +5,11 @@ def file_queue(path, template_path="/vent/"):
     """
     import ConfigParser
     import docker
+    import requests
 
     status = (True, None)
     images = []
+    configs = []
 
     try:
         d_client = docker.from_env()
@@ -33,6 +35,7 @@ def file_queue(path, template_path="/vent/"):
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         for section in sections:
+            image_name = config.get(section, 'image_name')
             t_type = config.get(section, 'type')
             if t_type == 'repository':
                 t_path = config.get(section, 'path')
@@ -52,7 +55,43 @@ def file_queue(path, template_path="/vent/"):
                                              'ext_types').split(',')
                     for ext_type in ext_types:
                         if path.endswith(ext_type):
-                            images.append(config.get(section, 'image_name'))
+                            images.append(image_name)
+                            configs[image_name] = {}
+                if t_config.has_section('gpu') and image_name in configs:
+                    if t_config.has_option('gpu', 'enabled'):
+                        enabled = t_config.get('gpu', 'enabled')
+                        if enabled == 'yes':
+                            nd_url = 'http://localhost:3476/v1.0/docker/cli'
+                            nd_url += '?dev=0+1\&vol=nvidia_driver'
+                            r = requests.get(nd_url)
+                            if r.status_code == 200:
+                                options = r.text.split()
+                                for option in options:
+                                    if option.startswith('--volume-driver='):
+                                        configs[image_name]['volume_driver'] = option.split("=", 1)[1]
+                                    elif option.startswith('--volume='):
+                                        vol = option.split("=", 1)[1].split(":")
+                                        if 'volumes' in configs[image_name]:
+                                            # !! TODO handle if volumes is a list
+                                            configs[image_name]['volumes'][vol[0]] = {'bind': vol[1],
+                                                                                      'mode': vol[2]}
+                                        else:
+                                            configs[image_name]['volumes'] = {vol[0]:
+                                                                              {'bind': vol[1],
+                                                                               'mode': vol[2]}}
+                                    elif option.startswith('--device='):
+                                        dev = option.split("=", 1)[1]
+                                        if 'devices' in configs[image_name]:
+                                            configs[image_name]['devices'].append(dev +
+                                                                                  ":" +
+                                                                                  dev +
+                                                                                  ":rwm")
+                                        else:
+                                            configs[image_name]['devices'] = [dev + ":" + dev + ":rwm"]
+                                    else:
+                                        print("Unable to parse " +
+                                              "nvidia-docker option: " +
+                                              str(option))
             elif t_type == 'registry':
                 # !! TODO deal with images not from a repo
                 pass
@@ -69,12 +108,20 @@ def file_queue(path, template_path="/vent/"):
 
         # start containers
         for image in images:
+            # TODO check for availability of gpu(s),
+            #      otherwise queue it up until it's
+            #      available
+            if 'volumes' in configs[image]:
+                for volume in volumes:
+                    configs[image]['volumes'][volume] = volumes[volume]
+            else:
+                configs[image]['volumes'] = volumes
             d_client.containers.run(image=image,
                                     command=path,
                                     labels=labels,
                                     detach=True,
                                     log_config=log_config,
-                                    volumes=volumes)
+                                    **configs[image])
         status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
