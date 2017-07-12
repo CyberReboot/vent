@@ -115,9 +115,10 @@ def Gpu(pull=False):
             gpus = proc.stdout.read()
             err = proc.stderr.read()
             if gpus:
+                gpu_str = ""
                 for line in gpus.strip().split("\n"):
-                    gpu += line.split(" (UUID: ")[0] + ", "
-                gpu = (True, gpu[:-2])
+                    gpu_str += line.split(" (UUID: ")[0] + ", "
+                gpu = (True, gpu_str[:-2])
             else:
                 if err:
                     gpu = (False, "Unknown", str(err))
