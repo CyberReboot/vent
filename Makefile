@@ -5,7 +5,7 @@ build: clean
 	@echo "checking dependencies"
 	@echo
 	env
-	docker version
+	docker version || true
 	pip -V
 	pip install -r tests/requirements.txt
 	python setup.py install
