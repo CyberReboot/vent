@@ -302,6 +302,22 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 else:
                     notify_confirm(status[1])
                 MainForm.exit()
+        elif action == "gpu":
+            gpu = Gpu(pull=True)
+            if gpu[0]:
+                notify_confirm("GPU detection successful. "
+                               "Found: " + gpu[1])
+            else:
+                if gpu[1] == "Unknown":
+                    notify_confirm("Unable to detect GPUs, try `make gpu` "
+                                   "from the vent repository directory. "
+                                   "Error: " + str(gpu[2]))
+                else:
+                    notify_confirm("No GPUs detected.")
+        elif action == "swarm":
+            # !! TODO
+            # add notify_cancel_ok popup once implemented
+            pass
         elif action == "upgrade":
             # !! TODO
             # add notify_cancel_ok popup once implemented
@@ -333,7 +349,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  name='Logical CPUs:',
                                  labelColor='DEFAULT', value=Cpu())
         self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
-                                 labelColor='DEFAULT', value=Gpu())
+                                 labelColor='DEFAULT', value=Gpu()[1])
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
@@ -453,6 +469,11 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # System Commands Menu Items
         self.m6 = self.add_menu(name="System Commands")
+        self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
+                        arguments=['gpu'], shortcut='g')
+        self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',
+                        onSelect=self.system_commands,
+                        arguments=['swarm'], shortcut='s')
         self.m6.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
         self.m6.addItem(text='Upgrade (To Be Implemented...)',

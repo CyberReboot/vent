@@ -6,7 +6,6 @@
 *.tar
 *.zip
 .cache
-.coverage
 .DS_Store
 .git
 .vent

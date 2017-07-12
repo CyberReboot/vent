@@ -80,6 +80,7 @@ def Containers(vent=True, running=True):
 
 
 def Cpu():
+    """ Get number of available CPUs """
     cpu = "Unknown"
     try:
         cpu = str(multiprocessing.cpu_count())
@@ -89,7 +90,8 @@ def Cpu():
 
 
 def Gpu(pull=False):
-    gpu = ""
+    """ Check for support of GPUs, and return what's available """
+    gpu = (False, "")
     try:
         image = 'nvidia/cuda:8.0-runtime'
         image_name, tag = image.split(":")
@@ -111,17 +113,29 @@ def Gpu(pull=False):
                                     shell=True,
                                     close_fds=True)
             gpus = proc.stdout.read()
+            err = proc.stderr.read()
             if gpus:
+                gpu_str = ""
                 for line in gpus.strip().split("\n"):
-                    gpu += line.split(" (UUID: ")[0] + ", "
-                gpu = gpu[:-2]
+                    gpu_str += line.split(" (UUID: ")[0] + ", "
+                gpu = (True, gpu_str[:-2])
             else:
-                gpu = "None"
+                if err:
+                    gpu = (False, "Unknown", str(err))
+                else:
+                    gpu = (False, "None")
         else:
-            gpu = "None"
+            gpu = (False, "None")
     except Exception as e:  # pragma: no cover
-        gpu = "Unknown"
+        gpu = (False, "Unknown", str(e))
     return gpu
+
+
+def GpuUsage():
+    """ Get the current GPU usage of available GPUs """
+    # TODO
+    usage = ""
+    return usage
 
 
 def Images(vent=True):
