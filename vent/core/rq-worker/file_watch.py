@@ -70,15 +70,12 @@ def file_queue(path, template_path="/vent/"):
                             route.wait()
                             host = h.strip()
                             nd_url = 'http://' + host + ':3476/v1.0/docker/cli'
-                            nd_url += '?dev=0+1\&vol=nvidia_driver'
-                            print(nd_url)
+                            params = {'vol': 'nvidia_driver'}
                             try:
-                                r = requests.get(nd_url)
-                                print(str(r.status_code))
+                                r = requests.get(nd_url, params=params)
                                 if r.status_code == 200:
                                     options = r.text.split()
                                     for option in options:
-                                        print(str(option))
                                         if option.startswith('--volume-driver='):
                                             configs[image_name]['volume_driver'] = option.split("=", 1)[1]
                                         elif option.startswith('--volume='):
@@ -105,7 +102,7 @@ def file_queue(path, template_path="/vent/"):
                                             # nvidia-docker-plugin
                                             pass
                             except Exception as e:  # pragma: no cover
-                                print("nvidia-driver failed: " + str(e))
+                                pass
             elif t_type == 'registry':
                 # !! TODO deal with images not from a repo
                 pass
