@@ -7,8 +7,8 @@ def file_queue(path, template_path="/vent/"):
     import docker
     import requests
     import shlex
-    
-    from subprocess import check_output STDOUT
+
+    from subprocess import check_output, STDOUT
 
     status = (True, None)
     images = []
