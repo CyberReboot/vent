@@ -461,7 +461,6 @@ class PluginHelper:
                     #      otherwise queue it up until it's
                     #      available
                     # !! TODO check for device settings in vent.template
-                    cmd = "/sbin/ip route"
                     route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
                     h = check_output(('awk', '/default/ {print $3}'),
                                      stdin=route.stdout)
