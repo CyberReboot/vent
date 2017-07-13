@@ -6,9 +6,8 @@ def file_queue(path, template_path="/vent/"):
     import ConfigParser
     import docker
     import requests
-    import shlex
 
-    from subprocess import check_output, STDOUT
+    from subprocess import check_output, Popen, PIPE
 
     status = (True, None)
     images = []
@@ -64,10 +63,12 @@ def file_queue(path, template_path="/vent/"):
                     if t_config.has_option('gpu', 'enabled'):
                         enabled = t_config.get('gpu', 'enabled')
                         if enabled == 'yes':
-                            cmd = "/sbin/ip route|awk '/default/ { print $3 }'"
-                            host = check_output(shlex.split(cmd),
-                                                stderr=STDOUT,
-                                                close_fds=True)
+                            cmd = "/sbin/ip route"
+                            route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
+                            h = check_output(('awk', '/default/ {print $3}'),
+                                             stdin=route.stdout)
+                            route.wait()
+                            host = h.strip()
                             nd_url = 'http://' + host + ':3476/v1.0/docker/cli'
                             nd_url += '?dev=0+1\&vol=nvidia_driver'
                             try:
