@@ -21,4 +21,3 @@ def Logger(name, **kargs):
         logger.addHandler(handler)
 
     return logger
-
