@@ -1,3 +1,14 @@
+# v0.4.1 (2017-07-13)
+
+improvements:
+ - core containers automatically restart if they fail
+ - added extra user action for destructive actions
+ - correctly mapped filedrop path from vent.cfg
+ - fixed incorrect image_id in the manifest
+ - more information is stored in the manifest now
+ - improvements to user experience and logging
+ - added basic GPU support
+
 # v0.4.0 (2017-06-08)
 
 improvements:
