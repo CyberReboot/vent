@@ -164,7 +164,7 @@ def Jobs():
     Get the number of jobs that are running and finished, and the number of
     total tools running and finished for those jobs
     """
-    jobs = [0,0,0,0]
+    jobs = [0, 0, 0, 0]
 
     # get running jobs
     try:
@@ -208,7 +208,8 @@ def Jobs():
             file_names = [d['FileName'] for d in finished_jobs]
 
             # multiple tools can run on 1 file. Use a tuple to status check
-            tool_names = [(d['FileName'], d['VentPlugin']) for d in finished_jobs]
+            tool_names = [(d['FileName'], d['VentPlugin']) \
+                for d in finished_jobs]
         
         for container in c:
             if 'file' in container.attrs['Config']['Labels']:
@@ -217,7 +218,7 @@ def Jobs():
                 if (container.attrs['Config']['Labels']['file'],
                     container.attrs['Config']['Labels']['vent.name']) not in \
                         tool_names:
-                    # TODO figure out a nicer way of getting desired values 
+                    # TODO figure out a nicer way of getting desired values
                     # from containers.attrs.
                     new_file = {}
                     new_file['FileName'] = \
