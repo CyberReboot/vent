@@ -209,7 +209,7 @@ def Jobs():
 
             # multiple tools can run on 1 file. Use a tuple to status check
             tool_names = [(d['FileName'], d['VentPlugin']) 
-                    for d in finished_jobs]
+                        for d in finished_jobs]
 
         for container in c:
             jobs[3] += 1
@@ -224,7 +224,7 @@ def Jobs():
                     # from containers.attrs.
                     new_file = {}
                     new_file['FileName'] = \
-                            container.attrs['Config']['Labels']['file']
+                        container.attrs['Config']['Labels']['file']
                     new_file['VentPlugin'] = \
                         container.attrs['Config']['Labels']['vent.name']
                     new_file['StartedAt'] = \
