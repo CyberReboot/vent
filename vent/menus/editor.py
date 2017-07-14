@@ -5,29 +5,20 @@ class EditorForm(npyscreen.ActionForm):
     """ Form that can be used as a pseudo test editor in npyscreen """
     def __init__(self, *args, **keywords):
         """ Initialize EditorForm objects """
-        self.save = keywords['save_configure']
+        self.next_tool = keywords['next_tool']
         self.tool_name = keywords['tool_name']
         self.branch = keywords['branch']
         self.version = keywords['version']
-        if not keywords['registry_download']:
-            self.next_tool = keywords['next_tool']
-            self.from_registry = keywords['from_registry']
-            # get vent.template settings
-            template = keywords['get_configure'](name=self.tool_name,
-                                                 branch=self.branch,
-                                                 version=self.version)
-            if template[0]:
-                self.config_val = template[1]
-            else:
-                npyscreen.notify_confirm("Couldn't find vent.template for " +
-                                         keywords['tool_name'])
+        template = keywords['get_configure'](name=self.tool_name,
+                                             branch=self.branch,
+                                             version=self.version)
+        if template[0]:
+            self.config_val = template[1]
         else:
-            self.next_tool = None
-            self.from_registry = True
-            # populate editor with known fields of registry image
-            self.config_val = "[info]\n"
-            self.config_val += "name = " + keywords['link_name'] + "\n"
-            self.config_val += "groups = " + keywords['groups'] + "\n"
+            npyscreen.notify_confirm("Couldn't find vent.template for " +
+                                     keywords['tool_name'])
+            self.change_screens()
+        self.save = keywords['save_configure']
         super(EditorForm, self).__init__(*args, **keywords)
 
     def create(self):
@@ -44,13 +35,8 @@ class EditorForm(npyscreen.ActionForm):
 
     def on_ok(self):
         """ Save changes made to vent.template """
-        save_args = {'config_val': self.edit_space.value,
-                     'name': self.tool_name,
-                     'branch': self.branch,
-                     'version': self.version}
-        if self.from_registry:
-            save_args.update({'from_registry': True})
-        self.save(**save_args)
+        self.save(name=self.tool_name, branch=self.branch,
+                  version=self.version, config_val=self.edit_space.value)
         npyscreen.notify_confirm("Done configuring this tool",
                                  title="Configurations saved")
         self.change_screens()
