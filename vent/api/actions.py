@@ -569,9 +569,10 @@ class Action:
             for section in template_dict:
                 return_str += "[" + section + "]\n"
                 for option in template_dict[section]:
-                    return_str += option + " = " + template_dict[section][option] + "\n"
+                    return_str += option + " = "
+                    return_str += template_dict[section][option] + "\n"
                 return_str += "\n"
-            # only one newling at end of file
+            # only one newline at end of file
             status = (True, return_str[:-1])
         else:
             status = (False, "Couldn't get vent.template")

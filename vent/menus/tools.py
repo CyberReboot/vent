@@ -214,7 +214,9 @@ class ToolForm(npyscreen.ActionForm):
                                        'version': t[2],
                                        'repo': repo}
                         options = ['type']
-                        tool, _ = self.action['api_action'].p_helper.constraint_options(constraints, options)
+                        action = self.action['api_action']
+                        tool = action.p_helper.constraint_options(constraints,
+                                                                  options)[0]
                         # only one tool should be returned
                         name = tool.keys()[0]
                         if tool[name]['type'] == 'registry':
