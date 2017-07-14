@@ -208,13 +208,17 @@ def Tools(**kargs):
     return tools[1]
 
 
-def Services(core, vent=True):
+def Services(core, vent=True, **kargs):
     """
     Get services that have exposed ports, expects param core to be True or
     False based on which type of services to return, by default limit to vent
     containers, if not limited by vent containers, then core is ignored.
     """
     services = []
+    path_dirs = PathDirs(**kargs)
+    cfg = os.path.join(path_dirs.meta_dir, "vent.cfg")
+    template = Template(template=cfg)
+    services_uri = template.option("main", "services_uri")
     try:
         d_client = docker.from_env()
         if vent:
@@ -254,7 +258,10 @@ def Services(core, vent=True):
                     uri_creds = ''
                     if uri_user or uri_pw:
                         uri_creds = " - (" + uri_user + uri_pw + " )"
-                    p.append(uri_prefix + ports[port][0]['HostIp'] + ":" +
+                    host = ports[port][0]['HostIp']
+                    if services_uri[0] and host == '0.0.0.0':
+                        host = services_uri[1]
+                    p.append(uri_prefix + host + ":" +
                              ports[port][0]['HostPort'] + uri_postfix +
                              uri_creds)
             if p and name:
