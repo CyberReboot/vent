@@ -7,6 +7,8 @@ def file_queue(path, template_path="/vent/"):
     import docker
     import requests
 
+    from subprocess import check_output, Popen, PIPE
+
     status = (True, None)
     images = []
     configs = {}
@@ -61,37 +63,45 @@ def file_queue(path, template_path="/vent/"):
                     if t_config.has_option('gpu', 'enabled'):
                         enabled = t_config.get('gpu', 'enabled')
                         if enabled == 'yes':
-                            nd_url = 'http://localhost:3476/v1.0/docker/cli'
-                            nd_url += '?dev=0+1\&vol=nvidia_driver'
-                            r = requests.get(nd_url)
-                            if r.status_code == 200:
-                                options = r.text.split()
-                                for option in options:
-                                    if option.startswith('--volume-driver='):
-                                        configs[image_name]['volume_driver'] = option.split("=", 1)[1]
-                                    elif option.startswith('--volume='):
-                                        vol = option.split("=", 1)[1].split(":")
-                                        if 'volumes' in configs[image_name]:
-                                            # !! TODO handle if volumes is a list
-                                            configs[image_name]['volumes'][vol[0]] = {'bind': vol[1],
-                                                                                      'mode': vol[2]}
+                            route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
+                            h = check_output(('awk', '/default/ {print $3}'),
+                                             stdin=route.stdout)
+                            route.wait()
+                            host = h.strip()
+                            nd_url = 'http://' + host + ':3476/v1.0/docker/cli'
+                            params = {'vol': 'nvidia_driver'}
+                            try:
+                                r = requests.get(nd_url, params=params)
+                                if r.status_code == 200:
+                                    options = r.text.split()
+                                    for option in options:
+                                        if option.startswith('--volume-driver='):
+                                            configs[image_name]['volume_driver'] = option.split("=", 1)[1]
+                                        elif option.startswith('--volume='):
+                                            vol = option.split("=", 1)[1].split(":")
+                                            if 'volumes' in configs[image_name]:
+                                                # !! TODO handle if volumes is a list
+                                                configs[image_name]['volumes'][vol[0]] = {'bind': vol[1],
+                                                                                          'mode': vol[2]}
+                                            else:
+                                                configs[image_name]['volumes'] = {vol[0]:
+                                                                                  {'bind': vol[1],
+                                                                                   'mode': vol[2]}}
+                                        elif option.startswith('--device='):
+                                            dev = option.split("=", 1)[1]
+                                            if 'devices' in configs[image_name]:
+                                                configs[image_name]['devices'].append(dev +
+                                                                                      ":" +
+                                                                                      dev +
+                                                                                      ":rwm")
+                                            else:
+                                                configs[image_name]['devices'] = [dev + ":" + dev + ":rwm"]
                                         else:
-                                            configs[image_name]['volumes'] = {vol[0]:
-                                                                              {'bind': vol[1],
-                                                                               'mode': vol[2]}}
-                                    elif option.startswith('--device='):
-                                        dev = option.split("=", 1)[1]
-                                        if 'devices' in configs[image_name]:
-                                            configs[image_name]['devices'].append(dev +
-                                                                                  ":" +
-                                                                                  dev +
-                                                                                  ":rwm")
-                                        else:
-                                            configs[image_name]['devices'] = [dev + ":" + dev + ":rwm"]
-                                    else:
-                                        # unable to parse option provided by
-                                        # nvidia-docker-plugin
-                                        pass
+                                            # unable to parse option provided by
+                                            # nvidia-docker-plugin
+                                            pass
+                            except Exception as e:  # pragma: no cover
+                                pass
             elif t_type == 'registry':
                 # !! TODO deal with images not from a repo
                 pass
@@ -126,5 +136,4 @@ def file_queue(path, template_path="/vent/"):
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 
-    print(str(status))
     return status
