@@ -7,7 +7,6 @@ import web
 import uuid
 
 
-
 class CreateR:
     """
     This endpoint is for creating a new filter
@@ -15,6 +14,10 @@ class CreateR:
 
     @staticmethod
     def POST():
+        """
+        Send a POST request with id/nic/interval/filter/iters and it will start
+        a container for collection with those specifications
+        """
         web.header('Content-Type', 'application/json')
 
         # verify payload is in the correct format
