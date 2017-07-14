@@ -1,4 +1,3 @@
-import ast
 import datetime
 import docker
 import json
@@ -214,12 +213,12 @@ def Jobs():
         for container in c:
             if 'file' in container.attrs['Config']['Labels']:
                 # make sure the file name nor the tool exists because multiple
-                # tools can run on 1 file. 
-                if (container.attrs['Config']['Labels']['file'], 
+                # tools can run on 1 file.
+                if (container.attrs['Config']['Labels']['file'],
                     container.attrs['Config']['Labels']['vent.name']) not in \
                         tool_names:
-                    # TODO figure out a nicer way of getting desired values from 
-                    # containers.attrs. 
+                    # TODO figure out a nicer way of getting desired values 
+                    # from containers.attrs.
                     new_file = {}
                     new_file['FileName'] = \
                             container.attrs['Config']['Labels']['file']
@@ -232,12 +231,11 @@ def Jobs():
                     new_file['Image'] = \
                         container.attrs['Image'][:12]
 
-                    # create/append a json file with all wanted information 
+                    # create/append a json file with all wanted information
                     with open(manifest, file_status) as outfile:
                         json.dump(new_file, outfile)
                         outfile.write("\n")
 
-        
         # add extra one to account for file that just finished if the file was
         # just created since file_names is processed near the beginning
         if file_status == 'w' and len(file_names) == 1:
@@ -249,11 +247,6 @@ def Jobs():
 
     except Exception as e:  # pragma: no cover
         pass
-
-    # error checking
-    #  with open(manifest, file_status) as outfile:
-    #      outfile.write(str(finished_count))
-
 
     return tuple(jobs)
 
