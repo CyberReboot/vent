@@ -79,8 +79,8 @@ class CreateR:
                       "network_mode": "host",
                       "volumes_from": [socket.gethostname()]}
 
-            cmd = '/tmp/run.sh ' + payload['nic'] + ' ' payload['interval']
-            cmd += ' ' + payload['id'] + ' ' payload['iters'] + ' '
+            cmd = '/tmp/run.sh ' + payload['nic'] + ' ' + payload['interval']
+            cmd += ' ' + payload['id'] + ' ' + payload['iters'] + ' '
             cmd += payload['filter']
             container_id = c.containers.run(image='cyberreboot/vent-ncapture',
                                             command=cmd, detach=True, **tool_d)
