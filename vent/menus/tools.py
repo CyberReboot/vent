@@ -68,10 +68,7 @@ class ToolForm(npyscreen.ActionForm):
                 ncore_list = []
 
                 # splice the repo names for processing
-                if (repo.startswith("http")):
-                    repo_name = repo.rsplit("/", 2)[1:]
-                else:
-                    repo_name = repo.split("/")
+                repo_name = repo.rsplit("/", 2)[1:]
 
                 # figure out what tools in the repo are core and what are not
                 for tool in inventory['tools']:
@@ -209,29 +206,13 @@ class ToolForm(npyscreen.ActionForm):
                         if status[0]:
                             tool_d.update(status[1])
                     elif self.action['action_name'] == 'configure':
-                        constraints = {'name': t[0],
-                                       'branch': t[1],
-                                       'version': t[2],
-                                       'repo': repo}
-                        options = ['type']
-                        action = self.action['api_action']
-                        tool = action.p_helper.constraint_options(constraints,
-                                                                  options)[0]
-                        # only one tool should be returned
-                        name = tool.keys()[0]
-                        if tool[name]['type'] == 'registry':
-                            registry_image = True
-                        else:
-                            registry_image = False
                         kargs = {'name': 'Configure ' + t[0],
                                  'tool_name': t[0],
                                  'branch': t[1],
                                  'version': t[2],
                                  'next_tool': None,
                                  'get_configure': self.action['action_object1'],
-                                 'save_configure': self.action['action_object2'],
-                                 'from_registry': registry_image,
-                                 'registry_download': False}
+                                 'save_configure': self.action['action_object2']}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
                         self.parentApp.addForm("EDITOR" + t[0], EditorForm,
