@@ -208,11 +208,12 @@ def Jobs():
             file_names = [d['FileName'] for d in finished_jobs]
 
             # multiple tools can run on 1 file. Use a tuple to status check
-            tool_names = [(d['FileName'], d['VentPlugin']) \
-                for d in finished_jobs]
-        
+            tool_names = [(d['FileName'], d['VentPlugin']) 
+                    for d in finished_jobs]
+
         for container in c:
             jobs[3] += 1
+
             if 'file' in container.attrs['Config']['Labels']:
                 # make sure the file name nor the tool exists because multiple
                 # tools can run on 1 file.
