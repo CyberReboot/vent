@@ -212,6 +212,7 @@ def Jobs():
                 for d in finished_jobs]
         
         for container in c:
+            jobs[3] += 1
             if 'file' in container.attrs['Config']['Labels']:
                 # make sure the file name nor the tool exists because multiple
                 # tools can run on 1 file.
