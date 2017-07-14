@@ -1,0 +1,10 @@
+[info]
+name = NetworkTap
+groups = core,collection,files,network
+
+[settings]
+priority = 11
+
+[docker]
+volumes = {'/var/run/docker.sock': {'bind': '/var/run/docker.sock', 'mode': 'rw'}}
+links = {"Redis":"redis"}
