@@ -5,6 +5,7 @@ import time
 from vent.api.actions import Action
 from vent.api.plugin_helpers import PluginHelper
 from vent.menus.add_options import AddOptionsForm
+from vent.menus.editor import EditorForm
 
 
 class AddForm(npyscreen.ActionForm):
@@ -94,7 +95,17 @@ class AddForm(npyscreen.ActionForm):
                                            'groups': self.groups.value})
             popup(thr, 'image', 'Please wait, adding image...')
             npyscreen.notify_confirm('Done adding image.', title='Added image')
-            self.quit()
+            editor_args = {'save_configure': api_action.save_configure,
+                           'registry_download': True,
+                           'link_name': self.link_name.value,
+                           'groups': self.groups.value,
+                           'tool_name': self.image.value,
+                           'branch': '',
+                           'version': self.tag.value}
+            self.parentApp.addForm("CONFIGUREIMAGE", EditorForm,
+                                   name="Specify vent.template settings for "
+                                   "image pulled (optional)", **editor_args)
+            self.parentApp.change_form("CONFIGUREIMAGE")
         elif self.image.value:
             npyscreen.notify_confirm("A name needs to be supplied for "
                                      "the image being added!",
