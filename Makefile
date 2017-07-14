@@ -16,11 +16,11 @@ gpu: build
 		docker pull nvidia/cuda:8.0-runtime; \
 		if [ "${OS}" = "Linux" ] ; then \
 			if [ -f /etc/redhat-release ] ; then \
-				sudo sed -i '/ExecStart=/usr/bin/nvidia-docker-plugin -s $$SOCK_DIR/c\ExecStart=/usr/bin/nvidia-docker-plugin -s $$SOCK_DIR -l :3476' /usr/lib/systemd/system/nvidia-docker.service; \
+				sudo sed -i '/ExecStart=\/usr\/bin\/nvidia-docker-plugin -s $$SOCK_DIR/c\ExecStart=\/usr\/bin\/nvidia-docker-plugin -s $$SOCK_DIR -l :3476' /usr/lib/systemd/system/nvidia-docker.service; \
 				sudo systemctl daemon-reload; \
 				sudo systemctl start nvidia-docker; \
 			elif [ -f /etc/debian_version ] ; then \
-				sudo sed -i '/ExecStart=/usr/bin/nvidia-docker-plugin -s $$SOCK_DIR/c\ExecStart=/usr/bin/nvidia-docker-plugin -s $$SOCK_DIR -l :3476' /lib/systemd/system/nvidia-docker.service; \
+				sudo sed -i '/ExecStart=\/usr\/bin\/nvidia-docker-plugin -s $$SOCK_DIR/c\ExecStart=\/usr\/bin\/nvidia-docker-plugin -s $$SOCK_DIR -l :3476' /lib/systemd/system/nvidia-docker.service; \
 				sudo systemctl daemon-reload; \
 				sudo systemctl restart nvidia-docker; \
 			fi \
@@ -31,13 +31,13 @@ gpu: build
 			if [ -f /etc/redhat-release ] ; then \
 				wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker-1.0.1-1.x86_64.rpm && \
 				sudo rpm -i /tmp/nvidia-docker*.rpm && rm /tmp/nvidia-docker*.rpm; \
-				sudo sed -i '/ExecStart=/usr/bin/nvidia-docker-plugin -s $$SOCK_DIR/c\ExecStart=/usr/bin/nvidia-docker-plugin -s $$SOCK_DIR -l :3476' /usr/lib/systemd/system/nvidia-docker.service; \
+				sudo sed -i '/ExecStart=\/usr\/bin\/nvidia-docker-plugin -s $$SOCK_DIR/c\ExecStart=\/usr\/bin\/nvidia-docker-plugin -s $$SOCK_DIR -l :3476' /usr/lib/systemd/system/nvidia-docker.service; \
 				sudo systemctl daemon-reload; \
 				sudo systemctl start nvidia-docker; \
 			elif [ -f /etc/debian_version ] ; then \
 				wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb && \
 				sudo dpkg -i /tmp/nvidia-docker*.deb && rm /tmp/nvidia-docker*.deb; \
-				sudo sed -i '/ExecStart=/usr/bin/nvidia-docker-plugin -s $$SOCK_DIR/c\ExecStart=/usr/bin/nvidia-docker-plugin -s $$SOCK_DIR -l :3476' /lib/systemd/system/nvidia-docker.service; \
+				sudo sed -i '/ExecStart=\/usr\/bin\/nvidia-docker-plugin -s $$SOCK_DIR/c\ExecStart=\/usr\/bin\/nvidia-docker-plugin -s $$SOCK_DIR -l :3476' /lib/systemd/system/nvidia-docker.service; \
 				sudo systemctl daemon-reload; \
 				sudo systemctl restart nvidia-docker; \
 			else \
