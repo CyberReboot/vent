@@ -547,22 +547,32 @@ class Action:
                       enabled="yes",
                       branch="master",
                       version="HEAD"):
-        """ Get the vent.template file for a given tool """
+        """
+        Get the vent.template settings for a given tool by looking at the
+        plugin_manifest
+        """
         self.logger.info("Starting: get_configure")
         constraints = locals()
         status = (True, None)
-        options = ['path']
+        # all possible vent.template sections
+        options = ['info', 'service', 'settings', 'docker']
         tools = self.p_helper.constraint_options(constraints, options)[0]
         if tools:
-            for tool in tools:
-                template_path = os.path.join(tools[tool]['path'],
-                                             'vent.template')
-                try:
-                    with open(template_path) as f:
-                        status = (True, f.read())
-                except Exception as e:
-                    status = (False, str(e))
-                    self.logger.error(str(e))
+            # should only be one tool
+            tool = tools.keys()[0]
+            # load all vent.template options into dict
+            template_dict = {}
+            for section in tools[tool]:
+                template_dict[section] = json.loads(tools[tool][section])
+            # display all those options as they would in vent.template
+            return_str = ""
+            for section in template_dict:
+                return_str += "[" + section + "]\n"
+                for option in template_dict[section]:
+                    return_str += option + " = " + template_dict[section][option] + "\n"
+                return_str += "\n"
+            # only one newling at end of file
+            status = (True, return_str[:-1])
         else:
             status = (False, "Couldn't get vent.template")
         self.logger.info("Status of get_configure: " + str(status[0]))
@@ -640,7 +650,7 @@ class Action:
             except Exception as e:
                 self.logger.error(str(e))
                 status = (False, str(e))
-        # close os file handle
+        # close os file handle and remove temp file
         if from_registry:
             try:
                 os.close(fd)

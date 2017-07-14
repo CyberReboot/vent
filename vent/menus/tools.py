@@ -209,6 +209,18 @@ class ToolForm(npyscreen.ActionForm):
                         if status[0]:
                             tool_d.update(status[1])
                     elif self.action['action_name'] == 'configure':
+                        constraints = {'name': t[0],
+                                       'branch': t[1],
+                                       'version': t[2],
+                                       'repo': repo}
+                        options = ['type']
+                        tool, _ = self.action['api_action'].p_helper.constraint_options(constraints, options)
+                        # only one tool should be returned
+                        name = tool.keys()[0]
+                        if tool[name]['type'] == 'registry':
+                            registry_image = True
+                        else:
+                            registry_image = False
                         kargs = {'name': 'Configure ' + t[0],
                                  'tool_name': t[0],
                                  'branch': t[1],
@@ -216,7 +228,8 @@ class ToolForm(npyscreen.ActionForm):
                                  'next_tool': None,
                                  'get_configure': self.action['action_object1'],
                                  'save_configure': self.action['action_object2'],
-                                 'from_registry': False}
+                                 'from_registry': registry_image,
+                                 'registry_download': False}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
                         self.parentApp.addForm("EDITOR" + t[0], EditorForm,

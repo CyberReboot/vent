@@ -96,7 +96,7 @@ class AddForm(npyscreen.ActionForm):
             popup(thr, 'image', 'Please wait, adding image...')
             npyscreen.notify_confirm('Done adding image.', title='Added image')
             editor_args = {'save_configure': api_action.save_configure,
-                           'from_registry': True,
+                           'registry_download': True,
                            'tool_name': self.image.value,
                            'version': self.tag.value}
             self.parentApp.addForm("CONFIGUREIMAGE", EditorForm,
