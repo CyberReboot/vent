@@ -319,7 +319,7 @@ class PluginHelper:
                     else:
                         tool_d[c_name]['volumes'] = {self.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
                     if files[0]:
-                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
+                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'rw'}
             else:
                 tool_d[c_name]['log_config'] = log_config
 
