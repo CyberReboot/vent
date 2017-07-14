@@ -259,6 +259,11 @@ class PluginHelper:
                 for option in status[1]:
                     tool_d[c_name]['labels'][option[0]] = option[1]
 
+            # get network mappings
+            if 'network_mode' in tool_d[c_name]:
+                # !! TODO check if mappings are available in the host config
+                pass
+
             # check for gpu settings
             status = vent_template.section('gpu')
             self.logger.info(status)
