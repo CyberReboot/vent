@@ -11,6 +11,8 @@ class EditorForm(npyscreen.ActionForm):
         self.version = keywords['version']
         if not keywords['registry_download']:
             self.next_tool = keywords['next_tool']
+            self.from_registry = keywords['from_registry']
+            # get vent.template settings
             template = keywords['get_configure'](name=self.tool_name,
                                                  branch=self.branch,
                                                  version=self.version)
@@ -19,10 +21,13 @@ class EditorForm(npyscreen.ActionForm):
             else:
                 npyscreen.notify_confirm("Couldn't find vent.template for " +
                                          keywords['tool_name'])
-            self.from_registry = keywords['from_registry']
         else:
             self.next_tool = None
             self.from_registry = True
+            # populate editor with known fields of registry image
+            self.config_val = "[info]\n"
+            self.config_val += "name = " + keywords['link_name'] + "\n"
+            self.config_val += "groups = " + keywords['groups'] + "\n"
         super(EditorForm, self).__init__(*args, **keywords)
 
     def create(self):
