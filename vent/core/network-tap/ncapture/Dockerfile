@@ -8,7 +8,7 @@ RUN apk add --update \
 
 VOLUME /tmp
 WORKDIR /tmp
-ADD run.sh run.sh
+COPY run.sh run.sh
 
 LABEL vent="" \
       vent.name="file-drop" \

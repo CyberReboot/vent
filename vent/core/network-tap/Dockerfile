@@ -6,7 +6,7 @@ RUN apk add --update \
     py-pip \
     && rm -rf /var/cache/apk/*
 
-ADD . /ncontrol
+COPY . /ncontrol
 RUN pip install -r /ncontrol/requirements.txt
 WORKDIR /ncontrol/ncontrol
 RUN pip install -r requirements.txt

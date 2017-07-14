@@ -1,9 +1,7 @@
 #!/usr/bin/python
-import ast
-
 import ncontrol
-import pytest
 import web
+
 from paste.fixture import TestApp
 
 

@@ -25,11 +25,11 @@ class CreateR:
         payload = {}
         try:
             payload = ast.literal_eval(data)
-            if type(payload) != dict:
+            if isinstance(payload, dict):
                 payload = ast.literal_eval(json.loads(data))
-        except:
+        except Exception as e:
             # !! TODO parse out url parms...
-            return 'malformed json body'
+            return 'malformed json body: ' + str(e)
 
         # payload should have the following fields:
         # - id
@@ -60,15 +60,15 @@ class CreateR:
         r = None
         try:
             r = redis.StrictRedis(host='redis', port=6379, db=0)
-        except:
-            return 'unable to connect to redis'
+        except Exception as e:
+            return 'unable to connect to redis because: ' + str(e)
 
         # connect to docker
         c = None
         try:
             c = docker.from_env()
-        except:
-            return 'unable to connect to docker'
+        except Exception as e:
+            return 'unable to connect to docker because: ' + str(e)
 
         # store payload in redis
         if r:
@@ -85,7 +85,11 @@ class CreateR:
             cmd = '/tmp/run.sh ' + payload['nic'] + ' ' + payload['interval']
             cmd += ' ' + payload['id'] + ' ' + payload['iters'] + ' '
             cmd += payload['filter']
-            container_id = c.containers.run(image='cyberreboot/vent-ncapture',
-                                            command=cmd, detach=True, **tool_d)
+            try:
+                container_id = c.containers.run(image='cyberreboot/vent-ncapture',
+                                                command=cmd, detach=True, **tool_d)
+            except Exception as e:
+                return 'unable to start container because: ' + str(e)
 
-        return 'successfully created and started filter ' + str(payload['id'])
+        return ('successfully created and started filter ' +
+                str(payload['id']) + ' on container: ' + str(container_id))
