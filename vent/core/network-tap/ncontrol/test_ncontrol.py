@@ -12,57 +12,60 @@ def start_web_app():
     nf_inst = ncontrol.NControl()
     urls = nf_inst.urls()
     app = web.application(urls, globals())
-    testApp = TestApp(app.wsgifunc())
-    return testApp
+    test_app = TestApp(app.wsgifunc())
+    return test_app
 
 
 def test_start_r():
     """ tests the restful endpoint: start """
     # get web app
-    testApp = start_web_app()
+    test_app = start_web_app()
 
     # test start
-    r = testApp.get('/start/foo')
+    r = test_app.get('/start/foo')
     assert r.status == 200
 
 
 def test_stop_r():
     """ tests the restful endpoint: stop """
     # get web app
-    testApp = start_web_app()
+    test_app = start_web_app()
 
     # test stop
-    r = testApp.get('/stop/foo')
+    r = test_app.get('/stop/foo')
     assert r.status == 200
 
 
 def test_create_r():
     """ tests the restful endpoint: create """
     # get web app
-    testApp = start_web_app()
+    test_app = start_web_app()
 
     # test create
-    r = testApp.post('/create', params={'id': 'foo', 'interval': '60', 'filter': '',
-                                        'nic': 'eth1'}, headers={'Content-Type': 'application/json'})
+    r = test_app.post('/create', params={'id': 'foo',
+                                         'interval': '60',
+                                         'filter': '',
+                                         'nic': 'eth1'},
+                      headers={'Content-Type': 'application/json'})
     assert r.status == 200
-    r = testApp.post('/create', params={})
+    r = test_app.post('/create', params={})
     assert r.status == 200
-    r = testApp.post('/create', params={'nic': 'eth1'})
+    r = test_app.post('/create', params={'nic': 'eth1'})
     assert r.status == 200
-    r = testApp.post('/create', params={'nic': 'eth1', 'id': 'foo'})
+    r = test_app.post('/create', params={'nic': 'eth1', 'id': 'foo'})
     assert r.status == 200
-    r = testApp.post(
+    r = test_app.post(
         '/create', params={'nic': 'eth1', 'id': 'foo', 'interval': '60'})
     assert r.status == 200
-    r = testApp.post('/create', params='{}')
+    r = test_app.post('/create', params='{}')
     assert r.status == 200
 
 
 def test_filters_r():
     """ tests the restful endpoint: filters """
     # get web app
-    testApp = start_web_app()
+    test_app = start_web_app()
 
     # test filters
-    r = testApp.get('/filters')
+    r = test_app.get('/filters')
     assert r.status == 200
