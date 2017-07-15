@@ -6,9 +6,8 @@ RUN apk add --update \
     py-pip \
     && rm -rf /var/cache/apk/*
 
-COPY . /ncontrol
-RUN pip install -r /ncontrol/requirements.txt
-WORKDIR /ncontrol/ncontrol
+COPY . /network-tap
+WORKDIR /network-tap/ncontrol
 RUN pip install -r requirements.txt
 
 EXPOSE 8080
