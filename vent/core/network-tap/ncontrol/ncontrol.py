@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import logging
 import sys
-
 import web
+
 from rest.create import CreateR
 from rest.filters import FiltersR
 from rest.start import StartR
