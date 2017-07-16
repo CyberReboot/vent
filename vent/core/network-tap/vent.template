@@ -2,6 +2,9 @@
 name = NetworkTap
 groups = core,collection,files,network
 
+[service]
+uri_prefix = http://
+
 [settings]
 priority = 11
 

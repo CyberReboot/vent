@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import docker
 import logging
 import sys
 import web
@@ -24,6 +25,8 @@ class NControlServer(object):
             return object.__new__(*args, **kw)
 
     def __init__(self, port=8080, host='0.0.0.0'):  # pragma: no cover
+        d_client = docker.from_env()
+        d_client.images.pull('cyberreboot/vent-ncapture', tag='master')
         nf_inst = NControl()
         urls = nf_inst.urls()
         app = web.application(urls, globals())

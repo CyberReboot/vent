@@ -75,7 +75,7 @@ class CreateR:
         # spin up container with payload specifications
         if c:
             # TODO read from template
-            tool_d = {"auto_remove": True,
+            tool_d = {"remove": True,
                       "network_mode": "host",
                       "volumes_from": [socket.gethostname()]}
 
