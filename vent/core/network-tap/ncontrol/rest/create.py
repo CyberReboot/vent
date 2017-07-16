@@ -1,6 +1,5 @@
 import ast
 import docker
-import json
 import redis
 import socket
 import web
@@ -25,11 +24,9 @@ class CreateR:
         payload = {}
         try:
             payload = ast.literal_eval(data)
-            if isinstance(payload, dict):
-                payload = ast.literal_eval(json.loads(data))
         except Exception as e:
             # !! TODO parse out url parms...
-            return 'malformed json body: ' + str(e)
+            return 'malformed payload: ' + str(e)
 
         # payload should have the following fields:
         # - id
@@ -86,7 +83,7 @@ class CreateR:
             cmd += ' ' + payload['id'] + ' ' + payload['iters'] + ' '
             cmd += payload['filter']
             try:
-                container_id = c.containers.run(image='cyberreboot/vent-ncapture',
+                container_id = c.containers.run(image='cyberreboot/vent-ncapture:master',
                                                 command=cmd, detach=True, **tool_d)
             except Exception as e:
                 return 'unable to start container because: ' + str(e)

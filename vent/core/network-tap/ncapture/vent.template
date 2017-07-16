@@ -3,6 +3,6 @@ name = NetworkCapture
 groups = collection,network
 
 [docker]
-auto_remove = True
+remove = True
 network_mode = host
 volumes_from = ['NetworkTap']
