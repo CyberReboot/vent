@@ -368,7 +368,8 @@ class MenuHelper:
                     else:
                         image_check = not core_check
                     if image_check:
-                        if 'vent.name' in image.attrs['Labels']:
+                        if ('vent.name' in image.attrs['Labels'] and
+                            'hidden' not in image.attrs['Labels']['vent.groups']):
                             all_tools['built'].append(image.attrs['Labels']['vent.name'])
                 except Exception as err:  # pragma: no cover
                     pass
@@ -383,7 +384,8 @@ class MenuHelper:
                     else:
                         container_check = not core_check
                     if container_check:
-                        if 'vent.name' in container.attrs['Config']['Labels']:
+                        if ('vent.name' in container.attrs['Config']['Labels'] and
+                            'hidden' not in image.attrs['Labels']['vent.groups']):
                             all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'])
                 except Exception as err:  # pragma: no cover
                     pass
