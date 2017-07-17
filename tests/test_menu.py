@@ -112,7 +112,7 @@ def test_menu():
     cmds += [TAB, TAB, TAB, BACKSPACE, BACKSPACE, BACKSPACE, BACKSPACE,
              BACKSPACE, BACKSPACE, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, ENTER,
              ENTER, CTRL_Q]
-    run_menu(cmd)
+    run_menu(cmds)
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, 'alpine', TAB, 'alpine',
               TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, TAB, TAB, ENTER,
               ENTER, ENTER])
