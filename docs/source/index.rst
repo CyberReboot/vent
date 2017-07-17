@@ -5,6 +5,7 @@
 
 Vent Documentation
 ================================
+.. parsed-literal::
 
           'b      *
            '$    #.
