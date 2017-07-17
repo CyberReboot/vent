@@ -3,32 +3,6 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Vent Documentation
-================================
-
-::
->        '.,
->          'b      *
->           '$    #.
->            $:   #:
->            *#  @):
->            :@,@):   ,.**:'
->  ,         :@@*: ..**'
->   '#o.    .:(@'.@*"'
->      'bq,..:,@@*'   ,*
->      ,p$q8,:@)'  .p*'
->     '    '@@Pp@@*'
->           Y7'.'
->          :@):.
->         .:@:'.
->       .::(@:.
->                   _
->  __   _____ _ __ | |_
->  \ \ / / _ \ '_ \| __|
->   \ V /  __/ | | | |_
->    \_/ \___|_| |_|\__|
-
-
 Overview
 ====
 Vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, Vent serves as a user-friendly platform to build custom `plugins` on to perform user-defined processing on incoming network data. Vent supports any filetype, but only processes filetypes based on the types of plugins installed for that instance of vent.
