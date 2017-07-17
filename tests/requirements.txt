@@ -10,3 +10,4 @@ redis
 rq
 watchdog
 web.py
+sphinx
