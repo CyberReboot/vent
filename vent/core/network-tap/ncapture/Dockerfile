@@ -12,6 +12,6 @@ COPY run.sh run.sh
 
 LABEL vent="" \
       vent.name="file-drop" \
-      vent.groups="collection,network"
+      vent.groups="collection,hidden,network"
 
 CMD /tmp/run.sh
