@@ -6,7 +6,7 @@ import shlex
 from ast import literal_eval
 from os import chdir, getcwd, walk
 from os.path import join
-from subprocess import check_output, STDOUT
+from subprocess import check_output, Popen, PIPE, STDOUT
 
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
@@ -259,6 +259,11 @@ class PluginHelper:
                 for option in status[1]:
                     tool_d[c_name]['labels'][option[0]] = option[1]
 
+            # get network mappings
+            if 'network_mode' in tool_d[c_name]:
+                # !! TODO check if mappings are available in the host config
+                pass
+
             # check for gpu settings
             status = vent_template.section('gpu')
             self.logger.info(status)
@@ -314,7 +319,7 @@ class PluginHelper:
                     else:
                         tool_d[c_name]['volumes'] = {self.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
                     if files[0]:
-                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
+                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'rw'}
             else:
                 tool_d[c_name]['log_config'] = log_config
 
@@ -461,9 +466,15 @@ class PluginHelper:
                     #      otherwise queue it up until it's
                     #      available
                     # !! TODO check for device settings in vent.template
-                    nd_url = 'http://localhost:3476/v1.0/docker/cli'
-                    nd_url += '?dev=0+1\&vol=nvidia_driver'
-                    r = requests.get(nd_url)
+                    route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
+                    h = check_output(('awk', '/default/ {print $3}'),
+                                     stdin=route.stdout)
+                    route.wait()
+                    host = h.strip()
+                    nd_url = 'http://' + host + ':3476/v1.0/docker/cli'
+                    params = {'vol': 'nvidia_driver'}
+
+                    r = requests.get(nd_url, params=params)
                     if r.status_code == 200:
                         options = r.text.split()
                         for option in options:

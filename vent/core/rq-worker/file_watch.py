@@ -63,7 +63,6 @@ def file_queue(path, template_path="/vent/"):
                     if t_config.has_option('gpu', 'enabled'):
                         enabled = t_config.get('gpu', 'enabled')
                         if enabled == 'yes':
-                            cmd = "/sbin/ip route"
                             route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
                             h = check_output(('awk', '/default/ {print $3}'),
                                              stdin=route.stdout)

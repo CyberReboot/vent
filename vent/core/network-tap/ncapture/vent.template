@@ -1,0 +1,7 @@
+[info]
+name = NetworkCapture
+groups = collection,hidden,network
+
+[docker]
+network_mode = host
+volumes_from = ['NetworkTap']
