@@ -60,6 +60,12 @@ def test_menu():
               ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
+              TAB, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
+              TAB, TAB, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
@@ -91,6 +97,7 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'c', 't', TAB, ENTER, ENTER, ENTER])
 
     # go through the plugins menus
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
