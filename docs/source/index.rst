@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Overview
-====
+========
 Vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, Vent serves as a user-friendly platform to build custom ``plugins`` on to perform user-defined processing on incoming network data. Vent supports any filetype, but only processes filetypes based on the types of plugins installed for that instance of vent.
 
 Simply create your ``plugins``, point Vent to them, install them, and drop a file in Vent to begin processing!
@@ -41,7 +41,7 @@ Once installed, it's simply::
 
 
 Contributing to Vent
-====
+====================
 
 Want to contribute?  Awesome!  Issue a pull request or see more `details here`_.
 
@@ -49,14 +49,6 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 
 .. _details here: https://github.com/CyberReboot/vent/blob/master/CONTRIBUTING.md
 .. _this: https://media.readthedocs.org/pdf/npyscreen/latest/npyscreen.pdf
-
-
-
-
-
-
-
-
 
 
 .. toctree::
