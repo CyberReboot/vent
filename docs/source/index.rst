@@ -17,19 +17,21 @@ Welcome to Vent's documentation!
    :maxdepth: 2
    :caption: Core
 
-   vent.core.rst
+   vent.core
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Helper Functions
 
-   vent.helper.rst
+   vent.helpers
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Menu Functions
+
+   vent.menus
 
 Indices and tables
 ==================
