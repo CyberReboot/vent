@@ -8,6 +8,9 @@ build: clean
 	docker version || true
 	pip -V
 	pip install -r tests/requirements.txt
+	cd docs/
+	sphinx-apidoc -f -o source/ ../vent
+	cd ..
 	python setup.py install
 
 gpu: build
