@@ -8,10 +8,28 @@ Welcome to Vent's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Api Functions
 
-   modules
+   vent.api
 
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Core
+
+   vent.core.rst
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Helper Functions
+
+   vent.helper.rst
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Menu Functions
 
 Indices and tables
 ==================
