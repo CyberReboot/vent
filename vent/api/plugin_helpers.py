@@ -264,7 +264,8 @@ class PluginHelper:
                     for option in options_dict:
                         tool_d[c_name]['labels'][option] = options_dict[option]
                 except Exception as e:
-                    self.logger.error("unable to store service options for docker: " + str(e))
+                    self.logger.error("unable to store service options for "
+                                      "docker: " + str(e))
 
             # get network mappings
             if 'network_mode' in tool_d[c_name]:
@@ -280,7 +281,8 @@ class PluginHelper:
                     for option in options_dict:
                         tool_d[c_name]['labels']['gpu.'+option] = options_dict[option]
                 except Exception as e:
-                    self.logger.error("unable to store gpu options for docker: " + str(e))
+                    self.logger.error("unable to store gpu options for "
+                                      "docker: " + str(e))
 
             # get temporary name for links, etc.
             plugin_c = Template(template=self.manifest)
@@ -344,7 +346,8 @@ class PluginHelper:
                         if option == 'priority':
                             tool_d[c_name]['labels']['vent.priority'] = options_dict[option]
                 except Exception as e:
-                    self.logger.error("unable to store settings options for docker " + str(e))
+                    self.logger.error("unable to store settings options "
+                                      "for docker " + str(e))
 
             # only start tools that have been built
             if s[section]['built'] != 'yes':

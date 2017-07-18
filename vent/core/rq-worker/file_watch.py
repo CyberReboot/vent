@@ -55,10 +55,10 @@ def file_queue(path, template_path="/vent/"):
                     for option in options_dict:
                         if option == 'ext_types':
                             ext_types = options_dict[option].split(',')
-                                for ext_type in ext_types:
-                                    if path.endswith(ext_type):
-                                        images.append(image_name)
-                                        configs[image_name] = {}
+                            for ext_type in ext_types:
+                                if path.endswith(ext_type):
+                                    images.append(image_name)
+                                    configs[image_name] = {}
                 except Exception as e:
                     pass
             if config.has_option(section, 'gpu') and image_name in configs:
