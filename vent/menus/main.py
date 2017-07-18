@@ -7,6 +7,8 @@ from docker.errors import DockerException
 from npyscreen import notify_confirm
 from threading import Thread
 
+from vent.helpers.paths import PathDirs
+
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Containers
@@ -350,6 +352,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Cpu())
         self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
                                  labelColor='DEFAULT', value=Gpu()[1])
+        self.location = self.add(npyscreen.TitleFixedText, 
+                                 name='.vent:',
+                                 value=PathDirs().meta_dir,
+                                 labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
@@ -367,6 +373,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                   " 0 completed jobs", labelColor='DEFAULT')
         self.multifield1 = self.add(npyscreen.MultiLineEdit, max_height=22,
                                     editable=False, value="""
+
 
             '.,
               'b      *
