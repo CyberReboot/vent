@@ -263,7 +263,7 @@ class PluginHelper:
                     options_dict = json.loads(status[1])
                     for option in options_dict:
                         tool_d[c_name]['labels'][option] = options_dict[option]
-                except Exception as e:
+                except Exception as e:   # pragma: no cover
                     self.logger.error("unable to store service options for "
                                       "docker: " + str(e))
 
@@ -280,7 +280,7 @@ class PluginHelper:
                     options_dict = json.loads(status[1])
                     for option in options_dict:
                         tool_d[c_name]['labels']['gpu.'+option] = options_dict[option]
-                except Exception as e:
+                except Exception as e:   # pragma: no cover
                     self.logger.error("unable to store gpu options for "
                                       "docker: " + str(e))
 
@@ -345,7 +345,7 @@ class PluginHelper:
                     for option in options_dict:
                         if option == 'priority':
                             tool_d[c_name]['labels']['vent.priority'] = options_dict[option]
-                except Exception as e:
+                except Exception as e:   # pragma: no cover
                     self.logger.error("unable to store settings options "
                                       "for docker " + str(e))
 
