@@ -38,7 +38,6 @@ def file_queue(path, template_path="/vent/"):
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         for section in sections:
-            # update to read from plugin_manifest
             image_name = config.get(section, 'image_name')
             # doesn't matter if it's a repository or registry because both in manifest
             if config.has_option(section, 'service'):
@@ -47,8 +46,8 @@ def file_queue(path, template_path="/vent/"):
                     for option in options_dict:
                         value = options_dict[option]
                         labels[option] = value
-                except Exception as e:
-                    pass
+                except Exception as e:   # pragma: no cover
+                    status = (False, str(e))
             if config.has_option(section, 'settings'):
                 try:
                     options_dict = json.loads(config.get(section, 'settings'))
@@ -59,8 +58,8 @@ def file_queue(path, template_path="/vent/"):
                                 if path.endswith(ext_type):
                                     images.append(image_name)
                                     configs[image_name] = {}
-                except Exception as e:
-                    pass
+                except Exception as e:   # pragma: no cover
+                    status = (False, str(e))
             if config.has_option(section, 'gpu') and image_name in configs:
                 try:
                     options_dict = json.loads(config.get(section, 'gpu'))
@@ -105,9 +104,9 @@ def file_queue(path, template_path="/vent/"):
                                             # nvidia-docker-plugin
                                             pass
                             except Exception as e:  # pragma: no cover
-                                pass
-                except Exception as e:
-                    pass
+                                status = (False, str(e))
+                except Exception as e:   # pragma: no cover
+                    status = (False, str(e))
 
         # TODO add connections to syslog, labels, and file path etc.
         # TODO get syslog address rather than hardcode
@@ -120,22 +119,23 @@ def file_queue(path, template_path="/vent/"):
         volumes = {path: {'bind': path, 'mode': 'ro'}}
 
         # start containers
-        for image in images:
-            # TODO check for availability of gpu(s),
-            #      otherwise queue it up until it's
-            #      available
-            if 'volumes' in configs[image]:
-                for volume in volumes:
-                    configs[image]['volumes'][volume] = volumes[volume]
-            else:
-                configs[image]['volumes'] = volumes
-            d_client.containers.run(image=image,
-                                    command=path,
-                                    labels=labels,
-                                    detach=True,
-                                    log_config=log_config,
-                                    **configs[image])
-        status = (True, images)
+        if status[0]:
+            for image in images:
+                # TODO check for availability of gpu(s),
+                #      otherwise queue it up until it's
+                #      available
+                if 'volumes' in configs[image]:
+                    for volume in volumes:
+                        configs[image]['volumes'][volume] = volumes[volume]
+                else:
+                    configs[image]['volumes'] = volumes
+                d_client.containers.run(image=image,
+                                        command=path,
+                                        labels=labels,
+                                        detach=True,
+                                        log_config=log_config,
+                                        **configs[image])
+            status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 
