@@ -259,9 +259,12 @@ class PluginHelper:
             status = manifest.option(section, 'service')
             self.logger.info(status)
             if status[0]:
-                options_dict = json.loads(status[1])
-                for option in options_dict:
-                    tool_d[c_name]['labels'][option] = options_dict[option]
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        tool_d[c_name]['labels'][option] = options_dict[option]
+                except Exception as e:
+                    self.logger.error("unable to store service options for docker: " + str(e))
 
             # get network mappings
             if 'network_mode' in tool_d[c_name]:
@@ -272,9 +275,12 @@ class PluginHelper:
             status = manifest.option(section, 'gpu')
             self.logger.info(status)
             if status[0]:
-                options_dict = json.loads(status[1])
-                for option in options_dict:
-                    tool_d[c_name]['labels']['gpu.'+option] = options_dict[option]
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        tool_d[c_name]['labels']['gpu.'+option] = options_dict[option]
+                except Exception as e:
+                    self.logger.error("unable to store gpu options for docker: " + str(e))
 
             # get temporary name for links, etc.
             plugin_c = Template(template=self.manifest)
@@ -332,10 +338,13 @@ class PluginHelper:
             status = manifest.option(section, 'settings')
             self.logger.info(status)
             if status[0]:
-                options_dict = json.loads(status[1])
-                for option in options_dict:
-                    if option == 'priority':
-                        tool_d[c_name]['labels']['vent.priority'] = options_dict[option]
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        if option == 'priority':
+                            tool_d[c_name]['labels']['vent.priority'] = options_dict[option]
+                except Exception as e:
+                    self.logger.error("unable to store settings options for docker " + str(e))
 
             # only start tools that have been built
             if s[section]['built'] != 'yes':

@@ -37,6 +37,7 @@ def file_queue(path, template_path="/vent/"):
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         for section in sections:
+            # update to read from plugin_manifest
             image_name = config.get(section, 'image_name')
             t_type = config.get(section, 'type')
             if t_type == 'repository':
@@ -104,6 +105,7 @@ def file_queue(path, template_path="/vent/"):
                                 pass
             elif t_type == 'registry':
                 # !! TODO deal with images not from a repo
+                # Doing this now
                 pass
 
         # TODO add connections to syslog, labels, and file path etc.
