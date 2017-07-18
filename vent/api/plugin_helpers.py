@@ -207,7 +207,6 @@ class PluginHelper:
         tool_d = {}
         for section in s:
             # initialize needed vars
-            template_path = join(s[section]['path'], 'vent.template')
             c_name = s[section]['image_name'].replace(':', '-')
             c_name = c_name.replace('/', '-')
             image_name = s[section]['image_name']
@@ -215,10 +214,12 @@ class PluginHelper:
             # checkout the right version and branch of the repo
             cwd = getcwd()
             self.logger.info("current directory is: " + str(cwd))
-            chdir(join(s[section]['path']))
-            status = self.checkout(branch=branch, version=version)
-            self.logger.info(status)
-            chdir(cwd)
+            # images built from registry won't have path
+            if s[section]['path'] != '':
+                chdir(join(s[section]['path']))
+                status = self.checkout(branch=branch, version=version)
+                self.logger.info(status)
+                chdir(cwd)
 
             # set docker settings for container
             manifest = Template(self.manifest)
