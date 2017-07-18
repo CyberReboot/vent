@@ -8,7 +8,13 @@ build: clean
 	docker version || true
 	pip -V
 	pip install -r tests/requirements.txt
+	rename '-' '_' vent/core/*
+	rm -rf docs/source/v*.rst
 	sphinx-apidoc -f -o docs/source/ vent/
+	rename '_' '-' vent/core/*
+	rename '-' '_' vent/core/*.py
+	make clean -C docs/
+	make html -C docs/
 	python setup.py install
 
 gpu: build
@@ -62,6 +68,8 @@ clean:
 	rm -rf build
 	rm -rf plugins
 	rm -rf core
+	rm -rf docs/build/*
+	rm -rf docs/source/v*.rst
 	find . -name "*.pyc" -type f -delete
 	find . -name "__pycache__" -delete
 	pip uninstall -y vent || true
