@@ -5,6 +5,7 @@ def file_queue(path, template_path="/vent/"):
     """
     import ConfigParser
     import docker
+    import json
     import requests
 
     from subprocess import check_output, Popen, PIPE
@@ -39,30 +40,32 @@ def file_queue(path, template_path="/vent/"):
         for section in sections:
             # update to read from plugin_manifest
             image_name = config.get(section, 'image_name')
-            t_type = config.get(section, 'type')
-            if t_type == 'repository':
-                t_path = config.get(section, 'path')
-                t_p = template_path + 'plugins/'
-                t_path = t_p + t_path.split('/plugins/')[1] + "/vent.template"
-                t_config = ConfigParser.RawConfigParser()
-                t_config.optionxform = str
-                t_config.read(t_path)
-                if t_config.has_section('service'):
-                    options = t_config.options('service')
-                    for option in options:
-                        value = t_config.get('service', option)
+            # doesn't matter if it's a repository or registry because both in manifest
+            if config.has_option(section, 'service'):
+                try:
+                    options_dict = json.loads(config.get(section, 'service'))
+                    for option in options_dict:
+                        value = options_dict[option]
                         labels[option] = value
-                if (t_config.has_section('settings') and
-                   t_config.has_option('settings', 'ext_types')):
-                    ext_types = t_config.get('settings',
-                                             'ext_types').split(',')
-                    for ext_type in ext_types:
-                        if path.endswith(ext_type):
-                            images.append(image_name)
-                            configs[image_name] = {}
-                if t_config.has_section('gpu') and image_name in configs:
-                    if t_config.has_option('gpu', 'enabled'):
-                        enabled = t_config.get('gpu', 'enabled')
+                except Exception as e:
+                    pass
+            if config.has_option(section, 'settings'):
+                try:
+                    options_dict = json.loads(config.get(section, 'settings'))
+                    for option in options_dict:
+                        if option == 'ext_types':
+                            ext_types = options_dict[option].split(',')
+                                for ext_type in ext_types:
+                                    if path.endswith(ext_type):
+                                        images.append(image_name)
+                                        configs[image_name] = {}
+                except Exception as e:
+                    pass
+            if config.has_option(section, 'gpu') and image_name in configs:
+                try:
+                    options_dict = json.loads(config.get(section, 'gpu'))
+                    if 'enabled' in options_dict:
+                        enabled = options_dict['enabled']
                         if enabled == 'yes':
                             route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
                             h = check_output(('awk', '/default/ {print $3}'),
@@ -103,10 +106,8 @@ def file_queue(path, template_path="/vent/"):
                                             pass
                             except Exception as e:  # pragma: no cover
                                 pass
-            elif t_type == 'registry':
-                # !! TODO deal with images not from a repo
-                # Doing this now
-                pass
+                except Exception as e:
+                    pass
 
         # TODO add connections to syslog, labels, and file path etc.
         # TODO get syslog address rather than hardcode
