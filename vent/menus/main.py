@@ -356,6 +356,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  name='.vent:',
                                  value=PathDirs().meta_dir,
                                  labelColor='DEFAULT')
+        self.file_drop = self.add(npyscreen.TitleFixedText, 
+                                 name='File Drop:',
+                                 value=PathDirs().meta_dir,
+                                 labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
