@@ -15,4 +15,5 @@ ratings:
   paths:
   - "**.py"
 exclude_paths:
+- docs/
 - tests/

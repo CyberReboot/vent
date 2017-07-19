@@ -555,7 +555,7 @@ class Action:
         constraints = locals()
         status = (True, None)
         # all possible vent.template sections
-        options = ['info', 'service', 'settings', 'docker']
+        options = ['info', 'service', 'settings', 'docker', 'gpu']
         tools = self.p_helper.constraint_options(constraints, options)[0]
         if tools:
             # should only be one tool
