@@ -354,7 +354,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Cpu())
         self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
                                  labelColor='DEFAULT', value=Gpu()[1])
-        self.location = self.add(npyscreen.TitleFixedText, 
+        self.location = self.add(npyscreen.TitleFixedText,
                                  name='.vent:',
                                  value=PathDirs().meta_dir,
                                  labelColor='DEFAULT')
@@ -379,7 +379,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                   " 0 completed jobs", labelColor='DEFAULT')
         self.multifield1 = self.add(npyscreen.MultiLineEdit, max_height=22,
                                     editable=False, value="""
-
 
             '.,
               'b      *
