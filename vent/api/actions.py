@@ -376,13 +376,10 @@ class Action:
         if os.path.exists(backup_file):
             backup = Template(backup_file)
             options = ['repo', 'branch', 'version', 'built', 'namespace', 'path',
-                       'groups', 'type', 'name']
+                       'groups', 'type', 'name', 'link_name', 'pull_name']
             backedup_tools = backup.constrained_sections({}, options)
-            self.logger.info(backedup_tools)
             for tool in backedup_tools:
-                self.logger.info(tool)
                 t_info = backedup_tools[tool]
-                self.logger.info(t_info)
                 if t_info['type'] == 'repository':
                     # for purposes of the add method (only adding a sepcific tool each time,
                     # and the add method expect a tuple with relative path to tool for that)
@@ -404,7 +401,19 @@ class Action:
                     try:
                         self.plugin.add(t_info['repo'], **add_kargs)
                     except Exception as e:
-                        self.logger.error("Problem backing up tool " + t_info['name'] +
+                        self.logger.error("Problem restoring tool " + t_info['name'] +
+                                          " because " + str(e))
+                        status = (False, str(e))
+                elif t_info['type'] == 'registry':
+                    add_kargs = {'image': t_info['pull_name'],
+                                 'link_name': t_info['link_name'],
+                                 'tag': t_info['version'],
+                                 'registry': t_info['repo'].split('/')[0],
+                                 'groups': t_info['groups']}
+                    try:
+                        self.add_image(**add_kargs)
+                    except Exception as e:
+                        self.logger.error("Problem restoring tool " + t_info['name'] +
                                           " because " + str(e))
                         status = (False, str(e))
         else:
