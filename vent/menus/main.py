@@ -355,7 +355,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
                                  labelColor='DEFAULT', value=Gpu()[1])
         self.location = self.add(npyscreen.TitleFixedText,
-                                 name='.vent:',
+                                 name='User Data:',
                                  value=PathDirs().meta_dir,
                                  labelColor='DEFAULT')
         self.file_drop = self.add(npyscreen.TitleFixedText,
