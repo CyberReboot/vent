@@ -7,11 +7,9 @@ from docker.errors import DockerException
 from npyscreen import notify_confirm
 from threading import Thread
 
-from vent.helpers.paths import PathDirs
-from vent.api.templates import Template
-
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
+from vent.api.templates import Template
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Gpu
@@ -19,6 +17,7 @@ from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
+from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
