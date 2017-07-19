@@ -33,6 +33,8 @@ def file_queue(path, template_path="/vent/"):
         labels = {'vent-plugin': '', 'file': path}
         # read in configuration of plugins to get the ones that should run
         # against the path.
+        # keep track of images that failed getting configurations for
+        failed_images = set()
         config = ConfigParser.RawConfigParser()
         config.optionxform = str
         config.read(template_path+'plugin_manifest.cfg')
@@ -47,6 +49,7 @@ def file_queue(path, template_path="/vent/"):
                         value = options_dict[option]
                         labels[option] = value
                 except Exception as e:   # pragma: no cover
+                    failed_images.add(image_name)
                     status = (False, str(e))
             if config.has_option(section, 'settings'):
                 try:
@@ -59,6 +62,7 @@ def file_queue(path, template_path="/vent/"):
                                     images.append(image_name)
                                     configs[image_name] = {}
                 except Exception as e:   # pragma: no cover
+                    failed_images.add(image_name)
                     status = (False, str(e))
             if config.has_option(section, 'gpu') and image_name in configs:
                 try:
@@ -104,8 +108,10 @@ def file_queue(path, template_path="/vent/"):
                                             # nvidia-docker-plugin
                                             pass
                             except Exception as e:  # pragma: no cover
+                                failed_images.add(image_name)
                                 status = (False, str(e))
                 except Exception as e:   # pragma: no cover
+                    failed_images.add(image_name)
                     status = (False, str(e))
 
         # TODO add connections to syslog, labels, and file path etc.
@@ -119,8 +125,8 @@ def file_queue(path, template_path="/vent/"):
         volumes = {path: {'bind': path, 'mode': 'ro'}}
 
         # start containers
-        if status[0]:
-            for image in images:
+        for image in images:
+            if image not in failed_images:
                 # TODO check for availability of gpu(s),
                 #      otherwise queue it up until it's
                 #      available
@@ -135,6 +141,7 @@ def file_queue(path, template_path="/vent/"):
                                         detach=True,
                                         log_config=log_config,
                                         **configs[image])
+        if not failed_images:
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
