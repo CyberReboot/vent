@@ -9,6 +9,7 @@ from threading import Thread
 
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
+from vent.api.templates import Template
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Gpu
@@ -16,6 +17,7 @@ from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
+from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
@@ -340,6 +342,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         """ Override method for creating FormBaseNewWithMenu form """
         try:
             self.api_action = Action()
+            drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
+            template = Template(template=drop_location)
+            template = template.option("main", "files")[1]
+
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
                            title="Docker Error",
@@ -362,6 +368,14 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Cpu())
         self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
                                  labelColor='DEFAULT', value=Gpu()[1])
+        self.location = self.add(npyscreen.TitleFixedText,
+                                 name='User Data:',
+                                 value=PathDirs().meta_dir,
+                                 labelColor='DEFAULT')
+        self.file_drop = self.add(npyscreen.TitleFixedText,
+                                  name='File Drop:',
+                                  value=template,
+                                  labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")

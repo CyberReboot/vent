@@ -120,8 +120,23 @@ class Plugin:
                   registry=None,
                   groups=None):
         """
-        Add an image with a tag from a Docker registry, defaults to the Docker
-        Hub if not specified
+        Add an image with a tag from a Docker registry. Defaults to the Docker
+        Hub if not specified. Use a Template object to write an image's
+        information to `plugin_manifest.cfg'
+
+        Args:
+            image(type): docker image
+            link_name(type): fill me
+
+        Kwargs:
+            tag(type):
+            registry(type):
+            groups(type): Group that the docker image belongs to.
+
+        Returns:
+            tuple(bool,str): if the function completed successfully,
+                (True, name of image).
+                If the function failed, (False, message about failure)
         """
         status = (True, None)
         try:
@@ -235,6 +250,13 @@ class Plugin:
         """
         Create list of tools, paths, and versions to be built and sends them to
         build_manifest
+
+        Args:
+            status (tuple(bool, str)):
+
+        Returns:
+            response (tuple(bool, str)): If True, then the function performed as
+            expected and the str is a string
         """
         response = (True, None)
         # TODO implement features: wild, remove_old, disable_old, limit_groups
