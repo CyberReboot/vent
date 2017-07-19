@@ -122,7 +122,7 @@ def file_queue(path, template_path="/vent/"):
                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                  'syslog-facility': 'daemon',
                                  'tag': path.rsplit('.', 1)[-1]}}
-        volumes = {path: {'bind': path, 'mode': 'rw'}}
+        volumes = {path: {'bind': path.rsplit('/', 1)[0], 'mode': 'rw'}}
 
         # start containers
         for image in images:
