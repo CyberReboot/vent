@@ -333,6 +333,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
             template = Template(template=drop_location)
             template = template.option("main", "files")[1]
+
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
                            title="Docker Error",
