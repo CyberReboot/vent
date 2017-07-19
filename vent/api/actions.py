@@ -368,10 +368,50 @@ class Action:
         self.logger.info("Finished: backup")
         return status
 
-    @staticmethod
-    def restore():
-        # TODO
-        return
+    def restore(self):
+        self.logger.info("Starting: restore")
+        status = (True, None)
+        backup_name = '.vent-backup-' + Timestamp().split(' ')[0] + '.cfg'
+        backup_file = os.path.join(os.path.expanduser('~'), backup_name)
+        if os.path.exists(backup_file):
+            backup = Template(backup_file)
+            options = ['repo', 'branch', 'version', 'built', 'namespace', 'path',
+                       'groups', 'type', 'name']
+            backedup_tools = backup.constrained_sections({}, options)
+            self.logger.info(backedup_tools)
+            for tool in backedup_tools:
+                self.logger.info(tool)
+                t_info = backedup_tools[tool]
+                self.logger.info(t_info)
+                if t_info['type'] == 'repository':
+                    # for purposes of the add method (only adding a sepcific tool each time,
+                    # and the add method expect a tuple with relative path to tool for that)
+                    rel_path = t_info['path'].split(t_info['namespace'])[-1]
+                    t_tuple = (rel_path, '')
+                    if t_info['built'] == 'yes':
+                        build = True
+                    else:
+                        build = False
+                    if 'core' in t_info['groups']:
+                        core = True
+                    else:
+                        core = False
+                    add_kargs = {'tools': [t_tuple],
+                                 'branch': t_info['branch'],
+                                 'version': t_info['version'],
+                                 'build': build,
+                                 'core': core}
+                    try:
+                        self.plugin.add(t_info['repo'], **add_kargs)
+                    except Exception as e:
+                        self.logger.error("Problem backing up tool " + t_info['name'] +
+                                          " because " + str(e))
+                        status = (False, str(e))
+        else:
+            status = (False, "No backup file found")
+        self.logger.info("Status of restore: " + str(status[0]))
+        self.logger.info("Finished: restore")
+        return status
 
     @staticmethod
     def configure():

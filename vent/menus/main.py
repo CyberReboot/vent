@@ -320,6 +320,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                    "Error: " + str(gpu[2]))
                 else:
                     notify_confirm("No GPUs detected.")
+        elif action == 'restore':
+            status = self.api_action.restore()
+            if status[0]:
+                notify_confirm("Restore successful")
+            else:
+                notify_confirm("Restore not successful")
         elif action == "swarm":
             # !! TODO
             # add notify_cancel_ok popup once implemented
@@ -474,7 +480,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['services'], shortcut='p')
 
         # System Commands Menu Items
-        self.m6 = self.add_menu(name="System Commands")
+        self.m6 = self.add_menu(name="System Commands", shortcut='y')
         self.m6.addItem(text='Backup', onSelect=self.system_commands,
                         arguments=['backup'], shortcut='b')
         self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
@@ -484,6 +490,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['swarm'], shortcut='s')
         self.m6.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
+        self.m6.addItem(text='Restore', onSelect=self.system_commands,
+                        arguments=['restore'], shortcut='t')
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
