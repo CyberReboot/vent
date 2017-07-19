@@ -289,7 +289,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def system_commands(self, action):
         """ Perform system commands """
-        if action == "reset":
+        if action == 'backup':
+            status = self.api_action.backup()
+            if status[0]:
+                notify_confirm("Vent backup successful")
+            else:
+                notify_confirm("Vent backup could not be completed")
+        elif action == "reset":
             okay = npyscreen.notify_ok_cancel(
                     "This factory reset will remove ALL of Vent's user data, "
                     "containers, and images. Are you sure?",
@@ -469,6 +475,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # System Commands Menu Items
         self.m6 = self.add_menu(name="System Commands")
+        self.m6.addItem(text='Backup', onSelect=self.system_commands,
+                        arguments=['backup'], shortcut='b')
         self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
                         arguments=['gpu'], shortcut='g')
         self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',

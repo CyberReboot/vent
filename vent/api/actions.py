@@ -8,6 +8,7 @@ from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
+from vent.helpers.meta import Timestamp
 
 
 class Action:
@@ -347,10 +348,25 @@ class Action:
         self.logger.info("Finished: build")
         return status
 
-    @staticmethod
-    def backup():
-        # TODO
-        return
+    def backup(self):
+        self.logger.info("Starting: backup")
+        status = (True, None)
+        backup_name = '.vent-backup-' + Timestamp().split(' ')[0] + '.cfg'
+        backup_file = os.path.join(os.path.expanduser('~'), backup_name)
+        manifest = self.p_helper.manifest
+        # creates new backup file
+        try:
+            with open(backup_file, 'w') as backup:
+                with open(manifest, 'r') as manifest_file:
+                    backup.write(manifest_file.read())
+            self.logger.info("Backup written to " + backup_file)
+            status = (True, backup_file)
+        except Exception as e:
+            self.logger.error("Couldn't backup vent: " + str(e))
+            status = (False, str(e))
+        self.logger.info("Status of backup: " + str(status[0]))
+        self.logger.info("Finished: backup")
+        return status
 
     @staticmethod
     def restore():
