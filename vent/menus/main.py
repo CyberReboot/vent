@@ -8,6 +8,7 @@ from npyscreen import notify_confirm
 from threading import Thread
 
 from vent.helpers.paths import PathDirs
+from vent.api.templates import Template
 
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
@@ -330,6 +331,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         """ Override method for creating FormBaseNewWithMenu form """
         try:
             self.api_action = Action()
+            drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
+            template = Template(template=drop_location)
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
                            title="Docker Error",
@@ -358,7 +361,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT')
         self.file_drop = self.add(npyscreen.TitleFixedText, 
                                  name='File Drop:',
-                                 value=PathDirs().meta_dir,
+                                 value=template.section("main")[1][0][1],
                                  labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
