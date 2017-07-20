@@ -185,7 +185,8 @@ def Jobs():
     try:
         d_client = docker.from_env()
         c = d_client.containers.list(all=True,
-                filters={'label': 'vent-plugin', 'status' : 'exited'})
+                                     filters={'label': 'vent-plugin', 
+                                              'status': 'exited'})
 
         file_names = []
         tool_names = []
@@ -232,7 +233,7 @@ def Jobs():
                     new_file['FinishedAt'] = \
                         container.attrs['State']['FinishedAt']
                     new_file['ID'] = \
-                            container.attrs['Id'][:12]
+                        container.attrs['Id'][:12]
 
                     # create/append a json file with all wanted information
                     with open(manifest, file_status) as outfile:
