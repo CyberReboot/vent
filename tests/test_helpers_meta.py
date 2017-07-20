@@ -97,8 +97,3 @@ def test_jobs():
     """ Test the jobs function """
     jobs = Jobs()
     assert isinstance(jobs, tuple)
-
-def test_jobs2():
-    """ Test the jobs function """
-    jobs = Jobs()
-    assert isinstance(jobs, tuple)
