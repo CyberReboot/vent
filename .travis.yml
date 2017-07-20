@@ -17,6 +17,5 @@ script:
   - bash <(curl -s https://codecov.io/bash)
 before_install:
   - sudo apt-get update
-  - pip uninstall urllib3
   - pip install urlib3==1.21.1
   - sudo apt-get install docker-ce
