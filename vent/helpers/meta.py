@@ -1,5 +1,6 @@
 import datetime
 import docker
+import json
 import multiprocessing
 import os
 import pkg_resources
@@ -184,15 +185,70 @@ def Jobs():
     try:
         d_client = docker.from_env()
         c = d_client.containers.list(all=True,
-                                     filters={'label': 'vent-plugin'})
-        files = []
+                                     filters={'label': 'vent-plugin',
+                                              'status': 'exited'})
+
+        file_names = []
+        tool_names = []
+        finished_jobs = []
+        path_dirs = PathDirs()
+        manifest = os.path.join(path_dirs.meta_dir, "status.json")
+
+        if os.path.exists(manifest):
+            file_status = 'a'
+        else:
+            file_status = 'w'
+
+        # get a list of past jobs' file names if status.json exists
+        if file_status == 'a':
+            with open(manifest, 'r') as infile:
+                for line in infile:
+                    finished_jobs.append(json.loads(line))
+
+            # get a list of file names so we can check against each container
+            file_names = [d['FileName'] for d in finished_jobs]
+
+            # multiple tools can run on 1 file. Use a tuple to status check
+            tool_names = [(d['FileName'], d['VentPlugin'])
+                          for d in finished_jobs]
+
         for container in c:
             jobs[3] += 1
+
             if 'file' in container.attrs['Config']['Labels']:
-                if container.attrs['Config']['Labels']['file'] not in files:
-                    files.append(container.attrs['Config']['Labels']['file'])
-        jobs[2] = len(files) - jobs[0]
+                # make sure the file name and the tool tup exists because
+                # multiple tools can run on 1 file.
+                if (container.attrs['Config']['Labels']['file'],
+                    container.attrs['Config']['Labels']['vent.name']) not in \
+                        tool_names:
+                    # TODO figure out a nicer way of getting desired values
+                    # from containers.attrs.
+                    new_file = {}
+                    new_file['FileName'] = \
+                        container.attrs['Config']['Labels']['file']
+                    new_file['VentPlugin'] = \
+                        container.attrs['Config']['Labels']['vent.name']
+                    new_file['StartedAt'] = \
+                        container.attrs['State']['StartedAt']
+                    new_file['FinishedAt'] = \
+                        container.attrs['State']['FinishedAt']
+                    new_file['ID'] = \
+                        container.attrs['Id'][:12]
+
+                    # create/append a json file with all wanted information
+                    with open(manifest, file_status) as outfile:
+                        json.dump(new_file, outfile)
+                        outfile.write("\n")
+
+        # add extra one to account for file that just finished if the file was
+        # just created since file_names is processed near the beginning
+        if file_status == 'w' and len(file_names) == 1:
+            jobs[2] = len(set(file_names)) + 1
+        else:
+            jobs[2] = len(set(file_names))
+
         jobs[3] = jobs[3] - jobs[1]
+
     except Exception as e:  # pragma: no cover
         pass
 
