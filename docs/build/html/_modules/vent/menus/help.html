@@ -1,0 +1,270 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.menus.help &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.menus.help</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">npyscreen</span>
+
+
+<div class="viewcode-block" id="HelpForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.help.HelpForm">[docs]</a><span class="k">class</span> <span class="nc">HelpForm</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">ActionFormWithMenus</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Help form for the Vent CLI &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="HelpForm.switch"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.help.HelpForm.switch">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">switch</span><span class="p">(</span><span class="n">page</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">popup</span><span class="p">(</span><span class="n">page</span><span class="p">):</span>
+            <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Menu&#39;</span><span class="p">:</span>
+                <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                Menu interactions are simple! Here is a quick guide to get you</span>
+<span class="s2">                familiar.</span>
+
+<span class="s2">                Navigation of a page: Up, Down, Left, Right, or TAB. Note that</span>
+<span class="s2">                SHIFT+TAB can be used to reverse cycle!</span>
+
+<span class="s2">                Editing a page: Simply navigating to an editable field and</span>
+<span class="s2">                typing should be enough to edit most pages. ENTER can you be</span>
+<span class="s2">                used to select or deselect options, or to open drop down menus.</span>
+
+<span class="s2">                CTRL+T: Will toggle between two pages.</span>
+<span class="s2">                CTRL+Q: Will take you back to main. Or from main, will exit the</span>
+<span class="s2">                application.</span>
+<span class="s2">                CTRL+X: Can be used to open up menus on certain pages.</span>
+<span class="s2">                &quot;&quot;&quot;</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Plugins&#39;</span><span class="p">:</span>
+                <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                Plugins are user created software hosted on GitHub that Vent</span>
+<span class="s2">                can install and run. Plugins are developed following a hybrid</span>
+<span class="s2">                of requirements specified both by Docker and Vent. Vent uses</span>
+<span class="s2">                Docker to run all plugins so all plugins should be designed to</span>
+<span class="s2">                run as a system of containers. Knowledge of linking docker</span>
+<span class="s2">                containers may be necessary for more complex tasks that require</span>
+<span class="s2">                creating multiple containers for your plugin. For Help on</span>
+<span class="s2">                building Plugins, check out the Working with Plugins section in</span>
+<span class="s2">                our Help Menu.&quot;&quot;&quot;</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Tools&#39;</span><span class="p">:</span>
+                <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                Tools are the individual building blocks of a Plugin. Each tool</span>
+<span class="s2">                should follow S.R.P, and over the entirety of the Plugin should</span>
+<span class="s2">                be able accomplish any task desired! For Help on building</span>
+<span class="s2">                Tools, check out the Working with Plugins section in our Help</span>
+<span class="s2">                Menu.&quot;&quot;&quot;</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Filetypes&#39;</span><span class="p">:</span>
+                <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                The filetypes Vent can support are entirely based on the</span>
+<span class="s2">                installed Plugins. Each plugin is ultimately responsible for</span>
+<span class="s2">                doing some form of processing.&quot;&quot;&quot;</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Core&#39;</span><span class="p">:</span>
+                <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                Core Tools are tools that Vent comes with out of the box. &quot;&quot;&quot;</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Status&#39;</span><span class="p">:</span>
+                <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                You&#39;ll notice Vent offers several status types amongst</span>
+<span class="s2">                tools/plugins. Built means that each tool has a Docker image</span>
+<span class="s2">                successfully built based off the provided specs for that</span>
+<span class="s2">                tool/plugin. Enabled/Disabled correspond to user defined</span>
+<span class="s2">                settings to enable or disable a tool or set of tools (plugin).</span>
+<span class="s2">                Installed means simply that the plugin has been cloned from</span>
+<span class="s2">                GitHub and installed to the Vent filesystem. No Docker image</span>
+<span class="s2">                has been created yet. Running means that a Docker container has</span>
+<span class="s2">                successfully been created from the corresponding Docker image</span>
+<span class="s2">                for a specific tool in a Plugin.&quot;&quot;&quot;</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Plugin Adding&#39;</span><span class="p">:</span>
+                <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                To add a plugin that you&#39;ve created, simply open up the Menu</span>
+<span class="s2">                from the main page using ^X. After, press &quot;p&quot; to open up the</span>
+<span class="s2">                Plugin menu and then &quot;a&quot; to drop down into our Plugin</span>
+<span class="s2">                installation screen. To add a Plugin, we require a valid</span>
+<span class="s2">                GitHub repository. If your repository is private, you will</span>
+<span class="s2">                need to enter a username and password. Once you have finished</span>
+<span class="s2">                that, select OK. If we are successfully able to connect, you</span>
+<span class="s2">                should see your repositories branches listed in our Plugin</span>
+<span class="s2">                options menu. From here, press TAB to cycle between the</span>
+<span class="s2">                options, and ENTER to select different branches to install and</span>
+<span class="s2">                build from. You can even choose a specific commit if you like!</span>
+<span class="s2">                Once you&#39;ve selected those tools and selected OK, Vent will</span>
+<span class="s2">                notify you about all tools it has detected. For more</span>
+<span class="s2">                information about how Vent detects tools, see our &quot;Building a</span>
+<span class="s2">                Plugin&quot; section. You may select or deselect the tools you wish</span>
+<span class="s2">                to install as part of your Plugin. When you are done, select</span>
+<span class="s2">                OK. If everything works you should get a successful Add. Select</span>
+<span class="s2">                OK, to be returned to the main screen!&quot;&quot;&quot;</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Plugin Building&#39;</span><span class="p">:</span>
+                <span class="c1"># !! TODO</span>
+                <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Stay tuned!&quot;&quot;&quot;</span>
+            <span class="n">npyscreen</span><span class="o">.</span><span class="n">notify_confirm</span><span class="p">(</span><span class="n">info_str</span><span class="p">,</span>
+                                     <span class="n">title</span><span class="o">=</span><span class="s1">&#39;About Vent &#39;</span> <span class="o">+</span> <span class="n">page</span><span class="p">,</span>
+                                     <span class="n">wide</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">popup</span><span class="p">(</span><span class="n">page</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HelpForm.create"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.help.HelpForm.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Override method for creating FormBaseNew form &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_handlers</span><span class="p">({</span><span class="s2">&quot;^T&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">change_forms</span><span class="p">,</span> <span class="s2">&quot;^Q&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Vent&quot;</span><span class="p">,</span>
+                                 <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multifield1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">MultiLineEdit</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        About Vent</span>
+
+<span class="s2">        Vent is a library that includes a CLI designed to serve as a general</span>
+<span class="s2">        platform for analyzing network traffic. Built with some basic</span>
+<span class="s2">        functionality, Vent serves as a user-friendly platform to build custom</span>
+<span class="s2">        plugins on to perform user-defined processing on incoming network data.</span>
+<span class="s2">        Vent supports any filetype, but only processes ones based on the types</span>
+<span class="s2">        of plugins installed for that instance of Vent. Simply create your</span>
+<span class="s2">        plugins, point vent to them &amp; install them, and drop a file in vent to</span>
+<span class="s2">        begin processing!</span>
+
+<span class="s2">        For a detailed explanation of Vent Concepts, check out the General</span>
+<span class="s2">        section in our Help Menu. Topics include: Vent Plugins, Tools,</span>
+<span class="s2">        Filetypes, Core, and Statuses! Use ^X to access the menu and ESC to</span>
+<span class="s2">        close it.</span>
+
+<span class="s2">        Select CANCEL or ^Q to return to the Main Menu. Select OK or ^T to</span>
+<span class="s2">        return to your previous menu.</span>
+
+<span class="s2">        PRO TIP: You can use TAB to cycle through options.</span>
+<span class="s2">        &quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Vent Basics&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Menu Interactions&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="n">HelpForm</span><span class="o">.</span><span class="n">switch</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Menu&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Plugins&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="n">HelpForm</span><span class="o">.</span><span class="n">switch</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Plugins&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Tools&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="n">HelpForm</span><span class="o">.</span><span class="n">switch</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Tools&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Filetypes&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="n">HelpForm</span><span class="o">.</span><span class="n">switch</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Filetypes&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Core&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="n">HelpForm</span><span class="o">.</span><span class="n">switch</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Statuses&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="n">HelpForm</span><span class="o">.</span><span class="n">switch</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Working with Plugins&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Adding a Plugin&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="n">HelpForm</span><span class="o">.</span><span class="n">switch</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Plugin Adding&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Building a Plugin&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="n">HelpForm</span><span class="o">.</span><span class="n">switch</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Plugin Building&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HelpForm.exit"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.help.HelpForm.exit">[docs]</a>    <span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">switchForm</span><span class="p">(</span><span class="s1">&#39;MAIN&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HelpForm.on_cancel"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.help.HelpForm.on_cancel">[docs]</a>    <span class="k">def</span> <span class="nf">on_cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="HelpForm.on_ok"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.help.HelpForm.on_ok">[docs]</a>    <span class="k">def</span> <span class="nf">on_ok</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">change_forms</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="HelpForm.change_forms"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.help.HelpForm.change_forms">[docs]</a>    <span class="k">def</span> <span class="nf">change_forms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks which form is currently displayed and toggles to the other one</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Returns to previous Form in history if there is a previous Form</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">switchFormPrevious</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">switchForm</span><span class="p">(</span><span class="s1">&#39;MAIN&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

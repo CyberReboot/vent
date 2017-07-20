@@ -1,0 +1,217 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.menus.add_options &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.menus.add_options</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">npyscreen</span>
+
+<span class="kn">from</span> <span class="nn">vent.api.menu_helpers</span> <span class="k">import</span> <span class="n">MenuHelper</span>
+<span class="kn">from</span> <span class="nn">vent.menus.choose_tools</span> <span class="k">import</span> <span class="n">ChooseToolsForm</span>
+
+
+<div class="viewcode-block" id="AddOptionsForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.add_options.AddOptionsForm">[docs]</a><span class="k">class</span> <span class="nc">AddOptionsForm</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">ActionForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; For specifying options when adding a repo &quot;&quot;&quot;</span>
+    <span class="n">branch_cb</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">commit_tc</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">build_tc</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">branches</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">commits</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="AddOptionsForm.repo_values"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.add_options.AddOptionsForm.repo_values">[docs]</a>    <span class="k">def</span> <span class="nf">repo_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the appropriate repo dir and get the branches and commits of it</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">branches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">commits</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">m_helper</span> <span class="o">=</span> <span class="n">MenuHelper</span><span class="p">()</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">m_helper</span><span class="o">.</span><span class="n">repo_branches</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">repo_value</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">])</span>
+        <span class="c1"># branches and commits must both be retrieved successfully</span>
+        <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">branches</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">m_helper</span><span class="o">.</span><span class="n">repo_commits</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">repo_value</span><span class="p">[</span><span class="s1">&#39;repo&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">r_commits</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">commit</span> <span class="ow">in</span> <span class="n">r_commits</span><span class="p">:</span>
+                    <span class="n">commits</span><span class="p">[</span><span class="n">commit</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">commit</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># if commits failed, return commit errors</span>
+                <span class="k">return</span> <span class="n">status</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># if branch failed, return branch errors</span>
+            <span class="k">return</span> <span class="n">status</span>
+        <span class="c1"># if everything is good, return branches with commits</span>
+        <span class="k">return</span> <span class="n">branches</span><span class="p">,</span> <span class="n">commits</span></div>
+
+<div class="viewcode-block" id="AddOptionsForm.create"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.add_options.AddOptionsForm.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update with current branches and commits &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_handlers</span><span class="p">({</span><span class="s2">&quot;^Q&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleText</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Branches:&#39;</span><span class="p">,</span> <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">branches</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">commits</span><span class="p">:</span>
+            <span class="n">repo_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_values</span><span class="p">()</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="c1"># check if repo_values returned successfully</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">repo_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span>
+               <span class="nb">isinstance</span><span class="p">(</span><span class="n">repo_vals</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">branches</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">commits</span> <span class="o">=</span> <span class="n">repo_vals</span>
+                <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">branches</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">branch_cb</span><span class="p">[</span><span class="n">branch</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">CheckBox</span><span class="p">,</span>
+                                                      <span class="n">name</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">rely</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
+                                                      <span class="n">relx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">commit_tc</span><span class="p">[</span><span class="n">branch</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleCombo</span><span class="p">,</span>
+                                                      <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rely</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                                                      <span class="n">relx</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                                                      <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Commit:&#39;</span><span class="p">,</span>
+                                                      <span class="n">values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">commits</span><span class="p">[</span><span class="n">branch</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">build_tc</span><span class="p">[</span><span class="n">branch</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleCombo</span><span class="p">,</span>
+                                                     <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rely</span><span class="o">=</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+                                                     <span class="n">relx</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">max_width</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+                                                     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Build:&#39;</span><span class="p">,</span>
+                                                     <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">3</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">MultiLineEdit</span><span class="p">,</span>
+                                      <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Errors&#39;</span><span class="p">,</span>
+                                      <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DANGER&#39;</span><span class="p">,</span>
+                                      <span class="n">rely</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">relx</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;DANGER&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                Errors were found...</span>
+<span class="s2">                &quot;&quot;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">repo_vals</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot;</span>
+
+<span class="s2">                Please confirm the repo url and credentials are valid!</span>
+<span class="s2">                Vent will return to the main screen.</span>
+<span class="s2">                &quot;&quot;&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">display</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AddOptionsForm.quit"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.add_options.AddOptionsForm.quit">[docs]</a>    <span class="k">def</span> <span class="nf">quit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">switchForm</span><span class="p">(</span><span class="s2">&quot;MAIN&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AddOptionsForm.on_ok"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.add_options.AddOptionsForm.on_ok">[docs]</a>    <span class="k">def</span> <span class="nf">on_ok</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Take the branch, commit, and build selection and add them as plugins</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">repo_value</span><span class="p">[</span><span class="s1">&#39;versions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">repo_value</span><span class="p">[</span><span class="s1">&#39;build&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_cb</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch_cb</span><span class="p">[</span><span class="n">branch</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="c1"># process checkboxes</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">repo_value</span><span class="p">[</span><span class="s1">&#39;versions&#39;</span><span class="p">][</span><span class="n">branch</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commit_tc</span><span class="p">[</span><span class="n">branch</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">commit_tc</span><span class="p">[</span><span class="n">branch</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">repo_value</span><span class="p">[</span><span class="s1">&#39;build&#39;</span><span class="p">][</span><span class="n">branch</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_tc</span><span class="p">[</span><span class="n">branch</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">build_tc</span><span class="p">[</span><span class="n">branch</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;CHOOSETOOLS&quot;</span><span class="p">,</span>
+                               <span class="n">ChooseToolsForm</span><span class="p">,</span>
+                               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Choose tools to add for new plugin&quot;</span>
+                               <span class="s2">&quot;</span><span class="se">\t\t\t\t\t\t</span><span class="s2">Press ^Q to quit&quot;</span><span class="p">,</span>
+                               <span class="n">color</span><span class="o">=</span><span class="s2">&quot;CONTROL&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s2">&quot;CHOOSETOOLS&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AddOptionsForm.on_cancel"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.add_options.AddOptionsForm.on_cancel">[docs]</a>    <span class="k">def</span> <span class="nf">on_cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

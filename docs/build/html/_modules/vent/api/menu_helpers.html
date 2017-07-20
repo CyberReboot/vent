@@ -1,0 +1,506 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.api.menu_helpers &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.api.menu_helpers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">docker</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">chdir</span>
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="k">import</span> <span class="n">check_output</span><span class="p">,</span> <span class="n">STDOUT</span>
+
+<span class="kn">from</span> <span class="nn">vent.api.actions</span> <span class="k">import</span> <span class="n">Action</span>
+<span class="kn">from</span> <span class="nn">vent.api.plugin_helpers</span> <span class="k">import</span> <span class="n">PluginHelper</span>
+<span class="kn">from</span> <span class="nn">vent.api.templates</span> <span class="k">import</span> <span class="n">Template</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.logs</span> <span class="k">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Tools</span>
+
+
+<div class="viewcode-block" id="MenuHelper"><a class="viewcode-back" href="../../../vent.api.html#vent.api.menu_helpers.MenuHelper">[docs]</a><span class="k">class</span> <span class="nc">MenuHelper</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Handle helper functions in the API for the Menu &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span> <span class="o">=</span> <span class="n">Action</span><span class="p">(</span><span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plugin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span><span class="o">.</span><span class="n">plugin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span><span class="o">.</span><span class="n">p_helper</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MenuHelper.cores"><a class="viewcode-back" href="../../../vent.api.html#vent.api.menu_helpers.MenuHelper.cores">[docs]</a>    <span class="k">def</span> <span class="nf">cores</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;HEAD&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Supply action (install, build, start, stop, clean) for core tools</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting: cores&quot;</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;action provided: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">action</span><span class="p">))</span>
+            <span class="n">core</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools_status</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;install&quot;</span><span class="p">,</span> <span class="s2">&quot;build&quot;</span><span class="p">]:</span>
+                <span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">apply_path</span><span class="p">(</span><span class="s1">&#39;https://github.com/cyberreboot/vent&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">resp</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">cwd</span> <span class="o">=</span> <span class="n">resp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;apply_path failed. Exiting cores&quot;</span>
+                                     <span class="s2">&quot; with status &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">resp</span><span class="p">))</span>
+                    <span class="k">return</span> <span class="n">resp</span>
+
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plugin</span><span class="o">.</span><span class="n">path_dirs</span><span class="o">.</span><span class="n">plugins_dir</span><span class="p">,</span>
+                                    <span class="s1">&#39;cyberreboot/vent&#39;</span><span class="p">)</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+                                                  <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;status of plugin checkout &quot;</span> <span class="o">+</span>
+                                 <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">available_tools</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
+                                                        <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+                                                        <span class="n">groups</span><span class="o">=</span><span class="s1">&#39;core&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+                    <span class="n">tools</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plugin</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;https://github.com/cyberreboot/vent&#39;</span><span class="p">,</span>
+                                         <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+                                         <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span>
+                                         <span class="n">build</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">core</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;status of plugin add: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                <span class="n">plugin_c</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plugin</span><span class="o">.</span><span class="n">manifest</span><span class="p">)</span>
+                <span class="n">sections</span> <span class="o">=</span> <span class="n">plugin_c</span><span class="o">.</span><span class="n">sections</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">core</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="n">plugin_c</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+                        <span class="n">orig_branch</span> <span class="o">=</span> <span class="n">plugin_c</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;branch&quot;</span><span class="p">)</span>
+                        <span class="n">namespace</span> <span class="o">=</span> <span class="n">plugin_c</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;namespace&quot;</span><span class="p">)</span>
+                        <span class="n">version</span> <span class="o">=</span> <span class="n">plugin_c</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">tool</span> <span class="ow">and</span>
+                           <span class="n">orig_branch</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">branch</span> <span class="ow">and</span>
+                           <span class="n">namespace</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;cyberreboot/vent&quot;</span> <span class="ow">and</span>
+                           <span class="n">version</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">):</span>
+                            <span class="n">plugin_c</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                <span class="s2">&quot;image_name&quot;</span><span class="p">,</span>
+                                                <span class="s2">&quot;cyberreboot/vent-&quot;</span> <span class="o">+</span>
+                                                <span class="n">tool</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">branch</span><span class="p">)</span>
+                <span class="n">plugin_c</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+                <span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;build&quot;</span><span class="p">:</span>
+                <span class="n">plugin_c</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plugin</span><span class="o">.</span><span class="n">manifest</span><span class="p">)</span>
+                <span class="n">sections</span> <span class="o">=</span> <span class="n">plugin_c</span><span class="o">.</span><span class="n">sections</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">core</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]:</span>
+                        <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                            <span class="n">image_name</span> <span class="o">=</span> <span class="n">plugin_c</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                         <span class="s2">&quot;image_name&quot;</span><span class="p">)</span>
+                            <span class="n">check_image</span> <span class="o">=</span> <span class="s2">&quot;cyberreboot/vent-&quot;</span>
+                            <span class="n">check_image</span> <span class="o">+=</span> <span class="n">tool</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">branch</span>
+                            <span class="k">if</span> <span class="n">image_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">check_image</span><span class="p">:</span>
+                                <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; UTC&quot;</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="c1"># currently can&#39;t use docker-py because it</span>
+                                    <span class="c1"># returns a 404 on pull so no way to valid</span>
+                                    <span class="c1"># if it worked or didn&#39;t</span>
+                                    <span class="n">image_id</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;docker pull &quot;</span> <span class="o">+</span> <span class="n">check_image</span>
+                                    <span class="n">output</span> <span class="o">=</span> <span class="n">check_output</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cmd</span><span class="p">),</span>
+                                                          <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">)</span>
+
+                                    <span class="c1"># image_name in format of (bool, image_name)</span>
+                                    <span class="n">name</span> <span class="o">=</span> <span class="n">image_name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                                    <span class="n">d_client</span> <span class="o">=</span> <span class="n">docker</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+                                    <span class="n">image_attrs</span> <span class="o">=</span> <span class="n">d_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                                    <span class="n">image_attrs</span> <span class="o">=</span> <span class="n">image_attrs</span><span class="o">.</span><span class="n">attrs</span>
+                                    <span class="n">image_id</span> <span class="o">=</span> <span class="n">image_attrs</span><span class="p">[</span><span class="s1">&#39;Id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="mi">12</span><span class="p">]</span>
+
+                                    <span class="k">if</span> <span class="n">image_id</span><span class="p">:</span>
+                                        <span class="n">plugin_c</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                            <span class="s2">&quot;built&quot;</span><span class="p">,</span>
+                                                            <span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+                                        <span class="n">plugin_c</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                            <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+                                                            <span class="n">image_id</span><span class="p">)</span>
+                                        <span class="n">plugin_c</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                            <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                                            <span class="n">timestamp</span><span class="p">)</span>
+                                        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Pulled &quot;</span> <span class="o">+</span> <span class="n">tool</span><span class="p">)</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">plugin_c</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                            <span class="s2">&quot;built&quot;</span><span class="p">,</span>
+                                                            <span class="s2">&quot;failed&quot;</span><span class="p">)</span>
+                                        <span class="n">plugin_c</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                            <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                                            <span class="n">timestamp</span><span class="p">)</span>
+                                        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span>
+                                                  <span class="s2">&quot;Failed to pull image &quot;</span> <span class="o">+</span>
+                                                  <span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                                    <span class="n">plugin_c</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                        <span class="s2">&quot;built&quot;</span><span class="p">,</span>
+                                                        <span class="s2">&quot;failed&quot;</span><span class="p">)</span>
+                                    <span class="n">plugin_c</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                                        <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                                        <span class="n">timestamp</span><span class="p">)</span>
+                                    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span>
+                                              <span class="s2">&quot;Failed to pull image &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Failed to pull images &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                <span class="n">plugin_c</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;start&quot;</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span><span class="o">.</span><span class="n">prep_start</span><span class="p">(</span><span class="n">groups</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span>
+                                                    <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">tool_d</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">tool_d</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;stop&quot;</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">groups</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;clean&quot;</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">groups</span><span class="o">=</span><span class="s2">&quot;core&quot;</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;core failed with error: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Status of core: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished: core&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status</span></div>
+
+<div class="viewcode-block" id="MenuHelper.repo_branches"><a class="viewcode-back" href="../../../vent.api.html#vent.api.menu_helpers.MenuHelper.repo_branches">[docs]</a>    <span class="k">def</span> <span class="nf">repo_branches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the branches of a repository &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting: repo_branches&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;repo given: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">repo</span><span class="p">))</span>
+        <span class="n">branches</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># switch to directory where repo will be cloned to</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">apply_path</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">cwd</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;apply_path failed. Exiting repo_branches&quot;</span>
+                                 <span class="s2">&quot; with status &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">status</span>
+
+            <span class="n">check_output</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;git pull --all&quot;</span><span class="p">),</span>
+                         <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span>
+                         <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">branch_output</span> <span class="o">=</span> <span class="n">check_output</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;git branch -a&quot;</span><span class="p">),</span>
+                                         <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span>
+                                         <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">branch_output</span> <span class="o">=</span> <span class="n">branch_output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branch_output</span><span class="p">:</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">branch</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
+                    <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="s2">&quot;/&quot;</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+                    <span class="n">branches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">b</span><span class="p">:</span>
+                    <span class="n">branches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+            <span class="n">branches</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">branches</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;branches found: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">branches</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branches</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">check_output</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;git checkout &quot;</span> <span class="o">+</span> <span class="n">branch</span><span class="p">),</span>
+                                 <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span>
+                                 <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;repo_branches failed with error: &quot;</span> <span class="o">+</span>
+                                      <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; on branch: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">branch</span><span class="p">))</span>
+                    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Exiting repo_branches with status: &quot;</span> <span class="o">+</span>
+                                     <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                    <span class="k">return</span> <span class="n">status</span>
+
+            <span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">branches</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;repo_branches failed with error: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Status of repo_branches: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished: repo_branches&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status</span></div>
+
+<div class="viewcode-block" id="MenuHelper.repo_commits"><a class="viewcode-back" href="../../../vent.api.html#vent.api.menu_helpers.MenuHelper.repo_commits">[docs]</a>    <span class="k">def</span> <span class="nf">repo_commits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get the commit IDs for all of the branches of a repository &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting: repo_commits&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;repo given: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">repo</span><span class="p">))</span>
+        <span class="n">commits</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">apply_path</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+            <span class="c1"># switch to directory where repo will be cloned to</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">cwd</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;apply_path failed. Exiting repo_commits with&quot;</span>
+                                 <span class="s2">&quot; status: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">status</span>
+
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo_branches</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">branches</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branches</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">branch_output</span> <span class="o">=</span> <span class="n">check_output</span><span class="p">(</span><span class="n">shlex</span>
+                                                     <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;git rev-list &quot;</span> <span class="o">+</span>
+                                                            <span class="n">branch</span><span class="p">),</span>
+                                                     <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span>
+                                                     <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">branch_output</span> <span class="o">=</span> <span class="n">branch_output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">branch_output</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;HEAD&#39;</span><span class="p">]</span>
+                        <span class="n">commits</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">branch</span><span class="p">,</span> <span class="n">branch_output</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;repo_commits failed with error: &quot;</span> <span class="o">+</span>
+                                          <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; on branch: &quot;</span> <span class="o">+</span>
+                                          <span class="nb">str</span><span class="p">(</span><span class="n">branch</span><span class="p">))</span>
+                        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Exiting repo_commits with status: &quot;</span> <span class="o">+</span>
+                                         <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                        <span class="k">return</span> <span class="n">status</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;repo_branches failed. Exiting repo_commits&quot;</span>
+                                 <span class="s2">&quot; with status: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">status</span>
+
+            <span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">commits</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;repo_commits failed with error: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Status of repo_commits: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished: repo_commits&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status</span></div>
+
+<div class="viewcode-block" id="MenuHelper.repo_tools"><a class="viewcode-back" href="../../../vent.api.html#vent.api.menu_helpers.MenuHelper.repo_tools">[docs]</a>    <span class="k">def</span> <span class="nf">repo_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get available tools for a repository branch at a version &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting: repo_tools&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;repo given: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">repo</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;branch given: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">branch</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;version given: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">apply_path</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+            <span class="c1"># switch to directory where repo will be cloned to</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">cwd</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;apply_path failed. Exiting repo_tools with&quot;</span>
+                                 <span class="s2">&quot; status: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">status</span>
+
+            <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+                <span class="n">tools</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">available_tools</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;checkout failed. Exiting repo_tools with&quot;</span>
+                                 <span class="s2">&quot; status: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">status</span>
+
+            <span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">tools</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;repo_tools failed with error: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Status of repo_tools: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished: repo_tools&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status</span></div>
+
+<div class="viewcode-block" id="MenuHelper.tools_status"><a class="viewcode-back" href="../../../vent.api.html#vent.api.menu_helpers.MenuHelper.tools_status">[docs]</a>    <span class="k">def</span> <span class="nf">tools_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">core</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get tools that are currently installed/built/running and also the</span>
+<span class="sd">        number of repos that those tools come from; can toggle whether looking</span>
+<span class="sd">        for core tools or plugin tools</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># !! TODO this might need to store namespaces/branches/versions</span>
+        <span class="n">all_tools</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;built&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;running&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;installed&#39;</span><span class="p">:</span> <span class="p">[],</span> <span class="s1">&#39;normal&#39;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="n">core_repo</span> <span class="o">=</span> <span class="s1">&#39;https://github.com/cyberreboot/vent&#39;</span>
+        <span class="n">repos</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="n">Tools</span><span class="p">(</span><span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="n">p_helper</span> <span class="o">=</span> <span class="n">PluginHelper</span><span class="p">(</span><span class="n">plugins_dir</span><span class="o">=</span><span class="s1">&#39;.internals/plugins/&#39;</span><span class="p">)</span>
+
+        <span class="c1"># get manifest file</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">api_action</span><span class="o">.</span><span class="n">plugin</span><span class="o">.</span><span class="n">path_dirs</span><span class="o">.</span><span class="n">meta_dir</span><span class="p">,</span>
+                                <span class="s2">&quot;plugin_manifest.cfg&quot;</span><span class="p">)</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">manifest</span><span class="p">)</span>
+        <span class="n">tools</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">sections</span><span class="p">()</span>
+
+        <span class="c1"># get repos</span>
+        <span class="k">if</span> <span class="n">core</span><span class="p">:</span>
+            <span class="n">repos</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">core_repo</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">repo</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="s1">&#39;repo&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">repo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">repo</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">core_repo</span><span class="p">:</span>
+                    <span class="n">repos</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">repo</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># get normal tools</span>
+        <span class="k">for</span> <span class="n">repo</span> <span class="ow">in</span> <span class="n">repos</span><span class="p">:</span>
+            <span class="n">status</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">p_helper</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+                <span class="n">p_helper</span><span class="o">.</span><span class="n">apply_path</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>
+                <span class="n">p_helper</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+                <span class="n">path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">p_helper</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span> <span class="n">core</span><span class="o">=</span><span class="n">core</span><span class="p">)</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">core</span><span class="p">:</span>
+                    <span class="n">matches</span> <span class="o">=</span> <span class="n">p_helper</span><span class="o">.</span><span class="n">available_tools</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+                                                       <span class="n">groups</span><span class="o">=</span><span class="s1">&#39;core&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">matches</span> <span class="o">=</span> <span class="n">p_helper</span><span class="o">.</span><span class="n">available_tools</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+                    <span class="n">all_tools</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># get tools that have been installed</span>
+        <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">repo</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="s2">&quot;repo&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">repo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">repo</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">repos</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">all_tools</span><span class="p">[</span><span class="s1">&#39;installed&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="c1"># get core tools that have been built and/or are running</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">d_client</span> <span class="o">=</span> <span class="n">docker</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+            <span class="n">images</span> <span class="o">=</span> <span class="n">d_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;vent&#39;</span><span class="p">})</span>
+            <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">images</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">core_check</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;vent.groups&quot;</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Labels&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                                  <span class="s1">&#39;core&#39;</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Labels&#39;</span><span class="p">][</span><span class="s1">&#39;vent.groups&#39;</span><span class="p">])</span>
+                    <span class="n">image_check</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">core</span><span class="p">:</span>
+                        <span class="n">image_check</span> <span class="o">=</span> <span class="n">core_check</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">image_check</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">core_check</span>
+                    <span class="k">if</span> <span class="n">image_check</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;vent.name&#39;</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Labels&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                           <span class="s1">&#39;hidden&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Labels&#39;</span><span class="p">][</span><span class="s1">&#39;vent.groups&#39;</span><span class="p">]):</span>
+                            <span class="n">all_tools</span><span class="p">[</span><span class="s1">&#39;built&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Labels&#39;</span><span class="p">][</span><span class="s1">&#39;vent.name&#39;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="k">pass</span>
+            <span class="n">containers</span> <span class="o">=</span> <span class="n">d_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;vent&#39;</span><span class="p">})</span>
+            <span class="k">for</span> <span class="n">container</span> <span class="ow">in</span> <span class="n">containers</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">core_check</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;vent.groups&quot;</span> <span class="ow">in</span> <span class="n">container</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Config&#39;</span><span class="p">][</span><span class="s1">&#39;Labels&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                                  <span class="s1">&#39;core&#39;</span> <span class="ow">in</span> <span class="n">container</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Config&#39;</span><span class="p">][</span><span class="s1">&#39;Labels&#39;</span><span class="p">][</span><span class="s1">&#39;vent.groups&#39;</span><span class="p">])</span>
+                    <span class="n">container_check</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">core</span><span class="p">:</span>
+                        <span class="n">container_check</span> <span class="o">=</span> <span class="n">core_check</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">container_check</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">core_check</span>
+                    <span class="k">if</span> <span class="n">container_check</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;vent.name&#39;</span> <span class="ow">in</span> <span class="n">container</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Config&#39;</span><span class="p">][</span><span class="s1">&#39;Labels&#39;</span><span class="p">]</span> <span class="ow">and</span>
+                           <span class="s1">&#39;hidden&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Labels&#39;</span><span class="p">][</span><span class="s1">&#39;vent.groups&#39;</span><span class="p">]):</span>
+                            <span class="n">all_tools</span><span class="p">[</span><span class="s1">&#39;running&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Config&#39;</span><span class="p">][</span><span class="s1">&#39;Labels&#39;</span><span class="p">][</span><span class="s1">&#39;vent.name&#39;</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                    <span class="k">pass</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">repos</span><span class="p">),</span> <span class="n">all_tools</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
