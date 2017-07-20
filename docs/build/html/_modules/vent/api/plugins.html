@@ -1,0 +1,870 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.api.plugins &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.api.plugins</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">docker</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">chdir</span><span class="p">,</span> <span class="n">getcwd</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="k">import</span> <span class="n">check_output</span><span class="p">,</span> <span class="n">STDOUT</span>
+
+<span class="kn">from</span> <span class="nn">vent.api.plugin_helpers</span> <span class="k">import</span> <span class="n">PluginHelper</span>
+<span class="kn">from</span> <span class="nn">vent.api.templates</span> <span class="k">import</span> <span class="n">Template</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.errors</span> <span class="k">import</span> <span class="n">ErrorHandler</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.logs</span> <span class="k">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.paths</span> <span class="k">import</span> <span class="n">PathDirs</span>
+
+
+<div class="viewcode-block" id="Plugin"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin">[docs]</a><span class="k">class</span> <span class="nc">Plugin</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle Plugins</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path_dirs</span> <span class="o">=</span> <span class="n">PathDirs</span><span class="p">(</span><span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manifest</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path_dirs</span><span class="o">.</span><span class="n">meta_dir</span><span class="p">,</span>
+                             <span class="s2">&quot;plugin_manifest.cfg&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span> <span class="o">=</span> <span class="n">PluginHelper</span><span class="p">(</span><span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span> <span class="o">=</span> <span class="n">docker</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Plugin.add"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repo</span><span class="p">,</span> <span class="n">tools</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overrides</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span>
+            <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span> <span class="n">build</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pw</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">version_alias</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">wild</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">remove_old</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">disable_old</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">limit_groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">core</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a plugin of tool(s)</span>
+<span class="sd">        tools is a list of tuples, where the pair is a tool name (path to</span>
+<span class="sd">        Dockerfile) and version</span>
+<span class="sd">          tools are for explicitly limiting which tools and versions</span>
+<span class="sd">          (if version in tuple is &#39;&#39;, then defaults to version)</span>
+<span class="sd">        overrides is a list of tuples, where the pair is a tool name (path to</span>
+<span class="sd">        Dockerfile) and a version</span>
+<span class="sd">          overrides are for explicitly removing tools and overriding versions</span>
+<span class="sd">          of tools (if version in tuple is &#39;&#39;, then tool is removed, otherwise</span>
+<span class="sd">          that tool is checked out at the specific version in the tuple)</span>
+<span class="sd">        if tools and overrides are left as empty lists, then all tools in the</span>
+<span class="sd">          repo are pulled down at the version and branch specified or defaulted</span>
+<span class="sd">          to</span>
+<span class="sd">        version is globally set for all tools, unless overridden in tools or</span>
+<span class="sd">          overrides</span>
+<span class="sd">        branch is globally set for all tools</span>
+<span class="sd">        build is a boolean of whether or not to build the tools now</span>
+<span class="sd">        user is the username for a private repo if needed</span>
+<span class="sd">        pw is the password to go along with the username for a private repo</span>
+<span class="sd">        groups is globally set for all tools</span>
+<span class="sd">        version_alias is globally set for all tools and is a mapping from a</span>
+<span class="sd">          friendly version tag to the real version commit ID</span>
+<span class="sd">        wild lets you specify individual overrides for additional values in the</span>
+<span class="sd">          tuple of tools or overrides.  wild is a list containing one or more</span>
+<span class="sd">          of the following: branch, build, groups, version_alias</span>
+<span class="sd">          the order of the items in the wild list will expect values to be</span>
+<span class="sd">          tacked on in the same order to the tuple for tools and overrides in</span>
+<span class="sd">          additional to the tool name and version</span>
+<span class="sd">        remove_old lets you specify whether or not to remove previously found</span>
+<span class="sd">          tools that match to ones being added currently (note does not stop</span>
+<span class="sd">          currently running instances of the older version)</span>
+<span class="sd">        disable_old lets you specify whether or not to disable previously found</span>
+<span class="sd">          tools that match to ones being added currently (note does not stop</span>
+<span class="sd">          currently running instances of the older version)</span>
+<span class="sd">        limit_groups is a list of groups to build tools for that match group</span>
+<span class="sd">          names in vent.template of each tool if exists</span>
+<span class="sd">        Examples:</span>
+<span class="sd">          repo=fe</span>
+<span class="sd">            (get all tools from repo &#39;fe&#39; at version &#39;HEAD&#39; on branch &#39;master&#39;)</span>
+<span class="sd">          repo=foo, version=&quot;3d1f&quot;, branch=&quot;foo&quot;</span>
+<span class="sd">            (get all tools from repo &#39;foo&#39; at verion &#39;3d1f&#39; on branch &#39;foo&#39;)</span>
+<span class="sd">          repo=foo, tools=[(&#39;bar&#39;, &#39;&#39;), (&#39;baz&#39;, &#39;1d32&#39;)]</span>
+<span class="sd">            (get only &#39;bar&#39; from repo &#39;foo&#39; at version &#39;HEAD&#39; on branch</span>
+<span class="sd">            &#39;master&#39; and &#39;baz&#39; from repo &#39;foo&#39; at version &#39;1d32&#39; on branch</span>
+<span class="sd">            &#39;master&#39;, ignore all other tools in repo &#39;foo&#39;)</span>
+<span class="sd">          repo=foo overrides=[(&#39;baz/bar&#39;, &#39;&#39;), (&#39;.&#39;, &#39;1c4e&#39;)], version=&#39;4fad&#39;</span>
+<span class="sd">            (get all tools from repo &#39;foo&#39; at verion &#39;4fad&#39; on branch &#39;master&#39;</span>
+<span class="sd">            except &#39;baz/bar&#39; and for tool &#39;.&#39; get version &#39;1c4e&#39;)</span>
+<span class="sd">          repo=foo tools=[(&#39;bar&#39;, &#39;1a2d&#39;)], overrides=[(&#39;baz&#39;, &#39;f2a1&#39;)]</span>
+<span class="sd">            (not a particularly useful example, but get &#39;bar&#39; from &#39;foo&#39; at</span>
+<span class="sd">            version &#39;1a2d&#39; and get &#39;baz&#39; from &#39;foo&#39; at version &#39;f2a1&#39; on branch</span>
+<span class="sd">            &#39;master&#39;, ignore all other tools)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize and store class objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repo</span> <span class="o">=</span> <span class="n">repo</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="o">=</span> <span class="n">tools</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overrides</span> <span class="o">=</span> <span class="n">overrides</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">branch</span> <span class="o">=</span> <span class="n">branch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build</span> <span class="o">=</span> <span class="n">build</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">=</span> <span class="n">groups</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="n">core</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">org</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">get_path</span><span class="p">(</span><span class="n">repo</span><span class="p">,</span>
+                                                                <span class="n">core</span><span class="o">=</span><span class="n">core</span><span class="p">)</span>
+
+        <span class="c1"># TODO these need to be implemented</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version_alias</span> <span class="o">=</span> <span class="n">version_alias</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wild</span> <span class="o">=</span> <span class="n">wild</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_old</span> <span class="o">=</span> <span class="n">remove_old</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disable_old</span> <span class="o">=</span> <span class="n">disable_old</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">limit_groups</span> <span class="o">=</span> <span class="n">limit_groups</span>
+
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">status_code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span> <span class="n">pw</span><span class="o">=</span><span class="n">pw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">apply_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_tools</span><span class="p">(</span><span class="n">status_code</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">status</span></div>
+
+    <span class="nd">@ErrorHandler</span>
+    <span class="k">def</span> <span class="nf">add_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                  <span class="n">image</span><span class="p">,</span>
+                  <span class="n">link_name</span><span class="p">,</span>
+                  <span class="n">tag</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">registry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                  <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an image with a tag from a Docker registry. Defaults to the Docker</span>
+<span class="sd">        Hub if not specified. Use a Template object to write an image&#39;s</span>
+<span class="sd">        information to `plugin_manifest.cfg&#39;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            image(type): docker image</span>
+<span class="sd">            link_name(type): fill me</span>
+
+<span class="sd">        Kwargs:</span>
+<span class="sd">            tag(type):</span>
+<span class="sd">            registry(type):</span>
+<span class="sd">            groups(type): Group that the docker image belongs to.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple(bool,str): if the function completed successfully,</span>
+<span class="sd">                (True, name of image).</span>
+<span class="sd">                If the function failed, (False, message about failure)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">org</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">image</span>
+            <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">image</span><span class="p">:</span>
+                <span class="n">org</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">org</span> <span class="o">=</span> <span class="s2">&quot;official&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">tag</span><span class="p">:</span>
+                <span class="n">tag</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">registry</span><span class="p">:</span>
+                <span class="n">registry</span> <span class="o">=</span> <span class="s2">&quot;docker.io&quot;</span>
+            <span class="n">full_image</span> <span class="o">=</span> <span class="n">registry</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">image</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">tag</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">pull</span><span class="p">(</span><span class="n">full_image</span><span class="p">)</span>
+            <span class="n">section</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">registry</span><span class="p">,</span> <span class="n">org</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">tag</span><span class="p">])</span>
+            <span class="n">namespace</span> <span class="o">=</span> <span class="n">org</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">name</span>
+
+            <span class="c1"># set template section and options for tool at version and branch</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">manifest</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;namespace&quot;</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;repo&quot;</span><span class="p">,</span> <span class="n">registry</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">org</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                <span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Created&#39;</span><span class="p">])</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;image_name&quot;</span><span class="p">,</span>
+                                <span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;RepoTags&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;registry&quot;</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;link_name&quot;</span><span class="p">,</span> <span class="n">link_name</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;commit_id&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;built&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+                                <span class="n">image</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="mi">12</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">groups</span><span class="p">:</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+
+            <span class="c1"># write out configuration to the manifest file</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Successfully added &quot;</span> <span class="o">+</span> <span class="n">full_image</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">status</span>
+
+    <span class="nd">@ErrorHandler</span>
+    <span class="k">def</span> <span class="nf">builder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                <span class="n">template</span><span class="p">,</span>
+                <span class="n">match_path</span><span class="p">,</span>
+                <span class="n">image_name</span><span class="p">,</span>
+                <span class="n">section</span><span class="p">,</span>
+                <span class="n">build</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">branch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build tools</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting: builder&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;install path: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_path</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;image name: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;build: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">build</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;branch: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">branch</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;version: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">build</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build</span> <span class="o">=</span> <span class="n">build</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;build&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">branch</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">branch</span> <span class="o">=</span> <span class="n">branch</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;branch&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">branch</span> <span class="o">=</span> <span class="s1">&#39;master&#39;</span>
+
+        <span class="k">if</span> <span class="n">version</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;HEAD&#39;</span>
+
+        <span class="n">cwd</span> <span class="o">=</span> <span class="n">getcwd</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;current working directory: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cwd</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">chdir</span><span class="p">(</span><span class="n">match_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;unable to change to directory: &quot;</span> <span class="o">+</span>
+                              <span class="nb">str</span><span class="p">(</span><span class="n">match_path</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; because: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_image</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">match_path</span><span class="p">,</span> <span class="n">image_name</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+        <span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+
+        <span class="c1"># remove untagged images</span>
+        <span class="n">untagged</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;vent&quot;</span><span class="p">,</span>
+                                                      <span class="s2">&quot;dangling&quot;</span><span class="p">:</span> <span class="s2">&quot;true&quot;</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">untagged</span><span class="p">:</span>
+            <span class="n">deleted_images</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">untagged</span><span class="p">:</span>
+                <span class="n">deleted_images</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">deleted_images</span><span class="p">,</span> <span class="n">image</span><span class="o">.</span><span class="n">id</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;removed dangling images:&quot;</span> <span class="o">+</span> <span class="n">deleted_images</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;template of builder: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">template</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished: builder&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">template</span>
+
+    <span class="k">def</span> <span class="nf">_build_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create list of tools, paths, and versions to be built and sends them to</span>
+<span class="sd">        build_manifest</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            status (tuple(bool, str)):</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            response (tuple(bool, str)): If True, then the function performed</span>
+<span class="sd">            as expected and the str is a string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># TODO implement features: wild, remove_old, disable_old, limit_groups</span>
+
+        <span class="c1"># check result of clone, ensure successful or that it already exists</span>
+        <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="n">branch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">branch</span><span class="p">,</span>
+                                              <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">search_groups</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">core</span><span class="p">:</span>
+                    <span class="n">search_groups</span> <span class="o">=</span> <span class="s1">&#39;core&#39;</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrides</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># get all tools</span>
+                    <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">available_tools</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                                                            <span class="n">groups</span><span class="o">=</span><span class="n">search_groups</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># there&#39;s only something in overrides</span>
+                    <span class="c1"># grab all the tools then apply overrides</span>
+                    <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">available_tools</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                                                            <span class="n">groups</span><span class="o">=</span><span class="n">search_groups</span><span class="p">)</span>
+                    <span class="c1"># !! TODO apply overrides to matches</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrides</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># there&#39;s only something in tools</span>
+                    <span class="c1"># only grab the tools specified</span>
+                    <span class="n">matches</span> <span class="o">=</span> <span class="n">PluginHelper</span><span class="o">.</span><span class="n">tool_matches</span><span class="p">(</span><span class="n">tools</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span>
+                                                        <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># both tools and overrides were specified</span>
+                    <span class="c1"># grab only the tools specified, with the overrides applied</span>
+                    <span class="n">o_matches</span> <span class="o">=</span> <span class="n">PluginHelper</span><span class="o">.</span><span class="n">tool_matches</span><span class="p">(</span><span class="n">tools</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tools</span><span class="p">,</span>
+                                                          <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+                    <span class="n">matches</span> <span class="o">=</span> <span class="n">o_matches</span>
+                    <span class="k">for</span> <span class="n">override</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrides</span><span class="p">:</span>
+                        <span class="n">override_t</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">if</span> <span class="n">override</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                            <span class="n">override_t</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">override</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">override_t</span> <span class="o">=</span> <span class="n">override</span>
+                        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">o_matches</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">override_t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                                <span class="n">matches</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+                                <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">override_t</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_build_manifest</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">def</span> <span class="nf">_build_manifest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matches</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds and writes the manifest for the tools being added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># !! TODO check for pre-existing that conflict with request and</span>
+        <span class="c1">#         disable and/or remove image</span>
+        <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span><span class="p">:</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">manifest</span><span class="p">)</span>
+            <span class="c1"># TODO check for special settings here first for the specific match</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">checkout</span><span class="p">(</span><span class="n">branch</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">branch</span><span class="p">,</span>
+                                              <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">org</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span>
+                <span class="n">section</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+                <span class="n">match_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">+</span> <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">image_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">org</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="c1"># if tool is in a subdir, add that to the name of the image</span>
+                    <span class="n">image_name</span> <span class="o">+=</span> <span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span>
+                <span class="n">image_name</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span>
+
+                <span class="c1"># check if the section already exists</span>
+                <span class="n">exists</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">section</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+                <span class="n">previous_commit</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">previous_commits</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">head</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+                        <span class="c1"># TODO check if tool name but a different version</span>
+                        <span class="c1">#      exists - then disable/remove if set</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;version&#39;</span> <span class="ow">and</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">:</span>
+                            <span class="n">head</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;built&#39;</span> <span class="ow">and</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+                            <span class="c1"># !! TODO remove pre-existing image</span>
+                            <span class="k">pass</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;commit_id&#39;</span><span class="p">:</span>
+                            <span class="n">previous_commit</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;previous_versions&#39;</span><span class="p">:</span>
+                            <span class="n">previous_commits</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># !! TODO</span>
+                <span class="c1"># check if section should be removed from config i.e. all tools</span>
+                <span class="c1"># but new commit removed one that was in a previous commit</span>
+
+                <span class="c1"># set template section &amp; options for tool at version and branch</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;namespace&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">org</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="n">match_path</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;repo&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;branch&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">branch</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; UTC&quot;</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;image_name&quot;</span><span class="p">,</span> <span class="n">image_name</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;repository&quot;</span><span class="p">)</span>
+                <span class="c1"># save settings in vent.template to plugin_manifest</span>
+                <span class="n">vent_template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">join</span><span class="p">(</span><span class="n">match_path</span><span class="p">,</span>
+                                                       <span class="s1">&#39;vent.template&#39;</span><span class="p">))</span>
+                <span class="n">sections</span> <span class="o">=</span> <span class="n">vent_template</span><span class="o">.</span><span class="n">sections</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="n">section_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="n">options</span> <span class="o">=</span> <span class="n">vent_template</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">options</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                            <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                                <span class="n">option_name</span> <span class="o">=</span> <span class="n">option</span>
+                                <span class="k">if</span> <span class="n">option</span> <span class="o">==</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span>
+                                    <span class="n">option_name</span> <span class="o">=</span> <span class="s1">&#39;link_name&#39;</span>
+                                <span class="n">option</span> <span class="o">=</span> <span class="n">vent_template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                                <span class="n">option_val</span> <span class="o">=</span> <span class="n">option</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="n">section_dict</span><span class="p">[</span><span class="n">option_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">option_val</span>
+                        <span class="k">if</span> <span class="n">section_dict</span><span class="p">:</span>
+                            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span>
+                                                <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">section_dict</span><span class="p">))</span>
+                <span class="c1"># TODO do we need this if we save as a dictionary?</span>
+                <span class="n">vent_status</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="n">vent_template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">vent_status</span><span class="p">:</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;link_name&quot;</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                        <span class="s2">&quot;link_name&quot;</span><span class="p">,</span>
+                                        <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">commit_id</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">:</span>
+                    <span class="n">chdir</span><span class="p">(</span><span class="n">match_path</span><span class="p">)</span>
+                    <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;git rev-parse --short HEAD&quot;</span>
+                    <span class="n">commit_id</span> <span class="o">=</span> <span class="n">check_output</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">cmd</span><span class="p">),</span>
+                                             <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span>
+                                             <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;commit_id&quot;</span><span class="p">,</span> <span class="n">commit_id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">head</span><span class="p">:</span>
+                    <span class="c1"># no need to store previous commits if not HEAD, since</span>
+                    <span class="c1"># the version will always be the same commit ID</span>
+                    <span class="k">if</span> <span class="n">previous_commit</span> <span class="ow">and</span> <span class="n">previous_commit</span> <span class="o">!=</span> <span class="n">commit_id</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">previous_commits</span> <span class="ow">and</span>
+                           <span class="n">previous_commit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">previous_commits</span><span class="p">):</span>
+                            <span class="n">previous_commits</span> <span class="o">=</span> <span class="p">(</span><span class="n">previous_commit</span> <span class="o">+</span>
+                                                <span class="s1">&#39;,&#39;</span> <span class="o">+</span>
+                                                <span class="n">previous_commits</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="n">previous_commits</span><span class="p">:</span>
+                            <span class="n">previous_commits</span> <span class="o">=</span> <span class="n">previous_commit</span>
+                    <span class="k">if</span> <span class="n">previous_commits</span> <span class="ow">and</span> <span class="n">previous_commits</span> <span class="o">!=</span> <span class="n">commit_id</span><span class="p">:</span>
+                        <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                            <span class="s2">&quot;previous_versions&quot;</span><span class="p">,</span>
+                                            <span class="n">previous_commits</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">version_alias</span><span class="p">:</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span>
+                                        <span class="s2">&quot;version_alias&quot;</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">version_alias</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">:</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vent_template</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">match_path</span><span class="p">,</span> <span class="s1">&#39;vent.template&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">vent_template</span><span class="p">):</span>
+                        <span class="n">v_template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">vent_template</span><span class="p">)</span>
+                        <span class="n">groups</span> <span class="o">=</span> <span class="n">v_template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;info&quot;</span><span class="p">,</span> <span class="s2">&quot;groups&quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;groups&quot;</span><span class="p">,</span> <span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_image</span><span class="p">(</span><span class="n">template</span><span class="p">,</span>
+                                             <span class="n">match_path</span><span class="p">,</span>
+                                             <span class="n">image_name</span><span class="p">,</span>
+                                             <span class="n">section</span><span class="p">)</span>
+
+            <span class="c1"># write out configuration to the manifest file</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+
+        <span class="c1"># reset to repo directory</span>
+        <span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_build_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                     <span class="n">template</span><span class="p">,</span>
+                     <span class="n">match_path</span><span class="p">,</span>
+                     <span class="n">image_name</span><span class="p">,</span>
+                     <span class="n">section</span><span class="p">,</span>
+                     <span class="n">build_local</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build docker images and store results in template</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># !! TODO return status of whether it built successfully or not</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">build</span><span class="p">:</span>
+            <span class="n">cwd</span> <span class="o">=</span> <span class="n">getcwd</span><span class="p">()</span>
+            <span class="n">chdir</span><span class="p">(</span><span class="n">match_path</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># currently can&#39;t use docker-py because it doesn&#39;t support</span>
+                <span class="c1"># labels on images yet</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+                <span class="n">groups</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;groups&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">groups</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">image_name</span><span class="p">)</span>
+                <span class="c1"># pull if &#39;/&#39; in image_name, fallback to build</span>
+                <span class="n">pull</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="s1">&#39;/&#39;</span> <span class="ow">in</span> <span class="n">image_name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">build_local</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Trying to pull &quot;</span> <span class="o">+</span> <span class="n">image_name</span><span class="p">)</span>
+                        <span class="n">output</span> <span class="o">=</span> <span class="n">check_output</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;docker pull &quot;</span> <span class="o">+</span>
+                                                          <span class="n">image_name</span><span class="p">),</span>
+                                              <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span>
+                                              <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pulling &quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                                         <span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+
+                        <span class="n">i_attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span><span class="o">.</span><span class="n">attrs</span>
+                        <span class="n">image_id</span> <span class="o">=</span> <span class="n">i_attrs</span><span class="p">[</span><span class="s1">&#39;Id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="mi">12</span><span class="p">]</span>
+
+                        <span class="k">if</span> <span class="n">image_id</span><span class="p">:</span>
+                            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;built&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+                            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="n">image_id</span><span class="p">)</span>
+                            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="o">+</span>
+                                                <span class="s2">&quot; UTC&quot;</span><span class="p">)</span>
+                            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;Pulled &quot;</span> <span class="o">+</span> <span class="n">image_name</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;built&quot;</span><span class="p">,</span> <span class="s2">&quot;failed&quot;</span><span class="p">)</span>
+                            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="o">+</span>
+                                                <span class="s2">&quot; UTC&quot;</span><span class="p">)</span>
+                            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Failed to pull image &quot;</span> <span class="o">+</span>
+                                      <span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+                        <span class="n">pull</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Failed to pull image, going to&quot;</span>
+                                            <span class="s2">&quot; build instead: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">pull</span><span class="p">:</span>
+                    <span class="n">commit_tag</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                    <span class="k">if</span> <span class="n">image_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;HEAD&#39;</span><span class="p">):</span>
+                        <span class="n">commit_id</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;commit_id&quot;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">commit_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                            <span class="n">commit_tag</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot; -t &quot;</span> <span class="o">+</span> <span class="n">image_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span>
+                                          <span class="nb">str</span><span class="p">(</span><span class="n">commit_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="n">output</span> <span class="o">=</span> <span class="n">check_output</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;docker build --label&quot;</span>
+                                                      <span class="s2">&quot; vent --label&quot;</span>
+                                                      <span class="s2">&quot; vent.name=&quot;</span> <span class="o">+</span>
+                                                      <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; --label &quot;</span>
+                                                      <span class="s2">&quot;vent.groups=&quot;</span> <span class="o">+</span>
+                                                      <span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; -t &quot;</span> <span class="o">+</span>
+                                                      <span class="n">image_name</span> <span class="o">+</span>
+                                                      <span class="n">commit_tag</span> <span class="o">+</span> <span class="s2">&quot; .&quot;</span><span class="p">),</span>
+                                          <span class="n">stderr</span><span class="o">=</span><span class="n">STDOUT</span><span class="p">,</span>
+                                          <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Building &quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                                     <span class="nb">str</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+                    <span class="n">image_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+                        <span class="n">suc_str</span> <span class="o">=</span> <span class="s2">&quot;Successfully built &quot;</span>
+                        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">suc_str</span><span class="p">):</span>
+                            <span class="n">image_id</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">suc_str</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;built&quot;</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">)</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="n">image_id</span><span class="p">)</span>
+                    <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="o">+</span>
+                                        <span class="s2">&quot; UTC&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;unable to build image: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span> <span class="o">+</span>
+                                  <span class="s2">&quot; because: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;built&quot;</span><span class="p">,</span> <span class="s2">&quot;failed&quot;</span><span class="p">)</span>
+                <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; UTC&quot;</span><span class="p">)</span>
+            <span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;built&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">)</span>
+            <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot; UTC&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">template</span>
+
+<div class="viewcode-block" id="Plugin.list_tools"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.list_tools">[docs]</a>    <span class="k">def</span> <span class="nf">list_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return list of tuples of all tools</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">tools</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">manifest</span><span class="p">)</span>
+        <span class="n">exists</span><span class="p">,</span> <span class="n">sections</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">sections</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
+                <span class="n">options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="n">section</span><span class="p">,</span>
+                           <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="s1">&#39;built&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="s1">&#39;repo&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="s1">&#39;branch&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="s1">&#39;groups&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="s1">&#39;image_name&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+                <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">exists</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
+                        <span class="n">options</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">tools</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tools</span></div>
+
+<div class="viewcode-block" id="Plugin.remove"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">repo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span>
+               <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">,</span> <span class="n">built</span><span class="o">=</span><span class="s2">&quot;yes&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove tool (name) or repository, repository is the url. If no</span>
+<span class="sd">        arguments are specified, all tools will be removed for the defaults.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># get resulting dict of sections with options that match constraints</span>
+        <span class="n">results</span><span class="p">,</span> <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">constraint_options</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">response</span><span class="p">,</span> <span class="n">image_name</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;image_name&#39;</span><span class="p">)</span>
+
+            <span class="c1"># check for container and remove</span>
+            <span class="n">container_name</span> <span class="o">=</span> <span class="n">image_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">container</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing plugin container: &quot;</span> <span class="o">+</span>
+                                 <span class="n">container_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Unable to remove the plugin container: &quot;</span> <span class="o">+</span>
+                                 <span class="n">container_name</span> <span class="o">+</span> <span class="s2">&quot; because: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+            <span class="c1"># check for image and remove</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># due to problems with core image_id value in manifest file</span>
+                <span class="n">groups</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;groups&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="s2">&quot;core&quot;</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">image_name</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">image_id</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;image_id&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">image_id</span><span class="p">,</span>
+                                                           <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing plugin image: &quot;</span> <span class="o">+</span> <span class="n">image_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Unable to remove the plugin image: &quot;</span> <span class="o">+</span>
+                                 <span class="n">image_name</span> <span class="o">+</span> <span class="s2">&quot; because: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+            <span class="c1"># remove tool from the manifest</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">del_section</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Removing plugin tool: &quot;</span> <span class="o">+</span> <span class="n">result</span><span class="p">)</span>
+        <span class="c1"># TODO if all tools from a repo have been removed, remove the repo</span>
+        <span class="n">template</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">status</span></div>
+
+<div class="viewcode-block" id="Plugin.update"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+               <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">repo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">branch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+               <span class="n">groups</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update tool (name) or repository, repository is the url. If no</span>
+<span class="sd">        arguments are specified, all tools will be updated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;branch&#39;</span><span class="p">,</span> <span class="s1">&#39;groups&#39;</span><span class="p">,</span> <span class="s1">&#39;image_name&#39;</span><span class="p">]</span>
+
+        <span class="c1"># get resulting dict of sections with options that match constraints</span>
+        <span class="n">results</span><span class="p">,</span> <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">constraint_options</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="c1"># check for container and remove</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">container_name</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;image_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> \
+                                                      <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span>
+                <span class="n">container</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">v</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Error updating: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">+</span>
+                                 <span class="s2">&quot; because: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+            <span class="c1"># TODO git pull</span>
+            <span class="c1"># TODO build</span>
+            <span class="c1"># TODO docker pull</span>
+            <span class="c1"># TODO update tool in the manifest</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updating plugin tool: &quot;</span> <span class="o">+</span> <span class="n">result</span><span class="p">)</span>
+        <span class="n">template</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">status</span></div>
+
+    <span class="c1"># !! TODO name or group ?</span>
+<div class="viewcode-block" id="Plugin.versions"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.versions">[docs]</a>    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return available versions of a tool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="n">versions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;previous_versions&#39;</span><span class="p">]</span>
+
+        <span class="c1"># get resulting dict of sections with options that match constraints</span>
+        <span class="n">results</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">constraint_options</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">version_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">results</span><span class="p">[</span><span class="n">result</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="s1">&#39;previous_versions&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">result</span><span class="p">]:</span>
+                <span class="n">version_list</span> <span class="o">+=</span> <span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">result</span><span class="p">][</span><span class="s1">&#39;previous_versions&#39;</span><span class="p">])</span> \
+                                <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="n">versions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">result</span><span class="p">,</span> <span class="n">version_list</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">versions</span></div>
+
+    <span class="c1"># !! TODO name or group ?</span>
+<div class="viewcode-block" id="Plugin.current_version"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.current_version">[docs]</a>    <span class="k">def</span> <span class="nf">current_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return current version for a given tool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="n">versions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span>
+
+        <span class="c1"># get resulting dict of sections with options that match constraints</span>
+        <span class="n">results</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">constraint_options</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">versions</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">result</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="n">result</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">versions</span></div>
+
+    <span class="c1"># !! TODO name or group ?</span>
+<div class="viewcode-block" id="Plugin.state"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.state">[docs]</a>    <span class="k">def</span> <span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return state of a tool, disabled/enabled for each version</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="n">states</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span>
+
+        <span class="c1"># get resulting dict of sections with options that match constraints</span>
+        <span class="n">results</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">constraint_options</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="n">result</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+                <span class="n">states</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;enabled&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">states</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;disabled&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">states</span></div>
+
+    <span class="c1"># !! TODO name or group ?</span>
+<div class="viewcode-block" id="Plugin.enable"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.enable">[docs]</a>    <span class="k">def</span> <span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enable tool at a specific version, default to head</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># get resulting dict of sections with options that match constraints</span>
+        <span class="n">results</span><span class="p">,</span> <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">constraint_options</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="s1">&#39;yes&#39;</span><span class="p">)</span>
+        <span class="n">template</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">status</span></div>
+
+    <span class="c1"># !! TODO name or group ?</span>
+<div class="viewcode-block" id="Plugin.disable"><a class="viewcode-back" href="../../../vent.api.html#vent.api.plugins.Plugin.disable">[docs]</a>    <span class="k">def</span> <span class="nf">disable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="s2">&quot;master&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;HEAD&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Disable tool at a specific version, default to head</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># get resulting dict of sections with options that match constraints</span>
+        <span class="n">results</span><span class="p">,</span> <span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_helper</span><span class="o">.</span><span class="n">constraint_options</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="s1">&#39;no&#39;</span><span class="p">)</span>
+        <span class="n">template</span><span class="o">.</span><span class="n">write_config</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">status</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

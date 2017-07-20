@@ -1,0 +1,203 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.core.file_drop.file_drop &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.core.file_drop.file_drop</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">Redis</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="kn">from</span> <span class="nn">rq</span> <span class="k">import</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">watchdog.observers</span> <span class="k">import</span> <span class="n">Observer</span>
+<span class="kn">from</span> <span class="nn">watchdog.events</span> <span class="k">import</span> <span class="n">PatternMatchingEventHandler</span>
+
+
+<div class="viewcode-block" id="GZHandler"><a class="viewcode-back" href="../../../../vent.core.file_drop.html#vent.core.file_drop.file_drop.GZHandler">[docs]</a><span class="k">class</span> <span class="nc">GZHandler</span><span class="p">(</span><span class="n">PatternMatchingEventHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handles when an event on the directory being watched happens that matches</span>
+<span class="sd">    the values in patterns</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="GZHandler.process"><a class="viewcode-back" href="../../../../vent.core.file_drop.html#vent.core.file_drop.file_drop.GZHandler.process">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">r_host</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        event.event_type</span>
+<span class="sd">            &#39;modified&#39; | &#39;created&#39; | &#39;moved&#39; | &#39;deleted&#39;</span>
+<span class="sd">        event.is_directory</span>
+<span class="sd">            True | False</span>
+<span class="sd">        event.src_path</span>
+<span class="sd">            path/to/observed/file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+        <span class="n">hostname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;VENT_HOST&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">hostname</span><span class="p">:</span>
+            <span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="c1"># let jobs run for up to one day</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">(</span><span class="n">connection</span><span class="o">=</span><span class="n">Redis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">r_host</span><span class="p">),</span> <span class="n">default_timeout</span><span class="o">=</span><span class="mi">86400</span><span class="p">)</span>
+            <span class="c1"># TODO should directories be treated as bulk paths to send to a</span>
+            <span class="c1">#      plugin?</span>
+            <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">event_type</span> <span class="o">==</span> <span class="s2">&quot;created&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">event</span><span class="o">.</span><span class="n">is_directory</span><span class="p">:</span>
+                <span class="c1"># check if the file was already queued and ignore</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+                <span class="n">exists</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">uid</span><span class="o">+</span><span class="s2">&quot; started &quot;</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">)</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">r_host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">jobs</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="s2">&quot;rq:job*&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">jobs</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="s2">&quot; ***&quot;</span><span class="p">)</span>
+                    <span class="n">description</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">hget</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">description</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span>
+                          <span class="n">description</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;file_watch.file_queue(&#39;&quot;</span> <span class="o">+</span>
+                                            <span class="n">hostname</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">description</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;file_watch.file_queue(&#39;&quot;</span> <span class="o">+</span>
+                                         <span class="n">hostname</span> <span class="o">+</span>
+                                         <span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="s2">&quot; true&quot;</span><span class="p">)</span>
+                        <span class="n">exists</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="s2">&quot; ***&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">:</span>
+                    <span class="c1"># !! TODO this should be a configuration option in the</span>
+                    <span class="c1">#         vent.template</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="s2">&quot; let&#39;s queue it &quot;</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">)</span>
+                    <span class="c1"># let jobs be queued for up to 30 days</span>
+                    <span class="n">q</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="s1">&#39;file_watch.file_queue&#39;</span><span class="p">,</span>
+                              <span class="n">hostname</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">,</span>
+                              <span class="n">ttl</span><span class="o">=</span><span class="mi">2592000</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">uid</span> <span class="o">+</span> <span class="s2">&quot; end &quot;</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">src_path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GZHandler.on_created"><a class="viewcode-back" href="../../../../vent.core.file_drop.html#vent.core.file_drop.file_drop.GZHandler.on_created">[docs]</a>    <span class="k">def</span> <span class="nf">on_created</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="s1">&#39;redis&#39;</span><span class="p">)</span></div></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="n">observer</span> <span class="o">=</span> <span class="n">Observer</span><span class="p">()</span>
+    <span class="n">observer</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span><span class="n">GZHandler</span><span class="p">(),</span> <span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span> <span class="k">else</span> <span class="s1">&#39;/files&#39;</span><span class="p">)</span>
+    <span class="n">observer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">observer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+    <span class="n">observer</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

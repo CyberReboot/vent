@@ -1,0 +1,275 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.menus.tutorial_forms &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.menus.tutorial_forms</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">vent.menus.tutorials</span> <span class="k">import</span> <span class="n">TutorialForm</span>
+
+
+<div class="viewcode-block" id="TutorialAddingFilesForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialAddingFilesForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialAddingFilesForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial Adding Files form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize adding files tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Adding Files&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;TODO&quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALSETTINGUPSERVICES&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TutorialIntroForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialIntroForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialIntroForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial introduction landing form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize introduction landing tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Tutorial Introduction&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        Welcome to Vent!</span>
+
+<span class="s2">        This tutorial is intended to help you get up to speed on Vent, some of</span>
+<span class="s2">        the terminology we use, how to interact with this application, getting</span>
+<span class="s2">        setup, and more.</span>
+
+<span class="s2">        Please note the OK and CANCEL buttons on the bottom right of the</span>
+<span class="s2">        screen. If at any point you wish to quit the tutorial, simply click</span>
+<span class="s2">        CANCEL to be taken to the main menu. You can always find the tutorial</span>
+<span class="s2">        menu again from the main menu.</span>
+
+<span class="s2">        Navigating through our menus is simple. Directional arrow keys or TAB</span>
+<span class="s2">        will let you interact with the page and move between the buttons. ENTER</span>
+<span class="s2">        will select a button. At the top left you will notice additional</span>
+<span class="s2">        keybindings: CTRL+Q will take you back to the main menu for this page.</span>
+<span class="s2">        At the bottom left you will notice a menu for you to access. This menu</span>
+<span class="s2">        is specific to the tutorial and will allow you to skip to material you</span>
+<span class="s2">        want. Press CTRL+X to access the menu, up and down directional arrows</span>
+<span class="s2">        to change between entries or to access additional content in menus that</span>
+<span class="s2">        display - more -, ENTER to dive deeper into a submenu, and ESC to exit</span>
+<span class="s2">        the menu and return to the current page. You can also use the shortcut</span>
+<span class="s2">        letters to switch between entries quickly.</span>
+
+<span class="s2">        Click OK when you are ready to continue on with the tutorial.</span>
+
+<span class="s2">        NEXT UP: About Vent - Background</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALBACKGROUND&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TutorialAddingPluginsForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialAddingPluginsForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialAddingPluginsForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial Adding Plugins form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize adding plugins tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Adding Plugins&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;TODO&quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALADDINGFILES&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TutorialBackgroundForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialBackgroundForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialBackgroundForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial Background form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize background tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Vent Background&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;TODO&quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALTERMINOLOGY&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TutorialBuildingCoresForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialBuildingCoresForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialBuildingCoresForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial Building Cores form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize building cores tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Building Cores&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;TODO&quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALSTARTINGCORES&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TutorialGettingSetupForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialGettingSetupForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialGettingSetupForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial Getting Setup form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize getting setup tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Getting Setup&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;TODO&quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALBUILDINGCORES&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TutorialSettingUpServicesForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialSettingUpServicesForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialSettingUpServicesForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial Setting up Services form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize setting up services tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Setting up Services&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;TODO&quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;MAIN&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TutorialStartingCoresForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialStartingCoresForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialStartingCoresForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial Starting Cores form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize starting cores tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Starting Cores&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;TODO&quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALADDINGPLUGINS&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TutorialTerminologyForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.tutorial_forms.TutorialTerminologyForm">[docs]</a><span class="k">class</span> <span class="nc">TutorialTerminologyForm</span><span class="p">(</span><span class="n">TutorialForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Tutorial terminology form for the Vent CLI &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize terminology tutorial form fields &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Vent Terminology&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;TODO&quot;&quot;&quot;</span>
+        <span class="n">next_tutorial</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALGETTINGSETUP&quot;</span>
+        <span class="n">TutorialForm</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">title</span><span class="p">,</span>
+                              <span class="n">text</span><span class="p">,</span>
+                              <span class="n">next_tutorial</span><span class="p">,</span>
+                              <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">keywords</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

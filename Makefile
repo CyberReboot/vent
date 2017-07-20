@@ -10,7 +10,14 @@ build: clean
 	pip install -r tests/requirements.txt
 	@for file in vent/core/*/; do mv $$file `echo $$file | tr '-' '_'` ; done 2> /dev/null || true
 	rm -rf docs/source/v*.rst
-	sphinx-apidoc -f -o docs/source/ vent/
+	sphinx-apidoc -f -o docs/source/ vent/ \
+ 		vent/core/file-drop/test_file_drop.py \
+ 		vent/core/network-tap/ncontrol/test_ncontrol.py \
+ 		vent/core/rmq-es-connector/test_rmq_es_connector.py \
+ 		vent/core/rq-dashboard/rq_dash_settings.py \
+ 		vent/core/rq-dashboard/test_rq_dashboard.py \
+ 		vent/core/rq-worker/settings.py \
+ 		vent/core/rq-worker/test_rq_worker.py 
 	make clean -C docs/
 	make html -C docs/
 	@for file in vent/core/*/; do mv $$file `echo $$file | tr '_' '-'` ; done 2> /dev/null || true
