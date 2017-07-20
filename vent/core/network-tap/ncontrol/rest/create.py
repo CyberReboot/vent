@@ -24,7 +24,7 @@ class CreateR:
         payload = {}
         try:
             payload = ast.literal_eval(data)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             # !! TODO parse out url parms...
             return 'malformed payload: ' + str(e)
 
@@ -57,14 +57,14 @@ class CreateR:
         r = None
         try:
             r = redis.StrictRedis(host='redis', port=6379, db=0)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             return 'unable to connect to redis because: ' + str(e)
 
         # connect to docker
         c = None
         try:
             c = docker.from_env()
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             return 'unable to connect to docker because: ' + str(e)
 
         # store payload in redis
@@ -84,7 +84,7 @@ class CreateR:
             try:
                 container_id = c.containers.run(image='cyberreboot/vent-ncapture:master',
                                                 command=cmd, detach=True, **tool_d)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 return 'unable to start container because: ' + str(e)
 
         return ('successfully created and started filter ' +

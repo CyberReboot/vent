@@ -30,45 +30,33 @@ class InventoryForm(npyscreen.FormBaseNew):
                 value = "No tools were found.\n"
             else:
                 value = "Tools for each plugin found:\n"
+            tools = None
+            if self.action['cores'] and inventory['core']:
+                tools = inventory['core']
+            elif not self.action['cores'] and inventory['tools']:
+                tools = inventory['tools']
+
             for repo in inventory['repos']:
-                if (self.action['cores'] or
-                   (not self.action['cores'] and
-                   repo != "https://github.com/cyberreboot/vent")):
-                    value += "\n  Plugin: "+repo+"\n"
-                    repo_name = repo.rsplit("/", 2)[1:]
-                    if len(repo_name) == 1:
-                        repo_name = repo.split('/')
-                    for tool in inventory['tools']:
-                        is_core = False
-                        for core in inventory['core']:
-                            if core[0] == tool[0]:
-                                is_core = True
-                        if ((is_core and self.action['cores']) or
-                           (not is_core and not self.action['cores'])):
-                            r_name = tool[0].split(":")
-                            if (repo_name[0] == r_name[0] and
-                               repo_name[1] == r_name[1]):
-                                value += "    " + tool[1] + "\n"
-                                for built in inventory['built']:
-                                    if built[0] == tool[0]:
-                                        value += "      Built: " + built[2]
-                                        value += "\n"
-                                for enabled in inventory['enabled']:
-                                    if enabled[0] == tool[0]:
-                                        value += "      Enabled: " + enabled[2]
-                                        value += "\n"
-                                for image in inventory['images']:
-                                    if image[0] == tool[0]:
-                                        value += "      Image name: "
-                                        value += image[2] + "\n"
-                                for running in inventory['running']:
-                                    if running[0] == tool[0]:
-                                        value += "      Status: " + running[2]
-                                        value += "\n"
-                    if self.action['cores']:
-                        tmp_value = value.split("\n")
-                        if "Plugin: " in tmp_value[-2]:
-                            value = "\n".join(value.split("\n")[:-2])
+                s_value = ''
+                repo_name = repo.rsplit("/", 2)[1:]
+                if len(repo_name) == 1:
+                    repo_name = repo.split('/')
+                if tools:
+                    p_value = "\n  Plugin: " + repo + "\n"
+                    for tool in tools:
+                        t_name = tool.split(":")
+                        if (t_name[0] == repo_name[0] and
+                           t_name[1] == repo_name[1]):
+                            s_value += "    " + tools[tool] + "\n      Built: "
+                            s_value += inventory['built'][tool] + "\n"
+                            s_value += "      Enabled: "
+                            s_value += inventory['enabled'][tool] + "\n"
+                            s_value += "      Image name: "
+                            s_value += inventory['images'][tool] + "\n"
+                            s_value += "      Status: "
+                            s_value += inventory['running'][tool] + "\n"
+                if s_value:
+                    value += p_value + s_value
         else:
             value = "There was an issue with " + self.action['name']
             value += " retrieval:\n" + str(response[1])
