@@ -215,8 +215,8 @@ def Jobs():
             jobs[3] += 1
 
             if 'file' in container.attrs['Config']['Labels']:
-                # make sure the file name and the tool tup exists because multiple
-                # tools can run on 1 file.
+                # make sure the file name and the tool tup exists because
+                # multiple tools can run on 1 file.
                 if (container.attrs['Config']['Labels']['file'],
                     container.attrs['Config']['Labels']['vent.name']) not in \
                         tool_names:
