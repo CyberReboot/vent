@@ -79,7 +79,7 @@ class ToolForm(npyscreen.ActionForm):
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
                        repo_name[1] == tool_repo_name[1]):
-                        ncore_list.append(tool.split(":", 2)[2])
+                        ncore_list.append(tool.split(":", 2)[2].split("/")[-1])
 
                 for tool in inventory['core']:
                     tool_repo_name = tool.split(":")
@@ -87,7 +87,7 @@ class ToolForm(npyscreen.ActionForm):
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
                        repo_name[1] == tool_repo_name[1]):
-                        core_list.append(tool.split(":", 2)[2])
+                        core_list.append(tool.split(":", 2)[2].split("/")[-1])
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
@@ -103,8 +103,11 @@ class ToolForm(npyscreen.ActionForm):
                                  editable=False, rely=i, relx=5)
 
                         for tool in has_core[repo]:
+                            tool_name = tool
+                            if tool_name == "":
+                                tool_name = "/"
                             self.tools_tc[repo][tool] = self.add(
-                                    npyscreen.CheckBox, name=tool,
+                                    npyscreen.CheckBox, name=tool_name,
                                     value=True, relx=10)
                             i += 1
                         i += 3
@@ -116,8 +119,11 @@ class ToolForm(npyscreen.ActionForm):
                                  editable=False, rely=i, relx=5)
 
                         for tool in has_non_core[repo]:
+                            tool_name = tool
+                            if tool_name == "":
+                                tool_name = "/"
                             self.tools_tc[repo][tool] = self.add(
-                                    npyscreen.CheckBox, name=tool,
+                                    npyscreen.CheckBox, name=tool_name,
                                     value=True, relx=10)
                             i += 1
                         i += 3
