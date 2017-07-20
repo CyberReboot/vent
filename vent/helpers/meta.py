@@ -185,7 +185,7 @@ def Jobs():
     try:
         d_client = docker.from_env()
         c = d_client.containers.list(all=True,
-                                     filters={'label': 'vent-plugin', 
+                                     filters={'label': 'vent-plugin',
                                               'status': 'exited'})
 
         file_names = []
