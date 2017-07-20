@@ -22,7 +22,7 @@ def test_run_containers():
 def test_version():
     """ Test the version function """
     version = Version()
-    assert version != ''
+    assert version.startswith('v')
 
 def test_system():
     """ Test the system function """
