@@ -1,0 +1,161 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.core.rmq_es_connector.test_rmq_es_connector &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.core.rmq_es_connector.test_rmq_es_connector</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">rmq_es_connector</span>
+
+
+<div class="viewcode-block" id="Method"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.test_rmq_es_connector.Method">[docs]</a><span class="k">class</span> <span class="nc">Method</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; create mock method object &quot;&quot;&quot;</span>
+    <span class="n">routing_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">routing_key</span><span class="o">=</span><span class="s2">&quot;foo.bar&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">routing_key</span> <span class="o">=</span> <span class="n">routing_key</span></div>
+
+
+<div class="viewcode-block" id="test_rmq_es_connector_connections"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.test_rmq_es_connector.test_rmq_es_connector_connections">[docs]</a><span class="k">def</span> <span class="nf">test_rmq_es_connector_connections</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; tests the connections function &quot;&quot;&quot;</span>
+    <span class="n">rmq_es</span> <span class="o">=</span> <span class="n">rmq_es_connector</span><span class="o">.</span><span class="n">RmqEs</span><span class="p">()</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">connections</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">rmq_es</span> <span class="o">=</span> <span class="n">rmq_es_connector</span><span class="o">.</span><span class="n">RmqEs</span><span class="p">(</span><span class="n">es_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="n">rmq_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">connections</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_rmq_es_connector_callback"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.test_rmq_es_connector.test_rmq_es_connector_callback">[docs]</a><span class="k">def</span> <span class="nf">test_rmq_es_connector_callback</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; tests the callback function &quot;&quot;&quot;</span>
+    <span class="n">rmq_es</span> <span class="o">=</span> <span class="n">rmq_es_connector</span><span class="o">.</span><span class="n">RmqEs</span><span class="p">()</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">Method</span><span class="p">()</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;[]&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;[]&quot;</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">Method</span><span class="p">(</span><span class="n">routing_key</span><span class="o">=</span><span class="s2">&quot;syslog.foo&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;[]&quot;</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">Method</span><span class="p">(</span><span class="n">routing_key</span><span class="o">=</span><span class="s2">&quot;dshell_netflow.foo&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;[]&quot;</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">Method</span><span class="p">(</span><span class="n">routing_key</span><span class="o">=</span><span class="s2">&quot;hex_flow.foo&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;[]&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span> <span class="o">=</span> <span class="n">rmq_es_connector</span><span class="o">.</span><span class="n">RmqEs</span><span class="p">(</span><span class="n">es_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="n">rmq_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">connections</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;[]&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;asdf * &#39;[]&#39;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="test_rmq_es_connector_start"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.test_rmq_es_connector.test_rmq_es_connector_start">[docs]</a><span class="k">def</span> <span class="nf">test_rmq_es_connector_start</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; tests the start function &quot;&quot;&quot;</span>
+    <span class="n">rmq_es</span> <span class="o">=</span> <span class="n">rmq_es_connector</span><span class="o">.</span><span class="n">RmqEs</span><span class="p">(</span><span class="n">es_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="n">rmq_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">)</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;foo&quot;</span><span class="p">]</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="o">.</span><span class="n">raises</span><span class="p">(</span><span class="ne">SystemExit</span><span class="p">):</span>
+        <span class="n">rmq_es</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">argv</span> <span class="o">=</span> <span class="n">argv</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

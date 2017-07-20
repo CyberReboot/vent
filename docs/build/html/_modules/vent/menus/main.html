@@ -1,0 +1,638 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.menus.main &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.menus.main</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">npyscreen</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">docker.errors</span> <span class="k">import</span> <span class="n">DockerException</span>
+<span class="kn">from</span> <span class="nn">npyscreen</span> <span class="k">import</span> <span class="n">notify_confirm</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
+
+<span class="kn">from</span> <span class="nn">vent.api.actions</span> <span class="k">import</span> <span class="n">Action</span>
+<span class="kn">from</span> <span class="nn">vent.api.menu_helpers</span> <span class="k">import</span> <span class="n">MenuHelper</span>
+<span class="kn">from</span> <span class="nn">vent.api.templates</span> <span class="k">import</span> <span class="n">Template</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Containers</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Cpu</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Gpu</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Images</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Jobs</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Timestamp</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Uptime</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.paths</span> <span class="k">import</span> <span class="n">PathDirs</span>
+<span class="kn">from</span> <span class="nn">vent.menus.add</span> <span class="k">import</span> <span class="n">AddForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.inventory_forms</span> <span class="k">import</span> <span class="n">InventoryCoreToolsForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.inventory_forms</span> <span class="k">import</span> <span class="n">InventoryToolsForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.logs</span> <span class="k">import</span> <span class="n">LogsForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.services</span> <span class="k">import</span> <span class="n">ServicesForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tools</span> <span class="k">import</span> <span class="n">ToolForm</span>
+
+
+<div class="viewcode-block" id="MainForm"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm">[docs]</a><span class="k">class</span> <span class="nc">MainForm</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">FormBaseNewWithMenus</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Main information landing form for the Vent CLI &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MainForm.exit"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.exit">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;reset&#39;</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;stty sane&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">SystemExit</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">_exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainForm.t_status"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.t_status">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">t_status</span><span class="p">(</span><span class="n">core</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get status of tools for either plugins or core &quot;&quot;&quot;</span>
+        <span class="n">m_helper</span> <span class="o">=</span> <span class="n">MenuHelper</span><span class="p">()</span>
+        <span class="n">repos</span><span class="p">,</span> <span class="n">tools</span> <span class="o">=</span> <span class="n">m_helper</span><span class="o">.</span><span class="n">tools_status</span><span class="p">(</span><span class="n">core</span><span class="p">)</span>
+        <span class="n">installed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">custom_installed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">built</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">custom_built</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">running</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">custom_running</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">normal</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tools</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">[</span><span class="s1">&#39;running&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]:</span>
+                <span class="n">running</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">custom_running</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">[</span><span class="s1">&#39;built&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]:</span>
+                <span class="n">built</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">custom_built</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">[</span><span class="s1">&#39;installed&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">tool</span> <span class="ow">in</span> <span class="n">tools</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]:</span>
+                <span class="n">installed</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">custom_installed</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">tools_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">running</span> <span class="o">+</span> <span class="n">custom_running</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">normal</span> <span class="o">+</span> <span class="s2">&quot; running&quot;</span>
+        <span class="k">if</span> <span class="n">custom_running</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tools_str</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_running</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; custom)&quot;</span>
+        <span class="n">tools_str</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">built</span> <span class="o">+</span> <span class="n">custom_built</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">normal</span> <span class="o">+</span> <span class="s2">&quot; built&quot;</span>
+        <span class="k">if</span> <span class="n">custom_built</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tools_str</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_built</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; custom)&quot;</span>
+        <span class="n">tools_str</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">installed</span> <span class="o">+</span> <span class="n">custom_installed</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">normal</span>
+        <span class="n">tools_str</span> <span class="o">+=</span> <span class="s2">&quot; installed&quot;</span>
+        <span class="k">if</span> <span class="n">custom_built</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tools_str</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_installed</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; custom)&quot;</span>
+        <span class="k">return</span> <span class="n">tools_str</span><span class="p">,</span> <span class="p">(</span><span class="n">running</span><span class="p">,</span> <span class="n">custom_running</span><span class="p">,</span> <span class="n">normal</span><span class="p">,</span> <span class="n">repos</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainForm.while_waiting"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.while_waiting">[docs]</a>    <span class="k">def</span> <span class="nf">while_waiting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update fields periodically if nothing is happening &quot;&quot;&quot;</span>
+        <span class="c1"># give a little extra time for file descriptors to close</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">Timestamp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield2</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">Uptime</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield2</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield3</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Containers</span><span class="p">()))</span><span class="o">+</span><span class="s2">&quot; running&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Containers</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield3</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="s2">&quot;GOOD&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield3</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="s2">&quot;DEFAULT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield3</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
+
+        <span class="c1"># update core tool status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield5</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">MainForm</span><span class="o">.</span><span class="n">t_status</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;DANGER&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="s2">&quot;CAUTION&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;Idle&quot;</span>
+        <span class="k">elif</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="nb">int</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;GOOD&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;Ready to start jobs&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="s2">&quot;CAUTION&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;Ready to start jobs&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield5</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="n">color</span>
+
+        <span class="c1"># update plugin tool status</span>
+        <span class="n">plugin_str</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">MainForm</span><span class="o">.</span><span class="n">t_status</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plugin_str</span> <span class="o">+=</span> <span class="s2">&quot;, &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; plugin(s) installed&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield6</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">plugin_str</span>
+
+        <span class="c1"># get jobs</span>
+        <span class="n">jobs</span> <span class="o">=</span> <span class="n">Jobs</span><span class="p">()</span>
+
+        <span class="c1"># number of jobs, number of tool containers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield7</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">jobs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot; jobs running (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">jobs</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield7</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="s2">&quot; tool containers), &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">jobs</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield7</span><span class="o">.</span><span class="n">value</span> <span class="o">+=</span> <span class="s2">&quot; completed jobs&quot;</span>
+
+        <span class="k">if</span> <span class="n">jobs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="s2">&quot;GOOD&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;Processing jobs&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield7</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="s2">&quot;GOOD&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addfield7</span><span class="o">.</span><span class="n">labelColor</span> <span class="o">=</span> <span class="s2">&quot;DEFAULT&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield5</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield6</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield7</span><span class="o">.</span><span class="n">display</span><span class="p">()</span>
+
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MainForm.core_tools"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.core_tools">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">core_tools</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Perform actions for core tools &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Get the elements that exist in the first list and not in the second</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">second</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">second</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">first</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">second</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">popup</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="n">orig_type</span><span class="p">,</span> <span class="n">thr</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Start the thread and display a popup of info</span>
+<span class="sd">            until the thread is finished</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">thr</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">while</span> <span class="n">thr</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">orig_type</span> <span class="o">==</span> <span class="s1">&#39;containers&#39;</span><span class="p">:</span>
+                    <span class="n">info</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">Containers</span><span class="p">(),</span> <span class="n">original</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">orig_type</span> <span class="o">==</span> <span class="s1">&#39;images&#39;</span><span class="p">:</span>
+                    <span class="n">info</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">Images</span><span class="p">(),</span> <span class="n">original</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">info</span><span class="p">:</span>
+                    <span class="n">info_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+                    <span class="c1"># TODO limit length of info_str to fit box</span>
+                    <span class="n">info_str</span> <span class="o">+=</span> <span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;: &quot;</span><span class="o">+</span><span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">npyscreen</span><span class="o">.</span><span class="n">notify_wait</span><span class="p">(</span><span class="n">info_str</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;install&#39;</span><span class="p">:</span>
+            <span class="n">original_images</span> <span class="o">=</span> <span class="n">Images</span><span class="p">()</span>
+            <span class="n">m_helper</span> <span class="o">=</span> <span class="n">MenuHelper</span><span class="p">()</span>
+            <span class="n">thr</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">m_helper</span><span class="o">.</span><span class="n">cores</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(),</span>
+                         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;install&quot;</span><span class="p">})</span>
+            <span class="n">popup</span><span class="p">(</span><span class="n">original_images</span><span class="p">,</span> <span class="s2">&quot;images&quot;</span><span class="p">,</span> <span class="n">thr</span><span class="p">,</span>
+                  <span class="s1">&#39;Please wait, installing core containers...&#39;</span><span class="p">)</span>
+            <span class="n">notify_confirm</span><span class="p">(</span><span class="s2">&quot;Done installing core containers.&quot;</span><span class="p">,</span>
+                           <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Installed core containers&#39;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MainForm.add_form"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.add_form">[docs]</a>    <span class="k">def</span> <span class="nf">add_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">form_name</span><span class="p">,</span> <span class="n">form_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add new form and switch to it &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="n">form_name</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="o">**</span><span class="n">form_args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="n">form_name</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MainForm.remove_forms"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.remove_forms">[docs]</a>    <span class="k">def</span> <span class="nf">remove_forms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form_names</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove all forms supplied &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">form</span> <span class="ow">in</span> <span class="n">form_names</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">removeForm</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">pass</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MainForm.perform_action"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.perform_action">[docs]</a>    <span class="k">def</span> <span class="nf">perform_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Perform actions in the api from the CLI &quot;&quot;&quot;</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">ToolForm</span>
+        <span class="n">s_action</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;core&#39;</span> <span class="ow">in</span> <span class="n">action</span><span class="p">:</span>
+            <span class="n">form_action</span> <span class="o">=</span> <span class="n">s_action</span> <span class="o">+</span> <span class="s1">&#39; (only core tools are shown)&#39;</span>
+            <span class="n">form_name</span> <span class="o">=</span> <span class="n">s_action</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; core tools&quot;</span>
+            <span class="n">cores</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">form_action</span> <span class="o">=</span> <span class="n">s_action</span> <span class="o">+</span> <span class="s1">&#39; (only plugin tools are shown)&#39;</span>
+            <span class="n">form_name</span> <span class="o">=</span> <span class="n">s_action</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; tools&quot;</span>
+            <span class="n">cores</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">a_type</span> <span class="o">=</span> <span class="s1">&#39;containers&#39;</span>
+        <span class="k">if</span> <span class="n">s_action</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;build&#39;</span><span class="p">]:</span>
+            <span class="n">a_type</span> <span class="o">=</span> <span class="s1">&#39;images&#39;</span>
+        <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span><span class="n">action</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;TOOLS&#39;</span><span class="p">]</span>
+        <span class="n">form_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s1">&#39;CONTROL&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;names&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">s_action</span><span class="p">],</span>
+                     <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">form_name</span><span class="p">,</span>
+                     <span class="s1">&#39;action_dict&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;action_name&#39;</span><span class="p">:</span> <span class="n">s_action</span><span class="p">,</span>
+                                     <span class="s1">&#39;present_t&#39;</span><span class="p">:</span> <span class="n">s_action</span> <span class="o">+</span> <span class="s1">&#39;ing &#39;</span> <span class="o">+</span> <span class="n">a_type</span><span class="p">,</span>
+                                     <span class="s1">&#39;past_t&#39;</span><span class="p">:</span> <span class="n">s_action</span><span class="o">.</span><span class="n">title</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">a_type</span><span class="p">,</span>
+                                     <span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="n">form_action</span><span class="p">,</span>
+                                     <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">a_type</span><span class="p">,</span>
+                                     <span class="s1">&#39;cores&#39;</span><span class="p">:</span> <span class="n">cores</span><span class="p">}}</span>
+        <span class="k">if</span> <span class="n">s_action</span> <span class="o">==</span> <span class="s1">&#39;start&#39;</span><span class="p">:</span>
+            <span class="n">form_args</span><span class="p">[</span><span class="s1">&#39;names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;prep_start&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">s_action</span> <span class="o">==</span> <span class="s1">&#39;configure&#39;</span><span class="p">:</span>
+            <span class="n">form_args</span><span class="p">[</span><span class="s1">&#39;names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">form_args</span><span class="p">[</span><span class="s1">&#39;names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;get_configure&#39;</span><span class="p">)</span>
+            <span class="n">form_args</span><span class="p">[</span><span class="s1">&#39;names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;save_configure&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">AddForm</span>
+            <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ADD&#39;</span><span class="p">,</span> <span class="s1">&#39;ADDOPTIONS&#39;</span><span class="p">,</span> <span class="s1">&#39;CHOOSETOOLS&#39;</span><span class="p">]</span>
+            <span class="n">form_args</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Add plugins&quot;</span>
+            <span class="n">form_args</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">*</span><span class="mi">6</span> <span class="o">+</span> <span class="s2">&quot;Press ^Q to quit&quot;</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;inventory&quot;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">InventoryToolsForm</span>
+            <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;INVENTORY&#39;</span><span class="p">]</span>
+            <span class="n">form_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s2">&quot;STANDOUT&quot;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;Inventory of tools&quot;</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;logs&#39;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">LogsForm</span>
+            <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LOGS&#39;</span><span class="p">]</span>
+            <span class="n">form_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s2">&quot;STANDOUT&quot;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;Logs&quot;</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;services_core&#39;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">ServicesForm</span>
+            <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SERVICES&#39;</span><span class="p">]</span>
+            <span class="n">form_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s2">&quot;STANDOUT&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;Core Services&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;core&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;services&#39;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">ServicesForm</span>
+            <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SERVICES&#39;</span><span class="p">]</span>
+            <span class="n">form_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s2">&quot;STANDOUT&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;Plugin Services&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;core&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;inventory_core&quot;</span><span class="p">:</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="n">InventoryCoreToolsForm</span>
+            <span class="n">forms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;COREINVENTORY&#39;</span><span class="p">]</span>
+            <span class="n">form_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="s2">&quot;STANDOUT&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;Inventory of core tools&quot;</span><span class="p">}</span>
+        <span class="n">form_args</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">*</span><span class="mi">8</span> <span class="o">+</span> <span class="s2">&quot;Press ^T to toggle main&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_forms</span><span class="p">(</span><span class="n">forms</span><span class="p">)</span>
+            <span class="n">thr</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">add_form</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(),</span>
+                         <span class="n">kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;form&#39;</span><span class="p">:</span> <span class="n">form</span><span class="p">,</span>
+                                 <span class="s1">&#39;form_name&#39;</span><span class="p">:</span> <span class="n">forms</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                 <span class="s1">&#39;form_args&#39;</span><span class="p">:</span> <span class="n">form_args</span><span class="p">})</span>
+            <span class="n">thr</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">thr</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                <span class="n">npyscreen</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="s1">&#39;Please wait, loading form...&#39;</span><span class="p">,</span>
+                                 <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Loading&#39;</span><span class="p">)</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">pass</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MainForm.switch_tutorial"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.switch_tutorial">[docs]</a>    <span class="k">def</span> <span class="nf">switch_tutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Tutorial forms &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;background&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s1">&#39;TUTORIALBACKGROUND&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;terminology&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s1">&#39;TUTORIALTERMINOLOGY&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;setup&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s1">&#39;TUTORIALGETTINGSETUP&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;building_cores&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s1">&#39;TUTORIALBUILDINGCORES&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;starting_cores&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s1">&#39;TUTORIALSTARTINGCORES&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;adding_plugins&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s1">&#39;TUTORIALADDINGPLUGINS&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;adding_files&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s1">&#39;TUTORIALADDINGFILES&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;setting_up_services&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s1">&#39;TUTORIALSETTINGUPSERVICES&#39;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MainForm.system_commands"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.system_commands">[docs]</a>    <span class="k">def</span> <span class="nf">system_commands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Perform system commands &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;reset&quot;</span><span class="p">:</span>
+            <span class="n">okay</span> <span class="o">=</span> <span class="n">npyscreen</span><span class="o">.</span><span class="n">notify_ok_cancel</span><span class="p">(</span>
+                    <span class="s2">&quot;This factory reset will remove ALL of Vent&#39;s user data, &quot;</span>
+                    <span class="s2">&quot;containers, and images. Are you sure?&quot;</span><span class="p">,</span>
+                    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Confirm system command&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">okay</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">status</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">notify_confirm</span><span class="p">(</span><span class="s2">&quot;Vent reset complete. &quot;</span>
+                                   <span class="s2">&quot;Press OK to exit Vent Manager console.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">notify_confirm</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">MainForm</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+            <span class="n">gpu</span> <span class="o">=</span> <span class="n">Gpu</span><span class="p">(</span><span class="n">pull</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">gpu</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">notify_confirm</span><span class="p">(</span><span class="s2">&quot;GPU detection successful. &quot;</span>
+                               <span class="s2">&quot;Found: &quot;</span> <span class="o">+</span> <span class="n">gpu</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">gpu</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Unknown&quot;</span><span class="p">:</span>
+                    <span class="n">notify_confirm</span><span class="p">(</span><span class="s2">&quot;Unable to detect GPUs, try `make gpu` &quot;</span>
+                                   <span class="s2">&quot;from the vent repository directory. &quot;</span>
+                                   <span class="s2">&quot;Error: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">gpu</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">notify_confirm</span><span class="p">(</span><span class="s2">&quot;No GPUs detected.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;swarm&quot;</span><span class="p">:</span>
+            <span class="c1"># !! TODO</span>
+            <span class="c1"># add notify_cancel_ok popup once implemented</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;upgrade&quot;</span><span class="p">:</span>
+            <span class="c1"># !! TODO</span>
+            <span class="c1"># add notify_cancel_ok popup once implemented</span>
+            <span class="k">pass</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="MainForm.create"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Override method for creating FormBaseNewWithMenu form &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">api_action</span> <span class="o">=</span> <span class="n">Action</span><span class="p">()</span>
+            <span class="n">drop_location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">PathDirs</span><span class="p">()</span><span class="o">.</span><span class="n">base_dir</span><span class="p">,</span> <span class="s2">&quot;vent.cfg&quot;</span><span class="p">)</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="n">drop_location</span><span class="p">)</span>
+            <span class="n">template</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">,</span> <span class="s2">&quot;files&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">except</span> <span class="n">DockerException</span> <span class="k">as</span> <span class="n">de</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">notify_confirm</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">de</span><span class="p">),</span>
+                           <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Docker Error&quot;</span><span class="p">,</span>
+                           <span class="n">form_color</span><span class="o">=</span><span class="s1">&#39;DANGER&#39;</span><span class="p">,</span>
+                           <span class="n">wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">MainForm</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_handlers</span><span class="p">({</span><span class="s2">&quot;^T&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">help_form</span><span class="p">,</span> <span class="s2">&quot;^Q&quot;</span><span class="p">:</span> <span class="n">MainForm</span><span class="o">.</span><span class="n">exit</span><span class="p">})</span>
+
+        <span class="c1">#######################</span>
+        <span class="c1"># MAIN SCREEN WIDGETS #</span>
+        <span class="c1">#######################</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Date:&#39;</span><span class="p">,</span>
+                                 <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Timestamp</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Uptime:&#39;</span><span class="p">,</span>
+                                  <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Uptime</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cpufield</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span>
+                                 <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Logical CPUs:&#39;</span><span class="p">,</span>
+                                 <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Cpu</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gpufield</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;GPUs:&#39;</span><span class="p">,</span>
+                                 <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Gpu</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span>
+                                 <span class="n">name</span><span class="o">=</span><span class="s1">&#39;User Data:&#39;</span><span class="p">,</span>
+                                 <span class="n">value</span><span class="o">=</span><span class="n">PathDirs</span><span class="p">()</span><span class="o">.</span><span class="n">meta_dir</span><span class="p">,</span>
+                                 <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_drop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="s1">&#39;File Drop:&#39;</span><span class="p">,</span>
+                                  <span class="n">value</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
+                                  <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Containers:&#39;</span><span class="p">,</span>
+                                  <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span>
+                                  <span class="n">value</span><span class="o">=</span><span class="s2">&quot;0 &quot;</span><span class="o">+</span><span class="s2">&quot; running&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Status:&#39;</span><span class="p">,</span>
+                                  <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;CAUTION&#39;</span><span class="p">,</span>
+                                  <span class="n">value</span><span class="o">=</span><span class="s2">&quot;Idle&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield5</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Core Tools:&#39;</span><span class="p">,</span> <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DANGER&#39;</span><span class="p">,</span>
+                                  <span class="n">value</span><span class="o">=</span><span class="s2">&quot;Not built&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield6</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Plugin Tools:&#39;</span><span class="p">,</span> <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span>
+                                  <span class="n">value</span><span class="o">=</span><span class="s2">&quot;Not built&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addfield7</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">TitleFixedText</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Jobs:&#39;</span><span class="p">,</span>
+                                  <span class="n">value</span><span class="o">=</span><span class="s2">&quot;0 jobs running (0 tool containers),&quot;</span>
+                                  <span class="s2">&quot; 0 completed jobs&quot;</span><span class="p">,</span> <span class="n">labelColor</span><span class="o">=</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multifield1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">MultiLineEdit</span><span class="p">,</span> <span class="n">max_height</span><span class="o">=</span><span class="mi">22</span><span class="p">,</span>
+                                    <span class="n">editable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;</span>
+
+<span class="s2">            &#39;.,</span>
+<span class="s2">              &#39;b      *</span>
+<span class="s2">               &#39;$    #.</span>
+<span class="s2">                $:   #:</span>
+<span class="s2">                *#  @):</span>
+<span class="s2">                :@,@):   ,.**:&#39;</span>
+<span class="s2">      ,         :@@*: ..**&#39;</span>
+<span class="s2">       &#39;#o.    .:(@&#39;.@*&quot;&#39;</span>
+<span class="s2">          &#39;bq,..:,@@*&#39;   ,*</span>
+<span class="s2">          ,p$q8,:@)&#39;  .p*&#39;</span>
+<span class="s2">         &#39;    &#39;@@Pp@@*&#39;</span>
+<span class="s2">               Y7&#39;.&#39;</span>
+<span class="s2">              :@):.</span>
+<span class="s2">             .:@:&#39;.</span>
+<span class="s2">           .::(@:.</span>
+<span class="s2">                       _</span>
+<span class="s2">      __   _____ _ __ | |_</span>
+<span class="s2">      \ \ / / _ \ &#39;_ \| __|</span>
+<span class="s2">       \ V /  __/ | | | |_</span>
+<span class="s2">        \_/ \___|_| |_|\__|</span>
+<span class="s2">                           &quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1">################</span>
+        <span class="c1"># MENU OPTIONS #</span>
+        <span class="c1">################</span>
+
+        <span class="c1"># Core Tools Menu Items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Core Tools&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s2">&quot;c&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Add all latest core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="n">MainForm</span><span class="o">.</span><span class="n">core_tools</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;install&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Build core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;build_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Clean core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;clean_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Configure core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;configure_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Inventory of core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;inventory_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Remove core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;remove_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Start core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Stop core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;stop_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Update core tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;update_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Plugin Menu Items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Plugins&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s2">&quot;p&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Add new plugin&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;add&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Build plugin tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;build&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Clean plugin tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;clean&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Configure plugin tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;configure&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Inventory of installed plugins&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;inventory&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;i&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Remove plugins&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;remove&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Start plugin tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Stop plugin tools&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;stop&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Update plugins&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;update&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Log Menu Items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Logs&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s2">&quot;l&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m4</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Get container logs&#39;</span><span class="p">,</span> <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;logs&#39;</span><span class="p">],</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">)</span>
+
+        <span class="c1"># Services Menu Items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m5</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Services Running&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m5</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Core Services&#39;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;services_core&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m5</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Plugin Services&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">perform_action</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;services&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+
+        <span class="c1"># System Commands Menu Items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m6</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;System Commands&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m6</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Detect GPUs&#39;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">system_commands</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;gpu&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m6</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Enable Swarm Mode (To Be Implemented...)&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">system_commands</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;swarm&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m6</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Factory reset&#39;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">system_commands</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;reset&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m6</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Upgrade (To Be Implemented...)&#39;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">system_commands</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;upgrade&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;u&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Tutorial Menu Items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">m7</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_menu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tutorials&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s2">&quot;t&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m7</span><span class="o">.</span><span class="n">addNewSubmenu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;About Vent&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s1</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Background&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_tutorial</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;background&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s1</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Terminology&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_tutorial</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;terminology&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s1</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Getting Setup&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_tutorial</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;setup&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m7</span><span class="o">.</span><span class="n">addNewSubmenu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Working with Cores&quot;</span><span class="p">,</span>
+                                        <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Building Cores&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_tutorial</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;building_cores&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s2</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Starting Cores&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_tutorial</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;starting_cores&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s3</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m7</span><span class="o">.</span><span class="n">addNewSubmenu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Working with Plugins&quot;</span><span class="p">,</span>
+                                        <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;p&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s3</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Adding Plugins&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_tutorial</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;adding_plugins&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s4</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m7</span><span class="o">.</span><span class="n">addNewSubmenu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Files&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;f&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s4</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Adding Files&quot;</span><span class="p">,</span> <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_tutorial</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;adding_files&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s5</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m7</span><span class="o">.</span><span class="n">addNewSubmenu</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Services&quot;</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s5</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Setting up Services&quot;</span><span class="p">,</span>
+                        <span class="n">onSelect</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">switch_tutorial</span><span class="p">,</span>
+                        <span class="n">arguments</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;setting_up_services&#39;</span><span class="p">],</span> <span class="n">shortcut</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MainForm.help_form"><a class="viewcode-back" href="../../../vent.menus.html#vent.menus.main.MainForm.help_form">[docs]</a>    <span class="k">def</span> <span class="nf">help_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">keywords</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Toggles to help &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentApp</span><span class="o">.</span><span class="n">change_form</span><span class="p">(</span><span class="s2">&quot;HELP&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

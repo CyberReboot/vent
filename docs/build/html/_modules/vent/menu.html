@@ -1,0 +1,198 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.menu &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.menu</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python2.7</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">import</span> <span class="nn">npyscreen</span>
+
+<span class="kn">from</span> <span class="nn">vent.helpers.meta</span> <span class="k">import</span> <span class="n">Version</span>
+<span class="kn">from</span> <span class="nn">vent.helpers.paths</span> <span class="k">import</span> <span class="n">PathDirs</span>
+<span class="kn">from</span> <span class="nn">vent.menus.help</span> <span class="k">import</span> <span class="n">HelpForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.main</span> <span class="k">import</span> <span class="n">MainForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialAddingFilesForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialAddingPluginsForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialBackgroundForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialBuildingCoresForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialGettingSetupForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialIntroForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialSettingUpServicesForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialStartingCoresForm</span>
+<span class="kn">from</span> <span class="nn">vent.menus.tutorial_forms</span> <span class="k">import</span> <span class="n">TutorialTerminologyForm</span>
+
+
+<div class="viewcode-block" id="VentApp"><a class="viewcode-back" href="../../vent.html#vent.menu.VentApp">[docs]</a><span class="k">class</span> <span class="nc">VentApp</span><span class="p">(</span><span class="n">npyscreen</span><span class="o">.</span><span class="n">NPSAppManaged</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Main menu app for vent CLI &quot;&quot;&quot;</span>
+    <span class="n">keypress_timeout_default</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">repo_value</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">PathDirs</span><span class="p">()</span>
+    <span class="n">first_time</span> <span class="o">=</span> <span class="n">paths</span><span class="o">.</span><span class="n">ensure_file</span><span class="p">(</span><span class="n">paths</span><span class="o">.</span><span class="n">init_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">first_time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">first_time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;exists&quot;</span><span class="p">:</span>
+        <span class="n">npyscreen</span><span class="o">.</span><span class="n">NPSAppManaged</span><span class="o">.</span><span class="n">STARTING_FORM</span> <span class="o">=</span> <span class="s2">&quot;TUTORIALINTRO&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">npyscreen</span><span class="o">.</span><span class="n">NPSAppManaged</span><span class="o">.</span><span class="n">STARTING_FORM</span> <span class="o">=</span> <span class="s2">&quot;MAIN&quot;</span>
+
+<div class="viewcode-block" id="VentApp.onStart"><a class="viewcode-back" href="../../vent.html#vent.menu.VentApp.onStart">[docs]</a>    <span class="k">def</span> <span class="nf">onStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Override onStart method for npyscreen &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="o">.</span><span class="n">host_config</span><span class="p">()</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">Version</span><span class="p">()</span>
+        <span class="n">quit_s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">*</span><span class="mi">6</span> <span class="o">+</span> <span class="s2">&quot;Press ^Q to quit&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;MAIN&quot;</span><span class="p">,</span>
+                     <span class="n">MainForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Vent &quot;</span> <span class="o">+</span> <span class="n">version</span> <span class="o">+</span>
+                     <span class="s2">&quot;</span><span class="se">\t\t\t\t\t</span><span class="s2">Press ^T to toggle help&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;IMPORTANT&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;HELP&quot;</span><span class="p">,</span>
+                     <span class="n">HelpForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Help</span><span class="se">\t\t\t\t\t\t\t\t</span><span class="s2">Press ^T to toggle previous&quot;</span> <span class="o">+</span>
+                     <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALINTRO&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialIntroForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Vent Tutorial&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALBACKGROUND&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialBackgroundForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;About Vent&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALTERMINOLOGY&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialTerminologyForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;About Vent&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALGETTINGSETUP&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialGettingSetupForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;About Vent&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALBUILDINGCORES&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialBuildingCoresForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Working with Cores&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALSTARTINGCORES&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialStartingCoresForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Working with Cores&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALADDINGPLUGINS&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialAddingPluginsForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Working with Plugins&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALADDINGFILES&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialAddingFilesForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Files&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addForm</span><span class="p">(</span><span class="s2">&quot;TUTORIALSETTINGUPSERVICES&quot;</span><span class="p">,</span>
+                     <span class="n">TutorialSettingUpServicesForm</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Services&quot;</span> <span class="o">+</span> <span class="n">quit_s</span><span class="p">,</span>
+                     <span class="n">color</span><span class="o">=</span><span class="s2">&quot;DANGER&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VentApp.change_form"><a class="viewcode-back" href="../../vent.html#vent.menu.VentApp.change_form">[docs]</a>    <span class="k">def</span> <span class="nf">change_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Changes the form (window) that is displayed &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">switchForm</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
