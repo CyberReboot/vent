@@ -226,7 +226,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">d_client</span> <span class="o">=</span> <span class="n">docker</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">d_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="nb">all</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                     <span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;vent-plugin&#39;</span><span class="p">})</span>
+                <span class="n">filters</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="s1">&#39;vent-plugin&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span> <span class="p">:</span> <span class="s1">&#39;exited&#39;</span><span class="p">})</span>
 
         <span class="n">file_names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">tool_names</span> <span class="o">=</span> <span class="p">[]</span>
@@ -273,7 +273,7 @@
                     <span class="n">new_file</span><span class="p">[</span><span class="s1">&#39;FinishedAt&#39;</span><span class="p">]</span> <span class="o">=</span> \
                         <span class="n">container</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;State&#39;</span><span class="p">][</span><span class="s1">&#39;FinishedAt&#39;</span><span class="p">]</span>
                     <span class="n">new_file</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">]</span> <span class="o">=</span> \
-                        <span class="n">container</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Id&#39;</span><span class="p">]</span>
+                            <span class="n">container</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;Id&#39;</span><span class="p">][:</span><span class="mi">12</span><span class="p">]</span>
 
                     <span class="c1"># create/append a json file with all wanted information</span>
                     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">file_status</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
