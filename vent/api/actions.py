@@ -640,16 +640,16 @@ class Action:
                         elif manifest.option(tool, section)[0]:
                             manifest.del_option(tool, section)
                     manifest.write_config()
-            except Exception as e:
-                self.logger.error(str(e))
+            except Exception as e:  # pragma: no cover
+                self.logger.error("save_configure error: " + str(e))
                 status = (False, str(e))
         # close os file handle and remove temp file
         if from_registry:
             try:
                 os.close(fd)
                 os.remove(template_path)
-            except Exception as e:
-                self.logger.error(str(e))
+            except Exception as e:  # pragma: no cover
+                self.logger.error("save_configure error: " + str(e))
         self.logger.info("Status of save_configure: " + str(status[0]))
         self.logger.info("Finished: save_configure")
         return status
