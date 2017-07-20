@@ -5,6 +5,7 @@ import time
 
 from docker.errors import DockerException
 from npyscreen import notify_confirm
+from npyscreen import notify_wait
 from threading import Thread
 
 from vent.api.actions import Action
@@ -323,6 +324,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 else:
                     notify_confirm("No GPUs detected.")
         elif action == 'restore':
+            notify_wait("In the process of restoring", title="Restoring...")
             status = self.api_action.restore()
             if status[0]:
                 notify_confirm("Restore successful")
