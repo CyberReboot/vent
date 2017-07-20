@@ -474,7 +474,7 @@ class PluginHelper:
             s_containers.append(container)
             self.logger.info("started " + str(container) +
                              " with ID: " + str(c.short_id))
-        except Exception as err:  # pragma: no cover
+        except Exception as err:
             try:
                 gpu = 'gpu.enabled'
                 failed = False
