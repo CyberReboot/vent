@@ -1,0 +1,262 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.helpers package &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="vent.menus package" href="vent.menus.html" />
+    <link rel="prev" title="vent.core.rq_worker package" href="vent.core.rq_worker.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="vent-helpers-package">
+<h1>vent.helpers package<a class="headerlink" href="#vent-helpers-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-vent.helpers.errors">
+<span id="vent-helpers-errors-module"></span><h2>vent.helpers.errors module<a class="headerlink" href="#module-vent.helpers.errors" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="vent.helpers.errors.ErrorHandler">
+<code class="descclassname">vent.helpers.errors.</code><code class="descname">ErrorHandler</code><span class="sig-paren">(</span><em>function</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/errors.html#ErrorHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.errors.ErrorHandler" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-vent.helpers.logs">
+<span id="vent-helpers-logs-module"></span><h2>vent.helpers.logs module<a class="headerlink" href="#module-vent.helpers.logs" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="vent.helpers.logs.Logger">
+<code class="descclassname">vent.helpers.logs.</code><code class="descname">Logger</code><span class="sig-paren">(</span><em>name</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/logs.html#Logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.logs.Logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create and return logger</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-vent.helpers.meta">
+<span id="vent-helpers-meta-module"></span><h2>vent.helpers.meta module<a class="headerlink" href="#module-vent.helpers.meta" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="vent.helpers.meta.Containers">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Containers</code><span class="sig-paren">(</span><em>vent=True</em>, <em>running=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Containers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Containers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get containers that are created, by default limit to vent containers that
+are running</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Cpu">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Cpu</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Cpu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Cpu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get number of available CPUs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Docker">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Docker</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Docker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Docker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Docker setup information</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Gpu">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Gpu</code><span class="sig-paren">(</span><em>pull=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Gpu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Gpu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for support of GPUs, and return what’s available</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.GpuUsage">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">GpuUsage</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#GpuUsage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.GpuUsage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current GPU usage of available GPUs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Images">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Images</code><span class="sig-paren">(</span><em>vent=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get images that are build, by default limit to vent images</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Jobs">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Jobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Jobs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of jobs that are running and finished, and the number of
+total tools running and finished for those jobs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Services">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Services</code><span class="sig-paren">(</span><em>core</em>, <em>vent=True</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Services"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Services" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get services that have exposed ports, expects param core to be True or
+False based on which type of services to return, by default limit to vent
+containers, if not limited by vent containers, then core is ignored.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.System">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">System</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#System"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.System" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get system operating system</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Timestamp">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Timestamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current datetime in UTC</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Tools">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Tools</code><span class="sig-paren">(</span><em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Tools"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Tools" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get tools that exist in the manifest</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Uptime">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Uptime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Uptime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Uptime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current uptime information</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="vent.helpers.meta.Version">
+<code class="descclassname">vent.helpers.meta.</code><code class="descname">Version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/meta.html#Version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.meta.Version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get Vent version</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-vent.helpers.paths">
+<span id="vent-helpers-paths-module"></span><h2>vent.helpers.paths module<a class="headerlink" href="#module-vent.helpers.paths" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vent.helpers.paths.PathDirs">
+<em class="property">class </em><code class="descclassname">vent.helpers.paths.</code><code class="descname">PathDirs</code><span class="sig-paren">(</span><em>base_dir='/root/.vent/'</em>, <em>plugins_dir='plugins/'</em>, <em>meta_dir='/root/.vent'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/paths.html#PathDirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.paths.PathDirs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Global path directories for vent</p>
+<dl class="staticmethod">
+<dt id="vent.helpers.paths.PathDirs.ensure_dir">
+<em class="property">static </em><code class="descname">ensure_dir</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/paths.html#PathDirs.ensure_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.paths.PathDirs.ensure_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tries to create directory, if fails, checks if path already exists</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vent.helpers.paths.PathDirs.ensure_file">
+<em class="property">static </em><code class="descname">ensure_file</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/paths.html#PathDirs.ensure_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.paths.PathDirs.ensure_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if file exists, if fails, tries to create file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.helpers.paths.PathDirs.host_config">
+<code class="descname">host_config</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/helpers/paths.html#PathDirs.host_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.helpers.paths.PathDirs.host_config" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ensure the host configuration file exists</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-vent.helpers">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-vent.helpers" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">vent.helpers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.helpers.errors">vent.helpers.errors module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.helpers.logs">vent.helpers.logs module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.helpers.meta">vent.helpers.meta module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.helpers.paths">vent.helpers.paths module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.helpers">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="vent.core.rq_worker.html" title="previous chapter">vent.core.rq_worker package</a></li>
+      <li>Next: <a href="vent.menus.html" title="next chapter">vent.menus package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/vent.helpers.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

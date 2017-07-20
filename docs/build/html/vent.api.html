@@ -1,0 +1,586 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.api package &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="vent.core package" href="vent.core.html" />
+    <link rel="prev" title="Overview" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="vent-api-package">
+<h1>vent.api package<a class="headerlink" href="#vent-api-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-vent.api.actions">
+<span id="vent-api-actions-module"></span><h2>vent.api.actions module<a class="headerlink" href="#module-vent.api.actions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vent.api.actions.Action">
+<em class="property">class </em><code class="descclassname">vent.api.actions.</code><code class="descname">Action</code><span class="sig-paren">(</span><em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle actions in menu</p>
+<dl class="method">
+<dt id="vent.api.actions.Action.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>repo</em>, <em>tools=None</em>, <em>overrides=None</em>, <em>version='HEAD'</em>, <em>branch='master'</em>, <em>build=True</em>, <em>user=None</em>, <em>pw=None</em>, <em>groups=None</em>, <em>version_alias=None</em>, <em>wild=None</em>, <em>remove_old=True</em>, <em>disable_old=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new set of tool(s)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.add_image">
+<code class="descname">add_image</code><span class="sig-paren">(</span><em>image</em>, <em>link_name</em>, <em>tag=None</em>, <em>registry=None</em>, <em>groups=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.add_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.add_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new image from a Docker registry</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vent.api.actions.Action.backup">
+<em class="property">static </em><code class="descname">backup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.backup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.backup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.build">
+<code class="descname">build</code><span class="sig-paren">(</span><em>repo=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a set of tools that match the parameters given</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.clean">
+<code class="descname">clean</code><span class="sig-paren">(</span><em>repo=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.clean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.clean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clean (stop and remove) a set of tools that match the parameters given,
+if no parameters are given, clean all installed tools on the master
+branch at verison HEAD that are enabled</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vent.api.actions.Action.configure">
+<em class="property">static </em><code class="descname">configure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.configure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.get_configure">
+<code class="descname">get_configure</code><span class="sig-paren">(</span><em>repo=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.get_configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.get_configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the vent.template settings for a given tool by looking at the
+plugin_manifest</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vent.api.actions.Action.help">
+<em class="property">static </em><code class="descname">help</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.help"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.help" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.inventory">
+<code class="descname">inventory</code><span class="sig-paren">(</span><em>choices=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.inventory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.inventory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary of the inventory items and status</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.logs">
+<code class="descname">logs</code><span class="sig-paren">(</span><em>c_type=None</em>, <em>grep_list=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.logs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.logs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generically filter logs stored in log containers</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.prep_start">
+<code class="descname">prep_start</code><span class="sig-paren">(</span><em>repo=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.prep_start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.prep_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prep a bunch of containers to be started to they can be ordered</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>repo=None</em>, <em>namespace=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em>, <em>built='yes'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove tools or a repo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factory reset all of Vent’s user data, containers, and images</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vent.api.actions.Action.restore">
+<em class="property">static </em><code class="descname">restore</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.restore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.restore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.save_configure">
+<code class="descname">save_configure</code><span class="sig-paren">(</span><em>repo=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em>, <em>config_val=''</em>, <em>from_registry=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.save_configure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.save_configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save changes made to vent.template through npyscreen to the template
+and to plugin_manifest</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.start">
+<code class="descname">start</code><span class="sig-paren">(</span><em>tool_d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start a set of tools that match the parameters given, if no parameters
+are given, start all installed tools on the master branch at verison
+HEAD that are enabled</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>repo=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop a set of tools that match the parameters given, if no parameters
+are given, stop all installed tools on the master branch at verison
+HEAD that are enabled</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.actions.Action.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>repo=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a set of tools that match the parameters given, if no parameters
+are given, updated all installed tools on the master branch at verison
+HEAD that are enabled</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vent.api.actions.Action.upgrade">
+<em class="property">static </em><code class="descname">upgrade</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/actions.html#Action.upgrade"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.actions.Action.upgrade" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-vent.api.menu_helpers">
+<span id="vent-api-menu-helpers-module"></span><h2>vent.api.menu_helpers module<a class="headerlink" href="#module-vent.api.menu_helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vent.api.menu_helpers.MenuHelper">
+<em class="property">class </em><code class="descclassname">vent.api.menu_helpers.</code><code class="descname">MenuHelper</code><span class="sig-paren">(</span><em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/menu_helpers.html#MenuHelper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.menu_helpers.MenuHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle helper functions in the API for the Menu</p>
+<dl class="method">
+<dt id="vent.api.menu_helpers.MenuHelper.cores">
+<code class="descname">cores</code><span class="sig-paren">(</span><em>action</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/menu_helpers.html#MenuHelper.cores"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.menu_helpers.MenuHelper.cores" title="Permalink to this definition">¶</a></dt>
+<dd><p>Supply action (install, build, start, stop, clean) for core tools</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.menu_helpers.MenuHelper.repo_branches">
+<code class="descname">repo_branches</code><span class="sig-paren">(</span><em>repo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/menu_helpers.html#MenuHelper.repo_branches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.menu_helpers.MenuHelper.repo_branches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the branches of a repository</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.menu_helpers.MenuHelper.repo_commits">
+<code class="descname">repo_commits</code><span class="sig-paren">(</span><em>repo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/menu_helpers.html#MenuHelper.repo_commits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.menu_helpers.MenuHelper.repo_commits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the commit IDs for all of the branches of a repository</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.menu_helpers.MenuHelper.repo_tools">
+<code class="descname">repo_tools</code><span class="sig-paren">(</span><em>repo</em>, <em>branch</em>, <em>version</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/menu_helpers.html#MenuHelper.repo_tools"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.menu_helpers.MenuHelper.repo_tools" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get available tools for a repository branch at a version</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.menu_helpers.MenuHelper.tools_status">
+<code class="descname">tools_status</code><span class="sig-paren">(</span><em>core</em>, <em>branch='master'</em>, <em>version='HEAD'</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/menu_helpers.html#MenuHelper.tools_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.menu_helpers.MenuHelper.tools_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get tools that are currently installed/built/running and also the
+number of repos that those tools come from; can toggle whether looking
+for core tools or plugin tools</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-vent.api.plugin_helpers">
+<span id="vent-api-plugin-helpers-module"></span><h2>vent.api.plugin_helpers module<a class="headerlink" href="#module-vent.api.plugin_helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vent.api.plugin_helpers.PluginHelper">
+<em class="property">class </em><code class="descclassname">vent.api.plugin_helpers.</code><code class="descname">PluginHelper</code><span class="sig-paren">(</span><em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle helper functions for the Plugin class</p>
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.apply_path">
+<code class="descname">apply_path</code><span class="sig-paren">(</span><em>repo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.apply_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.apply_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set path to where the repo is and return original path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.available_tools">
+<code class="descname">available_tools</code><span class="sig-paren">(</span><em>path</em>, <em>version='HEAD'</em>, <em>groups=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.available_tools"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.available_tools" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of possible tools in repo for the given version and branch</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.checkout">
+<code class="descname">checkout</code><span class="sig-paren">(</span><em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.checkout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.checkout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checkout a specific version and branch of a repo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.clone">
+<code class="descname">clone</code><span class="sig-paren">(</span><em>repo</em>, <em>user=None</em>, <em>pw=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone the repository</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.constraint_options">
+<code class="descname">constraint_options</code><span class="sig-paren">(</span><em>constraint_dict</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.constraint_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.constraint_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return result of constraints and options against a template</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.get_path">
+<code class="descname">get_path</code><span class="sig-paren">(</span><em>repo</em>, <em>core=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.get_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.get_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the path for the repo</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.prep_start">
+<code class="descname">prep_start</code><span class="sig-paren">(</span><em>repo=None</em>, <em>name=None</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.prep_start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.prep_start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start a set of tools that match the parameters given, if no parameters
+are given, start all installed tools on the master branch at verison
+HEAD that are enabled</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.start_containers">
+<code class="descname">start_containers</code><span class="sig-paren">(</span><em>container</em>, <em>tool_d</em>, <em>s_containers</em>, <em>f_containers</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.start_containers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.start_containers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start container that was passed in and return status</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.start_priority_containers">
+<code class="descname">start_priority_containers</code><span class="sig-paren">(</span><em>groups</em>, <em>group_orders</em>, <em>tool_d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.start_priority_containers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.start_priority_containers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select containers based on priorities to start</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.start_remaining_containers">
+<code class="descname">start_remaining_containers</code><span class="sig-paren">(</span><em>containers_remaining</em>, <em>tool_d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.start_remaining_containers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.start_remaining_containers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select remaining containers that didn’t have priorities to start</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugin_helpers.PluginHelper.start_sections">
+<code class="descname">start_sections</code><span class="sig-paren">(</span><em>s</em>, <em>files</em>, <em>groups</em>, <em>enabled</em>, <em>branch</em>, <em>version</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.start_sections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.start_sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run through sections for prep_start</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="vent.api.plugin_helpers.PluginHelper.tool_matches">
+<em class="property">static </em><code class="descname">tool_matches</code><span class="sig-paren">(</span><em>tools=None</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugin_helpers.html#PluginHelper.tool_matches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugin_helpers.PluginHelper.tool_matches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the tools paths and versions that were specified</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-vent.api.plugins">
+<span id="vent-api-plugins-module"></span><h2>vent.api.plugins module<a class="headerlink" href="#module-vent.api.plugins" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vent.api.plugins.Plugin">
+<em class="property">class </em><code class="descclassname">vent.api.plugins.</code><code class="descname">Plugin</code><span class="sig-paren">(</span><em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle Plugins</p>
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>repo</em>, <em>tools=None</em>, <em>overrides=None</em>, <em>version='HEAD'</em>, <em>branch='master'</em>, <em>build=True</em>, <em>user=None</em>, <em>pw=None</em>, <em>groups=None</em>, <em>version_alias=None</em>, <em>wild=None</em>, <em>remove_old=True</em>, <em>disable_old=True</em>, <em>limit_groups=None</em>, <em>core=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a plugin of tool(s)
+tools is a list of tuples, where the pair is a tool name (path to
+Dockerfile) and version</p>
+<blockquote>
+<div>tools are for explicitly limiting which tools and versions
+(if version in tuple is ‘’, then defaults to version)</div></blockquote>
+<p>overrides is a list of tuples, where the pair is a tool name (path to
+Dockerfile) and a version</p>
+<blockquote>
+<div>overrides are for explicitly removing tools and overriding versions
+of tools (if version in tuple is ‘’, then tool is removed, otherwise
+that tool is checked out at the specific version in the tuple)</div></blockquote>
+<dl class="docutils">
+<dt>if tools and overrides are left as empty lists, then all tools in the</dt>
+<dd>repo are pulled down at the version and branch specified or defaulted
+to</dd>
+<dt>version is globally set for all tools, unless overridden in tools or</dt>
+<dd>overrides</dd>
+</dl>
+<p>branch is globally set for all tools
+build is a boolean of whether or not to build the tools now
+user is the username for a private repo if needed
+pw is the password to go along with the username for a private repo
+groups is globally set for all tools
+version_alias is globally set for all tools and is a mapping from a</p>
+<blockquote>
+<div>friendly version tag to the real version commit ID</div></blockquote>
+<dl class="docutils">
+<dt>wild lets you specify individual overrides for additional values in the</dt>
+<dd>tuple of tools or overrides.  wild is a list containing one or more
+of the following: branch, build, groups, version_alias
+the order of the items in the wild list will expect values to be
+tacked on in the same order to the tuple for tools and overrides in
+additional to the tool name and version</dd>
+<dt>remove_old lets you specify whether or not to remove previously found</dt>
+<dd>tools that match to ones being added currently (note does not stop
+currently running instances of the older version)</dd>
+<dt>disable_old lets you specify whether or not to disable previously found</dt>
+<dd>tools that match to ones being added currently (note does not stop
+currently running instances of the older version)</dd>
+<dt>limit_groups is a list of groups to build tools for that match group</dt>
+<dd>names in vent.template of each tool if exists</dd>
+<dt>Examples:</dt>
+<dd><dl class="first last docutils">
+<dt>repo=fe</dt>
+<dd>(get all tools from repo ‘fe’ at version ‘HEAD’ on branch ‘master’)</dd>
+<dt>repo=foo, version=”3d1f”, branch=”foo”</dt>
+<dd>(get all tools from repo ‘foo’ at verion ‘3d1f’ on branch ‘foo’)</dd>
+<dt>repo=foo, tools=[(‘bar’, ‘’), (‘baz’, ‘1d32’)]</dt>
+<dd>(get only ‘bar’ from repo ‘foo’ at version ‘HEAD’ on branch
+‘master’ and ‘baz’ from repo ‘foo’ at version ‘1d32’ on branch
+‘master’, ignore all other tools in repo ‘foo’)</dd>
+<dt>repo=foo overrides=[(‘baz/bar’, ‘’), (‘.’, ‘1c4e’)], version=‘4fad’</dt>
+<dd>(get all tools from repo ‘foo’ at verion ‘4fad’ on branch ‘master’
+except ‘baz/bar’ and for tool ‘.’ get version ‘1c4e’)</dd>
+<dt>repo=foo tools=[(‘bar’, ‘1a2d’)], overrides=[(‘baz’, ‘f2a1’)]</dt>
+<dd>(not a particularly useful example, but get ‘bar’ from ‘foo’ at
+version ‘1a2d’ and get ‘baz’ from ‘foo’ at version ‘f2a1’ on branch
+‘master’, ignore all other tools)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.add_image">
+<code class="descname">add_image</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.plugins.Plugin.add_image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.builder">
+<code class="descname">builder</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.plugins.Plugin.builder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.current_version">
+<code class="descname">current_version</code><span class="sig-paren">(</span><em>name</em>, <em>namespace=None</em>, <em>branch='master'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.current_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.current_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return current version for a given tool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.disable">
+<code class="descname">disable</code><span class="sig-paren">(</span><em>name</em>, <em>namespace=None</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.disable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.disable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable tool at a specific version, default to head</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.enable">
+<code class="descname">enable</code><span class="sig-paren">(</span><em>name</em>, <em>namespace=None</em>, <em>branch='master'</em>, <em>version='HEAD'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.enable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.enable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable tool at a specific version, default to head</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.list_tools">
+<code class="descname">list_tools</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.list_tools"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.list_tools" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return list of tuples of all tools</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>name=None</em>, <em>repo=None</em>, <em>namespace=None</em>, <em>branch='master'</em>, <em>groups=None</em>, <em>enabled='yes'</em>, <em>version='HEAD'</em>, <em>built='yes'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove tool (name) or repository, repository is the url. If no
+arguments are specified, all tools will be removed for the defaults.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.state">
+<code class="descname">state</code><span class="sig-paren">(</span><em>name</em>, <em>namespace=None</em>, <em>branch='master'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return state of a tool, disabled/enabled for each version</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>name=None</em>, <em>repo=None</em>, <em>namespace=None</em>, <em>branch=None</em>, <em>groups=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update tool (name) or repository, repository is the url. If no
+arguments are specified, all tools will be updated</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="vent.api.plugins.Plugin.versions">
+<code class="descname">versions</code><span class="sig-paren">(</span><em>name</em>, <em>namespace=None</em>, <em>branch='master'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/plugins.html#Plugin.versions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.plugins.Plugin.versions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return available versions of a tool</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-vent.api.templates">
+<span id="vent-api-templates-module"></span><h2>vent.api.templates module<a class="headerlink" href="#module-vent.api.templates" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="vent.api.templates.Template">
+<em class="property">class </em><code class="descclassname">vent.api.templates.</code><code class="descname">Template</code><span class="sig-paren">(</span><em>template=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/vent/api/templates.html#Template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#vent.api.templates.Template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle parsing templates</p>
+<dl class="method">
+<dt id="vent.api.templates.Template.add_option">
+<code class="descname">add_option</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.add_option" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.add_section">
+<code class="descname">add_section</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.add_section" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.constrained_sections">
+<code class="descname">constrained_sections</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.constrained_sections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.del_option">
+<code class="descname">del_option</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.del_option" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.del_section">
+<code class="descname">del_section</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.del_section" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.option">
+<code class="descname">option</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.option" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.options">
+<code class="descname">options</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.options" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.section">
+<code class="descname">section</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.section" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.sections">
+<code class="descname">sections</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.sections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.set_option">
+<code class="descname">set_option</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.set_option" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="vent.api.templates.Template.write_config">
+<code class="descname">write_config</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#vent.api.templates.Template.write_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-vent.api">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-vent.api" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">vent.api package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.api.actions">vent.api.actions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.api.menu_helpers">vent.api.menu_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.api.plugin_helpers">vent.api.plugin_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.api.plugins">vent.api.plugins module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.api.templates">vent.api.templates module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-vent.api">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Overview</a></li>
+      <li>Next: <a href="vent.core.html" title="next chapter">vent.core package</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/vent.api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
