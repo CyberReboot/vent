@@ -73,19 +73,21 @@ class ToolForm(npyscreen.ActionForm):
                 else:
                     repo_name = repo.split("/")
 
-                # figure out what tools in the repo are core and what are not
                 for tool in inventory['tools']:
-                    tool_repo_name = tool[0].split(":")
+                    tool_repo_name = tool.split(":")
 
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
-                            repo_name[1] == tool_repo_name[1]):
+                       repo_name[1] == tool_repo_name[1]):
+                        ncore_list.append(tool.split(":", 2)[2])
 
-                        # add the tools to their corresponding list
-                        if tool in inventory['core']:
-                            core_list.append(tool)
-                        else:
-                            ncore_list.append(tool)
+                for tool in inventory['core']:
+                    tool_repo_name = tool.split(":")
+
+                    # cross reference repo names
+                    if (repo_name[0] == tool_repo_name[0] and
+                       repo_name[1] == tool_repo_name[1]):
+                        core_list.append(tool.split(":", 2)[2])
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
@@ -101,15 +103,11 @@ class ToolForm(npyscreen.ActionForm):
                                  editable=False, rely=i, relx=5)
 
                         for tool in has_core[repo]:
-                            tool_name = tool[1]
-                            if tool_name == "":
-                                tool_name = "/"
-                            tool_name += ":" + ":".join(tool[0].split(":")[-2:])
-                            self.tools_tc[repo][tool_name] = self.add(
-                                    npyscreen.CheckBox, name=tool_name,
+                            self.tools_tc[repo][tool] = self.add(
+                                    npyscreen.CheckBox, name=tool,
                                     value=True, relx=10)
                             i += 1
-
+                        i += 3
                 else:
                     # make sure only repos with non-core tools are displayed
                     if has_non_core.get(repo):
@@ -118,15 +116,11 @@ class ToolForm(npyscreen.ActionForm):
                                  editable=False, rely=i, relx=5)
 
                         for tool in has_non_core[repo]:
-                            tool_name = tool[1]
-                            if tool_name == "":
-                                tool_name = "/"
-                            tool_name += ":" + ":".join(tool[0].split(":")[-2:])
-                            self.tools_tc[repo][tool_name] = self.add(
-                                    npyscreen.CheckBox, name=tool_name,
+                            self.tools_tc[repo][tool] = self.add(
+                                    npyscreen.CheckBox, name=tool,
                                     value=True, relx=10)
                             i += 1
-                i += 2
+                        i += 3
         return
 
     def on_ok(self):

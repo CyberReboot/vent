@@ -478,8 +478,8 @@ class Action:
             return (False, "No choices made")
         try:
             # choices: repos, core, tools, images, built, running, enabled
-            items = {'repos': [], 'core': [], 'tools': [], 'images': [],
-                     'built': [], 'running': [], 'enabled': []}
+            items = {'repos': [], 'core': {}, 'tools': {}, 'images': {},
+                     'built': {}, 'running': {}, 'enabled': {}}
 
             tools = self.plugin.list_tools()
             self.logger.info("found tools: " + str(tools))
@@ -492,22 +492,18 @@ class Action:
                                    tool['repo'] not in items[choice]):
                                     items[choice].append(tool['repo'])
                         elif choice == 'core':
-                            if 'groups' in tool:
-                                if 'core' in tool['groups']:
-                                    items[choice].append((tool['section'],
-                                                          tool['name']))
+                            if 'groups' in tool and 'core' in tool['groups']:
+                                items[choice][tool['section']] = tool['name']
                         elif choice == 'tools':
-                            items[choice].append((tool['section'],
-                                                  tool['name']))
+                            if (('groups' in tool and
+                               'core' not in tool['groups']) or
+                               'groups' not in tool):
+                                items[choice][tool['section']] = tool['name']
                         elif choice == 'images':
                             # TODO also check against docker
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['image_name']))
+                            items[choice][tool['section']] = tool['image_name']
                         elif choice == 'built':
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['built']))
+                            items[choice][tool['section']] = tool['built']
                         elif choice == 'running':
                             containers = Containers()
                             status = 'not running'
@@ -519,13 +515,9 @@ class Action:
                                 image_name = image_name.replace('/', '-')
                                 if container[0] == image_name:
                                     status = container[1]
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  status))
+                            items[choice][tool['section']] = status
                         elif choice == 'enabled':
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['enabled']))
+                            items[choice][tool['section']] = tool['enabled']
                         else:
                             # unknown choice
                             pass
