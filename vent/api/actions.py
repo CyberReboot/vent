@@ -371,6 +371,9 @@ class Action:
     def restore(self):
         self.logger.info("Starting: restore")
         status = (True, None)
+        # keep track of images added or failed
+        added_str = ''
+        failed_str = ''
         backup_name = '.vent-backup-' + Timestamp().split(' ')[0] + '.cfg'
         backup_file = os.path.join(os.path.expanduser('~'), backup_name)
         if os.path.exists(backup_file):
@@ -400,10 +403,11 @@ class Action:
                                  'core': core}
                     try:
                         self.plugin.add(t_info['repo'], **add_kargs)
+                        added_str += 'Restored: ' + t_info['name'] + '\n'
                     except Exception as e:
                         self.logger.error("Problem restoring tool " + t_info['name'] +
                                           " because " + str(e))
-                        status = (False, str(e))
+                        failed_str += 'Failed: ' + t_info['name'] + '\n'
                 elif t_info['type'] == 'registry':
                     add_kargs = {'image': t_info['pull_name'],
                                  'link_name': t_info['link_name'],
@@ -412,12 +416,15 @@ class Action:
                                  'groups': t_info['groups']}
                     try:
                         self.add_image(**add_kargs)
+                        added_str += 'Restored: ' + t_info['name'] + '\n'
                     except Exception as e:
                         self.logger.error("Problem restoring tool " + t_info['name'] +
                                           " because " + str(e))
-                        status = (False, str(e))
+                        failed_str += 'Failed: ' + t_info['name'] + '\n'
         else:
             status = (False, "No backup file found")
+        if status[0]:
+            status = (True, failed_str + added_str)
         self.logger.info("Status of restore: " + str(status[0]))
         self.logger.info("Finished: restore")
         return status

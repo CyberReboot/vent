@@ -321,11 +321,15 @@ class Plugin:
                 section = self.org + ":" + self.name + ":" + match[0] + ":"
                 section += self.branch + ":" + self.version
                 match_path = self.path + match[0]
-                image_name = self.org + "-" + self.name + "-"
-                if match[0] != '':
-                    # if tool is in a subdir, add that to the name of the image
-                    image_name += '-'.join(match[0].split('/')[1:]) + "-"
-                image_name += self.branch + ":" + self.version
+                if not self.core:
+                    image_name = self.org + "-" + self.name + "-"
+                    if match[0] != '':
+                        # if tool is in a subdir, add that to the name of the image
+                        image_name += '-'.join(match[0].split('/')[1:]) + "-"
+                    image_name += self.branch + ":" + self.version
+                else:
+                    image_name = ('cyberreboot/vent-' + match[0].split('/')[-1] + ':' +
+                                  self.branch)
 
                 # check if the section already exists
                 exists, options = template.section(section)

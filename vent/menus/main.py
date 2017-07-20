@@ -327,9 +327,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             notify_wait("In the process of restoring", title="Restoring...")
             status = self.api_action.restore()
             if status[0]:
-                notify_confirm("Restore successful")
+                notify_confirm("Backup file found, status of restore:\n" +
+                                status[1])
             else:
-                notify_confirm("Restore not successful")
+                notify_confirm(status[1])
         elif action == "swarm":
             # !! TODO
             # add notify_cancel_ok popup once implemented
