@@ -16,7 +16,10 @@ from vent.helpers.paths import PathDirs
 
 
 class Plugin:
-    """ Handle Plugins """
+    """
+    Handle Plugins
+    """
+
     def __init__(self, **kargs):
         self.path_dirs = PathDirs(**kargs)
         self.manifest = join(self.path_dirs.meta_dir,
@@ -83,6 +86,7 @@ class Plugin:
             version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
             'master', ignore all other tools)
         """
+
         # initialize and store class objects
         self.repo = repo.lower()
         self.tools = tools
@@ -138,6 +142,7 @@ class Plugin:
                 (True, name of image).
                 If the function failed, (False, message about failure)
         """
+
         status = (True, None)
         try:
             org = ''
@@ -194,7 +199,10 @@ class Plugin:
                 build=None,
                 branch=None,
                 version=None):
-        """ Build tools """
+        """
+        Build tools
+        """
+
         self.logger.info("Starting: builder")
         self.logger.info("install path: " + str(match_path))
         self.logger.info("image name: " + str(image_name))
@@ -252,9 +260,10 @@ class Plugin:
             status (tuple(bool, str)):
 
         Returns:
-            response (tuple(bool, str)): If True, then the function performed as
-            expected and the str is a string
+            response (tuple(bool, str)): If True, then the function performed
+            as expected and the str is a string
         """
+
         response = (True, None)
         # TODO implement features: wild, remove_old, disable_old, limit_groups
 
@@ -305,7 +314,10 @@ class Plugin:
         return response
 
     def _build_manifest(self, matches):
-        """ Builds and writes the manifest for the tools being added """
+        """
+        Builds and writes the manifest for the tools being added
+        """
+
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
@@ -443,7 +455,10 @@ class Plugin:
                      image_name,
                      section,
                      build_local=False):
-        """ Build docker images and store results in template """
+        """
+        Build docker images and store results in template
+        """
+
         # !! TODO return status of whether it built successfully or not
         if self.build:
             cwd = getcwd()
@@ -535,7 +550,10 @@ class Plugin:
         return template
 
     def list_tools(self):
-        """ Return list of tuples of all tools """
+        """
+        Return list of tuples of all tools
+        """
+
         tools = []
         template = Template(template=self.manifest)
         exists, sections = template.sections()
@@ -563,6 +581,7 @@ class Plugin:
         Remove tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be removed for the defaults.
         """
+
         # initialize
         args = locals()
         status = (True, None)
@@ -618,6 +637,7 @@ class Plugin:
         Update tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be updated
         """
+
         # initialize
         args = locals()
         status = (False, None)
@@ -647,7 +667,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def versions(self, name, namespace=None, branch="master"):
-        """ Return available versions of a tool """
+        """
+        Return available versions of a tool
+        """
+
         # initialize
         args = locals()
         versions = []
@@ -665,7 +688,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def current_version(self, name, namespace=None, branch="master"):
-        """ Return current version for a given tool """
+        """
+        Return current version for a given tool
+        """
+
         # initialize
         args = locals()
         versions = []
@@ -679,7 +705,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def state(self, name, namespace=None, branch="master"):
-        """ Return state of a tool, disabled/enabled for each version """
+        """
+        Return state of a tool, disabled/enabled for each version
+        """
+
         # initialize
         args = locals()
         states = []
@@ -696,7 +725,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def enable(self, name, namespace=None, branch="master", version="HEAD"):
-        """ Enable tool at a specific version, default to head """
+        """
+        Enable tool at a specific version, default to head
+        """
+
         # initialize
         args = locals()
         status = (False, None)
@@ -710,7 +742,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def disable(self, name, namespace=None, branch="master", version="HEAD"):
-        """ Disable tool at a specific version, default to head """
+        """
+        Disable tool at a specific version, default to head
+        """
+
         # initialize
         args = locals()
         status = (False, None)
