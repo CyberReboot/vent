@@ -496,7 +496,7 @@ class Action:
                                 items[choice][tool['section']] = tool['name']
                         elif choice == 'tools':
                             if (('groups' in tool and
-                               'core' not in tool['groups']) or
+                                 'core' not in tool['groups']) or
                                'groups' not in tool):
                                 items[choice][tool['section']] = tool['name']
                         elif choice == 'images':
