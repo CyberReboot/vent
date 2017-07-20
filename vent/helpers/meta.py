@@ -18,7 +18,7 @@ def Version():
         if not version.startswith('v'):
             version = 'v' + version
     except Exception as e:  # pragma: no cover
-        pass
+        version = "Error: " + str(e)
     return version
 
 
