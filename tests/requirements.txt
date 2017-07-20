@@ -9,5 +9,6 @@ python-magic
 redis
 rq
 sphinx
+urllib3==1.21.1
 watchdog
 web.py
