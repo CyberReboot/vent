@@ -13,12 +13,12 @@ from vent.helpers.paths import PathDirs
 def Version():
     """ Get Vent version """
     version = ''
-    try:
-        version = pkg_resources.require("vent")[0].version
-        if not version.startswith('v'):
-            version = 'v' + version
-    except Exception as e:  # pragma: no cover
-        pass
+    #try:
+    version = pkg_resources.require("vent")[0].version
+    if not version.startswith('v'):
+        version = 'v' + version
+    #except Exception as e:  # pragma: no cover
+    #    pass
     return version
 
 
