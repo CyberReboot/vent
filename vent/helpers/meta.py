@@ -231,8 +231,8 @@ def Jobs():
                         container.attrs['State']['StartedAt']
                     new_file['FinishedAt'] = \
                         container.attrs['State']['FinishedAt']
-                    new_file['Image'] = \
-                        container.attrs['Image'][:12]
+                    new_file['ID'] = \
+                        container.attrs['Id']
 
                     # create/append a json file with all wanted information
                     with open(manifest, file_status) as outfile:
