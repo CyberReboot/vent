@@ -20,7 +20,6 @@ build: clean
  		vent/core/rq-worker/test_rq_worker.py 
 	make clean -C docs/
 	make html -C docs/
-	rm -rf docs/source/v*.rst
 	@for file in vent/core/*/; do mv $$file `echo $$file | tr '_' '-'` ; done 2> /dev/null || true
 	python setup.py install
 
