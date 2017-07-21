@@ -218,6 +218,23 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'action': form_action,
                                      'type': a_type,
                                      'cores': cores}}
+        # grammar rules
+        vowels = ['a', 'e', 'i', 'o', 'u']
+
+        # consonant-vowel-consonant ending
+        # Eg: stop -> stopping
+        if s_action[-1] not in vowels and \
+           s_action[-2] in vowels and \
+           s_action[-3] not in vowels:
+                form_args['action_dict']['present_t'] = s_action + \
+                    s_action[-1] + 'ing ' + a_type
+
+        # word ends with a 'e'
+        # eg: remove -> removing
+        if s_action[-1] == 'e':
+                form_args['action_dict']['present_t'] = s_action[:-1] \
+                    + 'ing ' + a_type
+
         if s_action == 'start':
             form_args['names'].append('prep_start')
         elif s_action == 'configure':
