@@ -72,7 +72,8 @@ class MenuHelper:
                             plugin_c.set_option(section,
                                                 "image_name",
                                                 "cyberreboot/vent-" +
-                                                tool + ":" + branch)
+                                                tool.replace('_', '-') + ":" +
+                                                branch)
                 plugin_c.write_config()
                 chdir(cwd)
             if action == "build":
@@ -81,6 +82,7 @@ class MenuHelper:
                 try:
                     for tool in core['normal']:
                         for section in sections[1]:
+                            tool = tool.replace('_', '-')
                             image_name = plugin_c.option(section,
                                                          "image_name")
                             check_image = "cyberreboot/vent-"

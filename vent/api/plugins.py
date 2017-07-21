@@ -140,6 +140,7 @@ class Plugin:
 
         status = (True, None)
         try:
+            pull_name = image
             org = ''
             name = image
             if '/' in image:
@@ -159,6 +160,7 @@ class Plugin:
             template = Template(template=self.manifest)
             template.add_section(section)
             template.set_option(section, "name", name)
+            template.set_option(section, "pull_name", pull_name)
             template.set_option(section, "namespace", namespace)
             template.set_option(section, "path", "")
             template.set_option(section, "repo", registry + '/' + org)
@@ -175,13 +177,13 @@ class Plugin:
             template.set_option(section, "built", "yes")
             template.set_option(section, "image_id",
                                 image.attrs['Id'].split(':')[1][:12])
-            if groups:
-                template.set_option(section, "groups", groups)
+            template.set_option(section, "groups", groups)
 
             # write out configuration to the manifest file
             template.write_config()
             status = (True, "Successfully added " + full_image)
         except Exception as e:  # pragma: no cover
+            self.logger.error("Couldn't add image because " + str(e))
             status = (False, str(e))
         return status
 
@@ -325,11 +327,17 @@ class Plugin:
                 section = self.org + ":" + self.name + ":" + match[0] + ":"
                 section += self.branch + ":" + self.version
                 match_path = self.path + match[0]
-                image_name = self.org + "-" + self.name + "-"
-                if match[0] != '':
-                    # if tool is in a subdir, add that to the name of the image
-                    image_name += '-'.join(match[0].split('/')[1:]) + "-"
-                image_name += self.branch + ":" + self.version
+                if not self.core:
+                    image_name = self.org + "-" + self.name + "-"
+                    if match[0] != '':
+                        # if tool is in a subdir, add that to the name of the
+                        # image
+                        image_name += '-'.join(match[0].split('/')[1:]) + "-"
+                    image_name += self.branch + ":" + self.version
+                else:
+                    image_name = ('cyberreboot/vent-' +
+                                  match[0].split('/')[-1] + ':' + self.branch)
+                image_name = image_name.replace('_', '-')
 
                 # check if the section already exists
                 exists, options = template.section(section)
