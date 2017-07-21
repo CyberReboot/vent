@@ -225,24 +225,14 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         if s_action[-1] not in vowels and \
            s_action[-2] in vowels and \
            s_action[-3] not in vowels:
-               form_args['action_dict'] = \
-                   {'action_name': s_action,
-                    'present_t': s_action + s_action[-1] + 'ing ' + a_type,
-                    'past_t': s_action.title() + ' ' + a_type,
-                    'action': form_action,
-                    'type': a_type,
-                    'cores': cores}
+               form_args['action_dict']['present_t'] = s_action + s_action[-1] \
+                       + 'ing ' + a_type
 
         # word ends with a 'e'
         # eg: remove -> removing
         if s_action[-1] == 'e':
-               form_args['action_dict'] = \
-                   {'action_name': s_action,
-                    'present_t': s_action[:-1] + 'ing ' + a_type,
-                    'past_t': s_action.title() + ' ' + a_type,
-                    'action': form_action,
-                    'type': a_type,
-                    'cores': cores}
+               form_args['action_dict']['present_t'] = s_action[:-1] \
+                       + 'ing ' + a_type
 
         if s_action == 'start':
             form_args['names'].append('prep_start')
