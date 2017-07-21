@@ -10,7 +10,6 @@
 .DS_Store
 .vent
 /build/
-docs/build/doctrees/
 dist
 images
 plugins
