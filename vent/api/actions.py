@@ -349,6 +349,10 @@ class Action:
         return status
 
     def backup(self):
+        """
+        Saves the configuration information of the current running vent
+        instance to be used for restoring at a later time
+        """
         self.logger.info("Starting: backup")
         status = (True, None)
         backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')) +
@@ -370,6 +374,9 @@ class Action:
         return status
 
     def restore(self, backup_file):
+        """
+        Restores a vent configuration from a previously backed up version
+        """
         self.logger.info("Starting: restore")
         self.logger.info("File given: " + backup_file)
         status = (True, None)

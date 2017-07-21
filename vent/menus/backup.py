@@ -4,6 +4,7 @@ import npyscreen
 class BackupForm(npyscreen.ActionForm):
     """ Form that can be used to select a backup file to restore """
     def __init__(self, *args, **keywords):
+        """ Initialize backup form objects """
         self.restore = keywords['restore']
         self.files = keywords['files']
         self.display_vals = []
@@ -14,6 +15,7 @@ class BackupForm(npyscreen.ActionForm):
         super(BackupForm, self).__init__(*args, **keywords)
 
     def create(self):
+        """ Add backup files to select from """
         self.add(npyscreen.Textfield, value='Pick a version to restore from: ',
                  editable=False, color="STANDOUT")
         self.file_select = self.add(npyscreen.SelectOne,
@@ -21,6 +23,7 @@ class BackupForm(npyscreen.ActionForm):
                                     scroll_exit=True, rely=4)
 
     def on_ok(self):
+        """ Perform restoration on the backup file selected """
         if self.file_select.value:
             npyscreen.notify_wait("In the process of restoring",
                                   title="Restoring...")
@@ -35,4 +38,5 @@ class BackupForm(npyscreen.ActionForm):
             npyscreen.notify_confirm("Choose a file to restore from")
 
     def on_cancel(self):
+        """ When user clicks cancel, will return to MAIN """
         self.parentApp.change_form("MAIN")
