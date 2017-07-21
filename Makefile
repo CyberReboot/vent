@@ -17,9 +17,11 @@ build: clean
  		vent/core/rq-dashboard/rq_dash_settings.py \
  		vent/core/rq-dashboard/test_rq_dashboard.py \
  		vent/core/rq-worker/settings.py \
- 		vent/core/rq-worker/test_rq_worker.py 
+ 		vent/core/rq-worker/test_rq_worker.py
 	make clean -C docs/
 	make html -C docs/
+	mv docs/build/html/* docs/
+	rm -rf docs/build
 	@for file in vent/core/*/; do mv $$file `echo $$file | tr '_' '-'` ; done 2> /dev/null || true
 	python setup.py install
 
