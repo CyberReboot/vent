@@ -5,7 +5,6 @@ import time
 
 from docker.errors import DockerException
 from npyscreen import notify_confirm
-from npyscreen import notify_wait
 from threading import Thread
 
 from vent.api.actions import Action
@@ -20,6 +19,7 @@ from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
+from vent.menus.backup import BackupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
@@ -324,13 +324,23 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 else:
                     notify_confirm("No GPUs detected.")
         elif action == 'restore':
-            notify_wait("In the process of restoring", title="Restoring...")
-            status = self.api_action.restore()
-            if status[0]:
-                notify_confirm("Backup file found, status of restore:\n" +
-                                status[1])
-            else:
-                notify_confirm(status[1])
+            backup_dir = os.path.expanduser('~')
+            backup_files = [f for f in os.listdir(backup_dir) if f.startswith('.vent-backup')]
+            form_args = {'restore': self.api_action.restore,
+                         'files': backup_files,
+                         'name': 'test'}
+            add_kargs = {'form': BackupForm,
+                         'form_name': 'CHOOSEBACKUP',
+                         'form_args': form_args}
+            self.add_form(**add_kargs)
+            if False:
+                notify_wait("In the process of restoring", title="Restoring...")
+                status = self.api_action.restore()
+                if status[0]:
+                    notify_confirm("Backup file found, status of restore:\n" +
+                                    status[1])
+                else:
+                    notify_confirm(status[1])
         elif action == "swarm":
             # !! TODO
             # add notify_cancel_ok popup once implemented

@@ -368,14 +368,14 @@ class Action:
         self.logger.info("Finished: backup")
         return status
 
-    def restore(self):
+    def restore(self, backup_file):
         self.logger.info("Starting: restore")
+        self.logger.info("File given: " + backup_file)
         status = (True, None)
         # keep track of images added or failed
         added_str = ''
         failed_str = ''
-        backup_name = '.vent-backup-' + Timestamp().split(' ')[0] + '.cfg'
-        backup_file = os.path.join(os.path.expanduser('~'), backup_name)
+        backup_file = os.path.join(os.path.expanduser('~'), backup_file)
         if os.path.exists(backup_file):
             backup = Template(backup_file)
             options = ['repo', 'branch', 'version', 'built', 'namespace', 'path',
@@ -385,7 +385,7 @@ class Action:
                 t_info = backedup_tools[tool]
                 if t_info['type'] == 'repository':
                     # for purposes of the add method (only adding a sepcific tool each time,
-                    # and the add method expect a tuple with relative path to tool for that)
+                    # and the add method expects a tuple with relative path to tool for that)
                     rel_path = t_info['path'].split(t_info['namespace'])[-1]
                     t_tuple = (rel_path, '')
                     if t_info['built'] == 'yes':
@@ -422,7 +422,7 @@ class Action:
                                           " because " + str(e))
                         failed_str += 'Failed: ' + t_info['name'] + '\n'
         else:
-            status = (False, "No backup file found")
+            status = (False, "No backup file found at specified path")
         if status[0]:
             status = (True, failed_str + added_str)
         self.logger.info("Status of restore: " + str(status[0]))
