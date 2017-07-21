@@ -10,13 +10,13 @@ build: clean
 	pip install -r tests/requirements.txt
 	rm -rf docs/source/v*.rst
 	sphinx-apidoc -f -o docs/source/ vent/ \
- 		vent/core/file-drop/test_file_drop.py \
- 		vent/core/network-tap/ncontrol/test_ncontrol.py \
- 		vent/core/rmq-es-connector/test_rmq_es_connector.py \
- 		vent/core/rq-dashboard/rq_dash_settings.py \
- 		vent/core/rq-dashboard/test_rq_dashboard.py \
- 		vent/core/rq-worker/settings.py \
- 		vent/core/rq-worker/test_rq_worker.py 
+		vent/core/file_drop/test_file_drop.py \
+ 		vent/core/network_tap/ncontrol/test_ncontrol.py \
+ 		vent/core/rmq_es-_connector/test_rmq_es_connector.py \
+ 		vent/core/rq_dashboard/rq_dash_settings.py \
+ 		vent/core/rq_dashboard/test_rq_dashboard.py \
+ 		vent/core/rq_worker/settings.py \
+ 		vent/core/rq_worker/test_rq_worker.py
 	make clean -C docs/
 	make html -C docs/
 	python setup.py install
