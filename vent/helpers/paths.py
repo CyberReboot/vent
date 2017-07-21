@@ -55,15 +55,16 @@ class PathDirs:
                                             "vent_files")
         else:
             default_file_dir = "/tmp/vent_files"
+        self.ensure_dir(default_file_dir)
         config = Template(template=os.path.join(self.base_dir, "vent.cfg"))
-        resp = config.section("main")
-        if resp[0]:
-            resp = config.option("main", "files")
-            if not resp[0]:
-                config.add_option("main", "files", default_file_dir)
-                self.ensure_dir(default_file_dir)
-        else:
-            config.add_option("main", "files", default_file_dir)
-            self.ensure_dir(default_file_dir)
+        sections = {'main': {'files': default_file_dir},
+                    'network-mapping': {},
+                    'nvidia-docker-plugin': {'port': '3476'}}
+        for s in sections:
+            if sections[s]:
+                for option in sections[s]:
+                    config.add_option(s, option, sections[s][option])
+            else:
+                config.add_section(s)
         config.write_config()
         return
