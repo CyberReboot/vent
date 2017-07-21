@@ -359,11 +359,15 @@ class Action:
                        '.cfg')
         backup_file = os.path.join(os.path.expanduser('~'), backup_name)
         manifest = self.p_helper.manifest
+        vent_config = os.path.join(os.path.expanduser('~'), '.vent',
+                                   'vent.cfg')
         # creates new backup file
         try:
-            with open(backup_file, 'w') as backup:
+            with open(backup_file, 'a') as backup:
                 with open(manifest, 'r') as manifest_file:
                     backup.write(manifest_file.read())
+                with open(vent_config, 'r') as config_file:
+                    backup.write(config_file.read())
             self.logger.info("Backup written to " + backup_file)
             status = (True, backup_file)
         except Exception as e:
@@ -388,12 +392,29 @@ class Action:
             backup = Template(backup_file)
             options = ['repo', 'branch', 'version', 'built', 'namespace',
                        'path', 'groups', 'type', 'name', 'link_name',
-                       'pull_name']
+                       'pull_name', 'files']
             template_options = ['service', 'settings', 'docker', 'info',
                                 'gpu']
             backedup_tools = backup.constrained_sections({}, options +
                                                          template_options)
             for tool in backedup_tools:
+                # main means we're looking at vent.cfg
+                if tool == 'main':
+                    try:
+                        vent_config = os.path.join(os.path.expanduser('~'),
+                                                   '.vent', 'vent.cfg')
+                        conf_template = Template(vent_config)
+                        for option in backup.options(tool)[1]:
+                            conf_template.set_option(tool, option,
+                                                     backup.option(tool,
+                                                                   option)[1])
+                        conf_template.write_config()
+                        added_str += 'Restored: vent configuration file'
+                    except Exception as e:
+                        self.logger.error("Couldn't restore vent.cfg"
+                                          "because: " + str(e))
+                        failed_str += 'Failed: vent configuration file'
+                    continue
                 t_info = backedup_tools[tool]
                 if t_info['type'] == 'repository':
                     # for purposes of the add method (only adding a sepcific
