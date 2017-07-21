@@ -8,6 +8,7 @@ from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
+from vent.helpers.meta import Timestamp
 
 
 class Action:
@@ -347,15 +348,113 @@ class Action:
         self.logger.info("Finished: build")
         return status
 
-    @staticmethod
-    def backup():
-        # TODO
-        return
+    def backup(self):
+        """
+        Saves the configuration information of the current running vent
+        instance to be used for restoring at a later time
+        """
+        self.logger.info("Starting: backup")
+        status = (True, None)
+        backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')) +
+                       '.cfg')
+        backup_file = os.path.join(os.path.expanduser('~'), backup_name)
+        manifest = self.p_helper.manifest
+        # creates new backup file
+        try:
+            with open(backup_file, 'w') as backup:
+                with open(manifest, 'r') as manifest_file:
+                    backup.write(manifest_file.read())
+            self.logger.info("Backup written to " + backup_file)
+            status = (True, backup_file)
+        except Exception as e:
+            self.logger.error("Couldn't backup vent: " + str(e))
+            status = (False, str(e))
+        self.logger.info("Status of backup: " + str(status[0]))
+        self.logger.info("Finished: backup")
+        return status
 
-    @staticmethod
-    def restore():
-        # TODO
-        return
+    def restore(self, backup_file):
+        """
+        Restores a vent configuration from a previously backed up version
+        """
+        self.logger.info("Starting: restore")
+        self.logger.info("File given: " + backup_file)
+        status = (True, None)
+        # keep track of images added or failed
+        added_str = ''
+        failed_str = ''
+        backup_file = os.path.join(os.path.expanduser('~'), backup_file)
+        if os.path.exists(backup_file):
+            backup = Template(backup_file)
+            options = ['repo', 'branch', 'version', 'built', 'namespace',
+                       'path', 'groups', 'type', 'name', 'link_name',
+                       'pull_name']
+            template_options = ['service', 'settings', 'docker', 'info',
+                                'gpu']
+            backedup_tools = backup.constrained_sections({}, options +
+                                                         template_options)
+            for tool in backedup_tools:
+                t_info = backedup_tools[tool]
+                if t_info['type'] == 'repository':
+                    # for purposes of the add method (only adding a sepcific
+                    # tool each time, and the add method expects a tuple with
+                    # relative path to tool for that)
+                    rel_path = t_info['path'].split(t_info['namespace'])[-1]
+                    t_tuple = (rel_path, '')
+                    if t_info['built'] == 'yes':
+                        build = True
+                    else:
+                        build = False
+                    if 'core' in t_info['groups']:
+                        core = True
+                    else:
+                        core = False
+                    add_kargs = {'tools': [t_tuple],
+                                 'branch': t_info['branch'],
+                                 'version': t_info['version'],
+                                 'build': build,
+                                 'core': core}
+                    try:
+                        self.plugin.add(t_info['repo'], **add_kargs)
+                        # update manifest with customizations
+                        new_manifest = Template(self.plugin.manifest)
+                        for option in template_options:
+                            if option in t_info:
+                                new_manifest.set_option(tool, option,
+                                                        t_info[option])
+                        new_manifest.write_config()
+                        added_str += 'Restored: ' + t_info['name'] + '\n'
+                    except Exception as e:
+                        self.logger.error("Problem restoring tool " + t_info['name'] +
+                                          " because " + str(e))
+                        failed_str += 'Failed: ' + t_info['name'] + '\n'
+                elif t_info['type'] == 'registry':
+                    add_kargs = {'image': t_info['pull_name'],
+                                 'link_name': t_info['link_name'],
+                                 'tag': t_info['version'],
+                                 'registry': t_info['repo'].split('/')[0],
+                                 'groups': t_info['groups']}
+                    try:
+                        self.add_image(**add_kargs)
+                        # update manifest with customizations
+                        new_manifest = Template(self.plugin.manifest)
+                        for option in template_options:
+                            if option in t_info:
+                                new_manifest.set_option(tool, option,
+                                                        t_info[option])
+                        new_manifest.write_config()
+                        added_str += 'Restored: ' + t_info['name'] + '\n'
+                    except Exception as e:
+                        self.logger.error("Problem restoring tool " + t_info['name'] +
+                                          " because " + str(e))
+                        failed_str += 'Failed: ' + t_info['name'] + '\n'
+        else:
+            status = (False, "No backup file found at specified path")
+        if status[0]:
+            status = (True, failed_str + added_str)
+        self.logger.info("Status of restore: " + str(status[0]))
+        self.logger.info("Finished: restore")
+        return status
 
     @staticmethod
     def configure():

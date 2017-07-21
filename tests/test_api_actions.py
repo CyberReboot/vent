@@ -70,7 +70,7 @@ def test_prep_start():
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent',
                           branch='master',
-                          tools=[('vent/core/file-drop',''),
+                          tools=[('vent/core/file_drop',''),
                                  ('vent/core/redis', ''),
                                  ('vent/core/syslog', '')])
     assert isinstance(status, tuple)
@@ -106,11 +106,18 @@ def test_update():
 
 def test_backup():
     """ Test the backup function """
-    Action.backup()
+    instance = Action()
+    status = instance.backup()
+    assert isinstance(status, tuple)
+    assert status[0] == True
+    assert os.path.exists(status[1])
 
 def test_restore():
     """ Test the restore function """
-    Action.restore()
+    instance = Action()
+    status = instance.restore('not a backup')
+    assert isinstance(status, tuple)
+    assert status[0] == False
 
 def test_inventory():
     """ Test the inventory function """
