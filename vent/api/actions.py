@@ -382,7 +382,10 @@ class Action:
             options = ['repo', 'branch', 'version', 'built', 'namespace',
                        'path', 'groups', 'type', 'name', 'link_name',
                        'pull_name']
-            backedup_tools = backup.constrained_sections({}, options)
+            template_options = ['service', 'settings', 'docker', 'info',
+                                'gpu']
+            backedup_tools = backup.constrained_sections({}, options +
+                                                         template_options)
             for tool in backedup_tools:
                 t_info = backedup_tools[tool]
                 if t_info['type'] == 'repository':
@@ -406,6 +409,13 @@ class Action:
                                  'core': core}
                     try:
                         self.plugin.add(t_info['repo'], **add_kargs)
+                        # update manifest with customizations
+                        new_manifest = Template(self.plugin.manifest)
+                        for option in template_options:
+                            if option in t_info:
+                                new_manifest.set_option(tool, option,
+                                                        t_info[option])
+                        new_manifest.write_config()
                         added_str += 'Restored: ' + t_info['name'] + '\n'
                     except Exception as e:
                         self.logger.error("Problem restoring tool " + t_info['name'] +
@@ -419,6 +429,13 @@ class Action:
                                  'groups': t_info['groups']}
                     try:
                         self.add_image(**add_kargs)
+                        # update manifest with customizations
+                        new_manifest = Template(self.plugin.manifest)
+                        for option in template_options:
+                            if option in t_info:
+                                new_manifest.set_option(tool, option,
+                                                        t_info[option])
+                        new_manifest.write_config()
                         added_str += 'Restored: ' + t_info['name'] + '\n'
                     except Exception as e:
                         self.logger.error("Problem restoring tool " + t_info['name'] +

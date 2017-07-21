@@ -115,10 +115,9 @@ def test_backup():
 def test_restore():
     """ Test the restore function """
     instance = Action()
-    backup_file = instance.backup()[1]
-    status = instance.restore(backup_file)
+    status = instance.restore('not a backup')
     assert isinstance(status, tuple)
-    assert status[0] == True
+    assert status[0] == False
 
 def test_inventory():
     """ Test the inventory function """
