@@ -1,10 +1,13 @@
+import docker
 import fnmatch
+import json
+import requests
 import shlex
 
 from ast import literal_eval
 from os import chdir, getcwd, walk
 from os.path import join
-from subprocess import check_output, STDOUT
+from subprocess import check_output, Popen, PIPE, STDOUT
 
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
@@ -15,6 +18,7 @@ from vent.helpers.meta import Version
 class PluginHelper:
     """ Handle helper functions for the Plugin class """
     def __init__(self, **kargs):
+        self.d_client = docker.from_env()
         self.path_dirs = PathDirs(**kargs)
         self.manifest = join(self.path_dirs.meta_dir,
                              "plugin_manifest.cfg")
@@ -203,7 +207,6 @@ class PluginHelper:
         tool_d = {}
         for section in s:
             # initialize needed vars
-            template_path = join(s[section]['path'], 'vent.template')
             c_name = s[section]['image_name'].replace(':', '-')
             c_name = c_name.replace('/', '-')
             image_name = s[section]['image_name']
@@ -211,20 +214,23 @@ class PluginHelper:
             # checkout the right version and branch of the repo
             cwd = getcwd()
             self.logger.info("current directory is: " + str(cwd))
-            chdir(join(s[section]['path']))
-            status = self.checkout(branch=branch, version=version)
-            self.logger.info(status)
-            chdir(cwd)
+            # images built from registry won't have path
+            if s[section]['path'] != '':
+                chdir(join(s[section]['path']))
+                status = self.checkout(branch=branch, version=version)
+                self.logger.info(status)
+                chdir(cwd)
 
             # set docker settings for container
-            vent_template = Template(template_path)
-            status = vent_template.section('docker')
+            manifest = Template(self.manifest)
+            status = manifest.option(section, 'docker')
             self.logger.info(status)
             tool_d[c_name] = {'image': image_name,
                               'name': c_name}
             if status[0]:
-                for option in status[1]:
-                    options = option[1]
+                options_dict = json.loads(status[1])
+                for option in options_dict:
+                    options = options_dict[option]
                     # check for commands to evaluate
                     if '`' in options:
                         cmds = options.split('`')
@@ -241,20 +247,42 @@ class PluginHelper:
                         options = "".join(cmds)
                     # store options set for docker
                     try:
-                        tool_d[c_name][option[0]] = literal_eval(options)
+                        tool_d[c_name][option] = literal_eval(options)
                     except Exception as e:  # pragma: no cover
                         self.logger.error("unable to store the options set for docker: " + str(e))
-                        tool_d[c_name][option[0]] = options
+                        tool_d[c_name][option] = options
 
             if 'labels' not in tool_d[c_name]:
                 tool_d[c_name]['labels'] = {}
 
             # get the service uri info
-            status = vent_template.section('service')
+            status = manifest.option(section, 'service')
             self.logger.info(status)
             if status[0]:
-                for option in status[1]:
-                    tool_d[c_name]['labels'][option[0]] = option[1]
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        tool_d[c_name]['labels'][option] = options_dict[option]
+                except Exception as e:   # pragma: no cover
+                    self.logger.error("unable to store service options for "
+                                      "docker: " + str(e))
+
+            # get network mappings
+            if 'network_mode' in tool_d[c_name]:
+                # !! TODO check if mappings are available in the host config
+                pass
+
+            # check for gpu settings
+            status = manifest.option(section, 'gpu')
+            self.logger.info(status)
+            if status[0]:
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        tool_d[c_name]['labels']['gpu.'+option] = options_dict[option]
+                except Exception as e:   # pragma: no cover
+                    self.logger.error("unable to store gpu options for "
+                                      "docker: " + str(e))
 
             # get temporary name for links, etc.
             plugin_c = Template(template=self.manifest)
@@ -304,17 +332,22 @@ class PluginHelper:
                     else:
                         tool_d[c_name]['volumes'] = {self.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
                     if files[0]:
-                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
+                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'rw'}
             else:
                 tool_d[c_name]['log_config'] = log_config
 
             # add label for priority
-            status = vent_template.section('settings')
+            status = manifest.option(section, 'settings')
             self.logger.info(status)
             if status[0]:
-                for option in status[1]:
-                    if option[0] == 'priority':
-                        tool_d[c_name]['labels']['vent.priority'] = option[1]
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        if option == 'priority':
+                            tool_d[c_name]['labels']['vent.priority'] = options_dict[option]
+                except Exception as e:   # pragma: no cover
+                    self.logger.error("unable to store settings options "
+                                      "for docker " + str(e))
 
             # only start tools that have been built
             if s[section]['built'] != 'yes':
@@ -400,3 +433,108 @@ class PluginHelper:
         self.logger.info("Status of prep_start: "+str(status[0]))
         self.logger.info("Finished: prep_start")
         return status
+
+    def start_priority_containers(self, groups, group_orders, tool_d):
+        """ Select containers based on priorities to start """
+        groups = sorted(set(groups))
+        s_conts = []
+        f_conts = []
+        for group in groups:
+            if group in group_orders:
+                for cont_t in sorted(group_orders[group]):
+                    if cont_t[1] not in s_conts:
+                        s_conts, f_conts = self.start_containers(cont_t[1],
+                                                                 tool_d,
+                                                                 s_conts,
+                                                                 f_conts)
+        return (s_conts, f_conts)
+
+    def start_remaining_containers(self, containers_remaining, tool_d):
+        """
+        Select remaining containers that didn't have priorities to start
+        """
+        s_containers = []
+        f_containers = []
+        for container in containers_remaining:
+            s_containers, f_containers = self.start_containers(container,
+                                                               tool_d,
+                                                               s_containers,
+                                                               f_containers)
+        return (s_containers, f_containers)
+
+    def start_containers(self,
+                         container,
+                         tool_d,
+                         s_containers,
+                         f_containers):
+        """ Start container that was passed in and return status """
+        try:
+            c = self.d_client.containers.get(container)
+            c.start()
+            s_containers.append(container)
+            self.logger.info("started " + str(container) +
+                             " with ID: " + str(c.short_id))
+        except Exception as err:
+            try:
+                gpu = 'gpu.enabled'
+                failed = False
+                if (gpu in tool_d[container]['labels'] and
+                   tool_d[container]['labels'][gpu] == 'yes'):
+                    # TODO check for availability of gpu(s),
+                    #      otherwise queue it up until it's
+                    #      available
+                    # !! TODO check for device settings in vent.template
+                    route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
+                    h = check_output(('awk', '/default/ {print $3}'),
+                                     stdin=route.stdout)
+                    route.wait()
+                    host = h.strip()
+                    nd_url = 'http://' + host + ':3476/v1.0/docker/cli'
+                    params = {'vol': 'nvidia_driver'}
+
+                    r = requests.get(nd_url, params=params)
+                    if r.status_code == 200:
+                        options = r.text.split()
+                        for option in options:
+                            if option.startswith('--volume-driver='):
+                                tool_d[container]['volume_driver'] = option.split("=", 1)[1]
+                            elif option.startswith('--volume='):
+                                vol = option.split("=", 1)[1].split(":")
+                                if 'volumes' in tool_d[container]:
+                                    # !! TODO handle if volumes is a list
+                                    tool_d[container]['volumes'][vol[0]] = {'bind': vol[1],
+                                                                            'mode': vol[2]}
+                                else:
+                                    tool_d[container]['volumes'] = {vol[0]:
+                                                                    {'bind': vol[1],
+                                                                     'mode': vol[2]}}
+                            elif option.startswith('--device='):
+                                dev = option.split("=", 1)[1]
+                                if 'devices' in tool_d[container]:
+                                    tool_d[container]['devices'].append(dev +
+                                                                        ":" +
+                                                                        dev +
+                                                                        ":rwm")
+                                else:
+                                    tool_d[container]['devices'] = [dev + ":" + dev + ":rwm"]
+                            else:
+                                self.logger.error("Unable to parse " +
+                                                  "nvidia-docker option: " +
+                                                  str(option))
+                    else:
+                        failed = True
+                        f_containers.append(container)
+                        self.logger.error("failed to start " + str(container) +
+                                          " because nvidia-docker-plugin " +
+                                          "failed with: " + str(r.status_code))
+                if not failed:
+                    cont_id = self.d_client.containers.run(detach=True,
+                                                           **tool_d[container])
+                    s_containers.append(container)
+                    self.logger.info("started " + str(container) +
+                                     " with ID: " + str(cont_id))
+            except Exception as e:  # pragma: no cover
+                f_containers.append(container)
+                self.logger.error("failed to start " + str(container) +
+                                  " because: " + str(e))
+        return s_containers, f_containers

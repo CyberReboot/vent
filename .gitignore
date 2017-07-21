@@ -9,8 +9,8 @@
 .coverage
 .DS_Store
 .vent
-build
-core
+/build/
+docs/build/doctrees/
 dist
 images
 plugins

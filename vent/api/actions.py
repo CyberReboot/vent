@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import tempfile
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
@@ -133,54 +134,22 @@ class Action:
                             containers_remaining.remove(container)
 
             # start containers based on priorities
-            groups = sorted(set(groups))
-            started_containers = []
-            for group in groups:
-                if group in group_orders:
-                    for container_tuple in sorted(group_orders[group]):
-                        if container_tuple[1] not in started_containers:
-                            started_containers.append(container_tuple[1])
-                            try:
-                                try:
-                                    container = self.d_client.containers.get(container_tuple[1])
-                                    container.start()
-                                    self.logger.info("started " +
-                                                     str(container_tuple[1]) +
-                                                     " with ID: " +
-                                                     str(container.short_id))
-                                except Exception as err:  # pragma: no cover
-                                    self.logger.error(str(err))
-                                    container_id = self.d_client.containers.run(detach=True,
-                                                                                **tool_d[container_tuple[1]])
-                                    self.logger.info("started " +
-                                                     str(container_tuple[1]) +
-                                                     " with ID: " +
-                                                     str(container_id))
-                            except Exception as e:  # pragma: no cover
-                                self.logger.error("failed to start " +
-                                                  str(container_tuple[1]) +
-                                                  " because: " + str(e))
+            p_results = self.p_helper.start_priority_containers(groups,
+                                                                group_orders,
+                                                                tool_d)
 
             # start the rest of the containers that didn't have any priorities
-            for container in containers_remaining:
-                try:
-                    try:
-                        c = self.d_client.containers.get(container)
-                        c.start()
-                        self.logger.info("started " + str(container) +
-                                         " with ID: " + str(c.short_id))
-                    except Exception as err:  # pragma: no cover
-                        self.logger.error(str(err))
-                        container_id = self.d_client.containers.run(detach=True,
-                                                                    **tool_d[container])
-                        self.logger.info("started " + str(container) +
-                                         " with ID: " + str(container_id))
-                except Exception as e:  # pragma: no cover
-                    self.logger.error("failed to start " + str(container) +
-                                      " because: " + str(e))
+            r_results = self.p_helper.start_remaining_containers(containers_remaining, tool_d)
+            results = (p_results[0] + r_results[0],
+                       p_results[1] + r_results[1])
+
+            if len(results[1]) > 0:
+                status = (False, results)
+            else:
+                status = (True, results)
         except Exception as e:  # pragma: no cover
             self.logger.error("start failed with error: " + str(e))
-            status = (False, e)
+            status = (False, str(e))
 
         self.logger.info("Status of start: " + str(status[0]))
         self.logger.info("Finished: start")
@@ -509,8 +478,8 @@ class Action:
             return (False, "No choices made")
         try:
             # choices: repos, core, tools, images, built, running, enabled
-            items = {'repos': [], 'core': [], 'tools': [], 'images': [],
-                     'built': [], 'running': [], 'enabled': []}
+            items = {'repos': [], 'core': {}, 'tools': {}, 'images': {},
+                     'built': {}, 'running': {}, 'enabled': {}}
 
             tools = self.plugin.list_tools()
             self.logger.info("found tools: " + str(tools))
@@ -523,22 +492,18 @@ class Action:
                                    tool['repo'] not in items[choice]):
                                     items[choice].append(tool['repo'])
                         elif choice == 'core':
-                            if 'groups' in tool:
-                                if 'core' in tool['groups']:
-                                    items[choice].append((tool['section'],
-                                                          tool['name']))
+                            if 'groups' in tool and 'core' in tool['groups']:
+                                items[choice][tool['section']] = tool['name']
                         elif choice == 'tools':
-                            items[choice].append((tool['section'],
-                                                  tool['name']))
+                            if (('groups' in tool and
+                                 'core' not in tool['groups']) or
+                               'groups' not in tool):
+                                items[choice][tool['section']] = tool['name']
                         elif choice == 'images':
                             # TODO also check against docker
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['image_name']))
+                            items[choice][tool['section']] = tool['image_name']
                         elif choice == 'built':
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['built']))
+                            items[choice][tool['section']] = tool['built']
                         elif choice == 'running':
                             containers = Containers()
                             status = 'not running'
@@ -550,13 +515,9 @@ class Action:
                                 image_name = image_name.replace('/', '-')
                                 if container[0] == image_name:
                                     status = container[1]
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  status))
+                            items[choice][tool['section']] = status
                         elif choice == 'enabled':
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['enabled']))
+                            items[choice][tool['section']] = tool['enabled']
                         else:
                             # unknown choice
                             pass
@@ -578,22 +539,33 @@ class Action:
                       enabled="yes",
                       branch="master",
                       version="HEAD"):
-        """ Get the vent.template file for a given tool """
+        """
+        Get the vent.template settings for a given tool by looking at the
+        plugin_manifest
+        """
         self.logger.info("Starting: get_configure")
         constraints = locals()
         status = (True, None)
-        options = ['path']
+        # all possible vent.template sections
+        options = ['info', 'service', 'settings', 'docker', 'gpu']
         tools = self.p_helper.constraint_options(constraints, options)[0]
         if tools:
-            for tool in tools:
-                template_path = os.path.join(tools[tool]['path'],
-                                             'vent.template')
-                try:
-                    with open(template_path) as f:
-                        status = (True, f.read())
-                except Exception as e:
-                    status = (False, str(e))
-                    self.logger.error(str(e))
+            # should only be one tool
+            tool = tools.keys()[0]
+            # load all vent.template options into dict
+            template_dict = {}
+            for section in tools[tool]:
+                template_dict[section] = json.loads(tools[tool][section])
+            # display all those options as they would in vent.template
+            return_str = ""
+            for section in template_dict:
+                return_str += "[" + section + "]\n"
+                for option in template_dict[section]:
+                    return_str += option + " = "
+                    return_str += template_dict[section][option] + "\n"
+                return_str += "\n"
+            # only one newline at end of file
+            status = (True, return_str[:-1])
         else:
             status = (False, "Couldn't get vent.template")
         self.logger.info("Status of get_configure: " + str(status[0]))
@@ -607,7 +579,8 @@ class Action:
                        enabled="yes",
                        branch="master",
                        version="HEAD",
-                       config_val=""):
+                       config_val="",
+                       from_registry=False):
         """
         Save changes made to vent.template through npyscreen to the template
         and to plugin_manifest
@@ -615,49 +588,68 @@ class Action:
         self.logger.info("Starting: save_configure")
         constraints = locals()
         del constraints['config_val']
+        del constraints['from_registry']
         status = (True, None)
-        options = ['path']
-        tools, manifest = self.p_helper.constraint_options(constraints,
-                                                           options)
-        if tools:
-            for tool in tools:
+        fd = None
+        if not from_registry:
+            options = ['path']
+            tools, manifest = self.p_helper.constraint_options(constraints,
+                                                               options)
+            # only one tool in tools because do this function for every tool
+            if tools:
+                tool = tools.keys()[0]
                 template_path = os.path.join(tools[tool]['path'],
                                              'vent.template')
-                # save in vent.template
-                try:
-                    with open(template_path, 'w') as f:
-                        f.write(config_val)
-                except Exception as e:
-                    self.logger.error(str(e))
-                    status = (False, str(e))
-                    break
-                # save in plugin_manifest
-                try:
-                    vent_template = Template(template_path)
-                    sections = vent_template.sections()
-                    if sections[0]:
-                        for section in sections[1]:
-                            section_dict = {}
-                            options = vent_template.options(section)
-                            if options[0]:
-                                for option in options[1]:
-                                    option_name = option
-                                    if option == 'name':
-                                        option_name = 'link_name'
-                                    option_val = vent_template.option(section,
-                                                                      option)[1]
-                                    section_dict[option_name] = option_val
-                            if section_dict:
-                                manifest.set_option(tool, section,
-                                                    json.dumps(section_dict))
-                            elif manifest.option(tool, section)[0]:
-                                manifest.del_option(tool, section)
-                        manifest.write_config()
-                except Exception as e:
-                    self.logger.error(str(e))
-                    status = (False, str(e))
+            else:
+                status = (False, "Couldn't save configuration")
         else:
-            status = (False, "Couldn't save configuration")
+            fd, template_path = tempfile.mkstemp(suffix='.template')
+            options = ['namespace']
+            constraints.update({'type': 'registry'})
+            del constraints['branch']
+            self.logger.info(constraints)
+            tools, manifest = self.p_helper.constraint_options(constraints,
+                                                               options)
+            if tools:
+                tool = tools.keys()[0]
+            else:
+                status = (False, "Couldn't save configuration")
+        if status[0]:
+            try:
+                # save in vent.template
+                with open(template_path, 'w') as f:
+                    f.write(config_val)
+                # save in plugin_manifest
+                vent_template = Template(template_path)
+                sections = vent_template.sections()
+                if sections[0]:
+                    for section in sections[1]:
+                        section_dict = {}
+                        options = vent_template.options(section)
+                        if options[0]:
+                            for option in options[1]:
+                                option_name = option
+                                if option == 'name':
+                                    option_name = 'link_name'
+                                option_val = vent_template.option(section,
+                                                                  option)[1]
+                                section_dict[option_name] = option_val
+                        if section_dict:
+                            manifest.set_option(tool, section,
+                                                json.dumps(section_dict))
+                        elif manifest.option(tool, section)[0]:
+                            manifest.del_option(tool, section)
+                    manifest.write_config()
+            except Exception as e:  # pragma: no cover
+                self.logger.error("save_configure error: " + str(e))
+                status = (False, str(e))
+        # close os file handle and remove temp file
+        if from_registry:
+            try:
+                os.close(fd)
+                os.remove(template_path)
+            except Exception as e:  # pragma: no cover
+                self.logger.error("save_configure error: " + str(e))
         self.logger.info("Status of save_configure: " + str(status[0]))
         self.logger.info("Finished: save_configure")
         return status

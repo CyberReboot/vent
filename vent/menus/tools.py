@@ -68,21 +68,26 @@ class ToolForm(npyscreen.ActionForm):
                 ncore_list = []
 
                 # splice the repo names for processing
-                repo_name = repo.rsplit("/", 2)[1:]
+                if (repo.startswith("http")):
+                    repo_name = repo.rsplit("/", 2)[1:]
+                else:
+                    repo_name = repo.split("/")
 
-                # figure out what tools in the repo are core and what are not
                 for tool in inventory['tools']:
-                    tool_repo_name = tool[0].split(":")
+                    tool_repo_name = tool.split(":")
 
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
-                            repo_name[1] == tool_repo_name[1]):
+                       repo_name[1] == tool_repo_name[1]):
+                        ncore_list.append(tool.split(":", 2)[2].split("/")[-1])
 
-                        # add the tools to their corresponding list
-                        if tool in inventory['core']:
-                            core_list.append(tool)
-                        else:
-                            ncore_list.append(tool)
+                for tool in inventory['core']:
+                    tool_repo_name = tool.split(":")
+
+                    # cross reference repo names
+                    if (repo_name[0] == tool_repo_name[0] and
+                       repo_name[1] == tool_repo_name[1]):
+                        core_list.append(tool.split(":", 2)[2].split("/")[-1])
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
@@ -98,15 +103,14 @@ class ToolForm(npyscreen.ActionForm):
                                  editable=False, rely=i, relx=5)
 
                         for tool in has_core[repo]:
-                            tool_name = tool[1]
+                            tool_name = tool
                             if tool_name == "":
                                 tool_name = "/"
-                            tool_name += ":" + ":".join(tool[0].split(":")[-2:])
-                            self.tools_tc[repo][tool_name] = self.add(
+                            self.tools_tc[repo][tool] = self.add(
                                     npyscreen.CheckBox, name=tool_name,
                                     value=True, relx=10)
                             i += 1
-
+                        i += 3
                 else:
                     # make sure only repos with non-core tools are displayed
                     if has_non_core.get(repo):
@@ -115,15 +119,14 @@ class ToolForm(npyscreen.ActionForm):
                                  editable=False, rely=i, relx=5)
 
                         for tool in has_non_core[repo]:
-                            tool_name = tool[1]
+                            tool_name = tool
                             if tool_name == "":
                                 tool_name = "/"
-                            tool_name += ":" + ":".join(tool[0].split(":")[-2:])
-                            self.tools_tc[repo][tool_name] = self.add(
+                            self.tools_tc[repo][tool] = self.add(
                                     npyscreen.CheckBox, name=tool_name,
                                     value=True, relx=10)
                             i += 1
-                i += 2
+                        i += 3
         return
 
     def on_ok(self):
@@ -156,6 +159,16 @@ class ToolForm(npyscreen.ActionForm):
                 if self.action['action_name'] != 'configure':
                     npyscreen.notify_wait(info_str, title=title)
                     time.sleep(1)
+            # !! TODO join only returns None
+            result = thr.join()
+            if isinstance(result, tuple) and isinstance(result[1], tuple):
+                running, failed = result[1]
+                r_str = ''
+                for container in running:
+                    r_str += container + ": successful\n"
+                for container in failed:
+                    r_str += container + ": failed\n"
+                npyscreen.notify_confirm(r_str)
             return
 
         if self.action['type'] == 'images':
@@ -196,13 +209,29 @@ class ToolForm(npyscreen.ActionForm):
                         if status[0]:
                             tool_d.update(status[1])
                     elif self.action['action_name'] == 'configure':
+                        constraints = {'name': t[0],
+                                       'branch': t[1],
+                                       'version': t[2],
+                                       'repo': repo}
+                        options = ['type']
+                        action = self.action['api_action']
+                        tool = action.p_helper.constraint_options(constraints,
+                                                                  options)[0]
+                        # only one tool should be returned
+                        name = tool.keys()[0]
+                        if tool[name]['type'] == 'registry':
+                            registry_image = True
+                        else:
+                            registry_image = False
                         kargs = {'name': 'Configure ' + t[0],
                                  'tool_name': t[0],
                                  'branch': t[1],
                                  'version': t[2],
                                  'next_tool': None,
                                  'get_configure': self.action['action_object1'],
-                                 'save_configure': self.action['action_object2']}
+                                 'save_configure': self.action['action_object2'],
+                                 'from_registry': registry_image,
+                                 'registry_download': False}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
                         self.parentApp.addForm("EDITOR" + t[0], EditorForm,

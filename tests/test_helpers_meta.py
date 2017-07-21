@@ -22,7 +22,7 @@ def test_run_containers():
 def test_version():
     """ Test the version function """
     version = Version()
-    assert version != ''
+    assert version.startswith('v')
 
 def test_system():
     """ Test the system function """
@@ -89,8 +89,9 @@ def test_cpu():
 def test_gpu():
     """ Test the gpu function """
     gpu = Gpu()
-    assert isinstance(gpu, str)
+    assert isinstance(gpu, tuple)
     gpu = Gpu(pull=True)
+    assert isinstance(gpu, tuple)
 
 def test_jobs():
     """ Test the jobs function """

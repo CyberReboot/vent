@@ -1,0 +1,217 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>vent.core.rmq_es_connector.rmq_es_connector &#8212; Vent 0.4.1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for vent.core.rmq_es_connector.rmq_es_connector</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+<span class="kn">import</span> <span class="nn">pika</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+
+<span class="kn">from</span> <span class="nn">elasticsearch</span> <span class="k">import</span> <span class="n">Elasticsearch</span>
+
+
+<div class="viewcode-block" id="RmqEs"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.rmq_es_connector.RmqEs">[docs]</a><span class="k">class</span> <span class="nc">RmqEs</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    opens a connection to rabbitmq and receives messages based on the provided</span>
+<span class="sd">    binding keys and then takes those messages and sends them to an</span>
+<span class="sd">    elasticsearch index</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">es_conn</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">es_host</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rmq_host</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">channel</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">queue_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">es_host</span><span class="o">=</span><span class="s2">&quot;elasticsearch&quot;</span><span class="p">,</span> <span class="n">rmq_host</span><span class="o">=</span><span class="s2">&quot;rabbitmq&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; initialize host information &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">es_host</span> <span class="o">=</span> <span class="n">es_host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rmq_host</span> <span class="o">=</span> <span class="n">rmq_host</span>
+
+<div class="viewcode-block" id="RmqEs.connections"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.rmq_es_connector.RmqEs.connections">[docs]</a>    <span class="k">def</span> <span class="nf">connections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        wait for connections to both rabbitmq and elasticsearch to be made</span>
+<span class="sd">        before binding a routing key to a channel and sending messages to</span>
+<span class="sd">        elasticsearch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="n">wait</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rmq_host</span><span class="p">)</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">exchange_declare</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s1">&#39;topic_recs&#39;</span><span class="p">,</span>
+                                              <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;topic&#39;</span><span class="p">)</span>
+
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">queue_declare</span><span class="p">(</span><span class="n">exclusive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">queue</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">es_conn</span> <span class="o">=</span> <span class="n">Elasticsearch</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">es_host</span><span class="p">])</span>
+                <span class="n">wait</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;connected to rabbitmq...&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;waiting for connection to rabbitmq...&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">wait</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="RmqEs.callback"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.rmq_es_connector.RmqEs.callback">[docs]</a>    <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ch</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        callback triggered on rabiitmq message received and sends it to</span>
+<span class="sd">        an elasticsearch index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">routing_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">failed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">body</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;{&quot;log&quot;:&quot;&#39;</span> <span class="o">+</span> <span class="n">body</span> <span class="o">+</span> <span class="s1">&#39;&quot;}&#39;</span>
+                <span class="n">doc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">failed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">failed</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">es_conn</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+                                   <span class="n">doc_type</span><span class="o">=</span><span class="n">method</span><span class="o">.</span><span class="n">routing_key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+                                   <span class="nb">id</span><span class="o">=</span><span class="n">method</span><span class="o">.</span><span class="n">routing_key</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span>
+                                   <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()),</span>
+                                   <span class="n">body</span><span class="o">=</span><span class="n">doc</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="RmqEs.start"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.rmq_es_connector.RmqEs.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; start the channel listener and start consuming messages &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connections</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">binding_keys</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">binding_keys</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+                  <span class="s2">&quot;Usage: </span><span class="si">{0!s}</span><span class="s2"> [binding_key]...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">binding_key</span> <span class="ow">in</span> <span class="n">binding_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">queue_bind</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s1">&#39;topic_recs&#39;</span><span class="p">,</span>
+                                    <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span>
+                                    <span class="n">routing_key</span><span class="o">=</span><span class="n">binding_key</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RmqEs.consume"><a class="viewcode-back" href="../../../../vent.core.rmq_es_connector.html#vent.core.rmq_es_connector.rmq_es_connector.RmqEs.consume">[docs]</a>    <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot; start consuming rabbitmq messages &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; [*] Waiting for logs. To exit press CTRL+C&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">basic_consume</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">,</span>
+                                   <span class="n">queue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span>
+                                   <span class="n">no_ack</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">start_consuming</span><span class="p">()</span></div></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="n">rmq_es</span> <span class="o">=</span> <span class="n">RmqEs</span><span class="p">()</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">rmq_es</span><span class="o">.</span><span class="n">consume</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">Vent</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Api Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.api.html">vent.api package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Core</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.core.html">vent.core package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Helper Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.helpers.html">vent.helpers package</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Menu Functions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../vent.menus.html">vent.menus package</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, In-Q-Tel, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,5 +1,6 @@
 import datetime
 import docker
+import json
 import multiprocessing
 import os
 import pkg_resources
@@ -18,7 +19,7 @@ def Version():
         if not version.startswith('v'):
             version = 'v' + version
     except Exception as e:  # pragma: no cover
-        pass
+        version = "Error: " + str(e)
     return version
 
 
@@ -80,6 +81,7 @@ def Containers(vent=True, running=True):
 
 
 def Cpu():
+    """ Get number of available CPUs """
     cpu = "Unknown"
     try:
         cpu = str(multiprocessing.cpu_count())
@@ -89,7 +91,8 @@ def Cpu():
 
 
 def Gpu(pull=False):
-    gpu = ""
+    """ Check for support of GPUs, and return what's available """
+    gpu = (False, "")
     try:
         image = 'nvidia/cuda:8.0-runtime'
         image_name, tag = image.split(":")
@@ -111,17 +114,29 @@ def Gpu(pull=False):
                                     shell=True,
                                     close_fds=True)
             gpus = proc.stdout.read()
+            err = proc.stderr.read()
             if gpus:
+                gpu_str = ""
                 for line in gpus.strip().split("\n"):
-                    gpu += line.split(" (UUID: ")[0] + ", "
-                gpu = gpu[:-2]
+                    gpu_str += line.split(" (UUID: ")[0] + ", "
+                gpu = (True, gpu_str[:-2])
             else:
-                gpu = "None"
+                if err:
+                    gpu = (False, "Unknown", str(err))
+                else:
+                    gpu = (False, "None")
         else:
-            gpu = "None"
+            gpu = (False, "None")
     except Exception as e:  # pragma: no cover
-        gpu = "Unknown"
+        gpu = (False, "Unknown", str(e))
     return gpu
+
+
+def GpuUsage():
+    """ Get the current GPU usage of available GPUs """
+    # TODO
+    usage = ""
+    return usage
 
 
 def Images(vent=True):
@@ -170,15 +185,70 @@ def Jobs():
     try:
         d_client = docker.from_env()
         c = d_client.containers.list(all=True,
-                                     filters={'label': 'vent-plugin'})
-        files = []
+                                     filters={'label': 'vent-plugin',
+                                              'status': 'exited'})
+
+        file_names = []
+        tool_names = []
+        finished_jobs = []
+        path_dirs = PathDirs()
+        manifest = os.path.join(path_dirs.meta_dir, "status.json")
+
+        if os.path.exists(manifest):
+            file_status = 'a'
+        else:
+            file_status = 'w'
+
+        # get a list of past jobs' file names if status.json exists
+        if file_status == 'a':
+            with open(manifest, 'r') as infile:
+                for line in infile:
+                    finished_jobs.append(json.loads(line))
+
+            # get a list of file names so we can check against each container
+            file_names = [d['FileName'] for d in finished_jobs]
+
+            # multiple tools can run on 1 file. Use a tuple to status check
+            tool_names = [(d['FileName'], d['VentPlugin'])
+                          for d in finished_jobs]
+
         for container in c:
             jobs[3] += 1
+
             if 'file' in container.attrs['Config']['Labels']:
-                if container.attrs['Config']['Labels']['file'] not in files:
-                    files.append(container.attrs['Config']['Labels']['file'])
-        jobs[2] = len(files) - jobs[0]
+                # make sure the file name and the tool tup exists because
+                # multiple tools can run on 1 file.
+                if (container.attrs['Config']['Labels']['file'],
+                    container.attrs['Config']['Labels']['vent.name']) not in \
+                        tool_names:
+                    # TODO figure out a nicer way of getting desired values
+                    # from containers.attrs.
+                    new_file = {}
+                    new_file['FileName'] = \
+                        container.attrs['Config']['Labels']['file']
+                    new_file['VentPlugin'] = \
+                        container.attrs['Config']['Labels']['vent.name']
+                    new_file['StartedAt'] = \
+                        container.attrs['State']['StartedAt']
+                    new_file['FinishedAt'] = \
+                        container.attrs['State']['FinishedAt']
+                    new_file['ID'] = \
+                        container.attrs['Id'][:12]
+
+                    # create/append a json file with all wanted information
+                    with open(manifest, file_status) as outfile:
+                        json.dump(new_file, outfile)
+                        outfile.write("\n")
+
+        # add extra one to account for file that just finished if the file was
+        # just created since file_names is processed near the beginning
+        if file_status == 'w' and len(file_names) == 1:
+            jobs[2] = len(set(file_names)) + 1
+        else:
+            jobs[2] = len(set(file_names))
+
         jobs[3] = jobs[3] - jobs[1]
+
     except Exception as e:  # pragma: no cover
         pass
 
@@ -194,13 +264,17 @@ def Tools(**kargs):
     return tools[1]
 
 
-def Services(core, vent=True):
+def Services(core, vent=True, **kargs):
     """
     Get services that have exposed ports, expects param core to be True or
     False based on which type of services to return, by default limit to vent
     containers, if not limited by vent containers, then core is ignored.
     """
     services = []
+    path_dirs = PathDirs(**kargs)
+    cfg = os.path.join(path_dirs.meta_dir, "vent.cfg")
+    template = Template(template=cfg)
+    services_uri = template.option("main", "services_uri")
     try:
         d_client = docker.from_env()
         if vent:
@@ -240,7 +314,10 @@ def Services(core, vent=True):
                     uri_creds = ''
                     if uri_user or uri_pw:
                         uri_creds = " - (" + uri_user + uri_pw + " )"
-                    p.append(uri_prefix + ports[port][0]['HostIp'] + ":" +
+                    host = ports[port][0]['HostIp']
+                    if services_uri[0] and host == '0.0.0.0':
+                        host = services_uri[1]
+                    p.append(uri_prefix + host + ":" +
                              ports[port][0]['HostPort'] + uri_postfix +
                              uri_creds)
             if p and name:

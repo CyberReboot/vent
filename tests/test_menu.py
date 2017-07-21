@@ -41,6 +41,7 @@ def test_menu():
     RIGHT = curses.KEY_RIGHT
     DOWN = curses.KEY_DOWN
     SPACE = curses.ascii.SP
+    BACKSPACE = curses.ascii.BS
 
     # go through help menus
     run_menu([ENTER, CTRL_T, CTRL_X, 'b', 'm', ENTER, ENTER, CTRL_X, 'b', 'p',
@@ -60,6 +61,12 @@ def test_menu():
               ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
+              LEFT, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
+              TAB, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
@@ -74,6 +81,7 @@ def test_menu():
               ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
+    run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
@@ -91,14 +99,23 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_T])
+    run_menu([ENTER, CTRL_X, 'c', 't', TAB, ENTER, ENTER, ENTER])
 
     # go through the plugins menus
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, SPACE, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB, TAB, ENTER,
-              ENTER, ENTER])
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB, SPACE, TAB,
+              TAB, ENTER, ENTER, ENTER])
+    cmds = [ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, 'alpine', TAB, TAB, TAB,
+              TAB, TAB, TAB, ENTER, ENTER, ENTER]
+    cmds += (43 * [BACKSPACE])
+    cmds += [TAB, TAB, TAB, BACKSPACE, BACKSPACE, BACKSPACE, BACKSPACE,
+             BACKSPACE, BACKSPACE, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, ENTER,
+             ENTER, CTRL_Q]
+    run_menu(cmds)
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, 'alpine', TAB, 'alpine',
-              TAB, TAB, TAB, TAB, TAB, ENTER])
+              TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, TAB, TAB, ENTER,
+              ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'a', CTRL_T, CTRL_T, TAB, TAB, TAB, TAB, TAB,
               TAB, TAB, TAB, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'b', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
@@ -114,6 +131,7 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_T])
+    run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'p', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'p', ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'p', CTRL_Q])
@@ -139,6 +157,8 @@ def test_menu():
     # causes .coverage file to not exist
     # run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'r', TAB, RIGHT,
     #           ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'g', ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 's'])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'u'])
 
     # go through the tutorials menus
