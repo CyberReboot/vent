@@ -3,9 +3,9 @@ from setuptools import setup
 setup(
     name='vent',
     version='v0.4.2.dev',
-    packages=['vent', 'vent.core', 'vent.core.file-drop',
-              'vent.core.rq-worker', 'vent.core.rq-dashboard', 'vent.menus',
-              'vent.core.rmq-es-connector', 'vent.helpers', 'vent.api'],
+    packages=['vent', 'vent.core', 'vent.core.file_drop',
+              'vent.core.rq_worker', 'vent.core.rq_dashboard', 'vent.menus',
+              'vent.core.rmq_es_connector', 'vent.helpers', 'vent.api'],
     install_requires=['docker', 'npyscreen'],
     scripts=['bin/vent'],
     license='Apache License 2.0',
