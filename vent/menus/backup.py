@@ -7,11 +7,9 @@ class BackupForm(npyscreen.ActionForm):
         self.files = keywords['files']
         self.display_vals = []
         for f in self.files:
-            date = ''
-            date_arr = f.split('-')[2:]
-            for info in date_arr:
-                date += info.split('.')[0] + ' '
-            self.display_vals.append(date.strip())
+            date_arr = f.replace('.cfg', '').split('-')[2:]
+            self.display_vals.append('-'.join(date_arr[:3]) + ' at ' +
+                                     ' '.join(date_arr[3:]))
         super(BackupForm, self).__init__(*args, **keywords)
 
     def create(self):

@@ -328,7 +328,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             backup_files = [f for f in os.listdir(backup_dir) if f.startswith('.vent-backup')]
             form_args = {'restore': self.api_action.restore,
                          'files': backup_files,
-                         'name': 'test'}
+                         'name': "Pick a file to restore from" + "\t"*8 +
+                                 "Press ^T to toggle main",
+                         'color': 'CONTROL'}
             add_kargs = {'form': BackupForm,
                          'form_name': 'CHOOSEBACKUP',
                          'form_args': form_args}
