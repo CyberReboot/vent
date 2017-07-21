@@ -228,12 +228,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
            s_action[-2] in vowels and \
            s_action[-3] not in vowels:
                form_args['action_dict'] = \
-                    {'action_name': s_action,
-                     'present_t': s_action + s_action[-1] + 'ing ' + a_type,
-                     'past_t': s_action.title() + ' ' + a_type,
-                     'action': form_action,
-                     'type': a_type,
-                     'cores': cores}
+                   {'action_name': s_action,
+                    'present_t': s_action + s_action[-1] + 'ing ' + a_type,
+                    'past_t': s_action.title() + ' ' + a_type,
+                    'action': form_action,
+                    'type': a_type,
+                    'cores': cores}
 
         # word ends with a 'e'
         # eg: remove -> removing
