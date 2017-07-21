@@ -106,11 +106,18 @@ def test_update():
 
 def test_backup():
     """ Test the backup function """
-    Action.backup()
+    instance = Action()
+    status = instance.backup()
+    assert isinstance(status, tuple)
+    assert status[0] == True
+    assert os.path.exists(status[1])
 
 def test_restore():
     """ Test the restore function """
-    Action.restore()
+    instance = Action()
+    status = instance.restore()
+    assert isinstance(status, tuple)
+    assert status[0] == True
 
 def test_inventory():
     """ Test the inventory function """

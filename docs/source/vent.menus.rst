@@ -20,6 +20,14 @@ vent\.menus\.add\_options module
     :undoc-members:
     :show-inheritance:
 
+vent\.menus\.backup module
+--------------------------
+
+.. automodule:: vent.menus.backup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 vent\.menus\.choose\_tools module
 ---------------------------------
 
