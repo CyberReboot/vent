@@ -236,7 +236,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # word ends with a 'e'
         # eg: remove -> removing
         if s_action[-1] == 'e':
-            form_args['action_dict'] = \
+               form_args['action_dict'] = \
                    {'action_name': s_action,
                     'present_t': s_action[:-1] + 'ing ' + a_type,
                     'past_t': s_action.title() + ' ' + a_type,
