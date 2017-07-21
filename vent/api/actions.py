@@ -351,7 +351,8 @@ class Action:
     def backup(self):
         self.logger.info("Starting: backup")
         status = (True, None)
-        backup_name = '.vent-backup-' + '-'.join(Timestamp().split(' ')) + '.cfg'
+        backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')) +
+                       '.cfg')
         backup_file = os.path.join(os.path.expanduser('~'), backup_name)
         manifest = self.p_helper.manifest
         # creates new backup file

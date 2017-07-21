@@ -325,7 +325,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     notify_confirm("No GPUs detected.")
         elif action == 'restore':
             backup_dir = os.path.expanduser('~')
-            backup_files = [f for f in os.listdir(backup_dir) if f.startswith('.vent-backup')]
+            backup_files = [f for f in os.listdir(backup_dir) if
+                            f.startswith('.vent-backup')]
             form_args = {'restore': self.api_action.restore,
                          'files': backup_files,
                          'name': "Pick a file to restore from" + "\t"*8 +
