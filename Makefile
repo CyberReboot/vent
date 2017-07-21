@@ -8,7 +8,6 @@ build: clean
 	docker version || true
 	pip -V
 	pip install -r tests/requirements.txt
-	@for file in vent/core/*/; do mv $$file `echo $$file | tr '-' '_'` ; done 2> /dev/null || true
 	rm -rf docs/source/v*.rst
 	sphinx-apidoc -f -o docs/source/ vent/ \
  		vent/core/file-drop/test_file_drop.py \
@@ -20,7 +19,6 @@ build: clean
  		vent/core/rq-worker/test_rq_worker.py 
 	make clean -C docs/
 	make html -C docs/
-	#@for file in vent/core/*/; do mv $$file `echo $$file | tr '_' '-'` ; done 2> /dev/null || true
 	python setup.py install
 
 gpu: build
