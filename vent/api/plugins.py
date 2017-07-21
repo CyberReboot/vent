@@ -50,7 +50,7 @@ class Plugin:
         with the username for a private repo groups is globally set for all
         tools version_alias is globally set for all tools and is a mapping
         from a friendly version tag to the real version commit ID wild lets
-        you specify individual overrides for additional values in the tuple 
+        you specify individual overrides for additional values in the tuple
         of tools or overrides.  wild is a list containing one or more
         of the following: branch, build, groups, version_alias
         the order of the items in the wild list will expect values to be
