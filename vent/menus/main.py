@@ -220,9 +220,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'type': a_type,
                                      'cores': cores}}
         # grammar rules
-        vowels = ['a','e','i','o','u']
+        vowels = ['a', 'e', 'i', 'o', 'u']
 
-        #consonant-vowel-consonant ending
+        # consonant-vowel-consonant ending
         # Eg: stop -> stopping
         if s_action[-1] not in vowels and \
            s_action[-2] in vowels and \
@@ -239,12 +239,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # eg: remove -> removing
         if s_action[-1] == 'e':
             form_args['action_dict'] = \
-                    {'action_name': s_action,
-                     'present_t': s_action[:-1] + 'ing ' + a_type,
-                     'past_t': s_action.title() + ' ' + a_type,
-                     'action': form_action,
-                     'type': a_type,
-                     'cores': cores}
+                   {'action_name': s_action,
+                    'present_t': s_action[:-1] + 'ing ' + a_type,
+                    'past_t': s_action.title() + ' ' + a_type,
+                    'action': form_action,
+                    'type': a_type,
+                    'cores': cores}
 
         if s_action == 'start':
             form_args['names'].append('prep_start')
