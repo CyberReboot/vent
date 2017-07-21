@@ -72,7 +72,8 @@ class MenuHelper:
                             plugin_c.set_option(section,
                                                 "image_name",
                                                 "cyberreboot/vent-" +
-                                                tool.replace('_', '-') + ":" + branch)
+                                                tool.replace('_', '-') + ":" +
+                                                branch)
                 plugin_c.write_config()
                 chdir(cwd)
             if action == "build":
@@ -81,10 +82,11 @@ class MenuHelper:
                 try:
                     for tool in core['normal']:
                         for section in sections[1]:
+                            tool = tool.replace('_', '-')
                             image_name = plugin_c.option(section,
                                                          "image_name")
                             check_image = "cyberreboot/vent-"
-                            check_image += tool.replace('_', '-') + ":" + branch
+                            check_image += tool + ":" + branch
                             if image_name[1] == check_image:
                                 timestamp = str(datetime.utcnow()) + " UTC"
                                 try:

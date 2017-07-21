@@ -335,14 +335,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                          'form_name': 'CHOOSEBACKUP',
                          'form_args': form_args}
             self.add_form(**add_kargs)
-            if False:
-                notify_wait("In the process of restoring", title="Restoring...")
-                status = self.api_action.restore()
-                if status[0]:
-                    notify_confirm("Backup file found, status of restore:\n" +
-                                    status[1])
-                else:
-                    notify_confirm(status[1])
         elif action == "swarm":
             # !! TODO
             # add notify_cancel_ok popup once implemented

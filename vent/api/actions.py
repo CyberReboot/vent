@@ -378,14 +378,16 @@ class Action:
         backup_file = os.path.join(os.path.expanduser('~'), backup_file)
         if os.path.exists(backup_file):
             backup = Template(backup_file)
-            options = ['repo', 'branch', 'version', 'built', 'namespace', 'path',
-                       'groups', 'type', 'name', 'link_name', 'pull_name']
+            options = ['repo', 'branch', 'version', 'built', 'namespace',
+                       'path', 'groups', 'type', 'name', 'link_name',
+                       'pull_name']
             backedup_tools = backup.constrained_sections({}, options)
             for tool in backedup_tools:
                 t_info = backedup_tools[tool]
                 if t_info['type'] == 'repository':
-                    # for purposes of the add method (only adding a sepcific tool each time,
-                    # and the add method expects a tuple with relative path to tool for that)
+                    # for purposes of the add method (only adding a sepcific
+                    # tool each time, and the add method expects a tuple with
+                    # relative path to tool for that)
                     rel_path = t_info['path'].split(t_info['namespace'])[-1]
                     t_tuple = (rel_path, '')
                     if t_info['built'] == 'yes':

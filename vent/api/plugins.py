@@ -177,7 +177,6 @@ class Plugin:
             template.set_option(section, "built", "yes")
             template.set_option(section, "image_id",
                                 image.attrs['Id'].split(':')[1][:12])
-            #if groups:
             template.set_option(section, "groups", groups)
 
             # write out configuration to the manifest file
@@ -331,12 +330,14 @@ class Plugin:
                 if not self.core:
                     image_name = self.org + "-" + self.name + "-"
                     if match[0] != '':
-                        # if tool is in a subdir, add that to the name of the image
+                        # if tool is in a subdir, add that to the name of the
+                        # image
                         image_name += '-'.join(match[0].split('/')[1:]) + "-"
                     image_name += self.branch + ":" + self.version
                 else:
-                    image_name = ('cyberreboot/vent-' + match[0].split('/')[-1] + ':' +
-                                  self.branch)
+                    image_name = ('cyberreboot/vent-' +
+                                  match[0].split('/')[-1] + ':' + self.branch)
+                image_name = image_name.replace('_', '-')
 
                 # check if the section already exists
                 exists, options = template.section(section)
@@ -373,7 +374,7 @@ class Plugin:
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
-                template.set_option(section, "image_name", image_name.replace('_', '-'))
+                template.set_option(section, "image_name", image_name)
                 template.set_option(section, "type", "repository")
                 # save settings in vent.template to plugin_manifest
                 vent_template = Template(template=join(match_path,
