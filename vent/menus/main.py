@@ -25,8 +25,6 @@ from vent.menus.logs import LogsForm
 from vent.menus.services import ServicesForm
 from vent.menus.tools import ToolForm
 
-from vent.helpers.logs import Logger
-
 
 class MainForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
