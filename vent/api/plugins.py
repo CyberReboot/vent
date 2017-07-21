@@ -373,7 +373,7 @@ class Plugin:
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
-                template.set_option(section, "image_name", image_name)
+                template.set_option(section, "image_name", image_name.replace('_', '-'))
                 template.set_option(section, "type", "repository")
                 # save settings in vent.template to plugin_manifest
                 vent_template = Template(template=join(match_path,
