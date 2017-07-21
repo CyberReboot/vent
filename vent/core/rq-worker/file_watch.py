@@ -5,6 +5,7 @@ def file_queue(path, template_path="/vent/"):
     """
     import ConfigParser
     import docker
+    import json
     import requests
 
     from subprocess import check_output, Popen, PIPE
@@ -32,36 +33,42 @@ def file_queue(path, template_path="/vent/"):
         labels = {'vent-plugin': '', 'file': path}
         # read in configuration of plugins to get the ones that should run
         # against the path.
+        # keep track of images that failed getting configurations for
+        failed_images = set()
         config = ConfigParser.RawConfigParser()
         config.optionxform = str
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         for section in sections:
             image_name = config.get(section, 'image_name')
-            t_type = config.get(section, 'type')
-            if t_type == 'repository':
-                t_path = config.get(section, 'path')
-                t_p = template_path + 'plugins/'
-                t_path = t_p + t_path.split('/plugins/')[1] + "/vent.template"
-                t_config = ConfigParser.RawConfigParser()
-                t_config.optionxform = str
-                t_config.read(t_path)
-                if t_config.has_section('service'):
-                    options = t_config.options('service')
-                    for option in options:
-                        value = t_config.get('service', option)
+            # doesn't matter if it's a repository or registry because both in manifest
+            if config.has_option(section, 'service'):
+                try:
+                    options_dict = json.loads(config.get(section, 'service'))
+                    for option in options_dict:
+                        value = options_dict[option]
                         labels[option] = value
-                if (t_config.has_section('settings') and
-                   t_config.has_option('settings', 'ext_types')):
-                    ext_types = t_config.get('settings',
-                                             'ext_types').split(',')
-                    for ext_type in ext_types:
-                        if path.endswith(ext_type):
-                            images.append(image_name)
-                            configs[image_name] = {}
-                if t_config.has_section('gpu') and image_name in configs:
-                    if t_config.has_option('gpu', 'enabled'):
-                        enabled = t_config.get('gpu', 'enabled')
+                except Exception as e:   # pragma: no cover
+                    failed_images.add(image_name)
+                    status = (False, str(e))
+            if config.has_option(section, 'settings'):
+                try:
+                    options_dict = json.loads(config.get(section, 'settings'))
+                    for option in options_dict:
+                        if option == 'ext_types':
+                            ext_types = options_dict[option].split(',')
+                            for ext_type in ext_types:
+                                if path.endswith(ext_type):
+                                    images.append(image_name)
+                                    configs[image_name] = {}
+                except Exception as e:   # pragma: no cover
+                    failed_images.add(image_name)
+                    status = (False, str(e))
+            if config.has_option(section, 'gpu') and image_name in configs:
+                try:
+                    options_dict = json.loads(config.get(section, 'gpu'))
+                    if 'enabled' in options_dict:
+                        enabled = options_dict['enabled']
                         if enabled == 'yes':
                             route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
                             h = check_output(('awk', '/default/ {print $3}'),
@@ -101,10 +108,11 @@ def file_queue(path, template_path="/vent/"):
                                             # nvidia-docker-plugin
                                             pass
                             except Exception as e:  # pragma: no cover
-                                pass
-            elif t_type == 'registry':
-                # !! TODO deal with images not from a repo
-                pass
+                                failed_images.add(image_name)
+                                status = (False, str(e))
+                except Exception as e:   # pragma: no cover
+                    failed_images.add(image_name)
+                    status = (False, str(e))
 
         # TODO add connections to syslog, labels, and file path etc.
         # TODO get syslog address rather than hardcode
@@ -114,25 +122,28 @@ def file_queue(path, template_path="/vent/"):
                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                  'syslog-facility': 'daemon',
                                  'tag': path.rsplit('.', 1)[-1]}}
-        volumes = {path: {'bind': path, 'mode': 'ro'}}
+        dir_path = path.rsplit('/', 1)[0]
+        volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
 
         # start containers
         for image in images:
-            # TODO check for availability of gpu(s),
-            #      otherwise queue it up until it's
-            #      available
-            if 'volumes' in configs[image]:
-                for volume in volumes:
-                    configs[image]['volumes'][volume] = volumes[volume]
-            else:
-                configs[image]['volumes'] = volumes
-            d_client.containers.run(image=image,
-                                    command=path,
-                                    labels=labels,
-                                    detach=True,
-                                    log_config=log_config,
-                                    **configs[image])
-        status = (True, images)
+            if image not in failed_images:
+                # TODO check for availability of gpu(s),
+                #      otherwise queue it up until it's
+                #      available
+                if 'volumes' in configs[image]:
+                    for volume in volumes:
+                        configs[image]['volumes'][volume] = volumes[volume]
+                else:
+                    configs[image]['volumes'] = volumes
+                d_client.containers.run(image=image,
+                                        command=path,
+                                        labels=labels,
+                                        detach=True,
+                                        log_config=log_config,
+                                        **configs[image])
+        if not failed_images:
+            status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 

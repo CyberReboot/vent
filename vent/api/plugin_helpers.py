@@ -1,5 +1,6 @@
 import docker
 import fnmatch
+import json
 import requests
 import shlex
 
@@ -206,7 +207,6 @@ class PluginHelper:
         tool_d = {}
         for section in s:
             # initialize needed vars
-            template_path = join(s[section]['path'], 'vent.template')
             c_name = s[section]['image_name'].replace(':', '-')
             c_name = c_name.replace('/', '-')
             image_name = s[section]['image_name']
@@ -214,20 +214,23 @@ class PluginHelper:
             # checkout the right version and branch of the repo
             cwd = getcwd()
             self.logger.info("current directory is: " + str(cwd))
-            chdir(join(s[section]['path']))
-            status = self.checkout(branch=branch, version=version)
-            self.logger.info(status)
-            chdir(cwd)
+            # images built from registry won't have path
+            if s[section]['path'] != '':
+                chdir(join(s[section]['path']))
+                status = self.checkout(branch=branch, version=version)
+                self.logger.info(status)
+                chdir(cwd)
 
             # set docker settings for container
-            vent_template = Template(template_path)
-            status = vent_template.section('docker')
+            manifest = Template(self.manifest)
+            status = manifest.option(section, 'docker')
             self.logger.info(status)
             tool_d[c_name] = {'image': image_name,
                               'name': c_name}
             if status[0]:
-                for option in status[1]:
-                    options = option[1]
+                options_dict = json.loads(status[1])
+                for option in options_dict:
+                    options = options_dict[option]
                     # check for commands to evaluate
                     if '`' in options:
                         cmds = options.split('`')
@@ -244,20 +247,25 @@ class PluginHelper:
                         options = "".join(cmds)
                     # store options set for docker
                     try:
-                        tool_d[c_name][option[0]] = literal_eval(options)
+                        tool_d[c_name][option] = literal_eval(options)
                     except Exception as e:  # pragma: no cover
                         self.logger.error("unable to store the options set for docker: " + str(e))
-                        tool_d[c_name][option[0]] = options
+                        tool_d[c_name][option] = options
 
             if 'labels' not in tool_d[c_name]:
                 tool_d[c_name]['labels'] = {}
 
             # get the service uri info
-            status = vent_template.section('service')
+            status = manifest.option(section, 'service')
             self.logger.info(status)
             if status[0]:
-                for option in status[1]:
-                    tool_d[c_name]['labels'][option[0]] = option[1]
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        tool_d[c_name]['labels'][option] = options_dict[option]
+                except Exception as e:   # pragma: no cover
+                    self.logger.error("unable to store service options for "
+                                      "docker: " + str(e))
 
             # get network mappings
             if 'network_mode' in tool_d[c_name]:
@@ -265,11 +273,16 @@ class PluginHelper:
                 pass
 
             # check for gpu settings
-            status = vent_template.section('gpu')
+            status = manifest.option(section, 'gpu')
             self.logger.info(status)
             if status[0]:
-                for option in status[1]:
-                    tool_d[c_name]['labels']['gpu.'+option[0]] = option[1]
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        tool_d[c_name]['labels']['gpu.'+option] = options_dict[option]
+                except Exception as e:   # pragma: no cover
+                    self.logger.error("unable to store gpu options for "
+                                      "docker: " + str(e))
 
             # get temporary name for links, etc.
             plugin_c = Template(template=self.manifest)
@@ -319,17 +332,22 @@ class PluginHelper:
                     else:
                         tool_d[c_name]['volumes'] = {self.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
                     if files[0]:
-                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'ro'}
+                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'rw'}
             else:
                 tool_d[c_name]['log_config'] = log_config
 
             # add label for priority
-            status = vent_template.section('settings')
+            status = manifest.option(section, 'settings')
             self.logger.info(status)
             if status[0]:
-                for option in status[1]:
-                    if option[0] == 'priority':
-                        tool_d[c_name]['labels']['vent.priority'] = option[1]
+                try:
+                    options_dict = json.loads(status[1])
+                    for option in options_dict:
+                        if option == 'priority':
+                            tool_d[c_name]['labels']['vent.priority'] = options_dict[option]
+                except Exception as e:   # pragma: no cover
+                    self.logger.error("unable to store settings options "
+                                      "for docker " + str(e))
 
             # only start tools that have been built
             if s[section]['built'] != 'yes':
@@ -456,7 +474,7 @@ class PluginHelper:
             s_containers.append(container)
             self.logger.info("started " + str(container) +
                              " with ID: " + str(c.short_id))
-        except Exception as err:  # pragma: no cover
+        except Exception as err:
             try:
                 gpu = 'gpu.enabled'
                 failed = False

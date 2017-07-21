@@ -1,10 +1,13 @@
 docker
 elasticsearch
 npyscreen
+paste
 pika
 pytest
 pytest-cov
 python-magic
 redis
 rq
+sphinx
 watchdog
+web.py

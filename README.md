@@ -8,7 +8,6 @@ vent
 [![Documentation Status](https://readthedocs.org/projects/vent/badge/?version=latest)](http://vent.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/vent.svg)](https://badge.fury.io/py/vent)
 [![codecov](https://codecov.io/gh/CyberReboot/vent/branch/master/graph/badge.svg)](https://codecov.io/gh/CyberReboot/vent)
-[![Code Issues](https://www.quantifiedcode.com/api/v1/project/ffe3b2d6a9254b98a12de6b3273676b3/badge.svg)](https://www.quantifiedcode.com/app/project/ffe3b2d6a9254b98a12de6b3273676b3)
 [![Github Release Downloads](https://img.shields.io/github/downloads/cyberreboot/vent/total.svg?maxAge=2592000)](https://github.com/CyberReboot/vent/releases)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/vent-elasticsearch.svg)](https://hub.docker.com/u/cyberreboot)
 

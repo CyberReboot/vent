@@ -9,6 +9,7 @@ from threading import Thread
 
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
+from vent.api.templates import Template
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Gpu
@@ -16,7 +17,9 @@ from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
+from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
+from vent.menus.backup import BackupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
@@ -289,7 +292,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def system_commands(self, action):
         """ Perform system commands """
-        if action == "reset":
+        if action == 'backup':
+            status = self.api_action.backup()
+            if status[0]:
+                notify_confirm("Vent backup successful")
+            else:
+                notify_confirm("Vent backup could not be completed")
+        elif action == "reset":
             okay = npyscreen.notify_ok_cancel(
                     "This factory reset will remove ALL of Vent's user data, "
                     "containers, and images. Are you sure?",
@@ -314,6 +323,26 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                    "Error: " + str(gpu[2]))
                 else:
                     notify_confirm("No GPUs detected.")
+        elif action == 'restore':
+            backup_dir = os.path.expanduser('~')
+            backup_files = [f for f in os.listdir(backup_dir) if f.startswith('.vent-backup')]
+            form_args = {'restore': self.api_action.restore,
+                         'files': backup_files,
+                         'name': "Pick a file to restore from" + "\t"*8 +
+                                 "Press ^T to toggle main",
+                         'color': 'CONTROL'}
+            add_kargs = {'form': BackupForm,
+                         'form_name': 'CHOOSEBACKUP',
+                         'form_args': form_args}
+            self.add_form(**add_kargs)
+            if False:
+                notify_wait("In the process of restoring", title="Restoring...")
+                status = self.api_action.restore()
+                if status[0]:
+                    notify_confirm("Backup file found, status of restore:\n" +
+                                    status[1])
+                else:
+                    notify_confirm(status[1])
         elif action == "swarm":
             # !! TODO
             # add notify_cancel_ok popup once implemented
@@ -328,6 +357,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         """ Override method for creating FormBaseNewWithMenu form """
         try:
             self.api_action = Action()
+            drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
+            template = Template(template=drop_location)
+            template = template.option("main", "files")[1]
+
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
                            title="Docker Error",
@@ -350,6 +383,14 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Cpu())
         self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
                                  labelColor='DEFAULT', value=Gpu()[1])
+        self.location = self.add(npyscreen.TitleFixedText,
+                                 name='User Data:',
+                                 value=PathDirs().meta_dir,
+                                 labelColor='DEFAULT')
+        self.file_drop = self.add(npyscreen.TitleFixedText,
+                                  name='File Drop:',
+                                  value=template,
+                                  labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
@@ -468,7 +509,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['services'], shortcut='p')
 
         # System Commands Menu Items
-        self.m6 = self.add_menu(name="System Commands")
+        self.m6 = self.add_menu(name="System Commands", shortcut='y')
+        self.m6.addItem(text='Backup', onSelect=self.system_commands,
+                        arguments=['backup'], shortcut='b')
         self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
                         arguments=['gpu'], shortcut='g')
         self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',
@@ -476,6 +519,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['swarm'], shortcut='s')
         self.m6.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
+        self.m6.addItem(text='Restore', onSelect=self.system_commands,
+                        arguments=['restore'], shortcut='t')
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')

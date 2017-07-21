@@ -8,6 +8,7 @@ from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
+from vent.helpers.meta import Timestamp
 
 
 class Action:
@@ -347,15 +348,86 @@ class Action:
         self.logger.info("Finished: build")
         return status
 
-    @staticmethod
-    def backup():
-        # TODO
-        return
+    def backup(self):
+        self.logger.info("Starting: backup")
+        status = (True, None)
+        backup_name = '.vent-backup-' + '-'.join(Timestamp().split(' ')) + '.cfg'
+        backup_file = os.path.join(os.path.expanduser('~'), backup_name)
+        manifest = self.p_helper.manifest
+        # creates new backup file
+        try:
+            with open(backup_file, 'w') as backup:
+                with open(manifest, 'r') as manifest_file:
+                    backup.write(manifest_file.read())
+            self.logger.info("Backup written to " + backup_file)
+            status = (True, backup_file)
+        except Exception as e:
+            self.logger.error("Couldn't backup vent: " + str(e))
+            status = (False, str(e))
+        self.logger.info("Status of backup: " + str(status[0]))
+        self.logger.info("Finished: backup")
+        return status
 
-    @staticmethod
-    def restore():
-        # TODO
-        return
+    def restore(self, backup_file):
+        self.logger.info("Starting: restore")
+        self.logger.info("File given: " + backup_file)
+        status = (True, None)
+        # keep track of images added or failed
+        added_str = ''
+        failed_str = ''
+        backup_file = os.path.join(os.path.expanduser('~'), backup_file)
+        if os.path.exists(backup_file):
+            backup = Template(backup_file)
+            options = ['repo', 'branch', 'version', 'built', 'namespace', 'path',
+                       'groups', 'type', 'name', 'link_name', 'pull_name']
+            backedup_tools = backup.constrained_sections({}, options)
+            for tool in backedup_tools:
+                t_info = backedup_tools[tool]
+                if t_info['type'] == 'repository':
+                    # for purposes of the add method (only adding a sepcific tool each time,
+                    # and the add method expects a tuple with relative path to tool for that)
+                    rel_path = t_info['path'].split(t_info['namespace'])[-1]
+                    t_tuple = (rel_path, '')
+                    if t_info['built'] == 'yes':
+                        build = True
+                    else:
+                        build = False
+                    if 'core' in t_info['groups']:
+                        core = True
+                    else:
+                        core = False
+                    add_kargs = {'tools': [t_tuple],
+                                 'branch': t_info['branch'],
+                                 'version': t_info['version'],
+                                 'build': build,
+                                 'core': core}
+                    try:
+                        self.plugin.add(t_info['repo'], **add_kargs)
+                        added_str += 'Restored: ' + t_info['name'] + '\n'
+                    except Exception as e:
+                        self.logger.error("Problem restoring tool " + t_info['name'] +
+                                          " because " + str(e))
+                        failed_str += 'Failed: ' + t_info['name'] + '\n'
+                elif t_info['type'] == 'registry':
+                    add_kargs = {'image': t_info['pull_name'],
+                                 'link_name': t_info['link_name'],
+                                 'tag': t_info['version'],
+                                 'registry': t_info['repo'].split('/')[0],
+                                 'groups': t_info['groups']}
+                    try:
+                        self.add_image(**add_kargs)
+                        added_str += 'Restored: ' + t_info['name'] + '\n'
+                    except Exception as e:
+                        self.logger.error("Problem restoring tool " + t_info['name'] +
+                                          " because " + str(e))
+                        failed_str += 'Failed: ' + t_info['name'] + '\n'
+        else:
+            status = (False, "No backup file found at specified path")
+        if status[0]:
+            status = (True, failed_str + added_str)
+        self.logger.info("Status of restore: " + str(status[0]))
+        self.logger.info("Finished: restore")
+        return status
 
     @staticmethod
     def configure():
@@ -478,8 +550,8 @@ class Action:
             return (False, "No choices made")
         try:
             # choices: repos, core, tools, images, built, running, enabled
-            items = {'repos': [], 'core': [], 'tools': [], 'images': [],
-                     'built': [], 'running': [], 'enabled': []}
+            items = {'repos': [], 'core': {}, 'tools': {}, 'images': {},
+                     'built': {}, 'running': {}, 'enabled': {}}
 
             tools = self.plugin.list_tools()
             self.logger.info("found tools: " + str(tools))
@@ -492,22 +564,18 @@ class Action:
                                    tool['repo'] not in items[choice]):
                                     items[choice].append(tool['repo'])
                         elif choice == 'core':
-                            if 'groups' in tool:
-                                if 'core' in tool['groups']:
-                                    items[choice].append((tool['section'],
-                                                          tool['name']))
+                            if 'groups' in tool and 'core' in tool['groups']:
+                                items[choice][tool['section']] = tool['name']
                         elif choice == 'tools':
-                            items[choice].append((tool['section'],
-                                                  tool['name']))
+                            if (('groups' in tool and
+                                 'core' not in tool['groups']) or
+                               'groups' not in tool):
+                                items[choice][tool['section']] = tool['name']
                         elif choice == 'images':
                             # TODO also check against docker
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['image_name']))
+                            items[choice][tool['section']] = tool['image_name']
                         elif choice == 'built':
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['built']))
+                            items[choice][tool['section']] = tool['built']
                         elif choice == 'running':
                             containers = Containers()
                             status = 'not running'
@@ -519,13 +587,9 @@ class Action:
                                 image_name = image_name.replace('/', '-')
                                 if container[0] == image_name:
                                     status = container[1]
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  status))
+                            items[choice][tool['section']] = status
                         elif choice == 'enabled':
-                            items[choice].append((tool['section'],
-                                                  tool['name'],
-                                                  tool['enabled']))
+                            items[choice][tool['section']] = tool['enabled']
                         else:
                             # unknown choice
                             pass
@@ -555,7 +619,7 @@ class Action:
         constraints = locals()
         status = (True, None)
         # all possible vent.template sections
-        options = ['info', 'service', 'settings', 'docker']
+        options = ['info', 'service', 'settings', 'docker', 'gpu']
         tools = self.p_helper.constraint_options(constraints, options)[0]
         if tools:
             # should only be one tool
@@ -648,16 +712,16 @@ class Action:
                         elif manifest.option(tool, section)[0]:
                             manifest.del_option(tool, section)
                     manifest.write_config()
-            except Exception as e:
-                self.logger.error(str(e))
+            except Exception as e:  # pragma: no cover
+                self.logger.error("save_configure error: " + str(e))
                 status = (False, str(e))
         # close os file handle and remove temp file
         if from_registry:
             try:
                 os.close(fd)
                 os.remove(template_path)
-            except Exception as e:
-                self.logger.error(str(e))
+            except Exception as e:  # pragma: no cover
+                self.logger.error("save_configure error: " + str(e))
         self.logger.info("Status of save_configure: " + str(status[0]))
         self.logger.info("Finished: save_configure")
         return status

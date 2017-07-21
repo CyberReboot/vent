@@ -16,7 +16,10 @@ from vent.helpers.paths import PathDirs
 
 
 class Plugin:
-    """ Handle Plugins """
+    """
+    Handle Plugins
+    """
+
     def __init__(self, **kargs):
         self.path_dirs = PathDirs(**kargs)
         self.manifest = join(self.path_dirs.meta_dir,
@@ -32,57 +35,53 @@ class Plugin:
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
-        Dockerfile) and version
-          tools are for explicitly limiting which tools and versions
-          (if version in tuple is '', then defaults to version)
+        Dockerfile) and version tools are for explicitly limiting which tools
+        and versions (if version in tuple is '', then defaults to version)
         overrides is a list of tuples, where the pair is a tool name (path to
-        Dockerfile) and a version
-          overrides are for explicitly removing tools and overriding versions
-          of tools (if version in tuple is '', then tool is removed, otherwise
-          that tool is checked out at the specific version in the tuple)
-        if tools and overrides are left as empty lists, then all tools in the
-          repo are pulled down at the version and branch specified or defaulted
-          to
-        version is globally set for all tools, unless overridden in tools or
-          overrides
-        branch is globally set for all tools
-        build is a boolean of whether or not to build the tools now
-        user is the username for a private repo if needed
-        pw is the password to go along with the username for a private repo
-        groups is globally set for all tools
-        version_alias is globally set for all tools and is a mapping from a
-          friendly version tag to the real version commit ID
-        wild lets you specify individual overrides for additional values in the
-          tuple of tools or overrides.  wild is a list containing one or more
-          of the following: branch, build, groups, version_alias
-          the order of the items in the wild list will expect values to be
-          tacked on in the same order to the tuple for tools and overrides in
-          additional to the tool name and version
+        Dockerfile) and a version overrides are for explicitly removing tools
+        and overriding versions of tools (if version in tuple is '', then
+        tool is removed, otherwise that tool is checked out at the specific
+        version in the tuple) if tools and overrides are left as empty lists,
+        then all tools in the repo are pulled down at the version and branch
+        specified or defaulted to version is globally set for all tools, unless
+        overridden in tools or overrides branch is globally set for all tools
+        build is a boolean of whether or not to build the tools now user is the
+        username for a private repo if needed pw is the password to go along
+        with the username for a private repo groups is globally set for all
+        tools version_alias is globally set for all tools and is a mapping
+        from a friendly version tag to the real version commit ID wild lets
+        you specify individual overrides for additional values in the tuple
+        of tools or overrides.  wild is a list containing one or more
+        of the following: branch, build, groups, version_alias
+        the order of the items in the wild list will expect values to be
+        tacked on in the same order to the tuple for tools and overrides in
+        additional to the tool name and version
         remove_old lets you specify whether or not to remove previously found
-          tools that match to ones being added currently (note does not stop
-          currently running instances of the older version)
+        tools that match to ones being added currently (note does not stop
+        currently running instances of the older version)
         disable_old lets you specify whether or not to disable previously found
-          tools that match to ones being added currently (note does not stop
-          currently running instances of the older version)
+        tools that match to ones being added currently (note does not stop
+        currently running instances of the older version)
         limit_groups is a list of groups to build tools for that match group
-          names in vent.template of each tool if exists
+        names in vent.template of each tool if exists
         Examples:
-          repo=fe
-            (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
-          repo=foo, version="3d1f", branch="foo"
-            (get all tools from repo 'foo' at verion '3d1f' on branch 'foo')
-          repo=foo, tools=[('bar', ''), ('baz', '1d32')]
-            (get only 'bar' from repo 'foo' at version 'HEAD' on branch
-            'master' and 'baz' from repo 'foo' at version '1d32' on branch
-            'master', ignore all other tools in repo 'foo')
-          repo=foo overrides=[('baz/bar', ''), ('.', '1c4e')], version='4fad'
-            (get all tools from repo 'foo' at verion '4fad' on branch 'master'
-            except 'baz/bar' and for tool '.' get version '1c4e')
-          repo=foo tools=[('bar', '1a2d')], overrides=[('baz', 'f2a1')]
-            (not a particularly useful example, but get 'bar' from 'foo' at
-            version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
-            'master', ignore all other tools)
+        - repo=fe:
+        (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
+        - repo=foo, version="3d1f", branch="foo":
+        (get all tools from repo 'foo' at verion '3d1f' on branch 'foo')
+        - repo=foo, tools=[('bar', ''), ('baz', '1d32')]:
+        (get only 'bar' from repo 'foo' at version 'HEAD' on branch
+        'master' and 'baz' from repo 'foo' at version '1d32' on branch
+        'master', ignore all other tools in repo 'foo')
+        - repo=foo overrides=[('baz/bar', ''), ('.', '1c4e')], version='4fad':
+        (get all tools from repo 'foo' at verion '4fad' on branch 'master'
+        except 'baz/bar' and for tool '.' get version '1c4e')
+        - repo=foo tools=[('bar', '1a2d')], overrides=[('baz', 'f2a1')]:
+        (not a particularly useful example, but get 'bar' from 'foo' at
+        version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
+        'master', ignore all other tools)
         """
+
         # initialize and store class objects
         self.repo = repo.lower()
         self.tools = tools
@@ -120,11 +119,28 @@ class Plugin:
                   registry=None,
                   groups=None):
         """
-        Add an image with a tag from a Docker registry, defaults to the Docker
-        Hub if not specified
+        Add an image with a tag from a Docker registry. Defaults to the Docker
+        Hub if not specified. Use a Template object to write an image's
+        information to `plugin_manifest.cfg'
+
+        Args:
+            image(type): docker image
+            link_name(type): fill me
+
+        Kwargs:
+            tag(type):
+            registry(type):
+            groups(type): Group that the docker image belongs to.
+
+        Returns:
+            tuple(bool,str): if the function completed successfully,
+                (True, name of image).
+                If the function failed, (False, message about failure)
         """
+
         status = (True, None)
         try:
+            pull_name = image
             org = ''
             name = image
             if '/' in image:
@@ -144,6 +160,7 @@ class Plugin:
             template = Template(template=self.manifest)
             template.add_section(section)
             template.set_option(section, "name", name)
+            template.set_option(section, "pull_name", pull_name)
             template.set_option(section, "namespace", namespace)
             template.set_option(section, "path", "")
             template.set_option(section, "repo", registry + '/' + org)
@@ -160,13 +177,14 @@ class Plugin:
             template.set_option(section, "built", "yes")
             template.set_option(section, "image_id",
                                 image.attrs['Id'].split(':')[1][:12])
-            if groups:
-                template.set_option(section, "groups", groups)
+            #if groups:
+            template.set_option(section, "groups", groups)
 
             # write out configuration to the manifest file
             template.write_config()
             status = (True, "Successfully added " + full_image)
         except Exception as e:  # pragma: no cover
+            self.logger.error("Couldn't add image because " + str(e))
             status = (False, str(e))
         return status
 
@@ -179,7 +197,10 @@ class Plugin:
                 build=None,
                 branch=None,
                 version=None):
-        """ Build tools """
+        """
+        Build tools
+        """
+
         self.logger.info("Starting: builder")
         self.logger.info("install path: " + str(match_path))
         self.logger.info("image name: " + str(image_name))
@@ -232,7 +253,15 @@ class Plugin:
         """
         Create list of tools, paths, and versions to be built and sends them to
         build_manifest
+
+        Args:
+            status (tuple(bool, str)):
+
+        Returns:
+            response (tuple(bool, str)): If True, then the function performed
+            as expected and the str is a string
         """
+
         response = (True, None)
         # TODO implement features: wild, remove_old, disable_old, limit_groups
 
@@ -283,7 +312,10 @@ class Plugin:
         return response
 
     def _build_manifest(self, matches):
-        """ Builds and writes the manifest for the tools being added """
+        """
+        Builds and writes the manifest for the tools being added
+        """
+
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
@@ -296,11 +328,15 @@ class Plugin:
                 section = self.org + ":" + self.name + ":" + match[0] + ":"
                 section += self.branch + ":" + self.version
                 match_path = self.path + match[0]
-                image_name = self.org + "-" + self.name + "-"
-                if match[0] != '':
-                    # if tool is in a subdir, add that to the name of the image
-                    image_name += '-'.join(match[0].split('/')[1:]) + "-"
-                image_name += self.branch + ":" + self.version
+                if not self.core:
+                    image_name = self.org + "-" + self.name + "-"
+                    if match[0] != '':
+                        # if tool is in a subdir, add that to the name of the image
+                        image_name += '-'.join(match[0].split('/')[1:]) + "-"
+                    image_name += self.branch + ":" + self.version
+                else:
+                    image_name = ('cyberreboot/vent-' + match[0].split('/')[-1] + ':' +
+                                  self.branch)
 
                 # check if the section already exists
                 exists, options = template.section(section)
@@ -421,7 +457,10 @@ class Plugin:
                      image_name,
                      section,
                      build_local=False):
-        """ Build docker images and store results in template """
+        """
+        Build docker images and store results in template
+        """
+
         # !! TODO return status of whether it built successfully or not
         if self.build:
             cwd = getcwd()
@@ -513,7 +552,10 @@ class Plugin:
         return template
 
     def list_tools(self):
-        """ Return list of tuples of all tools """
+        """
+        Return list of tuples of all tools
+        """
+
         tools = []
         template = Template(template=self.manifest)
         exists, sections = template.sections()
@@ -541,6 +583,7 @@ class Plugin:
         Remove tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be removed for the defaults.
         """
+
         # initialize
         args = locals()
         status = (True, None)
@@ -596,6 +639,7 @@ class Plugin:
         Update tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be updated
         """
+
         # initialize
         args = locals()
         status = (False, None)
@@ -625,7 +669,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def versions(self, name, namespace=None, branch="master"):
-        """ Return available versions of a tool """
+        """
+        Return available versions of a tool
+        """
+
         # initialize
         args = locals()
         versions = []
@@ -643,7 +690,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def current_version(self, name, namespace=None, branch="master"):
-        """ Return current version for a given tool """
+        """
+        Return current version for a given tool
+        """
+
         # initialize
         args = locals()
         versions = []
@@ -657,7 +707,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def state(self, name, namespace=None, branch="master"):
-        """ Return state of a tool, disabled/enabled for each version """
+        """
+        Return state of a tool, disabled/enabled for each version
+        """
+
         # initialize
         args = locals()
         states = []
@@ -674,7 +727,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def enable(self, name, namespace=None, branch="master", version="HEAD"):
-        """ Enable tool at a specific version, default to head """
+        """
+        Enable tool at a specific version, default to head
+        """
+
         # initialize
         args = locals()
         status = (False, None)
@@ -688,7 +744,10 @@ class Plugin:
 
     # !! TODO name or group ?
     def disable(self, name, namespace=None, branch="master", version="HEAD"):
-        """ Disable tool at a specific version, default to head """
+        """
+        Disable tool at a specific version, default to head
+        """
+
         # initialize
         args = locals()
         status = (False, None)
