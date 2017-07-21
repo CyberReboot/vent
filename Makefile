@@ -17,8 +17,6 @@ build: clean
  		vent/core/rq_dashboard/test_rq_dashboard.py \
  		vent/core/rq_worker/settings.py \
  		vent/core/rq_worker/test_rq_worker.py
-	#make clean -C docs/
-	#make html -C docs/
 	python setup.py install
 
 gpu: build
