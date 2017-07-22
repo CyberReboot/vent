@@ -160,6 +160,9 @@ def test_menu():
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'g', ENTER, ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 's'])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'u'])
+    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'b', ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB, TAB, ENTER, ENTER, ENTER])
 
     # go through the tutorials menus
     run_menu([ENTER, CTRL_X, 't', 'v', 'b', RIGHT, ENTER])
