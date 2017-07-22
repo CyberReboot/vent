@@ -426,7 +426,7 @@ class Action:
                         build = True
                     else:
                         build = False
-                    if 'core' in t_info['groups']:
+                    if 'groups' in t_info and 'core' in t_info['groups']:
                         core = True
                     else:
                         core = False
