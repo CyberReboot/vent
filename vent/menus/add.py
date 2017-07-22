@@ -112,10 +112,10 @@ class AddForm(npyscreen.ActionForm):
                                      title="Specify a name for the image",
                                      form_color='CAUTION')
         elif self.repo.value:
-            self.parentApp.repo_value['repo'] = self.repo.value
+            self.parentApp.repo_value['repo'] = self.repo.value.lower()
             p_helper = PluginHelper()
             thr = threading.Thread(target=p_helper.clone, args=(),
-                                   kwargs={'repo': self.repo.value,
+                                   kwargs={'repo': self.repo.value.lower(),
                                            'user': self.user.value,
                                            'pw': self.pw.value})
             popup(thr, 'repository', 'Please wait, adding repository...')
