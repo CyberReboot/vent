@@ -1,13 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import atexit
 import curses
 import npyscreen
-import os
-import requests
-import shutil
-import sys
-import time
 
 from vent.helpers.paths import PathDirs
 from vent.menu import VentApp
@@ -186,35 +180,11 @@ def test_menu():
     # causes .coverage file to not exist
     # run_menu([ENTER, CTRL_Q])
 
-@atexit.register
-def test_running_jobs():
-    """ Run menu tests for running plugin tools jobs """
-    CTRL_X = '^X'
-    ENTER = curses.ascii.CR
-    TAB = curses.ascii.TAB
-    SPACE = curses.ascii.SP
-
-    test_input = [ENTER, CTRL_X, 'c', 'i', ENTER, ENTER, CTRL_X, 'c', 'b', TAB,
+    # extra complete run
+    run_menu([ENTER, CTRL_X, 'c', 'i', ENTER, ENTER, CTRL_X, 'c', 'b', TAB,
               TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER,
               ENTER, CTRL_X, 'c', 's', ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
               TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, ENTER, CTRL_X, 'p',
               'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, SPACE,
               TAB, TAB, TAB, TAB, ENTER, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, ENTER, ENTER, ENTER]
-
-    npyscreen.TEST_SETTINGS['TEST_INPUT'] = test_input
-
-    A = VentApp()
-    try:
-        A.run(fork=False)
-    except npyscreen.ExhaustedTestInput as e:
-        # run test job
-        pcap = 'https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap'
-        r = requests.get(pcap, stream=True)
-        with open('/tmp/vent_files/foo.matrix', 'w') as f:
-            f.write('24,23\n10,22')
-
-        if r.status_code == 200:
-            with open('/tmp/vent_files/foo.pcap', 'wb') as f:
-                r.raw.decode_content = True
-                shutil.copyfileobj(r.raw, f)
+              TAB, ENTER, ENTER, ENTER])

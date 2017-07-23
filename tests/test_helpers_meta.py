@@ -1,6 +1,9 @@
 import docker
 import os
+import requests
+import shlex
 
+from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Docker
@@ -95,5 +98,32 @@ def test_gpu():
 
 def test_jobs():
     """ Test the jobs function """
+    jobs = Jobs()
+    assert isinstance(jobs, tuple)
+    m_helper = MenuHelper()
+    status = m_helper.cores('install')
+    assert isinstance(status, tuple)
+    assert status[0]
+    status = m_helper.cores('build')
+    assert isinstance(status, tuple)
+    assert status[0]
+    status = m_helper.cores('start')
+    assert isinstance(status, tuple)
+    assert status[0]
+    status = m_helper.api_action.add('https://github.com/cyberreboot/vent-plugins')
+    assert isinstance(status, tuple)
+    assert status[0]
+    # run test job
+    pcap = 'https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap'
+    r = requests.get(pcap, stream=True)
+    with open('/tmp/vent_files/foo.matrix', 'w') as f:
+        f.write('24,23\n10,22')
+
+    if r.status_code == 200:
+        with open('/tmp/vent_files/foo.pcap', 'wb') as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+    services = Services(True)
+    assert isinstance(services, list)
     jobs = Jobs()
     assert isinstance(jobs, tuple)
