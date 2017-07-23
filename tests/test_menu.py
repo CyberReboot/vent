@@ -5,6 +5,7 @@ import npyscreen
 import os
 import requests
 import shutil
+import sys
 import time
 
 from vent.helpers.paths import PathDirs
@@ -191,27 +192,32 @@ def test_running_jobs():
     TAB = curses.ascii.TAB
     SPACE = curses.ascii.SP
 
-    # install core tools
-    run_menu([ENTER, CTRL_X, 'c', 'i', ENTER, ENTER])
-    # build core tools
-    run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, TAB, ENTER, ENTER, ENTER])
-    # start core tools
-    run_menu([ENTER, CTRL_X, 'c', 's', ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
-              TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER])
-    # add plugins
-    run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, ENTER, SPACE, TAB, TAB, TAB, TAB, ENTER, TAB, TAB, TAB, TAB,
-              TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER])
-    # run test job
-    r = requests.get('https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap',
-                     stream=True)
-    with open('/tmp/vent_files/foo.matrix', 'w') as f:
-        f.write('24,23\n10,22')
+    test_input = [ENTER, CTRL_X, 'c', 'i', ENTER, ENTER, CTRL_X, 'c', 'b', TAB,
+              TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER,
+              ENTER, CTRL_X, 'c', 's', ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
+              TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, ENTER, CTRL_X, 'p',
+              'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, SPACE,
+              TAB, TAB, TAB, TAB, ENTER, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              TAB, ENTER, ENTER, ENTER]
 
-    if r.status_code == 200:
-        with open('/tmp/vent_files/foo.pcap', 'wb') as f:
-            r.raw.decode_content = True
-            shutil.copyfileobj(r.raw, f)
-    while not os.path.exists('/home/travis/.vent/status.json'):
-        time.sleep(1)
+    npyscreen.TEST_SETTINGS['TEST_INPUT'] = test_input
+    npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = True
+
+    A = VentApp()
+    try:
+        A.run(fork=False)
+    except npyscreen.ExhaustedTestInput as e:
+        # run test job
+        pcap = 'https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap'
+        r = requests.get(pcap, stream=True)
+        with open('/tmp/vent_files/foo.matrix', 'w') as f:
+            f.write('24,23\n10,22')
+
+        if r.status_code == 200:
+            with open('/tmp/vent_files/foo.pcap', 'wb') as f:
+                r.raw.decode_content = True
+                shutil.copyfileobj(r.raw, f)
+    try:
+        sys.exit(0)
+    except SystemExit:
+        os._exit(0)
