@@ -201,11 +201,11 @@ def test_running_jobs():
               TAB, ENTER, ENTER, ENTER]
 
     npyscreen.TEST_SETTINGS['TEST_INPUT'] = test_input
-    npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = True
+    npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = False
 
     A = VentApp()
     try:
-        A.run(fork=False)
+        A.run(fork=True)
     except npyscreen.ExhaustedTestInput as e:
         # run test job
         pcap = 'https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap'
