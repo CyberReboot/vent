@@ -187,4 +187,4 @@ def test_menu():
               TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, ENTER, CTRL_X, 'p',
               'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, SPACE,
               TAB, TAB, TAB, TAB, ENTER, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, ENTER, ENTER, ENTER])
+              TAB, ENTER, ENTER, ENTER, CTRL_X, 's', 'c', CTRL_T])

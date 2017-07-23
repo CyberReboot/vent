@@ -1,7 +1,7 @@
 import docker
 import os
 import requests
-import shlex
+import shutil
 
 from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Containers
