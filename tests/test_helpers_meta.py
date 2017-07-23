@@ -16,6 +16,7 @@ from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Tools
 from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
+from vent.helpers.paths import PathDirs
 
 def test_run_containers():
     """ Run some containers for testing purposes """
@@ -100,6 +101,10 @@ def test_jobs():
     """ Test the jobs function """
     jobs = Jobs()
     assert isinstance(jobs, tuple)
+    path = PathDirs()
+    status = path.host_config()
+    assert isinstance(status, tuple)
+    assert status[0]
     m_helper = MenuHelper()
     status = m_helper.cores('install')
     assert isinstance(status, tuple)
@@ -114,10 +119,10 @@ def test_jobs():
     assert isinstance(status, tuple)
     assert status[0]
     # run test job
-    pcap = 'https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap'
-    r = requests.get(pcap, stream=True)
     with open('/tmp/vent_files/foo.matrix', 'w') as f:
         f.write('24,23\n10,22')
+    pcap = 'https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap'
+    r = requests.get(pcap, stream=True)
 
     if r.status_code == 200:
         with open('/tmp/vent_files/foo.pcap', 'wb') as f:
