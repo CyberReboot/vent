@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import atexit
 import curses
 import npyscreen
 import os
@@ -185,6 +186,7 @@ def test_menu():
     # causes .coverage file to not exist
     # run_menu([ENTER, CTRL_Q])
 
+@atexit.register
 def test_running_jobs():
     """ Run menu tests for running plugin tools jobs """
     CTRL_X = '^X'
@@ -201,11 +203,10 @@ def test_running_jobs():
               TAB, ENTER, ENTER, ENTER]
 
     npyscreen.TEST_SETTINGS['TEST_INPUT'] = test_input
-    npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = False
 
     A = VentApp()
     try:
-        A.run(fork=True)
+        A.run(fork=False)
     except npyscreen.ExhaustedTestInput as e:
         # run test job
         pcap = 'https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap'
@@ -217,7 +218,3 @@ def test_running_jobs():
             with open('/tmp/vent_files/foo.pcap', 'wb') as f:
                 r.raw.decode_content = True
                 shutil.copyfileobj(r.raw, f)
-    try:
-        sys.exit(0)
-    except SystemExit:
-        os._exit(0)
