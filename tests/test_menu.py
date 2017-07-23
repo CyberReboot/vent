@@ -4,7 +4,7 @@ import curses
 import npyscreen
 import os
 import requests
-import shutils
+import shutil
 import time
 
 from vent.helpers.paths import PathDirs
