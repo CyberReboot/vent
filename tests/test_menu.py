@@ -2,6 +2,10 @@
 
 import curses
 import npyscreen
+import os
+import requests
+import shutils
+import time
 
 from vent.helpers.paths import PathDirs
 from vent.menu import VentApp
@@ -161,8 +165,10 @@ def test_menu():
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 's'])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'u'])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'b', ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB, ENTER])
-    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB, TAB, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB,
+              ENTER])
+    run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB,
+              TAB, ENTER, ENTER, ENTER])
 
     # go through the tutorials menus
     run_menu([ENTER, CTRL_X, 't', 'v', 'b', RIGHT, ENTER])
@@ -177,3 +183,35 @@ def test_menu():
     # exit
     # causes .coverage file to not exist
     # run_menu([ENTER, CTRL_Q])
+
+def test_running_jobs():
+    """ Run menu tests for running plugin tools jobs """
+    CTRL_X = '^X'
+    ENTER = curses.ascii.CR
+    TAB = curses.ascii.TAB
+    SPACE = curses.ascii.SP
+
+    # install core tools
+    run_menu([ENTER, CTRL_X, 'c', 'i', ENTER, ENTER])
+    # build core tools
+    run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              TAB, TAB, ENTER, ENTER, ENTER])
+    # start core tools
+    run_menu([ENTER, CTRL_X, 'c', 's', ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
+              TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER])
+    # add plugins
+    run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              TAB, ENTER, SPACE, TAB, TAB, TAB, TAB, ENTER, TAB, TAB, TAB, TAB,
+              TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER])
+    # run test job
+    r = requests.get('https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap',
+                     stream=True)
+    with open('/tmp/vent_files/foo.matrix', 'w') as f:
+        f.write('24,23\n10,22')
+
+    if r.status_code == 200:
+        with open('/tmp/vent_files/foo.pcap', 'wb') as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+    while not os.path.exists('/home/travis/.vent/status.json'):
+        time.sleep(1)
