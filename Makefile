@@ -1,6 +1,6 @@
 OS=`uname -s`
 
-build: clean
+build: clean docs
 	@echo
 	@echo "checking dependencies"
 	@echo
@@ -8,6 +8,10 @@ build: clean
 	docker version || true
 	pip -V
 	pip install -r tests/requirements.txt
+	python setup.py install
+
+docs: docs_clean
+	@echo "generating documentation"
 	sphinx-apidoc -f -o docs/source/ vent/ \
 		vent/core/file_drop/test_file_drop.py \
  		vent/core/network_tap/ncontrol/test_ncontrol.py \
@@ -16,12 +20,9 @@ build: clean
  		vent/core/rq_dashboard/test_rq_dashboard.py \
  		vent/core/rq_worker/settings.py \
  		vent/core/rq_worker/test_rq_worker.py
-	python setup.py install
 
 docs_clean:
-	@echo
 	@echo "deleting all vent rst files"
-	@echo
 	rm -rf docs/source/v*.rst
 
 gpu: build
