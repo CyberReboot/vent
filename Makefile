@@ -1,6 +1,6 @@
 OS=`uname -s`
 
-build: clean docs
+build: clean
 	@echo
 	@echo "checking dependencies"
 	@echo
@@ -8,6 +8,7 @@ build: clean docs
 	docker version || true
 	pip -V
 	pip install -r tests/requirements.txt
+	$(MAKE) docs
 	python setup.py install
 
 docs: docs_clean
