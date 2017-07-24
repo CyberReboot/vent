@@ -106,6 +106,9 @@ def test_update():
 
 def test_backup():
     """ Test the backup function """
+    vent_config = os.path.join(os.path.expanduser('~'), '.vent', 'vent.cfg')
+    with open(vent_config, 'w') as f:
+        f.write('[main]\nfiles = /test')
     instance = Action()
     status = instance.backup()
     assert isinstance(status, tuple)
