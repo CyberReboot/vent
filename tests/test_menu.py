@@ -76,7 +76,7 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              RIGHT, ENTER, ENTER, ENTER])
+              RIGHT, ENTER, ENTER, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
@@ -127,7 +127,7 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'i', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, RIGHT, ENTER, ENTER, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_T])
@@ -184,7 +184,8 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'c', 'i', ENTER, ENTER, CTRL_X, 'c', 'b', TAB,
               TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER,
               ENTER, CTRL_X, 'c', 's', ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
-              TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, ENTER, CTRL_X, 'p',
-              'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, SPACE,
-              TAB, TAB, TAB, TAB, ENTER, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, ENTER, ENTER, ENTER, CTRL_X, 's', 'c', CTRL_T])
+              TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, ENTER, ENTER,
+              ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              TAB, ENTER, SPACE, TAB, TAB, TAB, TAB, ENTER, TAB, TAB, TAB, TAB,
+              TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, CTRL_X, 's', 'c',
+              CTRL_T])
