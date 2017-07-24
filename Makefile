@@ -8,7 +8,11 @@ build: clean
 	docker version || true
 	pip -V
 	pip install -r tests/requirements.txt
-	rm -rf docs/source/v*.rst
+	$(MAKE) docs
+	python setup.py install
+
+docs: docs_clean
+	@echo "generating documentation"
 	sphinx-apidoc -f -o docs/source/ vent/ \
 		vent/core/file_drop/test_file_drop.py \
  		vent/core/network_tap/ncontrol/test_ncontrol.py \
@@ -17,7 +21,10 @@ build: clean
  		vent/core/rq_dashboard/test_rq_dashboard.py \
  		vent/core/rq_worker/settings.py \
  		vent/core/rq_worker/test_rq_worker.py
-	python setup.py install
+
+docs_clean:
+	@echo "deleting all vent rst files"
+	rm -rf docs/source/v*.rst
 
 gpu: build
 	@if hash nvidia-docker 2>/dev/null; then \
@@ -70,8 +77,6 @@ clean:
 	rm -rf build
 	rm -rf plugins
 	rm -rf core
-	rm -rf docs/build/*
-	rm -rf docs/source/v*.rst
 	find . -name "*.pyc" -type f -delete
 	find . -name "__pycache__" -delete
 	pip uninstall -y vent || true
