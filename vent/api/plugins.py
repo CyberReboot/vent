@@ -362,6 +362,8 @@ class Plugin:
                 # check if section should be removed from config i.e. all tools
                 # but new commit removed one that was in a previous commit
 
+                image_name = image_name.lower()
+
                 # set template section & options for tool at version and branch
                 template.add_section(section)
                 template.set_option(section, "name", match[0].split('/')[-1])
