@@ -70,12 +70,23 @@ def file_queue(path, template_path="/vent/"):
                     if 'enabled' in options_dict:
                         enabled = options_dict['enabled']
                         if enabled == 'yes':
-                            route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-                            h = check_output(('awk', '/default/ {print $3}'),
-                                             stdin=route.stdout)
-                            route.wait()
-                            host = h.strip()
-                            nd_url = 'http://' + host + ':3476/v1.0/docker/cli'
+                            port = ''
+                            host = ''
+                            if (vent_config.has_section('nvidia-docker-plugin') and
+                               vent_config.has_option('nvidia-docker-plugin', 'port')):
+                                port = vent_config.get('nvidia-docker-plugin', 'port')
+                            else:
+                                port = '3476'
+                            if (vent_config.has_section('nvidia-docker-plugin') and
+                               vent_config.has_option('nvidia-docker-plugin', 'host')):
+                                host = vent_config.get('nvidia-docker-plugin', 'host')
+                            else:
+                                route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
+                                h = check_output(('awk', '/default/ {print $3}'),
+                                                 stdin=route.stdout)
+                                route.wait()
+                                host = h.strip()
+                            nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:
                                 r = requests.get(nd_url, params=params)
