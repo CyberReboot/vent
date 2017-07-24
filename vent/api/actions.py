@@ -1,3 +1,5 @@
+import Queue
+
 import json
 import os
 import shutil
@@ -19,6 +21,7 @@ class Action:
         self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
                                         "vent.cfg")
         self.p_helper = self.plugin.p_helper
+        self.queue = Queue.Queue()
         self.logger = Logger(__name__)
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
@@ -154,6 +157,7 @@ class Action:
 
         self.logger.info("Status of start: " + str(status[0]))
         self.logger.info("Finished: start")
+        self.queue.put(status)
         return status
 
     def update(self,
