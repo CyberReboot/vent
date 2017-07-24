@@ -5,7 +5,9 @@ import multiprocessing
 import os
 import pkg_resources
 import platform
-import subprocess
+import requests
+
+from subprocess import check_output, Popen, PIPE
 
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
@@ -108,11 +110,11 @@ def Gpu(pull=False):
 
         if len(nvidia_image) > 0:
             cmd = 'nvidia-docker run --rm ' + image + ' nvidia-smi -L'
-            proc = subprocess.Popen([cmd],
-                                    stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE,
-                                    shell=True,
-                                    close_fds=True)
+            proc = Popen([cmd],
+                         stdout=PIPE,
+                         stderr=PIPE,
+                         shell=True,
+                         close_fds=True)
             gpus = proc.stdout.read()
             err = proc.stderr.read()
             if gpus:
@@ -132,10 +134,67 @@ def Gpu(pull=False):
     return gpu
 
 
-def GpuUsage():
+def GpuUsage(**kargs):
     """ Get the current GPU usage of available GPUs """
-    # TODO
-    usage = ""
+    usage = (False, None)
+    gpu_status = {}
+
+    # TODO this should be a function by itself...
+    path_dirs = PathDirs(**kargs)
+    cfg = os.path.join(path_dirs.meta_dir, "vent.cfg")
+    template = Template(template=cfg)
+    port = '3476'
+    host = '0.0.0.0'
+    result = template.option('nvidia-docker-plugin', 'port')
+    if result[0]:
+        port = result[1]
+    result = template.option('nvidia-docker-plugin', 'host')
+    if result[0]:
+        host = result[1]
+    else:
+        try:
+            route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
+            h = check_output(('awk', '/default/ {print $3}'),
+                             stdin=route.stdout)
+            route.wait()
+            host = h.strip()
+        except Exception as e: # pragma: no cover
+            pass
+
+    # have to get the info separately to determine how much memory is availabe
+    nd_url = 'http://' + host + ':' + port + '/v1.0/gpu/info/json'
+    try:
+        r = requests.get(nd_url)
+        if r.status_code == 200:
+            status = r.json()
+            for i, device in enumerate(status['Devices']):
+                gpu_status[i] = {'global_memory': device['Memory'],
+                                 'cores': device['Cores']}
+        else:
+            usage = (False, "Unable to get GPU usage request error code: " +
+                     str(r.status_code))
+    except Exception as e:  # pragma: no cover
+        usage = (False, "Error: " + str(e))
+
+    # get actual status of each gpu
+    nd_url = 'http://' + host + ':' + port + '/v1.0/gpu/status/json'
+    try:
+        r = requests.get(nd_url)
+        if r.status_code == 200:
+            status = r.json()
+            for i, device in enumerate(status['Devices']):
+                if i not in gpu_status:
+                    gpu_status[i] = {}
+                gpu_status[i]['utilization'] = device['Utilization']
+                gpu_status[i]['memory'] = device['Memory']
+                gpu_status[i]['processes'] = device['Processes']
+            usage = (True, gpu_status)
+        else:
+            usage = (False, "Unable to get GPU usage request error code: " +
+                     str(r.status_code))
+    except Exception as e:  # pragma: no cover
+        usage = (False, "Error: " + str(e))
+
     return usage
 
 
@@ -341,7 +400,7 @@ def Uptime():
     """ Get the current uptime information """
     uptime = ""
     try:
-        uptime = str(subprocess.check_output(["uptime"], close_fds=True))[1:]
+        uptime = str(check_output(["uptime"], close_fds=True))[1:]
     except Exception as e:  # pragma: no cover
         pass
     return uptime
