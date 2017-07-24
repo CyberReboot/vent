@@ -158,7 +158,7 @@ def GpuUsage(**kargs):
                              stdin=route.stdout)
             route.wait()
             host = h.strip()
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             pass
 
     # have to get the info separately to determine how much memory is availabe
