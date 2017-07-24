@@ -414,7 +414,8 @@ class Action:
                 options = bmanifest.options(tool)[1]
                 for vals in bmanifest.section(tool)[1]:
                     constraints[vals[0]] = vals[1]
-                backedup_tool = bmanifest.constrained_sections(constraints, options)
+                backedup_tool = bmanifest.constrained_sections(constraints,
+                                                               options)
                 t_info = backedup_tool[tool]
                 if t_info['type'] == 'repository':
                     # for purposes of the add method (only adding a sepcific
