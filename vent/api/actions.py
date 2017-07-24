@@ -355,21 +355,32 @@ class Action:
         """
         self.logger.info("Starting: backup")
         status = (True, None)
-        backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')) +
-                       '.cfg')
-        backup_file = os.path.join(os.path.expanduser('~'), backup_name)
+        # initialize all needed variables (names for backup files, etc.)
+        backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')))
+        backup_dir = os.path.join(os.path.expanduser('~'), backup_name)
+        backup_manifest = os.path.join(backup_dir, 'backup_manifest.cfg')
+        backup_vcfg = os.path.join(backup_dir, 'backup_vcfg.cfg')
         manifest = self.p_helper.manifest
         vent_config = os.path.join(os.path.expanduser('~'), '.vent',
                                    'vent.cfg')
-        # creates new backup file
+        # create new backup directory
         try:
-            with open(backup_file, 'a') as backup:
-                with open(manifest, 'r') as manifest_file:
-                    backup.write(manifest_file.read())
-                with open(vent_config, 'r') as config_file:
-                    backup.write(config_file.read())
-            self.logger.info("Backup written to " + backup_file)
-            status = (True, backup_file)
+            os.mkdir(backup_dir)
+        except Exception as e:
+            self.logger.error(str(e))
+            return (False, str(e))
+        # create new files in backup directory
+        try:
+            # backup manifest
+            with open(backup_manifest, 'w') as bmanifest:
+                with open(manifest) as manifest_file:
+                    bmanifest.write(manifest_file.read())
+            # backup vent.cfg
+            with open(backup_vcfg, 'w') as bvcfg:
+                with open(vent_config) as vcfg_file:
+                    bvcfg.write(vcfg_file.read())
+            self.logger.info("Backup information written to " + backup_dir)
+            status = (True, backup_dir)
         except Exception as e:
             self.logger.error("Couldn't backup vent: " + str(e))
             status = (False, str(e))
@@ -377,45 +388,30 @@ class Action:
         self.logger.info("Finished: backup")
         return status
 
-    def restore(self, backup_file):
+    def restore(self, backup_dir):
         """
         Restores a vent configuration from a previously backed up version
         """
         self.logger.info("Starting: restore")
-        self.logger.info("File given: " + backup_file)
+        self.logger.info("Directory given: " + backup_dir)
         status = (True, None)
-        # keep track of images added or failed
+        # initialize needed variables
         added_str = ''
         failed_str = ''
-        backup_file = os.path.join(os.path.expanduser('~'), backup_file)
-        if os.path.exists(backup_file):
-            backup = Template(backup_file)
-            options = ['repo', 'branch', 'version', 'built', 'namespace',
-                       'path', 'groups', 'type', 'name', 'link_name',
-                       'pull_name', 'files']
-            template_options = ['service', 'settings', 'docker', 'info',
-                                'gpu']
-            backedup_tools = backup.constrained_sections({}, options +
-                                                         template_options)
-            for tool in backedup_tools:
-                # main means we're looking at vent.cfg
-                if tool == 'main':
-                    try:
-                        vent_config = os.path.join(os.path.expanduser('~'),
-                                                   '.vent', 'vent.cfg')
-                        conf_template = Template(vent_config)
-                        for option in backup.options(tool)[1]:
-                            conf_template.set_option(tool, option,
-                                                     backup.option(tool,
-                                                                   option)[1])
-                        conf_template.write_config()
-                        added_str += 'Restored: vent configuration file'
-                    except Exception as e:
-                        self.logger.error("Couldn't restore vent.cfg"
-                                          "because: " + str(e))
-                        failed_str += 'Failed: vent configuration file'
-                    continue
-                t_info = backedup_tools[tool]
+        template_options = ['service', 'settings', 'docker', 'info', 'gpu']
+        backup_dir = os.path.join(os.path.expanduser('~'), backup_dir)
+        if os.path.exists(backup_dir):
+            # restore backed up manifest file
+            backup_manifest = os.path.join(backup_dir, 'backup_manifest.cfg')
+            bmanifest = Template(backup_manifest)
+            tools = bmanifest.sections()[1]
+            for tool in tools:
+                constraints = {}
+                options = bmanifest.options(tool)[1]
+                for vals in bmanifest.section(tool)[1]:
+                    constraints[vals[0]] = vals[1]
+                backedup_tool = bmanifest.constrained_sections(constraints, options)
+                t_info = backedup_tool[tool]
                 if t_info['type'] == 'repository':
                     # for purposes of the add method (only adding a sepcific
                     # tool each time, and the add method expects a tuple with
@@ -469,8 +465,31 @@ class Action:
                         self.logger.error("Problem restoring tool " + t_info['name'] +
                                           " because " + str(e))
                         failed_str += 'Failed: ' + t_info['name'] + '\n'
+
+            # restore backed up vent.cfg file
+            backup_vcfg = os.path.join(backup_dir, 'backup_vcfg.cfg')
+            bvcfg = Template(backup_vcfg)
+            try:
+                vent_config = os.path.join(os.path.expanduser('~'),
+                                           '.vent', 'vent.cfg')
+                vcfg_template = Template(vent_config)
+                for section in bvcfg.sections()[1]:
+                    for vals in bvcfg.section(section)[1]:
+                        # add section to new template in case it doesn't exist
+                        try:
+                            vcfg_template.add_section(section)
+                        except Exception as e:
+                            # okay if error because of already existing
+                            pass
+                        vcfg_template.set_option(vals[0], vals[1])
+                vcfg_template.write_config()
+                added_str += 'Restored: vent configuration file'
+            except Exception as e:
+                self.logger.error("Couldn't restore vent.cfg"
+                                  "because: " + str(e))
+                failed_str += 'Failed: vent configuration file'
         else:
-            status = (False, "No backup file found at specified path")
+            status = (False, "No backup directory found at specified path")
         if status[0]:
             status = (True, failed_str + added_str)
         self.logger.info("Status of restore: " + str(status[0]))
