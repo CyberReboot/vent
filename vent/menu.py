@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
+import curses
 import npyscreen
 
 from vent.helpers.meta import Version
@@ -31,6 +32,7 @@ class VentApp(npyscreen.NPSAppManaged):
 
     def onStart(self):
         """ Override onStart method for npyscreen """
+        curses.mousemask(0)
         self.paths.host_config()
         version = Version()
         quit_s = "\t"*6 + "Press ^Q to quit"

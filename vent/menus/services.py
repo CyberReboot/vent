@@ -1,4 +1,3 @@
-import curses
 import npyscreen
 
 from vent.helpers.meta import Services
@@ -13,14 +12,10 @@ class ServicesForm(npyscreen.FormBaseNew):
 
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
-        curses.mousemask(1)
         self.parentApp.switchForm('MAIN')
 
     def create(self):
         """ Override method for creating FormBaseNew form """
-        # track the mouse cursor to allow highlighting
-        curses.mousemask(0)
-
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.services_tft = self.add(npyscreen.TitleFixedText,
                                      name='No services running.',
