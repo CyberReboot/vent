@@ -12,6 +12,7 @@ from vent.api.menu_helpers import MenuHelper
 from vent.api.templates import Template
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
+from vent.helpers.meta import DropLocation
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
@@ -133,6 +134,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5.display()
         self.addfield6.display()
         self.addfield7.display()
+
+        # if file drop location changes deal with it
+        self.file_drop.value = DropLocation()
+        self.file_drop.display()
 
         return
 
