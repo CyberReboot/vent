@@ -168,7 +168,7 @@ def GpuUsage(**kargs):
         if r.status_code == 200:
             status = r.json()
             for i, device in enumerate(status['Devices']):
-                gpu_status[i] = {'global_memory': device['Memory'],
+                gpu_status[i] = {'global_memory': device['Memory']['Global'],
                                  'cores': device['Cores']}
         else:
             usage = (False, "Unable to get GPU usage request error code: " +
