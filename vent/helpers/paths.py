@@ -55,7 +55,7 @@ class PathDirs:
                                             "vent_files")
         else:
             default_file_dir = "/tmp/vent_files"
-        self.ensure_dir(default_file_dir)
+        status = self.ensure_dir(default_file_dir)
         config = Template(template=os.path.join(self.base_dir, "vent.cfg"))
         sections = {'main': {'files': default_file_dir},
                     'network-mapping': {},
@@ -67,4 +67,4 @@ class PathDirs:
             else:
                 config.add_section(s)
         config.write_config()
-        return
+        return status

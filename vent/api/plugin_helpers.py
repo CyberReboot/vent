@@ -484,12 +484,25 @@ class PluginHelper:
                     #      otherwise queue it up until it's
                     #      available
                     # !! TODO check for device settings in vent.template
-                    route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-                    h = check_output(('awk', '/default/ {print $3}'),
-                                     stdin=route.stdout)
-                    route.wait()
-                    host = h.strip()
-                    nd_url = 'http://' + host + ':3476/v1.0/docker/cli'
+                    vent_config = Template(template=join(self.path_dirs.meta_dir,
+                                                         "vent.cfg"))
+                    port = ''
+                    host = ''
+                    result = vent_config.option('nvidia-docker-plugin', 'port')
+                    if result[0]:
+                        port = result[1]
+                    else:
+                        port = '3476'
+                    result = vent_config.option('nvidia-docker-plugin', 'host')
+                    if result[0]:
+                        host = result[1]
+                    else:
+                        route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
+                        h = check_output(('awk', '/default/ {print $3}'),
+                                         stdin=route.stdout)
+                        route.wait()
+                        host = h.strip()
+                    nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                     params = {'vol': 'nvidia_driver'}
 
                     r = requests.get(nd_url, params=params)
