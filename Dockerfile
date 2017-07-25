@@ -4,14 +4,11 @@ MAINTAINER Charlie Lewis <clewis@iqt.org>
 RUN apk add --update \
     docker \
     git \
-    make \
     python \
     py2-pip \
     && rm -rf /var/cache/apk/*
 
-ADD . /vent
-WORKDIR /vent
-RUN pip install -r tests/requirements.txt
+RUN pip install vent
 
-ENTRYPOINT ["make"]
-CMD ["test"]
+ENTRYPOINT ["vent"]
+CMD [""]
