@@ -387,8 +387,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         try:
             self.api_action = Action()
             drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
-            template = Template(template=drop_location)
-            template = template.option("main", "files")[1]
 
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
@@ -418,7 +416,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT')
         self.file_drop = self.add(npyscreen.TitleFixedText,
                                   name='File Drop:',
-                                  value=template,
+                                  value=DropLocation(),
                                   labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
