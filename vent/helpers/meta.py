@@ -406,6 +406,7 @@ def Uptime():
         pass
     return uptime
 
+
 def DropLocation():
     """ Get the directory that file drop is watching """
     drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")

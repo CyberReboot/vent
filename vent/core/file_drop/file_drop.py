@@ -17,6 +17,9 @@ class GZHandler(PatternMatchingEventHandler):
     """
 
     patterns = ["*"]
+    # don't want to process files in on_modified for files that have already
+    # been created and processed
+    created_files = set()
 
     @staticmethod
     def process(event, r_host):
@@ -37,9 +40,9 @@ class GZHandler(PatternMatchingEventHandler):
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
             # TODO should directories be treated as bulk paths to send to a
             #      plugin?
-            if event.event_type == "created" and not event.is_directory:
+            if not event.is_directory:
                 # check if the file was already queued and ignore
-                time.sleep(15)
+                time.sleep(1)
                 exists = False
                 print(uid+" started " + event.src_path)
                 r = StrictRedis(host=r_host, port=6379, db=0)
@@ -49,10 +52,10 @@ class GZHandler(PatternMatchingEventHandler):
                     description = r.hget(job, 'description')
                     print(uid + " " + description)
                     print(uid + " " +
-                          description.split("file_watch.file_queue('" +
+                          description.split("watch.file_queue('" +
                                             hostname + "_")[1][:-2])
                     print(uid + " " + event.src_path)
-                    if description.split("file_watch.file_queue('" +
+                    if description.split("watch.file_queue('" +
                                          hostname +
                                          "_")[1][:-2] == event.src_path:
                         print(uid + " true")
@@ -63,7 +66,7 @@ class GZHandler(PatternMatchingEventHandler):
                     #         vent.template
                     print(uid + " let's queue it " + event.src_path)
                     # let jobs be queued for up to 30 days
-                    q.enqueue('file_watch.file_queue',
+                    q.enqueue('watch.file_queue',
                               hostname + "_" + event.src_path,
                               ttl=2592000)
                 print(uid + " end " + event.src_path)
@@ -71,7 +74,19 @@ class GZHandler(PatternMatchingEventHandler):
             print(str(e))
 
     def on_created(self, event):
+        self.created_files.add(event.src_path)
         self.process(event, 'redis')
+
+    def on_modified(self, event):
+        # don't perform any action if file was already created or file is
+        # deleted
+        if (event.src_path not in self.created_files and
+                os.path.exists(event.src_path)):
+            # add to created files because the file was moved into directory,
+            # which is what should be creating it, but some OS's treat it as a
+            # modification with docker mounts
+            self.created_files.add(event.src_path)
+            self.process(event, 'redis')
 
 if __name__ == '__main__':  # pragma: no cover
     args = None
@@ -79,7 +94,8 @@ if __name__ == '__main__':  # pragma: no cover
         args = sys.argv[1:]
 
     observer = Observer()
-    observer.schedule(GZHandler(), path=args[0] if args else '/files')
+    observer.schedule(GZHandler(), path=args[0] if args else '/files',
+                      recursive=True)
     observer.start()
 
     try:
