@@ -23,6 +23,7 @@ def gpu_queue(options):
 
     return status
 
+
 def file_queue(path, template_path="/vent/"):
     """
     Processes files that have been added from the rq-worker, starts plugins
