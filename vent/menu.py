@@ -35,11 +35,12 @@ class VentApp(npyscreen.NPSAppManaged):
         curses.mousemask(0)
         self.paths.host_config()
         version = Version()
-        quit_s = "\t"*6 + "Press ^Q to quit"
+        quit_s = "\t"*4 + "Press ^Q to quit"
+        tab_esc = "\t"*4 + "Press TAB to close menu popup"
         self.addForm("MAIN",
                      MainForm,
                      name="Vent " + version +
-                     "\t\t\t\t\tPress ^T to toggle help" + quit_s,
+                     "\t\t\t\t\tPress ^T to toggle help" + quit_s + tab_esc,
                      color="IMPORTANT")
         self.addForm("HELP",
                      HelpForm,

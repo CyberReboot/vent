@@ -79,6 +79,11 @@ class Action:
         self.logger.info("Starting: remove")
         status = (True, None)
         try:
+            # don't want to include groups because constrained_sections will
+            # return everything that matches that group, possibly removing
+            # things we don't want to remove
+            if groups:
+                groups = None
             status = self.plugin.remove(name=name,
                                         repo=repo,
                                         namespace=namespace,
