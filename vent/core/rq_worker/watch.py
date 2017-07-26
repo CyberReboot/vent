@@ -11,7 +11,7 @@ def gpu_queue(options):
     try:
         d_client = docker.from_env()
         options = json.loads(options)
-        configs = options[configs]
+        configs = options['configs']
         del options[configs]
         params = options.copy()
         params.update(configs)
