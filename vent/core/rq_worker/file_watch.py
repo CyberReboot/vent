@@ -55,15 +55,16 @@ def file_queue(path, template_path="/vent/"):
             if config.has_option(section, 'settings'):
                 try:
                     options_dict = json.loads(config.get(section, 'settings'))
-                    process_file = False
-                    # check if this tool should look at files in base dir
+                    in_base = directory == '/files'
+                    # process base by default
+                    process_file = True if in_base else False
+                    # check if this tool shouldn't process the base by default
                     if 'process_base' in options_dict:
-                        if (options_dict['process_base'] == 'yes' and
-                                directory == '/files'):
-                            process_file = True
+                        if options_dict['process_base'] == 'no':
+                            process_file = False
                     # check if this tool should look at subdirs created by
                     # other tools' output
-                    if 'process_from_tool' in options_dict:
+                    if 'process_from_tool' in options_dict and not in_base:
                         for tool in options_dict['process_from_tool'].split(','):
                             if tool.replace(' ', '-') in directory:
                                 process_file = True
