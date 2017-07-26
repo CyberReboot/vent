@@ -2,6 +2,12 @@
 name = Redis
 groups = core
 
+[service]
+uri_prefix = tcp://
+
 [settings]
 instances = 1
 priority = 3
+
+[docker]
+publish_all_ports = True
