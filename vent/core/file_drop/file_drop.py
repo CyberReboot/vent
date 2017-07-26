@@ -79,7 +79,7 @@ if __name__ == '__main__':  # pragma: no cover
         args = sys.argv[1:]
 
     observer = Observer()
-    observer.schedule(GZHandler(), path=args[0] if args else '/files')
+    observer.schedule(GZHandler(), path=args[0] if args else '/files', recursive=True)
     observer.start()
 
     try:
