@@ -17,6 +17,9 @@ class GZHandler(PatternMatchingEventHandler):
     """
 
     patterns = ["*"]
+    # don't want to process files in on_modified for files that have already
+    # been created and processed
+    created_files = set()
 
     @staticmethod
     def process(event, r_host):
@@ -37,7 +40,7 @@ class GZHandler(PatternMatchingEventHandler):
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
             # TODO should directories be treated as bulk paths to send to a
             #      plugin?
-            if event.event_type == "created" and not event.is_directory:
+            if not event.is_directory:
                 # check if the file was already queued and ignore
                 time.sleep(15)
                 exists = False
@@ -71,7 +74,19 @@ class GZHandler(PatternMatchingEventHandler):
             print(str(e))
 
     def on_created(self, event):
+        self.created_files.add(event.src_path)
         self.process(event, 'redis')
+
+    def on_modified(self, event):
+        # don't perform any action if file was already created or file is
+        # deleted
+        if (event.src_path not in self.created_files and
+                os.path.exists(event.src_path)):
+            # add to created files because the file was moved into directory,
+            # which is what should be creating it, but some OS's treat it as a
+            # modification with docker mounts
+            self.created_files.add(event.src_path)
+            self.process(event, 'redis')
 
 if __name__ == '__main__':  # pragma: no cover
     args = None
