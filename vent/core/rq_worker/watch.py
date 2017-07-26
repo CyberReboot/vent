@@ -199,10 +199,10 @@ def file_queue(path, template_path="/vent/"):
                         configs[image]['volumes'][volume] = volumes[volume]
                 else:
                     configs[image]['volumes'] = volumes
-                if can_queue_gpu:
-                    if ('labels' in configs[image] and
-                       'vent.gpu' in configs[image]['labels'] and
-                       configs[image]['labels']['vent.gpu'] == 'yes'):
+                if ('labels' in configs[image] and
+                   'vent.gpu' in configs[image]['labels'] and
+                   configs[image]['labels']['vent.gpu'] == 'yes'):
+                    if can_queue_gpu:
                         # queue up containers requiring a gpu
                         q_str = json.dumps({'image': image,
                                             'command': path,
@@ -212,14 +212,14 @@ def file_queue(path, template_path="/vent/"):
                                             'configs': configs[image]})
                         q.enqueue('watch.gpu_queue', q_str, ttl=2592000)
                     else:
-                        d_client.containers.run(image=image,
-                                                command=path,
-                                                labels=labels,
-                                                detach=True,
-                                                log_config=log_config,
-                                                **configs[image])
+                        failed_images.add(image)
                 else:
-                    failed_images.add(image)
+                    d_client.containers.run(image=image,
+                                            command=path,
+                                            labels=labels,
+                                            detach=True,
+                                            log_config=log_config,
+                                            **configs[image])
         if failed_images:
             status = (False, failed_images)
         else:
