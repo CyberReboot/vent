@@ -9,7 +9,6 @@ from threading import Thread
 
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
-from vent.api.templates import Template
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import DropLocation
