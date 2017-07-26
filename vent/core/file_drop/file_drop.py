@@ -52,10 +52,10 @@ class GZHandler(PatternMatchingEventHandler):
                     description = r.hget(job, 'description')
                     print(uid + " " + description)
                     print(uid + " " +
-                          description.split("file_watch.file_queue('" +
+                          description.split("watch.file_queue('" +
                                             hostname + "_")[1][:-2])
                     print(uid + " " + event.src_path)
-                    if description.split("file_watch.file_queue('" +
+                    if description.split("watch.file_queue('" +
                                          hostname +
                                          "_")[1][:-2] == event.src_path:
                         print(uid + " true")
@@ -66,7 +66,7 @@ class GZHandler(PatternMatchingEventHandler):
                     #         vent.template
                     print(uid + " let's queue it " + event.src_path)
                     # let jobs be queued for up to 30 days
-                    q.enqueue('file_watch.file_queue',
+                    q.enqueue('watch.file_queue',
                               hostname + "_" + event.src_path,
                               ttl=2592000)
                 print(uid + " end " + event.src_path)
