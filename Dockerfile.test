@@ -1,8 +1,12 @@
-FROM alpine:3.5
+FROM elasticsearch:2-alpine
+FROM rabbitmq:3-management
+FROM redis:alpine
+FROM alpine:3.6
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
     docker \
+    git \
     make \
     python \
     py2-pip \

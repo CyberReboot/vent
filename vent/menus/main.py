@@ -19,6 +19,7 @@ from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
+from vent.menus.backup import BackupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
@@ -217,6 +218,23 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'action': form_action,
                                      'type': a_type,
                                      'cores': cores}}
+        # grammar rules
+        vowels = ['a', 'e', 'i', 'o', 'u']
+
+        # consonant-vowel-consonant ending
+        # Eg: stop -> stopping
+        if s_action[-1] not in vowels and \
+           s_action[-2] in vowels and \
+           s_action[-3] not in vowels:
+                form_args['action_dict']['present_t'] = s_action + \
+                    s_action[-1] + 'ing ' + a_type
+
+        # word ends with a 'e'
+        # eg: remove -> removing
+        if s_action[-1] == 'e':
+                form_args['action_dict']['present_t'] = s_action[:-1] \
+                    + 'ing ' + a_type
+
         if s_action == 'start':
             form_args['names'].append('prep_start')
         elif s_action == 'configure':
@@ -291,7 +309,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def system_commands(self, action):
         """ Perform system commands """
-        if action == "reset":
+        if action == 'backup':
+            status = self.api_action.backup()
+            if status[0]:
+                notify_confirm("Vent backup successful")
+            else:
+                notify_confirm("Vent backup could not be completed")
+        elif action == "reset":
             okay = npyscreen.notify_ok_cancel(
                     "This factory reset will remove ALL of Vent's user data, "
                     "containers, and images. Are you sure?",
@@ -316,6 +340,19 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                    "Error: " + str(gpu[2]))
                 else:
                     notify_confirm("No GPUs detected.")
+        elif action == 'restore':
+            backup_dir_home = os.path.expanduser('~')
+            backup_dirs = [f for f in os.listdir(backup_dir_home) if
+                           f.startswith('.vent-backup')]
+            form_args = {'restore': self.api_action.restore,
+                         'dirs': backup_dirs,
+                         'name': "Pick a version to restore from" + "\t"*8 +
+                                 "Press ^T to toggle main",
+                         'color': 'CONTROL'}
+            add_kargs = {'form': BackupForm,
+                         'form_name': 'CHOOSEBACKUP',
+                         'form_args': form_args}
+            self.add_form(**add_kargs)
         elif action == "swarm":
             # !! TODO
             # add notify_cancel_ok popup once implemented
@@ -482,7 +519,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['services'], shortcut='p')
 
         # System Commands Menu Items
-        self.m6 = self.add_menu(name="System Commands")
+        self.m6 = self.add_menu(name="System Commands", shortcut='y')
+        self.m6.addItem(text='Backup', onSelect=self.system_commands,
+                        arguments=['backup'], shortcut='b')
         self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
                         arguments=['gpu'], shortcut='g')
         self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',
@@ -490,6 +529,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['swarm'], shortcut='s')
         self.m6.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
+        self.m6.addItem(text='Restore', onSelect=self.system_commands,
+                        arguments=['restore'], shortcut='t')
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')

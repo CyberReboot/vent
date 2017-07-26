@@ -35,56 +35,51 @@ class Plugin:
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
-        Dockerfile) and version
-          tools are for explicitly limiting which tools and versions
-          (if version in tuple is '', then defaults to version)
+        Dockerfile) and version tools are for explicitly limiting which tools
+        and versions (if version in tuple is '', then defaults to version)
         overrides is a list of tuples, where the pair is a tool name (path to
-        Dockerfile) and a version
-          overrides are for explicitly removing tools and overriding versions
-          of tools (if version in tuple is '', then tool is removed, otherwise
-          that tool is checked out at the specific version in the tuple)
-        if tools and overrides are left as empty lists, then all tools in the
-          repo are pulled down at the version and branch specified or defaulted
-          to
-        version is globally set for all tools, unless overridden in tools or
-          overrides
-        branch is globally set for all tools
-        build is a boolean of whether or not to build the tools now
-        user is the username for a private repo if needed
-        pw is the password to go along with the username for a private repo
-        groups is globally set for all tools
-        version_alias is globally set for all tools and is a mapping from a
-          friendly version tag to the real version commit ID
-        wild lets you specify individual overrides for additional values in the
-          tuple of tools or overrides.  wild is a list containing one or more
-          of the following: branch, build, groups, version_alias
-          the order of the items in the wild list will expect values to be
-          tacked on in the same order to the tuple for tools and overrides in
-          additional to the tool name and version
+        Dockerfile) and a version overrides are for explicitly removing tools
+        and overriding versions of tools (if version in tuple is '', then
+        tool is removed, otherwise that tool is checked out at the specific
+        version in the tuple) if tools and overrides are left as empty lists,
+        then all tools in the repo are pulled down at the version and branch
+        specified or defaulted to version is globally set for all tools, unless
+        overridden in tools or overrides branch is globally set for all tools
+        build is a boolean of whether or not to build the tools now user is the
+        username for a private repo if needed pw is the password to go along
+        with the username for a private repo groups is globally set for all
+        tools version_alias is globally set for all tools and is a mapping
+        from a friendly version tag to the real version commit ID wild lets
+        you specify individual overrides for additional values in the tuple
+        of tools or overrides.  wild is a list containing one or more
+        of the following: branch, build, groups, version_alias
+        the order of the items in the wild list will expect values to be
+        tacked on in the same order to the tuple for tools and overrides in
+        additional to the tool name and version
         remove_old lets you specify whether or not to remove previously found
-          tools that match to ones being added currently (note does not stop
-          currently running instances of the older version)
+        tools that match to ones being added currently (note does not stop
+        currently running instances of the older version)
         disable_old lets you specify whether or not to disable previously found
-          tools that match to ones being added currently (note does not stop
-          currently running instances of the older version)
+        tools that match to ones being added currently (note does not stop
+        currently running instances of the older version)
         limit_groups is a list of groups to build tools for that match group
-          names in vent.template of each tool if exists
+        names in vent.template of each tool if exists
         Examples:
-          repo=fe
-            (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
-          repo=foo, version="3d1f", branch="foo"
-            (get all tools from repo 'foo' at verion '3d1f' on branch 'foo')
-          repo=foo, tools=[('bar', ''), ('baz', '1d32')]
-            (get only 'bar' from repo 'foo' at version 'HEAD' on branch
-            'master' and 'baz' from repo 'foo' at version '1d32' on branch
-            'master', ignore all other tools in repo 'foo')
-          repo=foo overrides=[('baz/bar', ''), ('.', '1c4e')], version='4fad'
-            (get all tools from repo 'foo' at verion '4fad' on branch 'master'
-            except 'baz/bar' and for tool '.' get version '1c4e')
-          repo=foo tools=[('bar', '1a2d')], overrides=[('baz', 'f2a1')]
-            (not a particularly useful example, but get 'bar' from 'foo' at
-            version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
-            'master', ignore all other tools)
+        - repo=fe:
+        (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
+        - repo=foo, version="3d1f", branch="foo":
+        (get all tools from repo 'foo' at verion '3d1f' on branch 'foo')
+        - repo=foo, tools=[('bar', ''), ('baz', '1d32')]:
+        (get only 'bar' from repo 'foo' at version 'HEAD' on branch
+        'master' and 'baz' from repo 'foo' at version '1d32' on branch
+        'master', ignore all other tools in repo 'foo')
+        - repo=foo overrides=[('baz/bar', ''), ('.', '1c4e')], version='4fad':
+        (get all tools from repo 'foo' at verion '4fad' on branch 'master'
+        except 'baz/bar' and for tool '.' get version '1c4e')
+        - repo=foo tools=[('bar', '1a2d')], overrides=[('baz', 'f2a1')]:
+        (not a particularly useful example, but get 'bar' from 'foo' at
+        version '1a2d' and get 'baz' from 'foo' at version 'f2a1' on branch
+        'master', ignore all other tools)
         """
 
         # initialize and store class objects
@@ -145,6 +140,7 @@ class Plugin:
 
         status = (True, None)
         try:
+            pull_name = image
             org = ''
             name = image
             if '/' in image:
@@ -164,6 +160,7 @@ class Plugin:
             template = Template(template=self.manifest)
             template.add_section(section)
             template.set_option(section, "name", name)
+            template.set_option(section, "pull_name", pull_name)
             template.set_option(section, "namespace", namespace)
             template.set_option(section, "path", "")
             template.set_option(section, "repo", registry + '/' + org)
@@ -180,13 +177,13 @@ class Plugin:
             template.set_option(section, "built", "yes")
             template.set_option(section, "image_id",
                                 image.attrs['Id'].split(':')[1][:12])
-            if groups:
-                template.set_option(section, "groups", groups)
+            template.set_option(section, "groups", groups)
 
             # write out configuration to the manifest file
             template.write_config()
             status = (True, "Successfully added " + full_image)
         except Exception as e:  # pragma: no cover
+            self.logger.error("Couldn't add image because " + str(e))
             status = (False, str(e))
         return status
 
@@ -330,11 +327,17 @@ class Plugin:
                 section = self.org + ":" + self.name + ":" + match[0] + ":"
                 section += self.branch + ":" + self.version
                 match_path = self.path + match[0]
-                image_name = self.org + "-" + self.name + "-"
-                if match[0] != '':
-                    # if tool is in a subdir, add that to the name of the image
-                    image_name += '-'.join(match[0].split('/')[1:]) + "-"
-                image_name += self.branch + ":" + self.version
+                if not self.core:
+                    image_name = self.org + "-" + self.name + "-"
+                    if match[0] != '':
+                        # if tool is in a subdir, add that to the name of the
+                        # image
+                        image_name += '-'.join(match[0].split('/')[1:]) + "-"
+                    image_name += self.branch + ":" + self.version
+                else:
+                    image_name = ('cyberreboot/vent-' +
+                                  match[0].split('/')[-1] + ':' + self.branch)
+                image_name = image_name.replace('_', '-')
 
                 # check if the section already exists
                 exists, options = template.section(section)
@@ -358,6 +361,8 @@ class Plugin:
                 # !! TODO
                 # check if section should be removed from config i.e. all tools
                 # but new commit removed one that was in a previous commit
+
+                image_name = image_name.lower()
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
