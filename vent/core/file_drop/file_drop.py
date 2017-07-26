@@ -42,7 +42,7 @@ class GZHandler(PatternMatchingEventHandler):
             #      plugin?
             if not event.is_directory:
                 # check if the file was already queued and ignore
-                time.sleep(15)
+                time.sleep(1)
                 exists = False
                 print(uid+" started " + event.src_path)
                 r = StrictRedis(host=r_host, port=6379, db=0)
