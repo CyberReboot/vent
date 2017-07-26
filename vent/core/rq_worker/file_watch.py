@@ -61,8 +61,8 @@ def file_queue(path, template_path="/vent/"):
                         if (options_dict['process_base'] == 'yes' and
                                 directory == '/files'):
                             process_file = True
-                    # check if this tool should look at subdirs created by other
-                    # tools' output
+                    # check if this tool should look at subdirs created by
+                    # other tools' output
                     if 'process_from_tool' in options_dict:
                         for tool in options_dict['process_from_tool'].split(','):
                             if tool.replace(' ', '-') in directory:
