@@ -404,3 +404,11 @@ def Uptime():
     except Exception as e:  # pragma: no cover
         pass
     return uptime
+
+
+def DropLocation():
+    """ Get the directory that file drop is watching """
+    drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
+    template = Template(template=drop_location)
+    drop_loc = template.option("main", "files")[1]
+    return drop_loc
