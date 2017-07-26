@@ -1,5 +1,5 @@
-import watch
 import os
+import watch
 
 from vent.helpers.paths import PathDirs
 
