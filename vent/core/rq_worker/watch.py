@@ -15,7 +15,7 @@ def gpu_queue(options):
         del options[configs]
         params = options.copy()
         params.update(configs)
-        print params
+        print(params)
         d_client.containers.run(**params)
         status = (True, None)
     except Exception as e:  # pragma: no cover
