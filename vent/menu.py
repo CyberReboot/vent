@@ -36,7 +36,7 @@ class VentApp(npyscreen.NPSAppManaged):
         self.paths.host_config()
         version = Version()
         quit_s = "\t"*4 + "Press ^Q to quit"
-        tab_esc = "\t"*4 + "Press TAB to close popup"
+        tab_esc = "\t"*4 + "Press TAB to close menu popup"
         self.addForm("MAIN",
                      MainForm,
                      name="Vent " + version +
