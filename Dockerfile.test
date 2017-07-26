@@ -1,3 +1,6 @@
+FROM elasticsearch:2-alpine
+FROM rabbitmq:3-management
+FROM redis:alpine
 FROM alpine:3.6
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 

@@ -28,6 +28,7 @@ def file_queue(path, template_path="/vent/"):
             files = '/'
 
         _, path = path.split('_', 1)
+        directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
 
         labels = {'vent-plugin': '', 'file': path}
@@ -54,13 +55,25 @@ def file_queue(path, template_path="/vent/"):
             if config.has_option(section, 'settings'):
                 try:
                     options_dict = json.loads(config.get(section, 'settings'))
-                    for option in options_dict:
-                        if option == 'ext_types':
-                            ext_types = options_dict[option].split(',')
-                            for ext_type in ext_types:
-                                if path.endswith(ext_type):
-                                    images.append(image_name)
-                                    configs[image_name] = {}
+                    in_base = directory == '/files'
+                    # process base by default
+                    process_file = True if in_base else False
+                    # check if this tool shouldn't process the base by default
+                    if 'process_base' in options_dict:
+                        if options_dict['process_base'] == 'no':
+                            process_file = False
+                    # check if this tool should look at subdirs created by
+                    # other tools' output
+                    if 'process_from_tool' in options_dict and not in_base:
+                        for tool in options_dict['process_from_tool'].split(','):
+                            if tool.replace(' ', '-') in directory:
+                                process_file = True
+                    if 'ext_types' in options_dict and process_file:
+                        ext_types = options_dict['ext_types'].split(',')
+                        for ext_type in ext_types:
+                            if path.endswith(ext_type):
+                                images.append(image_name)
+                                configs[image_name] = {}
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
