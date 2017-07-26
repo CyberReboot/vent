@@ -147,9 +147,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 if status[0]:
                     tool_d = status[1]
                     status = self.api_action.start(tool_d)
-            except Exception as e: # pragma no cover
+            except Exception as e:  # pragma no cover
                 logger.error("file drop restart failed with error: " + str(e))
-
             logger.info("Status of file drop restart: " + str(status[0]))
             logger.info("Finished: file drop restart")
         self.file_drop.display()
