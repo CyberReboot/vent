@@ -16,6 +16,7 @@ from vent.helpers.meta import DropLocation
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
+from vent.helpers.meta import RestartFileDrop
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 from vent.helpers.paths import PathDirs
@@ -136,7 +137,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield7.display()
 
         # if file drop location changes deal with it
-        self.file_drop.value = DropLocation()
+        if self.file_drop.value != DropLocation():
+            self.file_drop.value = DropLocation()
+            #RestartFileDrop()
         self.file_drop.display()
 
         return
