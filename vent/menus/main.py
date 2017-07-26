@@ -386,7 +386,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         """ Override method for creating FormBaseNewWithMenu form """
         try:
             self.api_action = Action()
-            drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
 
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
