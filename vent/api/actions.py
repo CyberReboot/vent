@@ -797,3 +797,20 @@ class Action:
         self.logger.info("Status of save_configure: " + str(status[0]))
         self.logger.info("Finished: save_configure")
         return status
+
+   #   def RestartFileDrop():
+        #  """ Restart File Drop if watched directory changes """
+        #  status = (False, None)
+        #  try:
+            #  status = self.clean(name = "file_drop", groups="core")
+            #  status = self.prep_start(groups="core", name="file_drop")
+            #  if status[0]:
+                #  tool_d = status[1]
+                #  status = self.start(tool_d)
+        #  except Exception as e: # pragma no cover
+            #  status = (False, "Failed to restart " + str(e))
+            #  self.logger.error(str(status))
+#
+        #  self.logger.info("Status of file drop reset: " + str(status[0]))
+        #  self.logger.info("Finished: file drop reset")
+   #       return status

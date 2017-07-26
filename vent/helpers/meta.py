@@ -9,9 +9,7 @@ import requests
 
 from subprocess import check_output, Popen, PIPE
 
-from vent.api.actions import Action
 from vent.api.templates import Template
-from vent.helpers.logger import Logger
 from vent.helpers.paths import PathDirs
 
 
@@ -413,20 +411,3 @@ def DropLocation():
     template = Template(template=drop_location)
     drop_loc = template.option("main", "files")[1]
     return drop_loc
-
-def RestartFileDrop():
-    """ Restart File Drop if watched directory changes """
-    status = (False, None)
-    logger = Logger(__name__)
-    api_action = Action()
-    try:
-        status = api_action.clean(name = "file_drop", groups="core")
-        status = api.action.prep_start(groups="core", name="file_drop")
-        if status[0]:
-            tool_d = status[1]
-            status = self.api_action.start(tool_d)
-    except Exception as e: # pragma no cover
-        status = (False, "Failed to restart " + str(e))
-        logger.error(str(status))
-    logger.info("Status of file drop reset: " + str(status[0]))
-    logger.info("Finished: file drop reset")

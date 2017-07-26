@@ -16,9 +16,9 @@ from vent.helpers.meta import DropLocation
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
-from vent.helpers.meta import RestartFileDrop
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
+from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.backup import BackupForm
@@ -137,9 +137,21 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield7.display()
 
         # if file drop location changes deal with it
+        logger = Logger(__name__)
         if self.file_drop.value != DropLocation():
-            self.file_drop.value = DropLocation()
-            #RestartFileDrop()
+            logger.info("Starting: file drop restart")
+            try:
+                self.file_drop.value = DropLocation()
+                status = self.api_action.clean(name='file_drop')
+                status = self.api_action.prep_start(name='file_drop')
+                if status[0]:
+                    tool_d = status[1]
+                    status = self.api_action.start(tool_d)
+            except Exception as e: # pragma no cover
+                logger.error("file drop restart failed with error: " + str(e))
+
+            logger.info("Status of file drop restart: " + str(status[0]))
+            logger.info("Finished: file drop restart")
         self.file_drop.display()
 
         return
