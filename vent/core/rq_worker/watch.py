@@ -1,3 +1,29 @@
+def gpu_queue(options):
+    """
+    Queued up containers waiting for GPU resources
+    """
+    import docker
+    import json
+    status = (False, None)
+
+    # !! TODO wait until resources are available
+
+    try:
+        d_client = docker.from_env()
+        options = json.loads(options)
+        configs = options['configs']
+        del options[configs]
+        params = options.copy()
+        params.update(configs)
+        print(params)
+        d_client.containers.run(**params)
+        status = (True, None)
+    except Exception as e:  # pragma: no cover
+        status = (False, str(e))
+
+    return status
+
+
 def file_queue(path, template_path="/vent/"):
     """
     Processes files that have been added from the rq-worker, starts plugins
@@ -8,6 +34,8 @@ def file_queue(path, template_path="/vent/"):
     import json
     import requests
 
+    from redis import Redis
+    from rq import Queue
     from subprocess import check_output, Popen, PIPE
 
     status = (True, None)
@@ -83,6 +111,10 @@ def file_queue(path, template_path="/vent/"):
                     if 'enabled' in options_dict:
                         enabled = options_dict['enabled']
                         if enabled == 'yes':
+                            if 'labels' in configs[image_name]:
+                                configs[image_name]['labels']['vent.gpu'] = 'yes'
+                            else:
+                                configs[image_name]['labels'] = {'vent.gpu': 'yes'}
                             port = ''
                             host = ''
                             if (vent_config.has_section('nvidia-docker-plugin') and
@@ -149,6 +181,13 @@ def file_queue(path, template_path="/vent/"):
         dir_path = path.rsplit('/', 1)[0]
         volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
 
+        # setup gpu queue
+        can_queue_gpu = True
+        try:
+            q = Queue(connection=Redis(host='redis'), default_timeout=86400)
+        except Exception as e:  # pragma: no cover
+            can_queue_gpu = False
+
         # start containers
         for image in images:
             if image not in failed_images:
@@ -160,13 +199,30 @@ def file_queue(path, template_path="/vent/"):
                         configs[image]['volumes'][volume] = volumes[volume]
                 else:
                     configs[image]['volumes'] = volumes
-                d_client.containers.run(image=image,
-                                        command=path,
-                                        labels=labels,
-                                        detach=True,
-                                        log_config=log_config,
-                                        **configs[image])
-        if not failed_images:
+                if ('labels' in configs[image] and
+                   'vent.gpu' in configs[image]['labels'] and
+                   configs[image]['labels']['vent.gpu'] == 'yes'):
+                    if can_queue_gpu:
+                        # queue up containers requiring a gpu
+                        q_str = json.dumps({'image': image,
+                                            'command': path,
+                                            'labels': labels,
+                                            'detach': True,
+                                            'log_config': log_config,
+                                            'configs': configs[image]})
+                        q.enqueue('watch.gpu_queue', q_str, ttl=2592000)
+                    else:
+                        failed_images.add(image)
+                else:
+                    d_client.containers.run(image=image,
+                                            command=path,
+                                            labels=labels,
+                                            detach=True,
+                                            log_config=log_config,
+                                            **configs[image])
+        if failed_images:
+            status = (False, failed_images)
+        else:
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
