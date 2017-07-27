@@ -382,7 +382,7 @@ class PluginHelper:
             vent_config = Template(template=join(self.path_dirs.meta_dir,
                                                  "vent.cfg"))
             files = vent_config.option('main', 'files')
-            files = (files[0],expanduser(files[1]))
+            files = (files[0], expanduser(files[1]))
             s, _ = self.constraint_options(args, options)
             status, tool_d = self.start_sections(s,
                                                  files,
