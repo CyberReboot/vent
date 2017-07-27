@@ -26,7 +26,6 @@ class GZHandler(PatternMatchingEventHandler):
         r = StrictRedis(host='redis', port=6379, db=0)
     except Exception as e:  # pragma: no cover
         print("Unable to connect to redis:", str(e))
-        sys.exit()
 
     def process(self, event):
         """
@@ -50,7 +49,7 @@ class GZHandler(PatternMatchingEventHandler):
                 historicalSize = -1
                 while (historicalSize != os.path.getsize(event.src_path)):
                     historicalSize = os.path.getsize(event.src_path)
-                    time.sleep(0.1)
+                    time.sleep(0.001)
 
                 # check if the file was already queued and ignore
                 exists = False
