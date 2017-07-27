@@ -21,9 +21,10 @@ class GZHandler(PatternMatchingEventHandler):
     # been created and processed
     created_files = set()
     try:
+        # let jobs run for up to one day
         q = Queue(connection=Redis(host='redis'), default_timeout=86400)
         r = StrictRedis(host='redis', port=6379, db=0)
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         print("Unable to connect to redis:", str(e))
         sys.exit()
 
@@ -40,7 +41,7 @@ class GZHandler(PatternMatchingEventHandler):
         hostname = os.environ.get("VENT_HOST")
         if not hostname:
             hostname = ""
-        # let jobs run for up to one day
+
         try:
             # TODO should directories be treated as bulk paths to send to a
             #      plugin?
@@ -50,6 +51,7 @@ class GZHandler(PatternMatchingEventHandler):
                 while (historicalSize != os.path.getsize(event.src_path))
                     historicalSize = os.path.getsize(event.src_path)
                     sleep(0.1)
+
                 # check if the file was already queued and ignore
                 exists = False
                 print(uid+" started " + event.src_path)
@@ -68,6 +70,7 @@ class GZHandler(PatternMatchingEventHandler):
                         print(uid + " true")
                         exists = True
                     print(uid + " ***")
+
                 if not exists:
                     # !! TODO this should be a configuration option in the
                     #         vent.template
