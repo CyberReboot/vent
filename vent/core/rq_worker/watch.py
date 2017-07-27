@@ -7,7 +7,7 @@ def gpu_queue(options):
     status = (False, None)
 
     # !! TODO wait until resources are available
-    print ("gpu queue", str(options))
+    print("gpu queue", str(options))
 
     try:
         d_client = docker.from_env()
