@@ -413,4 +413,6 @@ def DropLocation():
     drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
     template = Template(template=drop_location)
     drop_loc = template.option("main", "files")[1]
-    return drop_loc
+    drop_loc = os.path.expanduser(drop_loc)
+    drop_loc = os.path.abspath(drop_loc)
+    return (True, drop_loc)
