@@ -4,16 +4,22 @@ def gpu_queue(options):
     """
     import docker
     import json
+
+    from vent.helpers.meta import GpuUsage
+
     status = (False, None)
 
     # !! TODO wait until resources are available
     print("gpu queue", str(options))
+    print("gpu queue", str(GpuUsage()))
 
     try:
         d_client = docker.from_env()
         options = json.loads(options)
         configs = options['configs']
-        del options[configs]
+        gpu_options = options['gpu_options']
+        del options['configs']
+        del options['gpu_options']
         params = options.copy()
         params.update(configs)
         print(str(params))
@@ -112,6 +118,7 @@ def file_queue(path, template_path="/vent/"):
                     if 'enabled' in options_dict:
                         enabled = options_dict['enabled']
                         if enabled == 'yes':
+                            configs['gpu_options'] = options_dict
                             if 'labels' in configs[image_name]:
                                 configs[image_name]['labels']['vent.gpu'] = 'yes'
                             else:
@@ -228,5 +235,4 @@ def file_queue(path, template_path="/vent/"):
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 
-    print(str(status))
     return status
