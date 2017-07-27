@@ -27,8 +27,9 @@ def test_file_drop_GZHandler():
             self.r = StrictRedis(host='localhsot', port=6379, db=0)
 
     b = Event("created", "/dev/null", False)
+    c = Event("modified", "/etc/hosts", False)
     a.process(b)
     a.process(b)
     a.process(b)
     a.on_created(b)
-    a.on_modified(b)
+    a.on_modified(c)
