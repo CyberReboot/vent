@@ -47,10 +47,10 @@ class GZHandler(PatternMatchingEventHandler):
             #      plugin?
             if not event.is_directory:
                 # wait for long copies to finish
-                historicalSize=-1
-                while (historicalSize != os.path.getsize(event.src_path))
+                historicalSize = -1
+                while (historicalSize != os.path.getsize(event.src_path)):
                     historicalSize = os.path.getsize(event.src_path)
-                    sleep(0.1)
+                    time.sleep(0.1)
 
                 # check if the file was already queued and ignore
                 exists = False
