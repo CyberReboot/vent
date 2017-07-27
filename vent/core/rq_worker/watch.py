@@ -7,6 +7,7 @@ def gpu_queue(options):
     status = (False, None)
 
     # !! TODO wait until resources are available
+    print("gpu queue", str(options))
 
     try:
         d_client = docker.from_env()
@@ -15,7 +16,7 @@ def gpu_queue(options):
         del options[configs]
         params = options.copy()
         params.update(configs)
-        print(params)
+        print(str(params))
         d_client.containers.run(**params)
         status = (True, None)
     except Exception as e:  # pragma: no cover
@@ -227,4 +228,5 @@ def file_queue(path, template_path="/vent/"):
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 
+    print(str(status))
     return status
