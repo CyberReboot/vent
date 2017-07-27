@@ -136,7 +136,7 @@ def file_queue(path, template_path="/vent/"):
                     if 'enabled' in options_dict:
                         enabled = options_dict['enabled']
                         if enabled == 'yes':
-                            configs['gpu_options'] = options_dict
+                            configs[image_name]['gpu_options'] = options_dict
                             if 'labels' in configs[image_name]:
                                 configs[image_name]['labels']['vent.gpu'] = 'yes'
                             else:
