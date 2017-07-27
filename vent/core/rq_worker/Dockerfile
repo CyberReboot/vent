@@ -3,6 +3,7 @@ MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
     docker \
+    git \
     libmagic \
     python \
     py2-pip \
