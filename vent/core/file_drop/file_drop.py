@@ -20,9 +20,14 @@ class GZHandler(PatternMatchingEventHandler):
     # don't want to process files in on_modified for files that have already
     # been created and processed
     created_files = set()
+    try:
+        q = Queue(connection=Redis(host='redis'), default_timeout=86400)
+        r = StrictRedis(host='redis', port=6379, db=0)
+    except Exception as e:
+        print("Unable to connect to redis:", str(e))
+        sys.exit()
 
-    @staticmethod
-    def process(event, r_host):
+    def process(self, event):
         """
         event.event_type
             'modified' | 'created' | 'moved' | 'deleted'
@@ -37,19 +42,21 @@ class GZHandler(PatternMatchingEventHandler):
             hostname = ""
         # let jobs run for up to one day
         try:
-            q = Queue(connection=Redis(host=r_host), default_timeout=86400)
             # TODO should directories be treated as bulk paths to send to a
             #      plugin?
             if not event.is_directory:
+                # wait for long copies to finish
+                historicalSize=-1
+                while (historicalSize != os.path.getsize(event.src_path))
+                    historicalSize = os.path.getsize(event.src_path)
+                    sleep(0.1)
                 # check if the file was already queued and ignore
-                time.sleep(1)
                 exists = False
                 print(uid+" started " + event.src_path)
-                r = StrictRedis(host=r_host, port=6379, db=0)
-                jobs = r.keys(pattern="rq:job*")
+                jobs = self.r.keys(pattern="rq:job*")
                 for job in jobs:
                     print(uid + " ***")
-                    description = r.hget(job, 'description')
+                    description = self.r.hget(job, 'description')
                     print(uid + " " + description)
                     print(uid + " " +
                           description.split("watch.file_queue('" +
@@ -66,16 +73,16 @@ class GZHandler(PatternMatchingEventHandler):
                     #         vent.template
                     print(uid + " let's queue it " + event.src_path)
                     # let jobs be queued for up to 30 days
-                    q.enqueue('watch.file_queue',
-                              hostname + "_" + event.src_path,
-                              ttl=2592000)
+                    self.q.enqueue('watch.file_queue',
+                                   hostname + "_" + event.src_path,
+                                   ttl=2592000)
                 print(uid + " end " + event.src_path)
         except Exception as e:  # pragma: no cover
             print(str(e))
 
     def on_created(self, event):
         self.created_files.add(event.src_path)
-        self.process(event, 'redis')
+        self.process(event)
 
     def on_modified(self, event):
         # don't perform any action if file was already created or file is
@@ -86,7 +93,7 @@ class GZHandler(PatternMatchingEventHandler):
             # which is what should be creating it, but some OS's treat it as a
             # modification with docker mounts
             self.created_files.add(event.src_path)
-            self.process(event, 'redis')
+            self.process(event)
 
 if __name__ == '__main__':  # pragma: no cover
     args = None
