@@ -49,7 +49,7 @@ class GZHandler(PatternMatchingEventHandler):
                 historicalSize = -1
                 while (historicalSize != os.path.getsize(event.src_path)):
                     historicalSize = os.path.getsize(event.src_path)
-                    time.sleep(0.001)
+                    time.sleep(0.1)
 
                 # check if the file was already queued and ignore
                 exists = False
