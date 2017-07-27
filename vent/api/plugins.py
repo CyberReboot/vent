@@ -589,6 +589,8 @@ class Plugin:
 
         # initialize
         args = locals()
+        # want to remove things from manifest regardless of if built
+        del args['built']
         status = (True, None)
 
         # get resulting dict of sections with options that match constraints
