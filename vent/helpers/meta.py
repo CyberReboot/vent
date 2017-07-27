@@ -5,7 +5,6 @@ import multiprocessing
 import os
 import pkg_resources
 import platform
-import re
 import requests
 
 from subprocess import check_output, Popen, PIPE
