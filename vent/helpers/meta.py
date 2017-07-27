@@ -406,7 +406,6 @@ def Uptime():
         pass
     return uptime
 
-
 def DropLocation():
     """ Get the directory that file drop is watching """
     drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
@@ -414,7 +413,7 @@ def DropLocation():
     drop_loc = template.option("main", "files")[1]
 
     # if there's an unsupported character, display an error
-    allowed_char = '[a-zA-Z0-9_\.\-~/]'
+    allowed_char = '[a-zA-Z0-9_\.\\\\-~/:]'
     invalid = [d for d in drop_loc if not re.search(allowed_char, d)]
 
     if not invalid:
