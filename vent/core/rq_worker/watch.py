@@ -64,7 +64,10 @@ def file_queue(path, template_path="/vent/"):
         # escape any funky symbols to allow users FREEDOM of directory name
         for char in files:
             if char in set(punctuation):
-                file_name += '\\\\' + char
+                if char == '\\':
+                    file_name += '\\' + char
+                else:
+                    file_name += '\\\\' + char
             else:
                 file_name += char
 
