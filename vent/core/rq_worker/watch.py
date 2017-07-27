@@ -33,10 +33,12 @@ def file_queue(path, template_path="/vent/"):
     import docker
     import json
     import requests
+    import os
 
     from redis import Redis
     from rq import Queue
     from subprocess import check_output, Popen, PIPE
+    from string import punctuation
 
     status = (True, None)
     images = []
@@ -55,6 +57,18 @@ def file_queue(path, template_path="/vent/"):
         else:
             files = '/'
 
+        # deal with ~
+        files = os.path.expanduser(files)
+
+        file_name = ''
+        # escape any funky symbols to allow users FREEDOM of directory name
+        for char in files:
+            if char in set(punctuation):
+                file_name += '\\\\' + char
+            else:
+                file_name += char
+
+        files = file_name
         _, path = path.split('_', 1)
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)

@@ -411,18 +411,6 @@ def DropLocation():
     drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
     template = Template(template=drop_location)
     drop_loc = template.option("main", "files")[1]
-
-    # if there's an unsupported character, display an error
-    allowed_char = '[a-zA-Z0-9_\.\\\\-~/:]'
-    invalid = [d for d in drop_loc if not re.search(allowed_char, d)]
-
-    if not invalid:
-        # if there's a ~, expand it.
-        drop_loc = os.path.expanduser(drop_loc)
-
-        # then do absolute path
-        drop_loc = os.path.abspath(drop_loc)
-        return (True, drop_loc, invalid)
-
-    else:
-        return (False, "invalid path name: " + str(invalid))
+    drop_loc = os.path.expanduser(drop_loc)
+    drop_loc = os.path.abspath(drop_loc)
+    return (True, drop_loc)
