@@ -139,27 +139,29 @@ def GpuUsage(**kargs):
     usage = (False, None)
     gpu_status = {}
 
-    # TODO this should be a function by itself...
     path_dirs = PathDirs(**kargs)
+    path_dirs.host_config()
     cfg = os.path.join(path_dirs.meta_dir, "vent.cfg")
     template = Template(template=cfg)
     port = '3476'
-    host = '0.0.0.0'
+    # default docker gateway
+    host = '172.17.0.1'
     result = template.option('nvidia-docker-plugin', 'port')
     if result[0]:
         port = result[1]
     result = template.option('nvidia-docker-plugin', 'host')
     if result[0]:
         host = result[1]
-    else:
-        try:
-            route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-            h = check_output(('awk', '/default/ {print $3}'),
-                             stdin=route.stdout)
-            route.wait()
-            host = h.strip()
-        except Exception as e:  # pragma: no cover
-            pass
+    # TODO ignoring this option for now
+    # else:
+    #     try:
+    #         route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
+    #         h = check_output(('awk', '/default/ {print $3}'),
+    #                          stdin=route.stdout)
+    #         route.wait()
+    #         host = h.strip()
+    #     except Exception as e:  # pragma: no cover
+    #         pass
 
     # have to get the info separately to determine how much memory is availabe
     nd_url = 'http://' + host + ':' + port + '/v1.0/gpu/info/json'
