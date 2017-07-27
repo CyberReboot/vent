@@ -149,12 +149,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     status = self.api_action.prep_start(name='file_drop')
                 else:
                     logger.error("file drop path name invalid" +
-                            DropLocation()[1])
+                                 DropLocation()[1])
                 if status[0]:
                     tool_d = status[1]
                     status = self.api_action.start(tool_d)
                     logger.info("Status of file drop restart: " +
-                            str(status[0]))
+                                str(status[0]))
             except Exception as e:  # pragma no cover
                 logger.error("file drop restart failed with error: " + str(e))
             logger.info("Finished: file drop restart")
