@@ -28,6 +28,7 @@ def gpu_queue(options):
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 
+    print(str(status))
     return status
 
 
