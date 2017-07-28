@@ -1,3 +1,15 @@
+# v0.4.2 (2017-07-28)
+
+improvements:
+ - new core tool network tap that listens on a host bound nic for collection
+ - support for multi-state plugin pipelines
+ - vent can now save and restore hosts from a backup
+ - a user can now specify the location of where file drop watches
+ - file drop can now handle recursive directories
+ - data regarding finished jobs is now stored as status.json
+ - documentation set up and hosted using Read the Docs: http://vent.readthedocs.io/en/latest/
+ - various bug fixes
+
 # v0.4.1 (2017-07-13)
 
 improvements:
