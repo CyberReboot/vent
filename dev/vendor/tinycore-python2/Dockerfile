@@ -23,6 +23,7 @@ RUN tce-load -wic \
         flex \
         file \
         gcc \
+        git \ 
         make \
         linux-4.2.1_api_headers \
         glibc_add_lib \
@@ -93,7 +94,8 @@ RUN tce-load -wic \
     && rm -rf /tmp/tce/optional/* \
     && curl -SL 'https://bootstrap.pypa.io/get-pip.py' | sudo python2 \
     && sudo pip install --no-cache-dir --upgrade pip==$PYTHON_PIP_VERSION \
-    && sudo pip install --no-cache-dir docker npyscreen vent \
+    && sudo pip install --no-cache-dir docker npyscreen \
+    && sudo pip install --no-cache-dir git+git://github.com/cyberreboot/vent.git@master \
     && sudo pip uninstall -y pip \
     && sudo find /usr/local \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + \
     && find /usr/local \( -type d -a -name test -o -name tests \) | sudo xargs rm -rf \

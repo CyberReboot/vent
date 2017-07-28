@@ -137,18 +137,26 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # if file drop location changes deal with it
         logger = Logger(__name__)
-        if self.file_drop.value != DropLocation():
+        status = (False, None)
+        if self.file_drop.value != DropLocation()[1]:
             logger.info("Starting: file drop restart")
             try:
-                self.file_drop.value = DropLocation()
-                status = self.api_action.clean(name='file_drop')
-                status = self.api_action.prep_start(name='file_drop')
+                self.file_drop.value = DropLocation()[1]
+                logger.info("Path given: " + str(self.file_drop.value))
+                # restart if the path is valid
+                if DropLocation()[0]:
+                    status = self.api_action.clean(name='file_drop')
+                    status = self.api_action.prep_start(name='file_drop')
+                else:
+                    logger.error("file drop path name invalid" +
+                                 DropLocation()[1])
                 if status[0]:
                     tool_d = status[1]
                     status = self.api_action.start(tool_d)
+                    logger.info("Status of file drop restart: " +
+                                str(status[0]))
             except Exception as e:  # pragma no cover
                 logger.error("file drop restart failed with error: " + str(e))
-            logger.info("Status of file drop restart: " + str(status[0]))
             logger.info("Finished: file drop restart")
         self.file_drop.display()
 
@@ -414,7 +422,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT')
         self.file_drop = self.add(npyscreen.TitleFixedText,
                                   name='File Drop:',
-                                  value=DropLocation(),
+                                  value=DropLocation()[1],
                                   labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
