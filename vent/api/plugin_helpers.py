@@ -6,7 +6,7 @@ import shlex
 
 from ast import literal_eval
 from os import chdir, getcwd, walk
-from os.path import join
+from os.path import expanduser, join
 from subprocess import check_output, Popen, PIPE, STDOUT
 
 from vent.api.templates import Template
@@ -382,6 +382,7 @@ class PluginHelper:
             vent_config = Template(template=join(self.path_dirs.meta_dir,
                                                  "vent.cfg"))
             files = vent_config.option('main', 'files')
+            files = (files[0], expanduser(files[1]))
             s, _ = self.constraint_options(args, options)
             status, tool_d = self.start_sections(s,
                                                  files,

@@ -347,7 +347,10 @@ class MenuHelper:
                 else:
                     matches = p_helper.available_tools(path, version=version)
                 for match in matches:
-                    all_tools['normal'].append(match[0].split('/')[-1])
+                    if core:
+                        all_tools['normal'].append(match[0].split('/')[-1].replace('_', '-'))
+                    else:
+                        all_tools['normal'].append(match[0].split('/')[-1])
 
         # get tools that have been installed
         for tool in tools[1]:
@@ -355,7 +358,7 @@ class MenuHelper:
             if repo[0] and repo[1] in repos:
                 name = template.option(tool, "name")
                 if name[0]:
-                    all_tools['installed'].append(name[1])
+                    all_tools['installed'].append(name[1].replace('_', '-'))
 
         # get core tools that have been built and/or are running
         try:
@@ -373,7 +376,10 @@ class MenuHelper:
                     if image_check:
                         if ('vent.name' in image.attrs['Labels'] and
                            'hidden' not in image.attrs['Labels']['vent.groups']):
-                            all_tools['built'].append(image.attrs['Labels']['vent.name'])
+                            if core:
+                                all_tools['built'].append(image.attrs['Labels']['vent.name'].replace('_', '-'))
+                            else:
+                                all_tools['built'].append(image.attrs['Labels']['vent.name'])
                 except Exception as err:  # pragma: no cover
                     pass
             containers = d_client.containers.list(filters={'label': 'vent'})
@@ -389,7 +395,10 @@ class MenuHelper:
                     if container_check:
                         if ('vent.name' in container.attrs['Config']['Labels'] and
                            'hidden' not in image.attrs['Labels']['vent.groups']):
-                            all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'])
+                            if core:
+                                all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'].replace('_', '-'))
+                            else:
+                                all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'])
                 except Exception as err:  # pragma: no cover
                     pass
         except Exception as e:  # pragma: no cover

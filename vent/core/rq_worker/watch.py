@@ -4,23 +4,31 @@ def gpu_queue(options):
     """
     import docker
     import json
+
+    from vent.helpers.meta import GpuUsage
+
     status = (False, None)
 
     # !! TODO wait until resources are available
+    print("gpu queue", str(options))
+    print("gpu queue", str(GpuUsage()))
 
     try:
         d_client = docker.from_env()
         options = json.loads(options)
         configs = options['configs']
-        del options[configs]
+        gpu_options = configs['gpu_options']
+        del options['configs']
+        del configs['gpu_options']
         params = options.copy()
         params.update(configs)
-        print(params)
+        print(str(params))
         d_client.containers.run(**params)
         status = (True, None)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 
+    print(str(status))
     return status
 
 
@@ -33,10 +41,12 @@ def file_queue(path, template_path="/vent/"):
     import docker
     import json
     import requests
+    import os
 
     from redis import Redis
     from rq import Queue
     from subprocess import check_output, Popen, PIPE
+    from string import punctuation
 
     status = (True, None)
     images = []
@@ -55,6 +65,21 @@ def file_queue(path, template_path="/vent/"):
         else:
             files = '/'
 
+        # deal with ~
+        files = os.path.expanduser(files)
+
+        file_name = ''
+        # escape any funky symbols to allow users FREEDOM of directory name
+        for char in files:
+            if char in set(punctuation):
+                if char == '\\':
+                    file_name += '\\' + char
+                else:
+                    file_name += '\\\\' + char
+            else:
+                file_name += char
+
+        files = file_name
         _, path = path.split('_', 1)
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
@@ -111,6 +136,7 @@ def file_queue(path, template_path="/vent/"):
                     if 'enabled' in options_dict:
                         enabled = options_dict['enabled']
                         if enabled == 'yes':
+                            configs[image_name]['gpu_options'] = options_dict
                             if 'labels' in configs[image_name]:
                                 configs[image_name]['labels']['vent.gpu'] = 'yes'
                             else:
