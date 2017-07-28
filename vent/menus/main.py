@@ -21,6 +21,7 @@ from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.backup import BackupForm
+from vent.menus.editor import EditorForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
@@ -341,6 +342,15 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 notify_confirm("Vent backup successful")
             else:
                 notify_confirm("Vent backup could not be completed")
+        elif action == 'configure':
+            form_args = {'name': 'Change vent configuration',
+                         'get_configure': self.api_action.get_configure,
+                         'save_configure': self.api_action.save_configure,
+                         'vent_cfg': True}
+            add_kargs = {'form': EditorForm,
+                         'form_name': 'CONFIGUREVENT',
+                         'form_args': form_args}
+            self.add_form(**add_kargs)
         elif action == "reset":
             okay = npyscreen.notify_ok_cancel(
                     "This factory reset will remove ALL of Vent's user data, "
@@ -545,6 +555,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6 = self.add_menu(name="System Commands", shortcut='y')
         self.m6.addItem(text='Backup', onSelect=self.system_commands,
                         arguments=['backup'], shortcut='b')
+        self.m6.addItem(text='Change vent configuration',
+                        onSelect=self.system_commands, arguments=['configure'],
+                        shortcut='c')
         self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
                         arguments=['gpu'], shortcut='g')
         self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',

@@ -425,10 +425,12 @@ class PluginHelper:
                                 ip_adr = link_config['ip_address']
                                 port = link_config['port']
                                 tool_d[container]['extra_hosts'] = {}
-                                tool_d[container]['extra_hosts'][link] = ip_adr
+                                # containers use lowercase names for
+                                # connections
+                                tool_d[container]['extra_hosts'][link.lower()] = ip_adr
                                 # create an environment variable for container
                                 # to access port later
-                                env_variable = link.upper() + "_PORT=" + port
+                                env_variable = link.upper() + "_CUSTOM_PORT=" + port
                                 tool_d[container]['environment'].append(env_variable)
                                 # remove the entry from links because no
                                 # longer connecting to local container
