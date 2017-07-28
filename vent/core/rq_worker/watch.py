@@ -68,10 +68,14 @@ def file_queue(path, template_path="/vent/"):
         # deal with ~
         files = os.path.expanduser(files)
 
+        chars = set(punctuation)
+        chars.discard('/')
+        chars.discard('_')
+        chars.discard('-')
         file_name = ''
         # escape any funky symbols to allow users FREEDOM of directory name
         for char in files:
-            if char in set(punctuation):
+            if char in chars:
                 if char == '\\':
                     file_name += '\\' + char
                 else:
