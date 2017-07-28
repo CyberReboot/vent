@@ -12,6 +12,7 @@ class EditorForm(npyscreen.ActionForm):
             self.next_tool = None
             self.tool_name = 'vent configuration'
         else:
+            self.vent_cfg = False
             self.tool_name = keywords['tool_name']
             self.branch = keywords['branch']
             self.version = keywords['version']
