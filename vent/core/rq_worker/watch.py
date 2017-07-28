@@ -13,7 +13,7 @@ def gpu_queue(options):
     if 'device' in options['gpu_options']:
         dev = '/dev/nvidia' + options['gpu_options']['device'] + ':rwm'
         if 'devices' in options:
-            devices = option['devices']:
+            devices = option['devices']
             for device in devices:
                 if any(str.isdigit(char) for char in device):
                     if dev is not device:
