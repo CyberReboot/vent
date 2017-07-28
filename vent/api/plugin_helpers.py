@@ -249,7 +249,8 @@ class PluginHelper:
                     try:
                         tool_d[c_name][option] = literal_eval(options)
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("unable to store the options set for docker: " + str(e))
+                        self.logger.info("unable to literal_eval: " +
+                                         str(options))
                         tool_d[c_name][option] = options
 
             if 'labels' not in tool_d[c_name]:
