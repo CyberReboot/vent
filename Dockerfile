@@ -8,7 +8,7 @@ RUN apk add --update \
     py2-pip \
     && rm -rf /var/cache/apk/*
 
-RUN pip install vent==0.4.1
+RUN pip install vent==0.4.2
 
 ENTRYPOINT ["vent"]
 CMD [""]
