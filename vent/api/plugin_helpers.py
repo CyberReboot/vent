@@ -250,7 +250,7 @@ class PluginHelper:
                         tool_d[c_name][option] = literal_eval(options)
                     except Exception as e:  # pragma: no cover
                         self.logger.info("unable to literal_eval: " +
-                                str(options))
+                                         str(options))
                         tool_d[c_name][option] = options
 
             if 'labels' not in tool_d[c_name]:
