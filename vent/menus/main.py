@@ -9,14 +9,15 @@ from threading import Thread
 
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
-from vent.api.templates import Template
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
+from vent.helpers.meta import DropLocation
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
+from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.backup import BackupForm
@@ -134,6 +135,23 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield6.display()
         self.addfield7.display()
 
+        # if file drop location changes deal with it
+        logger = Logger(__name__)
+        if self.file_drop.value != DropLocation():
+            logger.info("Starting: file drop restart")
+            try:
+                self.file_drop.value = DropLocation()
+                status = self.api_action.clean(name='file_drop')
+                status = self.api_action.prep_start(name='file_drop')
+                if status[0]:
+                    tool_d = status[1]
+                    status = self.api_action.start(tool_d)
+            except Exception as e:  # pragma no cover
+                logger.error("file drop restart failed with error: " + str(e))
+            logger.info("Status of file drop restart: " + str(status[0]))
+            logger.info("Finished: file drop restart")
+        self.file_drop.display()
+
         return
 
     @staticmethod
@@ -218,6 +236,23 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                      'action': form_action,
                                      'type': a_type,
                                      'cores': cores}}
+        # grammar rules
+        vowels = ['a', 'e', 'i', 'o', 'u']
+
+        # consonant-vowel-consonant ending
+        # Eg: stop -> stopping
+        if s_action[-1] not in vowels and \
+           s_action[-2] in vowels and \
+           s_action[-3] not in vowels:
+                form_args['action_dict']['present_t'] = s_action + \
+                    s_action[-1] + 'ing ' + a_type
+
+        # word ends with a 'e'
+        # eg: remove -> removing
+        if s_action[-1] == 'e':
+                form_args['action_dict']['present_t'] = s_action[:-1] \
+                    + 'ing ' + a_type
+
         if s_action == 'start':
             form_args['names'].append('prep_start')
         elif s_action == 'configure':
@@ -324,25 +359,18 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 else:
                     notify_confirm("No GPUs detected.")
         elif action == 'restore':
-            backup_dir = os.path.expanduser('~')
-            backup_files = [f for f in os.listdir(backup_dir) if f.startswith('.vent-backup')]
+            backup_dir_home = os.path.expanduser('~')
+            backup_dirs = [f for f in os.listdir(backup_dir_home) if
+                           f.startswith('.vent-backup')]
             form_args = {'restore': self.api_action.restore,
-                         'files': backup_files,
-                         'name': "Pick a file to restore from" + "\t"*8 +
+                         'dirs': backup_dirs,
+                         'name': "Pick a version to restore from" + "\t"*8 +
                                  "Press ^T to toggle main",
                          'color': 'CONTROL'}
             add_kargs = {'form': BackupForm,
                          'form_name': 'CHOOSEBACKUP',
                          'form_args': form_args}
             self.add_form(**add_kargs)
-            if False:
-                notify_wait("In the process of restoring", title="Restoring...")
-                status = self.api_action.restore()
-                if status[0]:
-                    notify_confirm("Backup file found, status of restore:\n" +
-                                    status[1])
-                else:
-                    notify_confirm(status[1])
         elif action == "swarm":
             # !! TODO
             # add notify_cancel_ok popup once implemented
@@ -357,9 +385,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         """ Override method for creating FormBaseNewWithMenu form """
         try:
             self.api_action = Action()
-            drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
-            template = Template(template=drop_location)
-            template = template.option("main", "files")[1]
 
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
@@ -389,7 +414,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT')
         self.file_drop = self.add(npyscreen.TitleFixedText,
                                   name='File Drop:',
-                                  value=template,
+                                  value=DropLocation(),
                                   labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',

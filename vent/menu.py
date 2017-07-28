@@ -1,6 +1,7 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
+import curses
 import npyscreen
 
 from vent.helpers.meta import Version
@@ -31,13 +32,15 @@ class VentApp(npyscreen.NPSAppManaged):
 
     def onStart(self):
         """ Override onStart method for npyscreen """
+        curses.mousemask(0)
         self.paths.host_config()
         version = Version()
-        quit_s = "\t"*6 + "Press ^Q to quit"
+        quit_s = "\t"*4 + "Press ^Q to quit"
+        tab_esc = "\t"*4 + "Press TAB to close menu popup"
         self.addForm("MAIN",
                      MainForm,
                      name="Vent " + version +
-                     "\t\t\t\t\tPress ^T to toggle help" + quit_s,
+                     "\t\t\t\t\tPress ^T to toggle help" + quit_s + tab_esc,
                      color="IMPORTANT")
         self.addForm("HELP",
                      HelpForm,

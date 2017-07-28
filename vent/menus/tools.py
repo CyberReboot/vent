@@ -16,15 +16,15 @@ class ToolForm(npyscreen.ActionForm):
         """ Initialize tool form objects """
         self.logger = Logger(__name__)
         self.logger.info(str(keywords['names']))
-        api_action = Action()
-        action = {'api_action': api_action}
+        self.api_action = Action()
+        action = {'api_action': self.api_action}
         self.tools_tc = {}
         if keywords['action_dict']:
             action.update(keywords['action_dict'])
         if keywords['names']:
             i = 1
             for name in keywords['names']:
-                action['action_object'+str(i)] = getattr(api_action, name)
+                action['action_object'+str(i)] = getattr(self.api_action, name)
                 i += 1
         self.action = action
         super(ToolForm, self).__init__(*args, **keywords)
@@ -159,16 +159,20 @@ class ToolForm(npyscreen.ActionForm):
                 if self.action['action_name'] != 'configure':
                     npyscreen.notify_wait(info_str, title=title)
                     time.sleep(1)
-            # !! TODO join only returns None
-            result = thr.join()
-            if isinstance(result, tuple) and isinstance(result[1], tuple):
-                running, failed = result[1]
-                r_str = ''
-                for container in running:
-                    r_str += container + ": successful\n"
-                for container in failed:
-                    r_str += container + ": failed\n"
-                npyscreen.notify_confirm(r_str)
+
+            thr.join()
+            try:
+                result = self.api_action.queue.get(False)
+                if isinstance(result, tuple) and isinstance(result[1], tuple):
+                    running, failed = result[1]
+                    r_str = ''
+                    for container in running:
+                        r_str += container + ": successful\n"
+                    for container in failed:
+                        r_str += container + ": failed\n"
+                    npyscreen.notify_confirm(r_str)
+            except Exception as e:  # pragma: no cover
+                pass
             return
 
         if self.action['type'] == 'images':

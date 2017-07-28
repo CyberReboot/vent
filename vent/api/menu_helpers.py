@@ -72,7 +72,8 @@ class MenuHelper:
                             plugin_c.set_option(section,
                                                 "image_name",
                                                 "cyberreboot/vent-" +
-                                                tool + ":" + branch)
+                                                tool.replace('_', '-') + ":" +
+                                                branch)
                 plugin_c.write_config()
                 chdir(cwd)
             if action == "build":
@@ -81,6 +82,7 @@ class MenuHelper:
                 try:
                     for tool in core['normal']:
                         for section in sections[1]:
+                            tool = tool.replace('_', '-')
                             image_name = plugin_c.option(section,
                                                          "image_name")
                             check_image = "cyberreboot/vent-"
@@ -313,7 +315,6 @@ class MenuHelper:
         core_repo = 'https://github.com/cyberreboot/vent'
         repos = set()
         tools = Tools(**kargs)
-        p_helper = PluginHelper(plugins_dir='.internals/plugins/')
 
         # get manifest file
         manifest = os.path.join(self.api_action.plugin.path_dirs.meta_dir,
@@ -323,8 +324,10 @@ class MenuHelper:
 
         # get repos
         if core:
+            p_helper = PluginHelper(plugins_dir='.internals/plugins/')
             repos.add(core_repo)
         else:
+            p_helper = PluginHelper(plugins_dir='plugins/')
             for tool in tools[1]:
                 repo = template.option(tool, 'repo')
                 if repo[0] and repo[1] != core_repo:

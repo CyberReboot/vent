@@ -177,7 +177,6 @@ class Plugin:
             template.set_option(section, "built", "yes")
             template.set_option(section, "image_id",
                                 image.attrs['Id'].split(':')[1][:12])
-            #if groups:
             template.set_option(section, "groups", groups)
 
             # write out configuration to the manifest file
@@ -331,12 +330,14 @@ class Plugin:
                 if not self.core:
                     image_name = self.org + "-" + self.name + "-"
                     if match[0] != '':
-                        # if tool is in a subdir, add that to the name of the image
+                        # if tool is in a subdir, add that to the name of the
+                        # image
                         image_name += '-'.join(match[0].split('/')[1:]) + "-"
                     image_name += self.branch + ":" + self.version
                 else:
-                    image_name = ('cyberreboot/vent-' + match[0].split('/')[-1] + ':' +
-                                  self.branch)
+                    image_name = ('cyberreboot/vent-' +
+                                  match[0].split('/')[-1] + ':' + self.branch)
+                image_name = image_name.replace('_', '-')
 
                 # check if the section already exists
                 exists, options = template.section(section)
@@ -360,6 +361,8 @@ class Plugin:
                 # !! TODO
                 # check if section should be removed from config i.e. all tools
                 # but new commit removed one that was in a previous commit
+
+                image_name = image_name.lower()
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
@@ -586,6 +589,8 @@ class Plugin:
 
         # initialize
         args = locals()
+        # want to remove things from manifest regardless of if built
+        del args['built']
         status = (True, None)
 
         # get resulting dict of sections with options that match constraints
