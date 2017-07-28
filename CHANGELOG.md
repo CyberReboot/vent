@@ -1,6 +1,7 @@
 # v0.4.2 (2017-07-28)
 
 improvements:
+ - there is now a docker container that can be run vent: `docker pull cyberreboot/vent`
  - new core tool network tap that listens on a host bound nic for collection
  - support for multi-state plugin pipelines
  - vent can now save and restore hosts from a backup
