@@ -17,9 +17,9 @@ def gpu_queue(options):
         d_client = docker.from_env()
         options = json.loads(options)
         configs = options['configs']
-        gpu_options = options['gpu_options']
+        gpu_options = configs['gpu_options']
         del options['configs']
-        del options['gpu_options']
+        del configs['gpu_options']
         params = options.copy()
         params.update(configs)
         print(str(params))
@@ -136,7 +136,7 @@ def file_queue(path, template_path="/vent/"):
                     if 'enabled' in options_dict:
                         enabled = options_dict['enabled']
                         if enabled == 'yes':
-                            configs['gpu_options'] = options_dict
+                            configs[image_name]['gpu_options'] = options_dict
                             if 'labels' in configs[image_name]:
                                 configs[image_name]['labels']['vent.gpu'] = 'yes'
                             else:
