@@ -271,7 +271,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
             form_args['name'] = "Add plugins"
-            form_args['name'] += "\t"*6 + "Press ^Q to quit"
+            form_args['name'] += "\t"*6 + "^Q to quit"
         elif action == "inventory":
             form = InventoryToolsForm
             forms = ['INVENTORY']
@@ -297,7 +297,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             forms = ['COREINVENTORY']
             form_args = {'color': "STANDOUT",
                          'name': "Inventory of core tools"}
-        form_args['name'] += "\t"*8 + "Press ^T to toggle main"
+        form_args['name'] += "\t"*8 + "^T to toggle main"
         try:
             self.remove_forms(forms)
             thr = Thread(target=self.add_form, args=(),
@@ -373,7 +373,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args = {'restore': self.api_action.restore,
                          'dirs': backup_dirs,
                          'name': "Pick a version to restore from" + "\t"*8 +
-                                 "Press ^T to toggle main",
+                                 "^T to toggle main",
                          'color': 'CONTROL'}
             add_kargs = {'form': BackupForm,
                          'form_name': 'CHOOSEBACKUP',
