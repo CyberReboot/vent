@@ -137,11 +137,31 @@ def Gpu(pull=False):
 def GpuUsage(**kargs):
     """ Get the current GPU usage of available GPUs """
     usage = (False, None)
-    gpu_status = {}
+    gpu_status = {'vent_usage': {'dedicated':[], 'mem_mb':{}}}
 
     path_dirs = PathDirs(**kargs)
     path_dirs.host_config()
     template = Template(template=path_dirs.cfg_file)
+
+    # get running jobs using gpus
+    try:
+        d_client = docker.from_env()
+        c = d_client.containers.list(all=False,
+                                     filters={'label': 'vent-plugin'})
+        for container in c:
+            if ('vent.gpu' in container.attrs['Config']['Labels'] and
+               container.attrs['Config']['Labels']['vent.gpu'] == 'yes'):
+                device = container.attrs['Config']['Labels']['vent.gpu.device']
+                if ('vent.gpu.dedicated' in container.attrs['Config']['Labels'] and
+                   container.attrs['Config']['Labels']['vent.gpu.dedicated'] == 'yes'):
+                    gpu_status['vent_usage']['dedicated'].append(device)
+                elif 'vent.gpu.mem_mb' in container.attrs['Config']['Labels']:
+                    if device not in gpu_status['vent_usage']['mem_mb']:
+                        gpu_status['vent_usage']['mem_mb'][device] = 0
+                    gpu_status['vent_usage']['mem_mb'][device] += int(container.attrs['Config']['Labels']['vent.gpu.mem_mb'])
+    except Exception as e:  # pragma: no cover
+        pass
+
     port = '3476'
     # default docker gateway
     host = '172.17.0.1'
