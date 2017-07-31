@@ -262,6 +262,7 @@ class Plugin:
         """
 
         response = (True, None)
+        self.logger.info("Testing... in _build_tools")
         # TODO implement features: wild, remove_old, disable_old, limit_groups
 
         # check result of clone, ensure successful or that it already exists
@@ -326,6 +327,7 @@ class Plugin:
             if response[0]:
                 section = self.org + ":" + self.name + ":" + match[0] + ":"
                 section += self.branch + ":" + self.version
+                # need to get rid of temp identifiers for tools in same repo
                 match_path = self.path + match[0]
                 if not self.core:
                     image_name = self.org + "-" + self.name + "-"
@@ -379,8 +381,16 @@ class Plugin:
                 template.set_option(section, "image_name", image_name)
                 template.set_option(section, "type", "repository")
                 # save settings in vent.template to plugin_manifest
-                vent_template = Template(template=join(match_path,
-                                                       'vent.template'))
+                # watch for multiple tools in same directory
+                # just wanted to store match path with @ for path for use in
+                # other actions
+                match_path = match_path.split('.')[0]
+                tool_template = 'vent.template'
+                if match[0].find('.') >= 0:
+                    tool_template = match[0].split('.')[1] + '.template'
+                # need to get rid of . in match_path if multi_tool
+                vent_template = Template(join(match_path,
+                                              tool_template))
                 sections = vent_template.sections()
                 if sections[0]:
                     for header in sections[1]:
@@ -407,6 +417,7 @@ class Plugin:
                                         match[0].split('/')[-1])
                 commit_id = None
                 if self.version == 'HEAD':
+                    # remove @ in multi-tools
                     chdir(match_path)
                     cmd = "git rev-parse --short HEAD"
                     commit_id = check_output(shlex.split(cmd),
@@ -436,12 +447,9 @@ class Plugin:
                 if self.groups:
                     template.set_option(section, "groups", self.groups)
                 else:
-                    vent_template = join(match_path, 'vent.template')
-                    if os.path.exists(vent_template):
-                        v_template = Template(template=vent_template)
-                        groups = v_template.option("info", "groups")
-                        if groups[0]:
-                            template.set_option(section, "groups", groups[1])
+                    groups = vent_template.option("info", "groups")
+                    if groups[0]:
+                        template.set_option(section, "groups", groups[1])
                 template = self._build_image(template,
                                              match_path,
                                              image_name,
@@ -513,12 +521,19 @@ class Plugin:
                         self.logger.warning("Failed to pull image, going to"
                                             " build instead: " + str(e))
                 if not pull:
+                    # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
                     if image_name.endswith('HEAD'):
                         commit_id = template.option(section, "commit_id")
                         if commit_id[0]:
                             commit_tag = (" -t " + image_name[:-4] +
                                           str(commit_id[1]))
+                    # see if additional file arg needed for building multiple
+                    # images from same directory
+                    file_tag = " ."
+                    if image_name.find(".") >= 0:
+                        specific_file = image_name.split(".")[1].split('-')[0]
+                        file_tag = " -f Dockerfile." + specific_file + " ."
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.name=" +
@@ -526,7 +541,7 @@ class Plugin:
                                                       "vent.groups=" +
                                                       groups[1] + " -t " +
                                                       image_name +
-                                                      commit_tag + " ."),
+                                                      commit_tag + file_tag),
                                           stderr=STDOUT,
                                           close_fds=True)
                     self.logger.info("Building " + name[1] + "\n" +
