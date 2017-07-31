@@ -23,6 +23,7 @@ def test_file_queue():
     assert images[0]
     assert isinstance(images[1], list)
 
+
 def test_gpu_queue():
     """ Tests simulation of gpu job """
     options = json.dumps({'configs': {'devices': ['foo0', 'bar', 'baz3']}, 'gpu_options': {'device': '0'}, 'labels': {}, 'image': 'alpine:latest'})
