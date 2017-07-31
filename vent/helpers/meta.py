@@ -137,7 +137,7 @@ def Gpu(pull=False):
 def GpuUsage(**kargs):
     """ Get the current GPU usage of available GPUs """
     usage = (False, None)
-    gpu_status = {'vent_usage': {'dedicated':[], 'mem_mb':{}}}
+    gpu_status = {'vent_usage': {'dedicated': [], 'mem_mb': {}}}
 
     path_dirs = PathDirs(**kargs)
     path_dirs.host_config()
