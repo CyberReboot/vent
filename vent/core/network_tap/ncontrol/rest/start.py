@@ -41,27 +41,28 @@ class StartR:
             return 'unable to connect to docker because: ' + str(e)
 
         # start all network tap containers if keyword 'all' is given
-        if payload['id'] == 'all':
-            try:
-                network_containers = ListR.GET()
-                for container in network_containers:
-                    c.containers.start(container['id'])
-            except Exception as e: # pragma no cover
-                return 'unable to start multiple containers because' + \
-                       str(e)
+        # TODO: figure out how to implement all without reinventing the wheel
+        # if payload['id'] == 'all':
+        #    try:
+        #        network_containers = ListR.GET()
+        #        for container in network_containers:
+        #            c.containers.get(container['id']).start()
+        #    except Exception as e: # pragma no cover
+        #        return 'unable to start multiple containers because' + \
+        #               str(e)
 
         # if user gives a list of id, start them all
-        elif type(payload['id']) == list:
+        if type(payload['id']) == list:
             try:
                 for container_id in payload['id']:
-                    c.containers.start(container_id)
+                    c.containers.get(container_id).start()
             except Exception as e: # pragma: no cover
                 return 'unable to start list of containers because: ' + str(e)
 
         # if user gives just one id, start it
         else:
             try:
-                c.containers.start(payload['Id'])
+                c.containers.get(payload['Id']).start()
             except Exception as e: # pragma: no cover
                 return 'unable to start container because: ' + str(e)
 

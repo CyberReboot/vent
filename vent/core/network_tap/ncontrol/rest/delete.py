@@ -41,26 +41,27 @@ class DeleteR:
             return 'unable to connect to docker because: ' + str(e)
 
         # delete all network tap containers if keyword 'all' is given
-        if payload['id'] == 'all':
-            try:
-                network_containers = ListR.GET()
-                for container in network_containers:
-                    c.containers.remove(container['id'])
-            except Exception as e: # pragma no cover
-                return 'unable to delete multiple containers because' + \
-                       str(e)
+        # TODO: figure out how to implement all without reinventing the wheel
+        # if payload['id'] == 'all':
+        #    try:
+        #        network_containers = ListR.GET()
+        #        for container in network_containers:
+        #            c.containers.get(container['id']).remove()
+        #    except Exception as e: # pragma no cover
+        #        return 'unable to delete multiple containers because' + \
+        #               str(e)
 
         # if user gives a list of id, delete them all
-        elif type(payload['id']) == list:
+        if type(payload['id']) == list:
             try:
                 for container_id in payload['id']:
-                    c.containers.remove(container_id)
+                    c.containers.get(container_id).remove()
             except Exception as e: # pragma: no cover
                 return 'unable to delete list of containers because: ' + str(e)
         # if user gives just one id, delete it
         else:
             try:
-                c.containers.remove(payload['Id'])
+                c.containers.get(payload['Id']).remove()
             except Exception as e: # pragma: no cover
                 return 'unable to delete container because: ' + str(e)
 

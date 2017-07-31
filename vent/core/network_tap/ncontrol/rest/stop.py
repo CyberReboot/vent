@@ -41,17 +41,18 @@ class StopR:
             return 'unable to connect to docker because: ' + str(e)
 
         # stop all network tap containers if keyword 'all' is given
-        if payload['id'] == 'all':
-            try:
-                network_containers = ListR.GET()
-                for container in network_containers:
-                   c.containers.get(container['id']).stop()
-            except Exception as e: # pragma no cover
-                return 'unable to stop multiple containers because' + \
-                       str(e)
+        # TODO: figure out how to implement all without reinventing the wheel
+        # if payload['id'] == 'all':
+        #    try:
+        #        network_containers = ListR.GET()
+        #        for container in network_containers:
+        #           c.containers.get(container['id']).stop()
+        #    except Exception as e: # pragma no cover
+        #        return 'unable to stop multiple containers because: ' + \
+        #               str(e)
 
         # if user gives a list of id, delete them all
-        elif type(payload['id']) == list:
+        if type(payload['id']) == list:
             try:
                 for container_id in payload['id']:
                     c.containers.get(container_id).stop()
@@ -61,7 +62,7 @@ class StopR:
         # if user gives just one id, delete it
         else:
             try:
-                c.containers.get(payload['Id']).stop()
+                c.containers.get(payload['id']).stop()
             except Exception as e: # pragma: no cover
                 return 'unable to stop container because: ' + str(e)
 

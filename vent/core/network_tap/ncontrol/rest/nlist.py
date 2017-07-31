@@ -9,7 +9,7 @@ class ListR:
 
     @staticmethod
     def GET():
-        # web.header('Content-Type', 'text/html')
+        web.header('Content-Type', 'text/html')
 
         # connect to docker
         try:
