@@ -9,15 +9,19 @@ def gpu_queue(options):
 
     status = (False, None)
 
+    options = json.loads(options)
+    configs = options['configs']
+    gpu_options = configs['gpu_options']
+
     # device specified, remove all other devices
-    if 'device' in options['gpu_options']:
-        dev = '/dev/nvidia' + options['gpu_options']['device'] + ':rwm'
-        if 'devices' in options:
-            devices = option['devices']
+    if 'device' in gpu_options:
+        dev = '/dev/nvidia' + gpu_options['device'] + ':rwm'
+        if 'devices' in configs:
+            devices = configs['devices']
             for device in devices:
-                if any(str.isdigit(char) for char in device):
+                if any(str.isdigit(str(char)) for char in device):
                     if dev is not device:
-                        option['devices'].remove(device)
+                        configs['devices'].remove(device)
 
     print("gpu queue", str(options))
     print("gpu queue", str(GpuUsage()))
@@ -25,6 +29,7 @@ def gpu_queue(options):
     # TODO overriding until this is working
     # wait = True
     wait = False
+    device = None
 
     while wait:
         usage = GpuUsage()
@@ -34,9 +39,9 @@ def gpu_queue(options):
         if len(options['gpu_options']) == 1:
             check = 3
         else:
-            # check if dev is available
-            if 'device' in options['gpu_options']:
-                if not usage[options['gpu_options']['device']]['processes']:
+            # check if device is available
+            if 'device' in gpu_options:
+                if not usage[gpu_options['device']]['processes']:
                     check += 1
             else:
                 check += 1
@@ -48,11 +53,17 @@ def gpu_queue(options):
         # TODO check if gpus are available
         if check == 3:
             wait = False
+
+    # lock jobs to a specific gpu (no shared GPUs for a single process) this is
+    # needed to calculate if memory requested (but not necessarily in use)
+    # would become oversubscribed
+
+    # TODO store which device was mapped
+    # TODO testing
+    options['labels']['vent.gpu.device'] = '1'
+
     try:
         d_client = docker.from_env()
-        options = json.loads(options)
-        configs = options['configs']
-        gpu_options = configs['gpu_options']
         del options['configs']
         del configs['gpu_options']
         params = options.copy()
@@ -176,10 +187,13 @@ def file_queue(path, template_path="/vent/"):
                         enabled = options_dict['enabled']
                         if enabled == 'yes':
                             configs[image_name]['gpu_options'] = options_dict
-                            if 'labels' in configs[image_name]:
-                                configs[image_name]['labels']['vent.gpu'] = 'yes'
-                            else:
-                                configs[image_name]['labels'] = {'vent.gpu': 'yes'}
+                            labels['vent.gpu'] = 'yes'
+                            if 'dedicated' in options_dict:
+                                labels['vent.gpu.dedicated'] = options_dict['dedicated']
+                            if 'device' in options_dict:
+                                labels['vent.gpu.device'] = options_dict['device']
+                            if 'mem_mb' in options_dict:
+                                labels['vent.gpu.mem_mb'] = options_dict['mem_mb']
                             port = ''
                             host = ''
                             if (vent_config.has_section('nvidia-docker-plugin') and
