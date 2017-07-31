@@ -721,9 +721,6 @@ class Action:
             # display all those options as they would in the file
             for section in template_dict:
                 return_str += "[" + section + "]\n"
-                if section == 'external-services':
-                    return_str += "# you must specify settings as json strings" \
-                                  " (double quotes)" + "\n"
                 for option in template_dict[section]:
                     return_str += option + " = "
                     return_str += template_dict[section][option] + "\n"

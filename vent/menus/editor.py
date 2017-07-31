@@ -39,6 +39,26 @@ class EditorForm(npyscreen.ActionForm):
 
     def create(self):
         """ Create multi-line widget for editing """
+        # add various pointers to those editing vent_cfg
+        if self.vent_cfg:
+            self.add(npyscreen.Textfield,
+                     value='# when configuring external'
+                           ' services make sure to do so',
+                     editable=False)
+            self.add(npyscreen.Textfield,
+                     value='# in the form of Service = {"setting": "value"}',
+                     editable=False)
+            self.add(npyscreen.Textfield,
+                     value='# make sure to capitalize your service correctly'
+                           ' (i.e. Elasticsearch vs. elasticsearch)',
+                     editable=False)
+            self.add(npyscreen.Textfield,
+                     value='# and make sure to enclose all dict keys and'
+                           ' values in double quotes ("")',
+                     editable=False)
+            self.add(npyscreen.Textfield,
+                     value='',
+                     editable=False)
         self.edit_space = self.add(npyscreen.MultiLineEdit,
                                    value=self.config_val)
 
