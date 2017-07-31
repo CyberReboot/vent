@@ -14,7 +14,7 @@ class ListR:
         # connect to docker
         try:
             containers = docker.from_env()
-        except Exception as e: # pragma: no cover
+        except Exception as e:  # pragma: no cover
             return 'unable to connect to docker because: ' + str(e)
 
         # search for all docker containers and grab ncapture containers

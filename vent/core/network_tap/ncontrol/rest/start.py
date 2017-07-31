@@ -14,8 +14,6 @@ class StartR:
     def POST():
         """
         Send a POST request with a docker container ID and it will be started.
-        Can also send 'all' as the ID and every network tap container will be
-        started.
 
         Example input: {'id': "12345"}, {'id': ["123", "456"]}
         """

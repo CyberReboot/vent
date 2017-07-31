@@ -14,8 +14,6 @@ class DeleteR:
     def POST():
         """
         Send a POST request with a docker container ID and it will be deleted.
-        Can also send 'all' as the ID and every network tap container will be
-        deleted.
 
         Example input: {'id': "12345"}, {'id': ["123", "456"]}
         """
@@ -51,7 +49,7 @@ class DeleteR:
         else:
             try:
                 c.containers.get(payload['id']).remove()
-            except Exception as e: # pragma: no cover
+            except Exception as e:  # pragma: no cover
                 return 'unable to delete container because: ' + str(e)
 
         return ('container successfully deleted: ' + str(payload['id']))

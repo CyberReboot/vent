@@ -14,8 +14,6 @@ class StopR:
     def POST():
         """
         Send a POST request with a docker container ID and it will be stopped.
-        Can also send 'all' as the ID and every network tap container will be
-        stopped.
 
         Example input: {'id': "12345"}, {'id': ["123", "456"]
         """
