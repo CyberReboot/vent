@@ -1,3 +1,4 @@
+import ast
 import docker
 import web
 
@@ -6,7 +7,7 @@ from nlist import ListR
 
 class DeleteR:
     """
-    This endpoint is for deleting a network tap container
+    This endpoint is for deleting a network tap filter container
     """
 
     @staticmethod

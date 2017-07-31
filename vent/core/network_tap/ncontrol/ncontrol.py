@@ -45,10 +45,10 @@ class NControl:
         urls = (
             '/create', CreateR,
             '/filters', FiltersR,
-            '/start/(.+)', StartR,
-            '/stop/(.+)', StopR,
-            '/list/(.+)', ListR,
-            '/delete/(.+)', DeleteR
+            '/start', StartR,
+            '/stop', StopR,
+            '/list', ListR,
+            '/delete', DeleteR
         )
         return urls
 

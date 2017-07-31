@@ -1,3 +1,4 @@
+import ast
 import docker
 import web
 
@@ -6,7 +7,7 @@ from nlist import ListR
 
 class StopR:
     """
-    This endpoint is for stopping a network tap container
+    This endpoint is for stopping a network tap filter container
     """
 
     @staticmethod
@@ -44,7 +45,7 @@ class StopR:
             try:
                 network_containers = ListR.GET()
                 for container in network_containers:
-                    c.containers.stop(container['id'])
+                   c.containers.get(container['id']).stop()
             except Exception as e: # pragma no cover
                 return 'unable to stop multiple containers because' + \
                        str(e)
@@ -53,14 +54,14 @@ class StopR:
         elif type(payload['id']) == list:
             try:
                 for container_id in payload['id']:
-                    c.containers.stop(container_id)
+                    c.containers.get(container_id).stop()
             except Exception as e: # pragma: no cover
                 return 'unable to stop list of containers because: ' + str(e)
 
         # if user gives just one id, delete it
         else:
             try:
-                c.containers.stop(payload['Id'])
+                c.containers.get(payload['Id']).stop()
             except Exception as e: # pragma: no cover
                 return 'unable to stop container because: ' + str(e)
 
