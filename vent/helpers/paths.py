@@ -14,7 +14,8 @@ class PathDirs:
         self.base_dir = base_dir
         self.plugins_dir = base_dir + plugins_dir
         self.meta_dir = meta_dir
-        self.init_file = base_dir+"vent.init"
+        self.init_file = base_dir + "vent.init"
+        self.cfg_file = base_dir + "vent.cfg"
 
         # make sure the paths exists, if not create them
         self.ensure_dir(self.base_dir)
@@ -56,7 +57,7 @@ class PathDirs:
         else:
             default_file_dir = "/tmp/vent_files"
         status = self.ensure_dir(default_file_dir)
-        config = Template(template=os.path.join(self.base_dir, "vent.cfg"))
+        config = Template(template=self.cfg_file)
         sections = {'main': {'files': default_file_dir},
                     'network-mapping': {},
                     'nvidia-docker-plugin': {'port': '3476'}}

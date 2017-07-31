@@ -267,11 +267,6 @@ class PluginHelper:
                     self.logger.error("unable to store service options for "
                                       "docker: " + str(e))
 
-            # get network mappings
-            if 'network_mode' in tool_d[c_name]:
-                # !! TODO check if mappings are available in the host config
-                pass
-
             # check for gpu settings
             status = manifest.option(section, 'gpu')
             self.logger.info(status)
@@ -319,8 +314,23 @@ class PluginHelper:
                 # add restart=always to core containers
                 if 'core' in s[section]['groups']:
                     tool_d[c_name]['restart_policy'] = {"Name": "always"}
+                # map network names to environment variables
+                if 'network' in s[section]['groups']:
+                    vent_config = Template(template=self.path_dirs.cfg_file)
+                    nic_mappings = vent_config.section('network-mapping')
+                    nics = ''
+                    if nic_mappings[0]:
+                        for nic in nic_mappings[1]:
+                            nics += nic[0] + ":" + nic[1] + ","
+                        nics = nics[:-1]
+                    if nics:
+                        if 'environment' in tool_d[c_name]:
+                            tool_d[c_name]['environment'].append("VENT_NICS="+nics)
+                        else:
+                            tool_d[c_name]['environment'] = ["VENT_NICS="+nics]
                 # send logs to syslog
-                if 'syslog' not in s[section]['groups'] and 'core' in s[section]['groups']:
+                if ('syslog' not in s[section]['groups'] and
+                   'core' in s[section]['groups']):
                     log_config['config']['tag'] = 'core'
                     tool_d[c_name]['log_config'] = log_config
                 if 'syslog' not in s[section]['groups']:
@@ -379,8 +389,7 @@ class PluginHelper:
                        'image_name',
                        'branch',
                        'version']
-            vent_config = Template(template=join(self.path_dirs.meta_dir,
-                                                 "vent.cfg"))
+            vent_config = Template(template=self.path_dirs.cfg_file)
             files = vent_config.option('main', 'files')
             files = (files[0], expanduser(files[1]))
             s, _ = self.constraint_options(args, options)
@@ -485,8 +494,7 @@ class PluginHelper:
                     #      otherwise queue it up until it's
                     #      available
                     # !! TODO check for device settings in vent.template
-                    vent_config = Template(template=join(self.path_dirs.meta_dir,
-                                                         "vent.cfg"))
+                    vent_config = Template(template=self.path_dirs.cfg_file)
                     port = ''
                     host = ''
                     result = vent_config.option('nvidia-docker-plugin', 'port')
