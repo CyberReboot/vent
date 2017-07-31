@@ -262,7 +262,6 @@ class Plugin:
         """
 
         response = (True, None)
-        self.logger.info("Testing... in _build_tools")
         # TODO implement features: wild, remove_old, disable_old, limit_groups
 
         # check result of clone, ensure successful or that it already exists
@@ -319,13 +318,15 @@ class Plugin:
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
+            # remove @ in match for template setting purposes
+            true_name = match[0].replace('@', '')
             template = Template(template=self.manifest)
             # TODO check for special settings here first for the specific match
             self.version = match[1]
             response = self.p_helper.checkout(branch=self.branch,
                                               version=self.version)
             if response[0]:
-                section = self.org + ":" + self.name + ":" + match[0] + ":"
+                section = self.org + ":" + self.name + ":" + true_name + ":"
                 section += self.branch + ":" + self.version
                 # need to get rid of temp identifiers for tools in same repo
                 match_path = self.path + match[0]
@@ -368,7 +369,7 @@ class Plugin:
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
-                template.set_option(section, "name", match[0].split('/')[-1])
+                template.set_option(section, "name", true_name.split('/')[-1])
                 template.set_option(section, "namespace", self.org + '/' +
                                     self.name)
                 template.set_option(section, "path", match_path)
@@ -378,16 +379,17 @@ class Plugin:
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
-                template.set_option(section, "image_name", image_name)
+                template.set_option(section, "image_name",
+                                    image_name.replace('@', ''))
                 template.set_option(section, "type", "repository")
                 # save settings in vent.template to plugin_manifest
                 # watch for multiple tools in same directory
                 # just wanted to store match path with @ for path for use in
                 # other actions
-                match_path = match_path.split('.')[0]
+                match_path = match_path.split('@')[0]
                 tool_template = 'vent.template'
-                if match[0].find('.') >= 0:
-                    tool_template = match[0].split('.')[1] + '.template'
+                if match[0].find('@') >= 0:
+                    tool_template = match[0].split('@')[1] + '.template'
                 # need to get rid of . in match_path if multi_tool
                 vent_template = Template(join(match_path,
                                               tool_template))
@@ -414,7 +416,7 @@ class Plugin:
                 else:
                     template.set_option(section,
                                         "link_name",
-                                        match[0].split('/')[-1])
+                                        true_name.split('/')[-1])
                 commit_id = None
                 if self.version == 'HEAD':
                     # remove @ in multi-tools
@@ -531,9 +533,10 @@ class Plugin:
                     # see if additional file arg needed for building multiple
                     # images from same directory
                     file_tag = " ."
-                    if image_name.find(".") >= 0:
-                        specific_file = image_name.split(".")[1].split('-')[0]
+                    if image_name.find("@") >= 0:
+                        specific_file = image_name.split("@")[1].split('-')[0]
                         file_tag = " -f Dockerfile." + specific_file + " ."
+                        image_name = image_name.replace('@', '')
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.name=" +

@@ -170,12 +170,12 @@ class PluginHelper:
                 if add_info:
                     # need to use @ symbol because of issues with : with tagging
                     try:
-                        addtl_info = '.' + f.split('.')[1]
+                        addtl_info = '@' + f.split('.')[1]
                     except Exception as e:
-                        addtl_info = '.unspecified Dockerfile'
+                        addtl_info = '@unspecified Dockerfile'
                 if groups:
                     if add_info and not addtl_info.startswith(":unspecified"):
-                        tool_template = addtl_info.split('.')[1] + '.template'
+                        tool_template = addtl_info.split('@')[1] + '.template'
                     else:
                         tool_template = 'vent.template'
                     try:
