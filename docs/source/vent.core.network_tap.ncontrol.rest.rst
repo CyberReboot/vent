@@ -20,14 +20,6 @@ vent\.core\.network\_tap\.ncontrol\.rest\.delete module
     :undoc-members:
     :show-inheritance:
 
-vent\.core\.network\_tap\.ncontrol\.rest\.filters module
---------------------------------------------------------
-
-.. automodule:: vent.core.network_tap.ncontrol.rest.filters
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 vent\.core\.network\_tap\.ncontrol\.rest\.nlist module
 ------------------------------------------------------
 

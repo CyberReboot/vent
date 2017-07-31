@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import docker
 import ncontrol
 import web
 
@@ -12,26 +13,6 @@ def start_web_app():
     app = web.application(urls, globals())
     test_app = TestApp(app.wsgifunc())
     return test_app
-
-
-def test_start_r():
-    """ tests the restful endpoint: start """
-    # get web app
-    test_app = start_web_app()
-
-    # test start
-    r = test_app.get('/start/foo')
-    assert r.status == 200
-
-
-def test_stop_r():
-    """ tests the restful endpoint: stop """
-    # get web app
-    test_app = start_web_app()
-
-    # test stop
-    r = test_app.get('/stop/foo')
-    assert r.status == 200
 
 
 def test_create_r():
@@ -65,5 +46,35 @@ def test_filters_r():
     test_app = start_web_app()
 
     # test filters
-    r = test_app.get('/filters')
+    r = test_app.get('/list')
+    assert r.status == 200
+
+
+def test_stop_r():
+    """ tests the restful endpoint: stop """
+    # get web app
+    test_app = start_web_app()
+
+    # grab some container
+    d = docker.from_env()
+    d = d.containers.list()[0]
+
+    # test stop
+    r = test_app.post('/stop', params={})
+    r = test_app.post('/stop', params={'id': d.attrs['Id']})
+    assert r.status == 200
+
+
+def test_start_r():
+    """ tests the restful endpoint: start """
+    # get web app
+    test_app = start_web_app()
+
+    # grab some container
+    d = docker.from_env()
+    d = d.containers.list()[0]
+
+    # test start
+    r = test_app.post('/start', params={})
+    r = test_app.post('/stop', params={'id': d.attrs['Id']})
     assert r.status == 200
