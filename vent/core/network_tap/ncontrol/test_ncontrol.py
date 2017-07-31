@@ -40,12 +40,12 @@ def test_create_r():
     assert r.status == 200
 
 
-def test_filters_r():
-    """ tests the restful endpoint: filters """
+def test_list_r():
+    """ tests the restful endpoint: list """
     # get web app
     test_app = start_web_app()
 
-    # test filters
+    # test list
     r = test_app.get('/list')
     assert r.status == 200
 
@@ -55,13 +55,14 @@ def test_stop_r():
     # get web app
     test_app = start_web_app()
 
-    # grab some container
+    # create some container and start it
     d = docker.from_env()
-    d = d.containers.list()[0]
+    test_cont = d.containers.create('alpine')
 
     # test stop
     r = test_app.post('/stop', params={})
-    r = test_app.post('/stop', params={'id': d.attrs['Id']})
+    assert r.status == 200
+    r = test_app.post('/stop', params={'id': test_cont.attrs['Id']})
     assert r.status == 200
 
 
@@ -70,11 +71,28 @@ def test_start_r():
     # get web app
     test_app = start_web_app()
 
-    # grab some container
+    # create some container
     d = docker.from_env()
-    d = d.containers.list()[0]
+    test_cont = d.containers.create('alpine')
 
     # test start
     r = test_app.post('/start', params={})
-    r = test_app.post('/stop', params={'id': d.attrs['Id']})
+    assert r.status == 200
+    r = test_app.post('/stop', params={'id': test_cont.attrs['Id']})
+    assert r.status == 200
+
+
+def test_delete_r():
+    """ tests the restful endpoint: delete """
+    # get web app
+    test_app = start_web_app()
+
+    # create some container and start it
+    d = docker.from_env()
+    test_cont = d.containers.create('alpine')
+
+    # test delete
+    r = test_app.post('/delete', params={})
+    assert r.status == 200
+    r = test_app.post('/delete', params={'id': test_cont.attrs['Id']})
     assert r.status == 200
