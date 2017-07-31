@@ -141,8 +141,7 @@ def GpuUsage(**kargs):
 
     path_dirs = PathDirs(**kargs)
     path_dirs.host_config()
-    cfg = os.path.join(path_dirs.meta_dir, "vent.cfg")
-    template = Template(template=cfg)
+    template = Template(template=path_dirs.cfg_file)
     port = '3476'
     # default docker gateway
     host = '172.17.0.1'
@@ -333,8 +332,7 @@ def Services(core, vent=True, **kargs):
     """
     services = []
     path_dirs = PathDirs(**kargs)
-    cfg = os.path.join(path_dirs.meta_dir, "vent.cfg")
-    template = Template(template=cfg)
+    template = Template(template=path_dirs.cfg_file)
     services_uri = template.option("main", "services_uri")
     try:
         d_client = docker.from_env()
@@ -410,8 +408,7 @@ def Uptime():
 
 def DropLocation():
     """ Get the directory that file drop is watching """
-    drop_location = os.path.join(PathDirs().base_dir, "vent.cfg")
-    template = Template(template=drop_location)
+    template = Template(template=PathDirs().cfg_file)
     drop_loc = template.option("main", "files")[1]
     drop_loc = os.path.expanduser(drop_loc)
     drop_loc = os.path.abspath(drop_loc)
