@@ -37,7 +37,7 @@ class StopR:
             return 'unable to connect to docker because: ' + str(e)
 
         # if user gives a list of id, delete them all
-        if isinstance(payload['id']) == list:
+        if isinstance(payload['id'], list):
             try:
                 for container_id in payload['id']:
                     c.containers.get(container_id).stop()
