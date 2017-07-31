@@ -18,8 +18,7 @@ class Action:
     def __init__(self, **kargs):
         self.plugin = Plugin(**kargs)
         self.d_client = self.plugin.d_client
-        self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
-                                        "vent.cfg")
+        self.vent_config = self.plugin.path_dirs.cfg_file
         self.p_helper = self.plugin.p_helper
         self.queue = Queue.Queue()
         self.logger = Logger(__name__)
@@ -370,8 +369,7 @@ class Action:
         backup_manifest = os.path.join(backup_dir, 'backup_manifest.cfg')
         backup_vcfg = os.path.join(backup_dir, 'backup_vcfg.cfg')
         manifest = self.p_helper.manifest
-        vent_config = os.path.join(os.path.expanduser('~'), '.vent',
-                                   'vent.cfg')
+
         # create new backup directory
         try:
             os.mkdir(backup_dir)
@@ -386,7 +384,7 @@ class Action:
                     bmanifest.write(manifest_file.read())
             # backup vent.cfg
             with open(backup_vcfg, 'w') as bvcfg:
-                with open(vent_config) as vcfg_file:
+                with open(self.vent_config) as vcfg_file:
                     bvcfg.write(vcfg_file.read())
             self.logger.info("Backup information written to " + backup_dir)
             status = (True, backup_dir)
@@ -480,9 +478,7 @@ class Action:
             backup_vcfg = os.path.join(backup_dir, 'backup_vcfg.cfg')
             bvcfg = Template(backup_vcfg)
             try:
-                vent_config = os.path.join(os.path.expanduser('~'),
-                                           '.vent', 'vent.cfg')
-                vcfg_template = Template(vent_config)
+                vcfg_template = Template(self.vent_config)
                 for section in bvcfg.sections()[1]:
                     for vals in bvcfg.section(section)[1]:
                         # add section to new template in case it doesn't exist
@@ -687,7 +683,8 @@ class Action:
                       groups=None,
                       enabled="yes",
                       branch="master",
-                      version="HEAD"):
+                      version="HEAD",
+                      main_cfg=False):
         """
         Get the vent.template settings for a given tool by looking at the
         plugin_manifest
@@ -695,28 +692,44 @@ class Action:
         self.logger.info("Starting: get_configure")
         constraints = locals()
         status = (True, None)
-        # all possible vent.template sections
-        options = ['info', 'service', 'settings', 'docker', 'gpu']
-        tools = self.p_helper.constraint_options(constraints, options)[0]
-        if tools:
-            # should only be one tool
-            tool = tools.keys()[0]
-            # load all vent.template options into dict
-            template_dict = {}
-            for section in tools[tool]:
-                template_dict[section] = json.loads(tools[tool][section])
-            # display all those options as they would in vent.template
-            return_str = ""
+        template_dict = {}
+        return_str = ""
+        if main_cfg:
+            vent_cfg_path = os.path.join(os.path.expanduser('~'), '.vent',
+                                         'vent.cfg')
+            if os.path.exists(vent_cfg_path):
+                vent_cfg = Template(vent_cfg_path)
+                for section in vent_cfg.sections()[1]:
+                    template_dict[section] = {}
+                    for vals in vent_cfg.section(section)[1]:
+                        template_dict[section][vals[0]] = vals[1]
+            else:
+                status = (False, "Couldn't get vent.cfg information")
+        else:
+            # all possible vent.template sections
+            options = ['info', 'service', 'settings', 'docker', 'gpu']
+            tools = self.p_helper.constraint_options(constraints, options)[0]
+            if tools:
+                # should only be one tool
+                tool = tools.keys()[0]
+                # load all vent.template options into dict
+                for section in tools[tool]:
+                    template_dict[section] = json.loads(tools[tool][section])
+            else:
+                status = (False, "Couldn't get vent.template information")
+        if status[0]:
+            # display all those options as they would in the file
             for section in template_dict:
                 return_str += "[" + section + "]\n"
+                if section == 'external-services':
+                    return_str += "# you must specify settings as json strings" \
+                                  " (double quotes)" + "\n"
                 for option in template_dict[section]:
                     return_str += option + " = "
                     return_str += template_dict[section][option] + "\n"
                 return_str += "\n"
             # only one newline at end of file
             status = (True, return_str[:-1])
-        else:
-            status = (False, "Couldn't get vent.template")
         self.logger.info("Status of get_configure: " + str(status[0]))
         self.logger.info("Finished: get_configure")
         return status
@@ -729,7 +742,8 @@ class Action:
                        branch="master",
                        version="HEAD",
                        config_val="",
-                       from_registry=False):
+                       from_registry=False,
+                       main_cfg=False):
         """
         Save changes made to vent.template through npyscreen to the template
         and to plugin_manifest
@@ -738,67 +752,81 @@ class Action:
         constraints = locals()
         del constraints['config_val']
         del constraints['from_registry']
+        del constraints['main_cfg']
         status = (True, None)
         fd = None
-        if not from_registry:
-            options = ['path']
-            tools, manifest = self.p_helper.constraint_options(constraints,
-                                                               options)
-            # only one tool in tools because do this function for every tool
-            if tools:
-                tool = tools.keys()[0]
-                template_path = os.path.join(tools[tool]['path'],
-                                             'vent.template')
+        if not main_cfg:
+            if not from_registry:
+                options = ['path']
+                tools, manifest = self.p_helper.constraint_options(constraints,
+                                                                   options)
+                # only one tool in tools because perform this function for every
+                # tool
+                if tools:
+                    tool = tools.keys()[0]
+                    template_path = os.path.join(tools[tool]['path'],
+                                                 'vent.template')
+                else:
+                    status = (False, "Couldn't save configuration")
             else:
-                status = (False, "Couldn't save configuration")
+                fd, template_path = tempfile.mkstemp(suffix='.template')
+                options = ['namespace']
+                constraints.update({'type': 'registry'})
+                del constraints['branch']
+                tools, manifest = self.p_helper.constraint_options(constraints,
+                                                                   options)
+                if tools:
+                    tool = tools.keys()[0]
+                else:
+                    status = (False, "Couldn't save configuration")
+            if status[0]:
+                try:
+                    # save in vent.template
+                    with open(template_path, 'w') as f:
+                        f.write(config_val)
+                    # save in plugin_manifest
+                    vent_template = Template(template_path)
+                    sections = vent_template.sections()
+                    if sections[0]:
+                        for section in sections[1]:
+                            section_dict = {}
+                            options = vent_template.options(section)
+                            if options[0]:
+                                for option in options[1]:
+                                    option_name = option
+                                    if option == 'name':
+                                        option_name = 'link_name'
+                                    option_val = vent_template.option(section,
+                                                                      option)[1]
+                                    section_dict[option_name] = option_val
+                            if section_dict:
+                                manifest.set_option(tool, section,
+                                                    json.dumps(section_dict))
+                            elif manifest.option(tool, section)[0]:
+                                manifest.del_option(tool, section)
+                        manifest.write_config()
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("save_configure error: " + str(e))
+                    status = (False, str(e))
+            # close os file handle and remove temp file
+            if from_registry:
+                try:
+                    os.close(fd)
+                    os.remove(template_path)
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("save_configure error: " + str(e))
         else:
-            fd, template_path = tempfile.mkstemp(suffix='.template')
-            options = ['namespace']
-            constraints.update({'type': 'registry'})
-            del constraints['branch']
-            self.logger.info(constraints)
-            tools, manifest = self.p_helper.constraint_options(constraints,
-                                                               options)
-            if tools:
-                tool = tools.keys()[0]
-            else:
-                status = (False, "Couldn't save configuration")
-        if status[0]:
-            try:
-                # save in vent.template
-                with open(template_path, 'w') as f:
+            vent_cfg_path = os.path.join(os.path.expanduser('~'), '.vent',
+                                         'vent.cfg')
+            # remove the additional reminder we put in for editing purposes
+            warning_msg = "# you must specify settings as json strings" \
+                          " (double quotes)\n"
+            config_val = config_val.replace(warning_msg, '')
+            if os.path.exists(vent_cfg_path):
+                with open(vent_cfg_path, 'w') as f:
                     f.write(config_val)
-                # save in plugin_manifest
-                vent_template = Template(template_path)
-                sections = vent_template.sections()
-                if sections[0]:
-                    for section in sections[1]:
-                        section_dict = {}
-                        options = vent_template.options(section)
-                        if options[0]:
-                            for option in options[1]:
-                                option_name = option
-                                if option == 'name':
-                                    option_name = 'link_name'
-                                option_val = vent_template.option(section,
-                                                                  option)[1]
-                                section_dict[option_name] = option_val
-                        if section_dict:
-                            manifest.set_option(tool, section,
-                                                json.dumps(section_dict))
-                        elif manifest.option(tool, section)[0]:
-                            manifest.del_option(tool, section)
-                    manifest.write_config()
-            except Exception as e:  # pragma: no cover
-                self.logger.error("save_configure error: " + str(e))
-                status = (False, str(e))
-        # close os file handle and remove temp file
-        if from_registry:
-            try:
-                os.close(fd)
-                os.remove(template_path)
-            except Exception as e:  # pragma: no cover
-                self.logger.error("save_configure error: " + str(e))
+            else:
+                status = (False, "Couldn't find configuration file")
         self.logger.info("Status of save_configure: " + str(status[0]))
         self.logger.info("Finished: save_configure")
         return status

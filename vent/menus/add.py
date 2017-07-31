@@ -122,7 +122,7 @@ class AddForm(npyscreen.ActionForm):
             self.parentApp.addForm("ADDOPTIONS",
                                    AddOptionsForm,
                                    name="Set options for new plugin"
-                                        "\t\t\t\t\t\tPress ^Q to quit",
+                                        "\t\t\t\t\t\t^Q to quit",
                                    color="CONTROL")
             self.parentApp.change_form('ADDOPTIONS')
         else:

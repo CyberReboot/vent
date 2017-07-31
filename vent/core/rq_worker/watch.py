@@ -4,23 +4,66 @@ def gpu_queue(options):
     """
     import docker
     import json
+
+    from vent.helpers.meta import GpuUsage
+
     status = (False, None)
 
-    # !! TODO wait until resources are available
+    # device specified, remove all other devices
+    if 'device' in options['gpu_options']:
+        dev = '/dev/nvidia' + options['gpu_options']['device'] + ':rwm'
+        if 'devices' in options:
+            devices = option['devices']
+            for device in devices:
+                if any(str.isdigit(char) for char in device):
+                    if dev is not device:
+                        option['devices'].remove(device)
 
+    print("gpu queue", str(options))
+    print("gpu queue", str(GpuUsage()))
+
+    # TODO overriding until this is working
+    # wait = True
+    wait = False
+
+    while wait:
+        usage = GpuUsage()
+        check = 0
+        # TODO check if GPUs are available for the set restrictions
+        # no restrictions set
+        if len(options['gpu_options']) == 1:
+            check = 3
+        else:
+            # check if dev is available
+            if 'device' in options['gpu_options']:
+                if not usage[options['gpu_options']['device']]['processes']:
+                    check += 1
+            else:
+                check += 1
+
+            # TODO mem_mb needed available
+
+            # TODO dedicated
+
+        # TODO check if gpus are available
+        if check == 3:
+            wait = False
     try:
         d_client = docker.from_env()
         options = json.loads(options)
         configs = options['configs']
-        del options[configs]
+        gpu_options = configs['gpu_options']
+        del options['configs']
+        del configs['gpu_options']
         params = options.copy()
         params.update(configs)
-        print(params)
+        print(str(params))
         d_client.containers.run(**params)
         status = (True, None)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
 
+    print(str(status))
     return status
 
 
@@ -33,10 +76,12 @@ def file_queue(path, template_path="/vent/"):
     import docker
     import json
     import requests
+    import os
 
     from redis import Redis
     from rq import Queue
     from subprocess import check_output, Popen, PIPE
+    from string import punctuation
 
     status = (True, None)
     images = []
@@ -55,6 +100,25 @@ def file_queue(path, template_path="/vent/"):
         else:
             files = '/'
 
+        # deal with ~
+        files = os.path.expanduser(files)
+
+        chars = set(punctuation)
+        chars.discard('/')
+        chars.discard('_')
+        chars.discard('-')
+        file_name = ''
+        # escape any funky symbols to allow users FREEDOM of directory name
+        for char in files:
+            if char in chars:
+                if char == '\\':
+                    file_name += '\\' + char
+                else:
+                    file_name += '\\\\' + char
+            else:
+                file_name += char
+
+        files = file_name
         _, path = path.split('_', 1)
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
@@ -85,7 +149,7 @@ def file_queue(path, template_path="/vent/"):
                     options_dict = json.loads(config.get(section, 'settings'))
                     in_base = directory == '/files'
                     # process base by default
-                    process_file = True if in_base else False
+                    process_file = in_base
                     # check if this tool shouldn't process the base by default
                     if 'process_base' in options_dict:
                         if options_dict['process_base'] == 'no':
@@ -111,6 +175,7 @@ def file_queue(path, template_path="/vent/"):
                     if 'enabled' in options_dict:
                         enabled = options_dict['enabled']
                         if enabled == 'yes':
+                            configs[image_name]['gpu_options'] = options_dict
                             if 'labels' in configs[image_name]:
                                 configs[image_name]['labels']['vent.gpu'] = 'yes'
                             else:

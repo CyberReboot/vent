@@ -3,14 +3,15 @@ MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
     docker \
+    git \
     libmagic \
     python \
     py2-pip \
     && rm -rf /var/cache/apk/*
 
-RUN pip install rq==0.8.0
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
+RUN pip install git+git://github.com/cyberreboot/vent.git@master
 COPY *.py /
 
 LABEL vent="" \

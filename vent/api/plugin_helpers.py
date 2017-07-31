@@ -6,7 +6,7 @@ import shlex
 
 from ast import literal_eval
 from os import chdir, getcwd, walk
-from os.path import join
+from os.path import expanduser, join
 from subprocess import check_output, Popen, PIPE, STDOUT
 
 from vent.api.templates import Template
@@ -249,7 +249,8 @@ class PluginHelper:
                     try:
                         tool_d[c_name][option] = literal_eval(options)
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("unable to store the options set for docker: " + str(e))
+                        self.logger.info("unable to literal_eval: " +
+                                         str(options))
                         tool_d[c_name][option] = options
 
             if 'labels' not in tool_d[c_name]:
@@ -266,11 +267,6 @@ class PluginHelper:
                 except Exception as e:   # pragma: no cover
                     self.logger.error("unable to store service options for "
                                       "docker: " + str(e))
-
-            # get network mappings
-            if 'network_mode' in tool_d[c_name]:
-                # !! TODO check if mappings are available in the host config
-                pass
 
             # check for gpu settings
             status = manifest.option(section, 'gpu')
@@ -309,18 +305,52 @@ class PluginHelper:
             tool_d[c_name]['labels']['vent.version'] = version
             tool_d[c_name]['labels']['vent.name'] = s[section]['name']
 
-            log_config = {'type': 'syslog',
-                          'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                     'syslog-facility': 'daemon',
-                                     'tag': 'plugin'}}
+            # check for log_config settings in external-services
+            externally_configured = False
+            vent_config = Template(template=join(self.path_dirs.meta_dir,
+                                                 "vent.cfg"))
+            if 'log_config' in vent_config.options('external-services')[1]:
+                try:
+                    log_config = {}
+                    log_dict = json.loads(vent_config.option('external-services',
+                                                             'log_config')[1])
+                    log_config['type'] = log_dict['type']
+                    log_config['config'] = {}
+                    for option in log_dict['config']:
+                        log_config['config'][option] = log_dict['config'][option]
+                    externally_configured = True
+                except Exception as e:
+                    self.logger.error("external settings for log_config"
+                                      " couldn't be stored because: " + str(e))
+                    externally_configured = False
+            if not externally_configured:
+                log_config = {'type': 'syslog',
+                              'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                         'syslog-facility': 'daemon',
+                                         'tag': 'plugin'}}
             if 'groups' in s[section]:
                 # add labels for groups
                 tool_d[c_name]['labels']['vent.groups'] = s[section]['groups']
                 # add restart=always to core containers
                 if 'core' in s[section]['groups']:
                     tool_d[c_name]['restart_policy'] = {"Name": "always"}
+                # map network names to environment variables
+                if 'network' in s[section]['groups']:
+                    vent_config = Template(template=self.path_dirs.cfg_file)
+                    nic_mappings = vent_config.section('network-mapping')
+                    nics = ''
+                    if nic_mappings[0]:
+                        for nic in nic_mappings[1]:
+                            nics += nic[0] + ":" + nic[1] + ","
+                        nics = nics[:-1]
+                    if nics:
+                        if 'environment' in tool_d[c_name]:
+                            tool_d[c_name]['environment'].append("VENT_NICS="+nics)
+                        else:
+                            tool_d[c_name]['environment'] = ["VENT_NICS="+nics]
                 # send logs to syslog
-                if 'syslog' not in s[section]['groups'] and 'core' in s[section]['groups']:
+                if ('syslog' not in s[section]['groups'] and
+                   'core' in s[section]['groups']):
                     log_config['config']['tag'] = 'core'
                     tool_d[c_name]['log_config'] = log_config
                 if 'syslog' not in s[section]['groups']:
@@ -379,9 +409,9 @@ class PluginHelper:
                        'image_name',
                        'branch',
                        'version']
-            vent_config = Template(template=join(self.path_dirs.meta_dir,
-                                                 "vent.cfg"))
+            vent_config = Template(template=self.path_dirs.cfg_file)
             files = vent_config.option('main', 'files')
+            files = (files[0], expanduser(files[1]))
             s, _ = self.constraint_options(args, options)
             status, tool_d = self.start_sections(s,
                                                  files,
@@ -390,14 +420,41 @@ class PluginHelper:
                                                  branch,
                                                  version)
 
+            # look out for links to delete because they're defined externally
+            links_to_delete = set()
             # check and update links, volumes_from, network_mode
             for container in tool_d.keys():
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
-                        for c in tool_d.keys():
-                            if ('tmp_name' in tool_d[c] and
-                               tool_d[c]['tmp_name'] == link):
-                                tool_d[container]['links'][tool_d[c]['name']] = tool_d[container]['links'].pop(link)
+                        # add links to external services already running if necessary
+                        ext = 'external-services'
+                        if link in vent_config.options(ext)[1]:
+                            try:
+                                link_config = json.loads(vent_config.option(ext,
+                                                                            link)[1])
+                                ip_adr = link_config['ip_address']
+                                port = link_config['port']
+                                tool_d[container]['extra_hosts'] = {}
+                                # containers use lowercase names for
+                                # connections
+                                tool_d[container]['extra_hosts'][link.lower()] = ip_adr
+                                # create an environment variable for container
+                                # to access port later
+                                env_variable = link.upper() + "_CUSTOM_PORT=" + port
+                                tool_d[container]['environment'].append(env_variable)
+                                # remove the entry from links because no
+                                # longer connecting to local container
+                                links_to_delete.add(link)
+                            except Exception as e:
+                                self.logger.error("couldn't load external"
+                                                  " settings because: " +
+                                                  str(e))
+                                status = (False, str(e))
+                        else:
+                            for c in tool_d.keys():
+                                if ('tmp_name' in tool_d[c] and
+                                   tool_d[c]['tmp_name'] == link):
+                                    tool_d[container]['links'][tool_d[c]['name']] = tool_d[container]['links'].pop(link)
                 if 'volumes_from' in tool_d[container]:
                     tmp_volumes_from = tool_d[container]['volumes_from']
                     tool_d[container]['volumes_from'] = []
@@ -421,11 +478,23 @@ class PluginHelper:
                 if 'tmp_name' in tool_d[c]:
                     del tool_d[c]['tmp_name']
 
+            # remove links section if all were externally configured
+            for c in tool_d.keys():
+                if 'links' in tool_d[c]:
+                    for link in links_to_delete:
+                        del tool_d[c]['links'][link]
+                    # delete links if no more defined
+                    if not tool_d[c]['links']:
+                        del tool_d[c]['links']
+
             # remove containers that shouldn't be started
             for c in tool_d.keys():
                 if 'start' in tool_d[c] and not tool_d[c]['start']:
                     del tool_d[c]
-            status = (True, tool_d)
+            if status[0]:
+                status = (True, tool_d)
+            else:
+                status = (False, tool_d)
         except Exception as e:  # pragma: no cover
             self.logger.error("prep_start failed with error: "+str(e))
             status = (False, e)
@@ -484,8 +553,7 @@ class PluginHelper:
                     #      otherwise queue it up until it's
                     #      available
                     # !! TODO check for device settings in vent.template
-                    vent_config = Template(template=join(self.path_dirs.meta_dir,
-                                                         "vent.cfg"))
+                    vent_config = Template(template=self.path_dirs.cfg_file)
                     port = ''
                     host = ''
                     result = vent_config.option('nvidia-docker-plugin', 'port')

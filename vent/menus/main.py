@@ -21,6 +21,7 @@ from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.backup import BackupForm
+from vent.menus.editor import EditorForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
@@ -137,18 +138,26 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # if file drop location changes deal with it
         logger = Logger(__name__)
-        if self.file_drop.value != DropLocation():
+        status = (False, None)
+        if self.file_drop.value != DropLocation()[1]:
             logger.info("Starting: file drop restart")
             try:
-                self.file_drop.value = DropLocation()
-                status = self.api_action.clean(name='file_drop')
-                status = self.api_action.prep_start(name='file_drop')
+                self.file_drop.value = DropLocation()[1]
+                logger.info("Path given: " + str(self.file_drop.value))
+                # restart if the path is valid
+                if DropLocation()[0]:
+                    status = self.api_action.clean(name='file_drop')
+                    status = self.api_action.prep_start(name='file_drop')
+                else:
+                    logger.error("file drop path name invalid" +
+                                 DropLocation()[1])
                 if status[0]:
                     tool_d = status[1]
                     status = self.api_action.start(tool_d)
+                    logger.info("Status of file drop restart: " +
+                                str(status[0]))
             except Exception as e:  # pragma no cover
                 logger.error("file drop restart failed with error: " + str(e))
-            logger.info("Status of file drop restart: " + str(status[0]))
             logger.info("Finished: file drop restart")
         self.file_drop.display()
 
@@ -263,7 +272,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
             form_args['name'] = "Add plugins"
-            form_args['name'] += "\t"*6 + "Press ^Q to quit"
+            form_args['name'] += "\t"*6 + "^Q to quit"
         elif action == "inventory":
             form = InventoryToolsForm
             forms = ['INVENTORY']
@@ -289,7 +298,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             forms = ['COREINVENTORY']
             form_args = {'color': "STANDOUT",
                          'name': "Inventory of core tools"}
-        form_args['name'] += "\t"*8 + "Press ^T to toggle main"
+        form_args['name'] += "\t"*8 + "^T to toggle main"
         try:
             self.remove_forms(forms)
             thr = Thread(target=self.add_form, args=(),
@@ -333,6 +342,15 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 notify_confirm("Vent backup successful")
             else:
                 notify_confirm("Vent backup could not be completed")
+        elif action == 'configure':
+            form_args = {'name': 'Change vent configuration',
+                         'get_configure': self.api_action.get_configure,
+                         'save_configure': self.api_action.save_configure,
+                         'vent_cfg': True}
+            add_kargs = {'form': EditorForm,
+                         'form_name': 'CONFIGUREVENT',
+                         'form_args': form_args}
+            self.add_form(**add_kargs)
         elif action == "reset":
             okay = npyscreen.notify_ok_cancel(
                     "This factory reset will remove ALL of Vent's user data, "
@@ -365,7 +383,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args = {'restore': self.api_action.restore,
                          'dirs': backup_dirs,
                          'name': "Pick a version to restore from" + "\t"*8 +
-                                 "Press ^T to toggle main",
+                                 "^T to toggle main",
                          'color': 'CONTROL'}
             add_kargs = {'form': BackupForm,
                          'form_name': 'CHOOSEBACKUP',
@@ -414,7 +432,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT')
         self.file_drop = self.add(npyscreen.TitleFixedText,
                                   name='File Drop:',
-                                  value=DropLocation(),
+                                  value=DropLocation()[1],
                                   labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
@@ -537,6 +555,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6 = self.add_menu(name="System Commands", shortcut='y')
         self.m6.addItem(text='Backup', onSelect=self.system_commands,
                         arguments=['backup'], shortcut='b')
+        self.m6.addItem(text='Change vent configuration',
+                        onSelect=self.system_commands, arguments=['configure'],
+                        shortcut='c')
         self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
                         arguments=['gpu'], shortcut='g')
         self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',
