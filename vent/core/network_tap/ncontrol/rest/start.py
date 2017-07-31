@@ -2,8 +2,6 @@ import ast
 import docker
 import web
 
-from nlist import ListR
-
 
 class StartR:
     """
@@ -39,7 +37,7 @@ class StartR:
             return 'unable to connect to docker because: ' + str(e)
 
         # if user gives a list of id, start them all
-        if type(payload['id']) == list:
+        if isinstance(payload['id']) == list:
             try:
                 for container_id in payload['id']:
                     c.containers.get(container_id).start()
