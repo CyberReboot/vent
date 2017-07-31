@@ -311,14 +311,18 @@ class PluginHelper:
                                                  "vent.cfg"))
             if 'log_config' in vent_config.options('external-services')[1]:
                 try:
-                    log_config = {}
                     log_dict = json.loads(vent_config.option('external-services',
                                                              'log_config')[1])
-                    log_config['type'] = log_dict['type']
-                    log_config['config'] = {}
-                    for option in log_dict['config']:
-                        log_config['config'][option] = log_dict['config'][option]
-                    externally_configured = True
+                    # can only have one log_config at a time
+                    if ('locally_active' not in log_dict or
+                            log_dict['locally_active'] == 'no'):
+                        del log_dict['locally_active']
+                        log_config = {}
+                        log_config['type'] = log_dict['type']
+                        log_config['config'] = {}
+                        for option in log_dict['config']:
+                            log_config['config'][option] = log_dict['config'][option]
+                        externally_configured = True
                 except Exception as e:
                     self.logger.error("external settings for log_config"
                                       " couldn't be stored because: " + str(e))
@@ -419,38 +423,49 @@ class PluginHelper:
                                                  enabled,
                                                  branch,
                                                  version)
+            self.logger.info("Testing start_sections...")
+            self.logger.info(str(status))
 
             # look out for links to delete because they're defined externally
             links_to_delete = set()
             # check and update links, volumes_from, network_mode
             for container in tool_d.keys():
+                self.logger.info("Testing...")
+                if not 'start' in tool_d[container]:
+                    self.logger.info(tool_d[container])
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
-                        # add links to external services already running if necessary
+                        # add links to external services already running if
+                        # necessary, by default configure local services too
+                        configure_local = True
                         ext = 'external-services'
                         if link in vent_config.options(ext)[1]:
                             try:
                                 link_config = json.loads(vent_config.option(ext,
                                                                             link)[1])
-                                ip_adr = link_config['ip_address']
-                                port = link_config['port']
-                                tool_d[container]['extra_hosts'] = {}
-                                # containers use lowercase names for
-                                # connections
-                                tool_d[container]['extra_hosts'][link.lower()] = ip_adr
-                                # create an environment variable for container
-                                # to access port later
-                                env_variable = link.upper() + "_CUSTOM_PORT=" + port
-                                tool_d[container]['environment'].append(env_variable)
-                                # remove the entry from links because no
-                                # longer connecting to local container
-                                links_to_delete.add(link)
+                                if ('locally_active' not in link_config or
+                                        link_config['locally_active'] == 'no'):
+                                    ip_adr = link_config['ip_address']
+                                    port = link_config['port']
+                                    tool_d[container]['extra_hosts'] = {}
+                                    # containers use lowercase names for
+                                    # connections
+                                    tool_d[container]['extra_hosts'][link.lower()] = ip_adr
+                                    # create an environment variable for container
+                                    # to access port later
+                                    env_variable = link.upper() + "_CUSTOM_PORT=" + port
+                                    tool_d[container]['environment'].append(env_variable)
+                                    # remove the entry from links because no
+                                    # longer connecting to local container
+                                    links_to_delete.add(link)
+                                    configure_local = False
                             except Exception as e:
                                 self.logger.error("couldn't load external"
                                                   " settings because: " +
                                                   str(e))
-                                status = (False, str(e))
-                        else:
+                                configure_local = True
+                                status = False
+                        if configure_local:
                             for c in tool_d.keys():
                                 if ('tmp_name' in tool_d[c] and
                                    tool_d[c]['tmp_name'] == link):
@@ -482,16 +497,37 @@ class PluginHelper:
             for c in tool_d.keys():
                 if 'links' in tool_d[c]:
                     for link in links_to_delete:
-                        del tool_d[c]['links'][link]
+                        if link in tool_d[c]['links']:
+                            del tool_d[c]['links'][link]
                     # delete links if no more defined
                     if not tool_d[c]['links']:
                         del tool_d[c]['links']
 
             # remove containers that shouldn't be started
             for c in tool_d.keys():
+                deleted = False
                 if 'start' in tool_d[c] and not tool_d[c]['start']:
                     del tool_d[c]
-            if status[0]:
+                    deleted = True
+                if not deleted:
+                    # look for tools services that are being done externally
+                    # tools are capitalized in vent.cfg, so make them lowercase
+                    # for comparison
+                    ext = 'external-services'
+                    external_tools = vent_config.section(ext)[1]
+                    name = tool_d[c]['labels']['vent.name']
+                    for tool in external_tools:
+                        if name == tool[0].lower():
+                            try:
+                                tool_config = json.loads(tool[1])
+                                if ('locally_active' in tool_config and
+                                        tool_config['locally_active'] == 'no'):
+                                    del tool_d[c]
+                            except Exception as e:
+                                self.logger.warn("Locally running container " +
+                                                 name + " may be redundant")
+
+            if status:
                 status = (True, tool_d)
             else:
                 status = (False, tool_d)
