@@ -19,7 +19,7 @@ class ListR:
 
         # search for all docker containers and grab ncapture containers
         container_list = []
-        for c in containers.containers.list():
+        for c in containers.containers.list(all=True):
             # TODO: maybe find a way to not have to hard code image name
             if c.attrs["Config"]["Image"] == \
                     "cyberreboot/vent-ncapture:master":
@@ -27,7 +27,7 @@ class ListR:
                 if "core" not in c.attrs["Config"]["Labels"]["vent.groups"]:
                     lst = {}
                     lst['id'] = c.attrs["Id"][:12]
-                    lst['created'] = c.attrs["Created"]
+                    lst['status'] = c.attrs["State"]["Status"]
                     container_list.append(lst)
 
         return ("Container IDs: " + str(container_list))

@@ -62,7 +62,7 @@ class StartR:
         # if user gives just one id, start it
         else:
             try:
-                c.containers.get(payload['Id']).start()
+                c.containers.get(payload['id']).start()
             except Exception as e: # pragma: no cover
                 return 'unable to start container because: ' + str(e)
 

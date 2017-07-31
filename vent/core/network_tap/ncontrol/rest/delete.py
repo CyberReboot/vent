@@ -61,7 +61,7 @@ class DeleteR:
         # if user gives just one id, delete it
         else:
             try:
-                c.containers.get(payload['Id']).remove()
+                c.containers.get(payload['id']).remove()
             except Exception as e: # pragma: no cover
                 return 'unable to delete container because: ' + str(e)
 
