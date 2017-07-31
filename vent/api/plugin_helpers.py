@@ -423,16 +423,11 @@ class PluginHelper:
                                                  enabled,
                                                  branch,
                                                  version)
-            self.logger.info("Testing start_sections...")
-            self.logger.info(str(status))
 
             # look out for links to delete because they're defined externally
             links_to_delete = set()
             # check and update links, volumes_from, network_mode
             for container in tool_d.keys():
-                self.logger.info("Testing...")
-                if not 'start' in tool_d[container]:
-                    self.logger.info(tool_d[container])
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
                         # add links to external services already running if
