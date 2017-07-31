@@ -25,8 +25,9 @@ class ListR:
                     "cyberreboot/vent-ncapture:master":
                 # the core container is not what we want
                 if "core" not in c.attrs["Config"]["Labels"]["vent.groups"]:
-                    lst = c.attrs["Id"]
-                    lst.append(c.attrs["Created"])
-                    lst.append(c.attrs["Args"][0])
+                    lst = {}
+                    lst['id'] = c.attrs["Id"]
+                    lst['created'] = c.attrs["Created"]
                     container_list.append(lst)
-        return container_list
+
+        return ("Container IDs: " + str(container_list))

@@ -6,7 +6,7 @@ import web
 
 from rest.create import CreateR
 from rest.filters import FiltersR
-from rest.list import ListR
+from rest.nlist import ListR
 from rest.start import StartR
 from rest.stop import StopR
 
