@@ -19,7 +19,7 @@ def gpu_queue(options):
         if 'devices' in configs:
             devices = configs['devices']
             for device in devices:
-                if any(str.isdigit(char) for char in device):
+                if any(str.isdigit(str(char)) for char in device):
                     if dev is not device:
                         option['devices'].remove(device)
 
