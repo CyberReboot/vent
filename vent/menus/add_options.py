@@ -97,7 +97,7 @@ class AddOptionsForm(npyscreen.ActionForm):
         self.parentApp.addForm("CHOOSETOOLS",
                                ChooseToolsForm,
                                name="Choose tools to add for new plugin"
-                               "\t\t\t\t\t\tPress ^Q to quit",
+                               "\t\t\t\t\t\t^Q to quit",
                                color="CONTROL")
         self.parentApp.change_form("CHOOSETOOLS")
 
