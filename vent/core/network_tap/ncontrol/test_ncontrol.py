@@ -64,7 +64,8 @@ def test_stop_r():
     assert r.status == 200
     r = test_app.post('/stop', params={'id': test_cont.attrs['Id']})
     assert r.status == 200
-
+    r = test_app.post('/stop', params={'id': []})
+    assert r.status == 200
 
 def test_start_r():
     """ tests the restful endpoint: start """
@@ -78,7 +79,9 @@ def test_start_r():
     # test start
     r = test_app.post('/start', params={})
     assert r.status == 200
-    r = test_app.post('/stop', params={'id': test_cont.attrs['Id']})
+    r = test_app.post('/start', params={'id': test_cont.attrs['Id']})
+    assert r.status == 200
+    r = test_app.post('/start', params={'id': []})
     assert r.status == 200
 
 
@@ -95,4 +98,6 @@ def test_delete_r():
     r = test_app.post('/delete', params={})
     assert r.status == 200
     r = test_app.post('/delete', params={'id': test_cont.attrs['Id']})
+    assert r.status == 200
+    r = test_app.post('/delete', params={'id': []})
     assert r.status == 200
