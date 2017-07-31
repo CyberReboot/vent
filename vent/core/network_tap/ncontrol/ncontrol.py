@@ -5,6 +5,7 @@ import sys
 import web
 
 from rest.create import CreateR
+from rest.delete import DeleteR
 from rest.filters import FiltersR
 from rest.nlist import ListR
 from rest.start import StartR
@@ -46,7 +47,8 @@ class NControl:
             '/filters', FiltersR,
             '/start/(.+)', StartR,
             '/stop/(.+)', StopR,
-            '/list/(.+)', ListR
+            '/list/(.+)', ListR,
+            '/delete/(.+)', DeleteR
         )
         return urls
 

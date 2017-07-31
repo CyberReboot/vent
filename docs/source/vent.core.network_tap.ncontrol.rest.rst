@@ -12,6 +12,14 @@ vent\.core\.network\_tap\.ncontrol\.rest\.create module
     :undoc-members:
     :show-inheritance:
 
+vent\.core\.network\_tap\.ncontrol\.rest\.delete module
+-------------------------------------------------------
+
+.. automodule:: vent.core.network_tap.ncontrol.rest.delete
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 vent\.core\.network\_tap\.ncontrol\.rest\.filters module
 --------------------------------------------------------
 
@@ -20,10 +28,10 @@ vent\.core\.network\_tap\.ncontrol\.rest\.filters module
     :undoc-members:
     :show-inheritance:
 
-vent\.core\.network\_tap\.ncontrol\.rest\.list module
------------------------------------------------------
+vent\.core\.network\_tap\.ncontrol\.rest\.nlist module
+------------------------------------------------------
 
-.. automodule:: vent.core.network_tap.ncontrol.rest.list
+.. automodule:: vent.core.network_tap.ncontrol.rest.nlist
     :members:
     :undoc-members:
     :show-inheritance:

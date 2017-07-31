@@ -20,7 +20,7 @@ class StopR:
         """
         web.header('Content-Type', 'application/json')
 
-        # verify that user gave an ID
+        # verify user input
         data = web.data()
         payload = {}
         try:
