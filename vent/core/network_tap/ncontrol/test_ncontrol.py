@@ -67,6 +67,7 @@ def test_stop_r():
     r = test_app.post('/stop', params={'id': []})
     assert r.status == 200
 
+
 def test_start_r():
     """ tests the restful endpoint: start """
     # get web app
