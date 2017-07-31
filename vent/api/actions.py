@@ -18,8 +18,7 @@ class Action:
     def __init__(self, **kargs):
         self.plugin = Plugin(**kargs)
         self.d_client = self.plugin.d_client
-        self.vent_config = os.path.join(self.plugin.path_dirs.meta_dir,
-                                        "vent.cfg")
+        self.vent_config = self.plugin.path_dirs.cfg_file
         self.p_helper = self.plugin.p_helper
         self.queue = Queue.Queue()
         self.logger = Logger(__name__)
@@ -370,8 +369,7 @@ class Action:
         backup_manifest = os.path.join(backup_dir, 'backup_manifest.cfg')
         backup_vcfg = os.path.join(backup_dir, 'backup_vcfg.cfg')
         manifest = self.p_helper.manifest
-        vent_config = os.path.join(os.path.expanduser('~'), '.vent',
-                                   'vent.cfg')
+
         # create new backup directory
         try:
             os.mkdir(backup_dir)
@@ -386,7 +384,7 @@ class Action:
                     bmanifest.write(manifest_file.read())
             # backup vent.cfg
             with open(backup_vcfg, 'w') as bvcfg:
-                with open(vent_config) as vcfg_file:
+                with open(self.vent_config) as vcfg_file:
                     bvcfg.write(vcfg_file.read())
             self.logger.info("Backup information written to " + backup_dir)
             status = (True, backup_dir)
@@ -480,9 +478,7 @@ class Action:
             backup_vcfg = os.path.join(backup_dir, 'backup_vcfg.cfg')
             bvcfg = Template(backup_vcfg)
             try:
-                vent_config = os.path.join(os.path.expanduser('~'),
-                                           '.vent', 'vent.cfg')
-                vcfg_template = Template(vent_config)
+                vcfg_template = Template(self.vent_config)
                 for section in bvcfg.sections()[1]:
                     for vals in bvcfg.section(section)[1]:
                         # add section to new template in case it doesn't exist
