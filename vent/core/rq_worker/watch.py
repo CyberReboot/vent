@@ -21,7 +21,7 @@ def gpu_queue(options):
             for device in devices:
                 if any(str.isdigit(str(char)) for char in device):
                     if dev is not device:
-                        option['devices'].remove(device)
+                        configs['devices'].remove(device)
 
     print("gpu queue", str(options))
     print("gpu queue", str(GpuUsage()))
