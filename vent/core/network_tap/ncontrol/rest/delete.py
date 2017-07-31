@@ -4,23 +4,23 @@ import web
 from nlist import ListR
 
 
-class StartR:
+class DeleteR:
     """
-    This endpoint is for starting a network tap container
+    This endpoint is for deleting a network tap container
     """
 
     @staticmethod
     def POST():
         """
-        Send a POST request with a docker container ID and it will be started.
+        Send a POST request with a docker container ID and it will be deleted.
         Can also send 'all' as the ID and every network tap container will be
-        started.
+        deleted.
 
         Example input: {'id': "12345"}, {'id': ["123", "456"]}, or {'id': "all"}
         """
         web.header('Content-Type', 'application/json')
 
-        # verify that user gave an ID
+        # verify user input
         data = web.data()
         payload = {}
         try:
@@ -39,29 +39,28 @@ class StartR:
         except Exception as e: # pragma: no cover
             return 'unable to connect to docker because: ' + str(e)
 
-        # start all network tap containers if keyword 'all' is given
+        # delete all network tap containers if keyword 'all' is given
         if payload['id'] == 'all':
             try:
                 network_containers = ListR.GET()
                 for container in network_containers:
-                    c.containers.start(container['id'])
+                    c.containers.remove(container['id'])
             except Exception as e: # pragma no cover
-                return 'unable to start multiple containers because' + \
+                return 'unable to delete multiple containers because' + \
                        str(e)
 
-        # if user gives a list of id, start them all
+        # if user gives a list of id, delete them all
         elif type(payload['id']) == list:
             try:
                 for container_id in payload['id']:
-                    c.containers.start(container_id)
+                    c.containers.remove(container_id)
             except Exception as e: # pragma: no cover
-                return 'unable to start list of containers because: ' + str(e)
-
-        # if user gives just one id, start it
+                return 'unable to delete list of containers because: ' + str(e)
+        # if user gives just one id, delete it
         else:
             try:
-                c.containers.start(payload['Id'])
+                c.containers.remove(payload['Id'])
             except Exception as e: # pragma: no cover
-                return 'unable to start container because: ' + str(e)
+                return 'unable to delete container because: ' + str(e)
 
-        return ('container successfully started: ' + str(payload['id']))
+        return ('container successfully deleted: ' + str(payload['id']))
