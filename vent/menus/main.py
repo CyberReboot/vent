@@ -20,6 +20,7 @@ from vent.helpers.meta import Uptime
 from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
+from vent.menus.add_ntap import AddNTap
 from vent.menus.backup import BackupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
@@ -387,6 +388,15 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # !! TODO
             # add notify_cancel_ok popup once implemented
             pass
+        elif action == "ntinterface":
+            form_args = {'color': 'CONTROL',
+                         'names': 'Network Tap Interface' + "\t"*8 + \
+                                  '^T to toggle main'
+                        }
+            self.add_form(AddNTap, "Network Tap Interface", form_args)
+            #  forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
+            #  form_args['name'] = "Add plugins"
+            #  form_args['name'] += "\t"*6 + "^Q to quit"
         return
 
     def create(self):
@@ -557,6 +567,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
+        self.m6.addItem(text='Network Tap Interface',
+                        onSelect=self.system_commands,
+                        arguments=['ntinterface'], shortcut='n')
 
         # Tutorial Menu Items
         self.m7 = self.add_menu(name="Tutorials", shortcut="t")
