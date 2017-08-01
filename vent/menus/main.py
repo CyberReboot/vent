@@ -293,6 +293,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args = {'color': "STANDOUT",
                          'name': "Plugin Services",
                          'core': False}
+        elif action == 'services_external':
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "External Services",
+                         'core': False,
+                         'external': True}
         elif action == "inventory_core":
             form = InventoryCoreToolsForm
             forms = ['COREINVENTORY']
@@ -547,6 +554,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m5 = self.add_menu(name="Services Running", shortcut='s')
         self.m5.addItem(text='Core Services', onSelect=self.perform_action,
                         arguments=['services_core'], shortcut='c')
+        self.m5.addItem(text='External Services', onSelect=self.perform_action,
+                        arguments=['services_external'], shortcut='e')
         self.m5.addItem(text='Plugin Services',
                         onSelect=self.perform_action,
                         arguments=['services'], shortcut='p')
