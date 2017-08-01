@@ -695,16 +695,11 @@ class Action:
         template_dict = {}
         return_str = ""
         if main_cfg:
-            vent_cfg_path = os.path.join(os.path.expanduser('~'), '.vent',
-                                         'vent.cfg')
-            if os.path.exists(vent_cfg_path):
-                vent_cfg = Template(vent_cfg_path)
-                for section in vent_cfg.sections()[1]:
-                    template_dict[section] = {}
-                    for vals in vent_cfg.section(section)[1]:
-                        template_dict[section][vals[0]] = vals[1]
-            else:
-                status = (False, "Couldn't get vent.cfg information")
+            vent_cfg = Template(self.vent_config)
+            for section in vent_cfg.sections()[1]:
+                template_dict[section] = {}
+                for vals in vent_cfg.section(section)[1]:
+                    template_dict[section][vals[0]] = vals[1]
         else:
             # all possible vent.template options stored in plugin_manifest
             options = ['info', 'service', 'settings', 'docker', 'gpu']
