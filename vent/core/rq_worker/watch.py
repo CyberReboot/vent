@@ -245,8 +245,8 @@ def file_queue(path, template_path="/vent/"):
                             except Exception as e:  # pragma: no cover
                                 failed_images.add(image_name)
                                 status = (False, str(e))
-                                print("Unable to reach nvidia-docker-plugin: "
-                                      + str(e))
+                                print("Failure with nvidia-docker-plugin: " +
+                                      str(e))
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
