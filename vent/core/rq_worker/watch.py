@@ -282,6 +282,8 @@ def file_queue(path, template_path="/vent/"):
                         configs[image]['volumes'][volume] = volumes[volume]
                 else:
                     configs[image]['volumes'] = volumes
+
+                print(str(configs[image]))
                 if ('labels' in configs[image] and
                    'vent.gpu' in configs[image]['labels'] and
                    configs[image]['labels']['vent.gpu'] == 'yes'):
