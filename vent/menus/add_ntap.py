@@ -17,9 +17,9 @@ class AddNTap(npyscreen.ActionForm):
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
                  value= 'Example format: {"nic": "eth0", '
-                                         ' "id" = "exmpId", '
+                                         ' "id": "exmpId", '
                                          ' "interval": "60", '
-                                         ' "filters": "", '
+                                         ' "filter": "", '
                                          ' "iters": "1"} ',
                 editable=False,
                 color="STANDOUT")
@@ -70,9 +70,11 @@ class AddNTap(npyscreen.ActionForm):
         self.stop = self.add(npyscreen.TitleText, name='Stop container '
                              'id(s): ')
 
+
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm("MAIN")
+
 
     def send_request(self, network_port, json_data, action):
         """ Send a post/get request to the right port/url """
@@ -80,15 +82,17 @@ class AddNTap(npyscreen.ActionForm):
             url = "http://" + network_port
             data = ast.literal_eval(json_data)
             data = json.dumps(data)
-            npyscreen.notify_confirm(str(url))
             req = urllib2.Request(url,data)
             req.add_header('Content-Type', 'application/json')
             response = urllib2.urlopen(req, data)
-            npyscreen.notify_confirm("Succeess: " + str(response))
+            npyscreen.notify_confirm("Success: " + action + " " + json_data)
+            return True
         except Exception as e:  # pragma: no cover
             npyscreen.notify_confirm("unsuccessful call to network tap " +
                                      action + ": " + str(e),
                                      form_color='CAUTION')
+            return False
+
 
     def on_ok(self):
         """ Create, stop, start, delete network tap containers """
@@ -120,7 +124,6 @@ class AddNTap(npyscreen.ActionForm):
         # make the appropriate post requests if the textbox isnt blank
         if network_port:
             if self.create.value:
-                npyscreen.notify_confirm("Create")
                 # check to see if user input has the required fields
                 valid = ["nic", "id", "interval", "filter", "iters"]
                 not_in = [field for field in valid if field not in
@@ -130,24 +133,23 @@ class AddNTap(npyscreen.ActionForm):
                                              missing: " + str(not_in))
                 else:
                     url = network_port + '/create'
-                    self.send_request(url, self.create.value, "create")
+                    if self.send_request(url, self.create.value, "create"):
+                        self.quit()
 
             if self.delete.value:
-                npyscreen.notify_confirm("Delete")
                 url = network_port + '/delete'
-                self.send_request(url, self.delete.value, "delete")
+                if self.send_request(url, self.delete.value, "delete"):
+                    self.quit()
 
             if self.start.value:
-                npyscreen.notify_confirm("Start")
                 url = network_port + '/start'
-                self.send_request(url, self.start.value, "start")
+                if self.send_request(url, self.start.value, "start"):
+                    self.quit()
 
             if self.stop.value:
-                npyscreen.notify_confirm("Stop")
                 url = network_port + '/stop'
-                self.send_request(url, self.stop.value, "stop")
-
-            self.quit()
+                if self.send_request(url, self.stop.value, "stop"):
+                    self.quit()
 
         else:
             npyscreen.notify_confirm("Please ensure network tap is running")
@@ -156,9 +158,9 @@ class AddNTap(npyscreen.ActionForm):
         if not self.delete.value and not self.create.value and not \
         self.stop.value and not self.start.value:
             npyscreen.notify_confirm("Please fill out at least one field")
-            self.quit()
 
         return
+
 
     def on_cancel(self):
         """ when user cancels, return to MAIN """
