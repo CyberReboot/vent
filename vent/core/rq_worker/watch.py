@@ -18,13 +18,16 @@ def gpu_queue(options):
 
     # device specified, remove all other devices
     if 'device' in gpu_options:
-        dev = '/dev/nvidia' + gpu_options['device'] + ':rwm'
+        dev = '/dev/nvidia' + gpu_options['device'] + ':/dev/nvidia'
+        dev += gpu_options['device'] + ':rwm'
         if 'devices' in configs:
             devices = configs['devices']
             for device in devices:
                 if any(str.isdigit(str(char)) for char in device):
                     if dev is not device:
                         configs['devices'].remove(device)
+
+    # TODO check if configs['devices'] is now an empty list
 
     # TODO overriding until this is working
     # wait = True
