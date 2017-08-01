@@ -9,6 +9,9 @@ def gpu_queue(options):
 
     status = (False, None)
 
+    print("gpu queue", str(options))
+    print("gpu queue", str(GpuUsage()))
+
     options = json.loads(options)
     configs = options['configs']
     gpu_options = configs['gpu_options']
@@ -22,9 +25,6 @@ def gpu_queue(options):
                 if any(str.isdigit(str(char)) for char in device):
                     if dev is not device:
                         configs['devices'].remove(device)
-
-    print("gpu queue", str(options))
-    print("gpu queue", str(GpuUsage()))
 
     # TODO overriding until this is working
     # wait = True
@@ -245,9 +245,12 @@ def file_queue(path, template_path="/vent/"):
                             except Exception as e:  # pragma: no cover
                                 failed_images.add(image_name)
                                 status = (False, str(e))
+                                print("Failure with nvidia-docker-plugin: " +
+                                      str(e))
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
+                    print("Unable to process gpu options: " + str(e))
 
         # TODO add connections to syslog, labels, and file path etc.
         # TODO get syslog address rather than hardcode
@@ -266,6 +269,7 @@ def file_queue(path, template_path="/vent/"):
             q = Queue(connection=Redis(host='redis'), default_timeout=86400)
         except Exception as e:  # pragma: no cover
             can_queue_gpu = False
+            print("Unable to connect to redis: " + str(e))
 
         # start containers
         for image in images:
@@ -305,5 +309,7 @@ def file_queue(path, template_path="/vent/"):
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
+        print("Failed to process job: " + str(e))
 
+    print(str(status))
     return status
