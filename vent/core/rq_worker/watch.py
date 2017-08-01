@@ -283,10 +283,7 @@ def file_queue(path, template_path="/vent/"):
                 else:
                     configs[image]['volumes'] = volumes
 
-                print(str(configs[image]))
-                if ('labels' in configs[image] and
-                   'vent.gpu' in configs[image]['labels'] and
-                   configs[image]['labels']['vent.gpu'] == 'yes'):
+                if 'vent.gpu' in labels and labels['vent.gpu'] == 'yes':
                     if can_queue_gpu:
                         # queue up containers requiring a gpu
                         q_str = json.dumps({'image': image,
@@ -299,6 +296,8 @@ def file_queue(path, template_path="/vent/"):
                     else:
                         failed_images.add(image)
                 else:
+                    if 'gpu_options' in configs[image]:
+                        del configs[image]['gpu_options']
                     d_client.containers.run(image=image,
                                             command=path,
                                             labels=labels,
