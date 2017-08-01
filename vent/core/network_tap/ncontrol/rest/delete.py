@@ -23,18 +23,18 @@ class DeleteR:
         try:
             payload = ast.literal_eval(data)
         except Exception as e:  # pragma: no cover
-            return 'malformed payload : ' + str(e)
+            return (False, 'malformed payload : ' + str(e))
 
         # verify payload has a container ID
         if 'id' not in payload:
-            return 'payload missing container id'
+            return (False, 'payload missing container id')
 
         # connect to docker and stop the given container
         c = None
         try:
             c = docker.from_env()
         except Exception as e:  # pragma: no cover
-            return 'unable to connect to docker because: ' + str(e)
+            return (False, 'unable to connect to docker because: ' + str(e))
 
         # if user gives a list of id, delete them all
         if isinstance(payload['id'], list):
@@ -42,12 +42,13 @@ class DeleteR:
                 for container_id in payload['id']:
                     c.containers.get(container_id).remove()
             except Exception as e:  # pragma: no cover
-                return 'unable to delete list of containers because: ' + str(e)
+                return (False, 'unable to delete list of containers because: ' +
+                        str(e))
         # if user gives just one id, delete it
         else:
             try:
                 c.containers.get(payload['id']).remove()
             except Exception as e:  # pragma: no cover
-                return 'unable to delete container because: ' + str(e)
+                return (False, 'unable to delete container because: ' + str(e))
 
-        return ('container successfully deleted: ' + str(payload['id']))
+        return (True, 'container successfully deleted: ' + str(payload['id']))

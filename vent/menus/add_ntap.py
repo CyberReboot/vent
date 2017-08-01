@@ -169,21 +169,30 @@ class AddNTap(npyscreen.ActionForm):
                         url = network_port + '/create'
                         resp = self.send_request(url, self.create.value,
                                                  "create")
+                        npyscreen.notify_confirm(resp[1])
+                        if resp[0]:
+                            self.create.value=''
 
                 if self.delete.value:
                     url = network_port + '/delete'
                     resp = self.send_request(url, self.delete.value, "delete")
-                    npyscreen.notify_confirm(resp)
+                    npyscreen.notify_confirm(resp[1])
+                    if resp[0]:
+                        self.delete.value=''
 
                 if self.start.value:
                     url = network_port + '/start'
                     resp = self.send_request(url, self.start.value, "start")
-                    npyscreen.notify_confirm(resp)
+                    npyscreen.notify_confirm(resp[1])
+                    if resp[0]:
+                        self.start.value=''
 
                 if self.stop.value:
                     url = network_port + '/stop'
                     resp = self.send_request(url, self.stop.value, "stop")
-                    npyscreen.notify_confirm(resp)
+                    npyscreen.notify_confirm(resp[1])
+                    if resp[0]:
+                        self.stop.value=''
 
                 # update the containers list
                 containers = self.get_list(self.get_ntap_port())
@@ -192,8 +201,6 @@ class AddNTap(npyscreen.ActionForm):
                 npyscreen.notify_confirm("unsuccessful call to network \
                                          tap list" + str(e),
                                          form_color='CAUTION')
-
-
 
         else:
             npyscreen.notify_confirm("Please ensure network tap is running")
@@ -204,7 +211,6 @@ class AddNTap(npyscreen.ActionForm):
             npyscreen.notify_confirm("Please fill out at least one field")
 
         return
-
 
     def on_cancel(self):
         """ when user cancels, return to MAIN """

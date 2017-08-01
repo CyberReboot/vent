@@ -567,9 +567,14 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
-        self.m6.addItem(text='Network Tap Interface',
-                        onSelect=self.system_commands,
-                        arguments=['ntinterface'], shortcut='n')
+        #  self.m6.addItem(text='Network Tap Interface',
+                        #  onSelect=self.system_commands,
+                        #  arguments=['ntinterface'], shortcut='n')
+        self.m6.addNewSubmenu(name='Network Tap Interface', shortcut='n')
+        self.m6.addItem(text='Create', shortcut='c')
+        self.m6.addItem(text='Delete', shortcut='d')
+        self.m6.addItem(text='Start', shortcut='s')
+        self.m6.addItem(text='Stop', shortcut='t')
 
         # Tutorial Menu Items
         self.m7 = self.add_menu(name="Tutorials", shortcut="t")

@@ -58,14 +58,14 @@ class CreateR:
         try:
             r = redis.StrictRedis(host='redis', port=6379, db=0)
         except Exception as e:  # pragma: no cover
-            return 'unable to connect to redis because: ' + str(e)
+            return (False,'unable to connect to redis because: ' + str(e))
 
         # connect to docker
         c = None
         try:
             c = docker.from_env()
         except Exception as e:  # pragma: no cover
-            return 'unable to connect to docker because: ' + str(e)
+            return (False, 'unable to connect to docker because: ' + str(e))
 
         # store payload in redis
         if r:
@@ -85,7 +85,7 @@ class CreateR:
                 container_id = c.containers.run(image='cyberreboot/vent-ncapture:master',
                                                 command=cmd, detach=True, **tool_d)
             except Exception as e:  # pragma: no cover
-                return 'unable to start container because: ' + str(e)
+                return (False, 'unable to start container because: ' + str(e))
 
-        return ('successfully created and started filter ' +
+        return (True, 'successfully created and started filter ' +
                 str(payload['id']) + ' on container: ' + str(container_id))
