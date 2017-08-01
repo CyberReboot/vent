@@ -79,10 +79,10 @@ class AddNTap(npyscreen.ActionForm):
                  editable=False,
                  color="STANDOUT")
 
-        box = self.add(npyscreen.BoxTitle, name="Network Tap Containers",
+        self.box = self.add(npyscreen.BoxTitle, name="Network Tap Containers",
                 max_height=10)
-        box.entry_widget.scroll_exit = True
-        box.values = ast.literal_eval(containers)
+        self.box.entry_widget.scroll_exit = True
+        self.box.values = ast.literal_eval(containers)
 
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
@@ -92,15 +92,14 @@ class AddNTap(npyscreen.ActionForm):
     def send_request(self, network_port, json_data, action):
         """ Send a post/get request to the right port/url """
         try:
-            npyscreen.notify_wait("please wait...")
+            npyscreen.notify_wait("please wait..." + action)
             url = "http://" + str(network_port)
             data = ast.literal_eval(json_data)
             data = json.dumps(data)
             req = urllib2.Request(url,data)
             req.add_header('Content-Type', 'application/json')
             response = urllib2.urlopen(req, data)
-            npyscreen.notify_confirm("Success: " + action + " " + json_data)
-            return True
+            return response.read()
         except Exception as e:  # pragma: no cover
             npyscreen.notify_confirm("unsuccessful call to network tap " +
                                      action + ": " + str(e),
@@ -153,33 +152,48 @@ class AddNTap(npyscreen.ActionForm):
         network_port = self.get_ntap_port()
 
         if network_port:
-            if self.create.value:
-                # check to see if user input has the required fields
-                valid = ["nic", "id", "interval", "filter", "iters"]
-                not_in = [field for field in valid if field not in
-                        str(self.create.value)]
-                if not_in:
-                    npyscreen.notify_confirm("please include all required fields. \
-                                             missing: " + str(not_in))
-                else:
-                    url = network_port + '/create'
-                    if self.send_request(url, self.create.value, "create"):
-                        self.quit()
+            try:
+                # send the correct post requests to the right URLs depending on
+                # what the user wants
+                if self.create.value:
+                    # check to see if user input has the required fields
+                    valid = ["nic", "id", "interval", "filter", "iters"]
+                    not_in = [field for field in valid if field not in
+                              str(self.create.value)]
+                    if not_in:
+                        npyscreen.notify_confirm("please include all required "
+                                                 "fields. missing: " \
+                                                 + str(not_in))
+                        return
+                    else:
+                        url = network_port + '/create'
+                        resp = self.send_request(url, self.create.value,
+                                                 "create")
 
-            if self.delete.value:
-                url = network_port + '/delete'
-                if self.send_request(url, self.delete.value, "delete"):
-                    self.quit()
+                if self.delete.value:
+                    url = network_port + '/delete'
+                    resp = self.send_request(url, self.delete.value, "delete")
+                    npyscreen.notify_confirm(resp)
 
-            if self.start.value:
-                url = network_port + '/start'
-                if self.send_request(url, self.start.value, "start"):
-                    self.quit()
+                if self.start.value:
+                    url = network_port + '/start'
+                    resp = self.send_request(url, self.start.value, "start")
+                    npyscreen.notify_confirm(resp)
 
-            if self.stop.value:
-                url = network_port + '/stop'
-                if self.send_request(url, self.stop.value, "stop"):
-                    self.quit()
+                if self.stop.value:
+                    url = network_port + '/stop'
+                    resp = self.send_request(url, self.stop.value, "stop")
+                    npyscreen.notify_confirm(resp)
+
+                # update the containers list
+                containers = self.get_list(self.get_ntap_port())
+                self.box.values = ast.literal_eval(containers)
+            except Exception as e:  # pragma: no cover
+                npyscreen.notify_confirm("unsuccessful call to network \
+                                         tap list" + str(e),
+                                         form_color='CAUTION')
+
+
 
         else:
             npyscreen.notify_confirm("Please ensure network tap is running")

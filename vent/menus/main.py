@@ -390,13 +390,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             pass
         elif action == "ntinterface":
             form_args = {'color': 'CONTROL',
-                         'names': 'Network Tap Interface' + "\t"*8 + \
-                                  '^T to toggle main'
+                         'name': 'Network Tap Interface' + "\t"*6 + \
+                                  '^T to toggle main' + "\t"*6 + \
+                                  'Press TAB / Shift+TAB to switch forms' + \
+                                  "\t"*6 + \
+                                  'Press arrow to navigate container list'
                         }
             self.add_form(AddNTap, "Network Tap Interface", form_args)
-            #  forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
-            #  form_args['name'] = "Add plugins"
-            #  form_args['name'] += "\t"*6 + "^Q to quit"
         return
 
     def create(self):
