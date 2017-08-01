@@ -706,7 +706,7 @@ class Action:
             else:
                 status = (False, "Couldn't get vent.cfg information")
         else:
-            # all possible vent.template sections
+            # all possible vent.template options stored in plugin_manifest
             options = ['info', 'service', 'settings', 'docker', 'gpu']
             tools = self.p_helper.constraint_options(constraints, options)[0]
             if tools:
@@ -813,17 +813,8 @@ class Action:
                 except Exception as e:  # pragma: no cover
                     self.logger.error("save_configure error: " + str(e))
         else:
-            vent_cfg_path = os.path.join(os.path.expanduser('~'), '.vent',
-                                         'vent.cfg')
-            # remove the additional reminder we put in for editing purposes
-            warning_msg = "# you must specify settings as json strings" \
-                          " (double quotes)\n"
-            config_val = config_val.replace(warning_msg, '')
-            if os.path.exists(vent_cfg_path):
-                with open(vent_cfg_path, 'w') as f:
-                    f.write(config_val)
-            else:
-                status = (False, "Couldn't find configuration file")
+            with open(self.vent_config, 'w') as f:
+                f.write(config_val)
         self.logger.info("Status of save_configure: " + str(status[0]))
         self.logger.info("Finished: save_configure")
         return status

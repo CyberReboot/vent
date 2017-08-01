@@ -307,8 +307,7 @@ class PluginHelper:
 
             # check for log_config settings in external-services
             externally_configured = False
-            vent_config = Template(template=join(self.path_dirs.meta_dir,
-                                                 "vent.cfg"))
+            vent_config = Template(self.path_dirs.cfg_file)
             if 'log_config' in vent_config.options('external-services')[1]:
                 try:
                     log_dict = json.loads(vent_config.option('external-services',
