@@ -28,6 +28,7 @@ class ListR:
                     lst = {}
                     lst['id'] = c.attrs["Id"][:12]
                     lst['status'] = c.attrs["State"]["Status"]
+                    lst['args'] = c.attrs['Args']
                     container_list.append(lst)
 
-        return ("Container IDs: " + str(container_list))
+        return container_list

@@ -70,6 +70,19 @@ class AddNTap(npyscreen.ActionForm):
         self.stop = self.add(npyscreen.TitleText, name='Stop container '
                              'id(s): ')
 
+        self.nextrely += 1
+
+        # list fields
+        containers = self.get_list(self.get_ntap_port())
+        self.add(npyscreen.Textfield,
+                 value='List of all network tap containers.',
+                 editable=False,
+                 color="STANDOUT")
+
+        box = self.add(npyscreen.BoxTitle, name="Network Tap Containers",
+                max_height=10)
+        box.entry_widget.scroll_exit = True
+        box.values = ast.literal_eval(containers)
 
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
@@ -79,7 +92,8 @@ class AddNTap(npyscreen.ActionForm):
     def send_request(self, network_port, json_data, action):
         """ Send a post/get request to the right port/url """
         try:
-            url = "http://" + network_port
+            npyscreen.notify_wait("please wait...")
+            url = "http://" + str(network_port)
             data = ast.literal_eval(json_data)
             data = json.dumps(data)
             req = urllib2.Request(url,data)
@@ -93,14 +107,25 @@ class AddNTap(npyscreen.ActionForm):
                                      form_color='CAUTION')
             return False
 
+    def get_list(self, network_port):
+        """ Get a list of all network tap containers """
+        try:
+            url = "http://" + str(network_port) + "/list"
+            response = urllib2.urlopen(url)
+            return response.read()
+        except Exception as e:  # pragma: no cover
+            npyscreen.notify_confirm("unsuccessful call to network tap list"
+                                     + str(e),
+                                     form_color='CAUTION')
 
-    def on_ok(self):
-        """ Create, stop, start, delete network tap containers """
+    def get_ntap_port(self):
+        """
+        iterate through the containers to grab network tap and the port it's
+        listening to
+        """
         d = docker.from_env()
         containers = d.containers.list(filters={'label': 'vent'}, all=True)
 
-        # iterate through the containers to grab network tap and the port it's
-        # listening to
         network_port = ''
         found = False
         for c in containers:
@@ -120,8 +145,13 @@ class AddNTap(npyscreen.ActionForm):
             # no need to cycle every single container if we found our ports
             if found:
                 break
+        return network_port
 
+    def on_ok(self):
+        """ Create, stop, start, delete network tap containers """
         # make the appropriate post requests if the textbox isnt blank
+        network_port = self.get_ntap_port()
+
         if network_port:
             if self.create.value:
                 # check to see if user input has the required fields
