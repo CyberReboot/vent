@@ -17,8 +17,10 @@ class RmqEs():
     """
     es_conn = None
     es_host = None
+    # get custom set port or else use default port
     es_port = int(os.getenv("ELASTICSEARCH_CUSTOM_PORT", 9200))
     rmq_host = None
+    # get custom set port or else use default port
     rmq_port = int(os.getenv("RABBITMQ_CUSTOM_PORT", 5672))
     channel = None
     queue_name = None

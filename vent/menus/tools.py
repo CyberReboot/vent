@@ -1,9 +1,11 @@
+import json
 import npyscreen
 import time
 
 from threading import Thread
 
 from vent.api.actions import Action
+from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
@@ -79,7 +81,27 @@ class ToolForm(npyscreen.ActionForm):
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
                        repo_name[1] == tool_repo_name[1]):
-                        ncore_list.append(tool.split(":", 2)[2].split("/")[-1])
+                        # check to ensure tool not set to locally active = no
+                        # in vent.cfg
+                        vent_cfg_file = self.action['api_action'].vent_config
+                        vent_cfg = Template(vent_cfg_file)
+                        tool_pairs = vent_cfg.section('external-services')[1]
+                        display = True
+                        for ext_tool in tool_pairs:
+                            if ext_tool[0].lower() == inventory['tools'][tool]:
+                                try:
+                                    ext_tool_options = json.loads(ext_tool[1])
+                                    loc = 'locally_active'
+                                    if (loc in ext_tool_options and
+                                            ext_tool_options[loc] == 'no'):
+                                        display = False
+                                except Exception as e:
+                                    self.logger.error("Couldn't check ext"
+                                                      " because: " + str(e))
+                                    display = True
+                        if display:
+                            ncore_list.append(tool.split(":",
+                                                         2)[2].split("/")[-1])
 
                 for tool in inventory['core']:
                     tool_repo_name = tool.split(":")
@@ -87,7 +109,27 @@ class ToolForm(npyscreen.ActionForm):
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
                        repo_name[1] == tool_repo_name[1]):
-                        core_list.append(tool.split(":", 2)[2].split("/")[-1])
+                        # check to ensure tool not set to locally active = no
+                        # in vent.cfg
+                        vent_cfg_file = self.action['api_action'].vent_config
+                        vent_cfg = Template(vent_cfg_file)
+                        tool_pairs = vent_cfg.section('external-services')[1]
+                        display = True
+                        for ext_tool in tool_pairs:
+                            if ext_tool[0].lower() == inventory['core'][tool]:
+                                try:
+                                    ext_tool_options = json.loads(ext_tool[1])
+                                    loc = 'locally_active'
+                                    if (loc in ext_tool_options and
+                                            ext_tool_options[loc] == 'no'):
+                                        display = False
+                                except Exception as e:
+                                    self.logger.error("Couldn't check ext"
+                                                      " because: " + str(e))
+                                    display = True
+                        if display:
+                            core_list.append(tool.split(":",
+                                                        2)[2].split("/")[-1])
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
@@ -234,6 +276,7 @@ class ToolForm(npyscreen.ActionForm):
                                  'next_tool': None,
                                  'get_configure': self.action['action_object1'],
                                  'save_configure': self.action['action_object2'],
+                                 'restart_tools': self.action['action_object3'],
                                  'from_registry': registry_image,
                                  'registry_download': False}
                         if tools_to_configure:

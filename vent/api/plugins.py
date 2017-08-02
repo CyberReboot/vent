@@ -552,6 +552,7 @@ class Plugin:
             template.set_option(section, "built", "no")
             template.set_option(section, "last_updated",
                                 str(datetime.utcnow()) + " UTC")
+        template.set_option(section, 'running', 'no')
         return template
 
     def list_tools(self):
