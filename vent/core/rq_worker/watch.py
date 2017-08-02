@@ -23,8 +23,10 @@ def gpu_queue(options):
         if 'devices' in configs:
             devices = configs['devices']
             for device in devices:
+                print(dev + " compared to " + device)
                 if any(str.isdigit(str(char)) for char in device):
                     if dev is not device:
+                        print(dev + " doesn't match, removing: " + device)
                         configs['devices'].remove(device)
 
     # TODO check if configs['devices'] is now an empty list
