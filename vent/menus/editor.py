@@ -6,6 +6,8 @@ class EditorForm(npyscreen.ActionForm):
     def __init__(self, *args, **keywords):
         """ Initialize EditorForm objects """
         self.save = keywords['save_configure']
+        if 'restart_tools' in keywords:
+            self.restart_tools = keywords['restart_tools']
         if 'vent_cfg' in keywords and keywords['vent_cfg']:
             self.vent_cfg = True
             self.config_val = keywords['get_configure'](main_cfg=True)[1]
@@ -39,6 +41,26 @@ class EditorForm(npyscreen.ActionForm):
 
     def create(self):
         """ Create multi-line widget for editing """
+        # add various pointers to those editing vent_cfg
+        if self.vent_cfg:
+            self.add(npyscreen.Textfield,
+                     value='# when configuring external'
+                           ' services make sure to do so',
+                     editable=False)
+            self.add(npyscreen.Textfield,
+                     value='# in the form of Service = {"setting": "value"}',
+                     editable=False)
+            self.add(npyscreen.Textfield,
+                     value='# make sure to capitalize your service correctly'
+                           ' (i.e. Elasticsearch vs. elasticsearch)',
+                     editable=False)
+            self.add(npyscreen.Textfield,
+                     value='# and make sure to enclose all dict keys and'
+                           ' values in double quotes ("")',
+                     editable=False)
+            self.add(npyscreen.Textfield,
+                     value='',
+                     editable=False)
         self.edit_space = self.add(npyscreen.MultiLineEdit,
                                    value=self.config_val)
 
@@ -61,6 +83,17 @@ class EditorForm(npyscreen.ActionForm):
             if self.from_registry:
                 save_args.update({'from_registry': True})
             self.save(**save_args)
+        if hasattr(self, 'restart_tools'):
+            restart_kargs = {'main_cfg': self.vent_cfg,
+                             'old_val': self.config_val,
+                             'new_val': self.edit_space.value}
+            if not self.vent_cfg:
+                restart_kargs.update({'name': self.tool_name,
+                                      'version': self.version,
+                                      'branch': self.branch})
+            npyscreen.notify_wait("Restarting tools affected by changes...",
+                                  title="Restart")
+            self.restart_tools(**restart_kargs)
         npyscreen.notify_confirm("Done configuring " + self.tool_name,
                                  title="Configurations saved")
         self.change_screens()
