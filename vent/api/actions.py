@@ -683,7 +683,8 @@ class Action:
                       groups=None,
                       enabled="yes",
                       branch="master",
-                      version="HEAD"):
+                      version="HEAD",
+                      main_cfg=False):
         """
         Get the vent.template settings for a given tool by looking at the
         plugin_manifest
@@ -691,18 +692,28 @@ class Action:
         self.logger.info("Starting: get_configure")
         constraints = locals()
         status = (True, None)
-        # all possible vent.template sections
-        options = ['info', 'service', 'settings', 'docker', 'gpu']
-        tools = self.p_helper.constraint_options(constraints, options)[0]
-        if tools:
-            # should only be one tool
-            tool = tools.keys()[0]
-            # load all vent.template options into dict
-            template_dict = {}
-            for section in tools[tool]:
-                template_dict[section] = json.loads(tools[tool][section])
-            # display all those options as they would in vent.template
-            return_str = ""
+        template_dict = {}
+        return_str = ""
+        if main_cfg:
+            vent_cfg = Template(self.vent_config)
+            for section in vent_cfg.sections()[1]:
+                template_dict[section] = {}
+                for vals in vent_cfg.section(section)[1]:
+                    template_dict[section][vals[0]] = vals[1]
+        else:
+            # all possible vent.template options stored in plugin_manifest
+            options = ['info', 'service', 'settings', 'docker', 'gpu']
+            tools = self.p_helper.constraint_options(constraints, options)[0]
+            if tools:
+                # should only be one tool
+                tool = tools.keys()[0]
+                # load all vent.template options into dict
+                for section in tools[tool]:
+                    template_dict[section] = json.loads(tools[tool][section])
+            else:
+                status = (False, "Couldn't get vent.template information")
+        if status[0]:
+            # display all those options as they would in the file
             for section in template_dict:
                 return_str += "[" + section + "]\n"
                 for option in template_dict[section]:
@@ -711,8 +722,6 @@ class Action:
                 return_str += "\n"
             # only one newline at end of file
             status = (True, return_str[:-1])
-        else:
-            status = (False, "Couldn't get vent.template")
         self.logger.info("Status of get_configure: " + str(status[0]))
         self.logger.info("Finished: get_configure")
         return status
@@ -725,7 +734,8 @@ class Action:
                        branch="master",
                        version="HEAD",
                        config_val="",
-                       from_registry=False):
+                       from_registry=False,
+                       main_cfg=False):
         """
         Save changes made to vent.template through npyscreen to the template
         and to plugin_manifest
@@ -734,67 +744,186 @@ class Action:
         constraints = locals()
         del constraints['config_val']
         del constraints['from_registry']
+        del constraints['main_cfg']
         status = (True, None)
         fd = None
-        if not from_registry:
-            options = ['path']
-            tools, manifest = self.p_helper.constraint_options(constraints,
-                                                               options)
-            # only one tool in tools because do this function for every tool
-            if tools:
-                tool = tools.keys()[0]
-                template_path = os.path.join(tools[tool]['path'],
-                                             'vent.template')
+        if not main_cfg:
+            if not from_registry:
+                options = ['path']
+                tools, manifest = self.p_helper.constraint_options(constraints,
+                                                                   options)
+                # only one tool in tools because perform this function for
+                # every tool
+                if tools:
+                    tool = tools.keys()[0]
+                    template_path = os.path.join(tools[tool]['path'],
+                                                 'vent.template')
+                else:
+                    status = (False, "Couldn't save configuration")
             else:
-                status = (False, "Couldn't save configuration")
+                fd, template_path = tempfile.mkstemp(suffix='.template')
+                options = ['namespace']
+                constraints.update({'type': 'registry'})
+                del constraints['branch']
+                tools, manifest = self.p_helper.constraint_options(constraints,
+                                                                   options)
+                if tools:
+                    tool = tools.keys()[0]
+                else:
+                    status = (False, "Couldn't save configuration")
+            if status[0]:
+                try:
+                    # save in vent.template
+                    with open(template_path, 'w') as f:
+                        f.write(config_val)
+                    # save in plugin_manifest
+                    vent_template = Template(template_path)
+                    sections = vent_template.sections()
+                    if sections[0]:
+                        for section in sections[1]:
+                            section_dict = {}
+                            options = vent_template.options(section)
+                            if options[0]:
+                                for option in options[1]:
+                                    option_name = option
+                                    if option == 'name':
+                                        option_name = 'link_name'
+                                    opt_val = vent_template.option(section,
+                                                                   option)[1]
+                                    section_dict[option_name] = opt_val
+                            if section_dict:
+                                manifest.set_option(tool, section,
+                                                    json.dumps(section_dict))
+                            elif manifest.option(tool, section)[0]:
+                                manifest.del_option(tool, section)
+                        manifest.write_config()
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("save_configure error: " + str(e))
+                    status = (False, str(e))
+            # close os file handle and remove temp file
+            if from_registry:
+                try:
+                    os.close(fd)
+                    os.remove(template_path)
+                except Exception as e:  # pragma: no cover
+                    self.logger.error("save_configure error: " + str(e))
         else:
-            fd, template_path = tempfile.mkstemp(suffix='.template')
-            options = ['namespace']
-            constraints.update({'type': 'registry'})
-            del constraints['branch']
-            self.logger.info(constraints)
-            tools, manifest = self.p_helper.constraint_options(constraints,
-                                                               options)
-            if tools:
-                tool = tools.keys()[0]
-            else:
-                status = (False, "Couldn't save configuration")
-        if status[0]:
-            try:
-                # save in vent.template
-                with open(template_path, 'w') as f:
-                    f.write(config_val)
-                # save in plugin_manifest
-                vent_template = Template(template_path)
-                sections = vent_template.sections()
-                if sections[0]:
-                    for section in sections[1]:
-                        section_dict = {}
-                        options = vent_template.options(section)
-                        if options[0]:
-                            for option in options[1]:
-                                option_name = option
-                                if option == 'name':
-                                    option_name = 'link_name'
-                                option_val = vent_template.option(section,
-                                                                  option)[1]
-                                section_dict[option_name] = option_val
-                        if section_dict:
-                            manifest.set_option(tool, section,
-                                                json.dumps(section_dict))
-                        elif manifest.option(tool, section)[0]:
-                            manifest.del_option(tool, section)
-                    manifest.write_config()
-            except Exception as e:  # pragma: no cover
-                self.logger.error("save_configure error: " + str(e))
-                status = (False, str(e))
-        # close os file handle and remove temp file
-        if from_registry:
-            try:
-                os.close(fd)
-                os.remove(template_path)
-            except Exception as e:  # pragma: no cover
-                self.logger.error("save_configure error: " + str(e))
+            with open(self.vent_config, 'w') as f:
+                f.write(config_val)
         self.logger.info("Status of save_configure: " + str(status[0]))
         self.logger.info("Finished: save_configure")
+        return status
+
+    def restart_tools(self,
+                      repo=None,
+                      name=None,
+                      groups=None,
+                      enabled="yes",
+                      branch="master",
+                      version="HEAD",
+                      main_cfg=False,
+                      old_val='',
+                      new_val=''):
+        """
+        Restart necessary tools based on changes that have been made either to
+        vent.cfg or to vent.template. This includes tools that need to be
+        restarted because they depend on other tools that were changed.
+        """
+        self.logger.info("Starting: restart_tools")
+        status = (True, None)
+        if not main_cfg:
+            try:
+                t_identifier = {'name': name,
+                                'branch': branch,
+                                'version': version}
+                result = self.p_helper.constraint_options(t_identifier, [])
+                tool_d = result[0]
+                manifest = result[1]
+                for tool in tool_d:
+                    # only clean and start back up if running
+                    running = manifest.option(tool, 'running')
+                    if running[0] and running[1] == 'yes':
+                        self.clean(**t_identifier)
+                        tool_d = self.prep_start(**t_identifier)[1]
+                        self.start(tool_d)
+            except Exception as e:
+                self.logger.error('Trouble restarting tool ' + name +
+                                  'because: ' + str(e))
+                status = (False, str(e))
+        else:
+            try:
+                # string manipulation to get tools into arrays
+                ext_start = old_val.find('[external-services]')
+                if ext_start >= 0:
+                    ot_str = old_val[old_val.find('[external-services]') + 20:]
+                else:
+                    ot_str = ''
+                old_tools = []
+                for old_tool in ot_str.split('\n'):
+                    if old_tool != '':
+                        old_tools.append(old_tool.split('=')[0].strip())
+                ext_start = new_val.find('[external-services]')
+                if ext_start >= 0:
+                    nt_str = new_val[new_val.find('[external-services]') + 20:]
+                else:
+                    nt_str = ''
+                new_tools = []
+                for new_tool in nt_str.split('\n'):
+                    if new_tool != '':
+                        new_tools.append(new_tool.split('=')[0].strip())
+                # find tools changed
+                tool_changes = []
+                for old_tool in old_tools:
+                    if old_tool not in new_tools:
+                        tool_changes.append(old_tool.lower())
+                for new_tool in new_tools:
+                    if new_tool not in old_tools:
+                        tool_changes.append(new_tool.lower())
+                    else:
+                        # tool name will be the same
+                        oconf = old_val[old_val.find(new_tool):].split('\n')[0]
+                        nconf = new_val[new_val.find(new_tool):].split('\n')[0]
+                        if oconf != nconf:
+                            tool_changes.append(new_tool.lower())
+                # find dependencies
+                dependencies = []
+                manifest = Template(self.plugin.manifest)
+                for section in manifest.sections()[1]:
+                    # don't worry about dealing with tool if it's not running
+                    running = manifest.option(section, 'running')
+                    if not running[0] or running[1] != 'yes':
+                        continue
+                    t_name = manifest.option(section, 'name')[1]
+                    t_branch = manifest.option(section, 'branch')[1]
+                    t_version = manifest.option(section, 'version')[1]
+                    t_identifier = {'name': t_name,
+                                    'branch': t_branch,
+                                    'version': t_version}
+                    options = manifest.options(section)[1]
+                    if 'docker' in options:
+                        d_settings = json.loads(manifest.option(section,
+                                                                'docker')[1])
+                        self.logger.info(d_settings)
+                        if 'links' in d_settings:
+                            for link in json.loads(d_settings['links']):
+                                if link.lower() in tool_changes:
+                                    dependencies.append(t_identifier)
+                # restart tools
+                restart = tool_changes + dependencies
+                self.logger.info(restart)
+                for tool in restart:
+                    if isinstance(tool, dict):
+                        self.clean(**tool)
+                        tool_d = self.prep_start(**tool)[1]
+                    else:
+                        self.clean(name=tool)
+                        tool_d = self.prep_start(name=tool)[1]
+                    if tool_d:
+                        self.start(tool_d)
+            except Exception as e:
+                self.logger.error("Problem restarting tools: " + str(e))
+                status = (False, str(e))
+        self.logger.info("restart_tools finished with status: " +
+                         str(status[0]))
+        self.logger.info("Finished: restart_tools")
         return status
