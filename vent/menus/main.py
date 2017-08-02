@@ -21,6 +21,7 @@ from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.ntap import CreateNTap
+from vent.menus.ntap import ListNTap
 from vent.menus.ntap import SSDNTap
 from vent.menus.backup import BackupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
@@ -416,7 +417,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                   'Press arrow to navigate container list'
                         }
             self.add_form(SSDNTap, "Network Tap Stop", form_args)
-
+        elif action == "ntaplist":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface List' + "\t"*6 + \
+                                  '^T to toggle main' + "\t"*6
+                        }
+            self.add_form(ListNTap, "Network Tap List", form_args)
         return
 
     def create(self):

@@ -79,6 +79,47 @@ class CreateNTap(npyscreen.ActionForm):
         """ When user cancels, return to MAIN """
         self.quit()
 
+class ListNTap(npyscreen.ActionForm):
+    """ For listing all network tap capture containers """
+    def create(self):
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.add(npyscreen.Textfield,
+                 value= 'List all network tap capture containers',
+                 editable=False,
+                 color="STANDOUT")
+
+        self.nextrely += 1
+
+        try:
+            self.api_action = Action()
+            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/list'
+            request = self.api_action.get_request(url)
+
+            if request[0]:
+                box = self.add(npyscreen.BoxTitle,
+                               name="Network Tap Capture Containers",
+                               max_height = 40)
+                request = ast.literal_eval(str(request[1]))
+                data = [d for d in list(request[1])]
+                box.values = data
+            else:
+                npyscreen.notify_confirm("Failure: " + request[1])
+
+        except Exception as e:  # pragma no cover
+            npyscreen.notify_confirm("Failure: " + request[1])
+
+    def quit(self, *args, **kwargs):
+        """ Overriden to switch back to MAIN form """
+        self.parentApp.switchForm("MAIN")
+
+    def on_cancel(self):
+        """ When user cancels, return to MAIN """
+        self.quit()
+
+    def on_ok(self):
+        self.quit()
+
+
 class SSDNTap(npyscreen.ActionForm):
     """ For deleting/starting/stopping network tap capture containers """
     #  def __init__(self, n_action):
