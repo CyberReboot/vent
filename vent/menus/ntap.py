@@ -18,7 +18,7 @@ class CreateNTap(npyscreen.ActionForm):
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
                  value='via a POST request '
-                         'to the url of the core network tap tool. ',
+                        'to the url of the core network tap tool. ',
                  editable=False,
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
@@ -27,7 +27,7 @@ class CreateNTap(npyscreen.ActionForm):
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
                  value=' {"nic": "eth0", "id": "testId", "interval": "60" '
-                         '"filter": "", "iters": "1"} ',
+                       '"filter": "", "iters": "1"} ',
                  editable=False,
                  color="STANDOUT")
 
@@ -42,7 +42,7 @@ class CreateNTap(npyscreen.ActionForm):
     def on_ok(self):
         # error check to make sure all fields were filled out
         if not self.nic.value or not self.id.value or not self.interval.value \
-            or not self.iters.value:
+           or not self.iters.value:
             npyscreen.notify_confirm("Please fill out all fields",
                                      form_color='CAUTION')
             return
@@ -64,6 +64,7 @@ class CreateNTap(npyscreen.ActionForm):
 
             if request[0]:
                 npyscreen.notify_confirm("Success: " + str(request[1]))
+                self.quit()
 
             else:
                 npyscreen.notify_confirm("Failure: " + str(request[1]))
@@ -84,9 +85,9 @@ class CreateNTap(npyscreen.ActionForm):
 class ListNTap(npyscreen.ActionForm):
     """ For listing all network tap capture containers """
     def create(self):
-        self.add_handlers({"^T":self.quit, "^Q":self.quit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.Textfield,
-                 value= 'List all network tap capture containers',
+                 value='List all network tap capture containers',
                  editable=False,
                  color="STANDOUT")
 
@@ -129,7 +130,7 @@ class ActionNTap(npyscreen.ActionForm):
         super(ActionNTap, self).__init__(*args, **kwargs)
 
     def create(self):
-        self.add_handlers({"^T":self.quit, "^Q":self.quit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.Textfield,
                  value=self.n_action + ' a network tap capture container.',
                  editable=False,

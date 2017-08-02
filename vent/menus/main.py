@@ -395,34 +395,34 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             pass
         elif action == "ntapcreate":
             form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface Create' + "\t"*6 + \
-                                  '^T to toggle main'
+                         'name': 'Network Tap Interface Create' + "\t"*6 +
+                                 '^T to toggle main'
                         }
             self.add_form(CreateNTap, "Network Tap Create", form_args)
         elif action == "ntapdelete":
             form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface Delete' + "\t"*6 + \
-                                  '^T to toggle main' + "\t"*6 + \
-                                  'Press arrow to navigate container list'
+                         'name': 'Network Tap Interface Delete' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'
                         }
             self.add_form(DeleteNTap, "Network Tap Delete", form_args)
         elif action == "ntapstart":
             form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface Start' + "\t"*6 + \
-                                  '^T to toggle main' + "\t"*6 + \
-                                  'Press arrow to navigate container list'
+                         'name': 'Network Tap Interface Start' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'
                         }
             self.add_form(StartNTap, "Network Tap Start", form_args)
         elif action == "ntapstop":
             form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface Stop' + "\t"*6 + \
-                                  '^T to toggle main' + "\t"*6 + \
-                                  'Press arrow to navigate container list'
+                         'name': 'Network Tap Interface Stop' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'
                         }
             self.add_form(StopNTap, "Network Tap Stop", form_args)
         elif action == "ntaplist":
             form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface List' + "\t"*6 + \
+                         'name': 'Network Tap Interface List' + "\t"*6 +
                                   '^T to toggle main' + "\t"*6
                         }
             self.add_form(ListNTap, "Network Tap List", form_args)

@@ -816,21 +816,21 @@ class Action:
             A tuple of success status and whatever the url is supposed to give
             after a POST request or a failure message
         """
-        #try:
-        # evaluate the data and dump it into something json likes
-        data = ast.literal_eval(str(json_data))
-        data = json.dumps(data)
+        try:
+            # evaluate the data and dump it into something json likes
+            data = ast.literal_eval(str(json_data))
+            data = json.dumps(data)
 
-        # create the post request and send it off
-        req = urllib2.Request(url,data)
-        req.add_header('Content-Type', 'application/json')
-        response = urllib2.urlopen(req, data)
+            # create the post request and send it off
+            req = urllib2.Request(url, data)
+            req.add_header('Content-Type', 'application/json')
+            response = urllib2.urlopen(req, data)
 
-        # return whatever the webpage returned
-        return (True, response.read())
-        #  except Exception as e:  # pragma: no cover
-            #  return (False, "failed post request to " + url + " " +
-        #              ": " + str(e))
+            # return whatever the webpage returned
+            return (True, response.read())
+        except Exception as e:  # pragma: no cover
+            return (False, "failed post request to " + url + " " +
+                    ": " + str(e))
 
     def get_request(self, url):
         """
@@ -851,8 +851,9 @@ class Action:
 
     def get_vent_tool_url(self, tool_name):
         """
-        Iterate through all containers and grab the port number corresponding to
-        the given tool name. Works for only CORE tools.
+        Iterate through all containers and grab the port number
+        corresponding to the given tool name. Works for only CORE tools
+        since it specifically looks for core
 
         Args:
             tool_name(str): tool name to search for. Eg: network-tap
