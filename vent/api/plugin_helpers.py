@@ -308,24 +308,34 @@ class PluginHelper:
             # check for log_config settings in external-services
             externally_configured = False
             vent_config = Template(self.path_dirs.cfg_file)
-            if 'log_config' in vent_config.options('external-services')[1]:
-                try:
-                    log_dict = json.loads(vent_config.option('external-services',
-                                                             'log_config')[1])
-                    # can only have one log_config at a time
-                    if ('locally_active' not in log_dict or
-                            log_dict['locally_active'] == 'no'):
-                        del log_dict['locally_active']
-                        log_config = {}
-                        log_config['type'] = log_dict['type']
-                        log_config['config'] = {}
-                        for option in log_dict['config']:
-                            log_config['config'][option] = log_dict['config'][option]
-                        externally_configured = True
-                except Exception as e:
-                    self.logger.error("external settings for log_config"
-                                      " couldn't be stored because: " + str(e))
-                    externally_configured = False
+            for ext_tool in vent_config.section('external-services')[1]:
+                if ext_tool[0].lower() == 'syslog':
+                    try:
+                        log_dict = json.loads(ext_tool[1])
+                        # configure if not locally active
+                        if ('locally_active' not in log_dict or
+                                log_dict['locally_active'] == 'no'):
+                            del log_dict['locally_active']
+                            log_config = {}
+                            log_config['type'] = 'syslog'
+                            log_config['config'] = {}
+                            ip_address = ''
+                            port = ''
+                            for option in log_dict:
+                                if option == 'ip_address':
+                                    ip_address = log_dict[option]
+                                elif option == 'port':
+                                    port = log_dict['port']
+                            syslog_address = 'tcp://' + ip_address + ':' + port
+                            syslog_config = {'syslog-address': syslog_address,
+                                             'syslog-facility': 'deamon',
+                                             'tag': 'plugin'}
+                            log_config['config'].update(syslog_config)
+                            externally_configured = True
+                    except Exception as e:
+                        self.logger.error("external settings for log_config"
+                                          " couldn't be stored because: " + str(e))
+                        externally_configured = False
             if not externally_configured:
                 log_config = {'type': 'syslog',
                               'config': {'syslog-address': 'tcp://0.0.0.0:514',
@@ -385,6 +395,9 @@ class PluginHelper:
             # only start tools that have been built
             if s[section]['built'] != 'yes':
                 del tool_d[c_name]
+            # store section information for adding info to manifest later
+            else:
+                tool_d[c_name]['section'] = section
         return status, tool_d
 
     def prep_start(self,
@@ -448,6 +461,8 @@ class PluginHelper:
                                     # create an environment variable for container
                                     # to access port later
                                     env_variable = link.upper() + "_CUSTOM_PORT=" + port
+                                    if 'environment' not in tool_d[container]:
+                                        tool_d[container]['environment'] = []
                                     tool_d[container]['environment'].append(env_variable)
                                     # remove the entry from links because no
                                     # longer connecting to local container
@@ -567,10 +582,15 @@ class PluginHelper:
                          s_containers,
                          f_containers):
         """ Start container that was passed in and return status """
+        # use section to add info to manifest
+        section = tool_d[container]['section']
+        del tool_d[container]['section']
+        manifest = Template(self.manifest)
         try:
             c = self.d_client.containers.get(container)
             c.start()
             s_containers.append(container)
+            manifest.set_option(section, 'running', 'yes')
             self.logger.info("started " + str(container) +
                              " with ID: " + str(c.short_id))
         except Exception as err:
@@ -635,6 +655,7 @@ class PluginHelper:
                     else:
                         failed = True
                         f_containers.append(container)
+                        manifest.set_option(section, 'running', 'failed')
                         self.logger.error("failed to start " + str(container) +
                                           " because nvidia-docker-plugin " +
                                           "failed with: " + str(r.status_code))
@@ -642,10 +663,14 @@ class PluginHelper:
                     cont_id = self.d_client.containers.run(detach=True,
                                                            **tool_d[container])
                     s_containers.append(container)
+                    manifest.set_option(section, 'running', 'yes')
                     self.logger.info("started " + str(container) +
                                      " with ID: " + str(cont_id))
             except Exception as e:  # pragma: no cover
                 f_containers.append(container)
+                manifest.set_option(section, 'running', 'failed')
                 self.logger.error("failed to start " + str(container) +
                                   " because: " + str(e))
+        # save changes made to manifest
+        manifest.write_config()
         return s_containers, f_containers

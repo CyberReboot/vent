@@ -813,3 +813,86 @@ class Action:
         self.logger.info("Status of save_configure: " + str(status[0]))
         self.logger.info("Finished: save_configure")
         return status
+
+    def restart_tools(self,
+                      repo=None,
+                      name=None,
+                      groups=None,
+                      enabled="yes",
+                      branch="master",
+                      version="HEAD",
+                      main_cfg=False,
+                      old_val='',
+                      new_val=''):
+        """
+        Restart necessary tools based on changes that have been made either to
+        vent.cfg or to vent.template. This includes tools that need to be
+        restarted because they depend on other tools that were changed.
+        """
+        self.logger.info("Starting: restart_tools")
+        status = (True, None)
+        if not main_cfg:
+            pass
+        else:
+            try:
+                # string manipulation to get tools into arrays
+                old_tool_str = old_val[old_val.find('[external-services]') + 7:]
+                old_tools = []
+                for old_tool in old_tool_str.split('\n'):
+                    old_tools.append(old_tool.split('=')[0].strip())
+                new_tool_str = new_val[old_val.find('[external-services]') + 7:]
+                new_tools = []
+                for new_tool in new_tool_str.split('\n'):
+                    new_tools.append(new_tool.split('=')[0].strip())
+                # find tools changed
+                tool_changes = []
+                for old_tool in old_tools:
+                    if old_tool not in new_tools:
+                        tool_changes.append(old_tool.lower())
+                for new_tool in new_tools:
+                    if new_tool not in old_tools:
+                        tool_changes.append(new_tool)
+                    else:
+                        # tool name will be the same
+                        old_setting = old_val[old_val.find(new_tool):].split('\n')[0]
+                        new_setting = new_val[new_val.find(new_tool):].split('\n')[0]
+                        if old_setting != new_setting:
+                            tool_changes.append(new_tool.lower())
+                # find dependencies
+                dependencies = []
+                manifest = Template(self.plugin.manifest)
+                for section in manifest.sections()[1]:
+                    # don't worry about dealing with tool if it's not running
+                    running = manifest.option(section, 'running')
+                    if not running[0] or running[1] != 'yes':
+                        continue
+                    t_identifier = {'name': manifest.option(section, 'name')[1],
+                                    'branch': manifest.option(section, 'branch')[1],
+                                    'version': manifest.option(section, 'version')[1]}
+                    options = manifest.options(section)[1]
+                    if 'docker' in options:
+                        d_settings = json.loads(manifest.option(section,
+                                                                'docker')[1])
+                        self.logger.info(d_settings)
+                        if 'links' in d_settings:
+                            for link in json.loads(d_settings['links']):
+                                if link.lower() in tool_changes:
+                                    dependencies.append(t_identifier)
+                # restart tools
+                restart = tool_changes + dependencies
+                self.logger.info(restart)
+                for tool in restart:
+                    if isinstance(tool, dict):
+                        self.clean(**tool)
+                        tool_d = self.prep_start(**tool)[1]
+                    else:
+                        self.clean(name=tool)
+                        tool_d = self.prep_start(name=tool)[1]
+                    if tool_d:
+                        self.start(tool_d)
+            except Exception as e:
+                self.logger.error("Problem restarting tools: " + str(e))
+                status = (False, str(e))
+        self.logger.info("restart_tools finished with status: " +
+                         str(status[0]))
+        self.logger.info("Finished: restart_tools")

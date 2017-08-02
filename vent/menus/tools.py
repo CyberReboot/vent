@@ -272,6 +272,7 @@ class ToolForm(npyscreen.ActionForm):
                                  'next_tool': None,
                                  'get_configure': self.action['action_object1'],
                                  'save_configure': self.action['action_object2'],
+                                 'restart_tools': self.action['action_object3'],
                                  'from_registry': registry_image,
                                  'registry_download': False}
                         if tools_to_configure:

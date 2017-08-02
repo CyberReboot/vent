@@ -268,6 +268,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args['names'].pop()
             form_args['names'].append('get_configure')
             form_args['names'].append('save_configure')
+            form_args['names'].append('restart_tools')
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
@@ -353,6 +354,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args = {'name': 'Change vent configuration',
                          'get_configure': self.api_action.get_configure,
                          'save_configure': self.api_action.save_configure,
+                         'restart_tools': self.api_action.restart_tools,
                          'vent_cfg': True}
             add_kargs = {'form': EditorForm,
                          'form_name': 'CONFIGUREVENT',

@@ -6,6 +6,7 @@ class EditorForm(npyscreen.ActionForm):
     def __init__(self, *args, **keywords):
         """ Initialize EditorForm objects """
         self.save = keywords['save_configure']
+        self.restart_tools = keywords['restart_tools']
         if 'vent_cfg' in keywords and keywords['vent_cfg']:
             self.vent_cfg = True
             self.config_val = keywords['get_configure'](main_cfg=True)[1]
@@ -81,6 +82,8 @@ class EditorForm(npyscreen.ActionForm):
             if self.from_registry:
                 save_args.update({'from_registry': True})
             self.save(**save_args)
+        self.restart_tools(main_cfg=self.vent_cfg, old_val=self.config_val,
+                           new_val=self.edit_space.value)
         npyscreen.notify_confirm("Done configuring " + self.tool_name,
                                  title="Configurations saved")
         self.change_screens()
