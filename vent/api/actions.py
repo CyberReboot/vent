@@ -931,7 +931,8 @@ class Action:
         self.logger.info("Finished: restart_tools")
         return status
 
-    def post_request(self, url, json_data):
+    @staticmethod
+    def post_request(url, json_data):
         """
         Send a application/json post request to the given url
 
@@ -961,7 +962,8 @@ class Action:
             return (False, "failed post request to " + url + " " +
                     ": " + str(e))
 
-    def get_request(self, url):
+    @staticmethod
+    def get_request(url):
         """
         Send a get request to the given url
 
@@ -978,7 +980,8 @@ class Action:
         except Exception as e:  # pragma no cover
             return (False, "failed get request to " + url + " " + str(e))
 
-    def get_vent_tool_url(self, tool_name):
+    @staticmethod
+    def get_vent_tool_url(tool_name):
         """
         Iterate through all containers and grab the port number
         corresponding to the given tool name. Works for only CORE tools
