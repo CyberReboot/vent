@@ -3,17 +3,17 @@ import docker
 import web
 
 
-class StopR:
+class DeleteR:
     """
-    This endpoint is for stopping a network tap filter container
+    This endpoint is for deleting a network tap filter container
     """
 
     @staticmethod
     def POST():
         """
-        Send a POST request with a docker container ID and it will be stopped.
+        Send a POST request with a docker container ID and it will be deleted.
 
-        Example input: {'id': "12345"}, {'id': ["123", "456"]
+        Example input: {'id': "12345"}, {'id': ["123", "456"]}
         """
         web.header('Content-Type', 'application/json')
 
@@ -40,15 +40,14 @@ class StopR:
         if isinstance(payload['id'], list):
             try:
                 for container_id in payload['id']:
-                    c.containers.get(container_id).stop()
+                    c.containers.get(container_id).remove()
             except Exception as e:  # pragma: no cover
-                return 'unable to stop list of containers because: ' + str(e)
-
+                return 'unable to delete list of containers because: ' + str(e)
         # if user gives just one id, delete it
         else:
             try:
-                c.containers.get(payload['id']).stop()
+                c.containers.get(payload['id']).remove()
             except Exception as e:  # pragma: no cover
-                return 'unable to stop container because: ' + str(e)
+                return 'unable to delete container because: ' + str(e)
 
-        return ('container successfully stopped: ' + str(payload['id']))
+        return ('container successfully deleted: ' + str(payload['id']))
