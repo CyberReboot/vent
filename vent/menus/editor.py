@@ -82,10 +82,16 @@ class EditorForm(npyscreen.ActionForm):
             if self.from_registry:
                 save_args.update({'from_registry': True})
             self.save(**save_args)
+        restart_kargs = {'main_cfg': self.vent_cfg,
+                         'old_val': self.config_val,
+                         'new_val': self.edit_space.value}
+        if not self.vent_cfg:
+            restart_kargs.update({'name': self.tool_name,
+                                  'version': self.version,
+                                  'branch': self.branch})
         npyscreen.notify_wait("Restarting tools affected by changes...",
                               title="Restart")
-        self.restart_tools(main_cfg=self.vent_cfg, old_val=self.config_val,
-                           new_val=self.edit_space.value)
+        self.restart_tools(**restart_kargs)
         npyscreen.notify_confirm("Done configuring " + self.tool_name,
                                  title="Configurations saved")
         self.change_screens()

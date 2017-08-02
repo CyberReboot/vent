@@ -832,7 +832,24 @@ class Action:
         self.logger.info("Starting: restart_tools")
         status = (True, None)
         if not main_cfg:
-            pass
+            try:
+                t_identifier = {'name': name,
+                                'branch': branch,
+                                'version': version}
+                result = self.p_helper.constraint_options(t_identifier, [])
+                tool_d = result[0]
+                manifest = result[1]
+                for tool in tool_d:
+                    # only clean and start back up if running
+                    running = manifest.option(tool, 'running')
+                    if running[0] and running[1] == 'yes':
+                        self.clean(**t_identifier)
+                        tool_d = self.prep_start(**t_identifier)[1]
+                        self.start(tool_d)
+            except Exception as e:
+                self.logger.error('Trouble restarting tool ' + name +
+                                  'because: ' + str(e))
+                status = (False, str(e))
         else:
             try:
                 # string manipulation to get tools into arrays
@@ -899,3 +916,4 @@ class Action:
         self.logger.info("restart_tools finished with status: " +
                          str(status[0]))
         self.logger.info("Finished: restart_tools")
+        return status

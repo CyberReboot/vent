@@ -430,8 +430,6 @@ def Services(core, vent=True, external=False, **kargs):
                     if p and name:
                         services.append((name, p))
                 except Exception as e:
-                    with open('/Users/bpagon/Desktop/random.txt', 'a') as f:
-                        f.write(str(e))
                     p = None
     except Exception as e:  # pragma: no cover
         pass
