@@ -21,8 +21,11 @@ from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.ntap import CreateNTap
+from vent.menus.ntap import DeleteNTap
 from vent.menus.ntap import ListNTap
-from vent.menus.ntap import SSDNTap
+from vent.menus.ntap import ActionNTap
+from vent.menus.ntap import StartNTap
+from vent.menus.ntap import StopNTap
 from vent.menus.backup import BackupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
@@ -402,21 +405,21 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                   '^T to toggle main' + "\t"*6 + \
                                   'Press arrow to navigate container list'
                         }
-            self.add_form(SSDNTap, "Network Tap Delete", form_args)
+            self.add_form(DeleteNTap, "Network Tap Delete", form_args)
         elif action == "ntapstart":
             form_args = {'color': 'CONTROL',
                          'name': 'Network Tap Interface Start' + "\t"*6 + \
                                   '^T to toggle main' + "\t"*6 + \
                                   'Press arrow to navigate container list'
                         }
-            self.add_form(SSDNTap, "Network Tap Start", form_args)
+            self.add_form(StartNTap, "Network Tap Start", form_args)
         elif action == "ntapstop":
             form_args = {'color': 'CONTROL',
                          'name': 'Network Tap Interface Stop' + "\t"*6 + \
                                   '^T to toggle main' + "\t"*6 + \
                                   'Press arrow to navigate container list'
                         }
-            self.add_form(SSDNTap, "Network Tap Stop", form_args)
+            self.add_form(StopNTap, "Network Tap Stop", form_args)
         elif action == "ntaplist":
             form_args = {'color': 'CONTROL',
                          'name': 'Network Tap Interface List' + "\t"*6 + \
@@ -593,9 +596,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
-        #  self.m6.addItem(text='Network Tap Interface',
-                        #  onSelect=self.system_commands,
-                        #  arguments=['ntinterface'], shortcut='n')
         self.s6 = self.m6.addNewSubmenu(name='Network Tap Interface',
                                         shortcut='n')
         self.s6.addItem(text='Create', onSelect=self.system_commands,

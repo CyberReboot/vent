@@ -119,20 +119,20 @@ class ListNTap(npyscreen.ActionForm):
     def on_ok(self):
         self.quit()
 
-
-class SSDNTap(npyscreen.ActionForm):
-    """ For deleting/starting/stopping network tap capture containers """
-    #  def __init__(self, n_action):
-    #      self.n_action = n_action
+class ActionNTap(npyscreen.ActionForm):
+    """ Base class to inherit from. """
+    def __init__(self, n_action=None, *args, **kwargs):
+        self.n_action = n_action
+        super(ActionNTap, self).__init__(*args, **kwargs)
 
     def create(self):
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.Textfield,
-                 value= ' a network tap capture container.',
+                 value= self.n_action + ' a network tap capture container.',
                  editable=False,
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
-                 value='Choose a container to ' ,
+                 value='Choose a container to ' + self.n_action,
                  editable=False,
                  color="STANDOUT")
 
@@ -151,35 +151,37 @@ class SSDNTap(npyscreen.ActionForm):
                 request = ast.literal_eval(str(request[1]))
                 data = [d for d in list(request[1])]
                 self.ms = self.add(npyscreen.TitleMultiSelect, max_height = 20,
-                              name = 'Choose one or more containers to ',
+                              name = 'Choose one or more containers to ' +
+                              self.n_action,
                               values = data)
 
             else:
-                npyscreen.notify_confirm("Failure: " + request[1])
+                npyscreen.notify_confirm("Failure: " + str(request[1]))
 
         except Exception as e:  # pragma: no cover
             npyscreen.notify_confirm("Failure: " + str(e))
 
     def on_ok(self):
         # error check to make sure at least one box was selected
-        npyscreen.notify_confirm(str(type(self.ms.value)))
-        if not self.ms.get_selected_objects:
-            npyscreen.notify_confirm("Please select at least one container",
+        if not self.ms.value:
+            npyscreen.notify_confirm("Please select at least one container.",
                                      form_color='CAUTION')
 
         # format the data into something ncontrol likes
         else:
-            payload = {'id': self.ms.value}
+            payload = {'id': x['id'] for x in self.ms.values}
 
         # grab the url that network-tap is listening to
         try:
             npyscreen.notify_wait("Please wait. Currently working")
             self.api_action = Action()
-            url = self.api_action.get_vent_tool_url + "/"
+            url = self.api_action.get_vent_tool_url('network-tap')[1] + "/" \
+                    + self.n_action
             request = self.api_action.post_request(url, payload)
 
             if request[0]:
                 npyscreen.notify_confirm("Success: " + str(request[1]))
+                self.quit()
 
             else:
                 npyscreen.notify_confirm("Failure: " + str(request[1]))
@@ -194,3 +196,18 @@ class SSDNTap(npyscreen.ActionForm):
     def on_cancel(self):
         """ When user cancels, return to MAIN """
         self.quit()
+
+class DeleteNTap(ActionNTap):
+    """ Delete inheritance """
+    def __init__(self, *args, **kwargs):
+        ActionNTap.__init__(self, 'delete')
+
+class StartNTap(ActionNTap):
+    """ Delete inheritance """
+    def __init__(self, *args, **kwargs):
+        ActionNTap.__init__(self, 'start')
+
+class StopNTap(ActionNTap):
+    """ Delete inheritance """
+    def __init__(self, *args, **kwargs):
+        ActionNTap.__init__(self, 'stop')
