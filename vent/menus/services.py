@@ -8,6 +8,10 @@ class ServicesForm(npyscreen.FormBaseNew):
     def __init__(self, *args, **keywords):
         """ Initialize service form objects """
         self.core = keywords['core']
+        if 'external' in keywords:
+            self.external = keywords['external']
+        else:
+            self.external = False
         super(ServicesForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):
@@ -20,7 +24,7 @@ class ServicesForm(npyscreen.FormBaseNew):
         self.services_tft = self.add(npyscreen.TitleFixedText,
                                      name='No services running.',
                                      value="")
-        services = Services(self.core)
+        services = Services(self.core, external=self.external)
         if services:
             self.services_tft.hidden = True
             for service in services:

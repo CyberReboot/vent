@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import ast
+import os
 import pika
 import sys
 import time
@@ -16,7 +17,11 @@ class RmqEs():
     """
     es_conn = None
     es_host = None
+    # get custom set port or else use default port
+    es_port = int(os.getenv("ELASTICSEARCH_CUSTOM_PORT", 9200))
     rmq_host = None
+    # get custom set port or else use default port
+    rmq_port = int(os.getenv("RABBITMQ_CUSTOM_PORT", 5672))
     channel = None
     queue_name = None
 
@@ -33,7 +38,8 @@ class RmqEs():
         """
         while wait:
             try:
-                params = pika.ConnectionParameters(host=self.rmq_host)
+                params = pika.ConnectionParameters(host=self.rmq_host,
+                                                   port=self.rmq_port)
                 connection = pika.BlockingConnection(params)
                 self.channel = connection.channel()
                 self.channel.exchange_declare(exchange='topic_recs',
@@ -41,7 +47,8 @@ class RmqEs():
 
                 result = self.channel.queue_declare(exclusive=True)
                 self.queue_name = result.method.queue
-                self.es_conn = Elasticsearch([self.es_host])
+                self.es_conn = Elasticsearch([{'host': self.es_host,
+                                               'port': self.es_port}])
                 wait = False
                 print("connected to rabbitmq...")
             except Exception as e:  # pragma: no cover
