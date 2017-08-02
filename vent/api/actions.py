@@ -789,7 +789,7 @@ class Action:
                                     if option == 'name':
                                         option_name = 'link_name'
                                     opt_val = vent_template.option(section,
-                                                                      option)[1]
+                                                                   option)[1]
                                     section_dict[option_name] = opt_val
                             if section_dict:
                                 manifest.set_option(tool, section,
@@ -886,8 +886,8 @@ class Action:
                     else:
                         # tool name will be the same
                         oconf = old_val[old_val.find(new_tool):].split('\n')[0]
-                        n_conf = new_val[new_val.find(new_tool):].split('\n')[0]
-                        if oconf != n_conf:
+                        nconf = new_val[new_val.find(new_tool):].split('\n')[0]
+                        if oconf != nconf:
                             tool_changes.append(new_tool.lower())
                 self.logger.info(tool_changes)
                 # find dependencies

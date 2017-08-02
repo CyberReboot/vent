@@ -462,7 +462,7 @@ class PluginHelper:
                                     # create an environment variable for container
                                     # to access port later
                                     env_variable = link.upper() + \
-                                                   "_CUSTOM_PORT=" + port
+                                            "_CUSTOM_PORT=" + port
                                     if 'environment' not in tool_d[container]:
                                         tool_d[container]['environment'] = []
                                     tool_d[container]['environment'].append(env_variable)
