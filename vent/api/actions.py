@@ -853,14 +853,28 @@ class Action:
         else:
             try:
                 # string manipulation to get tools into arrays
-                ot_str = old_val[old_val.find('[external-services]') + 7:]
+                ext_start = old_val.find('[external-services]')
+                if ext_start >= 0:
+                    ot_str = old_val[old_val.find('[external-services]') + 20:]
+                    self.logger.info(ot_str)
+                else:
+                    ot_str = ''
                 old_tools = []
                 for old_tool in ot_str.split('\n'):
-                    old_tools.append(old_tool.split('=')[0].strip())
-                nt_str = new_val[old_val.find('[external-services]') + 7:]
+                    if old_tool != '':
+                        old_tools.append(old_tool.split('=')[0].strip())
+                self.logger.info(old_tools)
+                ext_start = new_val.find('[external-services]')
+                if ext_start >= 0:
+                    nt_str = new_val[new_val.find('[external-services]') + 20:]
+                    self.logger.info(nt_str)
+                else:
+                    nt_str = ''
                 new_tools = []
                 for new_tool in nt_str.split('\n'):
-                    new_tools.append(new_tool.split('=')[0].strip())
+                    if new_tool != '':
+                        new_tools.append(new_tool.split('=')[0].strip())
+                self.logger.info(new_tools)
                 # find tools changed
                 tool_changes = []
                 for old_tool in old_tools:
@@ -868,13 +882,14 @@ class Action:
                         tool_changes.append(old_tool.lower())
                 for new_tool in new_tools:
                     if new_tool not in old_tools:
-                        tool_changes.append(new_tool)
+                        tool_changes.append(new_tool.lower())
                     else:
                         # tool name will be the same
                         oconf = old_val[old_val.find(new_tool):].split('\n')[0]
                         n_conf = new_val[new_val.find(new_tool):].split('\n')[0]
                         if oconf != n_conf:
                             tool_changes.append(new_tool.lower())
+                self.logger.info(tool_changes)
                 # find dependencies
                 dependencies = []
                 manifest = Template(self.plugin.manifest)

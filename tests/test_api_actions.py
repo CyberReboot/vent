@@ -86,6 +86,9 @@ def test_start():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+def test_restart_tools():
+    instance = Action()
+
 def test_stop():
     """ Test the stop function """
     instance = Action()
