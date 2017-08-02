@@ -15,21 +15,28 @@ def gpu_queue(options):
     options = json.loads(options)
     configs = options['configs']
     gpu_options = configs['gpu_options']
+    devices = []
 
+    print(str(configs['devices']))
     # device specified, remove all other devices
     if 'device' in gpu_options:
         dev = '/dev/nvidia' + gpu_options['device'] + ':/dev/nvidia'
         dev += gpu_options['device'] + ':rwm'
         if 'devices' in configs:
             devices = configs['devices']
+            print(str(devices))
             for device in devices:
                 print(dev + " compared to " + device)
                 if any(str.isdigit(str(char)) for char in device):
-                    if dev is not device:
+                    if dev == device:
+                        devices.append(device)
+                    else:
                         print(dev + " doesn't match, removing: " + device)
                         configs['devices'].remove(device)
 
-    # TODO check if configs['devices'] is now an empty list
+    # check if devices is still an empty list
+    if not devices:
+        return (False, "no valid devices match the requested device")
 
     # TODO overriding until this is working
     # wait = True
