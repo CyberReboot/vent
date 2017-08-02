@@ -20,7 +20,8 @@ from vent.helpers.meta import Uptime
 from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
-from vent.menus.add_ntap import AddNTap
+from vent.menus.ntap import CreateNTap
+from vent.menus.ntap import SSDNTap
 from vent.menus.backup import BackupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
@@ -388,15 +389,34 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # !! TODO
             # add notify_cancel_ok popup once implemented
             pass
-        elif action == "ntinterface":
+        elif action == "ntapcreate":
             form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface' + "\t"*6 + \
+                         'name': 'Network Tap Interface Create' + "\t"*6 + \
+                                  '^T to toggle main'
+                        }
+            self.add_form(CreateNTap, "Network Tap Create", form_args)
+        elif action == "ntapdelete":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Delete' + "\t"*6 + \
                                   '^T to toggle main' + "\t"*6 + \
-                                  'Press TAB / Shift+TAB to switch forms' + \
-                                  "\t"*6 + \
                                   'Press arrow to navigate container list'
                         }
-            self.add_form(AddNTap, "Network Tap Interface", form_args)
+            self.add_form(SSDNTap, "Network Tap Delete", form_args)
+        elif action == "ntapstart":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Start' + "\t"*6 + \
+                                  '^T to toggle main' + "\t"*6 + \
+                                  'Press arrow to navigate container list'
+                        }
+            self.add_form(SSDNTap, "Network Tap Start", form_args)
+        elif action == "ntapstop":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Stop' + "\t"*6 + \
+                                  '^T to toggle main' + "\t"*6 + \
+                                  'Press arrow to navigate container list'
+                        }
+            self.add_form(SSDNTap, "Network Tap Stop", form_args)
+
         return
 
     def create(self):
