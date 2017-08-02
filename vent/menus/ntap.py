@@ -1,7 +1,5 @@
 import ast
-import json
 import npyscreen
-import urllib2
 
 from vent.api.actions import Action
 
@@ -109,7 +107,7 @@ class ListNTap(npyscreen.ActionForm):
                 npyscreen.notify_confirm("Failure: " + request[1])
 
         except Exception as e:  # pragma no cover
-            npyscreen.notify_confirm("Failure: " + request[1])
+            npyscreen.notify_confirm("Failure: " + e)
 
     def quit(self, *args, **kwargs):
         """ Overriden to switch back to MAIN form """

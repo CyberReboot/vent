@@ -23,7 +23,6 @@ from vent.menus.add import AddForm
 from vent.menus.ntap import CreateNTap
 from vent.menus.ntap import DeleteNTap
 from vent.menus.ntap import ListNTap
-from vent.menus.ntap import ActionNTap
 from vent.menus.ntap import StartNTap
 from vent.menus.ntap import StopNTap
 from vent.menus.backup import BackupForm
