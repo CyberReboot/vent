@@ -429,7 +429,7 @@ def Services(core, vent=True, external=False, **kargs):
                         p.append(protocol + '://' + ip_address + ':' + port)
                     if p and name:
                         services.append((name, p))
-                except Exception as e:
+                except Exception:
                     p = None
     except Exception as e:  # pragma: no cover
         pass

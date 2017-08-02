@@ -6,7 +6,8 @@ class EditorForm(npyscreen.ActionForm):
     def __init__(self, *args, **keywords):
         """ Initialize EditorForm objects """
         self.save = keywords['save_configure']
-        self.restart_tools = keywords['restart_tools']
+        if 'restart_tools' in keywords:
+            self.restart_tools = keywords['restart_tools']
         if 'vent_cfg' in keywords and keywords['vent_cfg']:
             self.vent_cfg = True
             self.config_val = keywords['get_configure'](main_cfg=True)[1]
@@ -82,16 +83,17 @@ class EditorForm(npyscreen.ActionForm):
             if self.from_registry:
                 save_args.update({'from_registry': True})
             self.save(**save_args)
-        restart_kargs = {'main_cfg': self.vent_cfg,
-                         'old_val': self.config_val,
-                         'new_val': self.edit_space.value}
-        if not self.vent_cfg:
-            restart_kargs.update({'name': self.tool_name,
-                                  'version': self.version,
-                                  'branch': self.branch})
-        npyscreen.notify_wait("Restarting tools affected by changes...",
-                              title="Restart")
-        self.restart_tools(**restart_kargs)
+        if hasattr(self, 'restart_tools'):
+            restart_kargs = {'main_cfg': self.vent_cfg,
+                             'old_val': self.config_val,
+                             'new_val': self.edit_space.value}
+            if not self.vent_cfg:
+                restart_kargs.update({'name': self.tool_name,
+                                      'version': self.version,
+                                      'branch': self.branch})
+            npyscreen.notify_wait("Restarting tools affected by changes...",
+                                  title="Restart")
+            self.restart_tools(**restart_kargs)
         npyscreen.notify_confirm("Done configuring " + self.tool_name,
                                  title="Configurations saved")
         self.change_screens()
