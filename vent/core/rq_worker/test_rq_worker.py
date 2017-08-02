@@ -1,3 +1,4 @@
+import json
 import os
 import watch
 
@@ -21,3 +22,10 @@ def test_file_queue():
     assert isinstance(images, tuple)
     assert images[0]
     assert isinstance(images[1], list)
+
+
+def test_gpu_queue():
+    """ Tests simulation of gpu job """
+    options = json.dumps({'configs': {'devices': ['foo0', 'bar', 'baz3'], 'gpu_options': {'device': '0'}}, 'labels': {}, 'image': 'alpine:latest'})
+    status = watch.gpu_queue(options)
+    assert isinstance(status, tuple)
