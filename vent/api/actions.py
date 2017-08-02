@@ -802,12 +802,12 @@ class Action:
         self.logger.info("Finished: save_configure")
         return status
 
-    def send_request(self, url, json_data, action=None):
+    def post_request(self, url, json_data):
         """
         Send a application/json post request to the given url
 
         Args:
-            url(str): url to send the data to. Eg: 0.0.0.0:37728
+            url(str): url to send the data to. Eg: http://0.0.0.0:37728
             json_data(dict): json obj with data that will be sent to specified
                              url
             action(str): what is being done. Eg: 'starting a container'
@@ -817,8 +817,7 @@ class Action:
             after a POST request or a failure message
         """
         try:
-            #npyscreen.notify_wait("please wait..." + action)
-            url = "http://" + str(url)
+            npyscreen.notify_wait("please wait...")
 
             # evaluate the data and dump it into something json likes
             data = ast.literal_eval(json_data)
@@ -832,7 +831,7 @@ class Action:
             # return whatever the webpage returned
             return (True, response.read())
         except Exception as e:  # pragma: no cover
-            return (False, "failed post request to " + url + " " +  action +
+            return (False, "failed post request to " + url + " " +
                     ": " + str(e))
 
     def get_request(self, url):
@@ -840,23 +839,22 @@ class Action:
         Send a get request to the given url
 
         Args:
-            url(str): url to send the data to. Eg: 0.0.0.0:37728
+            url(str): url to send the data to. Eg: http://0.0.0.0:37728
 
         Returns:
             A tuple of success status and whatever the url is supposed to give
             after a GET request or a failure message
         """
         try:
-            url = "http://" + str(url)
             response = urllib.urlopen(url)
             return (True, response.read())
         except Exception as e:  # pragma no cover
             return (False, "failed get request to " + url + " " + str(e))
 
-    def get_vent_tool_port(self, tool_name):
+    def get_vent_tool_url(self, tool_name):
         """
         Iterate through all containers and grab the port number corresponding to
-        the given tool name
+        the given tool name. Works for only CORE tools.
 
         Args:
             tool_name(str): tool name to search for. Eg: network-tap
@@ -864,7 +862,7 @@ class Action:
         Returns:
             A tuple of success status and the url corresponding to the given
             tool name or a failure mesage. An example return url is
-            0.0.0.0:37728. Works well with send_request and get_request.
+            http://0.0.0.0:37728. Works well with send_request and get_request.
         """
         try:
             d = docker.from_env()
@@ -875,7 +873,7 @@ class Action:
         url = ''
         found = False
         for c in containers:
-            if 'network-tap' in c.attrs['Name'] and \
+            if tool_name in c.attrs['Name'] and \
                     'core' in c.attrs['Config']['Labels']['vent.groups']:
                 # get a dictionary of ports
                 url = c.attrs['NetworkSettings']['Ports']
@@ -885,7 +883,7 @@ class Action:
                 for port in url:
                     h_port = url[port][0]['HostPort']
                     h_ip = rul[port][0]['HostIp']
-                    url = str(h_ip) + ":" + str(h_port)
+                    url = "http://" + str(h_ip) + ":" + str(h_port)
                     found = True
                     break
             # no need to cycle every single container if we found our ports
