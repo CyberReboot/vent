@@ -25,7 +25,7 @@ class ListR:
                 if c.attrs["Config"]["Image"] == \
                         "cyberreboot/vent-ncapture:master":
                     # the core container is not what we want
-                    if "core" not in c.attrs["Config"]["Labels"] \
+                    if "core" not in c.attrs["Config"]["Labels"]\
                        ["vent.groups"]:
                         lst = {}
                         lst['id'] = c.attrs["Id"][:12]

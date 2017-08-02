@@ -42,8 +42,8 @@ class DeleteR:
                 for container_id in payload['id']:
                     c.containers.get(container_id).remove()
             except Exception as e:  # pragma: no cover
-                return (False, 'unable to delete list of containers because: ' +
-                        str(e))
+                return (False, 'unable to delete list of containers because: '
+                        + str(e))
         # if user gives just one id, delete it
         else:
             try:
