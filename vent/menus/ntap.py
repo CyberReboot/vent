@@ -17,32 +17,32 @@ class CreateNTap(npyscreen.ActionForm):
                  editable=False,
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
-                value = 'via a POST request '
-                        'to the url of the core network tap tool. ',
-                editable=False,
-                color="STANDOUT")
-        self.add(npyscreen.Textfield,
-                 value = 'An example payload: ',
+                 value='via a POST request '
+                         'to the url of the core network tap tool. ',
                  editable=False,
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
-                 value = '  {"nic": "eth0", "id": "testId", "interval": "60" '
+                 value='An example payload: ',
+                 editable=False,
+                 color="STANDOUT")
+        self.add(npyscreen.Textfield,
+                 value=' {"nic": "eth0", "id": "testId", "interval": "60" '
                          '"filter": "", "iters": "1"} ',
                  editable=False,
                  color="STANDOUT")
 
         self.nextrely += 1
 
-        self.nic = self.add(npyscreen.TitleText, name = 'nic')
-        self.id = self.add(npyscreen.TitleText, name  = 'id')
-        self.interval = self.add(npyscreen.TitleText, name = 'interval')
-        self.filter = self.add(npyscreen.TitleText, name = 'filter')
-        self.iters = self.add(npyscreen.TitleText, name = 'iters')
+        self.nic = self.add(npyscreen.TitleText, name='nic')
+        self.id = self.add(npyscreen.TitleText, name='id')
+        self.interval = self.add(npyscreen.TitleText, name='interval')
+        self.filter = self.add(npyscreen.TitleText, name='filter')
+        self.iters = self.add(npyscreen.TitleText, name='iters')
 
     def on_ok(self):
         # error check to make sure all fields were filled out
         if not self.nic.value or not self.id.value or not self.interval.value \
-        or not self.iters.value:
+            or not self.iters.value:
             npyscreen.notify_confirm("Please fill out all fields",
                                      form_color='CAUTION')
             return
@@ -58,7 +58,8 @@ class CreateNTap(npyscreen.ActionForm):
         # create an action object and have it do the work
         self.api_action = Action()
         try:
-            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/create'
+            url = self.api_action.get_vent_tool_url('network-tap')[1] + \
+                  '/create'
             request = self.api_action.post_request(url, str(payload))
 
             if request[0]:
@@ -79,10 +80,11 @@ class CreateNTap(npyscreen.ActionForm):
         """ When user cancels, return to MAIN """
         self.quit()
 
+
 class ListNTap(npyscreen.ActionForm):
     """ For listing all network tap capture containers """
     def create(self):
-        self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.add_handlers({"^T":self.quit, "^Q":self.quit})
         self.add(npyscreen.Textfield,
                  value= 'List all network tap capture containers',
                  editable=False,
@@ -98,7 +100,7 @@ class ListNTap(npyscreen.ActionForm):
             if request[0]:
                 box = self.add(npyscreen.BoxTitle,
                                name="Network Tap Capture Containers",
-                               max_height = 40)
+                               max_height=40)
                 request = ast.literal_eval(str(request[1]))
                 data = [d for d in list(request[1])]
                 box.values = data
@@ -119,6 +121,7 @@ class ListNTap(npyscreen.ActionForm):
     def on_ok(self):
         self.quit()
 
+
 class ActionNTap(npyscreen.ActionForm):
     """ Base class to inherit from. """
     def __init__(self, n_action=None, *args, **kwargs):
@@ -126,9 +129,9 @@ class ActionNTap(npyscreen.ActionForm):
         super(ActionNTap, self).__init__(*args, **kwargs)
 
     def create(self):
-        self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.add_handlers({"^T":self.quit, "^Q":self.quit})
         self.add(npyscreen.Textfield,
-                 value= self.n_action + ' a network tap capture container.',
+                 value=self.n_action + ' a network tap capture container.',
                  editable=False,
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
@@ -150,10 +153,10 @@ class ActionNTap(npyscreen.ActionForm):
             if request[0]:
                 request = ast.literal_eval(str(request[1]))
                 data = [d for d in list(request[1])]
-                self.ms = self.add(npyscreen.TitleMultiSelect, max_height = 20,
-                              name = 'Choose one or more containers to ' +
-                              self.n_action,
-                              values = data)
+                self.ms = self.add(npyscreen.TitleMultiSelect, max_height=20,
+                                   name='Choose one or more containers to ' +
+                                   self.n_action,
+                                   values=data)
 
             else:
                 npyscreen.notify_confirm("Failure: " + str(request[1]))
@@ -176,7 +179,7 @@ class ActionNTap(npyscreen.ActionForm):
             npyscreen.notify_wait("Please wait. Currently working")
             self.api_action = Action()
             url = self.api_action.get_vent_tool_url('network-tap')[1] + "/" \
-                    + self.n_action
+                  + self.n_action
             request = self.api_action.post_request(url, payload)
 
             if request[0]:
@@ -197,15 +200,18 @@ class ActionNTap(npyscreen.ActionForm):
         """ When user cancels, return to MAIN """
         self.quit()
 
+
 class DeleteNTap(ActionNTap):
     """ Delete inheritance """
     def __init__(self, *args, **kwargs):
         ActionNTap.__init__(self, 'delete')
 
+
 class StartNTap(ActionNTap):
     """ Delete inheritance """
     def __init__(self, *args, **kwargs):
         ActionNTap.__init__(self, 'start')
+
 
 class StopNTap(ActionNTap):
     """ Delete inheritance """
