@@ -305,10 +305,43 @@ class PluginHelper:
             tool_d[c_name]['labels']['vent.version'] = version
             tool_d[c_name]['labels']['vent.name'] = s[section]['name']
 
-            log_config = {'type': 'syslog',
-                          'config': {'syslog-address': 'tcp://0.0.0.0:514',
-                                     'syslog-facility': 'daemon',
-                                     'tag': 'plugin'}}
+            # check for log_config settings in external-services
+            externally_configured = False
+            vent_config = Template(self.path_dirs.cfg_file)
+            for ext_tool in vent_config.section('external-services')[1]:
+                if ext_tool[0].lower() == 'syslog':
+                    try:
+                        log_dict = json.loads(ext_tool[1])
+                        # configure if not locally active
+                        if ('locally_active' not in log_dict or
+                                log_dict['locally_active'] == 'no'):
+                            del log_dict['locally_active']
+                            log_config = {}
+                            log_config['type'] = 'syslog'
+                            log_config['config'] = {}
+                            ip_address = ''
+                            port = ''
+                            for option in log_dict:
+                                if option == 'ip_address':
+                                    ip_address = log_dict[option]
+                                elif option == 'port':
+                                    port = log_dict['port']
+                            syslog_address = 'tcp://' + ip_address + ':' + port
+                            syslog_config = {'syslog-address': syslog_address,
+                                             'syslog-facility': 'deamon',
+                                             'tag': 'plugin'}
+                            log_config['config'].update(syslog_config)
+                            externally_configured = True
+                    except Exception as e:
+                        self.logger.error("external settings for log_config"
+                                          " couldn't be stored because: " +
+                                          str(e))
+                        externally_configured = False
+            if not externally_configured:
+                log_config = {'type': 'syslog',
+                              'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                                         'syslog-facility': 'daemon',
+                                         'tag': 'plugin'}}
             if 'groups' in s[section]:
                 # add labels for groups
                 tool_d[c_name]['labels']['vent.groups'] = s[section]['groups']
@@ -363,6 +396,9 @@ class PluginHelper:
             # only start tools that have been built
             if s[section]['built'] != 'yes':
                 del tool_d[c_name]
+            # store section information for adding info to manifest later
+            else:
+                tool_d[c_name]['section'] = section
         return status, tool_d
 
     def prep_start(self,
@@ -401,14 +437,50 @@ class PluginHelper:
                                                  branch,
                                                  version)
 
+            # look out for links to delete because they're defined externally
+            links_to_delete = set()
             # check and update links, volumes_from, network_mode
             for container in tool_d.keys():
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
-                        for c in tool_d.keys():
-                            if ('tmp_name' in tool_d[c] and
-                               tool_d[c]['tmp_name'] == link):
-                                tool_d[container]['links'][tool_d[c]['name']] = tool_d[container]['links'].pop(link)
+                        # add links to external services already running if
+                        # necessary, by default configure local services too
+                        configure_local = True
+                        ext = 'external-services'
+                        if link in vent_config.options(ext)[1]:
+                            try:
+                                lconf = json.loads(vent_config.option(ext,
+                                                                      link)[1])
+                                if ('locally_active' not in lconf or
+                                        lconf['locally_active'] == 'no'):
+                                    ip_adr = lconf['ip_address']
+                                    port = lconf['port']
+                                    tool_d[container]['extra_hosts'] = {}
+                                    # containers use lowercase names for
+                                    # connections
+                                    tool_d[container]['extra_hosts'][link.lower()] = ip_adr
+                                    # create an environment variable for container
+                                    # to access port later
+                                    env_variable = link.upper() + \
+                                            "_CUSTOM_PORT=" + port
+                                    if 'environment' not in tool_d[container]:
+                                        tool_d[container]['environment'] = []
+                                    tool_d[container]['environment'].append(env_variable)
+                                    # remove the entry from links because no
+                                    # longer connecting to local container
+                                    links_to_delete.add(link)
+                                    configure_local = False
+                            except Exception as e:
+                                self.logger.error("couldn't load external"
+                                                  " settings because: " +
+                                                  str(e))
+                                configure_local = True
+                                status = False
+                        if configure_local:
+                            for c in tool_d.keys():
+                                if ('tmp_name' in tool_d[c] and
+                                   tool_d[c]['tmp_name'] == link):
+                                    tool_d[container]['links'][tool_d[c]['name']] = tool_d[container]['links'].pop(link)
                 if 'volumes_from' in tool_d[container]:
                     tmp_volumes_from = tool_d[container]['volumes_from']
                     tool_d[container]['volumes_from'] = []
@@ -432,11 +504,44 @@ class PluginHelper:
                 if 'tmp_name' in tool_d[c]:
                     del tool_d[c]['tmp_name']
 
+            # remove links section if all were externally configured
+            for c in tool_d.keys():
+                if 'links' in tool_d[c]:
+                    for link in links_to_delete:
+                        if link in tool_d[c]['links']:
+                            del tool_d[c]['links'][link]
+                    # delete links if no more defined
+                    if not tool_d[c]['links']:
+                        del tool_d[c]['links']
+
             # remove containers that shouldn't be started
             for c in tool_d.keys():
+                deleted = False
                 if 'start' in tool_d[c] and not tool_d[c]['start']:
                     del tool_d[c]
-            status = (True, tool_d)
+                    deleted = True
+                if not deleted:
+                    # look for tools services that are being done externally
+                    # tools are capitalized in vent.cfg, so make them lowercase
+                    # for comparison
+                    ext = 'external-services'
+                    external_tools = vent_config.section(ext)[1]
+                    name = tool_d[c]['labels']['vent.name']
+                    for tool in external_tools:
+                        if name == tool[0].lower():
+                            try:
+                                tool_config = json.loads(tool[1])
+                                if ('locally_active' in tool_config and
+                                        tool_config['locally_active'] == 'no'):
+                                    del tool_d[c]
+                            except Exception as e:
+                                self.logger.warn("Locally running container " +
+                                                 name + " may be redundant")
+
+            if status:
+                status = (True, tool_d)
+            else:
+                status = (False, tool_d)
         except Exception as e:  # pragma: no cover
             self.logger.error("prep_start failed with error: "+str(e))
             status = (False, e)
@@ -479,10 +584,15 @@ class PluginHelper:
                          s_containers,
                          f_containers):
         """ Start container that was passed in and return status """
+        # use section to add info to manifest
+        section = tool_d[container]['section']
+        del tool_d[container]['section']
+        manifest = Template(self.manifest)
         try:
             c = self.d_client.containers.get(container)
             c.start()
             s_containers.append(container)
+            manifest.set_option(section, 'running', 'yes')
             self.logger.info("started " + str(container) +
                              " with ID: " + str(c.short_id))
         except Exception as err:
@@ -547,6 +657,7 @@ class PluginHelper:
                     else:
                         failed = True
                         f_containers.append(container)
+                        manifest.set_option(section, 'running', 'failed')
                         self.logger.error("failed to start " + str(container) +
                                           " because nvidia-docker-plugin " +
                                           "failed with: " + str(r.status_code))
@@ -554,10 +665,14 @@ class PluginHelper:
                     cont_id = self.d_client.containers.run(detach=True,
                                                            **tool_d[container])
                     s_containers.append(container)
+                    manifest.set_option(section, 'running', 'yes')
                     self.logger.info("started " + str(container) +
                                      " with ID: " + str(cont_id))
             except Exception as e:  # pragma: no cover
                 f_containers.append(container)
+                manifest.set_option(section, 'running', 'failed')
                 self.logger.error("failed to start " + str(container) +
                                   " because: " + str(e))
+        # save changes made to manifest
+        manifest.write_config()
         return s_containers, f_containers

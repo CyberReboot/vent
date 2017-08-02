@@ -137,11 +137,31 @@ def Gpu(pull=False):
 def GpuUsage(**kargs):
     """ Get the current GPU usage of available GPUs """
     usage = (False, None)
-    gpu_status = {}
+    gpu_status = {'vent_usage': {'dedicated': [], 'mem_mb': {}}}
 
     path_dirs = PathDirs(**kargs)
     path_dirs.host_config()
     template = Template(template=path_dirs.cfg_file)
+
+    # get running jobs using gpus
+    try:
+        d_client = docker.from_env()
+        c = d_client.containers.list(all=False,
+                                     filters={'label': 'vent-plugin'})
+        for container in c:
+            if ('vent.gpu' in container.attrs['Config']['Labels'] and
+               container.attrs['Config']['Labels']['vent.gpu'] == 'yes'):
+                device = container.attrs['Config']['Labels']['vent.gpu.device']
+                if ('vent.gpu.dedicated' in container.attrs['Config']['Labels'] and
+                   container.attrs['Config']['Labels']['vent.gpu.dedicated'] == 'yes'):
+                    gpu_status['vent_usage']['dedicated'].append(device)
+                elif 'vent.gpu.mem_mb' in container.attrs['Config']['Labels']:
+                    if device not in gpu_status['vent_usage']['mem_mb']:
+                        gpu_status['vent_usage']['mem_mb'][device] = 0
+                    gpu_status['vent_usage']['mem_mb'][device] += int(container.attrs['Config']['Labels']['vent.gpu.mem_mb'])
+    except Exception as e:  # pragma: no cover
+        pass
+
     port = '3476'
     # default docker gateway
     host = '172.17.0.1'
@@ -324,63 +344,93 @@ def Tools(**kargs):
     return tools[1]
 
 
-def Services(core, vent=True, **kargs):
+def Services(core, vent=True, external=False, **kargs):
     """
     Get services that have exposed ports, expects param core to be True or
     False based on which type of services to return, by default limit to vent
-    containers, if not limited by vent containers, then core is ignored.
+    containers and processes not running externally, if not limited by vent
+    containers, then core is ignored.
     """
     services = []
     path_dirs = PathDirs(**kargs)
     template = Template(template=path_dirs.cfg_file)
     services_uri = template.option("main", "services_uri")
     try:
-        d_client = docker.from_env()
-        if vent:
-            containers = d_client.containers.list(filters={'label': 'vent'})
-        else:
-            containers = d_client.containers.list()
-        for c in containers:
-            uri_prefix = ''
-            uri_postfix = ''
-            uri_user = ''
-            uri_pw = ''
-            name = None
-            if vent and 'vent.name' in c.attrs['Config']['Labels']:
-                if ((core and
-                     'vent.groups' in c.attrs['Config']['Labels'] and
-                     'core' in c.attrs['Config']['Labels']['vent.groups']) or
-                    (not core and
-                     'vent.groups' in c.attrs['Config']['Labels'] and
-                     'core' not in c.attrs['Config']['Labels']['vent.groups'])):
-                    name = c.attrs['Config']['Labels']['vent.name']
-                    if 'uri_prefix' in c.attrs['Config']['Labels']:
-                        uri_prefix = c.attrs['Config']['Labels']['uri_prefix']
-                    if 'uri_postfix' in c.attrs['Config']['Labels']:
-                        uri_postfix = c.attrs['Config']['Labels']['uri_postfix']
-                    if 'uri_user' in c.attrs['Config']['Labels']:
-                        uri_user = " user:"
-                        uri_user += c.attrs['Config']['Labels']['uri_user']
-                    if 'uri_pw' in c.attrs['Config']['Labels']:
-                        uri_pw = " pw:"
-                        uri_pw += c.attrs['Config']['Labels']['uri_pw']
+        # look for internal services
+        if not external:
+            d_client = docker.from_env()
+            if vent:
+                c_filter = {'label': 'vent'}
+                containers = d_client.containers.list(filters=c_filter)
             else:
-                name = c.name
-            ports = c.attrs['NetworkSettings']['Ports']
-            p = []
-            for port in ports:
-                if ports[port]:
-                    uri_creds = ''
-                    if uri_user or uri_pw:
-                        uri_creds = " - (" + uri_user + uri_pw + " )"
-                    host = ports[port][0]['HostIp']
-                    if services_uri[0] and host == '0.0.0.0':
-                        host = services_uri[1]
-                    p.append(uri_prefix + host + ":" +
-                             ports[port][0]['HostPort'] + uri_postfix +
-                             uri_creds)
-            if p and name:
-                services.append((name, p))
+                containers = d_client.containers.list()
+            for c in containers:
+                uri_prefix = ''
+                uri_postfix = ''
+                uri_user = ''
+                uri_pw = ''
+                name = None
+                if vent and 'vent.name' in c.attrs['Config']['Labels']:
+                    if ((core and
+                         'vent.groups' in c.attrs['Config']['Labels'] and
+                         'core' in c.attrs['Config']['Labels']['vent.groups']) or
+                        (not core and
+                         'vent.groups' in c.attrs['Config']['Labels'] and
+                         'core' not in c.attrs['Config']['Labels']['vent.groups'])):
+                        name = c.attrs['Config']['Labels']['vent.name']
+                        if 'uri_prefix' in c.attrs['Config']['Labels']:
+                            uri_prefix = c.attrs['Config']['Labels']['uri_prefix']
+                        if 'uri_postfix' in c.attrs['Config']['Labels']:
+                            uri_postfix = c.attrs['Config']['Labels']['uri_postfix']
+                        if 'uri_user' in c.attrs['Config']['Labels']:
+                            uri_user = " user:"
+                            uri_user += c.attrs['Config']['Labels']['uri_user']
+                        if 'uri_pw' in c.attrs['Config']['Labels']:
+                            uri_pw = " pw:"
+                            uri_pw += c.attrs['Config']['Labels']['uri_pw']
+                else:
+                    name = c.name
+                ports = c.attrs['NetworkSettings']['Ports']
+                p = []
+                for port in ports:
+                    if ports[port]:
+                        uri_creds = ''
+                        if uri_user or uri_pw:
+                            uri_creds = " - (" + uri_user + uri_pw + " )"
+                        host = ports[port][0]['HostIp']
+                        if services_uri[0] and host == '0.0.0.0':
+                            host = services_uri[1]
+                        p.append(uri_prefix + host + ":" +
+                                 ports[port][0]['HostPort'] + uri_postfix +
+                                 uri_creds)
+                if p and name:
+                    services.append((name, p))
+        # look for external services
+        else:
+            ext_tools = template.section('external-services')[1]
+            for ext_tool in ext_tools:
+                try:
+                    name = ext_tool[0].lower()
+                    p = []
+                    settings_dict = json.loads(ext_tool[1])
+                    if ('locally_active' in settings_dict and
+                            settings_dict['locally_active'] == 'no'):
+                        # default protocol to display will be http
+                        protocol = 'http'
+                        ip_address = ''
+                        port = ''
+                        for setting in settings_dict:
+                            if setting == 'ip_address':
+                                ip_address = settings_dict[setting]
+                            if setting == 'port':
+                                port = settings_dict[setting]
+                            if setting == 'protocol':
+                                protocol = settings_dict[setting]
+                        p.append(protocol + '://' + ip_address + ':' + port)
+                    if p and name:
+                        services.append((name, p))
+                except Exception:
+                    p = None
     except Exception as e:  # pragma: no cover
         pass
     return services
