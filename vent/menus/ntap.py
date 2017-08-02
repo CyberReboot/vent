@@ -41,8 +41,8 @@ class CreateNTap(npyscreen.ActionForm):
 
     def on_ok(self):
         # error check to make sure all fields were filled out
-        if not self.nic or not self.id or not self.interval or not self.filter\
-        or not self.iters:
+        if not self.nic.value or not self.id.value or not self.interval.value \
+        or not self.iters.value:
             npyscreen.notify_confirm("Please fill out all fields",
                                      form_color='CAUTION')
             return
@@ -58,8 +58,8 @@ class CreateNTap(npyscreen.ActionForm):
         # create an action object and have it do the work
         self.api_action = Action()
         try:
-            url = self.api_action.get_vent_tool_url('network-tap') + '/create'
-            request = self.api_action.post_request(url, payload)
+            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/create'
+            request = self.api_action.post_request(url, str(payload))
 
             if request[0]:
                 npyscreen.notify_confirm("Success: " + str(request[1]))
@@ -87,11 +87,11 @@ class SSDNTap(npyscreen.ActionForm):
     def create(self):
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.Textfield,
-                 value= self.n_action + ' a network tap capture container.',
+                 value= ' a network tap capture container.',
                  editable=False,
                  color="STANDOUT")
         self.add(npyscreen.Textfield,
-                 value='Choose a container to ' + self.n_action,
+                 value='Choose a container to ' ,
                  editable=False,
                  color="STANDOUT")
 
@@ -99,38 +99,42 @@ class SSDNTap(npyscreen.ActionForm):
 
         try:
             self.api_action = Action()
+
             # display all containers by sending a get request to ntap/list
-            url = self.api_action.get_vent_tool_url('network-tap') + '/list'
+            # nlist returns tuple and get_request returns tuple
+            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/list'
             request = self.api_action.get_request(url)
 
             # create selection for containers
             if request[0]:
-                self.ms = self.add(npyscreen.TitleMultiSelect, max_height = 5,
-                              name = 'Choose one or more containers to ' +
-                                     self.n_action,
-                              values = request[1])
+                request = ast.literal_eval(str(request[1]))
+                data = [d for d in list(request[1])]
+                self.ms = self.add(npyscreen.TitleMultiSelect, max_height = 20,
+                              name = 'Choose one or more containers to ',
+                              values = data)
 
-                # allow user to interact with form
-                self.ms.edit()
+            else:
+                npyscreen.notify_confirm("Failure: " + request[1])
 
         except Exception as e:  # pragma: no cover
             npyscreen.notify_confirm("Failure: " + str(e))
 
-    def on_on(self):
+    def on_ok(self):
         # error check to make sure at least one box was selected
+        npyscreen.notify_confirm(str(type(self.ms.value)))
         if not self.ms.get_selected_objects:
             npyscreen.notify_confirm("Please select at least one container",
                                      form_color='CAUTION')
 
         # format the data into something ncontrol likes
         else:
-            payload = {'id': ms.get_selected_objects}
+            payload = {'id': self.ms.value}
 
         # grab the url that network-tap is listening to
         try:
             npyscreen.notify_wait("Please wait. Currently working")
             self.api_action = Action()
-            url = self.api_action.get_vent_tool_url + "/" + self.n_action
+            url = self.api_action.get_vent_tool_url + "/"
             request = self.api_action.post_request(url, payload)
 
             if request[0]:

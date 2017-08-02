@@ -817,8 +817,6 @@ class Action:
             after a POST request or a failure message
         """
         try:
-            npyscreen.notify_wait("please wait...")
-
             # evaluate the data and dump it into something json likes
             data = ast.literal_eval(json_data)
             data = json.dumps(data)
@@ -846,7 +844,7 @@ class Action:
             after a GET request or a failure message
         """
         try:
-            response = urllib.urlopen(url)
+            response = urllib2.urlopen(url)
             return (True, response.read())
         except Exception as e:  # pragma no cover
             return (False, "failed get request to " + url + " " + str(e))
@@ -882,11 +880,11 @@ class Action:
                 # is it safe to assume only 1 entry in the dict will exist?
                 for port in url:
                     h_port = url[port][0]['HostPort']
-                    h_ip = rul[port][0]['HostIp']
+                    h_ip = url[port][0]['HostIp']
                     url = "http://" + str(h_ip) + ":" + str(h_port)
                     found = True
                     break
             # no need to cycle every single container if we found our ports
             if found:
                 break
-        return (True, url)
+        return (True, str(url))
