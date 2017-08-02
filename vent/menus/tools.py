@@ -83,15 +83,17 @@ class ToolForm(npyscreen.ActionForm):
                        repo_name[1] == tool_repo_name[1]):
                         # check to ensure tool not set to locally active = no
                         # in vent.cfg
-                        vent_cfg = Template(self.action['api_action'].vent_config)
+                        vent_cfg_file = self.action['api_action'].vent_config
+                        vent_cfg = Template(vent_cfg_file)
                         tool_pairs = vent_cfg.section('external-services')[1]
                         display = True
                         for ext_tool in tool_pairs:
                             if ext_tool[0].lower() == inventory['tools'][tool]:
                                 try:
                                     ext_tool_options = json.loads(ext_tool[1])
-                                    if ('locally_active' in ext_tool_options and
-                                            ext_tool_options['locally_active'] == 'no'):
+                                    loc = 'locally_active'
+                                    if (loc in ext_tool_options and
+                                            ext_tool_options[loc] == 'no'):
                                         display = False
                                 except Exception as e:
                                     self.logger.error("Couldn't check ext"
@@ -109,15 +111,17 @@ class ToolForm(npyscreen.ActionForm):
                        repo_name[1] == tool_repo_name[1]):
                         # check to ensure tool not set to locally active = no
                         # in vent.cfg
-                        vent_cfg = Template(self.action['api_action'].vent_config)
+                        vent_cfg_file = self.action['api_action'].vent_config
+                        vent_cfg = Template(vent_cfg_file)
                         tool_pairs = vent_cfg.section('external-services')[1]
                         display = True
                         for ext_tool in tool_pairs:
                             if ext_tool[0].lower() == inventory['core'][tool]:
                                 try:
                                     ext_tool_options = json.loads(ext_tool[1])
-                                    if ('locally_active' in ext_tool_options and
-                                            ext_tool_options['locally_active'] == 'no'):
+                                    loc = 'locally_active'
+                                    if (loc in ext_tool_options and
+                                            ext_tool_options[loc] == 'no'):
                                         display = False
                                 except Exception as e:
                                     self.logger.error("Couldn't check ext"

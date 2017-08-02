@@ -334,7 +334,8 @@ class PluginHelper:
                             externally_configured = True
                     except Exception as e:
                         self.logger.error("external settings for log_config"
-                                          " couldn't be stored because: " + str(e))
+                                          " couldn't be stored because: " +
+                                          str(e))
                         externally_configured = False
             if not externally_configured:
                 log_config = {'type': 'syslog',
@@ -448,19 +449,20 @@ class PluginHelper:
                         ext = 'external-services'
                         if link in vent_config.options(ext)[1]:
                             try:
-                                link_config = json.loads(vent_config.option(ext,
-                                                                            link)[1])
-                                if ('locally_active' not in link_config or
-                                        link_config['locally_active'] == 'no'):
-                                    ip_adr = link_config['ip_address']
-                                    port = link_config['port']
+                                lconf = json.loads(vent_config.option(ext,
+                                                                      link)[1])
+                                if ('locally_active' not in lconf or
+                                        lconf['locally_active'] == 'no'):
+                                    ip_adr = lconf['ip_address']
+                                    port = lconf['port']
                                     tool_d[container]['extra_hosts'] = {}
                                     # containers use lowercase names for
                                     # connections
                                     tool_d[container]['extra_hosts'][link.lower()] = ip_adr
                                     # create an environment variable for container
                                     # to access port later
-                                    env_variable = link.upper() + "_CUSTOM_PORT=" + port
+                                    env_variable = link.upper() + \
+                                                   "_CUSTOM_PORT=" + port
                                     if 'environment' not in tool_d[container]:
                                         tool_d[container]['environment'] = []
                                     tool_d[container]['environment'].append(env_variable)

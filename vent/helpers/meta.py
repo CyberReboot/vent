@@ -360,7 +360,8 @@ def Services(core, vent=True, external=False, **kargs):
         if not external:
             d_client = docker.from_env()
             if vent:
-                containers = d_client.containers.list(filters={'label': 'vent'})
+                c_filter = {'label': 'vent'}
+                containers = d_client.containers.list(filters=c_filter)
             else:
                 containers = d_client.containers.list()
             for c in containers:

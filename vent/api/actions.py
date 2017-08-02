@@ -752,8 +752,8 @@ class Action:
                 options = ['path']
                 tools, manifest = self.p_helper.constraint_options(constraints,
                                                                    options)
-                # only one tool in tools because perform this function for every
-                # tool
+                # only one tool in tools because perform this function for
+                # every tool
                 if tools:
                     tool = tools.keys()[0]
                     template_path = os.path.join(tools[tool]['path'],
@@ -788,9 +788,9 @@ class Action:
                                     option_name = option
                                     if option == 'name':
                                         option_name = 'link_name'
-                                    option_val = vent_template.option(section,
+                                    opt_val = vent_template.option(section,
                                                                       option)[1]
-                                    section_dict[option_name] = option_val
+                                    section_dict[option_name] = opt_val
                             if section_dict:
                                 manifest.set_option(tool, section,
                                                     json.dumps(section_dict))
@@ -836,13 +836,13 @@ class Action:
         else:
             try:
                 # string manipulation to get tools into arrays
-                old_tool_str = old_val[old_val.find('[external-services]') + 7:]
+                ot_str = old_val[old_val.find('[external-services]') + 7:]
                 old_tools = []
-                for old_tool in old_tool_str.split('\n'):
+                for old_tool in ot_str.split('\n'):
                     old_tools.append(old_tool.split('=')[0].strip())
-                new_tool_str = new_val[old_val.find('[external-services]') + 7:]
+                nt_str = new_val[old_val.find('[external-services]') + 7:]
                 new_tools = []
-                for new_tool in new_tool_str.split('\n'):
+                for new_tool in nt_str.split('\n'):
                     new_tools.append(new_tool.split('=')[0].strip())
                 # find tools changed
                 tool_changes = []
@@ -854,9 +854,9 @@ class Action:
                         tool_changes.append(new_tool)
                     else:
                         # tool name will be the same
-                        old_setting = old_val[old_val.find(new_tool):].split('\n')[0]
-                        new_setting = new_val[new_val.find(new_tool):].split('\n')[0]
-                        if old_setting != new_setting:
+                        oconf = old_val[old_val.find(new_tool):].split('\n')[0]
+                        n_conf = new_val[new_val.find(new_tool):].split('\n')[0]
+                        if oconf != n_conf:
                             tool_changes.append(new_tool.lower())
                 # find dependencies
                 dependencies = []
@@ -866,9 +866,12 @@ class Action:
                     running = manifest.option(section, 'running')
                     if not running[0] or running[1] != 'yes':
                         continue
-                    t_identifier = {'name': manifest.option(section, 'name')[1],
-                                    'branch': manifest.option(section, 'branch')[1],
-                                    'version': manifest.option(section, 'version')[1]}
+                    t_name = manifest.option(section, 'name')[1]
+                    t_branch = manifest.option(section, 'branch')[1]
+                    t_version = manifest.option(section, 'version')[1]
+                    t_identifier = {'name': t_name,
+                                    'branch': t_branch,
+                                    'version': t_version}
                     options = manifest.options(section)[1]
                     if 'docker' in options:
                         d_settings = json.loads(manifest.option(section,
