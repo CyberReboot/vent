@@ -12,6 +12,14 @@ vent\.menus\.add module
     :undoc-members:
     :show-inheritance:
 
+vent\.menus\.add\_ntap module
+-----------------------------
+
+.. automodule:: vent.menus.add_ntap
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 vent\.menus\.add\_options module
 --------------------------------
 
@@ -80,6 +88,14 @@ vent\.menus\.main module
 ------------------------
 
 .. automodule:: vent.menus.main
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+vent\.menus\.ntap module
+------------------------
+
+.. automodule:: vent.menus.ntap
     :members:
     :undoc-members:
     :show-inheritance:

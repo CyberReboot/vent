@@ -20,7 +20,13 @@ from vent.helpers.meta import Uptime
 from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
+from vent.menus.ntap import CreateNTap
+from vent.menus.ntap import DeleteNTap
+from vent.menus.ntap import ListNTap
+from vent.menus.ntap import StartNTap
+from vent.menus.ntap import StopNTap
 from vent.menus.backup import BackupForm
+from vent.menus.editor import EditorForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
@@ -267,6 +273,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args['names'].pop()
             form_args['names'].append('get_configure')
             form_args['names'].append('save_configure')
+            form_args['names'].append('restart_tools')
         if action == 'add':
             form = AddForm
             forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
@@ -292,6 +299,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args = {'color': "STANDOUT",
                          'name': "Plugin Services",
                          'core': False}
+        elif action == 'services_external':
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "External Services",
+                         'core': False,
+                         'external': True}
         elif action == "inventory_core":
             form = InventoryCoreToolsForm
             forms = ['COREINVENTORY']
@@ -341,6 +355,16 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 notify_confirm("Vent backup successful")
             else:
                 notify_confirm("Vent backup could not be completed")
+        elif action == 'configure':
+            form_args = {'name': 'Change vent configuration',
+                         'get_configure': self.api_action.get_configure,
+                         'save_configure': self.api_action.save_configure,
+                         'restart_tools': self.api_action.restart_tools,
+                         'vent_cfg': True}
+            add_kargs = {'form': EditorForm,
+                         'form_name': 'CONFIGUREVENT',
+                         'form_args': form_args}
+            self.add_form(**add_kargs)
         elif action == "reset":
             okay = npyscreen.notify_ok_cancel(
                     "This factory reset will remove ALL of Vent's user data, "
@@ -387,6 +411,34 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # !! TODO
             # add notify_cancel_ok popup once implemented
             pass
+        elif action == "ntapcreate":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Create' + "\t"*6 +
+                                 '^T to toggle main'}
+            self.add_form(CreateNTap, "Network Tap Create", form_args)
+        elif action == "ntapdelete":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Delete' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(DeleteNTap, "Network Tap Delete", form_args)
+        elif action == "ntapstart":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Start' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(StartNTap, "Network Tap Start", form_args)
+        elif action == "ntapstop":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Stop' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(StopNTap, "Network Tap Stop", form_args)
+        elif action == "ntaplist":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface List' + "\t"*6 +
+                                  '^T to toggle main' + "\t"*6}
+            self.add_form(ListNTap, "Network Tap List", form_args)
         return
 
     def create(self):
@@ -537,6 +589,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m5 = self.add_menu(name="Services Running", shortcut='s')
         self.m5.addItem(text='Core Services', onSelect=self.perform_action,
                         arguments=['services_core'], shortcut='c')
+        self.m5.addItem(text='External Services', onSelect=self.perform_action,
+                        arguments=['services_external'], shortcut='e')
         self.m5.addItem(text='Plugin Services',
                         onSelect=self.perform_action,
                         arguments=['services'], shortcut='p')
@@ -545,6 +599,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6 = self.add_menu(name="System Commands", shortcut='y')
         self.m6.addItem(text='Backup', onSelect=self.system_commands,
                         arguments=['backup'], shortcut='b')
+        self.m6.addItem(text='Change vent configuration',
+                        onSelect=self.system_commands, arguments=['configure'],
+                        shortcut='c')
         self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
                         arguments=['gpu'], shortcut='g')
         self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',
@@ -557,6 +614,18 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
+        self.s6 = self.m6.addNewSubmenu(name='Network Tap Interface',
+                                        shortcut='n')
+        self.s6.addItem(text='Create', onSelect=self.system_commands,
+                        shortcut='c', arguments=['ntapcreate'])
+        self.s6.addItem(text='Delete', onSelect=self.system_commands,
+                        shortcut='d', arguments=['ntapdelete'])
+        self.s6.addItem(text='Start', onSelect=self.system_commands,
+                        shortcut='s', arguments=['ntapstart'])
+        self.s6.addItem(text='Stop', onSelect=self.system_commands,
+                        shortcut='t', arguments=['ntapstop'])
+        self.s6.addItem(text='List', onSelect=self.system_commands,
+                        shortcut='l', arguments=['ntaplist'])
 
         # Tutorial Menu Items
         self.m7 = self.add_menu(name="Tutorials", shortcut="t")
