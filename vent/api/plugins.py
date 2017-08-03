@@ -322,7 +322,10 @@ class Plugin:
             if self.repo.endswith('.git'):
                 self.repo = self.repo[:-4]
             # remove @ in match for template setting purposes
-            true_name = match[0].replace('@', '')
+            if match[0].find('@') >= 0:
+                true_name = match[0].split('@')[1]
+            else:
+                true_name = match[0]
             template = Template(template=self.manifest)
             # TODO check for special settings here first for the specific match
             self.version = match[1]
@@ -390,7 +393,7 @@ class Plugin:
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
                 template.set_option(section, "image_name",
-                                    image_name.replace('@', ''))
+                                    image_name.replace('@', '-'))
                 template.set_option(section, "type", "repository")
                 # save settings in vent.template to plugin_manifest
                 # watch for multiple tools in same directory
@@ -548,7 +551,7 @@ class Plugin:
                     if image_name.find("@") >= 0:
                         specific_file = image_name.split("@")[1].split('-')[0]
                         file_tag = " -f Dockerfile." + specific_file + " ."
-                        image_name = image_name.replace('@', '')
+                        image_name = image_name.replace('@', '-')
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.name=" +
