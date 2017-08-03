@@ -702,18 +702,6 @@ class Action:
                     template_dict[section][vals[0]] = vals[1]
         else:
             # all possible vent.template options stored in plugin_manifest
-            vent_cfg_path = os.path.join(os.path.expanduser('~'), '.vent',
-                                         'vent.cfg')
-            if os.path.exists(vent_cfg_path):
-                vent_cfg = Template(vent_cfg_path)
-                for section in vent_cfg.sections()[1]:
-                    template_dict[section] = {}
-                    for vals in vent_cfg.section(section)[1]:
-                        template_dict[section][vals[0]] = vals[1]
-            else:
-                status = (False, "Couldn't get vent.cfg information")
-        else:
-            # all possible vent.template sections
             options = ['info', 'service', 'settings', 'docker', 'gpu']
             tools = self.p_helper.constraint_options(constraints, options)[0]
             if tools:
@@ -728,9 +716,6 @@ class Action:
             # display all those options as they would in the file
             for section in template_dict:
                 return_str += "[" + section + "]\n"
-                if section == 'external-services':
-                    return_str += "# you must specify settings as json strings" \
-                                  " (double quotes)" + "\n"
                 for option in template_dict[section]:
                     return_str += option + " = "
                     return_str += template_dict[section][option] + "\n"
@@ -941,17 +926,4 @@ class Action:
         self.logger.info("restart_tools finished with status: " +
                          str(status[0]))
         self.logger.info("Finished: restart_tools")
-            vent_cfg_path = os.path.join(os.path.expanduser('~'), '.vent',
-                                         'vent.cfg')
-            # remove the additional reminder we put in for editing purposes
-            warning_msg = "# you must specify settings as json strings" \
-                          " (double quotes)\n"
-            config_val = config_val.replace(warning_msg, '')
-            if os.path.exists(vent_cfg_path):
-                with open(vent_cfg_path, 'w') as f:
-                    f.write(config_val)
-            else:
-                status = (False, "Couldn't find configuration file")
-        self.logger.info("Status of save_configure: " + str(status[0]))
-        self.logger.info("Finished: save_configure")
         return status

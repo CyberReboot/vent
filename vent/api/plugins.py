@@ -318,6 +318,9 @@ class Plugin:
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
+            # remove the .git for adding repo info to manifest
+            if self.repo.endswith('.git'):
+                self.repo = self.repo[:-4]
             # remove @ in match for template setting purposes
             true_name = match[0].replace('@', '')
             template = Template(template=self.manifest)
@@ -329,7 +332,7 @@ class Plugin:
                 section = self.org + ":" + self.name + ":" + true_name + ":"
                 section += self.branch + ":" + self.version
                 # need to get rid of temp identifiers for tools in same repo
-                match_path = self.path + match[0]
+                match_path = self.path + match[0].split('@')[0]
                 if not self.core:
                     image_name = self.org + "-" + self.name + "-"
                     if match[0] != '':
@@ -361,6 +364,12 @@ class Plugin:
                         if option[0] == 'previous_versions':
                             previous_commits = option[1]
 
+
+                # check if tool comes from multi directory
+                multi_tool = "no"
+                if match[0].find('@') >= 0:
+                    multi_tool = "yes"
+
                 # !! TODO
                 # check if section should be removed from config i.e. all tools
                 # but new commit removed one that was in a previous commit
@@ -375,6 +384,7 @@ class Plugin:
                 template.set_option(section, "path", match_path)
                 template.set_option(section, "repo", self.repo)
                 template.set_option(section, "enabled", "yes")
+                template.set_option(section, "multi_tool", multi_tool)
                 template.set_option(section, "branch", self.branch)
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
@@ -386,7 +396,6 @@ class Plugin:
                 # watch for multiple tools in same directory
                 # just wanted to store match path with @ for path for use in
                 # other actions
-                match_path = match_path.split('@')[0]
                 tool_template = 'vent.template'
                 if match[0].find('@') >= 0:
                     tool_template = match[0].split('@')[1] + '.template'
@@ -452,6 +461,9 @@ class Plugin:
                     groups = vent_template.option("info", "groups")
                     if groups[0]:
                         template.set_option(section, "groups", groups[1])
+                    # set groups to empty string if no groups defined for tool
+                    else:
+                        template.set_option(section, "groups", '')
                 template = self._build_image(template,
                                              match_path,
                                              image_name,
