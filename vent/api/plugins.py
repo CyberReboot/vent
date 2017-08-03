@@ -367,7 +367,6 @@ class Plugin:
                         if option[0] == 'previous_versions':
                             previous_commits = option[1]
 
-
                 # check if tool comes from multi directory
                 multi_tool = "no"
                 if match[0].find('@') >= 0:

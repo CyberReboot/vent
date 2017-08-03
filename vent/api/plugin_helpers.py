@@ -168,7 +168,8 @@ class PluginHelper:
                 # !! TODO deal with wild/etc.?
                 addtl_info = ''
                 if add_info:
-                    # need to use @ symbol because of issues with : with tagging
+                    # need to use @ symbol because of issues with : when
+                    # tagging
                     try:
                         addtl_info = '@' + f.split('.')[1]
                     except Exception as e:
