@@ -174,7 +174,7 @@ class PluginHelper:
                     except Exception as e:
                         addtl_info = '@unspecified'
                 if groups:
-                    if add_info and not addtl_info == '@':
+                    if add_info and not addtl_info == '@unspecified':
                         tool_template = addtl_info.split('@')[1] + '.template'
                     else:
                         tool_template = 'vent.template'
