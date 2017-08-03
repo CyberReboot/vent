@@ -701,7 +701,7 @@ class Action:
                 for vals in vent_cfg.section(section)[1]:
                     template_dict[section][vals[0]] = vals[1]
         else:
-            # all possible vent.template sections stored in plugin_manifest
+            # all possible vent.template options stored in plugin_manifest
             options = ['info', 'service', 'settings', 'docker', 'gpu']
             tools = self.p_helper.constraint_options(constraints, options)[0]
             if tools:
@@ -716,9 +716,6 @@ class Action:
             # display all those options as they would in the file
             for section in template_dict:
                 return_str += "[" + section + "]\n"
-                if section == 'external-services':
-                    return_str += "# you must specify settings as json strings" \
-                                  " (double quotes)" + "\n"
                 for option in template_dict[section]:
                     return_str += option + " = "
                     return_str += template_dict[section][option] + "\n"
