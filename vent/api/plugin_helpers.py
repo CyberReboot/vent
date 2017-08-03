@@ -168,14 +168,13 @@ class PluginHelper:
                 # !! TODO deal with wild/etc.?
                 addtl_info = ''
                 if add_info:
-                    # need to use @ symbol because of issues with : when
-                    # tagging
+                    # @ will be delimiter symbol for multi-tools
                     try:
                         addtl_info = '@' + f.split('.')[1]
                     except Exception as e:
-                        addtl_info = '@unspecified Dockerfile'
+                        addtl_info = '@unspecified'
                 if groups:
-                    if add_info and not addtl_info.startswith(":unspecified"):
+                    if add_info and not addtl_info == '@':
                         tool_template = addtl_info.split('@')[1] + '.template'
                     else:
                         tool_template = 'vent.template'

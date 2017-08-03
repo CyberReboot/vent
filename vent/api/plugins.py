@@ -549,7 +549,10 @@ class Plugin:
                     file_tag = " ."
                     if image_name.find("@") >= 0:
                         specific_file = image_name.split("@")[1].split('-')[0]
-                        file_tag = " -f Dockerfile." + specific_file + " ."
+                        if specific_file == 'unspecified':
+                            file_tag = " -f Dockerfile ."
+                        else:
+                            file_tag = " -f Dockerfile." + specific_file + " ."
                         image_name = image_name.replace('@', '-')
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
