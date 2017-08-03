@@ -1,9 +1,12 @@
 import Queue
 
+import ast
+import docker
 import json
 import os
 import shutil
 import tempfile
+import urllib2
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
@@ -927,3 +930,94 @@ class Action:
                          str(status[0]))
         self.logger.info("Finished: restart_tools")
         return status
+
+    @staticmethod
+    def post_request(url, json_data):
+        """
+        Send a application/json post request to the given url
+
+        Args:
+            url(str): url to send the data to. Eg: http://0.0.0.0:37728
+            json_data(dict): json obj with data that will be sent to specified
+                             url
+            action(str): what is being done. Eg: 'starting a container'
+
+        Returns:
+            A tuple of success status and whatever the url is supposed to give
+            after a POST request or a failure message
+        """
+        try:
+            # evaluate the data and dump it into something json likes
+            data = ast.literal_eval(str(json_data))
+            data = json.dumps(data)
+
+            # create the post request and send it off
+            req = urllib2.Request(url, data)
+            req.add_header('Content-Type', 'application/json')
+            response = urllib2.urlopen(req, data)
+
+            # return whatever the webpage returned
+            return (True, response.read())
+        except Exception as e:  # pragma: no cover
+            return (False, "failed post request to " + url + " " +
+                    ": " + str(e))
+
+    @staticmethod
+    def get_request(url):
+        """
+        Send a get request to the given url
+
+        Args:
+            url(str): url to send the data to. Eg: http://0.0.0.0:37728
+
+        Returns:
+            A tuple of success status and whatever the url is supposed to give
+            after a GET request or a failure message
+        """
+        try:
+            response = urllib2.urlopen(url)
+            return (True, response.read())
+        except Exception as e:  # pragma no cover
+            return (False, "failed get request to " + url + " " + str(e))
+
+    @staticmethod
+    def get_vent_tool_url(tool_name):
+        """
+        Iterate through all containers and grab the port number
+        corresponding to the given tool name. Works for only CORE tools
+        since it specifically looks for core
+
+        Args:
+            tool_name(str): tool name to search for. Eg: network-tap
+
+        Returns:
+            A tuple of success status and the url corresponding to the given
+            tool name or a failure mesage. An example return url is
+            http://0.0.0.0:37728. Works well with send_request and get_request.
+        """
+        try:
+            d = docker.from_env()
+            containers = d.containers.list(filters={'label': 'vent'}, all=True)
+        except Exception as e:  # pragma no cover
+            return (False, "docker failed with error " + str(e))
+
+        url = ''
+        found = False
+        for c in containers:
+            if tool_name in c.attrs['Name'] and \
+                    'core' in c.attrs['Config']['Labels']['vent.groups']:
+                # get a dictionary of ports
+                url = c.attrs['NetworkSettings']['Ports']
+
+                # iterate through the dict to avoid hard coding anything
+                # is it safe to assume only 1 entry in the dict will exist?
+                for port in url:
+                    h_port = url[port][0]['HostPort']
+                    h_ip = url[port][0]['HostIp']
+                    url = "http://" + str(h_ip) + ":" + str(h_port)
+                    found = True
+                    break
+            # no need to cycle every single container if we found our ports
+            if found:
+                break
+        return (True, str(url))

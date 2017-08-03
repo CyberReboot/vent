@@ -20,6 +20,11 @@ from vent.helpers.meta import Uptime
 from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
+from vent.menus.ntap import CreateNTap
+from vent.menus.ntap import DeleteNTap
+from vent.menus.ntap import ListNTap
+from vent.menus.ntap import StartNTap
+from vent.menus.ntap import StopNTap
 from vent.menus.backup import BackupForm
 from vent.menus.editor import EditorForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
@@ -406,6 +411,34 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # !! TODO
             # add notify_cancel_ok popup once implemented
             pass
+        elif action == "ntapcreate":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Create' + "\t"*6 +
+                                 '^T to toggle main'}
+            self.add_form(CreateNTap, "Network Tap Create", form_args)
+        elif action == "ntapdelete":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Delete' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(DeleteNTap, "Network Tap Delete", form_args)
+        elif action == "ntapstart":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Start' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(StartNTap, "Network Tap Start", form_args)
+        elif action == "ntapstop":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Stop' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(StopNTap, "Network Tap Stop", form_args)
+        elif action == "ntaplist":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface List' + "\t"*6 +
+                                  '^T to toggle main' + "\t"*6}
+            self.add_form(ListNTap, "Network Tap List", form_args)
         return
 
     def create(self):
@@ -593,6 +626,18 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
+        self.s6 = self.m6.addNewSubmenu(name='Network Tap Interface',
+                                        shortcut='n')
+        self.s6.addItem(text='Create', onSelect=self.system_commands,
+                        shortcut='c', arguments=['ntapcreate'])
+        self.s6.addItem(text='Delete', onSelect=self.system_commands,
+                        shortcut='d', arguments=['ntapdelete'])
+        self.s6.addItem(text='Start', onSelect=self.system_commands,
+                        shortcut='s', arguments=['ntapstart'])
+        self.s6.addItem(text='Stop', onSelect=self.system_commands,
+                        shortcut='t', arguments=['ntapstop'])
+        self.s6.addItem(text='List', onSelect=self.system_commands,
+                        shortcut='l', arguments=['ntaplist'])
 
         # Tutorial Menu Items
         self.m7 = self.add_menu(name="Tutorials", shortcut="t")
