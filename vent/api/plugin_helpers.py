@@ -199,9 +199,6 @@ class PluginHelper:
     def tool_matches(tools=None, version='HEAD'):
         """ Get the tools paths and versions that were specified """
         matches = []
-        with open("/Users/bpagon/random.txt", "a") as f:
-            f.write("In tool_matches\n")
-            f.write(str(tools) + "\n")
         if tools:
             for tool in tools:
                 match_version = version
