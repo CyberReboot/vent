@@ -160,21 +160,38 @@ class PluginHelper:
         if groups:
             groups = groups.split(",")
         for root, _, filenames in walk(path):
-            for _ in fnmatch.filter(filenames, 'Dockerfile'):
+            files = fnmatch.filter(filenames, 'Dockerfile*')
+            # append additional identifiers to tools if multiple in same
+            # directory
+            add_info = len(files) > 1
+            for f in files:
                 # !! TODO deal with wild/etc.?
+                addtl_info = ''
+                if add_info:
+                    # @ will be delimiter symbol for multi-tools
+                    try:
+                        addtl_info = '@' + f.split('.')[1]
+                    except Exception as e:
+                        addtl_info = '@unspecified'
                 if groups:
+                    if add_info and not addtl_info == '@unspecified':
+                        tool_template = addtl_info.split('@')[1] + '.template'
+                    else:
+                        tool_template = 'vent.template'
                     try:
                         template = Template(template=join(root,
-                                                          'vent.template'))
+                                                          tool_template))
                         for group in groups:
                             template_groups = template.option("info", "groups")
                             if (template_groups[0] and
                                group in template_groups[1]):
-                                matches.append((root.split(path)[1], version))
+                                matches.append((root.split(path)[1] +
+                                                addtl_info, version))
                     except Exception as e:  # pragma: no cover
                         self.logger.info("error: " + str(e))
                 else:
-                    matches.append((root.split(path)[1], version))
+                    matches.append((root.split(path)[1] +
+                                    addtl_info, version))
         return matches
 
     @staticmethod
@@ -584,6 +601,8 @@ class PluginHelper:
                          s_containers,
                          f_containers):
         """ Start container that was passed in and return status """
+        self.logger.info("Testing t_d...")
+        self.logger.info(tool_d)
         # use section to add info to manifest
         section = tool_d[container]['section']
         del tool_d[container]['section']
@@ -671,6 +690,8 @@ class PluginHelper:
             except Exception as e:  # pragma: no cover
                 f_containers.append(container)
                 manifest.set_option(section, 'running', 'failed')
+                self.logger.info("Testing tool dict...")
+                self.logger.info(tool_d[container])
                 self.logger.error("failed to start " + str(container) +
                                   " because: " + str(e))
         # save changes made to manifest

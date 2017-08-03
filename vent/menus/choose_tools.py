@@ -46,8 +46,9 @@ class ChooseToolsForm(npyscreen.ActionForm):
                 value = True
                 if tool.startswith("/dev"):
                     value = False
-                if tool == "":
-                    tool = "/"
+                # tool in base directory
+                if tool == "" or tool.startswith(':'):
+                    tool = "/" + tool
                 self.tools_tc[branch][tool] = self.add(npyscreen.CheckBox,
                                                        name=tool,
                                                        value=value,
@@ -94,6 +95,8 @@ class ChooseToolsForm(npyscreen.ActionForm):
             tools = []
             for tool in self.tools_tc[branch]:
                 if self.tools_tc[branch][tool].value:
+                    # get rid of temporary show for multiple tools in same
+                    # directory
                     if tool == '/':
                         tools.append(('.', ''))
                     else:
