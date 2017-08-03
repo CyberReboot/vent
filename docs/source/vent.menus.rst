@@ -84,6 +84,14 @@ vent\.menus\.main module
     :undoc-members:
     :show-inheritance:
 
+vent\.menus\.ntap module
+------------------------
+
+.. automodule:: vent.menus.ntap
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 vent\.menus\.services module
 ----------------------------
 

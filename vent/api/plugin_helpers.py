@@ -168,14 +168,13 @@ class PluginHelper:
                 # !! TODO deal with wild/etc.?
                 addtl_info = ''
                 if add_info:
-                    # need to use @ symbol because of issues with : when
-                    # tagging
+                    # @ will be delimiter symbol for multi-tools
                     try:
                         addtl_info = '@' + f.split('.')[1]
                     except Exception as e:
-                        addtl_info = '@unspecified Dockerfile'
+                        addtl_info = '@unspecified'
                 if groups:
-                    if add_info and not addtl_info.startswith(":unspecified"):
+                    if add_info and not addtl_info == '@unspecified':
                         tool_template = addtl_info.split('@')[1] + '.template'
                     else:
                         tool_template = 'vent.template'
@@ -602,6 +601,8 @@ class PluginHelper:
                          s_containers,
                          f_containers):
         """ Start container that was passed in and return status """
+        self.logger.info("Testing t_d...")
+        self.logger.info(tool_d)
         # use section to add info to manifest
         section = tool_d[container]['section']
         del tool_d[container]['section']
@@ -689,6 +690,8 @@ class PluginHelper:
             except Exception as e:  # pragma: no cover
                 f_containers.append(container)
                 manifest.set_option(section, 'running', 'failed')
+                self.logger.info("Testing tool dict...")
+                self.logger.info(tool_d[container])
                 self.logger.error("failed to start " + str(container) +
                                   " because: " + str(e))
         # save changes made to manifest
