@@ -215,6 +215,15 @@ def file_queue(path, template_path="/vent/"):
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
+            if image_name in configs:
+                if config.has_option(section, 'docker'):
+                    try:
+                        options_dict = json.loads(config.get(section, 'docker'))
+                        for option in options_dict:
+                            configs[image_name][option] = options_dict[option]
+                    except Exception as e:   # pragma: no cover
+                        failed_images.add(image_name)
+                        status = (False, str(e))
             if config.has_option(section, 'gpu') and image_name in configs:
                 try:
                     options_dict = json.loads(config.get(section, 'gpu'))
@@ -333,6 +342,7 @@ def file_queue(path, template_path="/vent/"):
                 else:
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
+                    print(str(configs[image]))
                     d_client.containers.run(image=image,
                                             command=path,
                                             labels=labels,
