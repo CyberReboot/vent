@@ -569,10 +569,28 @@ class PluginHelper:
 
     def start_priority_containers(self, groups, group_orders, tool_d):
         """ Select containers based on priorities to start """
-        groups = sorted(set(groups))
+        vent_cfg = Template(self.path_dirs.cfg_file)
+        cfg_groups = vent_cfg.option('groups', 'start_order')
+        if cfg_groups[0]:
+            cfg_groups = cfg_groups[1].split(',')
+        else:
+            cfg_groups = []
+        all_groups = sorted(set(groups))
         s_conts = []
         f_conts = []
-        for group in groups:
+        # start tools in order of group defined in vent.cfg
+        for group in cfg_groups:
+            # remove from all_groups because already checked out
+            all_groups.remove(group)
+            if group in group_orders:
+                for cont_t in sorted(group_orders[group]):
+                    if cont_t[1] not in s_conts:
+                        s_conts, f_conts = self.start_containers(cont_t[1],
+                                                                 tool_d,
+                                                                 s_conts,
+                                                                 f_conts)
+        # start tools that haven't been specified in the vent.cfg, if any
+        for group in all_groups:
             if group in group_orders:
                 for cont_t in sorted(group_orders[group]):
                     if cont_t[1] not in s_conts:
@@ -601,8 +619,6 @@ class PluginHelper:
                          s_containers,
                          f_containers):
         """ Start container that was passed in and return status """
-        self.logger.info("Testing t_d...")
-        self.logger.info(tool_d)
         # use section to add info to manifest
         section = tool_d[container]['section']
         del tool_d[container]['section']
