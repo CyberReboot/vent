@@ -1,6 +1,7 @@
 import datetime
 import docker
 import json
+import math
 import multiprocessing
 import os
 import pkg_resources
@@ -189,7 +190,8 @@ def GpuUsage(**kargs):
         if r.status_code == 200:
             status = r.json()
             for i, device in enumerate(status['Devices']):
-                gpu_status[i] = {'global_memory': device['Memory']['Global'],
+                gm = int(round(math.log(int(device['Memory']['Global']), 2)))
+                gpu_status[i] = {'global_memory': gm,
                                  'cores': device['Cores']}
         else:
             usage = (False, "Unable to get GPU usage request error code: " +
