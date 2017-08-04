@@ -119,6 +119,7 @@ def file_queue(path, template_path="/vent/"):
     that match the mime type for the new file.
     """
     import ConfigParser
+    import ast
     import docker
     import json
     import requests
