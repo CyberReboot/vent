@@ -168,7 +168,7 @@ class Plugin:
             template.set_option(section, "branch", "")
             template.set_option(section, "version", tag)
             template.set_option(section, "last_updated",
-                                image.attrs['Created'])
+                                str(datetime.utcnow()) + " UTC")
             template.set_option(section, "image_name",
                                 image.attrs['RepoTags'][0])
             template.set_option(section, "type", "registry")
