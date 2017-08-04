@@ -27,6 +27,7 @@ from vent.menus.ntap import StartNTap
 from vent.menus.ntap import StopNTap
 from vent.menus.backup import BackupForm
 from vent.menus.editor import EditorForm
+from vent.menus.groups import GroupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
@@ -311,6 +312,18 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             forms = ['COREINVENTORY']
             form_args = {'color': "STANDOUT",
                          'name': "Inventory of core tools"}
+        elif action == 'groups_core':
+            form = GroupForm
+            forms = ['COREGROUPS']
+            form_args = {'color': 'STANDOUT',
+                         'name': 'Groups of core tools',
+                         'core': True}
+        elif action == 'groups':
+            form = GroupForm
+            forms = ['TOOLGROUPS']
+            form_args = {'color': 'STANDOUT',
+                         'name': 'Groups of core tools',
+                         'core': False}
         form_args['name'] += "\t"*8 + "^T to toggle main"
         try:
             self.remove_forms(forms)
@@ -543,6 +556,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Inventory of core tools',
                         onSelect=self.perform_action,
                         arguments=['inventory_core'], shortcut='v')
+        self.m2.addItem(text='List groups of core tools',
+                        onSelect=self.perform_action,
+                        arguments=['groups_core'], shortcut='l')
         self.m2.addItem(text='Remove core tools',
                         onSelect=self.perform_action,
                         arguments=['remove_core'], shortcut='r')
@@ -579,6 +595,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Inventory of installed plugins',
                         onSelect=self.perform_action,
                         arguments=['inventory'], shortcut='i')
+        self.m3.addItem(text='List groups of tools',
+                        onSelect=self.perform_action,
+                        arguments=['groups'], shortcut='l')
         self.m3.addItem(text='Remove plugins',
                         onSelect=self.perform_action,
                         arguments=['remove'], shortcut='r')
