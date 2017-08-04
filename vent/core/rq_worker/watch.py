@@ -222,7 +222,10 @@ def file_queue(path, template_path="/vent/"):
                     try:
                         options_dict = ast.literal_eval(config.get(section, 'docker'))
                         for option in options_dict:
-                            configs[image_name][option] = ast.literal_eval(options_dict[option])
+                            try:
+                                configs[image_name][option] = ast.literal_eval(options_dict[option])
+                            except Exception as e:  # pragma: no cover
+                                configs[image_name][option] = options_dict[option]
                     except Exception as e:   # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
