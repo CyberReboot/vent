@@ -218,7 +218,7 @@ def file_queue(path, template_path="/vent/"):
             if image_name in configs:
                 if config.has_option(section, 'docker'):
                     try:
-                        options_dict = json.loads(config.get(section, 'docker'))
+                        options_dict = ast.literal_eval(config.get(section, 'docker'))
                         for option in options_dict:
                             configs[image_name][option] = options_dict[option]
                     except Exception as e:   # pragma: no cover
