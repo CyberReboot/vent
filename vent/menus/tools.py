@@ -75,6 +75,12 @@ class ToolForm(npyscreen.ActionForm):
                 else:
                     repo_name = repo.split("/")
 
+                # determine if enabled or disabled tools should be shown
+                show_disabled = False
+                if 'action_name' in self.action:
+                    if self.action['action_name'] == 'enable':
+                        show_disabled = True
+
                 for tool in inventory['tools']:
                     tool_repo_name = tool.split(":")
 
@@ -83,10 +89,10 @@ class ToolForm(npyscreen.ActionForm):
                        repo_name[1] == tool_repo_name[1]):
                         # check to ensure tool not set to locally active = no
                         # in vent.cfg
+                        externally_active = False
                         vent_cfg_file = self.action['api_action'].vent_config
                         vent_cfg = Template(vent_cfg_file)
                         tool_pairs = vent_cfg.section('external-services')[1]
-                        display = True
                         for ext_tool in tool_pairs:
                             if ext_tool[0].lower() == inventory['tools'][tool]:
                                 try:
@@ -94,12 +100,22 @@ class ToolForm(npyscreen.ActionForm):
                                     loc = 'locally_active'
                                     if (loc in ext_tool_options and
                                             ext_tool_options[loc] == 'no'):
-                                        display = False
+                                        externally_active = True
                                 except Exception as e:
                                     self.logger.error("Couldn't check ext"
                                                       " because: " + str(e))
-                                    display = True
-                        if display:
+                                    externally_active = False
+                        # check to ensure not disabled
+                        disabled = False
+                        manifest = Template(self.api_action.plugin.manifest)
+                        if manifest.option(tool, 'enabled')[1] == 'no':
+                            disabled = True
+                        if (not externally_active and not disabled and not
+                                show_disabled):
+                            ncore_list.append(tool.split(":",
+                                                         2)[2].split("/")[-1])
+                        elif (not externally_active and disabled and
+                                show_disabled):
                             ncore_list.append(tool.split(":",
                                                          2)[2].split("/")[-1])
 
@@ -111,10 +127,10 @@ class ToolForm(npyscreen.ActionForm):
                        repo_name[1] == tool_repo_name[1]):
                         # check to ensure tool not set to locally active = no
                         # in vent.cfg
+                        externally_active = False
                         vent_cfg_file = self.action['api_action'].vent_config
                         vent_cfg = Template(vent_cfg_file)
                         tool_pairs = vent_cfg.section('external-services')[1]
-                        display = True
                         for ext_tool in tool_pairs:
                             if ext_tool[0].lower() == inventory['core'][tool]:
                                 try:
@@ -122,14 +138,24 @@ class ToolForm(npyscreen.ActionForm):
                                     loc = 'locally_active'
                                     if (loc in ext_tool_options and
                                             ext_tool_options[loc] == 'no'):
-                                        display = False
+                                        externally_active = True
                                 except Exception as e:
                                     self.logger.error("Couldn't check ext"
                                                       " because: " + str(e))
-                                    display = True
-                        if display:
+                                    externally_active = False
+                        # check to ensure not disabled
+                        disabled = False
+                        manifest = Template(self.api_action.plugin.manifest)
+                        if manifest.option(tool, 'enabled')[1] == 'no':
+                            disabled = True
+                        if (not externally_active and not disabled and not
+                                show_disabled):
                             core_list.append(tool.split(":",
-                                                        2)[2].split("/")[-1])
+                                                         2)[2].split("/")[-1])
+                        elif (not externally_active and disabled and
+                                show_disabled):
+                            core_list.append(tool.split(":",
+                                                         2)[2].split("/")[-1])
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list

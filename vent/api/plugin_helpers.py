@@ -160,21 +160,38 @@ class PluginHelper:
         if groups:
             groups = groups.split(",")
         for root, _, filenames in walk(path):
-            for _ in fnmatch.filter(filenames, 'Dockerfile'):
+            files = fnmatch.filter(filenames, 'Dockerfile*')
+            # append additional identifiers to tools if multiple in same
+            # directory
+            add_info = len(files) > 1
+            for f in files:
                 # !! TODO deal with wild/etc.?
+                addtl_info = ''
+                if add_info:
+                    # @ will be delimiter symbol for multi-tools
+                    try:
+                        addtl_info = '@' + f.split('.')[1]
+                    except Exception as e:
+                        addtl_info = '@unspecified'
                 if groups:
+                    if add_info and not addtl_info == '@unspecified':
+                        tool_template = addtl_info.split('@')[1] + '.template'
+                    else:
+                        tool_template = 'vent.template'
                     try:
                         template = Template(template=join(root,
-                                                          'vent.template'))
+                                                          tool_template))
                         for group in groups:
                             template_groups = template.option("info", "groups")
                             if (template_groups[0] and
                                group in template_groups[1]):
-                                matches.append((root.split(path)[1], version))
+                                matches.append((root.split(path)[1] +
+                                                addtl_info, version))
                     except Exception as e:  # pragma: no cover
                         self.logger.info("error: " + str(e))
                 else:
-                    matches.append((root.split(path)[1], version))
+                    matches.append((root.split(path)[1] +
+                                    addtl_info, version))
         return matches
 
     @staticmethod
@@ -552,10 +569,29 @@ class PluginHelper:
 
     def start_priority_containers(self, groups, group_orders, tool_d):
         """ Select containers based on priorities to start """
-        groups = sorted(set(groups))
+        vent_cfg = Template(self.path_dirs.cfg_file)
+        cfg_groups = vent_cfg.option('groups', 'start_order')
+        if cfg_groups[0]:
+            cfg_groups = cfg_groups[1].split(',')
+        else:
+            cfg_groups = []
+        all_groups = sorted(set(groups))
         s_conts = []
         f_conts = []
-        for group in groups:
+        # start tools in order of group defined in vent.cfg
+        for group in cfg_groups:
+            # remove from all_groups because already checked out
+            if group in all_groups:
+                all_groups.remove(group)
+            if group in group_orders:
+                for cont_t in sorted(group_orders[group]):
+                    if cont_t[1] not in s_conts:
+                        s_conts, f_conts = self.start_containers(cont_t[1],
+                                                                 tool_d,
+                                                                 s_conts,
+                                                                 f_conts)
+        # start tools that haven't been specified in the vent.cfg, if any
+        for group in all_groups:
             if group in group_orders:
                 for cont_t in sorted(group_orders[group]):
                     if cont_t[1] not in s_conts:
@@ -671,6 +707,8 @@ class PluginHelper:
             except Exception as e:  # pragma: no cover
                 f_containers.append(container)
                 manifest.set_option(section, 'running', 'failed')
+                self.logger.info("Testing tool dict...")
+                self.logger.info(tool_d[container])
                 self.logger.error("failed to start " + str(container) +
                                   " because: " + str(e))
         # save changes made to manifest

@@ -168,7 +168,7 @@ class Plugin:
             template.set_option(section, "branch", "")
             template.set_option(section, "version", tag)
             template.set_option(section, "last_updated",
-                                image.attrs['Created'])
+                                str(datetime.utcnow()) + " UTC")
             template.set_option(section, "image_name",
                                 image.attrs['RepoTags'][0])
             template.set_option(section, "type", "registry")
@@ -318,15 +318,24 @@ class Plugin:
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
+            # remove the .git for adding repo info to manifest
+            if self.repo.endswith('.git'):
+                self.repo = self.repo[:-4]
+            # remove @ in match for template setting purposes
+            if match[0].find('@') >= 0:
+                true_name = match[0].split('@')[1]
+            else:
+                true_name = match[0]
             template = Template(template=self.manifest)
             # TODO check for special settings here first for the specific match
             self.version = match[1]
             response = self.p_helper.checkout(branch=self.branch,
                                               version=self.version)
             if response[0]:
-                section = self.org + ":" + self.name + ":" + match[0] + ":"
+                section = self.org + ":" + self.name + ":" + true_name + ":"
                 section += self.branch + ":" + self.version
-                match_path = self.path + match[0]
+                # need to get rid of temp identifiers for tools in same repo
+                match_path = self.path + match[0].split('@')[0]
                 if not self.core:
                     image_name = self.org + "-" + self.name + "-"
                     if match[0] != '':
@@ -358,6 +367,11 @@ class Plugin:
                         if option[0] == 'previous_versions':
                             previous_commits = option[1]
 
+                # check if tool comes from multi directory
+                multi_tool = "no"
+                if match[0].find('@') >= 0:
+                    multi_tool = "yes"
+
                 # !! TODO
                 # check if section should be removed from config i.e. all tools
                 # but new commit removed one that was in a previous commit
@@ -366,21 +380,30 @@ class Plugin:
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
-                template.set_option(section, "name", match[0].split('/')[-1])
+                template.set_option(section, "name", true_name.split('/')[-1])
                 template.set_option(section, "namespace", self.org + '/' +
                                     self.name)
                 template.set_option(section, "path", match_path)
                 template.set_option(section, "repo", self.repo)
                 template.set_option(section, "enabled", "yes")
+                template.set_option(section, "multi_tool", multi_tool)
                 template.set_option(section, "branch", self.branch)
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
-                template.set_option(section, "image_name", image_name)
+                template.set_option(section, "image_name",
+                                    image_name.replace('@', '-'))
                 template.set_option(section, "type", "repository")
                 # save settings in vent.template to plugin_manifest
-                vent_template = Template(template=join(match_path,
-                                                       'vent.template'))
+                # watch for multiple tools in same directory
+                # just wanted to store match path with @ for path for use in
+                # other actions
+                tool_template = 'vent.template'
+                if match[0].find('@') >= 0:
+                    tool_template = match[0].split('@')[1] + '.template'
+                # need to get rid of . in match_path if multi_tool
+                vent_template = Template(join(match_path,
+                                              tool_template))
                 sections = vent_template.sections()
                 if sections[0]:
                     for header in sections[1]:
@@ -404,9 +427,10 @@ class Plugin:
                 else:
                     template.set_option(section,
                                         "link_name",
-                                        match[0].split('/')[-1])
+                                        true_name.split('/')[-1])
                 commit_id = None
                 if self.version == 'HEAD':
+                    # remove @ in multi-tools
                     chdir(match_path)
                     cmd = "git rev-parse --short HEAD"
                     commit_id = check_output(shlex.split(cmd),
@@ -436,12 +460,12 @@ class Plugin:
                 if self.groups:
                     template.set_option(section, "groups", self.groups)
                 else:
-                    vent_template = join(match_path, 'vent.template')
-                    if os.path.exists(vent_template):
-                        v_template = Template(template=vent_template)
-                        groups = v_template.option("info", "groups")
-                        if groups[0]:
-                            template.set_option(section, "groups", groups[1])
+                    groups = vent_template.option("info", "groups")
+                    if groups[0]:
+                        template.set_option(section, "groups", groups[1])
+                    # set groups to empty string if no groups defined for tool
+                    else:
+                        template.set_option(section, "groups", '')
                 template = self._build_image(template,
                                              match_path,
                                              image_name,
@@ -513,12 +537,23 @@ class Plugin:
                         self.logger.warning("Failed to pull image, going to"
                                             " build instead: " + str(e))
                 if not pull:
+                    # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
                     if image_name.endswith('HEAD'):
                         commit_id = template.option(section, "commit_id")
                         if commit_id[0]:
                             commit_tag = (" -t " + image_name[:-4] +
                                           str(commit_id[1]))
+                    # see if additional file arg needed for building multiple
+                    # images from same directory
+                    file_tag = " ."
+                    if image_name.find("@") >= 0:
+                        specific_file = image_name.split("@")[1].split('-')[0]
+                        if specific_file == 'unspecified':
+                            file_tag = " -f Dockerfile ."
+                        else:
+                            file_tag = " -f Dockerfile." + specific_file + " ."
+                        image_name = image_name.replace('@', '-')
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.name=" +
@@ -526,7 +561,7 @@ class Plugin:
                                                       "vent.groups=" +
                                                       groups[1] + " -t " +
                                                       image_name +
-                                                      commit_tag + " ."),
+                                                      commit_tag + file_tag),
                                           stderr=STDOUT,
                                           close_fds=True)
                     self.logger.info("Building " + name[1] + "\n" +

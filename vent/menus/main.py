@@ -534,6 +534,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Configure core tools',
                         onSelect=self.perform_action,
                         arguments=['configure_core'], shortcut='t')
+        self.m2.addItem(text='Disable core tools',
+                        onSelect=self.perform_action,
+                        arguments=['disable_core'], shortcut='d')
+        self.m2.addItem(text='Enable core tools',
+                        onSelect=self.perform_action,
+                        arguments=['enable_core'], shortcut='e')
         self.m2.addItem(text='Inventory of core tools',
                         onSelect=self.perform_action,
                         arguments=['inventory_core'], shortcut='v')
@@ -564,6 +570,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Configure plugin tools',
                         onSelect=self.perform_action,
                         arguments=['configure'], shortcut='t')
+        self.m3.addItem(text='Disable plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['disable'], shortcut='d')
+        self.m3.addItem(text='Enable plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['enable'], shortcut='e')
         self.m3.addItem(text='Inventory of installed plugins',
                         onSelect=self.perform_action,
                         arguments=['inventory'], shortcut='i')
