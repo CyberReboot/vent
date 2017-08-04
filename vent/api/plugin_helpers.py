@@ -581,7 +581,8 @@ class PluginHelper:
         # start tools in order of group defined in vent.cfg
         for group in cfg_groups:
             # remove from all_groups because already checked out
-            all_groups.remove(group)
+            if group in all_groups:
+                all_groups.remove(group)
             if group in group_orders:
                 for cont_t in sorted(group_orders[group]):
                     if cont_t[1] not in s_conts:
