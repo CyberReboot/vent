@@ -124,6 +124,7 @@ def file_queue(path, template_path="/vent/"):
     import json
     import requests
     import os
+    import sys
 
     from redis import Redis
     from rq import Queue
@@ -356,7 +357,9 @@ def file_queue(path, template_path="/vent/"):
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
+        print 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno)
         print("Failed to process job: " + str(e))
 
+    print(str(configs))
     print(str(status))
     return status
