@@ -931,6 +931,56 @@ class Action:
         self.logger.info("Finished: restart_tools")
         return status
 
+    def disable(self,
+                repo=None,
+                name=None,
+                groups=None,
+                enabled="yes",
+                branch="master",
+                version="HEAD"):
+        """ Take an enabled tool and disable it """
+        self.logger.info("Starting: disable")
+        constraints = locals()
+        status = (True, None)
+        try:
+            tools, manifest = self.p_helper.constraint_options(constraints, [])
+            for tool in tools:
+                manifest.set_option(tool, 'enabled', 'no')
+                manifest.write_config()
+                tool_name = manifest.option(tool, 'name')[1]
+                self.logger.info("Disabled tool: " + tool_name)
+        except Exception as e:
+            self.logger.error("Troubling disabling tool because: " + str(e))
+            status = (False, str(e))
+        self.logger.info("Status of disable: " + str(status[0]))
+        self.logger.info("Finished: disable")
+        return status
+
+    def enable(self,
+               repo=None,
+               name=None,
+               groups=None,
+               enabled="no",
+               branch="master",
+               version="HEAD"):
+        """ Take a disabled tool and enable it """
+        self.logger.info("Starting: enable")
+        constraints = locals()
+        status = (True, None)
+        try:
+            tools, manifest = self.p_helper.constraint_options(constraints, [])
+            for tool in tools:
+                manifest.set_option(tool, 'enabled', 'yes')
+                manifest.write_config()
+                tool_name = manifest.option(tool, 'name')[1]
+                self.logger.info("Enabled tool: " + tool_name)
+        except Exception as e:
+            self.logger.error("Troubling enabling tool because: " + str(e))
+            status = (False, str(e))
+        self.logger.info("Status of enable: " + str(status[0]))
+        self.logger.info("Finished: enable")
+        return status
+
     @staticmethod
     def post_request(url, json_data):
         """
