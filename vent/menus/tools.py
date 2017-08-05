@@ -2,6 +2,7 @@ import json
 import npyscreen
 import time
 
+from collections import deque
 from threading import Thread
 
 from vent.api.actions import Action
@@ -21,6 +22,7 @@ class ToolForm(npyscreen.ActionForm):
         self.api_action = Action()
         action = {'api_action': self.api_action}
         self.tools_tc = {}
+        self.repo_widgets = {}
         if keywords['action_dict']:
             action.update(keywords['action_dict'])
         if keywords['names']:
@@ -29,20 +31,63 @@ class ToolForm(npyscreen.ActionForm):
                 action['action_object'+str(i)] = getattr(self.api_action, name)
                 i += 1
         self.action = action
+        # get list of all possible group views to display
+        if False:
+            self.views = deque()
+            possible_groups = set()
+            manifest = Template(self.api_action.plugin.manifest)
+            if self.action['cores']:
+                tools = self.api_action.inventory(choices=['core'])[1]['core']
+            else:
+                tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+            for tool in tools:
+                groups = manifest.option(tool, 'groups')[1].split(',')
+                for group in groups:
+                    # don't do core because that's the purpose of all in views
+                    if group != '' and group != 'core':
+                        possible_groups.add(group)
+            self.views += possible_groups
+            self.views.append('all groups')
         super(ToolForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm('MAIN')
 
-    def create(self):
+    def toggle_view(self, *args, **kwargs):
+        manifest = Template(self.api_action.plugin.manifest)
+        group_to_display = self.views.popleft()
+        self.cur_view.value = group_to_display
+        for repo in self.tools_tc:
+            for tool in self.tools_tc[repo]:
+                if (group_to_display not in manifest.option(tool, 'groups')[1]
+                        and group_to_display != 'all groups'):
+                    self.tools_tc[repo][tool].value = False
+                    self.tools_tc[repo][tool].hidden = True
+                else:
+                    self.tools_tc[repo][tool].value = True
+                    self.tools_tc[repo][tool].hidden = False
+        # redraw elements
+        self.display()
+        # add view back to queue
+        self.views.append(group_to_display)
+
+    def create(self, group_view=False):
         """ Update with current tools """
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
         self.add(npyscreen.TitleText,
                  name='Select which tools to ' + self.action['action'] + ':',
                  editable=False)
+        togglable = ['remove', 'enable', 'disable', 'build']
+        if self.action['action_name'] in togglable:
+            self.cur_view = self.add(npyscreen.TitleText,
+                                     name='Group view:',
+                                     value='all groups', editable=False, rely=3)
+            self.add_handlers({"^V": self.toggle_view})
+            i = 5
+        else:
+            i = 4
 
-        i = 4
         if self.action['action_name'] == 'start':
             response = self.action['api_action'].inventory(choices=['repos',
                                                                     'tools',
@@ -112,12 +157,10 @@ class ToolForm(npyscreen.ActionForm):
                             disabled = True
                         if (not externally_active and not disabled and not
                                 show_disabled):
-                            ncore_list.append(tool.split(":",
-                                                         2)[2].split("/")[-1])
+                            ncore_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
-                            ncore_list.append(tool.split(":",
-                                                         2)[2].split("/")[-1])
+                            ncore_list.append(tool)
 
                 for tool in inventory['core']:
                     tool_repo_name = tool.split(":")
@@ -150,12 +193,10 @@ class ToolForm(npyscreen.ActionForm):
                             disabled = True
                         if (not externally_active and not disabled and not
                                 show_disabled):
-                            core_list.append(tool.split(":",
-                                                         2)[2].split("/")[-1])
+                            core_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
-                            core_list.append(tool.split(":",
-                                                         2)[2].split("/")[-1])
+                            core_list.append(tool)
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
@@ -166,12 +207,13 @@ class ToolForm(npyscreen.ActionForm):
                 if self.action['cores']:
                     # make sure only repos with core tools are displayed
                     if has_core.get(repo):
-                        self.add(npyscreen.TitleText,
-                                 name='Plugin: '+repo,
-                                 editable=False, rely=i, relx=5)
+                        self.repo_widgets[repo] = self.add(npyscreen.TitleText,
+                                                           name='Plugin: '+repo,
+                                                           editable=False,
+                                                           rely=i, relx=5)
 
                         for tool in has_core[repo]:
-                            tool_name = tool
+                            tool_name = tool.split(":", 2)[2].split("/")[-1]
                             if tool_name == "":
                                 tool_name = "/"
                             self.tools_tc[repo][tool] = self.add(
@@ -182,12 +224,13 @@ class ToolForm(npyscreen.ActionForm):
                 else:
                     # make sure only repos with non-core tools are displayed
                     if has_non_core.get(repo):
-                        self.add(npyscreen.TitleText,
-                                 name='Plugin: '+repo,
-                                 editable=False, rely=i, relx=5)
+                        self.repo_widgets[repo] = self.add(npyscreen.TitleText,
+                                                           name='Plugin: '+repo,
+                                                           editable=False,
+                                                           rely=i, relx=5)
 
                         for tool in has_non_core[repo]:
-                            tool_name = tool
+                            tool_name = tool.split(":", 2)[2].split("/")[-1]
                             if tool_name == "":
                                 tool_name = "/"
                             self.tools_tc[repo][tool] = self.add(
@@ -270,7 +313,7 @@ class ToolForm(npyscreen.ActionForm):
             for tool in self.tools_tc[repo]:
                 self.logger.info(tool)
                 if self.tools_tc[repo][tool].value:
-                    t = tool
+                    t = tool.split(":", 2)[2].split("/")[-1]
                     if t.startswith('/:'):
                         t = " "+t[1:]
                     t = t.split(":")
