@@ -44,14 +44,6 @@ vent\.menus\.editor module
     :undoc-members:
     :show-inheritance:
 
-vent\.menus\.groups module
---------------------------
-
-.. automodule:: vent.menus.groups
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 vent\.menus\.help module
 ------------------------
 
