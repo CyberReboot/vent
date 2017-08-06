@@ -627,9 +627,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['reset'], shortcut='r')
         self.m6.addItem(text='Restore', onSelect=self.system_commands,
                         arguments=['restore'], shortcut='t')
-        #self.m6.addItem(text='Upgrade (To Be Implemented...)',
-        #                onSelect=self.system_commands,
-        #                arguments=['upgrade'], shortcut='u')
+        self.m6.addItem(text='Upgrade (To Be Implemented...)',
+                        onSelect=self.system_commands,
+                        arguments=['upgrade'], shortcut='u')
         self.s6 = self.m6.addNewSubmenu(name='Network Tap Interface',
                                         shortcut='n')
         self.s6.addItem(text='Create', onSelect=self.system_commands,

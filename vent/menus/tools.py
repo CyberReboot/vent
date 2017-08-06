@@ -59,8 +59,8 @@ class ToolForm(npyscreen.ActionForm):
         self.cur_view.value = group_to_display
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
-                if (group_to_display not in manifest.option(tool, 'groups')[1]
-                        and group_to_display != 'all groups'):
+                if group_to_display not in manifest.option(tool, 'groups')[1] \
+                        and group_to_display != 'all groups':
                     self.tools_tc[repo][tool].value = False
                     self.tools_tc[repo][tool].hidden = True
                 else:
@@ -81,7 +81,8 @@ class ToolForm(npyscreen.ActionForm):
         if self.action['action_name'] in togglable:
             self.cur_view = self.add(npyscreen.TitleText,
                                      name='Group view:',
-                                     value='all groups', editable=False, rely=3)
+                                     value='all groups', editable=False,
+                                     rely=3)
             self.add_handlers({"^V": self.toggle_view})
             i = 5
         else:

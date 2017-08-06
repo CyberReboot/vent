@@ -2,7 +2,6 @@ import npyscreen
 
 from collections import deque
 
-from vent.api.actions import Action
 from vent.api.templates import Template
 
 
@@ -38,7 +37,7 @@ class InventoryForm(npyscreen.FormBaseNew):
     def toggle_view(self, *args, **kwargs):
         group = self.views.popleft()
         new_display = []
-        new_display.append('Tools for ' + group + ' found:')
+        new_display.append('Tools for group ' + group + ' found:')
         manifest = Template(self.api_action.plugin.manifest)
         cur_repo = ''
         for i in range(1, len(self.all_tools) - 1):
@@ -51,8 +50,8 @@ class InventoryForm(npyscreen.FormBaseNew):
             elif val.startswith("    ") and not val.startswith("      "):
                 name = val.strip()
                 constraints = {"repo": cur_repo, "name": name}
-                t_section = self.api_action.p_helper.constraint_options(constraints,
-                                                                        [])[0]
+                t_section = self.api_action.p_helper \
+                            .constraint_options(constraints, [])[0]
                 t_section = t_section.keys()[0]
                 if group in manifest.option(t_section, 'groups')[1].split(','):
                     new_display += self.all_tools[i:i+5]
@@ -70,7 +69,8 @@ class InventoryForm(npyscreen.FormBaseNew):
 
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.quit, "^Q": self.quit, "^V": self.toggle_view})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit,
+                           "^V": self.toggle_view})
         self.add(npyscreen.TitleFixedText, name=self.action['title'], value='')
         response = self.action['api_action'].inventory(choices=['repos',
                                                                 'core',
