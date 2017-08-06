@@ -1,5 +1,10 @@
 import npyscreen
 
+from collections import deque
+
+from vent.api.actions import Action
+from vent.api.templates import Template
+
 
 class InventoryForm(npyscreen.FormBaseNew):
     """ Inventory form for the Vent CLI """
@@ -7,15 +12,65 @@ class InventoryForm(npyscreen.FormBaseNew):
         """ Initialize inventory form objects """
         self.action = action
         self.logger = logger
+        self.api_action = self.action['api_action']
+        # get list of all possible group views to display
+        self.views = deque()
+        possible_groups = set()
+        manifest = Template(self.api_action.plugin.manifest)
+        if self.action['cores']:
+            tools = self.api_action.inventory(choices=['core'])[1]['core']
+        else:
+            tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+        for tool in tools:
+            groups = manifest.option(tool, 'groups')[1].split(',')
+            for group in groups:
+                # don't do core because that's the purpose of all in views
+                if group != '' and group != 'core':
+                    possible_groups.add(group)
+        self.views += possible_groups
+        self.views.append('all groups')
         super(InventoryForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
         self.parentApp.switchForm('MAIN')
 
+    def toggle_view(self, *args, **kwargs):
+        group = self.views.popleft()
+        new_display = []
+        new_display.append('Tools for ' + group + ' found:')
+        manifest = Template(self.api_action.plugin.manifest)
+        cur_repo = ''
+        for i in range(1, len(self.all_tools) - 1):
+            val = self.all_tools[i]
+            # get repo val
+            if val.startswith("  Plugin:"):
+                new_display.append(val)
+                cur_repo = val.split(':', 1)[1].strip()
+            # determine if tool should be displayed in this group
+            elif val.startswith("    ") and not val.startswith("      "):
+                name = val.strip()
+                constraints = {"repo": cur_repo, "name": name}
+                t_section = self.api_action.p_helper.constraint_options(constraints,
+                                                                        [])[0]
+                t_section = t_section.keys()[0]
+                if group in manifest.option(t_section, 'groups')[1].split(','):
+                    new_display += self.all_tools[i:i+5]
+            elif val == '':
+                new_display.append(val)
+        # if all groups display all groups
+        if group == 'all groups':
+            self.display_val.values = self.all_tools
+        else:
+            self.display_val.values = new_display
+        # redraw
+        self.display()
+        # add group back into cycle
+        self.views.append(group)
+
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.add_handlers({"^T": self.quit, "^Q": self.quit, "^V": self.toggle_view})
         self.add(npyscreen.TitleFixedText, name=self.action['title'], value='')
         response = self.action['api_action'].inventory(choices=['repos',
                                                                 'core',
@@ -29,7 +84,7 @@ class InventoryForm(npyscreen.FormBaseNew):
             if len(inventory['repos']) == 0:
                 value = "No tools were found.\n"
             else:
-                value = "Tools for each plugin found:\n"
+                value = "Tools for all groups found:\n"
             tools = None
             if self.action['cores'] and inventory['core']:
                 tools = inventory['core']
@@ -61,4 +116,5 @@ class InventoryForm(npyscreen.FormBaseNew):
             value = "There was an issue with " + self.action['name']
             value += " retrieval:\n" + str(response[1])
             value += "\nPlease see vent.log for more details."
-        self.add(npyscreen.Pager, values=value.split("\n"))
+        self.all_tools = value.split("\n")
+        self.display_val = self.add(npyscreen.Pager, values=value.split("\n"))

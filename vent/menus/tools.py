@@ -32,22 +32,21 @@ class ToolForm(npyscreen.ActionForm):
                 i += 1
         self.action = action
         # get list of all possible group views to display
-        if False:
-            self.views = deque()
-            possible_groups = set()
-            manifest = Template(self.api_action.plugin.manifest)
-            if self.action['cores']:
-                tools = self.api_action.inventory(choices=['core'])[1]['core']
-            else:
-                tools = self.api_action.inventory(choices=['tools'])[1]['tools']
-            for tool in tools:
-                groups = manifest.option(tool, 'groups')[1].split(',')
-                for group in groups:
-                    # don't do core because that's the purpose of all in views
-                    if group != '' and group != 'core':
-                        possible_groups.add(group)
-            self.views += possible_groups
-            self.views.append('all groups')
+        self.views = deque()
+        possible_groups = set()
+        manifest = Template(self.api_action.plugin.manifest)
+        if self.action['cores']:
+            tools = self.api_action.inventory(choices=['core'])[1]['core']
+        else:
+            tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+        for tool in tools:
+            groups = manifest.option(tool, 'groups')[1].split(',')
+            for group in groups:
+                # don't do core because that's the purpose of all in views
+                if group != '' and group != 'core':
+                    possible_groups.add(group)
+        self.views += possible_groups
+        self.views.append('all groups')
         super(ToolForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):

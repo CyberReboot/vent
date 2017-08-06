@@ -27,7 +27,6 @@ from vent.menus.ntap import StartNTap
 from vent.menus.ntap import StopNTap
 from vent.menus.backup import BackupForm
 from vent.menus.editor import EditorForm
-from vent.menus.groups import GroupForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
@@ -166,7 +165,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 logger.error("file drop restart failed with error: " + str(e))
             logger.info("Finished: file drop restart")
         self.file_drop.display()
-
         return
 
     @staticmethod
@@ -312,19 +310,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             forms = ['COREINVENTORY']
             form_args = {'color': "STANDOUT",
                          'name': "Inventory of core tools"}
-        elif action == 'groups_core':
-            form = GroupForm
-            forms = ['COREGROUPS']
-            form_args = {'color': 'STANDOUT',
-                         'name': 'Groups of core tools',
-                         'core': True}
-        elif action == 'groups':
-            form = GroupForm
-            forms = ['TOOLGROUPS']
-            form_args = {'color': 'STANDOUT',
-                         'name': 'Groups of core tools',
-                         'core': False}
         form_args['name'] += "\t"*8 + "^T to toggle main"
+        if s_action in self.view_togglable:
+            form_args['name'] += "\t"*8 + "^V to toggle group view"
         try:
             self.remove_forms(forms)
             thr = Thread(target=self.add_form, args=(),
@@ -467,6 +455,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             MainForm.exit()
 
         self.add_handlers({"^T": self.help_form, "^Q": MainForm.exit})
+        # all forms that can toggle view by group
+        self.view_togglable = ['inventory', 'remove', 'update', 'enable',
+                               'disable', 'build']
 
         #######################
         # MAIN SCREEN WIDGETS #
@@ -556,9 +547,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m2.addItem(text='Inventory of core tools',
                         onSelect=self.perform_action,
                         arguments=['inventory_core'], shortcut='v')
-        self.m2.addItem(text='List groups of core tools',
-                        onSelect=self.perform_action,
-                        arguments=['groups_core'], shortcut='l')
         self.m2.addItem(text='Remove core tools',
                         onSelect=self.perform_action,
                         arguments=['remove_core'], shortcut='r')
@@ -595,9 +583,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Inventory of installed plugins',
                         onSelect=self.perform_action,
                         arguments=['inventory'], shortcut='i')
-        self.m3.addItem(text='List groups of tools',
-                        onSelect=self.perform_action,
-                        arguments=['groups'], shortcut='l')
         self.m3.addItem(text='Remove plugins',
                         onSelect=self.perform_action,
                         arguments=['remove'], shortcut='r')
@@ -642,9 +627,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['reset'], shortcut='r')
         self.m6.addItem(text='Restore', onSelect=self.system_commands,
                         arguments=['restore'], shortcut='t')
-        self.m6.addItem(text='Upgrade (To Be Implemented...)',
-                        onSelect=self.system_commands,
-                        arguments=['upgrade'], shortcut='u')
+        #self.m6.addItem(text='Upgrade (To Be Implemented...)',
+        #                onSelect=self.system_commands,
+        #                arguments=['upgrade'], shortcut='u')
         self.s6 = self.m6.addNewSubmenu(name='Network Tap Interface',
                                         shortcut='n')
         self.s6.addItem(text='Create', onSelect=self.system_commands,
