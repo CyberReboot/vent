@@ -165,7 +165,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 logger.error("file drop restart failed with error: " + str(e))
             logger.info("Finished: file drop restart")
         self.file_drop.display()
-
         return
 
     @staticmethod
@@ -312,6 +311,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args = {'color': "STANDOUT",
                          'name': "Inventory of core tools"}
         form_args['name'] += "\t"*8 + "^T to toggle main"
+        if s_action in self.view_togglable:
+            form_args['name'] += "\t"*8 + "^V to toggle group view"
         try:
             self.remove_forms(forms)
             thr = Thread(target=self.add_form, args=(),
@@ -454,6 +455,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             MainForm.exit()
 
         self.add_handlers({"^T": self.help_form, "^Q": MainForm.exit})
+        # all forms that can toggle view by group
+        self.view_togglable = ['inventory', 'remove', 'update', 'enable',
+                               'disable', 'build']
 
         #######################
         # MAIN SCREEN WIDGETS #
