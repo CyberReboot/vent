@@ -2,7 +2,7 @@ import npyscreen
 
 
 class EditorForm(npyscreen.ActionForm):
-    """ Form that can be used as a pseudo test editor in npyscreen """
+    """ Form that can be used as a pseudo text editor in npyscreen """
     def __init__(self, *args, **keywords):
         """ Initialize EditorForm objects """
         self.save = keywords['save_configure']
