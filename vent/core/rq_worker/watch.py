@@ -4,6 +4,7 @@ def gpu_queue(options):
     """
     import docker
     import json
+    import time
 
     from vent.helpers.meta import GpuUsage
 
@@ -23,9 +24,9 @@ def gpu_queue(options):
         dev = '/dev/nvidia' + gpu_options['device'] + ':/dev/nvidia'
         dev += gpu_options['device'] + ':rwm'
         if 'devices' in configs:
-            devices = configs['devices']
-            print(str(devices))
-            for device in devices:
+            d = configs['devices']
+            print(str(d))
+            for device in d:
                 print(dev + " compared to " + device)
                 if any(str.isdigit(str(char)) for char in device):
                     if dev == device:
@@ -33,46 +34,68 @@ def gpu_queue(options):
                     else:
                         print(dev + " doesn't match, removing: " + device)
                         configs['devices'].remove(device)
+    else:
+        d = configs['devices']
+        for device in d:
+            if any(str.isdigit(str(char)) for char in device):
+                devices.append(device)
 
     # check if devices is still an empty list
     if not devices:
-        return (False, "no valid devices match the requested device")
+        status = (False, "no valid devices match the requested device")
+        print(str(status))
+        return status
 
-    # TODO overriding until this is working
-    # wait = True
-    wait = False
+    mem_needed = 0
+    dedicated = False
+    # need a gpu to itself
+    if ('dedicated' in options['gpu_options'] and
+       options['gpu_options']['dedicated'] == 'yes'):
+        dedicated = True
+    if 'mem_mb' in options['gpu_options']:
+        # TODO input error checking
+        mem_needed = int(options['gpu_options']['mem_mb'])
+
     device = None
-
-    while wait:
+    while not device:
         usage = GpuUsage()
-        check = 0
-        # TODO check if GPUs are available for the set restrictions
-        # no restrictions set
-        if len(options['gpu_options']) == 1:
-            check = 3
-        else:
-            # check if device is available
-            if 'device' in gpu_options:
-                if not usage[gpu_options['device']]['processes']:
-                    check += 1
-            else:
-                check += 1
 
-            # TODO mem_mb needed available
+        # {"device": "0",
+        #  "mem_mb": "1024",
+        #  "dedicated": "yes",
+        #  "enabled": "yes"}
+        for d in devices:
+            dev = d.split(":")[0].split('nvidia')[1]
+            # if the device is already dedicated, can't be used
+            if dev not in usage['vent_usage']['dedicated']:
+                ram_used = usage['vent_usage']['mem_mb'][dev]
+                # check for vent usage/processes running
+                if (dedicated and
+                   dev not in usage['vent_usage']['mem_mb'] and
+                   mem_needed <= usage[dev]['global_memory'] and
+                   not usage[dev]['processes']):
+                    device = dev
+                # check for ram constraints
+                elif mem_needed <= (usage[dev]['global_memory'] - ram_used):
+                    device = dev
 
-            # TODO dedicated
-
-        # TODO check if gpus are available
-        if check == 3:
-            wait = False
+        # TODO make this sleep incremental up to a point, potentially kill
+        #      after a set time configured from vent.cfg, outputting as it goes
+        time.sleep(1)
 
     # lock jobs to a specific gpu (no shared GPUs for a single process) this is
     # needed to calculate if memory requested (but not necessarily in use)
     # would become oversubscribed
 
-    # TODO store which device was mapped
-    # TODO testing
-    options['labels']['vent.gpu.device'] = '1'
+    # store which device was mapped
+    options['labels']['vent.gpu.device'] = device
+    gpu_device = '/dev/nvidia' + device + ':/dev/nvidia' + device + ':rwm'
+    if 'devices' in configs:
+        d = configs['devices']
+        for dev in d:
+            if any(str.isdigit(str(char)) for char in dev):
+                if gpu_device != dev:
+                    configs['devices'].remove(dev)
 
     try:
         d_client = docker.from_env()
@@ -96,10 +119,12 @@ def file_queue(path, template_path="/vent/"):
     that match the mime type for the new file.
     """
     import ConfigParser
+    import ast
     import docker
     import json
     import requests
     import os
+    import sys
 
     from redis import Redis
     from rq import Queue
@@ -155,8 +180,11 @@ def file_queue(path, template_path="/vent/"):
         config.optionxform = str
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
+        name_maps = {}
         for section in sections:
             image_name = config.get(section, 'image_name')
+            link_name = config.get(section, 'link_name')
+            name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
             # doesn't matter if it's a repository or registry because both in manifest
             if config.has_option(section, 'service'):
                 try:
@@ -192,6 +220,25 @@ def file_queue(path, template_path="/vent/"):
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
+            if image_name in configs:
+                if config.has_option(section, 'docker'):
+                    try:
+                        options_dict = ast.literal_eval(config.get(section, 'docker'))
+                        for option in options_dict:
+                            try:
+                                configs[image_name][option] = ast.literal_eval(options_dict[option])
+                            except Exception as e:  # pragma: no cover
+                                configs[image_name][option] = options_dict[option]
+                        if 'links' in configs[image_name]:
+                            for link in configs[image_name]['links']:
+                                if link in name_maps:
+                                    configs[image_name]['links'][name_maps[link]] = configs[image_name]['links'].pop(link)
+                        # TODO network_mode
+                        # TODO volumes_from
+                        # TODO external services
+                    except Exception as e:   # pragma: no cover
+                        failed_images.add(image_name)
+                        status = (False, str(e))
             if config.has_option(section, 'gpu') and image_name in configs:
                 try:
                     options_dict = json.loads(config.get(section, 'gpu'))
@@ -310,6 +357,7 @@ def file_queue(path, template_path="/vent/"):
                 else:
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
+                    print(str(configs[image]))
                     d_client.containers.run(image=image,
                                             command=path,
                                             labels=labels,
@@ -322,7 +370,9 @@ def file_queue(path, template_path="/vent/"):
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
+        print 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno)
         print("Failed to process job: " + str(e))
 
+    print(str(configs))
     print(str(status))
     return status
