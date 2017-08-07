@@ -184,7 +184,7 @@ def file_queue(path, template_path="/vent/"):
         for section in sections:
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
-            name_maps[link_name] = image_name
+            name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
             # doesn't matter if it's a repository or registry because both in manifest
             if config.has_option(section, 'service'):
                 try:
