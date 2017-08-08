@@ -169,6 +169,7 @@ def file_queue(path, template_path="/vent/"):
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
 
+        # change
         labels = {'vent-plugin': '', 'file': path}
         # read in configuration of plugins to get the ones that should run
         # against the path.
@@ -181,6 +182,26 @@ def file_queue(path, template_path="/vent/"):
         for section in sections:
             image_name = config.get(section, 'image_name')
             # doesn't matter if it's a repository or registry because both in manifest
+            if 'dump' in path:
+                if 'replay_pcap' in config.get(section, 'name'):
+                    try:
+                        # read the vent.cfg file to grab the network-mapping
+                        # specified. For replay_pcap
+                        n_name = 'network-mapping'
+                        n_map = []
+                        if vent_config.has_section(n_name):
+                            options = vent_config.options(n_name)
+                            for option in options:
+                                if vent_config.get(n_name, option):
+                                    n_map.append(vent_config.get(n_name, option))
+                            # make sure that the options aren't empty
+                            # returns tuple(status, values)
+                        orig_path = path
+                        path = str(n_map[0]) + " " + path
+                    except Exception as e:  # pragma: no cover
+                        failed_images.add(image_name)
+                        status = (False, str(e))
+
             if config.has_option(section, 'service'):
                 try:
                     options_dict = json.loads(config.get(section, 'service'))
@@ -212,6 +233,7 @@ def file_queue(path, template_path="/vent/"):
                             if path.endswith(ext_type):
                                 images.append(image_name)
                                 configs[image_name] = {}
+
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
@@ -224,6 +246,7 @@ def file_queue(path, template_path="/vent/"):
                     except Exception as e:   # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
+
             if config.has_option(section, 'gpu') and image_name in configs:
                 try:
                     options_dict = json.loads(config.get(section, 'gpu'))
@@ -304,8 +327,14 @@ def file_queue(path, template_path="/vent/"):
                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                  'syslog-facility': 'daemon',
                                  'tag': path.rsplit('.', 1)[-1]}}
-        dir_path = path.rsplit('/', 1)[0]
-        volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
+
+        # if dump is in the path, dont bind to the volume
+        if 'dump' not in path:
+            dir_path = path.rsplit('/', 1)[0]
+            volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
+        else:
+            dir_path = orig_path.rsplit('/', 1)[0]
+            volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
 
         # setup gpu queue
         can_queue_gpu = True
@@ -315,6 +344,8 @@ def file_queue(path, template_path="/vent/"):
             can_queue_gpu = False
             print("Unable to connect to redis: " + str(e))
 
+        print(images)
+        print(failed_images)
         # start containers
         for image in images:
             if image not in failed_images:
@@ -340,6 +371,9 @@ def file_queue(path, template_path="/vent/"):
                     else:
                         failed_images.add(image)
                 else:
+                    print("hello")
+                    print(image)
+                    print(path)
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
                     print(str(configs[image]))
