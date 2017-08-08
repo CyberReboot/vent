@@ -171,11 +171,9 @@ def file_queue(path, template_path="/vent/"):
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
 
-<<<<<<< HEAD
         # change
         labels = {'vent-plugin': '', 'file': path}
-=======
->>>>>>> 09b7327a0770b9d7cddfc8b20a7e0172d12e9990
+
         # read in configuration of plugins to get the ones that should run
         # against the path.
         # keep track of images that failed getting configurations for
@@ -363,8 +361,6 @@ def file_queue(path, template_path="/vent/"):
             can_queue_gpu = False
             print("Unable to connect to redis: " + str(e))
 
-        print(images)
-        print(failed_images)
         # start containers
         for image in images:
             if image not in failed_images:
@@ -390,9 +386,6 @@ def file_queue(path, template_path="/vent/"):
                     else:
                         failed_images.add(image)
                 else:
-                    print("hello")
-                    print(image)
-                    print(path)
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
                     print(str(configs[image]))
@@ -408,7 +401,7 @@ def file_queue(path, template_path="/vent/"):
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
-        print 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno)
+        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
         print("Failed to process job: " + str(e))
 
     print(str(configs))
