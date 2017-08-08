@@ -6,6 +6,7 @@ import web
 
 from rest.create import CreateR
 from rest.delete import DeleteR
+from rest.nics import NICsR
 from rest.nlist import ListR
 from rest.start import StartR
 from rest.stop import StopR
@@ -43,10 +44,11 @@ class NControl:
     def urls():
         urls = (
             '/create', CreateR,
-            '/start', StartR,
-            '/stop', StopR,
+            '/delete', DeleteR,
             '/list', ListR,
-            '/delete', DeleteR
+            '/nics', NICsR,
+            '/start', StartR,
+            '/stop', StopR
         )
         return urls
 
