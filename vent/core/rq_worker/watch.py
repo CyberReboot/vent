@@ -49,12 +49,12 @@ def gpu_queue(options):
     mem_needed = 0
     dedicated = False
     # need a gpu to itself
-    if ('dedicated' in options['gpu_options'] and
-       options['gpu_options']['dedicated'] == 'yes'):
+    if ('dedicated' in configs['gpu_options'] and
+       configs['gpu_options']['dedicated'] == 'yes'):
         dedicated = True
     if 'mem_mb' in options['gpu_options']:
         # TODO input error checking
-        mem_needed = int(options['gpu_options']['mem_mb'])
+        mem_needed = int(configs['gpu_options']['mem_mb'])
 
     device = None
     while not device:
@@ -119,10 +119,12 @@ def file_queue(path, template_path="/vent/"):
     that match the mime type for the new file.
     """
     import ConfigParser
+    import ast
     import docker
     import json
     import requests
     import os
+    import sys
 
     from redis import Redis
     from rq import Queue
@@ -169,8 +171,11 @@ def file_queue(path, template_path="/vent/"):
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
 
+<<<<<<< HEAD
         # change
         labels = {'vent-plugin': '', 'file': path}
+=======
+>>>>>>> 09b7327a0770b9d7cddfc8b20a7e0172d12e9990
         # read in configuration of plugins to get the ones that should run
         # against the path.
         # keep track of images that failed getting configurations for
@@ -179,8 +184,12 @@ def file_queue(path, template_path="/vent/"):
         config.optionxform = str
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
+        name_maps = {}
         for section in sections:
+            labels = {'vent-plugin': '', 'file': path}
             image_name = config.get(section, 'image_name')
+            link_name = config.get(section, 'link_name')
+            name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
             # doesn't matter if it's a repository or registry because both in manifest
             if 'dump' in path:
                 if 'replay_pcap' in config.get(section, 'name'):
@@ -240,9 +249,19 @@ def file_queue(path, template_path="/vent/"):
             if image_name in configs:
                 if config.has_option(section, 'docker'):
                     try:
-                        options_dict = json.loads(config.get(section, 'docker'))
+                        options_dict = ast.literal_eval(config.get(section, 'docker'))
                         for option in options_dict:
-                            configs[image_name][option] = options_dict[option]
+                            try:
+                                configs[image_name][option] = ast.literal_eval(options_dict[option])
+                            except Exception as e:  # pragma: no cover
+                                configs[image_name][option] = options_dict[option]
+                        if 'links' in configs[image_name]:
+                            for link in configs[image_name]['links']:
+                                if link in name_maps:
+                                    configs[image_name]['links'][name_maps[link]] = configs[image_name]['links'].pop(link)
+                        # TODO network_mode
+                        # TODO volumes_from
+                        # TODO external services
                     except Exception as e:   # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
@@ -389,7 +408,9 @@ def file_queue(path, template_path="/vent/"):
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
+        print 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno)
         print("Failed to process job: " + str(e))
 
+    print(str(configs))
     print(str(status))
     return status

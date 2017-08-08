@@ -661,7 +661,13 @@ class Action:
                                                      tool['version'], 1)[0]
                                 image_name = image_name.replace(':', '-')
                                 image_name = image_name.replace('/', '-')
+                                self.logger.info("image_name: " + image_name)
                                 if container[0] == image_name:
+                                    status = container[1]
+                                # cores need to not have version, plugins need
+                                # to have version in order to match
+                                elif container[0] == image_name + \
+                                        '-' + tool['version']:
                                     status = container[1]
                             items[choice][tool['section']] = status
                         elif choice == 'enabled':
