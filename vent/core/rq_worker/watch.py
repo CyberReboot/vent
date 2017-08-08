@@ -49,12 +49,12 @@ def gpu_queue(options):
     mem_needed = 0
     dedicated = False
     # need a gpu to itself
-    if ('dedicated' in options['gpu_options'] and
-       options['gpu_options']['dedicated'] == 'yes'):
+    if ('dedicated' in configs['gpu_options'] and
+       configs['gpu_options']['dedicated'] == 'yes'):
         dedicated = True
     if 'mem_mb' in options['gpu_options']:
         # TODO input error checking
-        mem_needed = int(options['gpu_options']['mem_mb'])
+        mem_needed = int(configs['gpu_options']['mem_mb'])
 
     device = None
     while not device:
@@ -171,7 +171,6 @@ def file_queue(path, template_path="/vent/"):
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
 
-        labels = {'vent-plugin': '', 'file': path}
         # read in configuration of plugins to get the ones that should run
         # against the path.
         # keep track of images that failed getting configurations for
@@ -182,6 +181,7 @@ def file_queue(path, template_path="/vent/"):
         sections = config.sections()
         name_maps = {}
         for section in sections:
+            labels = {'vent-plugin': '', 'file': path}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
             name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
