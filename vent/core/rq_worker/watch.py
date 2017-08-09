@@ -180,12 +180,33 @@ def file_queue(path, template_path="/vent/"):
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
+        orig_path = ''
         for section in sections:
             labels = {'vent-plugin': '', 'file': path}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
             name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
             # doesn't matter if it's a repository or registry because both in manifest
+            if config.has_option(section, 'groups'):
+                if 'replay' in config.get(section, 'groups'):
+                    try:
+                        # read the vent.cfg file to grab the network-mapping
+                        # specified. For replay_pcap
+                        n_name = 'network-mapping'
+                        n_map = []
+                        if vent_config.has_section(n_name):
+                            # make sure that the options aren't empty
+                            if vent_config.options(n_name):
+                                options = vent_config.options(n_name)
+                                for option in options:
+                                    if vent_config.get(n_name, option):
+                                        n_map.append(vent_config.get(
+                                            n_name, option))
+                                orig_path = path
+                                path = str(n_map[0]) + " " + path
+                    except Exception as e:  # pragma: no cover
+                        failed_images.add(image_name)
+                        status = (False, str(e))
             if config.has_option(section, 'service'):
                 try:
                     options_dict = json.loads(config.get(section, 'service'))
@@ -217,6 +238,7 @@ def file_queue(path, template_path="/vent/"):
                             if path.endswith(ext_type):
                                 images.append(image_name)
                                 configs[image_name] = {}
+
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
@@ -239,6 +261,7 @@ def file_queue(path, template_path="/vent/"):
                     except Exception as e:   # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
+
             if config.has_option(section, 'gpu') and image_name in configs:
                 try:
                     options_dict = json.loads(config.get(section, 'gpu'))
@@ -319,8 +342,18 @@ def file_queue(path, template_path="/vent/"):
                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                  'syslog-facility': 'daemon',
                                  'tag': path.rsplit('.', 1)[-1]}}
-        dir_path = path.rsplit('/', 1)[0]
-        volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
+
+        special_bind = False
+        if orig_path:
+            # replay_pcap is special so we can't bind it like normal
+            # since the plugin takes in an additional argument
+            dir_path = orig_path.rsplit('/', 1)[0]
+            volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
+            special_bind = True
+
+        if not special_bind:
+            dir_path = path.rsplit('/', 1)[0]
+            volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
 
         # setup gpu queue
         can_queue_gpu = True
@@ -370,7 +403,7 @@ def file_queue(path, template_path="/vent/"):
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
-        print 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno)
+        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
         print("Failed to process job: " + str(e))
 
     print(str(configs))
