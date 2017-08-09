@@ -1,12 +1,12 @@
 # build stage
 FROM golang:alpine AS builder
 MAINTAINER Charlie Lewis <clewis@iqt.org>
-COPY main.go /go/src/gonet/main.go
-WORKDIR /go/src/gonet
-RUN go install
+COPY main.go /app/main.go
+WORKDIR /app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gonet .
 
 # final stage
 FROM alpine:3.6
 MAINTAINER Charlie Lewis <clewis@iqt.org>
-COPY --from=builder /go/bin/gonet /gonet
+COPY --from=builder /app/gonet /gonet
 CMD ["/gonet"]
