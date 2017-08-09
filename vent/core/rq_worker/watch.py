@@ -24,7 +24,7 @@ def gpu_queue(options):
         dev = '/dev/nvidia' + gpu_options['device'] + ':/dev/nvidia'
         dev += gpu_options['device'] + ':rwm'
         if 'devices' in configs:
-            d = configs['devices']
+            d = list(configs['devices'])
             print(str(d))
             for device in d:
                 print(dev + " compared to " + device)
