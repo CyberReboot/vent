@@ -6,7 +6,7 @@ WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gonet .
 
 # final stage
-FROM alpine:3.6
+FROM scratch
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 COPY --from=builder /app/gonet /gonet
 CMD ["/gonet"]
