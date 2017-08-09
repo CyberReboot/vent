@@ -194,14 +194,14 @@ def file_queue(path, template_path="/vent/"):
                         n_name = 'network-mapping'
                         n_map = []
                         if vent_config.has_section(n_name):
-                            options = vent_config.options(n_name)
-                            for option in options:
-                                if vent_config.get(n_name, option):
-                                    n_map.append(vent_config.get(n_name, option))
                             # make sure that the options aren't empty
-                            # returns tuple(status, values)
-                        orig_path = path
-                        path = str(n_map[0]) + " " + path
+                            if vent_config.options(n_name):
+                                options = vent_config.options(n_name)
+                                for option in options:
+                                    if vent_config.get(n_name, option):
+                                        n_map.append(vent_config.get(n_name, option))
+                                orig_path = path
+                                path = str(n_map[0]) + " " + path
                     except Exception as e:  # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
