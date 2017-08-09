@@ -168,9 +168,6 @@ def file_queue(path, template_path="/vent/"):
 
         files = file_name
         _, path = path.split('_', 1)
-        directory = path.rsplit('/', 1)[0]
-        path = path.replace('/files', files, 1)
-
         # change
         labels = {'vent-plugin': '', 'file': path}
 
@@ -189,25 +186,27 @@ def file_queue(path, template_path="/vent/"):
             link_name = config.get(section, 'link_name')
             name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
             # doesn't matter if it's a repository or registry because both in manifest
-            if 'dump' in path:
-                if 'replay_pcap' in config.get(section, 'name'):
-                    try:
-                        # read the vent.cfg file to grab the network-mapping
-                        # specified. For replay_pcap
-                        n_name = 'network-mapping'
-                        n_map = []
-                        if vent_config.has_section(n_name):
-                            options = vent_config.options(n_name)
-                            for option in options:
-                                if vent_config.get(n_name, option):
-                                    n_map.append(vent_config.get(n_name, option))
-                            # make sure that the options aren't empty
-                            # returns tuple(status, values)
-                        orig_path = path
-                        path = str(n_map[0]) + " " + path
-                    except Exception as e:  # pragma: no cover
-                        failed_images.add(image_name)
-                        status = (False, str(e))
+
+            ########
+            if 'replay' in config.get(section, 'groups'):
+                try:
+                    # read the vent.cfg file to grab the network-mapping
+                    # specified. For replay_pcap
+                    n_name = 'network-mapping'
+                    n_map = []
+                    if vent_config.has_section(n_name):
+                        options = vent_config.options(n_name)
+                        for option in options:
+                            if vent_config.get(n_name, option):
+                                n_map.append(vent_config.get(n_name, option))
+                        # make sure that the options aren't empty
+                        # returns tuple(status, values)
+                    orig_path = path
+                    path = str(n_map[0]) + " " + path
+                except Exception as e:  # pragma: no cover
+                    failed_images.add(image_name)
+                    status = (False, str(e))
+            ########
 
             if config.has_option(section, 'service'):
                 try:
@@ -345,11 +344,11 @@ def file_queue(path, template_path="/vent/"):
                                  'syslog-facility': 'daemon',
                                  'tag': path.rsplit('.', 1)[-1]}}
 
-        # if dump is in the path, dont bind to the volume
-        if 'dump' not in path:
+        if 'replay' in config.get(section, 'groups'):
             dir_path = path.rsplit('/', 1)[0]
             volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
         else:
+            # replay_pcap is special so we can't bind it like normal
             dir_path = orig_path.rsplit('/', 1)[0]
             volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
 
