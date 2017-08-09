@@ -180,8 +180,10 @@ def file_queue(path, template_path="/vent/"):
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
-        orig_path = ''
+        orig_path_d = {}
+        labels_d = {}
         for section in sections:
+            orig_path = ''
             labels = {'vent-plugin': '', 'file': path}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
@@ -333,6 +335,8 @@ def file_queue(path, template_path="/vent/"):
                     failed_images.add(image_name)
                     status = (False, str(e))
                     print("Unable to process gpu options: " + str(e))
+            orig_path_d[image_name] = orig_path
+            labels_d[image_name] = labels
 
         # TODO add connections to syslog, labels, and file path etc.
         # TODO get syslog address rather than hardcode
@@ -342,18 +346,6 @@ def file_queue(path, template_path="/vent/"):
                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                  'syslog-facility': 'daemon',
                                  'tag': path.rsplit('.', 1)[-1]}}
-
-        special_bind = False
-        if orig_path:
-            # replay_pcap is special so we can't bind it like normal
-            # since the plugin takes in an additional argument
-            dir_path = orig_path.rsplit('/', 1)[0]
-            volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
-            special_bind = True
-
-        if not special_bind:
-            dir_path = path.rsplit('/', 1)[0]
-            volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
 
         # setup gpu queue
         can_queue_gpu = True
@@ -366,9 +358,17 @@ def file_queue(path, template_path="/vent/"):
         # start containers
         for image in images:
             if image not in failed_images:
-                # TODO check for availability of gpu(s),
-                #      otherwise queue it up until it's
-                #      available
+                orig_path = orig_path_d[image]
+                labels = labels_d[image]
+
+                if orig_path:
+                    # replay_pcap is special so we can't bind it like normal
+                    # since the plugin takes in an additional argument
+                    dir_path = orig_path.rsplit('/', 1)[0]
+                else:
+                    dir_path = path.rsplit('/', 1)[0]
+                volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
+
                 if 'volumes' in configs[image]:
                     for volume in volumes:
                         configs[image]['volumes'][volume] = volumes[volume]
