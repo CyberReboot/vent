@@ -52,7 +52,7 @@ def gpu_queue(options):
     if ('dedicated' in configs['gpu_options'] and
        configs['gpu_options']['dedicated'] == 'yes'):
         dedicated = True
-    if 'mem_mb' in options['gpu_options']:
+    if 'mem_mb' in configs['gpu_options']:
         # TODO input error checking
         mem_needed = int(configs['gpu_options']['mem_mb'])
 
