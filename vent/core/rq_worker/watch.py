@@ -180,6 +180,7 @@ def file_queue(path, template_path="/vent/"):
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
+        orig_path = ''
         for section in sections:
             labels = {'vent-plugin': '', 'file': path}
             image_name = config.get(section, 'image_name')
@@ -199,7 +200,8 @@ def file_queue(path, template_path="/vent/"):
                                 options = vent_config.options(n_name)
                                 for option in options:
                                     if vent_config.get(n_name, option):
-                                        n_map.append(vent_config.get(n_name, option))
+                                        n_map.append(vent_config.get(
+                                            n_name, option))
                                 orig_path = path
                                 path = str(n_map[0]) + " " + path
                     except Exception as e:  # pragma: no cover
@@ -342,13 +344,12 @@ def file_queue(path, template_path="/vent/"):
                                  'tag': path.rsplit('.', 1)[-1]}}
 
         special_bind = False
-        if config.has_option(section, 'groups'):
-            if 'replay' in config.get(section, 'groups'):
-                # replay_pcap is special so we can't bind it like normal
-                # since the plugin takes in an additional argument
-                dir_path = orig_path.rsplit('/', 1)[0]
-                volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
-                special_bind = True
+        if orig_path:
+            # replay_pcap is special so we can't bind it like normal
+            # since the plugin takes in an additional argument
+            dir_path = orig_path.rsplit('/', 1)[0]
+            volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
+            special_bind = True
 
         if not special_bind:
             dir_path = path.rsplit('/', 1)[0]
