@@ -8,7 +8,7 @@ RUN apk add --update \
     py2-pip \
     && rm -rf /var/cache/apk/*
 
-RUN pip install git+git://github.com/cyberreboot/vent.git@master 
+RUN pip install git+git://github.com/cyberreboot/vent.git@master
 
 ENTRYPOINT ["vent"]
 CMD [""]
