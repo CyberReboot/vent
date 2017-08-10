@@ -180,8 +180,11 @@ def file_queue(path, template_path="/vent/"):
         config.optionxform = str
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
+        name_maps = {}
         for section in sections:
             image_name = config.get(section, 'image_name')
+            link_name = config.get(section, 'link_name')
+            name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
             # doesn't matter if it's a repository or registry because both in manifest
             if config.has_option(section, 'service'):
                 try:
@@ -226,6 +229,13 @@ def file_queue(path, template_path="/vent/"):
                                 configs[image_name][option] = ast.literal_eval(options_dict[option])
                             except Exception as e:  # pragma: no cover
                                 configs[image_name][option] = options_dict[option]
+                        if 'links' in configs[image_name]:
+                            for link in configs[image_name]['links']:
+                                if link in name_maps:
+                                    configs[image_name]['links'][name_maps[link]] = configs[image_name]['links'].pop(link)
+                        # TODO network_mode
+                        # TODO volumes_from
+                        # TODO external services
                     except Exception as e:   # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
