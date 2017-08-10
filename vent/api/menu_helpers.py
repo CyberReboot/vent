@@ -33,7 +33,7 @@ class MenuHelper:
             if action in ["install", "build"]:
                 tools = []
                 core_repo = 'https://github.com/cyberreboot/vent'
-                resp = self.p_helper.apply_path('https://github.com/cyberreboot/vent')
+                resp = self.p_helper.apply_path(core_repo)
 
                 if resp[0]:
                     cwd = resp[1]
@@ -61,7 +61,7 @@ class MenuHelper:
                         tools.append((match[0], ''))
                 # only add stuff not already installed
                 if tools:
-                    status = self.plugin.add('https://github.com/cyberreboot/vent',
+                    status = self.plugin.add(core_repo,
                                              tools=tools,
                                              branch=branch,
                                              build=False, core=True)
