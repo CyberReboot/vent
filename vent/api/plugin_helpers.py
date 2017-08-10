@@ -146,8 +146,13 @@ class PluginHelper:
             chdir(status[1])
             status = (True, status[1])
         except Exception as e:  # pragma: no cover
-            self.logger.error("clone failed with error: " + str(e))
-            status = (False, str(e))
+            e_str = str(e)
+            # scrub username and password from error message
+            if e_str.find('@') >= 0:
+                e_str = e_str[:e_str.find('//') + 2] + \
+                        e_str[e_str.find('@') + 1:]
+            self.logger.error("clone failed with error: " + e_str)
+            status = (False, e_str)
         self.logger.info("Status of clone: " + str(status))
         self.logger.info("Finished: clone")
         return status
