@@ -1,3 +1,4 @@
 docker
+netifaces
 python-magic
 rq==0.8.0
