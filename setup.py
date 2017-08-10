@@ -6,7 +6,7 @@ setup(
     packages=['vent', 'vent.core', 'vent.core.file_drop',
               'vent.core.rq_worker', 'vent.core.rq_dashboard', 'vent.menus',
               'vent.core.rmq_es_connector', 'vent.helpers', 'vent.api'],
-    install_requires=['docker', 'npyscreen'],
+    install_requires=['docker', 'npyscreen', 'netifaces'],
     scripts=['bin/vent'],
     license='Apache License 2.0',
     author='arpit',

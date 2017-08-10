@@ -175,11 +175,13 @@ def GpuUsage(**kargs):
     # TODO ignoring this option for now
     # else:
     #     try:
-    #         route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-    #         h = check_output(('awk', '/default/ {print $3}'),
-    #                          stdin=route.stdout)
-    #         route.wait()
-    #         host = h.strip()
+    #         # get the default device using netifaces
+    #         # external library
+    #         d_device = netifaces.gateways()
+    #         d_device = d_device['default'][netifaces.AF_INET]
+    #         host = netifaces.ifaddresses(d_device[1])
+    #         host = host[netifaces.AF_INET]
+    #         host = host[0]['addr']
     #     except Exception as e:  # pragma: no cover
     #         pass
 
