@@ -8,6 +8,7 @@ import socket
 from ast import literal_eval
 from os import chdir, getcwd, walk
 from os.path import expanduser, join
+from subprocess import check_output, STDOUT
 
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
