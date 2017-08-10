@@ -56,6 +56,8 @@ def gpu_queue(options):
         # TODO input error checking
         mem_needed = int(configs['gpu_options']['mem_mb'])
 
+    print("mem_needed: ", mem_needed)
+    print("dedicated: ", dedicated)
     device = None
     while not device:
         usage = GpuUsage()
@@ -64,18 +66,21 @@ def gpu_queue(options):
             usage = usage[1]
         else:
             return usage
+        print(usage)
         # {"device": "0",
         #  "mem_mb": "1024",
         #  "dedicated": "yes",
         #  "enabled": "yes"}
         for d in devices:
             dev = str(d.split(":")[0].split('nvidia')[1])
+            print(dev)
             # if the device is already dedicated, can't be used
             dedicated_gpus = usage['vent_usage']['dedicated']
             is_dedicated = False
             for gpu in dedicated_gpus:
                 if dev in gpu:
                     is_dedicated = True
+            print("is_dedicated: ", is_dedicated)
             if not is_dedicated:
                 ram_used = 0
                 if dev in usage['vent_usage']['mem_mb']:
