@@ -1,13 +1,14 @@
 import docker
 import fnmatch
 import json
+import netifaces
 import requests
 import shlex
 
 from ast import literal_eval
 from os import chdir, getcwd, walk
 from os.path import expanduser, join
-from subprocess import check_output, Popen, PIPE, STDOUT
+from subprocess import check_output, STDOUT
 
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
@@ -653,11 +654,13 @@ class PluginHelper:
                     if result[0]:
                         host = result[1]
                     else:
-                        route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-                        h = check_output(('awk', '/default/ {print $3}'),
-                                         stdin=route.stdout)
-                        route.wait()
-                        host = h.strip()
+                        # get the default device using netifaces
+                        # external library
+                        d_device = netifaces.gateways()
+                        d_device = d_device['default'][netifaces.AF_INET]
+                        host = netifaces.ifaddresses(d_device[1])
+                        host = host[netifaces.AF_INET]
+                        host = host[0]['addr']
                     nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                     params = {'vol': 'nvidia_driver'}
 
