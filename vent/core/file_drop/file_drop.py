@@ -17,6 +17,8 @@ class GZHandler(PatternMatchingEventHandler):
     """
 
     patterns = ["*"]
+    # want to ignore certain pcap files from splitter as they contain junk
+    ignore_patters = ["*-miscellaneous*"]
     # don't want to process files in on_modified for files that have already
     # been created and processed
     created_files = set()

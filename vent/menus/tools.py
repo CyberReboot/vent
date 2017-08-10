@@ -6,6 +6,7 @@ from collections import deque
 from threading import Thread
 
 from vent.api.actions import Action
+from vent.api.menu_helpers import MenuHelper
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
@@ -20,6 +21,7 @@ class ToolForm(npyscreen.ActionForm):
         self.logger = Logger(__name__)
         self.logger.info(str(keywords['names']))
         self.api_action = Action()
+        self.m_helper = MenuHelper()
         action = {'api_action': self.api_action}
         self.tools_tc = {}
         self.repo_widgets = {}
@@ -360,6 +362,16 @@ class ToolForm(npyscreen.ActionForm):
                         # add core recognition
                         if self.action['cores']:
                             kargs.update({'groups': 'core'})
+                        # use latest version for update, not necessarily
+                        # version in manifest
+                        if self.action['action_name'] == 'update':
+                            if t[2] != 'HEAD':
+                                repo_commits = self.m_helper.repo_commits(repo)[1]
+                                for branch in repo_commits:
+                                    if branch[0] == t[1]:
+                                        kargs.update({'new_version': branch[1][0]})
+                            else:
+                                kargs.update({'new_version': 'HEAD'})
                         thr = Thread(target=self.action['action_object1'],
                                      args=(),
                                      kwargs=kargs)
