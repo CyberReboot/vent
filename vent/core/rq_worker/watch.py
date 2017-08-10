@@ -118,11 +118,11 @@ def file_queue(path, template_path="/vent/"):
     Processes files that have been added from the rq-worker, starts plugins
     that match the mime type for the new file.
     """
+    import commands
     import ConfigParser
     import ast
     import docker
     import json
-    import netifaces
     import requests
     import os
     import sys
@@ -289,13 +289,13 @@ def file_queue(path, template_path="/vent/"):
                                vent_config.has_option('nvidia-docker-plugin', 'host')):
                                 host = vent_config.get('nvidia-docker-plugin', 'host')
                             else:
-                                # get the default device using netifaces
-                                # external library
-                                d_device = netifaces.gateways()
-                                d_device = d_device['default'][netifaces.AF_INET]
-                                host = netifaces.ifaddresses(d_device[1])
-                                host = host[netifaces.AF_INET]
-                                host = host[0]['addr']
+                                # grab the default gateway
+                                route = Popen(('/sbin/ip', 'route'),
+                                              stdout=PIPE)
+                                h = check_output(('awk', '/default/ {print$3}'),
+                                                 stdin=route.stdout)
+                                route.wait()
+                                host = h.strip()
                             nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:

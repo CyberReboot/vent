@@ -1,7 +1,6 @@
 import docker
 import fnmatch
 import json
-import netifaces
 import requests
 import shlex
 
@@ -654,13 +653,19 @@ class PluginHelper:
                     if result[0]:
                         host = result[1]
                     else:
-                        # get the default device using netifaces
-                        # external library
-                        d_device = netifaces.gateways()
-                        d_device = d_device['default'][netifaces.AF_INET]
-                        host = netifaces.ifaddresses(d_device[1])
-                        host = host[netifaces.AF_INET]
-                        host = host[0]['addr']
+                        # now just requires ip, ifconfig
+                        route = check_output(('ip', 'route')).split('\n')
+                        default = ''
+                        # grab the default network device.
+                        for device in route:
+                            if 'default' in device:
+                                default = device.split()[4]
+                                break
+
+                        # grab the IP address for the default device
+                        ip_addr = check_output(('ifconfig', default))
+                        ip_addr = ip_addr.split('\n')[1].split()[1]
+                        host = ip_addr
                     nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                     params = {'vol': 'nvidia_driver'}
 
