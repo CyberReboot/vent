@@ -3,7 +3,6 @@ import fnmatch
 import json
 import requests
 import shlex
-import socket
 
 from ast import literal_eval
 from os import chdir, getcwd, walk
@@ -654,12 +653,13 @@ class PluginHelper:
                     if result[0]:
                         host = result[1]
                     else:
-                        s = socket.socket(socket.AF_INET,
-                                          socket.SOCK_DGRAM)
-                        s.connect(("8.8.8.8", 80))
-                        host = s.getsockname()[0]
-                        s.shutdown()
-                        s.close()
+                        # get the default device using netifaces
+                        # external library
+                        d_device = netifaces.gateways()
+                        d_device = d_device['default'][netifaces.AF_INET]
+                        host = netifaces.ifaddresses(d_device[1])
+                        host = host[netifaces.AF_INET]
+                        host = host[0]['addr']
                     nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                     params = {'vol': 'nvidia_driver'}
 
