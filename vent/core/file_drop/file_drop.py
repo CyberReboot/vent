@@ -61,15 +61,23 @@ class GZHandler(PatternMatchingEventHandler):
                     print(uid + " ***")
                     description = self.r.hget(job, 'description')
                     print(uid + " " + description)
-                    print(uid + " " +
-                          description.split("watch.file_queue('" +
-                                            hostname + "_")[1][:-2])
-                    print(uid + " " + event.src_path)
-                    if description.split("watch.file_queue('" +
-                                         hostname +
-                                         "_")[1][:-2] == event.src_path:
-                        print(uid + " true")
-                        exists = True
+                    if description.startswith("watch.file_queue('"):
+                        print(uid + " " +
+                              description.split("watch.file_queue('" +
+                                                hostname + "_")[1][:-2])
+                        print(uid + " " + event.src_path)
+                        if description.split("watch.file_queue('" +
+                                             hostname +
+                                             "_")[1][:-2] == event.src_path:
+                            print(uid + " true")
+                            exists = True
+                    elif description.startswith("watch.gpu_queue('"):
+                        print(uid + " " +
+                              description.split('"file": "')[1].split('"')[0])
+                        print(uid + " " + event.src_path)
+                        if description.split('"file": "')[1].split('"')[0] == event.src_path:
+                            print(uid + " true")
+                            exists = True
                     print(uid + " ***")
 
                 if not exists:
@@ -82,7 +90,7 @@ class GZHandler(PatternMatchingEventHandler):
                                    ttl=2592000)
                 print(uid + " end " + event.src_path)
         except Exception as e:  # pragma: no cover
-            print(str(e))
+            print("file drop error: " + str(e))
 
     def on_created(self, event):
         self.created_files.add(event.src_path)
