@@ -118,7 +118,6 @@ def file_queue(path, template_path="/vent/"):
     Processes files that have been added from the rq-worker, starts plugins
     that match the mime type for the new file.
     """
-    import commands
     import ConfigParser
     import ast
     import docker
