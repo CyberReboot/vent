@@ -32,6 +32,7 @@ class MenuHelper:
             core = self.tools_status(True, branch=branch, version=version)[1]
             if action in ["install", "build"]:
                 tools = []
+                core_repo = 'https://github.com/cyberreboot/vent'
                 resp = self.p_helper.apply_path('https://github.com/cyberreboot/vent')
 
                 if resp[0]:
@@ -51,30 +52,41 @@ class MenuHelper:
                                                         version=version,
                                                         groups='core')
                 for match in matches:
-                    tools.append((match[0], ''))
-                status = self.plugin.add('https://github.com/cyberreboot/vent',
-                                         tools=tools,
-                                         branch=branch,
-                                         build=False, core=True)
-                self.logger.info("status of plugin add: " + str(status))
-                plugin_c = Template(template=self.plugin.manifest)
-                sections = plugin_c.sections()
-                for tool in core['normal']:
-                    for section in sections[1]:
-                        name = plugin_c.option(section, "name")
-                        orig_branch = plugin_c.option(section, "branch")
-                        namespace = plugin_c.option(section, "namespace")
-                        version = plugin_c.option(section, "version")
-                        if (name[1] == tool and
-                           orig_branch[1] == branch and
-                           namespace[1] == "cyberreboot/vent" and
-                           version[1] == "HEAD"):
-                            plugin_c.set_option(section,
-                                                "image_name",
-                                                "cyberreboot/vent-" +
-                                                tool.replace('_', '-') + ":" +
-                                                branch)
-                plugin_c.write_config()
+                    name = match[0].rsplit('/')[-1]
+                    constraints = {'name': name,
+                                   'repo': core_repo}
+                    prev_installed, _ = self.p_helper. \
+                                        constraint_options(constraints, [])
+                    if not prev_installed:
+                        tools.append((match[0], ''))
+                # only add stuff not already installed
+                if tools:
+                    status = self.plugin.add('https://github.com/cyberreboot/vent',
+                                             tools=tools,
+                                             branch=branch,
+                                             build=False, core=True)
+                    self.logger.info("status of plugin add: " + str(status))
+                    plugin_c = Template(template=self.plugin.manifest)
+                    sections = plugin_c.sections()
+                    for tool in core['normal']:
+                        for section in sections[1]:
+                            name = plugin_c.option(section, "name")
+                            orig_branch = plugin_c.option(section, "branch")
+                            namespace = plugin_c.option(section, "namespace")
+                            version = plugin_c.option(section, "version")
+                            if (name[1] == tool and
+                               orig_branch[1] == branch and
+                               namespace[1] == "cyberreboot/vent" and
+                               version[1] == "HEAD"):
+                                plugin_c.set_option(section,
+                                                    "image_name",
+                                                    "cyberreboot/vent-" +
+                                                    tool.replace('_', '-') + ":" +
+                                                    branch)
+                    plugin_c.write_config()
+                else:
+                    self.logger.info("no new tools to install")
+                    status = (True, "previously installed")
                 chdir(cwd)
             if action == "build":
                 plugin_c = Template(template=self.plugin.manifest)
