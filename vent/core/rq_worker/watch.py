@@ -61,7 +61,7 @@ def gpu_queue(options):
         usage = GpuUsage()
 
         if usage[0]:
-            usage = usage[1]
+            usage = json.loads(usage[1])
         else:
             return usage
         # {"device": "0",
