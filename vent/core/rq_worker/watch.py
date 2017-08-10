@@ -83,11 +83,11 @@ def gpu_queue(options):
                 # check for vent usage/processes running
                 if (dedicated and
                    dev not in usage['vent_usage']['mem_mb'] and
-                   mem_needed <= usage[dev]['global_memory'] and
-                   not usage[dev]['processes']):
+                   mem_needed <= usage[int(dev)]['global_memory'] and
+                   not usage[int(dev)]['processes']):
                     device = dev
                 # check for ram constraints
-                elif mem_needed <= (usage[dev]['global_memory'] - ram_used):
+                elif mem_needed <= (usage[int(dev)]['global_memory'] - ram_used):
                     device = dev
 
         # TODO make this sleep incremental up to a point, potentially kill
