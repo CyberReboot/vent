@@ -3,11 +3,11 @@ import fnmatch
 import json
 import requests
 import shlex
+import socket
 
 from ast import literal_eval
 from os import chdir, getcwd, walk
 from os.path import expanduser, join
-from subprocess import check_output, Popen, PIPE, STDOUT
 
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
@@ -653,11 +653,12 @@ class PluginHelper:
                     if result[0]:
                         host = result[1]
                     else:
-                        route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-                        h = check_output(('awk', '/default/ {print $3}'),
-                                         stdin=route.stdout)
-                        route.wait()
-                        host = h.strip()
+                        s = socket.socket(socket.AF_INET,
+                                          socket.SOCK_DGRAM)
+                        s.connect(("8.8.8.8", 80))
+                        host = s.getsockname()[0]
+                        s.shutdown()
+                        s.close()
                     nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                     params = {'vol': 'nvidia_driver'}
 

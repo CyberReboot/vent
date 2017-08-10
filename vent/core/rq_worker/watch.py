@@ -124,11 +124,11 @@ def file_queue(path, template_path="/vent/"):
     import json
     import requests
     import os
+    import socket
     import sys
 
     from redis import Redis
     from rq import Queue
-    from subprocess import check_output, Popen, PIPE
     from string import punctuation
 
     status = (True, None)
@@ -289,11 +289,12 @@ def file_queue(path, template_path="/vent/"):
                                vent_config.has_option('nvidia-docker-plugin', 'host')):
                                 host = vent_config.get('nvidia-docker-plugin', 'host')
                             else:
-                                route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-                                h = check_output(('awk', '/default/ {print $3}'),
-                                                 stdin=route.stdout)
-                                route.wait()
-                                host = h.strip()
+                                s = socket.socket(socket.AF_INET,
+                                        socket.SOCK_DGRAM)
+                                s.connect(("8.8.8.8", 80))
+                                host = s.getsockname()[0]
+                                s.shutdown()
+                                s.close()
                             nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:
