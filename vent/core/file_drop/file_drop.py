@@ -73,12 +73,9 @@ class GZHandler(PatternMatchingEventHandler):
                             exists = True
                     elif description.startswith("watch.gpu_queue('"):
                         print(uid + " " +
-                              description.split("watch.gpu_queue('" +
-                                                hostname + "_")[1][:-2])
+                              description.split('"file": "')[1].split('"')[0])
                         print(uid + " " + event.src_path)
-                        if description.split("watch.gpu_queue('" +
-                                             hostname +
-                                             "_")[1][:-2] == event.src_path:
+                        if description.split('"file": "')[1].split('"')[0] == event.src_path:
                             print(uid + " true")
                             exists = True
                     print(uid + " ***")
