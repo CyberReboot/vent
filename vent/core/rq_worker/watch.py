@@ -60,6 +60,10 @@ def gpu_queue(options):
     while not device:
         usage = GpuUsage()
 
+        if usage[0]:
+            usage = usage[1]
+        else:
+            return usage
         # {"device": "0",
         #  "mem_mb": "1024",
         #  "dedicated": "yes",
