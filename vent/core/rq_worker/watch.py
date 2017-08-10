@@ -61,7 +61,7 @@ def gpu_queue(options):
         usage = GpuUsage()
 
         if usage[0]:
-            usage = json.loads(usage[1])
+            usage = usage[1]
         else:
             return usage
         # {"device": "0",
@@ -69,7 +69,7 @@ def gpu_queue(options):
         #  "dedicated": "yes",
         #  "enabled": "yes"}
         for d in devices:
-            dev = d.split(":")[0].split('nvidia')[1]
+            dev = str(d.split(":")[0].split('nvidia')[1])
             # if the device is already dedicated, can't be used
             dedicated_gpus = usage['vent_usage']['dedicated']
             is_dedicated = False
@@ -77,7 +77,9 @@ def gpu_queue(options):
                 if dev in gpu:
                     is_dedicated = True
             if not is_dedicated:
-                ram_used = usage['vent_usage']['mem_mb'][dev]
+                ram_used = 0
+                if dev in usage['vent_usage']['mem_mb']:
+                    ram_used = usage['vent_usage']['mem_mb'][dev]
                 # check for vent usage/processes running
                 if (dedicated and
                    dev not in usage['vent_usage']['mem_mb'] and
