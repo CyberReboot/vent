@@ -186,6 +186,7 @@ def file_queue(path, template_path="/vent/"):
         _, path = path.split('_', 1)
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
+        path_copy = path
 
         # read in configuration of plugins to get the ones that should run
         # against the path.
@@ -199,6 +200,7 @@ def file_queue(path, template_path="/vent/"):
         orig_path_d = {}
         labels_d = {}
         for section in sections:
+            path = path_copy
             orig_path = ''
             labels = {'vent-plugin': '', 'file': path}
             image_name = config.get(section, 'image_name')
