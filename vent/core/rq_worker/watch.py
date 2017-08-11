@@ -128,6 +128,7 @@ def file_queue(path, template_path="/vent/"):
 
     from redis import Redis
     from rq import Queue
+    from subprocess import check_output, Popen, PIPE
     from string import punctuation
 
     status = (True, None)
@@ -289,12 +290,15 @@ def file_queue(path, template_path="/vent/"):
                                 host = vent_config.get('nvidia-docker-plugin', 'host')
                             else:
                                 # grab the default gateway
-                                route = Popen(('/sbin/ip', 'route'),
-                                              stdout=PIPE)
-                                h = check_output(('awk', '/default/ {print$3}'),
-                                                 stdin=route.stdout)
-                                route.wait()
-                                host = h.strip()
+                                try:
+                                    route = Popen(('/sbin/ip', 'route'),
+                                                  stdout=PIPE)
+                                    h = check_output(('awk', '/default/ {print$3}'),
+                                                     stdin=route.stdout)
+                                    route.wait()
+                                    host = h.strip()
+                                except Exception as e:  # pragma no cover
+                                    pass
                             nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:
