@@ -210,7 +210,6 @@ def file_queue(path, template_path="/vent/"):
             # doesn't matter if it's a repository or registry because both in manifest
             if config.has_option(section, 'groups'):
                 if 'replay' in config.get(section, 'groups'):
-                    print("replay saw it")
                     try:
                         # read the vent.cfg file to grab the network-mapping
                         # specified. For replay_pcap
@@ -226,8 +225,6 @@ def file_queue(path, template_path="/vent/"):
                                             n_name, option))
                                 orig_path = path
                                 path = str(n_map[0]) + " " + path
-                                print("orig: " + orig_path)
-                                print("path: " + path)
                     except Exception as e:  # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
