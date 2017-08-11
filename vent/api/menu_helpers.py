@@ -59,8 +59,9 @@ class MenuHelper:
                                         constraint_options(constraints, [])
                     if not prev_installed:
                         tools.append((match[0], ''))
-                # only add stuff not already installed
-                if tools:
+                # only add stuff not already installed or repo specification
+                if ((tools) or
+                        (isinstance(matches, list) and len(matches) == 0)):
                     status = self.plugin.add(core_repo,
                                              tools=tools,
                                              branch=branch,
