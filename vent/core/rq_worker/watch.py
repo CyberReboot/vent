@@ -198,6 +198,7 @@ def file_queue(path, template_path="/vent/"):
         sections = config.sections()
         name_maps = {}
         orig_path_d = {}
+        path_cmd = {}
         labels_d = {}
         for section in sections:
             path = path_copy
@@ -209,6 +210,7 @@ def file_queue(path, template_path="/vent/"):
             # doesn't matter if it's a repository or registry because both in manifest
             if config.has_option(section, 'groups'):
                 if 'replay' in config.get(section, 'groups'):
+                    print("replay saw it")
                     try:
                         # read the vent.cfg file to grab the network-mapping
                         # specified. For replay_pcap
@@ -224,6 +226,8 @@ def file_queue(path, template_path="/vent/"):
                                             n_name, option))
                                 orig_path = path
                                 path = str(n_map[0]) + " " + path
+                                print("orig: " + orig_path)
+                                print("path: " + path)
                     except Exception as e:  # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
@@ -358,6 +362,7 @@ def file_queue(path, template_path="/vent/"):
                     failed_images.add(image_name)
                     status = (False, str(e))
                     print("Unable to process gpu options: " + str(e))
+            path_cmd[image_name] = path
             orig_path_d[image_name] = orig_path
             labels_d[image_name] = labels
 
@@ -402,7 +407,7 @@ def file_queue(path, template_path="/vent/"):
                     if can_queue_gpu:
                         # queue up containers requiring a gpu
                         q_str = json.dumps({'image': image,
-                                            'command': path,
+                                            'command': path_cmd[image],
                                             'labels': labels,
                                             'detach': True,
                                             'log_config': log_config,
@@ -415,7 +420,7 @@ def file_queue(path, template_path="/vent/"):
                         del configs[image]['gpu_options']
                     print(str(configs[image]))
                     d_client.containers.run(image=image,
-                                            command=path,
+                                            command=path_cmd[image],
                                             labels=labels,
                                             detach=True,
                                             log_config=log_config,
