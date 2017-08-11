@@ -33,19 +33,40 @@ class Action:
         self.logger.info("Starting: add")
         status = (True, None)
         try:
-            status = self.plugin.add(repo,
-                                     tools=tools,
-                                     overrides=overrides,
-                                     version=version,
-                                     branch=branch,
-                                     build=build,
-                                     user=user,
-                                     pw=pw,
-                                     groups=groups,
-                                     version_alias=version_alias,
-                                     wild=wild,
-                                     remove_old=remove_old,
-                                     disable_old=disable_old)
+            # remove tools that are already installed from being added
+            if isinstance(tools, list):
+                i = len(tools) - 1
+                while i >= 0:
+                    tool = tools[i]
+                    if tool[0].find('@') >= 0:
+                        tool_name = tool[0].split('@')[-1]
+                    else:
+                        tool_name = tool[0].rsplit('/', 1)[-1]
+                    constraints = {'name': tool_name,
+                                   'repo': repo.split('.git')[0]}
+                    prev_installed, _ = self.p_helper. \
+                                        constraint_options(constraints, [])
+                    # don't reinstall
+                    if prev_installed:
+                        tools.remove(tool)
+                    i -= 1
+            if tools is None or len(tools) > 0:
+                status = self.plugin.add(repo,
+                                         tools=tools,
+                                         overrides=overrides,
+                                         version=version,
+                                         branch=branch,
+                                         build=build,
+                                         user=user,
+                                         pw=pw,
+                                         groups=groups,
+                                         version_alias=version_alias,
+                                         wild=wild,
+                                         remove_old=remove_old,
+                                         disable_old=disable_old)
+            else:
+                self.logger.info("no new tools to add, exiting")
+                status = (True, "previously installed")
         except Exception as e:  # pragma: no cover
             self.logger.error("add failed with error: " + str(e))
             status = (False, str(e))

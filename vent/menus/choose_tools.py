@@ -30,8 +30,12 @@ class ChooseToolsForm(npyscreen.ActionForm):
         self.add(npyscreen.TitleText,
                  name='Select which tools to add from each branch selected:',
                  editable=False)
+        self.add(npyscreen.Textfield,
+                 value='NOTE tools you have already installed will be ignored',
+                 color='STANDOUT',
+                 editable=False)
 
-        i = 4
+        i = 6
         for branch in self.parentApp.repo_value['versions']:
             self.tools_tc[branch] = {}
             self.add(npyscreen.TitleText,
