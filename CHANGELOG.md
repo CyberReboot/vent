@@ -1,3 +1,18 @@
+# v0.4.3 (2017-08-11)
+
+improvements:
+- give ability for users to configure vent.cfg with various customizations:
+    - can set an option to use already running external services over locally provided containers (changes will be executed automatically after editing)
+    - can set a network-mapping option that can tell tools to use specific nics
+    - can set a start order for groups
+- implemented an option set under system commands for running network tap so that users can more easily utilize it
+- can toggle view by group for certain options
+- added ability to start, stop, list, and delete containers running network tap
+- can now build multiple tools defined in the same directory
+- fixed docker error with rmq_es_connector
+- can update a tool to latest version without having to stop and restart containers
+- changing the vent.template of a tool now triggers it to restart with new settings
+
 # v0.4.2 (2017-07-28)
 
 improvements:
