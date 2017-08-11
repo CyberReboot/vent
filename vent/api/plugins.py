@@ -547,13 +547,16 @@ class Plugin:
                     # see if additional file arg needed for building multiple
                     # images from same directory
                     file_tag = " ."
-                    if image_name.find("@") >= 0:
-                        specific_file = image_name.split("@")[1].split('-')[0]
+                    multi_tool = template.option(section, 'multi_tool')
+                    if multi_tool[0] and multi_tool[1] == 'yes':
+                        specific_file = template.option(section, 'name')[1]
                         if specific_file == 'unspecified':
                             file_tag = " -f Dockerfile ."
                         else:
                             file_tag = " -f Dockerfile." + specific_file + " ."
                         image_name = image_name.replace('@', '-')
+                    # update image name with new version for update
+                    image_name = image_name.rsplit(':', 1)[0]+':'+self.version
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.name=" +

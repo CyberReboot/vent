@@ -56,27 +56,43 @@ def gpu_queue(options):
         # TODO input error checking
         mem_needed = int(configs['gpu_options']['mem_mb'])
 
+    print("mem_needed: ", mem_needed)
+    print("dedicated: ", dedicated)
     device = None
     while not device:
         usage = GpuUsage()
 
+        if usage[0]:
+            usage = usage[1]
+        else:
+            return usage
+        print(usage)
         # {"device": "0",
         #  "mem_mb": "1024",
         #  "dedicated": "yes",
         #  "enabled": "yes"}
         for d in devices:
-            dev = d.split(":")[0].split('nvidia')[1]
+            dev = str(d.split(":")[0].split('nvidia')[1])
+            print(dev)
             # if the device is already dedicated, can't be used
-            if dev not in usage['vent_usage']['dedicated']:
-                ram_used = usage['vent_usage']['mem_mb'][dev]
+            dedicated_gpus = usage['vent_usage']['dedicated']
+            is_dedicated = False
+            for gpu in dedicated_gpus:
+                if dev in gpu:
+                    is_dedicated = True
+            print("is_dedicated: ", is_dedicated)
+            if not is_dedicated:
+                ram_used = 0
+                if dev in usage['vent_usage']['mem_mb']:
+                    ram_used = usage['vent_usage']['mem_mb'][dev]
                 # check for vent usage/processes running
                 if (dedicated and
                    dev not in usage['vent_usage']['mem_mb'] and
-                   mem_needed <= usage[dev]['global_memory'] and
-                   not usage[dev]['processes']):
+                   mem_needed <= usage[int(dev)]['global_memory'] and
+                   not usage[int(dev)]['processes']):
                     device = dev
                 # check for ram constraints
-                elif mem_needed <= (usage[dev]['global_memory'] - ram_used):
+                elif mem_needed <= (usage[int(dev)]['global_memory'] - ram_used):
                     device = dev
 
         # TODO make this sleep incremental up to a point, potentially kill

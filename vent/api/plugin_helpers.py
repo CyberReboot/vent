@@ -719,8 +719,6 @@ class PluginHelper:
             except Exception as e:  # pragma: no cover
                 f_containers.append(container)
                 manifest.set_option(section, 'running', 'failed')
-                self.logger.info("Testing tool dict...")
-                self.logger.info(tool_d[container])
                 self.logger.error("failed to start " + str(container) +
                                   " because: " + str(e))
         # save changes made to manifest

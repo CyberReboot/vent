@@ -173,18 +173,21 @@ class Action:
                groups=None,
                enabled="yes",
                branch="master",
-               version="HEAD"):
+               version="HEAD",
+               new_version="HEAD"):
         """
         Update a set of tools that match the parameters given, if no parameters
         are given, updated all installed tools on the master branch at verison
         HEAD that are enabled
         """
         args = locals()
+        del args['new_version']
         self.logger.info("Starting: update")
         self.logger.info(args)
         status = (True, None)
         try:
-            options = ['path', 'image_name', 'image_id']
+            options = ['path', 'image_name', 'image_id', 'running',
+                       'multi_tool', 'name', 'link_name']
             s, template = self.p_helper.constraint_options(args, options)
 
             # get existing containers and images and states
@@ -202,29 +205,139 @@ class Action:
                     self.logger.info("current working directory: " + str(cwd))
                     os.chdir(s[section]['path'])
                     c_status = self.p_helper.checkout(branch=branch,
-                                                      version=version)
+                                                      version=new_version)
                     self.logger.info(c_status)
                     os.chdir(cwd)
-                    template = self.plugin.builder(template,
-                                                   s[section]['path'],
-                                                   s[section]['image_name'],
-                                                   section,
-                                                   build=True,
-                                                   branch=branch,
-                                                   version=version)
-                    self.logger.info(template)
-                    # stop & remove old containers & images if image_id updated
-                    # !! TODO
+                    self.plugin.builder(template,
+                                        s[section]['path'],
+                                        s[section]['image_name'],
+                                        section,
+                                        build=True,
+                                        branch=branch,
+                                        version=new_version)
 
-                    # start containers if they were running
-                    # !! TODO
+                    # exit if no changes were made
+                    if (template.option(section, 'image_id')[1] ==
+                            s[section]['image_id']):
+                        self.logger.info("No changes made through update")
+                        self.logger.info("Status of update: True")
+                        self.logger.info("Finished: update")
+                        return (True, "no changes made")
 
-                    # TODO logging
+                    # update any new vent.template settings that may have been set
+                    vent_template_path = s[section]['path']
+                    if s[section]['multi_tool'] == 'yes':
+                        name = s[section]['name']
+                        if name == 'unspecified':
+                            name = 'vent'
+                        vent_template_path = os.path.join(vent_template_path,
+                                                          name+'.template')
+                    else:
+                        vent_template_path = os.path.join(vent_template_path,
+                                                          'vent.template')
+
+                    if os.path.exists(vent_template_path):
+                        vent_template = Template(vent_template_path)
+                        for setting in vent_template.sections()[1]:
+                            # perserve customizations
+                            prev_dict = template.option(section, setting)
+                            if prev_dict[0]:
+                                prev_dict = json.loads(prev_dict[1])
+                            else:
+                                prev_dict = {}
+                            self.logger.info('old settings for option ' +
+                                             setting + ' are: ' +
+                                             str(prev_dict))
+                            opt_vals = vent_template.section(setting)[1]
+                            self.logger.info('new settings:')
+                            for opt_val in opt_vals:
+                                name = opt_val[0]
+                                val = opt_val[1]
+                                if name == 'name':
+                                    name = 'link_name'
+                                self.logger.info(name + ' = ' + val)
+                                # set groups and link_name individually
+                                if name in ['link_name', 'groups']:
+                                    template.set_option(section, name, val)
+                                if name not in prev_dict:
+                                    prev_dict.update({name: val})
+                                # check to see if a list variable has been updated
+                                elif prev_dict[name] != val:
+                                    prev_dict.update({name: val})
+                            template.set_option(section, setting,
+                                                json.dumps(prev_dict))
+
+                    # reset containers that may be affected by changes,
+                    # including dependencies
+                    tool_d = {}
+                    if (s[section]['running'] == 'yes'):
+                        # find dependencies that will need to be restarted
+                        # once this tool is reset
+                        prev_dependencies = []
+                        for t_sect in template.sections()[1]:
+                            self.logger.info("Testing check tool: " + t_sect)
+                            t_name = template.option(t_sect, 'name')[1]
+                            t_branch = template.option(t_sect, 'branch')[1]
+                            t_version = template.option(t_sect, 'version')[1]
+                            self.logger.info(t_name + ', ' + t_branch + ', ' + t_version)
+                            t_identifier = {'name': t_name,
+                                            'branch': t_branch,
+                                            'version': t_version}
+                            # don't worry about dealing with tool if it's not
+                            # running
+                            running = template.option(t_sect, 'running')
+                            if (not running[0] or running[1] != 'yes' or
+                                    t_name == s[section]['name']):
+                                self.logger.info("tool not dependency," +
+                                                 " skipping to next")
+                                continue
+                            options = template.options(t_sect)[1]
+                            self.logger.info(options)
+                            if 'docker' in options:
+                                d_settings = json.loads(template.option(t_sect,
+                                                                        'docker')[1])
+                                self.logger.info(d_settings)
+                                if 'links' in d_settings:
+                                    for link in json.loads(d_settings['links']):
+                                        if link == s[section]['link_name']:
+                                            prev_dependencies.append(t_identifier)
+
+                        # remove old containers, start new
+                        self.logger.info("running tools to be restarted: " +
+                                str(prev_dependencies))
+                        for tool in prev_dependencies:
+                            self.clean(**tool)
+                            tool_d.update(self.prep_start(**tool)[1])
+                        # clean tool before new manifest entry to get rid of
+                        # old tool
+                        self.clean(name=s[section]['name'], branch=branch,
+                                   version=version)
+                    # finish writing new manifest entry, including creating new
+                    # section name and deleting old image
+                    template.set_option(section, 'version', new_version)
+                    template.set_option(section, 'running', s[section]['running'])
+                    old_image = template.option(section, 'image_name')[1]
+                    self.logger.info("Testing old....   " + old_image)
+                    new_image = old_image.rsplit(':', 1)[0]+':'+new_version
+                    template.set_option(section, 'image_name', new_image)
+                    # create new section
+                    new_section = section.rsplit(':', 1)[0]+':'+new_version
+                    template.add_section(new_section)
+                    old_section = template.section(section)[1]
+                    for val in old_section:
+                        template.set_option(new_section, val[0], val[1])
+                    # remove old section and image
+                    self.d_client.images.remove(old_image, force=True)
+                    template.del_section(section)
+                    template.write_config()
+                    # now we can start new tool with correct info in manifest
+                    tool_d.update(self.prep_start(name=s[section]['name'],
+                                                  branch=branch,
+                                                  version=new_version)[1])
+                    self.start(tool_d)
                 except Exception as e:  # pragma: no cover
                     self.logger.error("unable to update: " + str(section) +
                                       " because: " + str(e))
-
-            template.write_config()
         except Exception as e:  # pragma: no cover
             self.logger.error("update failed with error: " + str(e))
             status = (False, e)
@@ -912,14 +1025,12 @@ class Action:
                     if 'docker' in options:
                         d_settings = json.loads(manifest.option(section,
                                                                 'docker')[1])
-                        self.logger.info(d_settings)
                         if 'links' in d_settings:
                             for link in json.loads(d_settings['links']):
                                 if link.lower() in tool_changes:
                                     dependencies.append(t_identifier)
                 # restart tools
                 restart = tool_changes + dependencies
-                self.logger.info(restart)
                 for tool in restart:
                     if isinstance(tool, dict):
                         self.clean(**tool)
