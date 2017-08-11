@@ -1,6 +1,5 @@
 docker
 elasticsearch
-netifaces
 npyscreen
 paste
 pika

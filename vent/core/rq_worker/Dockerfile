@@ -3,13 +3,9 @@ MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
     docker \
-    gcc \
     git \
     libmagic \
-    linux-headers \
-    musl-dev \
     python \
-    python-dev \
     py2-pip \
     && rm -rf /var/cache/apk/*
 
