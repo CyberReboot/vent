@@ -20,6 +20,14 @@ vent\.core\.network\_tap\.ncontrol\.rest\.delete module
     :undoc-members:
     :show-inheritance:
 
+vent\.core\.network\_tap\.ncontrol\.rest\.nics module
+-----------------------------------------------------
+
+.. automodule:: vent.core.network_tap.ncontrol.rest.nics
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 vent\.core\.network\_tap\.ncontrol\.rest\.nlist module
 ------------------------------------------------------
 

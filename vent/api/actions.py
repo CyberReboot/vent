@@ -246,7 +246,8 @@ class Action:
                             else:
                                 prev_dict = {}
                             self.logger.info('old settings for option ' +
-                                             setting + 'are: ' + str(prev_dict))
+                                             setting + ' are: ' +
+                                             str(prev_dict))
                             opt_vals = vent_template.section(setting)[1]
                             self.logger.info('new settings:')
                             for opt_val in opt_vals:
@@ -287,7 +288,7 @@ class Action:
                             running = template.option(t_sect, 'running')
                             if (not running[0] or running[1] != 'yes' or
                                     t_name == s[section]['name']):
-                                self.logger.info("tool not dependency," + 
+                                self.logger.info("tool not dependency," +
                                                  " skipping to next")
                                 continue
                             options = template.options(t_sect)[1]
@@ -300,7 +301,7 @@ class Action:
                                     for link in json.loads(d_settings['links']):
                                         if link == s[section]['link_name']:
                                             prev_dependencies.append(t_identifier)
-                        
+
                         # remove old containers, start new
                         self.logger.info("running tools to be restarted: " +
                                 str(prev_dependencies))

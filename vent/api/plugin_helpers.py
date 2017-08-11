@@ -7,7 +7,7 @@ import shlex
 from ast import literal_eval
 from os import chdir, getcwd, walk
 from os.path import expanduser, join
-from subprocess import check_output, Popen, PIPE, STDOUT
+from subprocess import check_output, STDOUT
 
 from vent.api.templates import Template
 from vent.helpers.logs import Logger
@@ -653,11 +653,23 @@ class PluginHelper:
                     if result[0]:
                         host = result[1]
                     else:
-                        route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-                        h = check_output(('awk', '/default/ {print $3}'),
-                                         stdin=route.stdout)
-                        route.wait()
-                        host = h.strip()
+                        # now just requires ip, ifconfig
+                        try:
+                            route = check_output(('ip', 'route')).split('\n')
+                            default = ''
+                            # grab the default network device.
+                            for device in route:
+                                if 'default' in device:
+                                    default = device.split()[4]
+                                    break
+
+                            # grab the IP address for the default device
+                            ip_addr = check_output(('ifconfig', default))
+                            ip_addr = ip_addr.split('\n')[1].split()[1]
+                            host = ip_addr
+                        except Exception as e:  # pragma no cover
+                            self.logger.error('failed to grab ip. Ensure that \
+                                              ip and ifconfig are installed')
                     nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                     params = {'vol': 'nvidia_driver'}
 

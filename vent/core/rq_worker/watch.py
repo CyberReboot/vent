@@ -24,7 +24,7 @@ def gpu_queue(options):
         dev = '/dev/nvidia' + gpu_options['device'] + ':/dev/nvidia'
         dev += gpu_options['device'] + ':rwm'
         if 'devices' in configs:
-            d = configs['devices']
+            d = list(configs['devices'])
             print(str(d))
             for device in d:
                 print(dev + " compared to " + device)
@@ -49,34 +49,50 @@ def gpu_queue(options):
     mem_needed = 0
     dedicated = False
     # need a gpu to itself
-    if ('dedicated' in options['gpu_options'] and
-       options['gpu_options']['dedicated'] == 'yes'):
+    if ('dedicated' in configs['gpu_options'] and
+       configs['gpu_options']['dedicated'] == 'yes'):
         dedicated = True
-    if 'mem_mb' in options['gpu_options']:
+    if 'mem_mb' in configs['gpu_options']:
         # TODO input error checking
-        mem_needed = int(options['gpu_options']['mem_mb'])
+        mem_needed = int(configs['gpu_options']['mem_mb'])
 
+    print("mem_needed: ", mem_needed)
+    print("dedicated: ", dedicated)
     device = None
     while not device:
         usage = GpuUsage()
 
+        if usage[0]:
+            usage = usage[1]
+        else:
+            return usage
+        print(usage)
         # {"device": "0",
         #  "mem_mb": "1024",
         #  "dedicated": "yes",
         #  "enabled": "yes"}
         for d in devices:
-            dev = d.split(":")[0].split('nvidia')[1]
+            dev = str(d.split(":")[0].split('nvidia')[1])
+            print(dev)
             # if the device is already dedicated, can't be used
-            if dev not in usage['vent_usage']['dedicated']:
-                ram_used = usage['vent_usage']['mem_mb'][dev]
+            dedicated_gpus = usage['vent_usage']['dedicated']
+            is_dedicated = False
+            for gpu in dedicated_gpus:
+                if dev in gpu:
+                    is_dedicated = True
+            print("is_dedicated: ", is_dedicated)
+            if not is_dedicated:
+                ram_used = 0
+                if dev in usage['vent_usage']['mem_mb']:
+                    ram_used = usage['vent_usage']['mem_mb'][dev]
                 # check for vent usage/processes running
                 if (dedicated and
                    dev not in usage['vent_usage']['mem_mb'] and
-                   mem_needed <= usage[dev]['global_memory'] and
-                   not usage[dev]['processes']):
+                   mem_needed <= usage[int(dev)]['global_memory'] and
+                   not usage[int(dev)]['processes']):
                     device = dev
                 # check for ram constraints
-                elif mem_needed <= (usage[dev]['global_memory'] - ram_used):
+                elif mem_needed <= (usage[int(dev)]['global_memory'] - ram_used):
                     device = dev
 
         # TODO make this sleep incremental up to a point, potentially kill
@@ -171,7 +187,6 @@ def file_queue(path, template_path="/vent/"):
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
 
-        labels = {'vent-plugin': '', 'file': path}
         # read in configuration of plugins to get the ones that should run
         # against the path.
         # keep track of images that failed getting configurations for
@@ -181,11 +196,35 @@ def file_queue(path, template_path="/vent/"):
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
+        orig_path_d = {}
+        labels_d = {}
         for section in sections:
+            orig_path = ''
+            labels = {'vent-plugin': '', 'file': path}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
             name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
             # doesn't matter if it's a repository or registry because both in manifest
+            if config.has_option(section, 'groups'):
+                if 'replay' in config.get(section, 'groups'):
+                    try:
+                        # read the vent.cfg file to grab the network-mapping
+                        # specified. For replay_pcap
+                        n_name = 'network-mapping'
+                        n_map = []
+                        if vent_config.has_section(n_name):
+                            # make sure that the options aren't empty
+                            if vent_config.options(n_name):
+                                options = vent_config.options(n_name)
+                                for option in options:
+                                    if vent_config.get(n_name, option):
+                                        n_map.append(vent_config.get(
+                                            n_name, option))
+                                orig_path = path
+                                path = str(n_map[0]) + " " + path
+                    except Exception as e:  # pragma: no cover
+                        failed_images.add(image_name)
+                        status = (False, str(e))
             if config.has_option(section, 'service'):
                 try:
                     options_dict = json.loads(config.get(section, 'service'))
@@ -217,6 +256,7 @@ def file_queue(path, template_path="/vent/"):
                             if path.endswith(ext_type):
                                 images.append(image_name)
                                 configs[image_name] = {}
+
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
@@ -239,6 +279,7 @@ def file_queue(path, template_path="/vent/"):
                     except Exception as e:   # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
+
             if config.has_option(section, 'gpu') and image_name in configs:
                 try:
                     options_dict = json.loads(config.get(section, 'gpu'))
@@ -264,11 +305,16 @@ def file_queue(path, template_path="/vent/"):
                                vent_config.has_option('nvidia-docker-plugin', 'host')):
                                 host = vent_config.get('nvidia-docker-plugin', 'host')
                             else:
-                                route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-                                h = check_output(('awk', '/default/ {print $3}'),
-                                                 stdin=route.stdout)
-                                route.wait()
-                                host = h.strip()
+                                # grab the default gateway
+                                try:
+                                    route = Popen(('/sbin/ip', 'route'),
+                                                  stdout=PIPE)
+                                    h = check_output(('awk', '/default/ {print$3}'),
+                                                     stdin=route.stdout)
+                                    route.wait()
+                                    host = h.strip()
+                                except Exception as e:  # pragma no cover
+                                    pass
                             nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:
@@ -310,6 +356,8 @@ def file_queue(path, template_path="/vent/"):
                     failed_images.add(image_name)
                     status = (False, str(e))
                     print("Unable to process gpu options: " + str(e))
+            orig_path_d[image_name] = orig_path
+            labels_d[image_name] = labels
 
         # TODO add connections to syslog, labels, and file path etc.
         # TODO get syslog address rather than hardcode
@@ -319,8 +367,6 @@ def file_queue(path, template_path="/vent/"):
                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                  'syslog-facility': 'daemon',
                                  'tag': path.rsplit('.', 1)[-1]}}
-        dir_path = path.rsplit('/', 1)[0]
-        volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
 
         # setup gpu queue
         can_queue_gpu = True
@@ -333,9 +379,17 @@ def file_queue(path, template_path="/vent/"):
         # start containers
         for image in images:
             if image not in failed_images:
-                # TODO check for availability of gpu(s),
-                #      otherwise queue it up until it's
-                #      available
+                orig_path = orig_path_d[image]
+                labels = labels_d[image]
+
+                if orig_path:
+                    # replay_pcap is special so we can't bind it like normal
+                    # since the plugin takes in an additional argument
+                    dir_path = orig_path.rsplit('/', 1)[0]
+                else:
+                    dir_path = path.rsplit('/', 1)[0]
+                volumes = {dir_path: {'bind': dir_path, 'mode': 'rw'}}
+
                 if 'volumes' in configs[image]:
                     for volume in volumes:
                         configs[image]['volumes'][volume] = volumes[volume]
@@ -370,7 +424,7 @@ def file_queue(path, template_path="/vent/"):
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
-        print 'Error on line {}'.format(sys.exc_info()[-1].tb_lineno)
+        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
         print("Failed to process job: " + str(e))
 
     print(str(configs))
