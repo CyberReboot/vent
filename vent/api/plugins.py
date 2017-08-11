@@ -318,6 +318,10 @@ class Plugin:
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
+            # keep track of whether or not to write an additional manifest
+            # entry for multiple instances, and how many additional entries
+            # to write
+            addtl_entries = 0
             # remove the .git for adding repo info to manifest
             if self.repo.endswith('.git'):
                 self.repo = self.repo[:-4]
@@ -414,6 +418,11 @@ class Plugin:
                                 option_name = option
                                 if option == 'name':
                                     option_name = 'link_name'
+                                elif option == 'instances':
+                                    instances = vent_template.option(header,
+                                                                     option)[1]
+                                    if int(instances) > 1:
+                                        addtl_entries = int(instances) - 1
                                 option = vent_template.option(header, option)
                                 option_val = option[1]
                                 section_dict[option_name] = option_val
@@ -470,6 +479,23 @@ class Plugin:
                                              match_path,
                                              image_name,
                                              section)
+                # write additional entries for multiple instances
+                if addtl_entries > 0:
+                    # mark instances in manifest
+                    template.set_option(section, 'instance_number', '1')
+                    # add 2 for naming conventions
+                    for i in range(2, addtl_entries + 2):
+                        addtl_section = section.rsplit(':', 2)
+                        addtl_section[0] += str(i)
+                        addtl_section = ':'.join(addtl_section)
+                        template.add_section(addtl_section)
+                        orig_vals = template.section(section)[1]
+                        for val in orig_vals:
+                            template.set_option(addtl_section, val[0], val[1])
+                        template.set_option(addtl_section, 'instance_number',
+                                            str(i))
+                        template.set_option(addtl_section, "name",
+                                            true_name.split('/')[-1]+str(i))
 
             # write out configuration to the manifest file
             template.write_config()
