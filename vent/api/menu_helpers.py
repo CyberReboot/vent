@@ -66,27 +66,27 @@ class MenuHelper:
                                              branch=branch,
                                              build=False, core=True)
                     self.logger.info("status of plugin add: " + str(status))
-                    plugin_c = Template(template=self.plugin.manifest)
-                    sections = plugin_c.sections()
-                    for tool in core['normal']:
-                        for section in sections[1]:
-                            name = plugin_c.option(section, "name")
-                            orig_branch = plugin_c.option(section, "branch")
-                            namespace = plugin_c.option(section, "namespace")
-                            version = plugin_c.option(section, "version")
-                            if (name[1] == tool and
-                               orig_branch[1] == branch and
-                               namespace[1] == "cyberreboot/vent" and
-                               version[1] == "HEAD"):
-                                plugin_c.set_option(section,
-                                                    "image_name",
-                                                    "cyberreboot/vent-" +
-                                                    tool.replace('_', '-') + ":" +
-                                                    branch)
-                    plugin_c.write_config()
                 else:
                     self.logger.info("no new tools to install")
                     status = (True, "previously installed")
+                plugin_c = Template(template=self.plugin.manifest)
+                sections = plugin_c.sections()
+                for tool in core['normal']:
+                    for section in sections[1]:
+                        name = plugin_c.option(section, "name")
+                        orig_branch = plugin_c.option(section, "branch")
+                        namespace = plugin_c.option(section, "namespace")
+                        version = plugin_c.option(section, "version")
+                        if (name[1] == tool and
+                           orig_branch[1] == branch and
+                           namespace[1] == "cyberreboot/vent" and
+                           version[1] == "HEAD"):
+                            plugin_c.set_option(section,
+                                                "image_name",
+                                                "cyberreboot/vent-" +
+                                                tool.replace('_', '-') + ":" +
+                                                branch)
+                plugin_c.write_config()
                 chdir(cwd)
             if action == "build":
                 plugin_c = Template(template=self.plugin.manifest)
