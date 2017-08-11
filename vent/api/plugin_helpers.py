@@ -654,18 +654,22 @@ class PluginHelper:
                         host = result[1]
                     else:
                         # now just requires ip, ifconfig
-                        route = check_output(('ip', 'route')).split('\n')
-                        default = ''
-                        # grab the default network device.
-                        for device in route:
-                            if 'default' in device:
-                                default = device.split()[4]
-                                break
+                        try:
+                            route = check_output(('ip', 'route')).split('\n')
+                            default = ''
+                            # grab the default network device.
+                            for device in route:
+                                if 'default' in device:
+                                    default = device.split()[4]
+                                    break
 
-                        # grab the IP address for the default device
-                        ip_addr = check_output(('ifconfig', default))
-                        ip_addr = ip_addr.split('\n')[1].split()[1]
-                        host = ip_addr
+                            # grab the IP address for the default device
+                            ip_addr = check_output(('ifconfig', default))
+                            ip_addr = ip_addr.split('\n')[1].split()[1]
+                            host = ip_addr
+                        except Exception as e:  # pragma no cover
+                            self.logger.error('failed to grab ip. Ensure that \
+                                              ip and ifconfig are installed')
                     nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                     params = {'vol': 'nvidia_driver'}
 
