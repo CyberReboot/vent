@@ -56,27 +56,43 @@ def gpu_queue(options):
         # TODO input error checking
         mem_needed = int(configs['gpu_options']['mem_mb'])
 
+    print("mem_needed: ", mem_needed)
+    print("dedicated: ", dedicated)
     device = None
     while not device:
         usage = GpuUsage()
 
+        if usage[0]:
+            usage = usage[1]
+        else:
+            return usage
+        print(usage)
         # {"device": "0",
         #  "mem_mb": "1024",
         #  "dedicated": "yes",
         #  "enabled": "yes"}
         for d in devices:
-            dev = d.split(":")[0].split('nvidia')[1]
+            dev = str(d.split(":")[0].split('nvidia')[1])
+            print(dev)
             # if the device is already dedicated, can't be used
-            if dev not in usage['vent_usage']['dedicated']:
-                ram_used = usage['vent_usage']['mem_mb'][dev]
+            dedicated_gpus = usage['vent_usage']['dedicated']
+            is_dedicated = False
+            for gpu in dedicated_gpus:
+                if dev in gpu:
+                    is_dedicated = True
+            print("is_dedicated: ", is_dedicated)
+            if not is_dedicated:
+                ram_used = 0
+                if dev in usage['vent_usage']['mem_mb']:
+                    ram_used = usage['vent_usage']['mem_mb'][dev]
                 # check for vent usage/processes running
                 if (dedicated and
                    dev not in usage['vent_usage']['mem_mb'] and
-                   mem_needed <= usage[dev]['global_memory'] and
-                   not usage[dev]['processes']):
+                   mem_needed <= usage[int(dev)]['global_memory'] and
+                   not usage[int(dev)]['processes']):
                     device = dev
                 # check for ram constraints
-                elif mem_needed <= (usage[dev]['global_memory'] - ram_used):
+                elif mem_needed <= (usage[int(dev)]['global_memory'] - ram_used):
                     device = dev
 
         # TODO make this sleep incremental up to a point, potentially kill
@@ -170,6 +186,7 @@ def file_queue(path, template_path="/vent/"):
         _, path = path.split('_', 1)
         directory = path.rsplit('/', 1)[0]
         path = path.replace('/files', files, 1)
+        path_copy = path
 
         # read in configuration of plugins to get the ones that should run
         # against the path.
@@ -181,8 +198,10 @@ def file_queue(path, template_path="/vent/"):
         sections = config.sections()
         name_maps = {}
         orig_path_d = {}
+        path_cmd = {}
         labels_d = {}
         for section in sections:
+            path = path_copy
             orig_path = ''
             labels = {'vent-plugin': '', 'file': path}
             image_name = config.get(section, 'image_name')
@@ -289,11 +308,16 @@ def file_queue(path, template_path="/vent/"):
                                vent_config.has_option('nvidia-docker-plugin', 'host')):
                                 host = vent_config.get('nvidia-docker-plugin', 'host')
                             else:
-                                route = Popen(('/sbin/ip', 'route'), stdout=PIPE)
-                                h = check_output(('awk', '/default/ {print $3}'),
-                                                 stdin=route.stdout)
-                                route.wait()
-                                host = h.strip()
+                                # grab the default gateway
+                                try:
+                                    route = Popen(('/sbin/ip', 'route'),
+                                                  stdout=PIPE)
+                                    h = check_output(('awk', '/default/ {print$3}'),
+                                                     stdin=route.stdout)
+                                    route.wait()
+                                    host = h.strip()
+                                except Exception as e:  # pragma no cover
+                                    pass
                             nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:
@@ -335,6 +359,7 @@ def file_queue(path, template_path="/vent/"):
                     failed_images.add(image_name)
                     status = (False, str(e))
                     print("Unable to process gpu options: " + str(e))
+            path_cmd[image_name] = path
             orig_path_d[image_name] = orig_path
             labels_d[image_name] = labels
 
@@ -379,7 +404,7 @@ def file_queue(path, template_path="/vent/"):
                     if can_queue_gpu:
                         # queue up containers requiring a gpu
                         q_str = json.dumps({'image': image,
-                                            'command': path,
+                                            'command': path_cmd[image],
                                             'labels': labels,
                                             'detach': True,
                                             'log_config': log_config,
@@ -392,7 +417,7 @@ def file_queue(path, template_path="/vent/"):
                         del configs[image]['gpu_options']
                     print(str(configs[image]))
                     d_client.containers.run(image=image,
-                                            command=path,
+                                            command=path_cmd[image],
                                             labels=labels,
                                             detach=True,
                                             log_config=log_config,
