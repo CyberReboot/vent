@@ -172,18 +172,23 @@ def GpuUsage(**kargs):
     result = template.option('nvidia-docker-plugin', 'host')
     if result[0]:
         host = result[1]
-    # TODO ignoring this option for now
-    # else:
-    #     try:
-    #         # get the default device using netifaces
-    #         # external library
-    #         d_device = netifaces.gateways()
-    #         d_device = d_device['default'][netifaces.AF_INET]
-    #         host = netifaces.ifaddresses(d_device[1])
-    #         host = host[netifaces.AF_INET]
-    #         host = host[0]['addr']
-    #     except Exception as e:  # pragma: no cover
-    #         pass
+    else:
+        try:
+            # now just requires ip, ifconfig
+            route = check_output(('ip', 'route')).split('\n')
+            default = ''
+            # grab the default network device.
+            for device in route:
+                if 'default' in device:
+                    default = device.split()[4]
+                    break
+
+            # grab the IP address for the default device
+            ip_addr = check_output(('ifconfig', default))
+            ip_addr = ip_addr.split('\n')[1].split()[1]
+            host = ip_addr
+        except Exception as e:  # pragma: no cover
+            pass
 
     # have to get the info separately to determine how much memory is availabe
     nd_url = 'http://' + host + ':' + port + '/v1.0/gpu/info/json'
