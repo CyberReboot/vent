@@ -159,10 +159,26 @@ class ToolForm(npyscreen.ActionForm):
                             disabled = True
                         if (not externally_active and not disabled and not
                                 show_disabled):
-                            ncore_list.append(tool)
+                            instance_num = manifest.option(tool,
+                                                           'instance_number')
+                            if ((not instance_num[0])
+                                    or (instance_num[0] and
+                                    int(instance_num[1]) < 2)):
+                                ncore_list.append(tool)
+                            # multiple instances share same image
+                            elif self.action['action_name'] != 'build':
+                                ncore_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
-                            ncore_list.append(tool)
+                            instance_num = manifest.option(tool,
+                                                           'instance_number')
+                            if ((not instance_num[0])
+                                    or (instance_num[0] and
+                                    int(instance_num[1]) < 2)):
+                                ncore_list.append(tool)
+                            # multiple instances share same image
+                            elif self.action['action_name'] != 'build':
+                                ncore_list.append(tool)
 
                 for tool in inventory['core']:
                     tool_repo_name = tool.split(":")
@@ -195,10 +211,26 @@ class ToolForm(npyscreen.ActionForm):
                             disabled = True
                         if (not externally_active and not disabled and not
                                 show_disabled):
-                            core_list.append(tool)
+                            instance_num = manifest.option(tool,
+                                                           'instance_number')
+                            if ((not instance_num[0])
+                                    or (instance_num[0] and
+                                    int(instance_num[1]) < 2)):
+                                core_list.append(tool)
+                            # multiple instances share same image
+                            elif self.action['action_name'] != 'build':
+                                core_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
-                            core_list.append(tool)
+                            instance_num = manifest.option(tool,
+                                                           'instance_number')
+                            if ((not instance_num[0])
+                                    or (instance_num[0] and
+                                    int(instance_num[1]) < 2)):
+                                core_list.append(tool)
+                            # multiple instances share same image
+                            elif self.action['action_name'] != 'build':
+                                core_list.append(tool)
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list

@@ -514,7 +514,33 @@ class Plugin:
         Build docker images and store results in template
         """
 
+        def set_instances(template, section, built, image_id=None):
+            """ Set build information for multiple instances """
+            self.logger.info("entering set_instances")
+            i = 2
+            while True:
+                self.logger.info("i = " + str(i))
+                addtl_section = section.rsplit(':', 2)
+                addtl_section[0] += str(i)
+                addtl_section = ':'.join(addtl_section)
+                self.logger.info(addtl_section)
+                if template.section(addtl_section)[0]:
+                    template.set_option(addtl_section, "built", built)
+                    if image_id:
+                        template.set_option(addtl_section, "image_id",
+                                            image_id)
+                    template.set_option(addtl_section,
+                                        "last_updated",
+                                        str(datetime. \
+                                                utcnow()) +
+                                        " UTC")
+                else:
+                    break
+                i += 1
+
         # !! TODO return status of whether it built successfully or not
+        self.logger.info("Testing build section...   " + section)
+        self.logger.info(str(template.option(section, 'instance_number')))
         if self.build:
             cwd = getcwd()
             chdir(match_path)
@@ -548,6 +574,9 @@ class Plugin:
                             template.set_option(section, "last_updated",
                                                 str(datetime.utcnow()) +
                                                 " UTC")
+                            # set other instances too
+                            if template.option(section, 'instance_number')[0]:
+                                set_instances(template, section, 'yes', image_id)
                             status = (True, "Pulled " + image_name)
                             self.logger.info(str(status))
                         else:
@@ -555,6 +584,9 @@ class Plugin:
                             template.set_option(section, "last_updated",
                                                 str(datetime.utcnow()) +
                                                 " UTC")
+                            # set other instances too
+                            if template.option(section, 'instance_number')[0]:
+                                set_instances(template, section, 'failed')
                             status = (False, "Failed to pull image " +
                                       str(output.split('\n')[-1]))
                             self.logger.warning(str(status))
@@ -605,17 +637,25 @@ class Plugin:
                     template.set_option(section, "last_updated",
                                         str(datetime.utcnow()) +
                                         " UTC")
+                    # set other instances too
+                    if template.option(section, 'instance_number')[0]:
+                        set_instances(template, section, 'yes', image_id)
             except Exception as e:  # pragma: no cover
                 self.logger.error("unable to build image: " + str(image_name) +
                                   " because: " + str(e))
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
+                if template.option(section, 'instance_number')[0]:
+                    set_instances(template, section, 'failed')
+
             chdir(cwd)
         else:
             template.set_option(section, "built", "no")
             template.set_option(section, "last_updated",
                                 str(datetime.utcnow()) + " UTC")
+            if template.option(section, 'instance_number')[0]:
+                set_instances(template, section, 'no')
         template.set_option(section, 'running', 'no')
         return template
 
