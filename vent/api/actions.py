@@ -892,15 +892,23 @@ class Action:
         fd = None
         if not main_cfg:
             if not from_registry:
-                options = ['path']
+                options = ['path', 'multi_tool', 'name']
                 tools, manifest = self.p_helper.constraint_options(constraints,
                                                                    options)
                 # only one tool in tools because perform this function for
                 # every tool
                 if tools:
                     tool = tools.keys()[0]
-                    template_path = os.path.join(tools[tool]['path'],
-                                                 'vent.template')
+                    if ('multi_tool' in tools[tool] and
+                            tools[tool]['multi_tool'] == 'yes'):
+                        name = tools[tool]['name']
+                        if name == 'unspecified':
+                            name = 'vent'
+                        template_path = os.path.join(tools[tool]['path'],
+                                                     name+'.template')
+                    else:
+                        template_path = os.path.join(tools[tool]['path'],
+                                                     'vent.template')
                 else:
                     status = (False, "Couldn't save configuration")
             else:
@@ -966,7 +974,8 @@ class Action:
                       version="HEAD",
                       main_cfg=False,
                       old_val='',
-                      new_val=''):
+                      new_val='',
+                      instances=1):
         """
         Restart necessary tools based on changes that have been made either to
         vent.cfg or to vent.template. This includes tools that need to be
@@ -983,15 +992,54 @@ class Action:
                 tool_d = result[0]
                 manifest = result[1]
                 for tool in tool_d:
+                    # add, remove, update instances as needed
+                    clean_name = tool.rsplit(':', 2)
+                    if clean_name[0][-1] in '0123456789':
+                        clean_name[0] = clean_name[0][:-1]
+                    clean_name = ':'.join(clean_name)
+                    i = 1
+                    while True:
+                        i_section = clean_name.rsplit(':', 2)
+                        i_section[0] += str(i) if i != 1 else ''
+                        i_section = ':'.join(i_section)
+                        if manifest.section(i_section)[0] and i > instances:
+                            manifest.del_section(i_section)
+                        elif (not manifest.section(i_section)[0] and
+                                i <= instances):
+                            manifest.add_section(i_section)
+                            for val_pair in manifest.section(tool)[1]:
+                                name = val_pair[0]
+                                val = val_pair[1]
+                                if name == 'name':
+                                    if val[-1] in '0123456789':
+                                        val = val[:-1] + str(i)
+                                    else:
+                                        val += str(i)
+                                elif name == 'instance_number':
+                                    val = str(i)
+                                elif name == 'last_updated':
+                                    val = Timestamp()
+                                manifest.set_option(i_section, name, val)
+                        elif manifest.section(i_section)[0] and i <= instances:
+                            settings = manifest.option(i_section, 'settings')
+                            if settings[0]:
+                                settings_dict = json.loads(settings[1])
+                                settings_dict['instances'] = str(instances)
+                                manifest.set_option(i_section, 'settings',
+                                                    json.dumps(settings_dict))
+                        else:
+                            break
+                        i += 1
                     # only clean and start back up if running
                     running = manifest.option(tool, 'running')
                     if running[0] and running[1] == 'yes':
                         self.clean(**t_identifier)
                         tool_d = self.prep_start(**t_identifier)[1]
                         self.start(tool_d)
+                manifest.write_config()
             except Exception as e:
                 self.logger.error('Trouble restarting tool ' + name +
-                                  'because: ' + str(e))
+                                  ' because: ' + str(e))
                 status = (False, str(e))
         else:
             try:

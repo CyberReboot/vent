@@ -73,9 +73,28 @@ class EditorForm(npyscreen.ActionForm):
 
     def on_ok(self):
         """ Save changes made to vent.template """
+        instances = 1
+        def instance_num(config_val):
+            """ Get the instance number from a given config string """
+            instance_loc = config_val.find('instances')
+            if instance_loc >= 0:
+                next_line = config_val.find('\n', instance_loc)
+                if next_line < 0:
+                    next_line = len(config_val)
+                instance = config_val[instance_loc+12:next_line]
+            else:
+                # default instance value
+                instance = '1'
+            return instance
+
         if self.vent_cfg:
             self.save(main_cfg=True, config_val=self.edit_space.value)
         else:
+            # check instance changes
+            if (instance_num(self.config_val) !=
+                    instance_num(self.edit_space.value)):
+                instances = int(instance_num(self.edit_space.value))
+                npyscreen.notify_confirm('Number of instances has changed')
             save_args = {'config_val': self.edit_space.value,
                          'name': self.tool_name,
                          'branch': self.branch,
@@ -90,7 +109,8 @@ class EditorForm(npyscreen.ActionForm):
             if not self.vent_cfg:
                 restart_kargs.update({'name': self.tool_name,
                                       'version': self.version,
-                                      'branch': self.branch})
+                                      'branch': self.branch,
+                                      'instances': instances})
             npyscreen.notify_wait("Restarting tools affected by changes...",
                                   title="Restart")
             self.restart_tools(**restart_kargs)
