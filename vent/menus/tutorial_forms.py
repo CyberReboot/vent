@@ -164,7 +164,7 @@ class TutorialSettingUpServicesForm(TutorialForm):
         """ Initialize setting up services tutorial form fields """
         title = "Setting up Services"
         text = """TODO"""
-        next_tutorial = "MAIN"
+        next_tutorial = "TUTORIALTROUBLESHOOTING"
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -214,11 +214,11 @@ class TutorialTerminologyForm(TutorialForm):
         User Data: File directory that has meta data about Vent. The most
         important files within User Data are:
             plugin_manifest: meta data about all added tools
-            vent.log: logs concerning how Vent runs. Almost every function
-            within Vent will write to this log.
+            vent.log: logs concerning how Vent runs. Almost every
+                      function within Vent will write to this log.
             vent.cfg: allows for the customization of certain functionality
-            within vent. File Drop location can be set here. Certain GPU
-            functionality can be set here.
+                      within vent. File Drop location can be set here. Certain
+                      GPU functionality can be set here.
         File Drop: File directory that Vent watches. Drop files in here so
         Vent can see and process them.
         """
@@ -242,7 +242,7 @@ class TutorialTroubleshootingForm(TutorialForm):
         1) Is Docker daemon running? Vent uses Docker containers so it is
         necessary to have the Docker daemon running.
         2) Is this the lastest version of Vent? Ways to get the latest Vent version:
-            Using pip: 'pip install vent && vent'
+            Using pip:    'pip install vent && vent'
             Using Docker: 'docker pull cyberreboot/vent'
                           'docker run -it vent_image_id'
             Using github: 'git clone https://github.com/CyberReboot/vent'
@@ -254,7 +254,7 @@ class TutorialTroubleshootingForm(TutorialForm):
         Firstly, let's see if it's Vent that's causing the problems.
         Go to the 'User Data' file and open up 'vent.log' with your favorite
         text editor. Let's search the key term 'False'. Iterate through the
-        search results and look for 'Status of some_function': False'. This
+        search results and look for 'Status of some_function: False'. This
         tells us that one of Vent's core functions is not performing as
         expected. Next to it, there will be an error message explaining what
         went wrong. If it's something with Vent's implementation, please create
@@ -265,7 +265,7 @@ class TutorialTroubleshootingForm(TutorialForm):
         This will return all information about the plugin's container and any
         information regarding the error should be displayed here.
         """
-        next_tutorial = "TUTORIALGETTINGSETUP"
+        next_tutorial = "MAIN"
         TutorialForm.__init__(self,
                               title,
                               text,

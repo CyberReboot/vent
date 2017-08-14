@@ -347,6 +347,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.parentApp.change_form('TUTORIALADDINGFILES')
         elif action == "setting_up_services":
             self.parentApp.change_form('TUTORIALSETTINGUPSERVICES')
+        elif action == "basic_troubleshooting":
+            self.parentApp.change_form('TUTORIALTROUBLESHOOTING')
         return
 
     def system_commands(self, action):
@@ -670,6 +672,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.s5.addItem(text="Setting up Services",
                         onSelect=self.switch_tutorial,
                         arguments=['setting_up_services'], shortcut='s')
+        self.s5.addItem(text="Basic Troubleshooting",
+                        onSelect=self.switch_tutorial,
+                        arguments=['basic_troubleshooting'], shortcut='t')
 
     def help_form(self, *args, **keywords):
         """ Toggles to help """
