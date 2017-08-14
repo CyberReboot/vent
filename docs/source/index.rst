@@ -50,6 +50,9 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 .. _details here: https://github.com/CyberReboot/vent/blob/master/CONTRIBUTING.md
 .. _this: https://media.readthedocs.org/pdf/npyscreen/latest/npyscreen.pdf
 
+..toctree::
+  :maxdepth: 2
+
    vent.api
 
    vent.core
