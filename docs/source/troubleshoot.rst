@@ -2,8 +2,8 @@
 Troubleshooting
 ***************
 
-Basic Troubleshooting
-=====================
+**Basic Troubleshooting**
+=========================
 Something not working as expected within Vent? Not a problem!
 Let's first get some basic possible errors out of the way.
 
@@ -26,17 +26,18 @@ Let's first get some basic possible errors out of the way.
         git clone https://github.com/CyberReboot/vent
         cd vent && make && vent
 
+|
 
-In-Depth Troubleshooting
-========================
+**In-Depth Troubleshooting**
+============================
 Still not working? That's fine! Let's get into the nitty gritty and
 try to figure out what went wrong.
 
 
 Is it Vent that's causing the problem?
-**************************************
+--------------------------------------
 Firstly, let's see if it's Vent that's causing the problems.
-Go to the ``User Data`` file and open up ``vent.log`` with your favorite
+Go to the ``User Data`` folder and open up ``vent.log`` with your favorite
 text editor. Let's search the key term ``False``. Iterate through the
 search results and look for ``Status of some_function: False``. This
 tells us that one of Vent's core functions is not performing as
@@ -48,9 +49,9 @@ https://github.com/CyberReboot/vent/issues.
 
 
 Is it a custom plugin that's causing the problem?
-*************************************************
+-------------------------------------------------
 If there's no obvious error messages within `vent.log`, let's check any
-added plugin tools.
+added plugin tools and their containers.
 
 Run the command ``docker logs syslog_container_id``.
 This will return all information about all plugin containers and any
