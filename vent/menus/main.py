@@ -345,8 +345,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.parentApp.change_form('TUTORIALADDINGPLUGINS')
         elif action == "adding_files":
             self.parentApp.change_form('TUTORIALADDINGFILES')
-        elif action == "setting_up_services":
-            self.parentApp.change_form('TUTORIALSETTINGUPSERVICES')
         elif action == "basic_troubleshooting":
             self.parentApp.change_form('TUTORIALTROUBLESHOOTING')
         return
@@ -668,10 +666,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.s4 = self.m7.addNewSubmenu(name="Files", shortcut='f')
         self.s4.addItem(text="Adding Files", onSelect=self.switch_tutorial,
                         arguments=['adding_files'], shortcut='a')
-        self.s5 = self.m7.addNewSubmenu(name="Services", shortcut='s')
-        self.s5.addItem(text="Setting up Services",
-                        onSelect=self.switch_tutorial,
-                        arguments=['setting_up_services'], shortcut='s')
+        self.s5 = self.m7.addNewSubmenu(name="Help", shortcut='s')
         self.s5.addItem(text="Basic Troubleshooting",
                         onSelect=self.switch_tutorial,
                         arguments=['basic_troubleshooting'], shortcut='t')

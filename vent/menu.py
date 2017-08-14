@@ -14,7 +14,6 @@ from vent.menus.tutorial_forms import TutorialBackgroundForm
 from vent.menus.tutorial_forms import TutorialBuildingCoresForm
 from vent.menus.tutorial_forms import TutorialGettingSetupForm
 from vent.menus.tutorial_forms import TutorialIntroForm
-from vent.menus.tutorial_forms import TutorialSettingUpServicesForm
 from vent.menus.tutorial_forms import TutorialStartingCoresForm
 from vent.menus.tutorial_forms import TutorialTerminologyForm
 from vent.menus.tutorial_forms import TutorialTroubleshootingForm
@@ -79,10 +78,6 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm("TUTORIALADDINGFILES",
                      TutorialAddingFilesForm,
                      name="Files" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALSETTINGUPSERVICES",
-                     TutorialSettingUpServicesForm,
-                     name="Services" + quit_s,
                      color="DANGER")
         self.addForm("TUTORIALTROUBLESHOOTING",
                      TutorialTroubleshootingForm,

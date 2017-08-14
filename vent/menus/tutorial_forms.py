@@ -35,7 +35,7 @@ class TutorialAddingFilesForm(TutorialForm):
         output a .csv2 file in the same File Drop directory. This, in turn,
         will cause Plugin B to start and process the newly created .csv2 file.
         """
-        next_tutorial = "TUTORIALSETTINGUPSERVICES"
+        next_tutorial = "TUTORIALTROUBLESHOOTING"
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -91,7 +91,30 @@ class TutorialAddingPluginsForm(TutorialForm):
     def __init__(self, *args, **keywords):
         """ Initialize adding plugins tutorial form fields """
         title = "Adding Plugins"
-        text = """TODO"""
+        text = """
+        Adding custom Vent plugins is easy.
+        From the main menu, hit '^X' to bring up the action menu.
+        Highlight 'Plugins' and hit enter to bring up a new menu. From there,
+        select 'Add new plugin' and hit 'Enter', which brings up another new
+        form.
+
+        It's possible to get plugins using Git or Docker.
+        For Git: Specify the repository URL and credentials (if needed) and hit OK.
+                 Vent will display all branches that the repo currently has.
+                 Highlight the desired branch and press the 'Space' key to
+                 select it. By default, Vent will pull from the latest commit
+                 but it is possible to select whatever desired commit. Just
+                 highlight the commit ID, press enter, and a menu will pop up
+                 with all commit IDs. Highlight the desired commit ID and press
+                 'Enter' to select it. Next, if the image should also be built, leave
+                 the value of 'Build' to 'True'. Otherwise, set it to 'False'
+                 and press OK.
+
+                 Now, select all desired plugins and hit 'OK' and Vent will do
+                 the rest.
+
+        For Docker: Give an image and name and hit OK.
+        """
         next_tutorial = "TUTORIALADDINGFILES"
         TutorialForm.__init__(self,
                               title,
@@ -158,21 +181,6 @@ class TutorialGettingSetupForm(TutorialForm):
                               **keywords)
 
 
-class TutorialSettingUpServicesForm(TutorialForm):
-    """ Tutorial Setting up Services form for the Vent CLI """
-    def __init__(self, *args, **keywords):
-        """ Initialize setting up services tutorial form fields """
-        title = "Setting up Services"
-        text = """TODO"""
-        next_tutorial = "TUTORIALTROUBLESHOOTING"
-        TutorialForm.__init__(self,
-                              title,
-                              text,
-                              next_tutorial,
-                              *args,
-                              **keywords)
-
-
 class TutorialStartingCoresForm(TutorialForm):
     """ Tutorial Starting Cores form for the Vent CLI """
     def __init__(self, *args, **keywords):
@@ -208,19 +216,21 @@ class TutorialTerminologyForm(TutorialForm):
         """ Initialize terminology tutorial form fields """
         title = "Vent Terminology"
         text = """
-        Core Tools: Main set of tools that Vent uses to do work. These tools are
-        the backbone of Vent.
-        Plugin Tools: User added tools that process user defined file types.
-        User Data: File directory that has meta data about Vent. The most
-        important files within User Data are:
-            plugin_manifest: meta data about all added tools
-            vent.log: logs concerning how Vent runs. Almost every
-                      function within Vent will write to this log.
-            vent.cfg: allows for the customization of certain functionality
-                      within vent. File Drop location can be set here. Certain
-                      GPU functionality can be set here.
-        File Drop: File directory that Vent watches. Drop files in here so
-        Vent can see and process them.
+        Core Tool:   Main set of tools that Vent uses to do work. These tools are
+                     the backbone of Vent.
+        Plugin Tool: User added tools that process user defined file types.
+        User Data:   File directory that has meta data about Vent. The most
+                     important files within User Data are:
+                        plugin_manifest: meta data about all added tools
+                        vent.log: logs concerning how Vent runs. Almost every
+                                  function within Vent will write to this log.
+                        vent.cfg: allows for the customization of certain functionality
+                                  within vent. File Drop location can be set here.
+                                  Certain GPU functionality can be set here.
+        File Drop:   File directory that Vent watches. Drop files in here so
+                     Vent can see and process them.
+
+        Template Files: tbd when I actually know what the options and stuff are D:
         """
         next_tutorial = "TUTORIALGETTINGSETUP"
         TutorialForm.__init__(self,
@@ -229,6 +239,7 @@ class TutorialTerminologyForm(TutorialForm):
                               next_tutorial,
                               *args,
                               **keywords)
+
 
 class TutorialTroubleshootingForm(TutorialForm):
     """ Tutorial troubleshooting form for the Vent CLI """
@@ -261,8 +272,8 @@ class TutorialTroubleshootingForm(TutorialForm):
         an issue here: https://github.com/CyberReboot/vent/issues
 
         If there's no obvious error messages within 'vent.log', let's check any
-        added plugin tools. Run the command 'docker logs plugin_container_id'.
-        This will return all information about the plugin's container and any
+        added plugin tools. Run the command 'docker logs syslog_container_id'.
+        This will return all information about all plugin containers and any
         information regarding the error should be displayed here.
         """
         next_tutorial = "MAIN"

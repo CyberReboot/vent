@@ -41,9 +41,7 @@ class TutorialForm(npyscreen.ActionFormWithMenus):
         self.m5 = self.add_menu(name="Files", shortcut='f')
         self.m5.addItem(text="Adding Files", onSelect=self.switch,
                         arguments=['TUTORIALADDINGFILES'], shortcut='a')
-        self.m6 = self.add_menu(name="Services", shortcut='s')
-        self.m6.addItem(text="Setting up Services", onSelect=self.switch,
-                        arguments=['TUTORIALSETTINGUPSERVICES'], shortcut='s')
+        self.m6 = self.add_menu(name="Help", shortcut='s')
         self.m6.addItem(text="Basic Troubleshooting", onSelect=self.switch,
                         arguments=['TUTORIALTROUBLESHOOTING'], shortcut='t')
 
