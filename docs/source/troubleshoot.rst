@@ -43,7 +43,7 @@ tells us that one of Vent's core functions is not performing as
 expected. Next to it, there will be an error message explaining what
 went wrong.
 
-If it's something with Vent's implementation, please create an issue here:
+If there's a problem with Vent's implementation, please create an issue here:
 https://github.com/CyberReboot/vent/issues.
 
 

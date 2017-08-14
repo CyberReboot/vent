@@ -52,10 +52,15 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 
 |
 
-Vent Function Packages
-======================
+.. toctree::
+  :maxdepth: 2
+  :caption: Vent Tutorials
+
+  troubleshoot
+
 .. toctree::
   :maxdepth: 1
+  :caption: Vent Functions
 
   vent.api
 
@@ -65,7 +70,6 @@ Vent Function Packages
 
   vent.menus
 
-  troubleshoot
 
 Indices and tables
 ==================
