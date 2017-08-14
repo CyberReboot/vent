@@ -171,7 +171,22 @@ class TutorialGettingSetupForm(TutorialForm):
     def __init__(self, *args, **keywords):
         """ Initialize getting setup tutorial form fields """
         title = "Getting Setup"
-        text = """TODO"""
+        text = """
+        Here's a quick setup guide to quickly get Vent up and running.
+        1) Enter the core tools submenu from the main action menu and
+           'add all latest core tools'
+        2) Build all core tools
+        3) Start all core tools
+
+        Now, Vent has the tools to work. Now we need to add plugin tools to
+        process files placed into File Drop.
+        4) Hit '^X' to open the main action menu and go to the Plugins submenu
+        5) Add and build new plugins using either Git or Docker
+        6) Now, drop any files that the plugins process into the File Drop
+           directory.
+
+        Congrats! You have just started and processed files using Vent!
+        """
         next_tutorial = "TUTORIALBUILDINGCORES"
         TutorialForm.__init__(self,
                               title,
@@ -250,14 +265,15 @@ class TutorialTroubleshootingForm(TutorialForm):
         Something not working as expected within Vent? Not a problem!
 
         Let's first get some basic possible errors out of the way.
-        1) Is Docker daemon running? Vent uses Docker containers so it is
-        necessary to have the Docker daemon running.
-        2) Is this the lastest version of Vent? Ways to get the latest Vent version:
-            Using pip:    'pip install vent && vent'
-            Using Docker: 'docker pull cyberreboot/vent'
-                          'docker run -it vent_image_id'
-            Using github: 'git clone https://github.com/CyberReboot/vent'
-                          'cd vent && make && vent'
+        1) Is Docker daemon running? Vent uses Docker heavily so it is
+           necessary to have the Docker daemon running.
+        2) Is this the lastest version of Vent? Ways to get the latest Vent
+           version:
+              Using pip:    'pip install vent && vent'
+              Using Docker: 'docker pull cyberreboot/vent'
+                            'docker run -it vent_image_id'
+              Using github: 'git clone https://github.com/CyberReboot/vent'
+                            'cd vent && make && vent'
 
         Still not working? That's fine! Let's get into the nitty gritty and
         try to figure out what went wrong.
