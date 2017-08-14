@@ -205,7 +205,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                          kwargs={"action": "install"})
             popup(original_images, "images", thr,
                   'Please wait, installing core containers...')
-            notify_confirm("Done installing core containers.",
+            notify_confirm("Done installing core containers (any"
+                           " already installed tools untouched).",
                            title='Installed core containers')
         return
 

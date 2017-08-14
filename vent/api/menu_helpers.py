@@ -32,7 +32,8 @@ class MenuHelper:
             core = self.tools_status(True, branch=branch, version=version)[1]
             if action in ["install", "build"]:
                 tools = []
-                resp = self.p_helper.apply_path('https://github.com/cyberreboot/vent')
+                core_repo = 'https://github.com/cyberreboot/vent'
+                resp = self.p_helper.apply_path(core_repo)
 
                 if resp[0]:
                     cwd = resp[1]
@@ -51,12 +52,24 @@ class MenuHelper:
                                                         version=version,
                                                         groups='core')
                 for match in matches:
-                    tools.append((match[0], ''))
-                status = self.plugin.add('https://github.com/cyberreboot/vent',
-                                         tools=tools,
-                                         branch=branch,
-                                         build=False, core=True)
-                self.logger.info("status of plugin add: " + str(status))
+                    name = match[0].rsplit('/')[-1]
+                    constraints = {'name': name,
+                                   'repo': core_repo}
+                    prev_installed, _ = self.p_helper. \
+                                        constraint_options(constraints, [])
+                    if not prev_installed:
+                        tools.append((match[0], ''))
+                # only add stuff not already installed or repo specification
+                if ((tools) or
+                        (isinstance(matches, list) and len(matches) == 0)):
+                    status = self.plugin.add(core_repo,
+                                             tools=tools,
+                                             branch=branch,
+                                             build=False, core=True)
+                    self.logger.info("status of plugin add: " + str(status))
+                else:
+                    self.logger.info("no new tools to install")
+                    status = (True, "previously installed")
                 plugin_c = Template(template=self.plugin.manifest)
                 sections = plugin_c.sections()
                 for tool in core['normal']:
