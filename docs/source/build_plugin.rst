@@ -9,6 +9,8 @@ Read more about ``Dockerfile`` `here`_.
 .. _here: https://docs.docker.com/engine/reference/builder/
 
 
+.. _venttemplate-label:
+
 Vent.template Files
 ===================
 Vent template files are what Vent uses to build images it recognizes. They're

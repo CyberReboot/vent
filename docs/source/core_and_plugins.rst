@@ -68,33 +68,33 @@ Short explanations of all actions available in the core tools and plugins sub-me
 
 Add all latest core/plugin tools
 ================================
-Clone the latest core tools from `cyberreboot/vent`_. This will **not** update or
-remove any core tool images that have already been added. All added tools are also
-added to ``plugin_manifest.cfg`` located in the ``User Data`` folder.
+Clone the latest version of the tool. This will **not** update or
+remove any tools that have already been added.
+
+By default, core tools are cloned from `cyberreboot/vent`_ and plugins, if no
+custom repo is specified, are cloned from `cyberreboot/vent-plugins`_.
 
 .. _cyberreboot/vent: https://github.com/CyberReboot/vent/
+.. _cyberreboot/vent-plugins: https://github.com/CyberReboot/vent-plugins/
 
 Build core/plugin tools
 =======================
-Build docker images from the Dockerfiles obtained above.
-This is essentially running ``docker build .`` in each core tool's respective
-directory.
+Build docker images from the Dockerfiles obtained from adding.
 
 Clean core/plugin tools
 =======================
+Stop and remove the chosen tools' containers.
 
 Configure core/plugin tools
 ===========================
-Edit a core tool's vent.template folder found in the tool's respective folder
-located in ``vent/core/``. Read more about vent template folders `here`_.
-
-.. _here: https://google.com
+Edit a tool's vent.template file found in the tool's respective folder.
+Read more about :ref:`venttemplate-label`
 
 Disable core/plugin tools
 =========================
-Remove chosen tools from menus. For example, if there were ten tools and only
-needed five, disable the five unneeded tools, and they will not show up in the
-menus anymore.
+Remove chosen tools from menus. For example, let's say there were ten tools but only
+five were needed. Disabling the five unneeded tools would stop the tools from
+appearing on the menus.
 
 Enable core/plugin tools
 ========================
@@ -102,13 +102,13 @@ Opposite of disable tools. Enables the tools so they can be seen again.
 
 Inventory of core/plugin tools
 ==============================
-Provides meta data regarding currently added core tools. It tells if a core tool is built,
+Provides meta data regarding currently added core/plugin tools. It tells if a tool is built,
 enabled, the name of the image, and the if the tool is currently running.
 
 Remove core/plugin tools
 ========================
-Remove the tool's image from ``plugin_manifest.cfg``. The tool must be added again if it is
-to be built.
+Remove a tool entirely. Any of that tool's containers are also stopped and
+deleted. The tool must be added again if it is to be used.
 
 Start core/plugin tools
 =======================
