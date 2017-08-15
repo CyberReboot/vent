@@ -156,3 +156,7 @@ plugin.
 
 If the plugin did not function correctly, try rereading the tutorial or check
 the :ref:`troubleshooting-label` guide.
+
+Other examples can be found at `CyberReboot/vent-plugins`_.
+
+.. _CyberReboot/vent-plugins: https://github.com/CyberReboot/vent-plugins
