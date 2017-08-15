@@ -78,8 +78,6 @@ class Template:
                 self.config.set(section, option)
             return(True, self.config.options(section))
         return(False, "Option: {} already exists @ {}".format(option, section))
-        # return (False, "Section: " + section +
-        #         " does not exist. Did you want to force it?")
 
     @ErrorHandler
     def del_section(self, section):
