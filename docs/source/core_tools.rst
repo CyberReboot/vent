@@ -1,7 +1,7 @@
 Core Tools
 ##########
 
-**Core Tool Explanations**
+Core Tool Explanations
 **************************
 There are currently nine core tools that Vent uses.
 
@@ -19,7 +19,8 @@ files based on what was monitored. Has an interface located in ``System
 Commands -> Network Tap Interface``. The interface has five available actions:
 
 - **Create**: Create a new container with a specified nic, tag, interval (in *seconds*),
-  filter, and iterations. The container is also automatically started.
+  filter, and iterations. The container is also automatically started on
+  creation.
 - **Start**: Start a network tap container. Uses the settings specified in ``create``
   to run.
 - **Stop**: Stop a network tap container.
@@ -57,7 +58,7 @@ replaced with user provided syslog system.
 
 |
 
-**Core Tool Actions**
+Core Tool Actions
 *********************
 
 Short explanations of all actions available in the core tools sub-menu.

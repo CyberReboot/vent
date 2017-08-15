@@ -1,8 +1,9 @@
-***************
-Troubleshooting
-***************
+.. _troubleshooting-label:
 
-**Basic Troubleshooting**
+Troubleshooting
+###############
+
+Basic Troubleshooting
 =========================
 Something not working as expected within Vent? Not a problem!
 Let's first get some basic possible errors out of the way.
@@ -32,7 +33,7 @@ try using the latest developer build:
 
 |
 
-**In-Depth Troubleshooting**
+In-Depth Troubleshooting
 ============================
 Still not working? That's fine! Let's get into the nitty gritty and
 try to figure out what went wrong.
@@ -48,15 +49,16 @@ tells us that one of Vent's core functions is not performing as
 expected. Next to it, there will be an error message explaining what
 went wrong.
 
-If there's a problem with Vent's implementation, please create an issue here:
-https://github.com/CyberReboot/vent/issues.
+If there's a problem with Vent's implementation, please create an issue `here`_.
+
+.. _here: https://github.com/CyberReboot/vent/issues
 
 
 Is it a custom plugin that's causing the problem?
 -------------------------------------------------
-If there's no obvious error messages within `vent.log`, let's check any
+If there's no obvious error messages within ``vent.log``, let's check any
 added plugin tools and their containers.
 
-Run the command ``docker logs syslog_container_id``.
+Run the command ``docker logs vent_syslog_container_id``.
 This will return all information about all plugin containers and any
 information regarding the error should be displayed here.

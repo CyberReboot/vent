@@ -60,11 +60,13 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 
   core_tools
 
+  build_plugin
+
   troubleshoot
 
 .. toctree::
   :maxdepth: 1
-  :caption: Vent Functions
+  :caption: Vent Code
 
   vent.api
 
