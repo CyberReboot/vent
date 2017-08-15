@@ -1,4 +1,4 @@
-.. _customeventplugin-label:
+.. _customventplugin-label:
 
 Custom Vent Plugins
 ############################
