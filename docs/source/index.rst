@@ -54,9 +54,12 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 
 .. toctree::
   :maxdepth: 2
-  :caption: Vent Basics 
+  :caption: Vent Basics
+
+  quickstart
 
   core_tools
+
   troubleshoot
 
 .. toctree::

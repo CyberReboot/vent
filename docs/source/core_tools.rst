@@ -20,7 +20,6 @@ Commands -> Network Tap Interface``. The interface has five available actions:
 
 - **Create**: Create a new container with a specified nic, tag, interval (in *seconds*),
   filter, and iterations. The container is also automatically started.
-
 - **Start**: Start a network tap container. Uses the settings specified in ``create``
   to run.
 - **Stop**: Stop a network tap container.
@@ -41,7 +40,7 @@ Description goes here
 rmq_es_connector
 ================
 A gateway between rabbitmq and elasticsearch. This way, a user is not locked
-into using rabbitmq. Any message formatting system would suffice.
+into using rabbitmq.
 
 rq_worker
 =========
@@ -61,16 +60,15 @@ replaced with user provided syslog system.
 **Core Tool Actions**
 *********************
 
-Short explanations of all actions available in the core tools sub=menu.
+Short explanations of all actions available in the core tools sub-menu.
 
 Add all latest core tools
 =========================
-Clone the latest core tools from `cyberreboot/vent`_. This will ==not== update or
+Clone the latest core tools from `cyberreboot/vent`_. This will **not** update or
 remove any core tool images that have already been added. All added tools are also
 added to ``plugin_manifest.cfg`` located in the ``User Data`` folder.
 
 .. _cyberreboot/vent: https://github.com/CyberReboot/vent/
-
 
 Build core tools
 ================
@@ -96,7 +94,7 @@ Enable core tools
 
 Inventory of core tools
 =======================
-Provides the meta data of the core tools. It tells if a core tool is built,
+Provides meta data regarding currently added core tools. It tells if a core tool is built,
 enabled, the name of the image, and the if the tool is currently running.
 
 Remove core tools
@@ -107,12 +105,12 @@ to be built.
 Start core tools
 ================
 Start the tools' respective containers. Similar to executing the command
-``docker run =it tool_name``.
+``docker run -it tool_id``.
 
 Stop core tools
 ===============
 Stop the tools' respective containers. Similar to executing the command
-``docker stop tool_name``.
+``docker stop tool_id``.
 
 Update core tools
 =================

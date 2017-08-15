@@ -16,12 +16,16 @@ Let's first get some basic possible errors out of the way.
 
         pip install vent && vent
 
+
+Pip installs the latest *stable* release of Vent. If a problem still persists,
+try using the latest developer build:
+
    - Using Docker::
 
         docker pull cyberreboot/vent
         docker run -it vent_image_id
 
-   - Using github::
+   - Using Git::
 
         git clone https://github.com/CyberReboot/vent
         cd vent && make && vent
