@@ -67,7 +67,6 @@ class Template:
         """
         # check if section exists; create if not
         if not self.config.has_section(section):
-            print("DEBUG: Section {} doesn't exist; creating".format(section))
             message = self.add_section(section)
             if not message[0]:
                 return message
@@ -78,7 +77,7 @@ class Template:
             else:
                 self.config.set(section, option)
             return(True, self.config.options(section))
-        return(False, "Option: {} already exists in {}".format(option,section))
+        return(False, "Option: {} already exists @ {}".format(option, section))
         # return (False, "Section: " + section +
         #         " does not exist. Did you want to force it?")
 
