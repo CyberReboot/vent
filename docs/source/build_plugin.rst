@@ -13,8 +13,8 @@ Read more about ``Dockerfile`` `here`_.
 
 Vent.template Files
 ===================
-Vent template files are what Vent uses to build images it recognizes. They're
-written and processed like ``.cfg`` files.
+Vent template files are what Vent uses to build images into something it recognizes.
+They're written and processed like ``.cfg`` files.
 
 docker
 ------
@@ -62,7 +62,7 @@ service
 
 settings
 --------
-?
+Some description for settings here
 
 *ext_types*
   Whatever this option is set to is the file extension that Vent will run this plugin on.
@@ -142,8 +142,8 @@ To test, let's create a test file.
 
 Finally, with Vent and the plugin up and running and all core tools added, built,
 and running, let's drop ``test.example`` into ``File Drop``. After a few
-seconds, the job counter on the main menu of Vent will show that 1 job is
-running, and it'll finish soon after and show 1 completed job.
+seconds, the job counter on the main menu of Vent will show that one job is
+running, and it'll finish soon after and show one completed job.
 
 To check that the plugin worked and outputted ``qwerty``, let's check the syslog
 container using the command ``docker logs vent_syslog_id > log_file``. Now
