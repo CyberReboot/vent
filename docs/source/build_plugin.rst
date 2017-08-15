@@ -85,7 +85,7 @@ Some description for settings here
 
 Example Custom Vent Plugin
 ==========================
-Let's create a Vent plugin that uses ``cat`` to output the contents of a
+Let's create a simple Vent plugin that uses ``cat`` to output the contents of a
 ``.example`` file. Let's create a ``vent_plugin_example`` and enter it.
 
 First, let's create a simple ``bash`` script that will ``cat`` the contents of a

@@ -27,7 +27,7 @@ Getting Vent set up is quick and easy.
    1. In the main menu, press ``^X`` to open the action menu
    2. Select ``Core Tools`` or press ``c``
    3. Select ``Add all latest core tools`` or press ``i``. Vent will now clone the
-      core tools' directories from `cyberreboot/vent`_.
+      core tools' directories from `CyberReboot/vent`_.
    4. Select ``Build core tools`` from the core tools sub-menu and use the arrow
       keys and the Enter key to press ``OK``. It's possible to choose which core
       tools are built using the Space key. Boxes with an ``X`` in them have been
@@ -38,20 +38,20 @@ Getting Vent set up is quick and easy.
       ``Build core tools``, it's possible to select which core tools are
       started.
 
-.. _cyberreboot/vent: https://github.com/CyberReboot/vent/
+.. _CyberReboot/vent: https://github.com/CyberReboot/vent/
 
 **3.** The core tools' containers are up and running. Next, let's add some plugins.
 
    1. From the action menu, Select ``Plugins`` or press ``p``.
    2. Select ``Add new plugin`` or press ``a``.
    3. For this quick start guide, we will use one of the example plugins
-      provided from `cyberreboot/vent-plugins`_. So just hit ``OK`` on the form.
+      provided from `CyberReboot/vent-plugins`_. So just hit ``OK`` on the form.
    4. Press the Space key to choose the ``master`` branch and hit ``OK``.
    5. Uncheck all the boxes except for ``/tcpdump_hex_parser`` and hit ``OK``.
       Depending on the plugin, add times may vary so it is not unusual for long
       plugin add times.
 
-.. _cyberreboot/vent-plugins: https://github.com/CyberReboot/vent-plugins/
+.. _CyberReboot/vent-plugins: https://github.com/CyberReboot/vent-plugins/
 
 **4.** Now we have a plugin that can process files with the extension ``.pcap``.
 

@@ -71,11 +71,11 @@ Add all latest core/plugin tools
 Clone the latest version of the tool. This will **not** update or
 remove any tools that have already been added.
 
-By default, core tools are cloned from `cyberreboot/vent`_ and plugins, if no
-custom repo is specified, are cloned from `cyberreboot/vent-plugins`_.
+By default, core tools are cloned from `CyberReboot/vent`_ and plugins, if no
+custom repo is specified, are cloned from `CyberReboot/vent-plugins`_.
 
-.. _cyberreboot/vent: https://github.com/CyberReboot/vent/
-.. _cyberreboot/vent-plugins: https://github.com/CyberReboot/vent-plugins/
+.. _CyberReboot/vent: https://github.com/CyberReboot/vent/
+.. _CyberReboot/vent-plugins: https://github.com/CyberReboot/vent-plugins/
 
 Build core/plugin tools
 =======================
