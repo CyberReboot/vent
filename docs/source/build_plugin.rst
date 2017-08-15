@@ -1,3 +1,5 @@
+.. _customeventplugin-label:
+
 Custom Vent Plugins
 ############################
 

@@ -56,13 +56,16 @@ Getting Vent set up is quick and easy.
 **4.** Now we have a plugin that can process files with the extension ``.pcap``.
 
    1. Now, at the Vent main menu, look for the field ``File Drop``. This is the
-      folder that Vent watches for new files. By default, the path is
-      ``/tmp/user_name/vent_files``
+      folder that Vent watches for new files.
    2. Move or copy a ``.pcap`` file into the path. Vent will recognize this new file
       and start ``tcpdump_hex_parser``. Depending on the size of the ``.pcap``
-      file, it could take anywhere from a few seconds to minutes.
+      file, it could take anywhere from a few seconds to minutes. You should see
+      the ``jobs running`` counter increase by one and, after the plugin is
+      finished running, the ``completed jobs`` counter will increase by one.
 
 Congrats! Vent is setup and has successfully recognized the pcap file and ran a
-plugin that specifically deals with pcaps.
+plugin that specifically deals with pcaps. You can now remove the
+``tcpdump_hex_parser`` via the ``Plugins`` sub-menu and install your own
+:ref:`customventplugin-label`
 
 
