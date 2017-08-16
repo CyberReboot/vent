@@ -66,8 +66,8 @@ same commit so that a revert would remove all traces of the feature or fix.
 Commits that fix or close an issue should include a reference like ``Closes #XXX``
 or ``Fixes #XXX``, which will automatically close the issue when merged.
 
-Add your name to the AUTHORS file, but make sure the list is sorted and your
-name and email address match your git configuration. The AUTHORS file is
+Add your name to the ``AUTHORS`` file, but make sure the list is sorted and your
+name and email address match your git configuration. The ``AUTHORS`` file is
 regenerated occasionally from the git commit history, so a mismatch may result
 in your changes being overwritten.
 
@@ -99,8 +99,8 @@ What are a maintainer's responsibility?
 
 It is every maintainer's responsibility to:
 
-* 1) Deliver prompt feedback and decisions on pull requests.
-* 2) Be available to anyone with questions, bug reports, criticism etc. on Vent.
+  - 1) Deliver prompt feedback and decisions on pull requests.
+  - 2) Be available to anyone with questions, bug reports, criticism etc. on Vent.
 
 How is this process changed?
 ****************************
