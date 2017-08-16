@@ -107,5 +107,6 @@ How is this process changed?
 
 Just like everything else: by making a pull request :)
 
-*Derivative work from `Docker`_*
-.. _Docker: https://github.com/docker/docker/blob/master/CONTRIBUTING.md)
+Derivative work from `Docker`_
+
+.. _Docker: https://github.com/docker/docker/blob/master/CONTRIBUTING.md
