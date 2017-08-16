@@ -59,6 +59,6 @@ Is it a custom plugin that's causing the problem?
 If there's no obvious error messages within ``vent.log``, let's check any
 added plugin tools and their containers.
 
-Run the command ``docker logs vent_syslog_container_id``.
+Run the command ``docker logs cyberreboot-vent-syslog-master``.
 This will return all information about all plugin containers and any
 information regarding the error should be displayed here.

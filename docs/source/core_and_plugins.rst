@@ -7,24 +7,27 @@ There are currently nine core tools that Vent uses.
 
 elasticsearch
 =============
-Indexes text for full text search. Enables comprehensive text search of syslog.
+Enables comprehensive text search of syslog.
 
 file_drop
 =========
 Watches the specified directory for any new files. If a new file is added, it is
 added to a ``redis`` queue.
 
+.. _networktap-label:
+
 network_tap
 ===========
-A container that will watch a specific nic using **tcpdump** to output pcap
+A container that will watch a specific nic using ``tcpdump`` to output pcap
 files based on what was monitored. Has an interface located in ``System
-Commands -> Network Tap Interface``. The interface has five available actions:
+Commands -> Network Tap Interface`` in the main action menu.
+The interface has five available actions:
 
 - **Create**: Create a new container with a specified nic, tag, interval (in *seconds*),
   filter, and iterations. The container is also automatically started on
   creation.
-- **Start**: Start a network tap container. Uses the settings specified in ``create``
-  to run.
+- **Start**: Start a network tap container if it is exited. Will run with the same
+  options given to the container in ``create``.
 - **Stop**: Stop a network tap container.
 - **List**: Show all network tap containers. Will return container's ID, if the container is
   running or not, and the tag provided in ``create``.
@@ -33,21 +36,21 @@ Commands -> Network Tap Interface``. The interface has five available actions:
 
 rabbitmq
 ========
-Formats messages received from syslog and sends the formatted messages to
-rmq_es_connector.
+Formats messages received from syslog and sends them to rmq_es_connector.
 
 redis
 =====
-The queuing system that ``file drop`` sends to and ``rq_worker`` pulls out of.
+A key/value store that is used for the queuing system that ``file drop`` sends to
+and ``rq_worker`` pulls out of.
 
 rmq_es_connector
 ================
-A gateway between ``rabbitmq`` and ``elasticsearch``. This way, the message
-formatting system does not have to be ``rabbitmq``.
+A gateway between the messaging system and ``elasticsearch``. This way, the message
+formatting system is not locked to ``rabbitmq``.
 
 rq_worker
 =========
-The tool that takes files from the ``redis`` queue and runs the plugins that deal with
+The tool that takes files from the ``redis`` queue and runs plugins that deal with
 those file extensions.
 
 rq_dashboard
@@ -56,8 +59,12 @@ Management console to look at rq_worker's active queue.
 
 syslog
 ======
-Standard logging system that adheres to the syslog standard. All containers send
-their information to syslog.
+Standard logging system that adheres to the syslog standard. All tool containers send
+their information to syslog. If there's some unexpected outputs or a container
+isn't running properly, all information will be in this tool's container.
+
+Access this tool's container with the command:
+``docker logs cyberreboot-vent-syslog-master``
 
 |
 
@@ -93,8 +100,8 @@ Read more about :ref:`venttemplate-label`
 Disable core/plugin tools
 =========================
 Remove chosen tools from menus. For example, let's say there were ten tools but only
-five were needed. Disabling the five unneeded tools would stop the tools from
-appearing on the menus.
+five were needed. Disabling the five unneeded tools would stop those tools from
+appearing on the other menus.
 
 Enable core/plugin tools
 ========================
@@ -112,14 +119,12 @@ deleted. The tool must be added again if it is to be used.
 
 Start core/plugin tools
 =======================
-Start the tools' respective containers. Similar to executing the command
-``docker run -it tool_id``.
+Start the tools' respective containers.
 
 Stop core/plugin tools
 ======================
-Stop the tools' respective containers. Similar to executing the command
-``docker stop tool_id``.
+Stop the tools' respective containers.
 
 Update core/plugin tools
 ========================
-Pulls the latest commit of the tool and builds it.
+Pulls the latest commit of the tool from its repo and builds it.

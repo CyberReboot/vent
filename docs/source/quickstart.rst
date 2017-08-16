@@ -63,9 +63,17 @@ Getting Vent set up is quick and easy.
       the ``jobs running`` counter increase by one and, after the plugin is
       finished running, the ``completed jobs`` counter will increase by one.
 
+**5.** Let's look at the results of the plugin using elasticsearch.
+
+   1. From the action menu, select ``Services Running`` and select ``Core
+      Services``.
+   2. Copy the address next to ``elasticsearch`` into the web browser of choice.
+   3. On the main page, there should be a section with ``pcap`` with the results
+      of the plugin.
+
 Congrats! Vent is setup and has successfully recognized the pcap file and ran a
 plugin that specifically deals with pcaps. You can now remove the
-``tcpdump_hex_parser`` via the ``Plugins`` sub-menu and install your own
+``tcpdump_hex_parser`` via the ``Plugins`` sub-menu and create and install your own
 :ref:`customventplugin-label`
 
 

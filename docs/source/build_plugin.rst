@@ -28,7 +28,7 @@ Read the `Docker python api parameters`_ for possible options.
 
 gpu
 ---
-Vent plugins can run on solely on GPU if specified. This section sets the
+Vent plugins can run on solely on GPU if specified (extra ``on``). This section sets the
 settings for GPU processing. At the moment, **only NVIDIA GPUs are supported**.
 
 *dedicated*
@@ -59,36 +59,37 @@ All metadata about the custom plugin goes under this section.
 service
 -------
 *uri_prefix*
-  text goes here
+  Services a tool exposes that need a more specific URL
 
 
 settings
 --------
-Some description for settings here
+Options that specify how the plugin will run.
 
 *ext_types*
   Whatever this option is set to is the file extension that Vent will run this plugin on.
   For example, ``ext_types = jpg`` means Vent will run this plugin if a ``.jpg``
   file is placed in ``File Drop``.
 
-*mime_types*
-  text goes here
-
 *priority*
-  text goes here
+  Set the order in which tools get started. If a tool belongs to more than one
+  group, it's possible to specify priorities for each group. The priorities are
+  comma separated and in the same order that the groups are specified.
 
 *process_base*
-  text goes here
+  Files put in ``File Drop`` by a user or process outside of Vent will get
+  processed. This option is set to ``yes`` by default.
 
 *process_from_tool*
-  text goes here
+  Allows to specify if the tool should process files that are outputs from
+  other tools specifically.
 
 |
 
 Example Custom Vent Plugin
 ==========================
 Let's create a simple Vent plugin that uses ``cat`` to output the contents of a
-``.example`` file. Let's create a ``vent_plugin_example`` and enter it.
+``.example`` file. Let's create a ``vent_plugin_example`` directory and enter it.
 
 First, let's create a simple ``bash`` script that will ``cat`` the contents of a
 file.
@@ -96,7 +97,7 @@ file.
 .. code-block:: bash
    :caption: cat.sh
 
-   #! bin/bash
+   #!bin/bash
    cat $1
 
 
@@ -122,7 +123,6 @@ Lastly, a ``vent.template`` file is needed so Vent knows how to use the plugin.
 
    [settings]
    ext_types = example
-   process_base = yes
 
 
 We need to add this to either a git repo or the docker hub. Let's use git.
@@ -148,12 +148,8 @@ seconds, the job counter on the main menu of Vent will show that one job is
 running, and it'll finish soon after and show one completed job.
 
 To check that the plugin worked and outputted ``qwerty``, let's check the syslog
-container using the command ``docker logs vent_syslog_id > log_file``. Now
-search log_file for ``qwerty``. It should look something like this:
-
-::
-
-    date/time example[some_num]: qwerty
+container using the command ``docker logs cyberreboot-vent-syslog-master | grep
+qwerty``.
 
 If you see this line, congrats! You have successfully built your first Vent
 plugin.
@@ -161,6 +157,6 @@ plugin.
 If the plugin did not function correctly, try rereading the tutorial or check
 the :ref:`troubleshooting-label` guide.
 
-Other examples can be found at `CyberReboot/vent-plugins`_.
+Other examples of custom plugins can be found at `CyberReboot/vent-plugins`_.
 
 .. _CyberReboot/vent-plugins: https://github.com/CyberReboot/vent-plugins
