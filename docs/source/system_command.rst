@@ -18,6 +18,10 @@ Detect GPUs
 Detect GPU devices on the current machine running Vent. Currently works **with
 NVIDIA GPUs only** .
 
+Enable Swarm Mode
+*****************
+To Be Implemented.
+
 Factory reset
 *************
 Remove all Vent related images and containers. Removes the ``User Data``
@@ -26,6 +30,10 @@ directory as well. Please back up any necessary information before activating th
 Restore
 *******
 Restores a backup.
+
+Upgrade
+*******
+To Be Implemented
 
 Network Tap Interface
 *********************

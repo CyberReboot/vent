@@ -89,7 +89,7 @@ How can I become a maintainer?
 ******************************
 
   - Step 1: learn the code inside out
-  - Step 2: make yourself useful by contributing code, bugfixes, support etc.
+  - Step 2: make yourself useful by contributing code, bug fixes, support etc.
 
 Don't forget: being a maintainer is a time investment. Make sure you will have time to make yourself available.
 You don't have to be a maintainer to make a difference on the project!
@@ -100,7 +100,7 @@ What are a maintainer's responsibility?
 It is every maintainer's responsibility to:
 
   - 1) Deliver prompt feedback and decisions on pull requests.
-  - 2) Be available to anyone with questions, bug reports, criticism etc. on Vent.
+  - 2) Be available to anyone with questions, bug reports, criticism, etc. regarding Vent.
 
 How is this process changed?
 ****************************
