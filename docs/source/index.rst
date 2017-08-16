@@ -50,33 +50,38 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 .. _details here: https://github.com/CyberReboot/vent/blob/master/CONTRIBUTING.md
 .. _this: https://media.readthedocs.org/pdf/npyscreen/latest/npyscreen.pdf
 
+|
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Api Functions
+  :maxdepth: 2
+  :caption: Vent Basics
 
-   vent.api
+  quickstart
 
+  core_and_plugins
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Core
+  system_command
 
-   vent.core
+  build_plugin
 
+  troubleshoot
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Helper Functions
+  contributing
 
-   vent.helpers
-
+  new_release
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Menu Functions
+  :maxdepth: 1
+  :caption: Vent Code
 
-   vent.menus
+  vent.api
+
+  vent.core
+
+  vent.helpers
+
+  vent.menus
+
 
 Indices and tables
 ==================

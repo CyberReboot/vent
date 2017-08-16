@@ -14,9 +14,9 @@ from vent.menus.tutorial_forms import TutorialBackgroundForm
 from vent.menus.tutorial_forms import TutorialBuildingCoresForm
 from vent.menus.tutorial_forms import TutorialGettingSetupForm
 from vent.menus.tutorial_forms import TutorialIntroForm
-from vent.menus.tutorial_forms import TutorialSettingUpServicesForm
 from vent.menus.tutorial_forms import TutorialStartingCoresForm
 from vent.menus.tutorial_forms import TutorialTerminologyForm
+from vent.menus.tutorial_forms import TutorialTroubleshootingForm
 
 
 class VentApp(npyscreen.NPSAppManaged):
@@ -79,9 +79,9 @@ class VentApp(npyscreen.NPSAppManaged):
                      TutorialAddingFilesForm,
                      name="Files" + quit_s,
                      color="DANGER")
-        self.addForm("TUTORIALSETTINGUPSERVICES",
-                     TutorialSettingUpServicesForm,
-                     name="Services" + quit_s,
+        self.addForm("TUTORIALTROUBLESHOOTING",
+                     TutorialTroubleshootingForm,
+                     name="Troubleshooting" + quit_s,
                      color="DANGER")
 
     def change_form(self, name):
