@@ -44,7 +44,7 @@ Get the latest clone of Vent from https://github.com/CyberReboot/vent
 
    - Attach the ISO and publish the release
 
-7. Finally, change the version number to the next version number with a ``dev``
+8. Finally, change the version number to the next version number with a ``dev``
    tag.
    Eg: ``0.4.4.dev``
 
