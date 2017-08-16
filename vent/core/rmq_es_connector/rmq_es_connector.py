@@ -52,6 +52,7 @@ class RmqEs():
                 wait = False
                 print("connected to rabbitmq...")
             except Exception as e:  # pragma: no cover
+                print(str(e))
                 print("waiting for connection to rabbitmq..." + str(e))
                 time.sleep(2)
                 wait = True

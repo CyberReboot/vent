@@ -82,6 +82,18 @@ clean:
 	pip2.7 uninstall -y vent || true
 
 test: build
-	py.test -s -v --cov=. -k 'not vendor' --cov-report term-missing
+	pytest -l -s -v --cov=. -k 'not vendor' --cov-report term-missing
+
+test-local: test-local-clean clean
+	docker build -t vent-test -f Dockerfile.test .
+	docker run -d --name vent-test-redis redis:alpine
+	docker run -d --name vent-test-rabbitmq rabbitmq:3-management
+	docker run -d --name vent-test-elasticsearch elasticsearch:2-alpine
+	docker run -it -v /var/run/docker.sock:/var/run/docker.sock:rw --link vent-test-redis:redis --link vent-test-rabbitmq:localhost --link vent-test-elasticsearch:localhost vent-test
+
+test-local-clean:
+	docker rm -f vent-test-redis || true
+	docker rm -f vent-test-rabbitmq || true
+	docker rm -f vent-test-elasticsearch || true
 
 .PHONY: build test
