@@ -485,7 +485,8 @@ class Action:
                                                build=True,
                                                branch=branch,
                                                version=version)
-            template.write_config()
+            if len(s) > 0:
+                template.write_config()
         except Exception as e:  # pragma: no cover
             self.logger.error("build failed with error: " + str(e))
             status = (False, e)
@@ -834,6 +835,7 @@ class Action:
         """
         self.logger.info("Starting: get_configure")
         constraints = locals()
+        del constraints['main_cfg']
         status = (True, None)
         template_dict = {}
         return_str = ""
