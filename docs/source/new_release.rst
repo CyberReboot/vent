@@ -40,9 +40,7 @@ Get the latest clone of Vent from https://github.com/CyberReboot/vent
 
 7. Create a new github release. Tag and release title are the version number.
    Since we already added changes to our ``CHANGELOG.md``, there's no need to
-   rewrite all that information so leave it blank.
-
-   - Attach the ISO and publish the release
+   rewrite all that information so leave it blank. Attach the ISO and publish the release
 
 8. Finally, change the version number to the next version number with a ``dev``
    tag.
