@@ -35,6 +35,7 @@ def test_menu():
     CTRL_Q = '^Q'
     CTRL_T = '^T'
     CTRL_X = '^X'
+    CTRL_V = '^V'
     ENTER = curses.ascii.CR
     TAB = curses.ascii.TAB
     LEFT = curses.KEY_LEFT
@@ -54,27 +55,43 @@ def test_menu():
     run_menu([ENTER, CTRL_T, RIGHT, ENTER])
 
     # go through the core tools menus
+    # install
     run_menu([ENTER, CTRL_X, 'c', 'i', ENTER])
+    # build - ok
     run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
+    # build - cancel
     run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               ENTER])
+    # build - quit back to main
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_Q])
+    # build - toggle to main
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
+    # configure - cancel
     run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
               LEFT, ENTER])
+    # configure - ok
     run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
               TAB, ENTER, ENTER, ENTER])
+    # clean - ok
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
+    # clean - cancel
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               ENTER])
+    # clean - quit back to main
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_Q])
+    # clean - toggle to main
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_T])
+    # inventory - quit back to main
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_Q])
+    # inventory - toggle to main
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
+    # inventory - toggle group view
+    run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_V, CTRL_V, CTRL_V, CTRL_V, CTRL_V,
+              CTRL_V, CTRL_V, CTRL_V, CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
