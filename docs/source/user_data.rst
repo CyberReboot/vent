@@ -36,7 +36,8 @@ main
 
         service_uri = 5.5.5.5
 
-    under the main section, the URL for ``Elasticsearch`` is now 5.5.5.5:3772.
+    under the main section, the URL for ``Elasticsearch`` is now
+    ``5.5.5.5:3772``.
 
 network-mapping
 ^^^^^^^^^^^^^^^
@@ -77,7 +78,7 @@ If a port is not specified, then it defaults to core tool's default port
 groups
 ^^^^^^
   *start_order*
-    The order in which the tool groups are started in. For example::
+    The order in which the tool groups are started in csv format. For example::
 
         core,pcap,replay
 
