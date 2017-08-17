@@ -98,7 +98,10 @@ def test_menu():
               ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
+    # services running - core services
     run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
+    # services running - external services
+    run_menu([ENTER, CTRL_X, 's', 'e', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
@@ -148,6 +151,7 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_T])
+    # services running - plugin services
     run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'p', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'p', ENTER])
@@ -168,12 +172,19 @@ def test_menu():
 
     # go through the services running menus
     run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
+    run_menu([ENTER, CTRL_X, 's', 'e', CTRL_T])
     run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
 
     # go through the system commands menus
     # causes .coverage file to not exist
     # run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'r', TAB, RIGHT,
     #           ENTER, ENTER, ENTER])
+    # system commands - backup
+    run_menu([ENTER, CTRL_X, 'y', 'b', ENTER, ENTER])
+    # system commands - configure - cancel
+    run_menu([ENTER, CTRL_X, 'y', 'c', TAB, ENTER, ENTER, ENTER])
+    # system commands - configure - ok
+    run_menu([ENTER, CTRL_X, 'y', 'c', TAB, TAB, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'g', ENTER, ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 's'])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'u'])
