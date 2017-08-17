@@ -58,7 +58,7 @@ class PathDirs:
             default_file_dir = "/tmp/vent_files"
         status = self.ensure_dir(default_file_dir)
         config = Template(template=self.cfg_file)
-        sections = {'main': {'files': default_file_dir},
+        sections = {'main': {'files': default_file_dir, 'plugin-dev': 'False'},
                     'network-mapping': {},
                     'nvidia-docker-plugin': {'port': '3476'}}
         for s in sections:

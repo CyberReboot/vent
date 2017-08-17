@@ -23,6 +23,7 @@ class PluginHelper:
         self.manifest = join(self.path_dirs.meta_dir,
                              "plugin_manifest.cfg")
         self.logger = Logger(__name__)
+        self.vent_config = Template(template=self.path_dirs.cfg_file)
 
     def constraint_options(self, constraint_dict, options):
         """ Return result of constraints and options against a template """
@@ -86,10 +87,16 @@ class PluginHelper:
             status = check_output(shlex.split("git pull"),
                                   stderr=STDOUT,
                                   close_fds=True)
-            status = check_output(shlex.split("git reset --hard " +
-                                              version),
-                                  stderr=STDOUT,
-                                  close_fds=True)
+            # hard reset ONLY IF plugin-dev exists && toggled to OFF/no/0/false
+            dev_mode = self.vent_config.option('main', 'plugin-dev')
+            if (dev_mode[0] and not dev_mode[1]):
+                self.logger.info("dev mode: {}; RESET".format(dev_mode[1]))
+                status = check_output(shlex.split("git reset --hard " +
+                                                  version),
+                                      stderr=STDOUT,
+                                      close_fds=True)
+            else:
+                self.logger.info("dev mode: {}; NO RESET".format(dev_mode[1]))
             response = (True, status)
         except Exception as e:  # pragma: no cover
             self.logger.error("checkout failed with error: " + str(e))
@@ -329,8 +336,7 @@ class PluginHelper:
 
             # check for log_config settings in external-services
             externally_configured = False
-            vent_config = Template(self.path_dirs.cfg_file)
-            for ext_tool in vent_config.section('external-services')[1]:
+            for ext_tool in self.vent_config.section('external-services')[1]:
                 if ext_tool[0].lower() == 'syslog':
                     try:
                         log_dict = json.loads(ext_tool[1])
@@ -372,8 +378,7 @@ class PluginHelper:
                     tool_d[c_name]['restart_policy'] = {"Name": "always"}
                 # map network names to environment variables
                 if 'network' in s[section]['groups']:
-                    vent_config = Template(template=self.path_dirs.cfg_file)
-                    nic_mappings = vent_config.section('network-mapping')
+                    nic_mappings = self.vent_config.section('network-mapping')
                     nics = ''
                     if nic_mappings[0]:
                         for nic in nic_mappings[1]:
@@ -448,8 +453,7 @@ class PluginHelper:
                        'image_name',
                        'branch',
                        'version']
-            vent_config = Template(template=self.path_dirs.cfg_file)
-            files = vent_config.option('main', 'files')
+            files = self.vent_config.option('main', 'files')
             files = (files[0], expanduser(files[1]))
             s, _ = self.constraint_options(args, options)
             status, tool_d = self.start_sections(s,
@@ -469,9 +473,9 @@ class PluginHelper:
                         # necessary, by default configure local services too
                         configure_local = True
                         ext = 'external-services'
-                        if link in vent_config.options(ext)[1]:
+                        if link in self.vent_config.options(ext)[1]:
                             try:
-                                lconf = json.loads(vent_config.option(ext,
+                                lconf = json.loads(self.vent_config.option(ext,
                                                                       link)[1])
                                 if ('locally_active' not in lconf or
                                         lconf['locally_active'] == 'no'):
@@ -547,7 +551,7 @@ class PluginHelper:
                     # tools are capitalized in vent.cfg, so make them lowercase
                     # for comparison
                     ext = 'external-services'
-                    external_tools = vent_config.section(ext)[1]
+                    external_tools = self.vent_config.section(ext)[1]
                     name = tool_d[c]['labels']['vent.name']
                     for tool in external_tools:
                         if name == tool[0].lower():
@@ -646,15 +650,14 @@ class PluginHelper:
                     #      otherwise queue it up until it's
                     #      available
                     # !! TODO check for device settings in vent.template
-                    vent_config = Template(template=self.path_dirs.cfg_file)
                     port = ''
                     host = ''
-                    result = vent_config.option('nvidia-docker-plugin', 'port')
+                    result = self.vent_config.option('nvidia-docker-plugin', 'port')
                     if result[0]:
                         port = result[1]
                     else:
                         port = '3476'
-                    result = vent_config.option('nvidia-docker-plugin', 'host')
+                    result = self.vent_config.option('nvidia-docker-plugin', 'host')
                     if result[0]:
                         host = result[1]
                     else:

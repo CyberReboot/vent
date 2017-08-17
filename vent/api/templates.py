@@ -42,7 +42,10 @@ class Template:
         """ Returns the value of the option """
         if self.config.has_section(section):
             if self.config.has_option(section, option):
-                return (True, self.config.get(section, option))
+                val = self.config.get(section, option)
+                if val in ['True','False','true','false','yes','no', '0', '1']:
+                    return (True, self.config.getboolean(section, option))
+                return (True, val)
             return (False, "Option: " + option + " does not exist")
         return (False, "Section: " + section + " does not exist")
 
