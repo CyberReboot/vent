@@ -20,8 +20,8 @@ Listed here are sections and their various options.
 
 Look below for examples of a ``vent.template`` file.
 
-docker
-------
+-docker
+-------
 All possible options and their explanations are the same as the parameters for the python `Docker container run command`_.
 
 For example, if we wanted the plugin's container to use the host network stack,
@@ -33,8 +33,8 @@ the following would be written in the ``vent.template`` file::
 .. _Docker container run command: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.run
 
 
-gpu
----
+-gpu
+----
 Vent plugins can run on solely on GPU if specified (extra ``on``). This section sets the
 settings for GPU processing. At the moment, **only NVIDIA GPUs are supported**.
 
@@ -52,8 +52,8 @@ settings for GPU processing. At the moment, **only NVIDIA GPUs are supported**.
   The amount of RAM(in MB) a plugin requires.
 
 
-info
-----
+-info
+-----
 All metadata about the custom plugin goes under this section.
 
 *groups*
@@ -63,14 +63,14 @@ All metadata about the custom plugin goes under this section.
   the plugin's name.
 
 
-service
--------
+-service
+--------
 *uri_prefix*
   Services a tool exposes that need a more specific URL
 
 
-settings
---------
+-settings
+---------
 Options that specify how the plugin will run.
 
 *ext_types*

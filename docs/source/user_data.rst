@@ -22,15 +22,15 @@ vent.cfg
 --------
 A configuration file used to customize Vent and its processes.
 
-main
-^^^^
+-main
+^^^^^
   *files*
     The directory of ``File Drop``. For example, if ``files = /tmp/vent_files``,
     Vent will monitor for any new files in that directory.
 
   *service_uri*
     Override the default POST name for all services. So, let's say Vent has
-    ``Elasticsearch`` at URL 0.0.0.0:3772.
+    ``Elasticsearch`` at URL ``0.0.0.0:3772``.
 
     By adding::
 
@@ -39,8 +39,8 @@ main
     under the main section, the URL for ``Elasticsearch`` is now
     ``5.5.5.5:3772``.
 
-network-mapping
-^^^^^^^^^^^^^^^
+-network-mapping
+^^^^^^^^^^^^^^^^
   *nic_name*
     The option here can be whatever is desired. The value is the nic that the
     plugin tool ``replay_pcap`` will replay to.
@@ -55,16 +55,16 @@ network-mapping
     Currently, only one nic at a time is supported.
 
 
-nvidia-docker-plugin
-^^^^^^^^^^^^^^^^^^^^
+-nvidia-docker-plugin
+^^^^^^^^^^^^^^^^^^^^^
   *port*
     Override port for the Nvidia docker plugin
 
   *host*
     Override the host for the Nvidia docker plugin
 
-external-services
-^^^^^^^^^^^^^^^^^
+-external-services
+^^^^^^^^^^^^^^^^^^
 Name of tool we want Vent to use externally rather than internally.
 For example, if there is already an ``Elasticsearch`` service that a user wants
 Vent to use rather than Vent's internal ``Elasticsearch``, we could write::
@@ -75,8 +75,8 @@ Vent to use rather than Vent's internal ``Elasticsearch``, we could write::
 
 If a port is not specified, then it defaults to core tool's default port
 
-groups
-^^^^^^
+-groups
+^^^^^^^
   *start_order*
     The order in which the tool groups are started in csv format. For example::
 
