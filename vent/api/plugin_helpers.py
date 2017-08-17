@@ -354,7 +354,7 @@ class PluginHelper:
                                              'tag': 'plugin'}
                             log_config['config'].update(syslog_config)
                             externally_configured = True
-                    except Exception as e:
+                    except Exception as e:  # pragma: no cover
                         self.logger.error("external settings for log_config"
                                           " couldn't be stored because: " +
                                           str(e))
@@ -492,7 +492,7 @@ class PluginHelper:
                                     # longer connecting to local container
                                     links_to_delete.add(link)
                                     configure_local = False
-                            except Exception as e:
+                            except Exception as e:  # pragma: no cover
                                 self.logger.error("couldn't load external"
                                                   " settings because: " +
                                                   str(e))
@@ -556,7 +556,7 @@ class PluginHelper:
                                 if ('locally_active' in tool_config and
                                         tool_config['locally_active'] == 'no'):
                                     del tool_d[c]
-                            except Exception as e:
+                            except Exception as e:  # pragma: no cover
                                 self.logger.warn("Locally running container " +
                                                  name + " may be redundant")
 
