@@ -193,6 +193,10 @@ def test_menu():
               ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB,
               TAB, ENTER, ENTER, ENTER])
+    # system commands - network tap interface - create
+    run_menu([ENTER, CTRL_X, 'y', 'n', 'c', 'lo', TAB, 'foo', TAB, '5', TAB,
+              TAB, 1, TAB, TAB, ENTER, ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
 
     # go through the tutorials menus
     run_menu([ENTER, CTRL_X, 't', 'v', 'b', RIGHT, ENTER])
