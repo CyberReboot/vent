@@ -9,7 +9,7 @@ Something not working as expected within Vent? Not a problem!
 Let's first get some basic possible errors out of the way.
 
 1. Is Docker installed and is the daemon running? Vent uses Docker heavily so
-   it is necessary to have the Docker instanned and the daemon running.
+   it is necessary to have the Docker installed and the daemon running.
 2. Is this the latest version of Vent? Ways to get the latest Vent
    version:
 
