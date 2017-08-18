@@ -642,10 +642,6 @@ class PluginHelper:
                 failed = False
                 if (gpu in tool_d[container]['labels'] and
                    tool_d[container]['labels'][gpu] == 'yes'):
-                    # TODO check for availability of gpu(s),
-                    #      otherwise queue it up until it's
-                    #      available
-                    # !! TODO check for device settings in vent.template
                     vent_config = Template(template=self.path_dirs.cfg_file)
                     port = ''
                     host = ''
