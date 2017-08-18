@@ -86,6 +86,20 @@ def test_start():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+def test_disable():
+    """ Test the disable function """
+    instance = Action()
+    status = instance.disable(name='elasticsearch')
+    assert isinstance(status, tuple)
+    assert status[0]
+
+def test_enable():
+    """ Test the enable function """
+    instance = Action()
+    status = instance.enable(name='elasticsearch')
+    assert isinstance(status, tuple)
+    assert status[0]
+
 def test_update():
     """ Test the update function """
     instance = Action()
