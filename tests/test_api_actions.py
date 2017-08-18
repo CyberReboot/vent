@@ -90,7 +90,8 @@ def test_disable():
     """ Test the disable function """
     instance = Action()
     status = instance.add('https://github.com/cyberreboot/vent',
-                          branch='master')
+                          branch='master',
+                          tools=[('vent/core/elasticsearch', '')])
     assert isinstance(status, tuple)
     assert status[0]
     status = instance.disable(name='elasticsearch')
@@ -101,7 +102,8 @@ def test_enable():
     """ Test the enable function """
     instance = Action()
     status = instance.add('https://github.com/cyberreboot/vent',
-                          branch='master')
+                          branch='master',
+                          tools=[('vent/core/elasticsearch', '')])
     assert isinstance(status, tuple)
     assert status[0]
     status = instance.enable(name='elasticsearch')
@@ -112,7 +114,8 @@ def test_update():
     """ Test the update function """
     instance = Action()
     status = instance.add('https://github.com/cyberreboot/vent',
-                          branch='master')
+                          branch='master',
+                          tools=[('vent/core/elasticsearch', '')])
     assert isinstance(status, tuple)
     assert status[0]
     status = instance.update(name='elasticsearch', branch='master')
