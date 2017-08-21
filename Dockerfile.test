@@ -1,20 +1,31 @@
 FROM elasticsearch:2-alpine
 FROM rabbitmq:3-management
 FROM redis:alpine
-FROM alpine:3.6
+FROM ubuntu:latest
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 
-RUN apk add --update \
-    docker \
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
     git \
     make \
     python \
-    py2-pip \
-    && rm -rf /var/cache/apk/*
+    python-pip \
+    software-properties-common
+
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+
+RUN apt-get update && apt-get install -y docker-ce
 
 ADD . /vent
 WORKDIR /vent
 RUN pip install -r tests/requirements.txt
+RUN python2.7 setup.py install
 
-ENTRYPOINT ["make"]
-CMD ["test"]
+ENTRYPOINT ["pytest"]
+CMD ["-l", "-s", "-v", "--cov=.", "-k", "'not vendor'", "--cov-report", "term-missing"]

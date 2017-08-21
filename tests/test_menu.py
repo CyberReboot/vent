@@ -35,6 +35,7 @@ def test_menu():
     CTRL_Q = '^Q'
     CTRL_T = '^T'
     CTRL_X = '^X'
+    CTRL_V = '^V'
     ENTER = curses.ascii.CR
     TAB = curses.ascii.TAB
     LEFT = curses.KEY_LEFT
@@ -54,34 +55,53 @@ def test_menu():
     run_menu([ENTER, CTRL_T, RIGHT, ENTER])
 
     # go through the core tools menus
+    # install
     run_menu([ENTER, CTRL_X, 'c', 'i', ENTER])
+    # build - ok
     run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
+    # build - cancel
     run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               ENTER])
+    # build - quit back to main
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_Q])
+    # build - toggle to main
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
+    # configure - cancel
     run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
               LEFT, ENTER])
+    # configure - ok
     run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
               TAB, ENTER, ENTER, ENTER])
+    # clean - ok
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
+    # clean - cancel
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               ENTER])
+    # clean - quit back to main
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_Q])
+    # clean - toggle to main
     run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_T])
+    # inventory - quit back to main
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_Q])
+    # inventory - toggle to main
     run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
+    # inventory - toggle group view
+    run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_V, CTRL_V, CTRL_V, CTRL_V, CTRL_V,
+              CTRL_V, CTRL_V, CTRL_V, CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               ENTER])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
+    # services running - core services
     run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
+    # services running - external services
+    run_menu([ENTER, CTRL_X, 's', 'e', CTRL_T])
     run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
@@ -131,6 +151,7 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_T])
+    # services running - plugin services
     run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'p', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'p', ENTER])
@@ -151,12 +172,19 @@ def test_menu():
 
     # go through the services running menus
     run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
+    run_menu([ENTER, CTRL_X, 's', 'e', CTRL_T])
     run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
 
     # go through the system commands menus
     # causes .coverage file to not exist
     # run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'r', TAB, RIGHT,
     #           ENTER, ENTER, ENTER])
+    # system commands - backup
+    run_menu([ENTER, CTRL_X, 'y', 'b', ENTER, ENTER])
+    # system commands - configure - cancel
+    run_menu([ENTER, CTRL_X, 'y', 'c', TAB, ENTER, ENTER, ENTER])
+    # system commands - configure - ok
+    run_menu([ENTER, CTRL_X, 'y', 'c', TAB, TAB, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'g', ENTER, ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 's'])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 'u'])
@@ -165,6 +193,10 @@ def test_menu():
               ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB,
               TAB, ENTER, ENTER, ENTER])
+    # system commands - network tap interface - create
+    run_menu([ENTER, CTRL_X, 'y', 'n', 'c', 'lo', TAB, 'foo', TAB, '5', TAB,
+              TAB, '1', TAB, TAB, ENTER, ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
+              ENTER])
 
     # go through the tutorials menus
     run_menu([ENTER, CTRL_X, 't', 'v', 'b', RIGHT, ENTER])

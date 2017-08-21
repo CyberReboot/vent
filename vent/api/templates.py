@@ -65,23 +65,19 @@ class Template:
         Creates an option for a section. If the section does
         not exist, it will create the section.
         """
-        # if duplicate section, and return error message
-        message = self.add_section(section)
-        if not message[0]:
-            return message
-        # check if section exists
-        if self.config.has_section(section):
-            if not self.config.has_option(section, option):
-                # if a value was provided, set to value
-                if value:
-                    self.config.set(section, option, value)
-                else:
-                    self.config.set(section, option)
-                return (True, self.config.options(section))
-            return (False, "Option: " + option + " already exists in " +
-                    section)
-        return (False, "Section: " + section +
-                " does not exist. Did you want to force it?")
+        # check if section exists; create if not
+        if not self.config.has_section(section):
+            message = self.add_section(section)
+            if not message[0]:
+                return message
+
+        if not self.config.has_option(section, option):
+            if value:
+                self.config.set(section, option, value)
+            else:
+                self.config.set(section, option)
+            return(True, self.config.options(section))
+        return(False, "Option: {} already exists @ {}".format(option, section))
 
     @ErrorHandler
     def del_section(self, section):

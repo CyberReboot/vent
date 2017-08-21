@@ -86,12 +86,51 @@ def test_start():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+def test_disable():
+    """ Test the disable function """
+    instance = Action()
+    status = instance.add('https://github.com/cyberreboot/vent',
+                          branch='master',
+                          tools=[('vent/core/elasticsearch', '')])
+    assert isinstance(status, tuple)
+    assert status[0]
+    status = instance.disable(name='elasticsearch')
+    assert isinstance(status, tuple)
+    assert status[0]
+
+def test_enable():
+    """ Test the enable function """
+    instance = Action()
+    status = instance.add('https://github.com/cyberreboot/vent',
+                          branch='master',
+                          tools=[('vent/core/elasticsearch', '')])
+    assert isinstance(status, tuple)
+    assert status[0]
+    status = instance.enable(name='elasticsearch')
+    assert isinstance(status, tuple)
+    assert status[0]
+
+def test_update():
+    """ Test the update function """
+    instance = Action()
+    status = instance.add('https://github.com/cyberreboot/vent',
+                          branch='master',
+                          tools=[('vent/core/elasticsearch', '')])
+    assert isinstance(status, tuple)
+    assert status[0]
+    status = instance.update(name='elasticsearch', branch='master')
+    assert isinstance(status, tuple)
+    assert status[0]
+
 def test_restart_tools():
     instance = Action()
     status = instance.restart_tools(main_cfg=True, old_val='', new_val='')
     assert isinstance(status, tuple)
     assert status[0]
     status = instance.restart_tools(main_cfg=True, old_val='junk', new_val='[ext]')
+    assert isinstance(status, tuple)
+    assert status[0]
+    status = instance.restart_tools()
     assert isinstance(status, tuple)
     assert status[0]
 
@@ -105,12 +144,6 @@ def test_clean():
     """ Test the clean function """
     instance = Action()
     status = instance.clean()
-    assert isinstance(status, tuple)
-
-def test_update():
-    """ Test the update function """
-    instance = Action()
-    status = instance.update(name='elasticsearch', branch='master')
     assert isinstance(status, tuple)
 
 def test_backup():
