@@ -11,7 +11,8 @@ def gpu_queue(options):
     status = (False, None)
 
     print("gpu queue", str(options))
-    print("gpu queue", str(GpuUsage()))
+    print("gpu queue", str(GpuUsage(base_dir="/vent/",
+                                    meta_dir="/vent")))
 
     options = json.loads(options)
     configs = options['configs']
@@ -60,7 +61,7 @@ def gpu_queue(options):
     print("dedicated: ", dedicated)
     device = None
     while not device:
-        usage = GpuUsage()
+        usage = GpuUsage(base_dir="/vent/", meta_dir="/vent")
 
         if usage[0]:
             usage = usage[1]
