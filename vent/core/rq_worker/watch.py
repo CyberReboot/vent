@@ -61,7 +61,7 @@ def gpu_queue(options):
     print("dedicated: ", dedicated)
     device = None
     while not device:
-        usage = GpuUsage(base_dir="/vent/.vent/", meta_dir="/vent/.vent")
+        usage = GpuUsage(base_dir="/vent/", meta_dir="/vent")
 
         if usage[0]:
             usage = usage[1]
