@@ -11,8 +11,8 @@ def gpu_queue(options):
     status = (False, None)
 
     print("gpu queue", str(options))
-    print("gpu queue", str(GpuUsage(base_dir="/vent/.vent/",
-                                    meta_dir="/vent/.vent")))
+    print("gpu queue", str(GpuUsage(base_dir="/vent/",
+                                    meta_dir="/vent")))
 
     options = json.loads(options)
     configs = options['configs']
