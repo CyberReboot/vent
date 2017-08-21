@@ -107,7 +107,7 @@ class NICsNTap(npyscreen.ActionForm):
                 npyscreen.notify_confirm("Failure: " + request[1])
 
         except Exception as e:  # pragma no cover
-            npyscreen.notify_confirm("Failure: " + e)
+            npyscreen.notify_confirm("Failure: " + str(e))
 
     def quit(self, *args, **kwargs):
         """ Overriden to switch back to MAIN form """
@@ -148,7 +148,7 @@ class ListNTap(npyscreen.ActionForm):
                 npyscreen.notify_confirm("Failure: " + request[1])
 
         except Exception as e:  # pragma no cover
-            npyscreen.notify_confirm("Failure: " + e)
+            npyscreen.notify_confirm("Failure: " + str(e))
 
     def quit(self, *args, **kwargs):
         """ Overriden to switch back to MAIN form """
