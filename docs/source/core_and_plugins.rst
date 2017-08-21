@@ -21,18 +21,20 @@ network_tap
 A container that will watch a specific nic using ``tcpdump`` to output pcap
 files based on what was monitored. Has an interface located in ``System
 Commands -> Network Tap Interface`` in the main action menu.
-The interface has five available actions:
+The interface has six available actions:
 
 - **Create**: Create a new container with a specified nic, tag, interval (in *seconds*),
   filter, and iterations. The container is also automatically started on
   creation.
+- **Delete**: Delete a specified network tap container. Containers *must be stopped* before they
+  are able to be deleted.
+- **List**: Show all network tap containers. Will return container's ID, if the container is
+  running or not, and the tag provided in ``create``.
+- **NICs**: Show all available network interfaces. Will return a list of the
+  names of the available NICs.
 - **Start**: Start a network tap container if it is exited. Will run with the same
   options given to the container in ``create``.
 - **Stop**: Stop a network tap container.
-- **List**: Show all network tap containers. Will return container's ID, if the container is
-  running or not, and the tag provided in ``create``.
-- **Delete**: Delete a specified network tap container. Containers *must be stopped* before they
-  are able to be deleted.
 
 rabbitmq
 ========

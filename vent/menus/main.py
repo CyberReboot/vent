@@ -23,6 +23,7 @@ from vent.menus.add import AddForm
 from vent.menus.ntap import CreateNTap
 from vent.menus.ntap import DeleteNTap
 from vent.menus.ntap import ListNTap
+from vent.menus.ntap import NICsNTap
 from vent.menus.ntap import StartNTap
 from vent.menus.ntap import StopNTap
 from vent.menus.backup import BackupForm
@@ -441,6 +442,11 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                          'name': 'Network Tap Interface List' + "\t"*6 +
                                   '^T to toggle main' + "\t"*6}
             self.add_form(ListNTap, "Network Tap List", form_args)
+        elif action == "ntapnics":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Available Network Interfaces' + "\t"*6 +
+                                  '^T to toggle main' + "\t"*6}
+            self.add_form(NICsNTap, "Available Network Interfaces", form_args)
         return
 
     def create(self):
@@ -626,23 +632,25 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         arguments=['swarm'], shortcut='s')
         self.m6.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
+        self.s6 = self.m6.addNewSubmenu(name='Network Tap Interface',
+                                        shortcut='n')
         self.m6.addItem(text='Restore', onSelect=self.system_commands,
                         arguments=['restore'], shortcut='t')
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
-        self.s6 = self.m6.addNewSubmenu(name='Network Tap Interface',
-                                        shortcut='n')
         self.s6.addItem(text='Create', onSelect=self.system_commands,
                         shortcut='c', arguments=['ntapcreate'])
         self.s6.addItem(text='Delete', onSelect=self.system_commands,
                         shortcut='d', arguments=['ntapdelete'])
+        self.s6.addItem(text='List', onSelect=self.system_commands,
+                        shortcut='l', arguments=['ntaplist'])
+        self.s6.addItem(text='NICs', onSelect=self.system_commands,
+                        shortcut='n', arguments=['ntapnics'])
         self.s6.addItem(text='Start', onSelect=self.system_commands,
                         shortcut='s', arguments=['ntapstart'])
         self.s6.addItem(text='Stop', onSelect=self.system_commands,
                         shortcut='t', arguments=['ntapstop'])
-        self.s6.addItem(text='List', onSelect=self.system_commands,
-                        shortcut='l', arguments=['ntaplist'])
 
         # Tutorial Menu Items
         self.m7 = self.add_menu(name="Tutorials", shortcut="t")
