@@ -360,7 +360,7 @@ class PluginHelper:
                                              'tag': 'plugin'}
                             log_config['config'].update(syslog_config)
                             externally_configured = True
-                    except Exception as e:
+                    except Exception as e:  # pragma: no cover
                         self.logger.error("external settings for log_config"
                                           " couldn't be stored because: " +
                                           str(e))
@@ -475,8 +475,7 @@ class PluginHelper:
                         ext = 'external-services'
                         if link in self.vent_config.options(ext)[1]:
                             try:
-                                lconf = json.loads(self.vent_config.option(ext,
-                                                                      link)[1])
+                                lconf = json.loads(self.vent_config.option(ext, link)[1])
                                 if ('locally_active' not in lconf or
                                         lconf['locally_active'] == 'no'):
                                     ip_adr = lconf['ip_address']
@@ -496,7 +495,7 @@ class PluginHelper:
                                     # longer connecting to local container
                                     links_to_delete.add(link)
                                     configure_local = False
-                            except Exception as e:
+                            except Exception as e:  # pragma: no cover
                                 self.logger.error("couldn't load external"
                                                   " settings because: " +
                                                   str(e))
@@ -560,7 +559,7 @@ class PluginHelper:
                                 if ('locally_active' in tool_config and
                                         tool_config['locally_active'] == 'no'):
                                     del tool_d[c]
-                            except Exception as e:
+                            except Exception as e:  # pragma: no cover
                                 self.logger.warn("Locally running container " +
                                                  name + " may be redundant")
 
@@ -645,11 +644,8 @@ class PluginHelper:
                 gpu = 'gpu.enabled'
                 failed = False
                 if (gpu in tool_d[container]['labels'] and
-                   tool_d[container]['labels'][gpu] == 'yes'):
-                    # TODO check for availability of gpu(s),
-                    #      otherwise queue it up until it's
-                    #      available
-                    # !! TODO check for device settings in vent.template
+                    tool_d[container]['labels'][gpu] == 'yes'):
+                    vent_config = Template(template=self.path_dirs.cfg_file)
                     port = ''
                     host = ''
                     result = self.vent_config.option('nvidia-docker-plugin', 'port')

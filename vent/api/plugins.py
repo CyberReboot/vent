@@ -234,14 +234,24 @@ class Plugin:
         template = self._build_image(template, match_path, image_name, section)
         chdir(cwd)
 
+        # get untagged images
+        untagged = None
+        try:
+            untagged = self.d_client.images.list(filters={"label": "vent",
+                                                          "dangling": "true"})
+        except Exception as e:  # pragma: no cover
+            self.logger.error("unabled to get images to remove: " + str(e))
+
         # remove untagged images
-        untagged = self.d_client.images.list(filters={"label": "vent",
-                                                      "dangling": "true"})
         if untagged:
             deleted_images = ""
             for image in untagged:
                 deleted_images = '\n'.join([deleted_images, image.id])
-                self.d_client.images.remove(image.id, force=True)
+                try:
+                    self.d_client.images.remove(image.id, force=True)
+                except Exception as e:  # pragma: no cover
+                    self.logger.warning("unable to remove image: " + image.id +
+                                        " because: " + str(e))
             self.logger.info("removed dangling images:" + deleted_images)
 
         self.logger.info("template of builder: " + str(template))

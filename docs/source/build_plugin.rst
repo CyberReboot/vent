@@ -16,18 +16,25 @@ Read more about ``Dockerfile`` `here`_.
 Vent.template Files
 ===================
 Vent template files are what Vent uses to build images into something it recognizes.
-They're written and processed like ``.cfg`` files.
+Listed here are sections and their various options.
 
-docker
-------
-Parameters for a python ``docker run`` command.
-Read the `Docker python api parameters`_ for possible options.
+Look below for examples of a ``vent.template`` file.
 
-.. _Docker python api parameters: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.run
+-docker
+-------
+All possible options and their explanations are the same as the parameters for the python `Docker container run command`_.
+
+For example, if we wanted the plugin's container to use the host network stack,
+the following would be written in the ``vent.template`` file::
+
+    [docker]
+    network_mode = host
+
+.. _Docker container run command: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.run
 
 
-gpu
----
+-gpu
+----
 Vent plugins can run on solely on GPU if specified (extra ``on``). This section sets the
 settings for GPU processing. At the moment, **only NVIDIA GPUs are supported**.
 
@@ -45,8 +52,8 @@ settings for GPU processing. At the moment, **only NVIDIA GPUs are supported**.
   The amount of RAM(in MB) a plugin requires.
 
 
-info
-----
+-info
+-----
 All metadata about the custom plugin goes under this section.
 
 *groups*
@@ -56,14 +63,14 @@ All metadata about the custom plugin goes under this section.
   the plugin's name.
 
 
-service
--------
+-service
+--------
 *uri_prefix*
   Services a tool exposes that need a more specific URL
 
 
-settings
---------
+-settings
+---------
 Options that specify how the plugin will run.
 
 *ext_types*
@@ -112,7 +119,7 @@ Next, a ``Dockerfile`` is needed so let's make it.
    CMD [""]
 
 
-Lastly, a ``vent.template`` file is needed so Vent knows how to use the plugin.
+Lastly, a ``vent.template`` file is needed so Vent knows how to use the plugin:
 
 .. code-block:: bash
    :caption: vent.template
@@ -123,6 +130,23 @@ Lastly, a ``vent.template`` file is needed so Vent knows how to use the plugin.
 
    [settings]
    ext_types = example
+
+Here's an example of this plugin using GPUs to do work:
+
+.. code-block:: bash
+   :caption: vent.template
+
+   [info]
+   name = example plugin
+   groups = example
+
+   [settings]
+   ext_types = example
+
+   [gpu]
+   enabled = yes
+   mem_mb = 1024
+   dedicated = yes
 
 
 We need to add this to either a git repo or the docker hub. Let's use git.

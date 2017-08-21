@@ -54,13 +54,9 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 
 .. toctree::
   :maxdepth: 2
-  :caption: Vent Basics
+  :caption: Vent Guides
 
   quickstart
-
-  core_and_plugins
-
-  system_command
 
   build_plugin
 
@@ -69,6 +65,16 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
   contributing
 
   new_release
+
+.. toctree::
+  :maxdepth: 2
+  :caption: Vent Internals
+
+  core_and_plugins
+
+  system_command
+
+  user_data
 
 .. toctree::
   :maxdepth: 1

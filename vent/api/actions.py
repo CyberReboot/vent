@@ -511,7 +511,7 @@ class Action:
         # create new backup directory
         try:
             os.mkdir(backup_dir)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error(str(e))
             return (False, str(e))
         # create new files in backup directory
@@ -526,7 +526,7 @@ class Action:
                     bvcfg.write(vcfg_file.read())
             self.logger.info("Backup information written to " + backup_dir)
             status = (True, backup_dir)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("Couldn't backup vent: " + str(e))
             status = (False, str(e))
         self.logger.info("Status of backup: " + str(status[0]))
@@ -587,7 +587,7 @@ class Action:
                                                         t_info[option])
                         new_manifest.write_config()
                         added_str += 'Restored: ' + t_info['name'] + '\n'
-                    except Exception as e:
+                    except Exception as e:  # pragma: no cover
                         self.logger.error("Problem restoring tool " + t_info['name'] +
                                           " because " + str(e))
                         failed_str += 'Failed: ' + t_info['name'] + '\n'
@@ -607,7 +607,7 @@ class Action:
                                                         t_info[option])
                         new_manifest.write_config()
                         added_str += 'Restored: ' + t_info['name'] + '\n'
-                    except Exception as e:
+                    except Exception as e:  # pragma: no cover
                         self.logger.error("Problem restoring tool " + t_info['name'] +
                                           " because " + str(e))
                         failed_str += 'Failed: ' + t_info['name'] + '\n'
@@ -622,13 +622,13 @@ class Action:
                         # add section to new template in case it doesn't exist
                         try:
                             vcfg_template.add_section(section)
-                        except Exception as e:
+                        except Exception as e:  # pragma: no cover
                             # okay if error because of already existing
                             pass
                         vcfg_template.set_option(vals[0], vals[1])
                 vcfg_template.write_config()
                 added_str += 'Restored: vent configuration file'
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 self.logger.error("Couldn't restore vent.cfg"
                                   "because: " + str(e))
                 failed_str += 'Failed: vent configuration file'
@@ -991,7 +991,7 @@ class Action:
                         self.clean(**t_identifier)
                         tool_d = self.prep_start(**t_identifier)[1]
                         self.start(tool_d)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 self.logger.error('Trouble restarting tool ' + name +
                                   'because: ' + str(e))
                 status = (False, str(e))
@@ -1063,7 +1063,7 @@ class Action:
                         tool_d = self.prep_start(name=tool)[1]
                     if tool_d:
                         self.start(tool_d)
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 self.logger.error("Problem restarting tools: " + str(e))
                 status = (False, str(e))
         self.logger.info("restart_tools finished with status: " +
@@ -1089,7 +1089,7 @@ class Action:
                 manifest.write_config()
                 tool_name = manifest.option(tool, 'name')[1]
                 self.logger.info("Disabled tool: " + tool_name)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("Troubling disabling tool because: " + str(e))
             status = (False, str(e))
         self.logger.info("Status of disable: " + str(status[0]))
@@ -1114,7 +1114,7 @@ class Action:
                 manifest.write_config()
                 tool_name = manifest.option(tool, 'name')[1]
                 self.logger.info("Enabled tool: " + tool_name)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("Troubling enabling tool because: " + str(e))
             status = (False, str(e))
         self.logger.info("Status of enable: " + str(status[0]))
