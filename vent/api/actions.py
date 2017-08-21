@@ -165,20 +165,23 @@ class Action:
                                 group_orders[container_groups[i]].append((int(priority), container))
                             containers_remaining.remove(container)
 
-            # start containers based on priorities
-            p_results = self.p_helper.start_priority_containers(groups,
-                                                                group_orders,
-                                                                tool_d)
+            self.logger.info("group orders: " + str(group_orders))
+            self.logger.info("containers remaining " + str(containers_remaining))
+            if False:
+                # start containers based on priorities
+                p_results = self.p_helper.start_priority_containers(groups,
+                                                                    group_orders,
+                                                                    tool_d)
 
-            # start the rest of the containers that didn't have any priorities
-            r_results = self.p_helper.start_remaining_containers(containers_remaining, tool_d)
-            results = (p_results[0] + r_results[0],
-                       p_results[1] + r_results[1])
+                # start the rest of the containers that didn't have any priorities
+                r_results = self.p_helper.start_remaining_containers(containers_remaining, tool_d)
+                results = (p_results[0] + r_results[0],
+                           p_results[1] + r_results[1])
 
-            if len(results[1]) > 0:
-                status = (False, results)
-            else:
-                status = (True, results)
+                if len(results[1]) > 0:
+                    status = (False, results)
+                else:
+                    status = (True, results)
         except Exception as e:  # pragma: no cover
             self.logger.error("start failed with error: " + str(e))
             status = (False, str(e))
@@ -985,13 +988,17 @@ class Action:
         status = (True, None)
         if not main_cfg:
             try:
+                start_tools = []
+                start_d = {}
                 t_identifier = {'name': name,
                                 'branch': branch,
                                 'version': version}
+                start_tools.append(t_identifier)
                 result = self.p_helper.constraint_options(t_identifier, [])
                 tool_d = result[0]
                 manifest = result[1]
                 for tool in tool_d:
+                    self.logger.info("restarting tool " + tool)
                     # add, remove, update instances as needed
                     clean_name = tool.rsplit(':', 2)
                     if clean_name[0][-1] in '0123456789':
@@ -1019,6 +1026,8 @@ class Action:
                                     val = str(i)
                                 elif name == 'last_updated':
                                     val = Timestamp()
+                                elif name == 'running':
+                                    start_tools.append(i_section)
                                 manifest.set_option(i_section, name, val)
                         elif manifest.section(i_section)[0] and i <= instances:
                             settings = manifest.option(i_section, 'settings')
@@ -1030,13 +1039,31 @@ class Action:
                         else:
                             break
                         i += 1
+                    manifest.write_config()
                     # only clean and start back up if running
                     running = manifest.option(tool, 'running')
                     if running[0] and running[1] == 'yes':
-                        self.clean(**t_identifier)
-                        tool_d = self.prep_start(**t_identifier)[1]
-                        self.start(tool_d)
-                manifest.write_config()
+                        self.logger.info("About to clean...   " + str(t_identifier))
+                        #self.clean(**t_identifier)
+                        self.logger.info("Start_tools: " + str(start_tools))
+                        for tool_identifier in start_tools:
+                            # translate sections into data that prep_start uses
+                            if not isinstance(tool_identifier, dict):
+                                t_name = manifest.option(tool_identifier,
+                                                         'name')[1]
+                                t_branch = manifest.option(tool_identifier,
+                                                         'branch')[1]
+                                t_version = manifest.option(tool_identifier,
+                                                         'version')[1]
+                                tool_identifier = {'name': t_name,
+                                                   'branch': t_branch,
+                                                   'version': t_version}
+                            start_d.update(self.prep_start(**tool_identifier)[1])
+                if start_d:
+                    self.logger.info("About to start...")
+                    for key in start_d:
+                        self.logger.info(key + ': ' + str(start_d[key]))
+                    # self.start(start_d)
             except Exception as e:
                 self.logger.error('Trouble restarting tool ' + name +
                                   ' because: ' + str(e))

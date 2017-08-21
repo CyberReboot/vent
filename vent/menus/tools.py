@@ -12,6 +12,7 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 from vent.menus.editor import EditorForm
+from vent.menus.instances import InstanceForm
 
 
 class ToolForm(npyscreen.ActionForm):
@@ -56,6 +57,7 @@ class ToolForm(npyscreen.ActionForm):
         self.parentApp.switchForm('MAIN')
 
     def toggle_view(self, *args, **kwargs):
+        """ Toggles the view between different groups """
         manifest = Template(self.api_action.plugin.manifest)
         group_to_display = self.views.popleft()
         self.cur_view.value = group_to_display
@@ -73,6 +75,16 @@ class ToolForm(npyscreen.ActionForm):
         # add view back to queue
         self.views.append(group_to_display)
 
+    def change_configure(self, *args, **kwargs):
+        """ Change whether configuring template or instances """
+        # reverse whatever previous configuration decision was
+        if self.conf_instances:
+            self.configure_view.value = 'template'
+        else:
+            self.configure_view.value = 'instances'
+        self.conf_instances = not self.conf_instances
+        self.display()
+
     def create(self, group_view=False):
         """ Update with current tools """
         self.add_handlers({"^T": self.quit, "^Q": self.quit})
@@ -89,6 +101,15 @@ class ToolForm(npyscreen.ActionForm):
             i = 5
         else:
             i = 4
+
+        if self.action['action_name'] == 'configure':
+            self.configure_view = self.add(npyscreen.TitleText,
+                                           name='Configuring:',
+                                           value='template', editable=False,
+                                           rely=3)
+            self.conf_instances = False
+            self.add_handlers({"^B": self.change_configure})
+            i = 5
 
         if self.action['action_name'] == 'start':
             response = self.action['api_action'].inventory(choices=['repos',
@@ -376,6 +397,7 @@ class ToolForm(npyscreen.ActionForm):
                                  'tool_name': t[0],
                                  'branch': t[1],
                                  'version': t[2],
+                                 'repo': repo,
                                  'next_tool': None,
                                  'get_configure': self.action['action_object1'],
                                  'save_configure': self.action['action_object2'],
@@ -384,9 +406,15 @@ class ToolForm(npyscreen.ActionForm):
                                  'registry_download': False}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
-                        self.parentApp.addForm("EDITOR" + t[0], EditorForm,
-                                               **kargs)
-                        tools_to_configure.append("EDITOR" + t[0])
+
+                        if not self.conf_instances:
+                            form_name = "EDITOR" + t[0]
+                            form = EditorForm
+                        else:
+                            form_name = "INSTANCE" + t[0]
+                            form = InstanceForm
+                        self.parentApp.addForm(form_name, form, **kargs)
+                        tools_to_configure.append(form_name)
                     else:
                         kargs = {'name': t[0],
                                  'branch': t[1],

@@ -1,4 +1,7 @@
 import npyscreen
+import os
+
+from vent.api.plugin_helpers import PluginHelper
 
 
 class EditorForm(npyscreen.ActionForm):
@@ -18,25 +21,60 @@ class EditorForm(npyscreen.ActionForm):
             self.tool_name = keywords['tool_name']
             self.branch = keywords['branch']
             self.version = keywords['version']
-            if not keywords['registry_download']:
-                self.next_tool = keywords['next_tool']
-                self.from_registry = keywords['from_registry']
-                # get vent.template settings
-                template = keywords['get_configure'](name=self.tool_name,
-                                                     branch=self.branch,
-                                                     version=self.version)
-                if template[0]:
-                    self.config_val = template[1]
-                else:
-                    npyscreen.notify_confirm("Couldn't find vent.template"
-                                             " for " + keywords['tool_name'])
-            else:
+            if keywords['registry_download']
                 self.next_tool = None
                 self.from_registry = True
                 # populate editor with known fields of registry image
                 self.config_val = "[info]\n"
                 self.config_val += "name = " + keywords['link_name'] + "\n"
                 self.config_val += "groups = " + keywords['groups'] + "\n"
+            else:
+                self.next_tool = keywords['next_tool']
+                self.from_registry = keywords['from_registry']
+                # get vent.template settings for specific tool
+                if ('default_temp' not in keywords or
+                        keywords['default_temp'] = False):
+                    template = keywords['get_configure'](name=self.tool_name,
+                                                         branch=self.branch,
+                                                         version=self.version)
+                    if template[0]:
+                        self.config_val = template[1]
+                    else:
+                        npyscreen.notify_confirm("Couldn't find vent.template"
+                                                 " for " +
+                                                 keywords['tool_name'])
+                # get default vent.template settings for a tool
+                else:
+                    try:
+                        p_helper = PluginHelper()
+                        constraints = {'name': keywords['tool_name'],
+                                       'branch': keywords['branch'],
+                                       'version': keywords['version']}
+                        tool, manifest = p_helper.constraint_options(constraints, [])
+                        # only one tool should be returned
+                        section = tool.keys()[0]
+                        path = manifest.option(section, 'path')
+                        # sending defaults to internals so it doesn't mess with
+                        # installed plugins
+                        path = path.replace('.vent/plugins', '.vent/.internals')
+                        multi_tool = manifest.option(section, 'multi_tool')
+                        if multi_tool[0] and multi_tool[1] == 'yes':
+                            name = manifest.option(section, 'name')[1]
+                            if name == 'unspecified':
+                                name == 'vent'
+                            template_path = os.path.join(path,
+                                                         name + '.template')
+                        else:
+                            template_path = os.path.join(path, 'vent.template')
+                        with open(template_path) as vent_template:
+                            self.config_val = vent_template.read()
+                    except:
+                        self.config_val = ''
+                        npyscreen.notify_confirm("Couldn't get default"
+                                                 " settings for tool, you can"
+                                                 " still enter in settings you"
+                                                 " want", title="Unsuccessful"
+                                                 " default")
         super(EditorForm, self).__init__(*args, **keywords)
 
     def create(self):
@@ -91,10 +129,20 @@ class EditorForm(npyscreen.ActionForm):
             self.save(main_cfg=True, config_val=self.edit_space.value)
         else:
             # check instance changes
-            if (instance_num(self.config_val) !=
-                    instance_num(self.edit_space.value)):
-                instances = int(instance_num(self.edit_space.value))
-                npyscreen.notify_confirm('Number of instances has changed')
+            instances = int(instance_num(self.edit_space.value))
+            if instances > int(instance_num(self.config_val)):
+                default = npyscreen.notify_yes_no('Do you want new instances to'
+                                                  ' have same settings listed'
+                                                  ' here?', title='Settings for'
+                                                  ' new instances')
+                if not default:
+                    running = npyscreen.notify_yes_no('Do you want new'
+                                                      ' instances to run?',
+                                                      title='Running or not')
+                    self.orig_config = self.edit_space.value
+                    npyscreen.notify_confirm("Write settings you want other"
+                                             " instances to have")
+                    return
             save_args = {'config_val': self.edit_space.value,
                          'name': self.tool_name,
                          'branch': self.branch,

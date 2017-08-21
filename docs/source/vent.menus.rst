@@ -52,6 +52,14 @@ vent\.menus\.help module
     :undoc-members:
     :show-inheritance:
 
+vent\.menus\.instances module
+-----------------------------
+
+.. automodule:: vent.menus.instances
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 vent\.menus\.inventory module
 -----------------------------
 

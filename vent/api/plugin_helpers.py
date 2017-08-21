@@ -231,6 +231,11 @@ class PluginHelper:
             # initialize needed vars
             c_name = s[section]['image_name'].replace(':', '-')
             c_name = c_name.replace('/', '-')
+            if 'instance_number' in s[section]:
+                instance = s[section]['instance_number']
+                self.logger.info(instance)
+                self.logger.info(str(isinstance(instance, int)))
+                c_name += instance if instance != '1' else ''
             image_name = s[section]['image_name']
 
             # checkout the right version and branch of the repo
@@ -447,7 +452,8 @@ class PluginHelper:
                        'path',
                        'image_name',
                        'branch',
-                       'version']
+                       'version',
+                       'instance_number']
             vent_config = Template(template=self.path_dirs.cfg_file)
             files = vent_config.option('main', 'files')
             files = (files[0], expanduser(files[1]))
