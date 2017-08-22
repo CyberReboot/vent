@@ -227,6 +227,7 @@ class PluginHelper:
                        version):
         """ Run through sections for prep_start """
         tool_d = {}
+        status = (True, None)
         for section in s:
             # initialize needed vars
             c_name = s[section]['image_name'].replace(':', '-')
