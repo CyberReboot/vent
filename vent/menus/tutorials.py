@@ -22,7 +22,8 @@ class TutorialForm(npyscreen.ActionFormWithMenus):
         """ Overridden to add handlers and content """
         self.add_handlers({"^Q": self.quit})
         self.add(npyscreen.TitleText, name=self.title, editable=False)
-        self.add(npyscreen.MultiLineEdit, editable=False, value=self.text)
+        self.add(npyscreen.MultiLineEdit, editable=False, value=self.text,
+                 max_width=75, slow_scroll=True)
         self.m2 = self.add_menu(name="About Vent", shortcut='v')
         self.m2.addItem(text="Background", onSelect=self.switch,
                         arguments=['TUTORIALBACKGROUND'], shortcut='b')
