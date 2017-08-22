@@ -14,7 +14,8 @@ EXPOSE 8080
 
 LABEL vent="" \
       vent.name="network-tap" \
-      vent.groups="core,collection,files,network"
+      vent.groups="core,collection,files,network" \
+      vent.section="[cyberreboot:vent:/vent/core/network_tap:master:HEAD]"
 
 ENTRYPOINT ["python", "ncontrol.py"]
 CMD [""]

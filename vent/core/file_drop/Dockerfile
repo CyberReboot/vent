@@ -13,7 +13,8 @@ WORKDIR /file-drop
 
 LABEL vent="" \
       vent.name="file-drop" \
-      vent.groups="core,files"
+      vent.groups="core,files" \
+      vent.section="[cyberreboot:vent:/vent/core/file_drop:master:HEAD]"
 
 ENTRYPOINT ["python", "/file-drop/file_drop.py"]
 
