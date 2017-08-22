@@ -525,7 +525,6 @@ class Plugin:
             self.logger.info("entering set_instances")
             i = 2
             while True:
-                self.logger.info("i = " + str(i))
                 addtl_section = section.rsplit(':', 2)
                 addtl_section[0] += str(i)
                 addtl_section = ':'.join(addtl_section)
@@ -545,9 +544,15 @@ class Plugin:
                 i += 1
 
         # !! TODO return status of whether it built successfully or not
-        self.logger.info("Testing build section...   " + section)
-        self.logger.info(str(template.option(section, 'instance_number')))
         if self.build:
+            try:
+                settings_dict = json.loads(template.option(section, 'settings')[1])
+                if int(settings_dict['instances']) > 1:
+                    multi_instance = True
+                else:
+                    mutli_instance = False
+            except:
+                multi_instance = False
             cwd = getcwd()
             chdir(match_path)
             try:
@@ -581,7 +586,7 @@ class Plugin:
                                                 str(datetime.utcnow()) +
                                                 " UTC")
                             # set other instances too
-                            if template.option(section, 'instance_number')[0]:
+                            if multi_instance:
                                 set_instances(template, section, 'yes', image_id)
                             status = (True, "Pulled " + image_name)
                             self.logger.info(str(status))
@@ -591,7 +596,7 @@ class Plugin:
                                                 str(datetime.utcnow()) +
                                                 " UTC")
                             # set other instances too
-                            if template.option(section, 'instance_number')[0]:
+                            if multi_instace:
                                 set_instances(template, section, 'failed')
                             status = (False, "Failed to pull image " +
                                       str(output.split('\n')[-1]))
@@ -644,7 +649,7 @@ class Plugin:
                                         str(datetime.utcnow()) +
                                         " UTC")
                     # set other instances too
-                    if template.option(section, 'instance_number')[0]:
+                    if multi_instance:
                         set_instances(template, section, 'yes', image_id)
             except Exception as e:  # pragma: no cover
                 self.logger.error("unable to build image: " + str(image_name) +
@@ -652,7 +657,7 @@ class Plugin:
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
-                if template.option(section, 'instance_number')[0]:
+                if multi_instance:
                     set_instances(template, section, 'failed')
 
             chdir(cwd)
@@ -660,7 +665,7 @@ class Plugin:
             template.set_option(section, "built", "no")
             template.set_option(section, "last_updated",
                                 str(datetime.utcnow()) + " UTC")
-            if template.option(section, 'instance_number')[0]:
+            if multi_instance:
                 set_instances(template, section, 'no')
         template.set_option(section, 'running', 'no')
         return template

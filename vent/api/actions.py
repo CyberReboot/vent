@@ -865,8 +865,9 @@ class Action:
             for section in template_dict:
                 return_str += "[" + section + "]\n"
                 for option in template_dict[section]:
-                    return_str += option + " = "
-                    return_str += template_dict[section][option] + "\n"
+                    if option != 'instances':
+                        return_str += option + " = "
+                        return_str += template_dict[section][option] + "\n"
                 return_str += "\n"
             # only one newline at end of file
             status = (True, return_str[:-1])
@@ -898,6 +899,8 @@ class Action:
             if sections[0]:
                 for section in sections[1]:
                     section_dict = {}
+                    if section == 'settings':
+                        section_dict.update({'instances': str(instances)})
                     options = vent_template.options(section)
                     if options[0]:
                         for option in options[1]:
@@ -906,8 +909,6 @@ class Action:
                                 option_name = 'link_name'
                             opt_val = vent_template.option(section,
                                                            option)[1]
-                            if option_name == 'instances':
-                                opt_val = str(instances)
                             section_dict[option_name] = opt_val
                     if section_dict:
                         manifest.set_option(tool, section,
@@ -915,13 +916,21 @@ class Action:
                     elif manifest.option(tool, section)[0]:
                         manifest.del_option(tool, section)
 
+        # ensure instances is an int
         instances = int(instances)
+        # get rid of instances if user tried to configure it in template
+        if 'instances = ' in config_val:
+            instance_start = config_val.find('instances =')
+            to_delete = config_val[instance_start:config_val. \
+                    find('\n', instance_start)+1]
+            config_val = config_val.replace(to_delete, '')
         self.logger.info("Starting: save_configure")
         constraints = locals()
         del constraints['config_val']
         del constraints['from_registry']
         del constraints['main_cfg']
         del constraints['instances']
+        del constraints['template_to_manifest']
         status = (True, None)
         fd = None
         if not main_cfg:
@@ -941,8 +950,10 @@ class Action:
                     tool = tools.keys()[0]
                 else:
                     options = ['path', 'multi_tool', 'name']
+                    self.logger.info(constraints)
                     tools, manifest = self.p_helper. \
                             constraint_options(constraints, options)
+                    self.logger.info(tools)
                     # only one tool in tools because perform this function for
                     # every tool
                     if tools:

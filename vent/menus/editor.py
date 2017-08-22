@@ -1,5 +1,7 @@
+import ast
 import npyscreen
 import os
+import re
 
 from vent.api.plugin_helpers import PluginHelper
 
@@ -8,7 +10,12 @@ class EditorForm(npyscreen.ActionForm):
     """ Form that can be used as a pseudo text editor in npyscreen """
     def __init__(self, *args, **keywords):
         """ Initialize EditorForm objects """
+        self.section_value = re.compile(r"""
+        \w+\ *=\ *[\w,-]*$      # option-value pairs
+        | \[\w+\]$              # section headers
+        """, re.VERBOSE)
         self.save = keywords['save_configure']
+        self.instance_cfg = False
         if 'restart_tools' in keywords:
             self.restart_tools = keywords['restart_tools']
         if 'vent_cfg' in keywords and keywords['vent_cfg']:
@@ -118,6 +125,35 @@ class EditorForm(npyscreen.ActionForm):
 
     def on_ok(self):
         """ Save changes made to vent.template """
+        # ensure user input is valid before proceeding
+        # ensure user didn't try to manually define instances
+        if 'instances =' in self.edit_space.value:
+            npyscreen.notify_confirm("You can't define instances manually in"
+                                     " editing, use the built-in instance"
+                                     " editor instead.", title="Invalid input")
+            return
+        # ensure user didn't have any syntactical errors
+        for entry in self.edit_space.value.split('\n'):
+            if entry.strip() == '':
+                continue
+            match = self.section_value.match(entry)
+            with open('/Users/bpagon/Desktop/random.txt', 'a') as f:
+                f.write(entry + ' || ' + str(match) + '\n')
+            if not match:
+                try:
+                    opt_val = entry.split('=', 1)
+                    assert(opt_val[0].strip() != '')
+                    ast.literal_eval(opt_val[1].strip())
+                except:
+                    npyscreen.notify_confirm("You didn't type in your input in"
+                                             " a syntactically correct format."
+                                             " You may be missing spaces"
+                                             " between the equal sign, have"
+                                             " non-alphanumeric characters,"
+                                             " have extraneous characters,"
+                                             " etc.", title="Invalid input")
+                    return
+
         instances = 1
         def instance_num(config_val):
             """ Get the instance number from a given config string """
