@@ -491,8 +491,6 @@ class Plugin:
                                              section)
                 # write additional entries for multiple instances
                 if addtl_entries > 0:
-                    # mark instances in manifest
-                    template.set_option(section, 'instance_number', '1')
                     # add 2 for naming conventions
                     for i in range(2, addtl_entries + 2):
                         addtl_section = section.rsplit(':', 2)
@@ -502,8 +500,6 @@ class Plugin:
                         orig_vals = template.section(section)[1]
                         for val in orig_vals:
                             template.set_option(addtl_section, val[0], val[1])
-                        template.set_option(addtl_section, 'instance_number',
-                                            str(i))
                         template.set_option(addtl_section, "name",
                                             true_name.split('/')[-1]+str(i))
 

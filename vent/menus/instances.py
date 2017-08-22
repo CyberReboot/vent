@@ -2,6 +2,7 @@ import json
 import npyscreen
 
 from vent.api.plugin_helpers import PluginHelper
+from vent.menus.editor import EditorForm
 
 class InstanceSelect(npyscreen.MultiSelect):
     """
@@ -36,12 +37,17 @@ class InstanceForm(npyscreen.ActionForm):
         self.tool_name = keywords['tool_name']
         self.branch = keywords['branch']
         self.version = keywords['version']
+        self.repo = keywords['repo']
         self.editor_args = keywords
-        self.editor_args['next_tool'] = None
+        self.editor_args['instance_cfg'] = True
+        # not restarting tools with instances for now
+        del self.editor_args['restart_tools']
         self.p_helper = PluginHelper(plugins_dir='.internals/')
         keywords['name'] = 'New number of instances for ' + \
                 keywords['tool_name']
         super(InstanceForm, self).__init__(*args, **keywords)
+        del self.editor_args['parentApp']
+        self.editor_args['name'] = 'Configure new instances for ' + self.tool_name
 
     def create(self):
         self.add(npyscreen.TitleText, name='How many instances:',
@@ -76,8 +82,24 @@ class InstanceForm(npyscreen.ActionForm):
         except:
             # if no previous instance number defined, default is one
             old_val = 1
-        d
-        self.change_screens()
+        if new_val > old_val:
+            try:
+                npyscreen.notify_wait("Pulling up default settings for " +
+                                      self.tool_name + "...",
+                                      title="Gathering settings")
+                self.p_helper.clone(self.repo)
+                self.editor_args['instances'] = new_val
+                self.parentApp.addForm('EDITOR' + self.tool_name, EditorForm,
+                                       **self.editor_args)
+                self.parentApp.change_form('EDITOR' + self.tool_name)
+            except Exception as e:
+                npyscreen.notify_confirm("Trouble getting information for"
+                                         " tool " + self.tool_name +
+                                         " because " + str(e), title="Error")
+        elif new_val < old_val:
+            pass
+        else:
+            self.on_cancel()
 
     def on_cancel(self):
         npyscreen.notify_confirm("No changes made")
