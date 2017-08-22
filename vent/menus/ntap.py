@@ -80,6 +80,47 @@ class CreateNTap(npyscreen.ActionForm):
         self.quit()
 
 
+class NICsNTap(npyscreen.ActionForm):
+    """ For listing all available network interfaces """
+    def create(self):
+        self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.add(npyscreen.Textfield,
+                 value='List all avilable network interfaces',
+                 editable=False,
+                 color="STANDOUT")
+
+        self.nextrely += 1
+
+        try:
+            self.api_action = Action()
+            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/nics'
+            request = self.api_action.get_request(url)
+
+            if request[0]:
+                box = self.add(npyscreen.BoxTitle,
+                               name="Available Network Interfaces",
+                               max_height=40)
+                request = ast.literal_eval(str(request[1]))
+                data = [d for d in request[1].split("\n")]
+                box.values = data
+            else:
+                npyscreen.notify_confirm("Failure: " + request[1])
+
+        except Exception as e:  # pragma no cover
+            npyscreen.notify_confirm("Failure: " + str(e))
+
+    def quit(self, *args, **kwargs):
+        """ Overriden to switch back to MAIN form """
+        self.parentApp.switchForm("MAIN")
+
+    def on_cancel(self):
+        """ When user cancels, return to MAIN """
+        self.quit()
+
+    def on_ok(self):
+        self.quit()
+
+
 class ListNTap(npyscreen.ActionForm):
     """ For listing all network tap capture containers """
     def create(self):
@@ -107,7 +148,7 @@ class ListNTap(npyscreen.ActionForm):
                 npyscreen.notify_confirm("Failure: " + request[1])
 
         except Exception as e:  # pragma no cover
-            npyscreen.notify_confirm("Failure: " + e)
+            npyscreen.notify_confirm("Failure: " + str(e))
 
     def quit(self, *args, **kwargs):
         """ Overriden to switch back to MAIN form """

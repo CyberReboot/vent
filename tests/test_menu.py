@@ -197,6 +197,10 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'y', 'n', 'c', 'lo', TAB, 'foo', TAB, '5', TAB,
               TAB, '1', TAB, TAB, ENTER, ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
               ENTER])
+    # system commands - network tap interface - nics
+    run_menu([ENTER, CTRL_X, 'y', 'n', 'n', TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'y', 'n', 'n', TAB, TAB, ENTER])
+    run_menu([ENTER, CTRL_X, 'y', 'n', 'n', CTRL_T])
 
     # go through the tutorials menus
     run_menu([ENTER, CTRL_X, 't', 'v', 'b', RIGHT, ENTER])
