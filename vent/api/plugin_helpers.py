@@ -326,6 +326,7 @@ class PluginHelper:
             tool_d[c_name]['labels']['vent.branch'] = branch
             tool_d[c_name]['labels']['vent.version'] = version
             tool_d[c_name]['labels']['vent.name'] = s[section]['name']
+            tool_d[c_name]['labels']['vent.section'] = section
 
             # check for log_config settings in external-services
             externally_configured = False
