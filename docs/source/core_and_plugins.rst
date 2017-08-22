@@ -31,7 +31,9 @@ The interface has six available actions:
 - **List**: Show all network tap containers. Will return container's ID, if the container is
   running or not, and the tag provided in ``create``.
 - **NICs**: Show all available network interfaces. Will return a list of the
-  names of the available NICs.
+  names of the available NICs.  Note for ``Docker for Mac`` it will show
+  available network interfaces on the VM running the Docker daemon, not the
+  network interface names on the Mac host.
 - **Start**: Start a network tap container if it is exited. Will run with the same
   options given to the container in ``create``.
 - **Stop**: Stop a network tap container.
