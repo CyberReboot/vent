@@ -16,6 +16,7 @@ COPY *.py /
 
 LABEL vent="" \
       vent.name="rq-worker" \
-      vent.groups="core,files"
+      vent.groups="core,files" \
+      vent.section="[cyberreboot:vent:/vent/core/rq_worker:master:HEAD]"
 
 ENTRYPOINT ["rqworker", "-c", "settings"]

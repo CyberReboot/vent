@@ -569,6 +569,8 @@ class Plugin:
                     image_name = image_name.rsplit(':', 1)[0]+':'+self.version
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
+                                                      " vent.section=" +
+                                                      section + "--label"
                                                       " vent.name=" +
                                                       name[1] + " --label "
                                                       "vent.groups=" +
