@@ -4,4 +4,4 @@ RUN plugin install mobz/elasticsearch-head
 LABEL vent="" \
       vent.name="elasticsearch" \
       vent.groups="core,search" \
-      vent.section="[cyberreboot:vent:/vent/core/elasticsearch:master:HEAD]"
+      vent.section="cyberreboot:vent:/vent/core/elasticsearch:master:HEAD"

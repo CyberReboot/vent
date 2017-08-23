@@ -570,7 +570,7 @@ class Plugin:
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.section=" +
-                                                      section + "--label"
+                                                      section + " --label"
                                                       " vent.name=" +
                                                       name[1] + " --label "
                                                       "vent.groups=" +

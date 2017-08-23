@@ -13,7 +13,7 @@ COPY rmq_es_connector.py /vent/rmq_es_connector.py
 LABEL vent="" \
       vent.name="rmq-es-connector" \
       vent.groups="core" \
-      vent.section="[cyberreboot:vent:/vent/core/rmq_es_connector:master:HEAD]"
+      vent.section="cyberreboot:vent:/vent/core/rmq_es_connector:master:HEAD"
 
 ENTRYPOINT ["python", "/vent/rmq_es_connector.py"]
 CMD [""]

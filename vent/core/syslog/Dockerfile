@@ -11,6 +11,6 @@ EXPOSE 514
 LABEL vent="" \
       vent.name="syslog" \
       vent.groups="core,logging,syslog" \
-      vent.section="[cyberreboot:vent:/vent/core/rq_worker:master:HEAD]"
+      vent.section="cyberreboot:vent:/vent/core/rq_worker:master:HEAD"
 
 ENTRYPOINT ["/usr/sbin/syslog-ng", "-F", "-f", "/etc/syslog-ng/syslog-ng.conf"]
