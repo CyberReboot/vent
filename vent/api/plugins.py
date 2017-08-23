@@ -578,8 +578,8 @@ class Plugin:
                                                       " vent.type=" +
                                                       t_type + " --label"
                                                       " vent.name=" +
-                                                      name[1] + " --label "
-                                                      "vent.groups=" +
+                                                      name[1] + " --label"
+                                                      " vent.groups=" +
                                                       groups[1] + " -t " +
                                                       image_name +
                                                       commit_tag + file_tag),

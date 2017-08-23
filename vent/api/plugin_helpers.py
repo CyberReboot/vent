@@ -451,6 +451,8 @@ class PluginHelper:
                        'path',
                        'image_name',
                        'branch',
+                       'repo',
+                       'type',
                        'version']
             vent_config = Template(template=self.path_dirs.cfg_file)
             files = vent_config.option('main', 'files')
