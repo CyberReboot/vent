@@ -574,9 +574,9 @@ class Plugin:
                                                       " vent.section=" +
                                                       section + " --label"
                                                       " vent.repo=" +
-                                                      repo + " --label"
+                                                      repo[1] + " --label"
                                                       " vent.type=" +
-                                                      t_type + " --label"
+                                                      t_type[1] + " --label"
                                                       " vent.name=" +
                                                       name[1] + " --label"
                                                       " vent.groups=" +
