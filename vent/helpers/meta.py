@@ -487,13 +487,8 @@ def AutoInstall(**kargs):
     d_client = docker.from_env()
     images = d_client.images.list(filters={'label': 'vent'})
     for image in images:
-        print(image.attrs['RepoTags'])
-        if 'vent.groups' in image.attrs['Labels']:
-            print(image.attrs['Labels']['vent.groups'])
-        if 'vent.section' in image.attrs['Labels']:
-            print(image.attrs['Labels']['vent.section'])
-            if image.attrs['Labels']['vent.section'] in sections:
-                print("exists")
-            else:
-                print("doesn't exist")
-        print()
+        if ('vent.section' in image.attrs['Labels'] and
+           not image.attrs['Labels']['vent.section'] in sections):
+            template.add_section(image.attrs['Labels']['vent.section'])
+            # get url that image or code for image exists
+            # check if repo has already been cloned, if not try to clone it

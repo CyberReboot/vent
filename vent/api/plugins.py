@@ -507,6 +507,8 @@ class Plugin:
                 # labels on images yet
                 name = template.option(section, "name")
                 groups = template.option(section, "groups")
+                repo = template.option(section, "repo")
+                t_type = template.option(section, "type")
                 if groups[1] == "" or not groups[0]:
                     groups = (True, "none")
                 if not name[0]:
@@ -571,6 +573,10 @@ class Plugin:
                                                       " vent --label"
                                                       " vent.section=" +
                                                       section + " --label"
+                                                      " vent.repo=" +
+                                                      repo + " --label"
+                                                      " vent.type=" +
+                                                      t_type + " --label"
                                                       " vent.name=" +
                                                       name[1] + " --label "
                                                       "vent.groups=" +
