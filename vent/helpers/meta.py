@@ -487,13 +487,13 @@ def AutoInstall(**kargs):
     d_client = docker.from_env()
     images = d_client.images.list(filters={'label': 'vent'})
     for image in images:
-        print image.attrs['RepoTags'],
+        print(image.attrs['RepoTags'])
         if 'vent.groups' in image.attrs['Labels']:
-           print image.attrs['Labels']['vent.groups'],
+            print(image.attrs['Labels']['vent.groups'])
         if 'vent.section' in image.attrs['Labels']:
-           print image.attrs['Labels']['vent.section'],
-           if image.attrs['Labels']['vent.section'] in sections:
-               print "exists",
-           else:
-               print "doesn't exist",
-        print
+            print(image.attrs['Labels']['vent.section'])
+            if image.attrs['Labels']['vent.section'] in sections:
+                print("exists")
+            else:
+                print("doesn't exist")
+        print()
