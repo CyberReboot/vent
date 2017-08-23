@@ -20,6 +20,8 @@ EXPOSE 9181
 LABEL vent="" \
       vent.name="rq-dashboard" \
       vent.groups="core" \
-      vent.section="[cyberreboot:vent:/vent/core/rq_dashboard:master:HEAD]"
+      vent.section="cyberreboot:vent:/vent/core/rq_dashboard:master:HEAD" \
+      vent.repo="https://github.com/cyberreboot/vent" \
+      vent.type="repository"
 
 CMD ["/run.sh"]

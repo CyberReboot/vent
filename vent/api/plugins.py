@@ -507,6 +507,8 @@ class Plugin:
                 # labels on images yet
                 name = template.option(section, "name")
                 groups = template.option(section, "groups")
+                repo = template.option(section, "repo")
+                t_type = template.option(section, "type")
                 if groups[1] == "" or not groups[0]:
                     groups = (True, "none")
                 if not name[0]:
@@ -570,10 +572,14 @@ class Plugin:
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.section=" +
-                                                      section + "--label"
+                                                      section + " --label"
+                                                      " vent.repo=" +
+                                                      repo[1] + " --label"
+                                                      " vent.type=" +
+                                                      t_type[1] + " --label"
                                                       " vent.name=" +
-                                                      name[1] + " --label "
-                                                      "vent.groups=" +
+                                                      name[1] + " --label"
+                                                      " vent.groups=" +
                                                       groups[1] + " -t " +
                                                       image_name +
                                                       commit_tag + file_tag),

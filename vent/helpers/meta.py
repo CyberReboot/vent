@@ -472,3 +472,23 @@ def DropLocation():
     drop_loc = os.path.expanduser(drop_loc)
     drop_loc = os.path.abspath(drop_loc)
     return (True, drop_loc)
+
+
+def AutoInstall(**kargs):
+    """
+    Automatically detects images and installes them in the manifest if they are
+    not there
+    """
+    path_dirs = PathDirs(**kargs)
+    path_dirs.host_config()
+    manifest = os.path.join(path_dirs.base_dir, "plugin_manifest.cfg")
+    template = Template(template=manifest)
+    sections = template.sections()
+    d_client = docker.from_env()
+    images = d_client.images.list(filters={'label': 'vent'})
+    for image in images:
+        if ('vent.section' in image.attrs['Labels'] and
+           not image.attrs['Labels']['vent.section'] in sections):
+            template.add_section(image.attrs['Labels']['vent.section'])
+            # get url that image or code for image exists
+            # check if repo has already been cloned, if not try to clone it
