@@ -38,9 +38,10 @@ class InstanceForm(npyscreen.ActionForm):
         self.branch = keywords['branch']
         self.version = keywords['version']
         self.repo = keywords['repo']
+        self.clean = keywords['clean']
         self.editor_args = keywords
         self.editor_args['instance_cfg'] = True
-        # not restarting tools with instances for now
+        del self.editor_args['clean']
         del self.editor_args['restart_tools']
         self.p_helper = PluginHelper(plugins_dir='.internals/')
         keywords['name'] = 'New number of instances for ' + \
@@ -50,8 +51,8 @@ class InstanceForm(npyscreen.ActionForm):
         self.editor_args['name'] = 'Configure new instances for ' + self.tool_name
 
     def create(self):
-        self.add(npyscreen.TitleText, name='How many instances:',
-                 editable=False)
+        self.title = self.add(npyscreen.TitleText, name='How many instances:',
+                              editable=False)
         self.num_instances = self.add(npyscreen.Textfield, rely=3)
 
     def change_screens(self):
@@ -84,20 +85,46 @@ class InstanceForm(npyscreen.ActionForm):
             old_val = 1
         if new_val > old_val:
             try:
-                npyscreen.notify_wait("Pulling up default settings for " +
-                                      self.tool_name + "...",
-                                      title="Gathering settings")
-                self.p_helper.clone(self.repo)
-                self.editor_args['instances'] = new_val
-                self.parentApp.addForm('EDITOR' + self.tool_name, EditorForm,
-                                       **self.editor_args)
-                self.parentApp.change_form('EDITOR' + self.tool_name)
+                res = npyscreen.notify_yes_no("You will be creating " +
+                                              str(new_val - old_val) +
+                                              " additional instance(s), is"
+                                              " that okay?")
+                if res:
+                    run = npyscreen.notify_yes_no("Do you want to start"
+                                                  " these new tools upon"
+                                                  " creation?")
+                    if not run:
+                        del self.editor_args['prep_start']
+                        del self.editor_args['start_tools']
+                    npyscreen.notify_wait("Pulling up default settings for " +
+                                          self.tool_name + "...",
+                                          title="Gathering settings")
+                    self.p_helper.clone(self.repo)
+                    self.editor_args['instances'] = new_val
+                    self.editor_args['old_instances'] = old_val
+                    self.parentApp.addForm('EDITOR' + self.tool_name,
+                                           EditorForm, **self.editor_args)
+                    self.parentApp.change_form('EDITOR' + self.tool_name)
             except Exception as e:
                 npyscreen.notify_confirm("Trouble getting information for"
                                          " tool " + self.tool_name +
                                          " because " + str(e), title="Error")
+                self.on_cacel()
         elif new_val < old_val:
-            pass
+            try:
+                res = npyscreen.notify_yes_no("You will be deleting " +
+                                              str(old_val - new_val) +
+                                              " instance(s), is"
+                                              " that okay?")
+                if res:
+                    self.title.hidden = True
+                    self.num_instances.hidden = True
+                    self.del_instances = self.add(npyscreen.MultiSelect,
+                                                  scroll_exit=True)
+            except Exception as e:
+                npyscreen.notify_confirm("Trouble deleting instances"
+                                         " because " + str(e))
+                self.on_cancel()
         else:
             self.on_cancel()
 

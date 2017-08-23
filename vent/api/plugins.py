@@ -543,16 +543,17 @@ class Plugin:
                     break
                 i += 1
 
+        # determine whether a tool should be considered a multi instance
+        try:
+            settings_dict = json.loads(template.option(section, 'settings')[1])
+            if int(settings_dict['instances']) > 1:
+                multi_instance = True
+            else:
+                multi_instance = False
+        except:
+            multi_instance = False
         # !! TODO return status of whether it built successfully or not
         if self.build:
-            try:
-                settings_dict = json.loads(template.option(section, 'settings')[1])
-                if int(settings_dict['instances']) > 1:
-                    multi_instance = True
-                else:
-                    mutli_instance = False
-            except:
-                multi_instance = False
             cwd = getcwd()
             chdir(match_path)
             try:

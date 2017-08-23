@@ -11,13 +11,19 @@ class EditorForm(npyscreen.ActionForm):
     def __init__(self, *args, **keywords):
         """ Initialize EditorForm objects """
         self.section_value = re.compile(r"""
-        \w+\ *=\ *[\w,-]*$      # option-value pairs
-        | \[\w+\]$              # section headers
+        \#.*                        # comments
+        | \w+\ *=\ *[\w,.:/#-]*$    # option-value pairs
+        | \[\w+\]$                  # section headers
         """, re.VERBOSE)
         self.save = keywords['save_configure']
         self.instance_cfg = False
+        self.p_helper = PluginHelper()
         if 'restart_tools' in keywords:
             self.restart_tools = keywords['restart_tools']
+        if 'prep_start' in keywords:
+            self.prep_start = keywords['prep_start']
+        if 'start_tools' in keywords:
+            self.start_tools = keywords['start_tools']
         if 'vent_cfg' in keywords and keywords['vent_cfg']:
             self.vent_cfg = True
             self.config_val = keywords['get_configure'](main_cfg=True)[1]
@@ -54,12 +60,13 @@ class EditorForm(npyscreen.ActionForm):
                 else:
                     try:
                         self.instance_cfg = True
-                        self.instances = keywords['instances']
-                        p_helper = PluginHelper()
+                        self.instances = int(keywords['instances'])
+                        self.old_instances = int(keywords['old_instances'])
                         constraints = {'name': keywords['tool_name'],
                                        'branch': keywords['branch'],
                                        'version': keywords['version']}
-                        tool, manifest = p_helper.constraint_options(constraints, [])
+                        tool, manifest = self.p_helper. \
+                                constraint_options(constraints, [])
                         # only one tool should be returned
                         section = tool.keys()[0]
                         path = manifest.option(section, 'path')[1]
@@ -76,7 +83,13 @@ class EditorForm(npyscreen.ActionForm):
                         else:
                             template_path = os.path.join(path, 'vent.template')
                         with open(template_path) as vent_template:
-                            self.config_val = vent_template.read()
+                            config_val = vent_template.read()
+                            if 'instances = ' in config_val:
+                                instance_start = config_val.find('instances =')
+                                to_delete = config_val[instance_start:\
+                                        config_val.find('\n', instance_start)+1]
+                                config_val = config_val.replace(to_delete, '')
+                            self.config_val = config_val
                     except:
                         self.config_val = ''
                         npyscreen.notify_confirm("Couldn't get default"
@@ -137,8 +150,6 @@ class EditorForm(npyscreen.ActionForm):
             if entry.strip() == '':
                 continue
             match = self.section_value.match(entry)
-            with open('/Users/bpagon/Desktop/random.txt', 'a') as f:
-                f.write(entry + ' || ' + str(match) + '\n')
             if not match:
                 try:
                     opt_val = entry.split('=', 1)
@@ -147,26 +158,12 @@ class EditorForm(npyscreen.ActionForm):
                 except:
                     npyscreen.notify_confirm("You didn't type in your input in"
                                              " a syntactically correct format."
-                                             " You may be missing spaces"
-                                             " between the equal sign, have"
-                                             " non-alphanumeric characters,"
-                                             " have extraneous characters,"
-                                             " etc.", title="Invalid input")
+                                             " Double check to make sure you"
+                                             " don't have extraneous"
+                                             " characters, have closed your"
+                                             " brackets, etc.",
+                                             title="Invalid input")
                     return
-
-        instances = 1
-        def instance_num(config_val):
-            """ Get the instance number from a given config string """
-            instance_loc = config_val.find('instances')
-            if instance_loc >= 0:
-                next_line = config_val.find('\n', instance_loc)
-                if next_line < 0:
-                    next_line = len(config_val)
-                instance = config_val[instance_loc+12:next_line]
-            else:
-                # default instance value
-                instance = '1'
-            return instance
 
         if self.vent_cfg:
             self.save(main_cfg=True, config_val=self.edit_space.value)
@@ -187,11 +184,35 @@ class EditorForm(npyscreen.ActionForm):
             if not self.vent_cfg:
                 restart_kargs.update({'name': self.tool_name,
                                       'version': self.version,
-                                      'branch': self.branch,
-                                      'instances': instances})
+                                      'branch': self.branch})
             npyscreen.notify_wait("Restarting tools affected by changes...",
                                   title="Restart")
             self.restart_tools(**restart_kargs)
+        # check if you need to start new instances
+        elif self.instance_cfg:
+            if hasattr(self, 'start_tools'):
+                npyscreen.notify_wait("Starting new instances...",
+                                      title="Start")
+                tool_d = {}
+                t_identifier = {'name': self.tool_name,
+                                'branch': self.branch,
+                                'version': self.version}
+                tools, manifest = self.p_helper. \
+                        constraint_options(t_identifier, [])
+                section = tools.keys()[0]
+                for i in range(self.old_instances + 1, self.instances + 1):
+                    i_section = section.rsplit(':', 2)
+                    i_section[0] += str(i)
+                    i_section = ':'.join(i_section)
+                    t_name = manifest.option(i_section, 'name')[1]
+                    t_branch = manifest.option(i_section, 'branch')[1]
+                    t_version = manifest.option(i_section, 'version')[1]
+                    t_id = {'name': t_name,
+                            'branch': t_branch,
+                            'version': t_version}
+                    tool_d.update(self.prep_start(**t_id)[1])
+                if tool_d:
+                    self.start_tools(tool_d)
         npyscreen.notify_confirm("Done configuring " + self.tool_name,
                                  title="Configurations saved")
         self.change_screens()

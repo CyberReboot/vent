@@ -232,11 +232,8 @@ class PluginHelper:
             # initialize needed vars
             c_name = s[section]['image_name'].replace(':', '-')
             c_name = c_name.replace('/', '-')
-            if 'instance_number' in s[section]:
-                instance = s[section]['instance_number']
-                self.logger.info(instance)
-                self.logger.info(str(isinstance(instance, int)))
-                c_name += instance if instance != '1' else ''
+            if s[section]['name'][-1] in '0123456789':
+                c_name += s[section]['name'][-1]
             image_name = s[section]['image_name']
 
             # checkout the right version and branch of the repo

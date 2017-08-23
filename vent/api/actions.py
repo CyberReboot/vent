@@ -166,22 +166,21 @@ class Action:
                             containers_remaining.remove(container)
 
             self.logger.info("group orders: " + str(group_orders))
-            self.logger.info("containers remaining " + str(containers_remaining))
-            if False:
-                # start containers based on priorities
-                p_results = self.p_helper.start_priority_containers(groups,
-                                                                    group_orders,
-                                                                    tool_d)
+            self.logger.info("containers remaining: " + str(containers_remaining))
+            # start containers based on priorities
+            p_results = self.p_helper.start_priority_containers(groups,
+                                                                group_orders,
+                                                                tool_d)
 
-                # start the rest of the containers that didn't have any priorities
-                r_results = self.p_helper.start_remaining_containers(containers_remaining, tool_d)
-                results = (p_results[0] + r_results[0],
-                           p_results[1] + r_results[1])
+            # start the rest of the containers that didn't have any priorities
+            r_results = self.p_helper.start_remaining_containers(containers_remaining, tool_d)
+            results = (p_results[0] + r_results[0],
+                       p_results[1] + r_results[1])
 
-                if len(results[1]) > 0:
-                    status = (False, results)
-                else:
-                    status = (True, results)
+            if len(results[1]) > 0:
+                status = (False, results)
+            else:
+                status = (True, results)
         except Exception as e:  # pragma: no cover
             self.logger.error("start failed with error: " + str(e))
             status = (False, str(e))
@@ -448,6 +447,8 @@ class Action:
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
                 container_name = container_name.replace('/', '-')
+                if s[section]['name'][-1] in '0123456789':
+                    container_name += s[section]['name'][-1]
                 try:
                     container = self.d_client.containers.get(container_name)
                     container.remove(force=True)
@@ -1003,6 +1004,8 @@ class Action:
                                         val += str(i)
                                     elif name == 'last_updated':
                                         val = Timestamp()
+                                    elif name == 'running':
+                                        val = 'no'
                                     manifest.set_option(i_section, name, val)
                                 template_to_manifest(vent_template, manifest,
                                                      i_section, instances)
@@ -1052,8 +1055,7 @@ class Action:
                       version="HEAD",
                       main_cfg=False,
                       old_val='',
-                      new_val='',
-                      instances=1):
+                      new_val=''):
         """
         Restart necessary tools based on changes that have been made either to
         vent.cfg or to vent.template. This includes tools that need to be
@@ -1065,26 +1067,26 @@ class Action:
             tools
             """
             dependencies = []
-            for tool in tools:
-                manifest = Template(self.plugin.manifest)
-                for section in manifest.sections()[1]:
+            if tools:
+                man = Template(self.plugin.manifest)
+                for section in man.sections()[1]:
                     # don't worry about dealing with tool if it's not running
-                    running = manifest.option(section, 'running')
+                    running = man.option(section, 'running')
                     if not running[0] or running[1] != 'yes':
                         continue
-                    t_name = manifest.option(section, 'name')[1]
-                    t_branch = manifest.option(section, 'branch')[1]
-                    t_version = manifest.option(section, 'version')[1]
+                    t_name = man.option(section, 'name')[1]
+                    t_branch = man.option(section, 'branch')[1]
+                    t_version = man.option(section, 'version')[1]
                     t_identifier = {'name': t_name,
                                     'branch': t_branch,
                                     'version': t_version}
-                    options = manifest.options(section)[1]
+                    options = man.options(section)[1]
                     if 'docker' in options:
-                        d_settings = json.loads(manifest.option(section,
-                                                                'docker')[1])
+                        d_settings = json.loads(man.option(section,
+                                                           'docker')[1])
                         if 'links' in d_settings:
                             for link in json.loads(d_settings['links']):
-                                if link.lower() in tool_changes:
+                                if link in tools:
                                     dependencies.append(t_identifier)
             return dependencies
 
@@ -1095,87 +1097,22 @@ class Action:
                 t_identifier = {'name': name,
                                 'branch': branch,
                                 'version': version}
-                tools = self.p_helper.constraint_options(t_identifier,
-                                                         ['running'])[0]
+                result = self.p_helper.constraint_options(t_identifier,
+                                                          ['running',
+                                                              'link_name'])
+                tools, manifest = result
                 tool = tools.keys()[0]
                 if ('running' in tools[tool] and
                         tools[tool]['running'] == 'yes'):
-                    self.clean(**t_identifier)
-                    self.start(**t_identifier)
-                if False:
-                    start_tools = []
+                    start_tools = [t_identifier]
+                    dependent_tools = [tools[tool]['link_name']]
+                    start_tools += find_dependencies(dependent_tools)
                     start_d = {}
-                    start_tools.append(t_identifier)
-                    result = self.p_helper.constraint_options(t_identifier, [])
-                    tool_d = result[0]
-                    manifest = result[1]
-                    for tool in tool_d:
-                        self.logger.info("restarting tool " + tool)
-                        # add, remove, update instances as needed
-                        clean_name = tool.rsplit(':', 2)
-                        if clean_name[0][-1] in '0123456789':
-                            clean_name[0] = clean_name[0][:-1]
-                        clean_name = ':'.join(clean_name)
-                        i = 1
-                        while True:
-                            i_section = clean_name.rsplit(':', 2)
-                            i_section[0] += str(i) if i != 1 else ''
-                            i_section = ':'.join(i_section)
-                            if manifest.section(i_section)[0] and i > instances:
-                                manifest.del_section(i_section)
-                            elif (not manifest.section(i_section)[0] and
-                                    i <= instances):
-                                manifest.add_section(i_section)
-                                for val_pair in manifest.section(tool)[1]:
-                                    name = val_pair[0]
-                                    val = val_pair[1]
-                                    if name == 'name':
-                                        if val[-1] in '0123456789':
-                                            val = val[:-1] + str(i)
-                                        else:
-                                            val += str(i)
-                                    elif name == 'instance_number':
-                                        val = str(i)
-                                    elif name == 'last_updated':
-                                        val = Timestamp()
-                                    elif name == 'running':
-                                        start_tools.append(i_section)
-                                    manifest.set_option(i_section, name, val)
-                            elif manifest.section(i_section)[0] and i <= instances:
-                                settings = manifest.option(i_section, 'settings')
-                                if settings[0]:
-                                    settings_dict = json.loads(settings[1])
-                                    settings_dict['instances'] = str(instances)
-                                    manifest.set_option(i_section, 'settings',
-                                                        json.dumps(settings_dict))
-                            else:
-                                break
-                            i += 1
-                        manifest.write_config()
-                        # only clean and start back up if running
-                        running = manifest.option(tool, 'running')
-                        if running[0] and running[1] == 'yes':
-                            self.logger.info("About to clean...   " + str(t_identifier))
-                            #self.clean(**t_identifier)
-                            self.logger.info("Start_tools: " + str(start_tools))
-                            for tool_identifier in start_tools:
-                                # translate sections into data that prep_start uses
-                                if not isinstance(tool_identifier, dict):
-                                    t_name = manifest.option(tool_identifier,
-                                                             'name')[1]
-                                    t_branch = manifest.option(tool_identifier,
-                                                             'branch')[1]
-                                    t_version = manifest.option(tool_identifier,
-                                                             'version')[1]
-                                    tool_identifier = {'name': t_name,
-                                                       'branch': t_branch,
-                                                       'version': t_version}
-                                start_d.update(self.prep_start(**tool_identifier)[1])
+                    for tool_identifier in start_tools:
+                        self.clean(**tool_identifier)
+                        start_d.update(self.prep_start(**tool_identifier)[1])
                     if start_d:
-                        self.logger.info("About to start...")
-                        for key in start_d:
-                            self.logger.info(key + ': ' + str(start_d[key]))
-                        # self.start(start_d)
+                        self.start(start_d)
             except Exception as e:  # pragma: no cover
                 self.logger.error('Trouble restarting tool ' + name +
                                   ' because: ' + str(e))
@@ -1205,28 +1142,31 @@ class Action:
                 tool_changes = []
                 for old_tool in old_tools:
                     if old_tool not in new_tools:
-                        tool_changes.append(old_tool.lower())
+                        tool_changes.append(old_tool)
                 for new_tool in new_tools:
                     if new_tool not in old_tools:
-                        tool_changes.append(new_tool.lower())
+                        tool_changes.append(new_tool)
                     else:
                         # tool name will be the same
                         oconf = old_val[old_val.find(new_tool):].split('\n')[0]
                         nconf = new_val[new_val.find(new_tool):].split('\n')[0]
                         if oconf != nconf:
-                            tool_changes.append(new_tool.lower())
-                dependencies = find_dependencies(tool_changes)
+                            tool_changes.append(new_tool)
+                # put link names in a dictionary for finding dependencies
+                dependent_tools = []
+                for i, entry in tool_changes:
+                    dependent_tools.append(entry)
+                    # change names to lowercase for use in clean, prep_start
+                    tool_changes[i] = {'name': entry.lower().replace('-', '_')}
+                dependencies = find_dependencies(dependent_tools)
                 # restart tools
                 restart = tool_changes + dependencies
+                tool_d = {}
                 for tool in restart:
-                    if isinstance(tool, dict):
-                        self.clean(**tool)
-                        tool_d = self.prep_start(**tool)[1]
-                    else:
-                        self.clean(name=tool)
-                        tool_d = self.prep_start(name=tool)[1]
-                    if tool_d:
-                        self.start(tool_d)
+                    self.clean(**tool)
+                    tool_d.update(self.prep_start(**tool)[1])
+                if tool_d:
+                    self.start(tool_d)
             except Exception as e:  # pragma: no cover
                 self.logger.error("Problem restarting tools: " + str(e))
                 status = (False, str(e))

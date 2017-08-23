@@ -401,6 +401,9 @@ class ToolForm(npyscreen.ActionForm):
                         else:
                             form_name = "INSTANCE" + t[0]
                             form = InstanceForm
+                            kargs.update({'clean': action.clean,
+                                          'prep_start': action.prep_start,
+                                          'start_tools': action.start})
                         self.parentApp.addForm(form_name, form, **kargs)
                         tools_to_configure.append(form_name)
                     else:
