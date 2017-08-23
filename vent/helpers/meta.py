@@ -492,3 +492,4 @@ def AutoInstall(**kargs):
             template.add_section(image.attrs['Labels']['vent.section'])
             # get url that image or code for image exists
             # check if repo has already been cloned, if not try to clone it
+            template.write_config()
