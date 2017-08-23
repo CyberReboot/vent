@@ -820,3 +820,26 @@ class Plugin:
             status = template.set_option(result, 'enabled', 'no')
         template.write_config()
         return status
+
+    def auto_install(self):
+        """
+        Automatically detects images and installes them in the manifest if they
+        are not there
+        """
+        template = Template(template=self.manifest)
+        sections = template.sections()
+        images = self.d_client.images.list(filters={'label': 'vent'})
+        for image in images:
+            if ('vent.section' in image.attrs['Labels'] and
+               not image.attrs['Labels']['vent.section'] in sections):
+                section = image.attrs['Labels']['vent.section']
+                template.add_section(section)
+                if 'vent.name' in image.attrs['Labels']:
+                    template.set_option(section,
+                                        'name',
+                                        image.attrs['Labels']['vent.name'])
+                if 'vent.repo' in image.attrs['Labels']:
+                    template.set_option(section,
+                                        'repo',
+                                        image.attrs['Labels']['vent.repo'])
+                template.write_config()
