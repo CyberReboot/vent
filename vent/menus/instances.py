@@ -53,7 +53,22 @@ class InstanceForm(npyscreen.ActionForm):
                 self.tool_name
 
     def create(self):
-        self.title = self.add(npyscreen.Textfield, value='How many instances:',
+        # get old number of instances for displaying
+        constraints = {'name': self.tool_name,
+                       'branch': self.branch,
+                       'version': self.version}
+        tools, manifest = self.p_helper.constraint_options(constraints, [])
+        section = tools.keys()[0]
+        try:
+            settings_dict = json.loads(manifest.option(section,
+                                                       'settings')[1])
+            prev_val = settings_dict['instances']
+        except:
+            # if no previous instance number defined, default is one
+            prev_val = '1'
+        self.title = self.add(npyscreen.Textfield, value='How many instances'
+                              ' (for reference, there are ' + prev_val +
+                              ' instance(s) of this tool already):',
                               editable=False, color="GOOD")
         self.num_instances = self.add(npyscreen.Textfield, rely=3)
 
@@ -150,9 +165,13 @@ class InstanceForm(npyscreen.ActionForm):
                                                   " additional instance(s), is"
                                                   " that okay?")
                     if res:
-                        run = npyscreen.notify_yes_no("Do you want to start"
-                                                      " these new tools upon"
-                                                      " creation?")
+                        if manifest.option(section, 'built')[1] == 'yes':
+                            run = npyscreen.notify_yes_no("Do you want to"
+                                                          " start these new"
+                                                          " tools upon"
+                                                          " creation?")
+                        else:
+                            run = False
                         if not run:
                             del self.editor_args['prep_start']
                             del self.editor_args['start_tools']
@@ -170,7 +189,7 @@ class InstanceForm(npyscreen.ActionForm):
                                              " tool " + self.tool_name +
                                              " because " + str(e),
                                              title="Error")
-                    self.on_cacel()
+                    self.on_cancel()
             elif new_val < old_val:
                 try:
                     res = npyscreen.notify_yes_no("You will be deleting " +

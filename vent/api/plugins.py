@@ -722,9 +722,12 @@ class Plugin:
         results, template = self.p_helper.constraint_options(args, [])
         for result in results:
             response, image_name = template.option(result, 'image_name')
+            name = template.option(result, 'name')[1]
 
             # check for container and remove
             container_name = image_name.replace(':', '-').replace('/', '-')
+            if name[-1] in '0123456789':
+                container_name += name[-1]
             try:
                 container = self.d_client.containers.get(container_name)
                 response = container.remove(v=True, force=True)
