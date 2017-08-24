@@ -48,21 +48,34 @@ pip
 python2.7.x
 ```
 
-### installing
+### option 1: running inside of a Docker container
+
+```
+docker run -it -v /var/run/docker.sock:/var/run/docker.sock cyberreboot/vent
+```
+
+### option 2: installing
 
 ```
 pip install vent
 ```
 
-### getting the bits and building
+### option 3: getting the bits and building
 
 ```
-git clone --recursive https://github.com/CyberReboot/vent.git
+git clone https://github.com/CyberReboot/vent.git
 cd vent
 make # (sudo may be required to install the vent command in the system bin path)
 ```
 
 _Note - If you already have `docker-py` installed on your machine, you may need to_ `pip uninstall docker-py` _first. `vent` will install `docker-py` as part of the installation process, however there are known incompatibilities of `docker-py` with older versions._
+
+### option 3: deploying with an ISO
+
+```
+go to [releases](https://github.com/CyberReboot/vent/releases) and download the ISO from the latest release (or build your own: `cd dev && make`)
+deploy the ISO as a VM or on bare metal.
+```
 
 ### running
 
