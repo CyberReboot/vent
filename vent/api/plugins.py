@@ -561,6 +561,8 @@ class Plugin:
                 # labels on images yet
                 name = template.option(section, "name")
                 groups = template.option(section, "groups")
+                repo = template.option(section, "repo")
+                t_type = template.option(section, "type")
                 if groups[1] == "" or not groups[0]:
                     groups = (True, "none")
                 if not name[0]:
@@ -629,9 +631,15 @@ class Plugin:
                     image_name = image_name.rsplit(':', 1)[0]+':'+self.version
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
+                                                      " vent.section=" +
+                                                      section + " --label"
+                                                      " vent.repo=" +
+                                                      repo[1] + " --label"
+                                                      " vent.type=" +
+                                                      t_type[1] + " --label"
                                                       " vent.name=" +
-                                                      name[1] + " --label "
-                                                      "vent.groups=" +
+                                                      name[1] + " --label"
+                                                      " vent.groups=" +
                                                       groups[1] + " -t " +
                                                       image_name +
                                                       commit_tag + file_tag),
@@ -880,3 +888,26 @@ class Plugin:
             status = template.set_option(result, 'enabled', 'no')
         template.write_config()
         return status
+
+    def auto_install(self):
+        """
+        Automatically detects images and installes them in the manifest if they
+        are not there
+        """
+        template = Template(template=self.manifest)
+        sections = template.sections()
+        images = self.d_client.images.list(filters={'label': 'vent'})
+        for image in images:
+            if ('vent.section' in image.attrs['Labels'] and
+               not image.attrs['Labels']['vent.section'] in sections):
+                section = image.attrs['Labels']['vent.section']
+                template.add_section(section)
+                if 'vent.name' in image.attrs['Labels']:
+                    template.set_option(section,
+                                        'name',
+                                        image.attrs['Labels']['vent.name'])
+                if 'vent.repo' in image.attrs['Labels']:
+                    template.set_option(section,
+                                        'repo',
+                                        image.attrs['Labels']['vent.repo'])
+                template.write_config()

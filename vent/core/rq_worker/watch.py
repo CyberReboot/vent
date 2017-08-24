@@ -204,7 +204,9 @@ def file_queue(path, template_path="/vent/"):
         for section in sections:
             path = path_copy
             orig_path = ''
-            labels = {'vent-plugin': '', 'file': path}
+            repo = config.get(section, 'repo')
+            t_type = config.get(section, 'type')
+            labels = {'vent-plugin': '', 'file': path, 'vent.section': section, 'vent.repo': repo, 'vent.type': t_type}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
             name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
