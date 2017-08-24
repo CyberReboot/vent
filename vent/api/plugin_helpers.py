@@ -329,6 +329,9 @@ class PluginHelper:
             tool_d[c_name]['labels']['vent.branch'] = branch
             tool_d[c_name]['labels']['vent.version'] = version
             tool_d[c_name]['labels']['vent.name'] = s[section]['name']
+            tool_d[c_name]['labels']['vent.section'] = section
+            tool_d[c_name]['labels']['vent.repo'] = s[section]['repo']
+            tool_d[c_name]['labels']['vent.type'] = s[section]['type']
 
             # check for log_config settings in external-services
             externally_configured = False
@@ -450,8 +453,9 @@ class PluginHelper:
                        'path',
                        'image_name',
                        'branch',
-                       'version',
-                       'instance_number']
+                       'repo',
+                       'type',
+                       'version']
             vent_config = Template(template=self.path_dirs.cfg_file)
             files = vent_config.option('main', 'files')
             files = (files[0], expanduser(files[1]))
