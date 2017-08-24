@@ -166,7 +166,8 @@ class Action:
                             containers_remaining.remove(container)
 
             self.logger.info("group orders: " + str(group_orders))
-            self.logger.info("containers remaining: " + str(containers_remaining))
+            self.logger.info("containers remaining: " + \
+                    str(containers_remaining))
             # start containers based on priorities
             p_results = self.p_helper.start_priority_containers(groups,
                                                                 group_orders,
@@ -922,8 +923,8 @@ class Action:
         # get rid of instances if user tried to configure it in template
         if 'instances = ' in config_val:
             instance_start = config_val.find('instances =')
-            to_delete = config_val[instance_start:config_val. \
-                    find('\n', instance_start)+1]
+            to_delete = config_val[instance_start:config_val.
+                                                  find('\n', instance_start)+1]
             config_val = config_val.replace(to_delete, '')
         self.logger.info("Starting: save_configure")
         constraints = locals()
@@ -1010,24 +1011,29 @@ class Action:
                                 template_to_manifest(vent_template, manifest,
                                                      i_section, instances)
                             else:
-                                settings = manifest.option(i_section, 'settings')
+                                settings = manifest.option(i_section,
+                                                           'settings')
                                 if settings[0]:
                                     settings_dict = json.loads(settings[1])
                                     settings_dict['instances'] = str(instances)
                                     manifest.set_option(i_section, 'settings',
-                                                        json.dumps(settings_dict))
+                                                        json.dumps(
+                                                            settings_dict))
                                 else:
-                                    settings_dict = {'instances': str(instances)}
+                                    inst = str(instances)
+                                    settings_dict = {'instances': inst}
                                     manifest.set_option(i_section, 'settings',
-                                                        json.dumps(settings_dict))
+                                                        json.dumps(
+                                                            settings_dict))
                     else:
                         try:
-                            settings_dict = json.loads(manifest.option(tool,
-                                                                       'settings')[1])
+                            settings_str = manifest.option(tool, 'settings')[1]
+                            settings_dict = json.loads(settings_str)
                             old_instances = int(settings_dict['instances'])
                         except Exception:
                             old_instances = 1
-                        template_to_manifest(vent_template, manifest, tool, old_instances)
+                        template_to_manifest(vent_template, manifest,
+                                             tool, old_instances)
                     manifest.write_config()
                 except Exception as e:  # pragma: no cover
                     self.logger.error("save_configure error: " + str(e))

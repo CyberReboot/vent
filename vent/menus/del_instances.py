@@ -32,7 +32,7 @@ class DeleteForm(npyscreen.ActionForm):
     """ A form for selecting instances to delete and deleting them """
     def __init__(self, *args, **keywords):
         """ Initialize a delete form object """
-        self.remaining_instances = int(keywords['remaining_instances'])
+        self.new_instances = int(keywords['new_instances'])
         self.next_tool = keywords['next_tool']
         self.manifest = keywords['manifest']
         self.clean = keywords['clean']
@@ -53,14 +53,15 @@ class DeleteForm(npyscreen.ActionForm):
 
     def create(self):
         """ Creates the necessary display for this form """
+        self.add_handlers({"^E": self.quit})
+        to_delete = self.old_instances - self.new_instances 
         self.add(npyscreen.Textfield, value='Select which instances to delete'
-                 ' (you must select ' +
-                 str(self.old_instances - self.remaining_instances) +
+                 ' (you must select ' + str(to_delete) +
                  ' instance(s) to delete):', editable=False, color="GOOD")
         self.del_instances = self.add(InstanceSelect,
                                       values=self.cur_instances,
                                       scroll_exit=True, rely=3,
-                                      instance_num=self.remaining_instances)
+                                      instance_num=to_delete)
 
     def change_screens(self):
         """ Change to the next tool to edit or back to MAIN form """
@@ -68,6 +69,11 @@ class DeleteForm(npyscreen.ActionForm):
             self.parentApp.change_form(self.next_tool)
         else:
             self.parentApp.change_form("MAIN")
+
+    def quit(self, *args, **kargs):
+        """ Quit without making any changes to the tool """
+        npyscreen.notify_confirm("No changes made")
+        self.change_screens()
 
     def on_ok(self):
         """ Takes the input the user gave and performs necessary actions """
@@ -79,36 +85,40 @@ class DeleteForm(npyscreen.ActionForm):
         for i, val in enumerate(self.del_instances.values):
             # clean all tools for renmaing and relabeling purposes
             t = val.split(':')
-            self.clean(name=t[0], branch=t[1], version=t[2])
             if i in self.del_instances.value:
+                self.clean(name=t[0], branch=t[1], version=t[2])
                 self.manifest.del_section(self.display_to_section[':'.join(t)])
             else:
                 try:
-                    # shift remaining containers down for naming purposes
-                    val_arr = val.split(':')
+                    # update instances for tools remaining
                     i_section = self.display_to_section[val]
                     settings_dict = json.loads(self.manifest.option \
                             (i_section, 'settings')[1])
-                    settings_dict['instances'] = self.remaining_instances
+                    settings_dict['instances'] = self.new_instances
                     self.manifest.set_option(i_section, 'settings',
                                         json.dumps(settings_dict))
-                    prev_name = self.manifest.option(i_section, 'name')[1]
-                    # number to identify different sections and tools by
+                    # check if tool name doesn't need to be shifted because
+                    # it's already correct
                     identifier = str(shift_num) if shift_num != 1 else ''
-                    new_name = re.split(r'[0-9]', prev_name)[0] + \
-                            identifier
-                    self.manifest.set_option(i_section, 'name', new_name)
-                    # copy new contents into shifted version
                     new_section = re.sub(r'[0-9]', identifier,
                                          i_section, 1)
-                    self.manifest.add_section(new_section)
-                    for val_pair in self.manifest.section(i_section)[1]:
-                        self.manifest.set_option(new_section, val_pair[0],
-                                            val_pair[1])
-                    self.manifest.del_section(i_section)
-                    to_update.append({'name': new_name,
-                                      'branch': val_arr[1],
-                                      'version': val_arr[2]})
+                    if i_section != new_section:
+                        # clean for renaming container and its labels, 
+                        # and rename tool
+                        self.clean(name=t[0], branch=t[1], version=t[2])
+                        prev_name = self.manifest.option(i_section, 'name')[1]
+                        new_name = re.split(r'[0-9]', prev_name)[0] + \
+                                identifier
+                        self.manifest.set_option(i_section, 'name', new_name)
+                        # copy new contents into shifted version
+                        self.manifest.add_section(new_section)
+                        for val_pair in self.manifest.section(i_section)[1]:
+                            self.manifest.set_option(new_section, val_pair[0],
+                                                     val_pair[1])
+                        self.manifest.del_section(i_section)
+                        to_update.append({'name': new_name,
+                                          'branch': t[1],
+                                          'version': t[2]})
                     shift_num += 1
                 except Exception as e:
                     npyscreen.notify_confirm("Trouble deleting tools"
@@ -125,5 +135,4 @@ class DeleteForm(npyscreen.ActionForm):
 
     def on_cancel(self):
         """ Exits the form without performing any action """
-        npyscreen.notify_confirm("No changes made")
-        self.change_screens()
+        self.quit()

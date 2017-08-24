@@ -414,8 +414,10 @@ class ToolForm(npyscreen.ActionForm):
                             kargs.update({'clean': action.clean,
                                           'prep_start': action.prep_start,
                                           'start_tools': action.start,
-                                          'name': 'New number of instances' \
-                                                  ' for ' + t[0]})
+                                          'name': 'New number of instances'
+                                                  ' for ' + t[0] + '\t'*8 +
+                                                  '^E to exit configuration'
+                                                  ' process'})
                         self.parentApp.addForm(form_name, form, **kargs)
                         tools_to_configure.append(form_name)
                     else:

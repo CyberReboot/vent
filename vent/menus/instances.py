@@ -25,11 +25,12 @@ class InstanceForm(npyscreen.ActionForm):
         self.p_helper = PluginHelper(plugins_dir='.internals/')
         super(InstanceForm, self).__init__(*args, **keywords)
         del self.editor_args['parentApp']
-        self.editor_args['name'] = 'Configure new instances for ' + \
-                self.tool_name
+        editor_name = 'Configure new instances for ' + self.tool_name
+        self.editor_args['name'] = editor_name
 
     def create(self):
         """ Creates the necessary display for this form """
+        self.add_handlers({"^E": self.quit})
         # get old number of instances for displaying
         constraints = {'name': self.tool_name,
                        'branch': self.branch,
@@ -55,6 +56,11 @@ class InstanceForm(npyscreen.ActionForm):
             self.parentApp.change_form(self.next_tool)
         else:
             self.parentApp.change_form("MAIN")
+
+    def quit(self, *args, **kargs):
+        """ Quit without making any changes to the tool """
+        npyscreen.notify_confirm("No changes made")
+        self.change_screens()
 
     def on_ok(self):
         """ Takes the input the user gave and performs necessary actions """
@@ -111,7 +117,7 @@ class InstanceForm(npyscreen.ActionForm):
                                          " tool " + self.tool_name +
                                          " because " + str(e),
                                          title="Error")
-                self.on_cancel()
+                self.quit()
         elif new_val < old_val:
             try:
                 res = npyscreen.notify_yes_no("You will be deleting " +
@@ -119,9 +125,10 @@ class InstanceForm(npyscreen.ActionForm):
                                               " instance(s), is"
                                               " that okay?")
                 if res:
-                    form_name = 'Delete instances for ' + self.tool_name
+                    form_name = 'Delete instances for ' + self.tool_name + \
+                            '\t'*8 + '^E to exit configuration process'
                     deleter_args = {'name': form_name,
-                                    'remaining_instances': new_val,
+                                    'new_instances': new_val,
                                     'old_instances': old_val,
                                     'next_tool': self.next_tool,
                                     'manifest': manifest,
@@ -135,16 +142,15 @@ class InstanceForm(npyscreen.ActionForm):
             except Exception as e:
                 npyscreen.notify_confirm("Trouble finding instances to"
                                          " delete because " + str(e))
-                self.on_cancel()
+                self.quit()
         else:
             res = npyscreen.notify_yes_no("This is the same number of"
                                           " instances you already have,"
                                           " do you want to exit?",
                                           title="Same number of instaces")
             if res:
-                self.on_cancel()
+                self.quit()
 
     def on_cancel(self):
         """ Exits the form without performing any action """
-        npyscreen.notify_confirm("No changes made")
-        self.change_screens()
+        self.quit()

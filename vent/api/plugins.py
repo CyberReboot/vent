@@ -12,6 +12,7 @@ from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.errors import ErrorHandler
 from vent.helpers.logs import Logger
+from vent.helpers.meta import Timestamp
 from vent.helpers.paths import PathDirs
 
 
@@ -535,10 +536,7 @@ class Plugin:
                         template.set_option(addtl_section, "image_id",
                                             image_id)
                     template.set_option(addtl_section,
-                                        "last_updated",
-                                        str(datetime. \
-                                                utcnow()) +
-                                        " UTC")
+                                        "last_updated", Timestamp())
                 else:
                     break
                 i += 1
@@ -590,7 +588,8 @@ class Plugin:
                                                 " UTC")
                             # set other instances too
                             if multi_instance:
-                                set_instances(template, section, 'yes', image_id)
+                                set_instances(template, section, 'yes',
+                                              image_id)
                             status = (True, "Pulled " + image_name)
                             self.logger.info(str(status))
                         else:

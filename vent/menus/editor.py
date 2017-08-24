@@ -46,7 +46,7 @@ class EditorForm(npyscreen.ActionForm):
                 self.from_registry = keywords['from_registry']
                 # get vent.template settings for specific tool
                 if ('instance_cfg' not in keywords or
-                        keywords['instance_cfg'] == False):
+                        not keywords['instance_cfg']):
                     template = keywords['get_configure'](name=self.tool_name,
                                                          branch=self.branch,
                                                          version=self.version)
@@ -65,14 +65,15 @@ class EditorForm(npyscreen.ActionForm):
                         constraints = {'name': keywords['tool_name'],
                                        'branch': keywords['branch'],
                                        'version': keywords['version']}
-                        tool, manifest = self.p_helper. \
-                                constraint_options(constraints, [])
+                        res = self.p_helper.constraint_options(constraints, [])
+                        tool, manifest = res
                         # only one tool should be returned
                         section = tool.keys()[0]
                         path = manifest.option(section, 'path')[1]
                         # sending defaults to internals so it doesn't mess with
                         # installed plugins
-                        path = path.replace('.vent/plugins', '.vent/.internals')
+                        path = path.replace('.vent/plugins',
+                                            '.vent/.internals')
                         multi_tool = manifest.option(section, 'multi_tool')
                         if multi_tool[0] and multi_tool[1] == 'yes':
                             name = manifest.option(section, 'name')[1]
@@ -85,15 +86,16 @@ class EditorForm(npyscreen.ActionForm):
                         with open(template_path) as vent_template:
                             config_val = vent_template.read()
                             if 'instances = ' in config_val:
-                                instance_start = config_val.find('instances =')
-                                to_delete = config_val[instance_start:\
-                                        config_val.find('\n', instance_start)+1]
+                                inst_start = config_val.find('instances =')
+                                inst_end = config_val.find('\n',
+                                                           inst_start) + 1
+                                to_delete = config_val[inst_start:inst_end]
                                 config_val = config_val.replace(to_delete, '')
                             self.config_val = config_val
                     except Exception:
                         self.config_val = ''
                         npyscreen.notify_confirm("Couldn't get default"
-                                                 " settings for tool because " + str(e) + ", you can"
+                                                 " settings for tool, you can"
                                                  " still enter in settings you"
                                                  " want", title="Unsuccessful"
                                                  " default")
@@ -201,8 +203,8 @@ class EditorForm(npyscreen.ActionForm):
                 t_identifier = {'name': self.tool_name,
                                 'branch': self.branch,
                                 'version': self.version}
-                tools, manifest = self.p_helper. \
-                        constraint_options(t_identifier, [])
+                result = self.p_helper.constraint_options(t_identifier, [])
+                tools, manifest = result
                 section = tools.keys()[0]
                 for i in range(self.old_instances + 1, self.instances + 1):
                     i_section = section.rsplit(':', 2)
