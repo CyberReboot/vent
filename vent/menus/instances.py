@@ -47,8 +47,6 @@ class InstanceForm(npyscreen.ActionForm):
         del self.editor_args['clean']
         del self.editor_args['restart_tools']
         self.p_helper = PluginHelper(plugins_dir='.internals/')
-        keywords['name'] = 'New number of instances for ' + \
-                keywords['tool_name']
         super(InstanceForm, self).__init__(*args, **keywords)
         del self.editor_args['parentApp']
         self.editor_args['name'] = 'Configure new instances for ' + \

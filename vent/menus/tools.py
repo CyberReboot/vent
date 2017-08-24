@@ -48,6 +48,7 @@ class ToolForm(npyscreen.ActionForm):
                 # don't do core because that's the purpose of all in views
                 if group != '' and group != 'core':
                     possible_groups.add(group)
+        self.manifest = manifest
         self.views += possible_groups
         self.views.append('all groups')
         super(ToolForm, self).__init__(*args, **keywords)
@@ -58,13 +59,13 @@ class ToolForm(npyscreen.ActionForm):
 
     def toggle_view(self, *args, **kwargs):
         """ Toggles the view between different groups """
-        manifest = Template(self.api_action.plugin.manifest)
         group_to_display = self.views.popleft()
         self.cur_view.value = group_to_display
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
-                if group_to_display not in manifest.option(tool, 'groups')[1] \
-                        and group_to_display != 'all groups':
+                t_groups = manifest.option(tool, 'groups')[1]
+                if group_to_display not in t_groups and \
+                        group_to_display != 'all groups':
                     self.tools_tc[repo][tool].value = False
                     self.tools_tc[repo][tool].hidden = True
                 else:
@@ -79,10 +80,19 @@ class ToolForm(npyscreen.ActionForm):
         """ Change whether configuring template or instances """
         # reverse whatever previous configuration decision was
         if self.conf_instances:
-            self.configure_view.value = 'template'
+            self.configure_view.value = 'specific tool'
         else:
             self.configure_view.value = 'instances'
         self.conf_instances = not self.conf_instances
+        for repo in self.tools_tc:
+            for tool in self.tools_tc[repo]:
+                if self.manifest.option(tool, 'name')[1][-1] in '0123456789':
+                    if self.conf_instances:
+                        self.tools_tc[repo][tool].value = False
+                        self.tools_tc[repo][tool].hidden = True
+                    else:
+                        self.tools_tc[repo][tool].value = True
+                        self.tools_tc[repo][tool].hidden = False
         self.display()
 
     def create(self, group_view=False):
@@ -105,8 +115,8 @@ class ToolForm(npyscreen.ActionForm):
         if self.action['action_name'] == 'configure':
             self.configure_view = self.add(npyscreen.TitleText,
                                            name='Configuring:',
-                                           value='template', editable=False,
-                                           rely=3)
+                                           value='specific tool',
+                                           editable=False, rely=3)
             self.conf_instances = False
             self.add_handlers({"^B": self.change_configure})
             i = 5
@@ -403,7 +413,9 @@ class ToolForm(npyscreen.ActionForm):
                             form = InstanceForm
                             kargs.update({'clean': action.clean,
                                           'prep_start': action.prep_start,
-                                          'start_tools': action.start})
+                                          'start_tools': action.start,
+                                          'name': 'New number of instances' \
+                                                  ' for ' + t[0]})
                         self.parentApp.addForm(form_name, form, **kargs)
                         tools_to_configure.append(form_name)
                     else:
