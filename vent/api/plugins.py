@@ -823,16 +823,19 @@ class Plugin:
 
     def auto_install(self):
         """
-        Automatically detects images and installes them in the manifest if they
-        are not there
+        Automatically detects images and installs them in the manifest if they
+        are not there already
         """
         template = Template(template=self.manifest)
         sections = template.sections()
         images = self.d_client.images.list(filters={'label': 'vent'})
+        add_sections = []
+        status = (True, None)
         for image in images:
             if ('vent.section' in image.attrs['Labels'] and
                not image.attrs['Labels']['vent.section'] in sections):
                 section = image.attrs['Labels']['vent.section']
+                section_str = image.attrs['Labels']['vent.section'].split(":")
                 template.add_section(section)
                 if 'vent.name' in image.attrs['Labels']:
                     template.set_option(section,
@@ -842,4 +845,30 @@ class Plugin:
                     template.set_option(section,
                                         'repo',
                                         image.attrs['Labels']['vent.repo'])
+                if ('vent.type' in image.attrs['Labels'] and
+                   image.attrs['Labels']['vent.type'] == 'repository'):
+                    template.set_option(section, 'namespace', "/".join(section_str[:2]))
+                    template.set_option(section, 'path', section_str[-3])
+                    template.set_option(section, 'enabled', 'yes')
+                    template.set_option(section, 'branch', section_str[-2])
+                    template.set_option(section, 'version', section_str[-1])
+                    template.set_option(section, 'last_updated', str(datetime.utcnow()) + " UTC")
+                    template.set_option(section, 'image_name', image.attrs['RepoTags'][0])
+                    template.set_option(section, 'type', 'repository')
+                    # TODO get template settings
+                if 'vent.groups' in image.attrs['Labels']:
+                    template.set_option(section,
+                                        'groups',
+                                        image.attrs['Labels']['vent.groups'])
+                template.set_option(section, 'built', 'yes')
+                template.set_option(section, 'image_id', image.attrs['Id'].split(":")[1][:12])
+                template.set_option(section, 'running', 'no')
+                # check if image is running as a container
+                containers = self.d_client.containers.list(filters={'label': 'vent'})
+                for container in containers:
+                    if container.attrs['Image'] == image.attrs['Id']:
+                        template.set_option(section, 'running', 'yes')
+                add_sections.append(section)
                 template.write_config()
+        status = (True, add_sections)
+        return status
