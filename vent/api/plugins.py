@@ -850,12 +850,32 @@ class Plugin:
                     if not isdir(git_path):
                         # clone it down
                         status = self.p_helper.clone(image.attrs['Labels']['vent.repo'])
-                    # TODO get link name
-                    # TODO get template settings
+                    template.set_option(section, 'path', join(git_path, section_str[-3][1:]))
+                    # get template settings
+                    # TODO account for template files not named vent.template
+                    v_template = Template(template=join(git_path, section_str[-3][1:], 'vent.template'))
+                    tool_sections = v_template.sections()
+                    if tool_sections[0]:
+                        for s in tool_sections[1]:
+                            section_dict = {}
+                            options = v_template.options(s)
+                            if options[0]:
+                                for option in options[1]:
+                                    option_name = option
+                                    if option == 'name':
+                                        # get link name
+                                        template.set_option(section,
+                                                            "link_name",
+                                                            v_template.option(s, option)[1])
+                                        option_name = 'link_name'
+                                    opt_val = v_template.option(s, option)[1]
+                                    section_dict[option_name] = opt_val
+                            if section_dict:
+                                template.set_option(section, s,
+                                                    json.dumps(section_dict))
                 if ('vent.type' in image.attrs['Labels'] and
                    image.attrs['Labels']['vent.type'] == 'repository'):
                     template.set_option(section, 'namespace', "/".join(section_str[:2]))
-                    template.set_option(section, 'path', section_str[-3])
                     template.set_option(section, 'enabled', 'yes')
                     template.set_option(section, 'branch', section_str[-2])
                     template.set_option(section, 'version', section_str[-1])
