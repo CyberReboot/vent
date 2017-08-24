@@ -77,7 +77,7 @@ class EditorForm(npyscreen.ActionForm):
                         if multi_tool[0] and multi_tool[1] == 'yes':
                             name = manifest.option(section, 'name')[1]
                             if name == 'unspecified':
-                                name == 'vent'
+                                name = 'vent'
                             template_path = os.path.join(path,
                                                          name + '.template')
                         else:
@@ -90,7 +90,7 @@ class EditorForm(npyscreen.ActionForm):
                                         config_val.find('\n', instance_start)+1]
                                 config_val = config_val.replace(to_delete, '')
                             self.config_val = config_val
-                    except:
+                    except Exception:
                         self.config_val = ''
                         npyscreen.notify_confirm("Couldn't get default"
                                                  " settings for tool because " + str(e) + ", you can"
@@ -153,16 +153,20 @@ class EditorForm(npyscreen.ActionForm):
             if not match:
                 try:
                     opt_val = entry.split('=', 1)
-                    assert(opt_val[0].strip() != '')
+                    if opt_val[0].strip() == '':
+                        raise Exception("It appears you haven't written"
+                                        " anything before an equals sign"
+                                        " somewhere.")
                     ast.literal_eval(opt_val[1].strip())
-                except:
+                except Exception as e:
                     npyscreen.notify_confirm("You didn't type in your input in"
                                              " a syntactically correct format."
                                              " Double check to make sure you"
                                              " don't have extraneous"
                                              " characters, have closed your"
-                                             " brackets, etc.",
-                                             title="Invalid input")
+                                             " brackets, etc. Here's an error"
+                                             " message that may be helpful: " +
+                                             str(e), title="Invalid input")
                     return
 
         if self.vent_cfg:

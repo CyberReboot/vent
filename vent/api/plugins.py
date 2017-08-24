@@ -550,7 +550,7 @@ class Plugin:
                 multi_instance = True
             else:
                 multi_instance = False
-        except:
+        except Exception:
             multi_instance = False
         # !! TODO return status of whether it built successfully or not
         if self.build:

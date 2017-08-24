@@ -1025,7 +1025,7 @@ class Action:
                             settings_dict = json.loads(manifest.option(tool,
                                                                        'settings')[1])
                             old_instances = int(settings_dict['instances'])
-                        except:
+                        except Exception:
                             old_instances = 1
                         template_to_manifest(vent_template, manifest, tool, old_instances)
                     manifest.write_config()
@@ -1100,7 +1100,7 @@ class Action:
                 result = self.p_helper.constraint_options(t_identifier,
                                                           ['running',
                                                               'link_name'])
-                tools, manifest = result
+                tools = result[0]
                 tool = tools.keys()[0]
                 if ('running' in tools[tool] and
                         tools[tool]['running'] == 'yes'):

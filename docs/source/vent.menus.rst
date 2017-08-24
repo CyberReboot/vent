@@ -36,6 +36,14 @@ vent\.menus\.choose\_tools module
     :undoc-members:
     :show-inheritance:
 
+vent\.menus\.del\_instances module
+----------------------------------
+
+.. automodule:: vent.menus.del_instances
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 vent\.menus\.editor module
 --------------------------
 

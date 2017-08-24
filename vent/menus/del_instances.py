@@ -1,0 +1,129 @@
+import json
+import npyscreen
+import re
+
+
+class InstanceSelect(npyscreen.MultiSelect):
+    """
+    A widget class for selecting an exact amount of instances to perform
+    actions on
+    """
+    def __init__(self, *args, **kargs):
+        """ Initialize an instance select object """
+        self.instance_num = kargs['instance_num']
+        super(InstanceSelect, self).__init__(*args, **kargs)
+
+    def when_value_edited(self, *args, **kargs):
+        """ Overrided to prevent user from selecting too many instances """
+        if len(self.value) > self.instance_num:
+            self.value.pop(-2)
+            self.display()
+
+    def safe_to_exit(self, *args, **kargs):
+        """
+        Overrided to prevent user from exiting selection until
+        they have selected the right amount of instances
+        """
+        if len(self.value) == self.instance_num:
+            return True
+        return False
+
+class DeleteForm(npyscreen.ActionForm):
+    """ A form for selecting instances to delete and deleting them """
+    def __init__(self, *args, **keywords):
+        """ Initialize a delete form object """
+        self.remaining_instances = int(keywords['remaining_instances'])
+        self.next_tool = keywords['next_tool']
+        self.manifest = keywords['manifest']
+        self.clean = keywords['clean']
+        self.prep_start = keywords['prep_start']
+        self.start_tools = keywords['start_tools']
+        self.cur_instances = []
+        self.display_to_section = {}
+        self.old_instances = int(keywords['old_instances'])
+        section = keywords['section']
+        for i in range(1, self.old_instances + 1):
+            i_section = section.rsplit(':', 2)
+            i_section[0] += str(i) if i != 1 else ''
+            i_section = ':'.join(i_section)
+            display = i_section.rsplit('/', 1)[-1]
+            self.cur_instances.append(display)
+            self.display_to_section[display] = i_section
+        super(DeleteForm, self).__init__(*args, **keywords)
+
+    def create(self):
+        """ Creates the necessary display for this form """
+        self.add(npyscreen.Textfield, value='Select which instances to delete'
+                 ' (you must select ' +
+                 str(self.old_instances - self.remaining_instances) +
+                 ' instance(s) to delete):', editable=False, color="GOOD")
+        self.del_instances = self.add(InstanceSelect,
+                                      values=self.cur_instances,
+                                      scroll_exit=True, rely=3,
+                                      instance_num=self.remaining_instances)
+
+    def change_screens(self):
+        """ Change to the next tool to edit or back to MAIN form """
+        if self.next_tool:
+            self.parentApp.change_form(self.next_tool)
+        else:
+            self.parentApp.change_form("MAIN")
+
+    def on_ok(self):
+        """ Takes the input the user gave and performs necessary actions """
+        npyscreen.notify_wait("Deleting instances given...",
+                              title="In progress")
+        # keep track of number for shifting instances down for alignment
+        shift_num = 1
+        to_update = []
+        for i, val in enumerate(self.del_instances.values):
+            # clean all tools for renmaing and relabeling purposes
+            t = val.split(':')
+            self.clean(name=t[0], branch=t[1], version=t[2])
+            if i in self.del_instances.value:
+                self.manifest.del_section(self.display_to_section[':'.join(t)])
+            else:
+                try:
+                    # shift remaining containers down for naming purposes
+                    val_arr = val.split(':')
+                    i_section = self.display_to_section[val]
+                    settings_dict = json.loads(self.manifest.option \
+                            (i_section, 'settings')[1])
+                    settings_dict['instances'] = self.remaining_instances
+                    self.manifest.set_option(i_section, 'settings',
+                                        json.dumps(settings_dict))
+                    prev_name = self.manifest.option(i_section, 'name')[1]
+                    # number to identify different sections and tools by
+                    identifier = str(shift_num) if shift_num != 1 else ''
+                    new_name = re.split(r'[0-9]', prev_name)[0] + \
+                            identifier
+                    self.manifest.set_option(i_section, 'name', new_name)
+                    # copy new contents into shifted version
+                    new_section = re.sub(r'[0-9]', identifier,
+                                         i_section, 1)
+                    self.manifest.add_section(new_section)
+                    for val_pair in self.manifest.section(i_section)[1]:
+                        self.manifest.set_option(new_section, val_pair[0],
+                                            val_pair[1])
+                    self.manifest.del_section(i_section)
+                    to_update.append({'name': new_name,
+                                      'branch': val_arr[1],
+                                      'version': val_arr[2]})
+                    shift_num += 1
+                except Exception as e:
+                    npyscreen.notify_confirm("Trouble deleting tools"
+                                             " because " + str(e))
+        self.manifest.write_config()
+        tool_d = {}
+        for tool in to_update:
+            tool_d.update(self.prep_start(**tool)[1])
+        if tool_d:
+            self.start_tools(tool_d)
+        npyscreen.notify_confirm("Done deleting instances.",
+                                 title="Finished")
+        self.change_screens()
+
+    def on_cancel(self):
+        """ Exits the form without performing any action """
+        npyscreen.notify_confirm("No changes made")
+        self.change_screens()
