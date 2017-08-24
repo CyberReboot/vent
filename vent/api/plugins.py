@@ -5,7 +5,7 @@ import shlex
 
 from datetime import datetime
 from os import chdir, getcwd
-from os.path import join
+from os.path import isdir, join
 from subprocess import check_output, STDOUT
 
 from vent.api.plugin_helpers import PluginHelper
@@ -833,7 +833,7 @@ class Plugin:
         status = (True, None)
         for image in images:
             if ('vent.section' in image.attrs['Labels'] and
-               not image.attrs['Labels']['vent.section'] in sections):
+               not image.attrs['Labels']['vent.section'] in sections[1]):
                 section = image.attrs['Labels']['vent.section']
                 section_str = image.attrs['Labels']['vent.section'].split(":")
                 template.add_section(section)
@@ -845,6 +845,13 @@ class Plugin:
                     template.set_option(section,
                                         'repo',
                                         image.attrs['Labels']['vent.repo'])
+                    git_path = join(self.path_dirs.plugins_dir,
+                                    "/".join(section_str[:2]))
+                    if not isdir(git_path):
+                        # clone it down
+                        status = self.p_helper.clone(image.attrs['Labels']['vent.repo'])
+                    # TODO get link name
+                    # TODO get template settings
                 if ('vent.type' in image.attrs['Labels'] and
                    image.attrs['Labels']['vent.type'] == 'repository'):
                     template.set_option(section, 'namespace', "/".join(section_str[:2]))
@@ -855,7 +862,6 @@ class Plugin:
                     template.set_option(section, 'last_updated', str(datetime.utcnow()) + " UTC")
                     template.set_option(section, 'image_name', image.attrs['RepoTags'][0])
                     template.set_option(section, 'type', 'repository')
-                    # TODO get template settings
                 if 'vent.groups' in image.attrs['Labels']:
                     template.set_option(section,
                                         'groups',
@@ -870,5 +876,6 @@ class Plugin:
                         template.set_option(section, 'running', 'yes')
                 add_sections.append(section)
                 template.write_config()
-        status = (True, add_sections)
+        if status[0]:
+            status = (True, add_sections)
         return status
