@@ -13,7 +13,7 @@ class EditorForm(npyscreen.ActionForm):
         self.section_value = re.compile(r"""
         \#.*                        # comments
         | \w+\ *=\ *[\w,.:/#-]*$    # option-value pairs
-        | \[\w+\]$                  # section headers
+        | \[[\w-]+\]$               # section headers
         """, re.VERBOSE)
         self.save = keywords['save_configure']
         self.instance_cfg = False

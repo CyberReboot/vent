@@ -2,6 +2,8 @@ import json
 import npyscreen
 import re
 
+from vent.helpers.meta import Dependencies
+
 
 class InstanceSelect(npyscreen.MultiSelect):
     """
@@ -53,7 +55,7 @@ class DeleteForm(npyscreen.ActionForm):
 
     def create(self):
         """ Creates the necessary display for this form """
-        self.add_handlers({"^E": self.quit})
+        self.add_handlers({"^E": self.quit, "^Q": self.quit})
         to_delete = self.old_instances - self.new_instances 
         self.add(npyscreen.Textfield, value='Select which instances to delete'
                  ' (you must select ' + str(to_delete) +
@@ -86,8 +88,16 @@ class DeleteForm(npyscreen.ActionForm):
             # clean all tools for renmaing and relabeling purposes
             t = val.split(':')
             if i in self.del_instances.value:
+                section = self.display_to_section[':'.join(t)]
+                # grab dependencies of tools that linked to previous one
+                if i == 0:
+                    dependent_tools = [self.manifest.option(section,
+                                                            'link_name')[1]]
+                    for dependency in Dependencies(dependent_tools):
+                        self.clean(**dependency)
+                        to_update.append(dependency)
                 self.clean(name=t[0], branch=t[1], version=t[2])
-                self.manifest.del_section(self.display_to_section[':'.join(t)])
+                self.manifest.del_section(section)
             else:
                 try:
                     # update instances for tools remaining
@@ -103,8 +113,8 @@ class DeleteForm(npyscreen.ActionForm):
                     new_section = re.sub(r'[0-9]', identifier,
                                          i_section, 1)
                     if i_section != new_section:
-                        # clean for renaming container and its labels, 
-                        # and rename tool
+                        # clean tool so that we can rename its container and
+                        # labels with new information
                         self.clean(name=t[0], branch=t[1], version=t[2])
                         prev_name = self.manifest.option(i_section, 'name')[1]
                         new_name = re.split(r'[0-9]', prev_name)[0] + \

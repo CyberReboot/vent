@@ -36,6 +36,8 @@ def test_menu():
     CTRL_T = '^T'
     CTRL_X = '^X'
     CTRL_V = '^V'
+    CTRL_B = '^B'
+    CTRL_E = '^E'
     ENTER = curses.ascii.CR
     TAB = curses.ascii.TAB
     LEFT = curses.KEY_LEFT
@@ -67,14 +69,71 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_Q])
     # build - toggle to main
     run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
+    # start - ok
+    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              TAB, TAB, ENTER, ENTER, ENTER, ENTER, ENTER])
+    # start - cancel
+    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
+              TAB, ENTER])
+    # start - quit back to main
+    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
+    # start - toggle to main
+    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
     # configure - cancel
     run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
               LEFT, ENTER])
+    # configure - quit back to main
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_Q])
+    # configure - toggle back to main
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_T])
     # configure - ok
     run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
-              TAB, ENTER, ENTER, ENTER])
+              TAB, ENTER, TAB, TAB, ENTER, ENTER, ENTER])
+    # configure - quit in the middle of add
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, '2', TAB, TAB, ENTER, ENTER, TAB,
+              ENTER, ENTER, TAB, ENTER, CTRL_Q])
+    # configure - exit in the middle of add
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, '2', TAB, TAB, ENTER, ENTER, TAB,
+              ENTER, ENTER, TAB, ENTER, CTRL_E])
+    # configure - instances add (add an instance of file_drop)
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, '2', TAB, TAB, ENTER, ENTER, TAB,
+              ENTER, ENTER, TAB, ENTER, TAB, TAB, ENTER, ENTER, ENTER])
+    # configure - quit in the middle of delete
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, '1', TAB, TAB, ENTER, ENTER, TAB,
+              ENTER, CTRL_Q])
+    # configure - exit in the middle of delete
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, '1', TAB, TAB, ENTER, ENTER, TAB,
+              ENTER, CTRL_E])
+    # configure - instances delete (delete an instance of file_drop)
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, '1', TAB, TAB, ENTER, ENTER, TAB,
+              ENTER, SPACE, TAB, TAB, ENTER, ENTER, ENTER])
+    # configure - keep instances the same
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, '1', TAB, TAB, ENTER, ENTER, TAB,
+              ENTER, ENTER, ENTER])
+    # configure - quit in the middle of typing in instances
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, CTRL_Q])
+    # configure - exit in the middle of typing in instances
+    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, TAB, ENTER, CTRL_E])
     # clean - ok
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
@@ -127,7 +186,7 @@ def test_menu():
               SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB, SPACE, TAB,
               TAB, ENTER, ENTER, ENTER])
     cmds = [ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, 'alpine', TAB, TAB, TAB,
-              TAB, TAB, TAB, ENTER, ENTER, ENTER]
+            TAB, TAB, TAB, ENTER, ENTER, ENTER]
     cmds += (43 * [BACKSPACE])
     cmds += [TAB, TAB, TAB, BACKSPACE, BACKSPACE, BACKSPACE, BACKSPACE,
              BACKSPACE, BACKSPACE, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, ENTER,
@@ -147,7 +206,8 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'i', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, RIGHT, ENTER, ENTER, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, RIGHT, ENTER, ENTER, ENTER,
+              ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_T])

@@ -472,3 +472,33 @@ def DropLocation():
     drop_loc = os.path.expanduser(drop_loc)
     drop_loc = os.path.abspath(drop_loc)
     return (True, drop_loc)
+
+def Dependencies(tools):
+    """
+    Takes in a list of tools that are being updated and returns any tools that
+    depend on linking to them
+    """
+    dependencies = []
+    if tools:
+        path_dirs = PathDirs()
+        man = Template(os.path.join(path_dirs.meta_dir, 'plugin_manifest.cfg'))
+        for section in man.sections()[1]:
+            # don't worry about dealing with tool if it's not running
+            running = man.option(section, 'running')
+            if not running[0] or running[1] != 'yes':
+                continue
+            t_name = man.option(section, 'name')[1]
+            t_branch = man.option(section, 'branch')[1]
+            t_version = man.option(section, 'version')[1]
+            t_identifier = {'name': t_name,
+                            'branch': t_branch,
+                            'version': t_version}
+            options = man.options(section)[1]
+            if 'docker' in options:
+                d_settings = json.loads(man.option(section,
+                                                   'docker')[1])
+                if 'links' in d_settings:
+                    for link in json.loads(d_settings['links']):
+                        if link in tools:
+                            dependencies.append(t_identifier)
+    return dependencies

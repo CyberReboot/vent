@@ -30,7 +30,7 @@ class InstanceForm(npyscreen.ActionForm):
 
     def create(self):
         """ Creates the necessary display for this form """
-        self.add_handlers({"^E": self.quit})
+        self.add_handlers({"^E": self.quit, "^Q": self.quit})
         # get old number of instances for displaying
         constraints = {'name': self.tool_name,
                        'branch': self.branch,
