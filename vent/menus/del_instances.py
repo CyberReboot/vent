@@ -119,7 +119,7 @@ class DeleteForm(npyscreen.ActionForm):
                         self.clean(name=t[0], branch=t[1], version=t[2])
                         prev_name = self.manifest.option(i_section, 'name')[1]
                         new_name = re.split(r'[0-9]', prev_name)[0] + \
-                                   identifier
+                            identifier
                         self.manifest.set_option(i_section, 'name', new_name)
                         # copy new contents into shifted version
                         self.manifest.add_section(new_section)
