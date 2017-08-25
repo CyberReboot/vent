@@ -41,7 +41,7 @@ class InstanceForm(npyscreen.ActionForm):
             settings_dict = json.loads(manifest.option(section,
                                                        'settings')[1])
             prev_val = settings_dict['instances']
-        except:
+        except Exception:
             # if no previous instance number defined, default is one
             prev_val = '1'
         self.add(npyscreen.Textfield, value='How many instances'

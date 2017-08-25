@@ -473,6 +473,7 @@ def DropLocation():
     drop_loc = os.path.abspath(drop_loc)
     return (True, drop_loc)
 
+
 def Dependencies(tools):
     """
     Takes in a list of tools that are being updated and returns any tools that

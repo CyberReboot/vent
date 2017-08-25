@@ -167,8 +167,8 @@ class Action:
                             containers_remaining.remove(container)
 
             self.logger.info("group orders: " + str(group_orders))
-            self.logger.info("containers remaining: " + \
-                    str(containers_remaining))
+            self.logger.info("containers remaining: " +
+                             str(containers_remaining))
             # start containers based on priorities
             p_results = self.p_helper.start_priority_containers(groups,
                                                                 group_orders,
@@ -925,7 +925,7 @@ class Action:
         if 'instances = ' in config_val:
             instance_start = config_val.find('instances =')
             to_delete = config_val[instance_start:config_val.
-                                                  find('\n', instance_start)+1]
+                                   find('\n', instance_start)+1]
             config_val = config_val.replace(to_delete, '')
         self.logger.info("Starting: save_configure")
         constraints = locals()

@@ -30,6 +30,7 @@ class InstanceSelect(npyscreen.MultiSelect):
             return True
         return False
 
+
 class DeleteForm(npyscreen.ActionForm):
     """ A form for selecting instances to delete and deleting them """
     def __init__(self, *args, **keywords):
@@ -56,7 +57,7 @@ class DeleteForm(npyscreen.ActionForm):
     def create(self):
         """ Creates the necessary display for this form """
         self.add_handlers({"^E": self.quit, "^Q": self.quit})
-        to_delete = self.old_instances - self.new_instances 
+        to_delete = self.old_instances - self.new_instances
         self.add(npyscreen.Textfield, value='Select which instances to delete'
                  ' (you must select ' + str(to_delete) +
                  ' instance(s) to delete):', editable=False, color="GOOD")
@@ -102,11 +103,11 @@ class DeleteForm(npyscreen.ActionForm):
                 try:
                     # update instances for tools remaining
                     i_section = self.display_to_section[val]
-                    settings_dict = json.loads(self.manifest.option \
-                            (i_section, 'settings')[1])
+                    settings_dict = json.loads(self.manifest.option
+                                               (i_section, 'settings')[1])
                     settings_dict['instances'] = self.new_instances
                     self.manifest.set_option(i_section, 'settings',
-                                        json.dumps(settings_dict))
+                                             json.dumps(settings_dict))
                     # check if tool name doesn't need to be shifted because
                     # it's already correct
                     identifier = str(shift_num) if shift_num != 1 else ''
@@ -118,7 +119,7 @@ class DeleteForm(npyscreen.ActionForm):
                         self.clean(name=t[0], branch=t[1], version=t[2])
                         prev_name = self.manifest.option(i_section, 'name')[1]
                         new_name = re.split(r'[0-9]', prev_name)[0] + \
-                                identifier
+                                   identifier
                         self.manifest.set_option(i_section, 'name', new_name)
                         # copy new contents into shifted version
                         self.manifest.add_section(new_section)
