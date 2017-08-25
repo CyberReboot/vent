@@ -832,7 +832,8 @@ class Plugin:
         add_sections = []
         status = (True, None)
         for image in images:
-            if ('vent.section' in image.attrs['Labels'] and
+            if ('Labels' in image.attrs and
+               'vent.section' in image.attrs['Labels'] and
                not image.attrs['Labels']['vent.section'] in sections[1]):
                 section = image.attrs['Labels']['vent.section']
                 section_str = image.attrs['Labels']['vent.section'].split(":")

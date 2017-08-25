@@ -130,7 +130,7 @@ def gpu_queue(options):
     return status
 
 
-def file_queue(path, template_path="/vent/"):
+def file_queue(path, template_path="/vent/", r_host="redis"):
     """
     Processes files that have been added from the rq-worker, starts plugins
     that match the mime type for the new file.
@@ -377,7 +377,7 @@ def file_queue(path, template_path="/vent/"):
         # setup gpu queue
         can_queue_gpu = True
         try:
-            q = Queue(connection=Redis(host='redis'), default_timeout=86400)
+            q = Queue(connection=Redis(host=r_host), default_timeout=86400)
         except Exception as e:  # pragma: no cover
             can_queue_gpu = False
             print("Unable to connect to redis: " + str(e))
