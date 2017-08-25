@@ -1,3 +1,20 @@
+# v0.4.4 (2017-08-25)
+
+bug fixes:
+- removed private credentials from getting logged into error messages
+- added ability to add options to existing sections in vent.cfg
+- fixed issue #792, wherein existing containers could not be deleted when rebuilding plugins:
+- fixed issue #805, wherein vent.cfg were not mounted in rq_worker
+
+improvements:
+- added tutorials and troubleshooting forms, and updated documentation
+- prevents installation of tools that have already been installed
+- tests can be run locally from a docker container
+- adds vent initialization status update when first vent is started
+- updates the manifest for existing images and containers in use when vent first starts
+- removes suplemon dependency
+
+
 # v0.4.3 (2017-08-11)
 
 improvements:
