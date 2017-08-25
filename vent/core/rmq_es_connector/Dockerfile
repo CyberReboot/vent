@@ -11,7 +11,7 @@ RUN pip install -r /vent/requirements.txt
 COPY rmq_es_connector.py /vent/rmq_es_connector.py
 
 LABEL vent="" \
-      vent.name="rmq-es-connector" \
+      vent.name="rmq_es_connector" \
       vent.groups="core" \
       vent.section="cyberreboot:vent:/vent/core/rmq_es_connector:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \

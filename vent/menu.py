@@ -3,7 +3,11 @@
 
 import curses
 import npyscreen
+import time
 
+from threading import Thread
+
+from vent.api.plugins import Plugin
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
 from vent.menus.help import HelpForm
@@ -35,6 +39,31 @@ class VentApp(npyscreen.NPSAppManaged):
         curses.mousemask(0)
         self.paths.host_config()
         version = Version()
+
+        # setup initial runtime stuff
+        plugins = Plugin()
+        thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': True})
+        thr.start()
+        while thr.is_alive():
+            npyscreen.notify_wait("Please wait while Vent initializes...1/3",
+                                  title="Setting up things...")
+            time.sleep(1)
+        thr.join()
+        thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': False})
+        thr.start()
+        while thr.is_alive():
+            npyscreen.notify_wait("Please wait while Vent initializes...2/3",
+                                  title="Setting up things...")
+            time.sleep(1)
+        thr.join()
+        thr = Thread(target=plugins.auto_install, args=(), kwargs={})
+        thr.start()
+        while thr.is_alive():
+            npyscreen.notify_wait("Please wait while Vent initializes...3/3",
+                                  title="Setting up things...")
+            time.sleep(1)
+        thr.join()
+
         quit_s = "\t"*4 + "^Q to quit"
         tab_esc = "\t"*4 + "TAB to close menu popup"
         self.addForm("MAIN",
