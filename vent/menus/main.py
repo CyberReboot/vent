@@ -58,10 +58,16 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         custom_built = 0
         running = 0
         custom_running = 0
+        # keep extra track of running in case of extra instances
+        run_str = str(len(tools['normal']))
         normal = str(len(tools['normal']))
         for tool in tools['running']:
+            # check for multi instances too for running
             if tool in tools['normal']:
                 running += 1
+            elif tool[:-1] in tools['normal']:
+                running += 1
+                run_str = str(int(run_str) + 1)
             else:
                 custom_running += 1
         for tool in tools['built']:
@@ -74,7 +80,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 installed += 1
             else:
                 custom_installed += 1
-        tools_str = str(running + custom_running) + "/" + normal + " running"
+        tools_str = str(running + custom_running) + "/" + run_str + " running"
         if custom_running > 0:
             tools_str += " (" + str(custom_running) + " custom)"
         tools_str += ", " + str(built + custom_built) + "/" + normal + " built"

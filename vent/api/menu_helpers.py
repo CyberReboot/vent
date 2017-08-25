@@ -370,10 +370,10 @@ class MenuHelper:
             repo = template.option(tool, "repo")
             if repo[0] and repo[1] in repos:
                 name = template.option(tool, "name")
-                if name[0]:
+                if name[0] and name[1][-1] not in '0123456789':
                     all_tools['installed'].append(name[1].replace('_', '-'))
 
-        # get core tools that have been built and/or are running
+        # get tools that have been built and/or are running
         try:
             d_client = docker.from_env()
             images = d_client.images.list(filters={'label': 'vent'})
@@ -407,7 +407,7 @@ class MenuHelper:
                         container_check = not core_check
                     if container_check:
                         if ('vent.name' in container.attrs['Config']['Labels'] and
-                           'hidden' not in image.attrs['Labels']['vent.groups']):
+                            'hidden' not in image.attrs['Labels']['vent.groups']):
                             if core:
                                 all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'].replace('_', '-'))
                             else:
