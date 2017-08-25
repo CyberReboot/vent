@@ -41,28 +41,29 @@ class VentApp(npyscreen.NPSAppManaged):
         version = Version()
 
         # setup initial runtime stuff
-        plugins = Plugin()
-        thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': True})
-        thr.start()
-        while thr.is_alive():
-            npyscreen.notify_wait("Please wait while Vent initializes...1/3",
-                                  title="Setting up things...")
-            time.sleep(1)
-        thr.join()
-        thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': False})
-        thr.start()
-        while thr.is_alive():
-            npyscreen.notify_wait("Please wait while Vent initializes...2/3",
-                                  title="Setting up things...")
-            time.sleep(1)
-        thr.join()
-        thr = Thread(target=plugins.auto_install, args=(), kwargs={})
-        thr.start()
-        while thr.is_alive():
-            npyscreen.notify_wait("Please wait while Vent initializes...3/3",
-                                  title="Setting up things...")
-            time.sleep(1)
-        thr.join()
+        if self.first_time[0] and self.first_time[1] != "exists":
+            plugins = Plugin()
+            thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': True})
+            thr.start()
+            while thr.is_alive():
+                npyscreen.notify_wait("Please wait while Vent initializes...1/3",
+                                      title="Setting up things...")
+                time.sleep(1)
+            thr.join()
+            thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': False})
+            thr.start()
+            while thr.is_alive():
+                npyscreen.notify_wait("Please wait while Vent initializes...2/3",
+                                      title="Setting up things...")
+                time.sleep(1)
+            thr.join()
+            thr = Thread(target=plugins.auto_install, args=(), kwargs={})
+            thr.start()
+            while thr.is_alive():
+                npyscreen.notify_wait("Please wait while Vent initializes...3/3",
+                                      title="Setting up things...")
+                time.sleep(1)
+            thr.join()
 
         quit_s = "\t"*4 + "^Q to quit"
         tab_esc = "\t"*4 + "TAB to close menu popup"
