@@ -27,7 +27,7 @@ def test_file_queue():
     instance = Action()
     status = instance.add('https://github.com/cyberreboot/vent-plugins',
                           branch='master',
-                          tools=[('gpu_example','')],
+                          tools=[('gpu_example', '')],
                           build=True)
     assert isinstance(status, tuple)
     assert status[0]
