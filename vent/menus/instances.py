@@ -74,7 +74,7 @@ class InstanceForm(npyscreen.ActionForm):
         # keep prompting user for an integer if not given
         try:
             new_val = int(self.num_instances.value)
-        except:
+        except Exception:
             npyscreen.notify_confirm("You must enter a valid number.",
                                      title="Invalid input")
             return
@@ -83,7 +83,7 @@ class InstanceForm(npyscreen.ActionForm):
             settings_dict = json.loads(manifest.option(section,
                                                        'settings')[1])
             old_val = int(settings_dict['instances'])
-        except:
+        except Exception:
             # if no previous instance number defined, default is one
             old_val = 1
         if new_val > old_val:
