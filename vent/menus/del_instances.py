@@ -79,7 +79,7 @@ class DeleteForm(npyscreen.ActionForm):
         self.change_screens()
 
     def on_ok(self):
-        """ Takes the input the user gave and performs necessary actions """
+        """ Delete the instances that the user chose to delete """
         npyscreen.notify_wait("Deleting instances given...",
                               title="In progress")
         # keep track of number for shifting instances down for alignment
