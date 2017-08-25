@@ -43,35 +43,35 @@
     <div class="row collapse">
       <div class="medium-3 columns">
         <ul class="tabs vertical" id="example-vert-tabs" data-tabs>
-          <li class="tabs-title is-active"><a href="#panel1v" aria-selected="true">Ubuntu Linux</a></li>
-          <li class="tabs-title"><a href="#panel2v">Red Hat Enterprise Linux/ CentOS</a></li>
-          <li class="tabs-title"><a href="#panel3v">Other Linux</a></li>
-          <li class="tabs-title"><a href="#panel4v">Mac OS X</a></li>
+          <li class="tabs-title is-active"><a href="#panel1v" aria-selected="true">Docker Hub Image</a></li>
+          <li class="tabs-title"><a href="#panel2v">Boot2Docker ISO</a></li>
+          <li class="tabs-title"><a href="#panel3v">Python Package Index</a></li>
+          <li class="tabs-title"><a href="#panel4v">Source Code</a></li>
         </ul>
         </div>
         <div class="medium-9 columns">
         <div class="tabs-content vertical" data-tabs-content="example-vert-tabs">
           <!-- tab -->
           <div class="tabs-panel extra is-active" id="panel1v">
-            <h3>Ubuntu Linux 16.04</h3>
-            <p>Built for Ubuntu 16.04 (64 bit)</p>
+            <h3>Docker Hub Image</h3>
+            <p>Built as a Docker Image</p>
             <br>
 
             <div class="row collapse">
             <div class="large-8 columns">
-              <p>Ubuntu Linux 16.04
+              <p>Docker Hub Image
               <br>Vent Latest Version</p>
             </div>
             <div class="large-4 columns">
               <div class ="">
-              <a class="button_dwnld" href="https://github.com/cyberreboot/vent"><i class="fa fa-download" aria-hidden="true" style="color:white"></i> DEB <p>(Ubuntu 16.04)</p></a>
+              <a class="button_dwnld" href="https://hub.docker.com/r/cyberreboot/vent/"><i class="fa fa-download" aria-hidden="true" style="color:white"></i> Hub <p>(Docker Image)</p></a>
               </div>
               <br>
             </div>
             </div>
             <br>
             <h4>Install</h4>
-            <p>full install details available <a href="https://github.com/cyberreboot/vent">here</a> </p>
+            <p><code>docker run -it -v /var/run/docker.sock:/var/run/docker.sock cyberreboot/vent</code></p>
           </div>
 
           <!-- tab -->
