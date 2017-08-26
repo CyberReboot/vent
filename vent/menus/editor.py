@@ -1,4 +1,6 @@
 import ast
+import copy
+import json
 import npyscreen
 import os
 import re
@@ -10,95 +12,60 @@ class EditorForm(npyscreen.ActionForm):
     """ Form that can be used as a pseudo text editor in npyscreen """
     def __init__(self, *args, **keywords):
         """ Initialize EditorForm objects """
+        # default for any editor
         self.section_value = re.compile(r"""
         \#.*                        # comments
         | \w+\ *=\ *[\w,.:/#-]*$    # option-value pairs
         | \[[\w-]+\]$               # section headers
         """, re.VERBOSE)
-        self.save = keywords['save_configure']
-        self.instance_cfg = False
         self.p_helper = PluginHelper()
-        if 'restart_tools' in keywords:
-            self.restart_tools = keywords['restart_tools']
-        if 'prep_start' in keywords:
-            self.prep_start = keywords['prep_start']
-        if 'start_tools' in keywords:
-            self.start_tools = keywords['start_tools']
-        if 'vent_cfg' in keywords and keywords['vent_cfg']:
-            self.vent_cfg = True
+        self.settings = keywords
+        del self.settings['parentApp']
+        self.tool_identifier = {'name': self.settings['tool_name'],
+                                'branch': self.settings['branch'],
+                                'version': self.settings['version']}
+
+        # setup checks
+        self.just_downloaded = ('just_downloaded' in self.settings and
+                keywords['just_downloaded'])
+        self.vent_cfg = ('vent_cfg' in self.settings and
+                self.settings['vent_cfg'])
+        self.registry_tool = ('from_registry' in self.settings and
+                self.settings['from_registry'])
+        self.instance_cfg = ('new_instance' in self.settings and
+                self.settings['new_instance'])
+
+        # get manifest info for tool that will be used throughout
+        if not self.just_downloaded and not self.vent_cfg:
+            result = self.p_helper.constraint_options(self.tool_identifier, [])
+            tool, self.manifest = result
+            self.section = tool.keys()[0]
+
+        # get configuration information depending on type
+        if self.just_downloaded:
+            self.config_val = '[info]\n'
+            self.config_val += 'name = ' + keywords['link_name'] + '\n'
+            self.config_val += 'groups = ' + keywords['groups'] + '\n'
+        elif self.vent_cfg:
             self.config_val = keywords['get_configure'](main_cfg=True)[1]
-            self.next_tool = None
-            self.tool_name = 'vent configuration'
-        else:
-            self.vent_cfg = False
-            self.tool_name = keywords['tool_name']
-            self.branch = keywords['branch']
-            self.version = keywords['version']
-            if keywords['registry_download']:
-                self.next_tool = None
-                self.from_registry = True
-                # populate editor with known fields of registry image
-                self.config_val = "[info]\n"
-                self.config_val += "name = " + keywords['link_name'] + "\n"
-                self.config_val += "groups = " + keywords['groups'] + "\n"
+        elif self.instance_cfg:
+            path = self.manifest.option(section, 'path')[1]
+            # defaults in .internals
+            path = path.replace('.vent/plugins',
+                                '.vent/.internals')
+            multi_tool = self.manifest.option(section, 'multi_tool')
+            if multi_tool[0] and multi_tool[1] == 'yes':
+                name = self.manifest.option(section, 'name')[1]
+                if name == 'unspecified':
+                    name = 'vent'
+                template_path = os.path.join(path,
+                                             name + '.template')
             else:
-                self.next_tool = keywords['next_tool']
-                self.from_registry = keywords['from_registry']
-                # get vent.template settings for specific tool
-                if ('instance_cfg' not in keywords or
-                        not keywords['instance_cfg']):
-                    template = keywords['get_configure'](name=self.tool_name,
-                                                         branch=self.branch,
-                                                         version=self.version)
-                    if template[0]:
-                        self.config_val = template[1]
-                    else:
-                        npyscreen.notify_confirm("Couldn't find vent.template"
-                                                 " for " +
-                                                 keywords['tool_name'])
-                # get default vent.template settings for a tool
-                else:
-                    try:
-                        self.instance_cfg = True
-                        self.instances = int(keywords['instances'])
-                        self.old_instances = int(keywords['old_instances'])
-                        constraints = {'name': keywords['tool_name'],
-                                       'branch': keywords['branch'],
-                                       'version': keywords['version']}
-                        res = self.p_helper.constraint_options(constraints, [])
-                        tool, manifest = res
-                        # only one tool should be returned
-                        section = tool.keys()[0]
-                        path = manifest.option(section, 'path')[1]
-                        # sending defaults to internals so it doesn't mess with
-                        # installed plugins
-                        path = path.replace('.vent/plugins',
-                                            '.vent/.internals')
-                        multi_tool = manifest.option(section, 'multi_tool')
-                        if multi_tool[0] and multi_tool[1] == 'yes':
-                            name = manifest.option(section, 'name')[1]
-                            if name == 'unspecified':
-                                name = 'vent'
-                            template_path = os.path.join(path,
-                                                         name + '.template')
-                        else:
-                            template_path = os.path.join(path, 'vent.template')
-                        with open(template_path) as vent_template:
-                            config_val = vent_template.read()
-                            if 'instances = ' in config_val:
-                                inst_start = config_val.find('instances =')
-                                inst_end = config_val.find('\n',
-                                                           inst_start) + 1
-                                to_delete = config_val[inst_start:inst_end]
-                                config_val = config_val.replace(to_delete, '')
-                            self.config_val = config_val
-                    except Exception:
-                        self.config_val = ''
-                        npyscreen.notify_confirm("Couldn't get default"
-                                                 " settings for tool, you can"
-                                                 " still enter in settings you"
-                                                 " want", title="Unsuccessful"
-                                                 " default")
+                template_path = os.path.join(path, 'vent.template')
+            with open(template_path) as vent_template:
+                self.config_val = vent_template.read()
+        else:
+            self.config_val = keywords['get_configure'](**self.tool_identifier)[1]
         super(EditorForm, self).__init__(*args, **keywords)
 
     def create(self):
@@ -133,93 +100,158 @@ class EditorForm(npyscreen.ActionForm):
 
     def change_screens(self):
         """ Change to the next tool to edit or back to MAIN form """
-        if self.next_tool:
+        if self.settings['next_tool']:
             self.parentApp.change_form(self.next_tool)
         else:
             self.parentApp.change_form("MAIN")
 
     def on_ok(self):
         """ Save changes made to vent.template """
-        # ensure user input is valid before proceeding
-        # ensure user didn't try to manually define instances
-        if 'instances =' in self.edit_space.value:
-            npyscreen.notify_confirm("You can't define instances manually in"
-                                     " editing, use the built-in instance"
-                                     " editor instead.", title="Invalid input")
-            return
-        # ensure user didn't have any syntactical errors
-        for entry in self.edit_space.value.split('\n'):
-            if entry.strip() == '':
-                continue
-            match = self.section_value.match(entry)
-            if not match:
-                try:
-                    opt_val = entry.split('=', 1)
-                    if opt_val[0].strip() == '':
-                        raise Exception("It appears you haven't written"
-                                        " anything before an equals sign"
-                                        " somewhere.")
-                    ast.literal_eval(opt_val[1].strip())
-                except Exception as e:
-                    npyscreen.notify_confirm("You didn't type in your input in"
-                                             " a syntactically correct format."
-                                             " Double check to make sure you"
-                                             " don't have extraneous"
-                                             " characters, have closed your"
-                                             " brackets, etc. Here's an error"
-                                             " message that may be helpful: " +
-                                             str(e), title="Invalid input")
-                    return
+       # # ensure user didn't have any syntactical errors
+       # for entry in self.edit_space.value.split('\n'):
+       #     if entry.strip() == '':
+       #         continue
+       #     match = self.section_value.match(entry)
+       #     if not match:
+       #         try:
+       #             opt_val = entry.split('=', 1)
+       #             if opt_val[0].strip() == '':
+       #                 raise Exception("It appears you haven't written"
+       #                                 " anything before an equals sign"
+       #                                 " somewhere.")
+       #             ast.literal_eval(opt_val[1].strip())
+       #         except Exception as e:
+       #             npyscreen.notify_confirm("You didn't type in your input in"
+       #                                      " a syntactically correct format."
+       #                                      " Double check to make sure you"
+       #                                      " don't have extraneous"
+       #                                      " characters, have closed your"
+       #                                      " brackets, etc. Here's an error"
+       #                                      " message that may be helpful: " +
+       #                                      str(e), title="Invalid input")
+       #             return
+       # # get the number of instances and ensure user didn't malform that
+       # if re.match(r"instances\ *=", self.edit_space.value):
+       #     try:
+       #         new_instances = int(re.split(r"instances\ *=\ *",
+       #                                      self.edit_space.value)[1][0])
+       #     except ValueError:
+       #         npyscreen.notify_confirm("You didn't specify a valid number" 
+       #                                  " for instances.")
+       #         return
+       #     # get old number of instances
+       #     try:
+       #         settings_dict = json.loads(self.manifest.option(self.section,
+       #                                                         'settings'[1]))
+       #         old_instances = int(settings_dict['instances'])
+       #     except Exception:
+       #         old_instances = 1
+       # else:
+       #     new_instances = 1
+       #     old_instances = 1
 
+        # save and restart tools, if necessary
         if self.vent_cfg:
-            self.save(main_cfg=True, config_val=self.edit_space.value)
+            self.settings['save_configure'](main_cfg=True,
+                                            config_val=self.edit_space.value)
         else:
-            save_args = {'config_val': self.edit_space.value,
-                         'name': self.tool_name,
-                         'branch': self.branch,
-                         'version': self.version}
-            if self.from_registry:
+            save_args = copy.deepcopy(self.tool_identifier)
+            save_args.update({'config_val': self.edit_space.value})
+            if self.registry_tool:
                 save_args.update({'from_registry': True})
-            if hasattr(self, 'instances'):
-                save_args.update({'instances': self.instances})
-            self.save(**save_args)
-        if hasattr(self, 'restart_tools'):
+            self.settings['save_configure'](**save_args)
+        if not self.just_downloaded and not self.instance_cfg:
             restart_kargs = {'main_cfg': self.vent_cfg,
                              'old_val': self.config_val,
                              'new_val': self.edit_space.value}
-            if not self.vent_cfg:
-                restart_kargs.update({'name': self.tool_name,
-                                      'version': self.version,
-                                      'branch': self.branch})
-            npyscreen.notify_wait("Restarting tools affected by changes...",
-                                  title="Restart")
-            self.restart_tools(**restart_kargs)
-        # check if you need to start new instances
-        elif self.instance_cfg:
-            if hasattr(self, 'start_tools'):
-                npyscreen.notify_wait("Starting new instances...",
-                                      title="Start")
-                tool_d = {}
-                t_identifier = {'name': self.tool_name,
-                                'branch': self.branch,
-                                'version': self.version}
-                result = self.p_helper.constraint_options(t_identifier, [])
-                tools, manifest = result
-                section = tools.keys()[0]
-                for i in range(self.old_instances + 1, self.instances + 1):
-                    i_section = section.rsplit(':', 2)
-                    i_section[0] += str(i)
-                    i_section = ':'.join(i_section)
-                    t_name = manifest.option(i_section, 'name')[1]
-                    t_branch = manifest.option(i_section, 'branch')[1]
-                    t_version = manifest.option(i_section, 'version')[1]
-                    t_id = {'name': t_name,
-                            'branch': t_branch,
-                            'version': t_version}
-                    tool_d.update(self.prep_start(**t_id)[1])
-                if tool_d:
-                    self.start_tools(tool_d)
-        npyscreen.notify_confirm("Done configuring " + self.tool_name,
+            if self.vent_cfg:
+                wait_str = "Restarting tools affected by changes..."
+            else:
+                wait_str = "Restarting this tool with new settings..."
+                restart_kargs.update(self.tool_identifier)
+            npyscreen.notify_wait(wait_str,
+                                  title="Restarting with changes")
+            self.settings['restart_tools'](**restart_kargs)
+       # # check if you need to start new instances
+       # elif self.instance_cfg:
+       #     if hasattr(self, 'start_tools'):
+       #         npyscreen.notify_wait("Starting new instances...",
+       #                               title="Start")
+       #         tool_d = {}
+       #         t_identifier = {'name': self.tool_name,
+       #                         'branch': self.branch,
+       #                         'version': self.version}
+       #         result = self.p_helper.constraint_options(t_identifier, [])
+       #         tools, manifest = result
+       #         section = tools.keys()[0]
+       #         for i in range(self.old_instances + 1, self.instances + 1):
+       #             i_section = section.rsplit(':', 2)
+       #             i_section[0] += str(i)
+       #             i_section = ':'.join(i_section)
+       #             t_name = manifest.option(i_section, 'name')[1]
+       #             t_branch = manifest.option(i_section, 'branch')[1]
+       #             t_version = manifest.option(i_section, 'version')[1]
+       #             t_id = {'name': t_name,
+       #                     'branch': t_branch,
+       #                     'version': t_version}
+       #             tool_d.update(self.prep_start(**t_id)[1])
+       #         if tool_d:
+       #             self.start_tools(tool_d)
+       # if new_instnaces > old_instances:
+       #     try:
+       #         res = npyscreen.notify_yes_no("You will be creating " +
+       #                                       str(new_val - old_val) +
+       #                                       " additional instance(s), is"
+       #                                       " that okay?")
+       #         if res:
+       #             if manifest.option(section, 'built')[1] == 'yes':
+       #                 run = npyscreen.notify_yes_no("Do you want to"
+       #                                               " start these new"
+       #                                               " tools upon"
+       #                                               " creation?")
+       #             else:
+       #                 run = False
+       #             if not run:
+       #                 del self.editor_args['prep_start']
+       #                 del self.editor_args['start_tools']
+       #             npyscreen.notify_wait("Pulling up default settings"
+       #                                   " for " + self.tool_name + "...",
+       #                                   title="Gathering settings")
+       #             self.p_helper.clone(self.repo)
+       #             self.editor_args['instances'] = new_val
+       #             self.editor_args['old_instances'] = old_val
+       #             self.parentApp.addForm('EDITOR' + self.tool_name,
+       #                                    EditorForm, **self.editor_args)
+       #             self.parentApp.change_form('EDITOR' + self.tool_name)
+       # elif new_instances < old_instances:
+       #     try:
+       #         res = npyscreen.notify_yes_no("You will be deleting " +
+       #                                       str(old_val - new_val) +
+       #                                       " instance(s), is"
+       #                                       " that okay?")
+       #         if res:
+       #             form_name = 'Delete instances for ' + self.tool_name + \
+       #                     '\t'*8 + '^E to exit configuration process'
+       #             deleter_args = {'name': form_name,
+       #                             'new_instances': new_val,
+       #                             'old_instances': old_val,
+       #                             'next_tool': self.next_tool,
+       #                             'manifest': manifest,
+       #                             'section': section,
+       #                             'clean': self.clean,
+       #                             'prep_start': self.prep_start,
+       #                             'start_tools': self.start_tools}
+       #             self.parentApp.addForm('DELETER' + self.tool_name,
+       #                                    DeleteForm, **deleter_args)
+       #             self.parentApp.change_form('DELETER' + self.tool_name)
+       #     except Exception as e:
+       #         npyscreen.notify_confirm("Trouble finding instances to"
+       #                                  " delete because " + str(e))
+       #         self.on_cancel()
+       # else:
+       #     pass
+        npyscreen.notify_confirm("Done configuring " +
+                                 self.settings['tool_name'],
                                  title="Configurations saved")
         self.change_screens()
 

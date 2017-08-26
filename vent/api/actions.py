@@ -4,6 +4,7 @@ import ast
 import docker
 import json
 import os
+import re
 import shutil
 import tempfile
 import urllib2
@@ -919,14 +920,6 @@ class Action:
                     elif manifest.option(tool, section)[0]:
                         manifest.del_option(tool, section)
 
-        # ensure instances is an int
-        instances = int(instances)
-        # get rid of instances if user tried to configure it in template
-        if 'instances = ' in config_val:
-            instance_start = config_val.find('instances =')
-            to_delete = config_val[instance_start:config_val.
-                                   find('\n', instance_start)+1]
-            config_val = config_val.replace(to_delete, '')
         self.logger.info("Starting: save_configure")
         constraints = locals()
         del constraints['config_val']
@@ -936,6 +929,10 @@ class Action:
         del constraints['template_to_manifest']
         status = (True, None)
         fd = None
+        # ensure instances is an int and remove instances from config_val to
+        # ensure correct info
+        instances = int(instances)
+        config_val = re.sub(r'instances\ *=\ *\w+\n', '', config_val)
         if not main_cfg:
             if not from_registry:
                 # creating new instances
