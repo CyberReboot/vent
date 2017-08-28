@@ -2,6 +2,11 @@
 name = RabbitMQ
 groups = core,messages,syslog
 
+[service]
+uri_prefix = http://
+uri_user = guest
+uri_pw = guest
+
 [settings]
 instances = 1
 locally_active = on

@@ -1,0 +1,16 @@
+[info]
+name = RQ-Dashboard
+groups = core
+
+[service]
+uri_prefix = http://
+uri_postfix = /rq
+
+[settings]
+instances = 1
+priority = 5
+
+[docker]
+environment = ["REMOTE_REDIS_HOST=redis"]
+links = {"Redis":"redis"}
+publish_all_ports = True

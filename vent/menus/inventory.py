@@ -1,61 +1,120 @@
 import npyscreen
-import os
-import sys
 
-from vent.api.actions import Action
+from collections import deque
+
+from vent.api.templates import Template
+
 
 class InventoryForm(npyscreen.FormBaseNew):
     """ Inventory form for the Vent CLI """
-    action = None
-    def while_waiting(self):
-        """ Update the text with the plugins in the inventory when nothing is happening """
-        if self.action is None:
-            self.action = Action()
-        # don't include core tools in this inventory
-        inventory = self.action.inventory(choices=['repos', 'core', 'tools', 'images', 'built', 'running', 'enabled'])
-        value = "Tools for each plugin found:\n"
-        for repo in inventory['repos']:
-            if repo != "https://github.com/cyberreboot/vent":
-                value += "\n  Plugin: "+repo+"\n"
-                repo_name = repo.rsplit("/", 2)[1:]
-                for tool in inventory['tools']:
-                    is_core = False
-                    for core in inventory['core']:
-                        if core[0] == tool[0]:
-                            is_core = True
-                    if not is_core:
-                        r_name = tool[0].split(":")
-                        if repo_name[0] == r_name[0] and repo_name[1] == r_name[1]:
-                            value += "    "+tool[1]+"\n"
-                            for built in inventory['built']:
-                                if built[0] == tool[0]:
-                                    value += "      Built: "+built[2]+"\n"
-                            for enabled in inventory['enabled']:
-                                if enabled[0] == tool[0]:
-                                    value += "      Enabled: "+enabled[2]+"\n"
-                            for image in inventory['images']:
-                                if image[0] == tool[0]:
-                                    value += "      Image name: "+image[2]+"\n"
-                            for running in inventory['running']:
-                                if running[0] == tool[0]:
-                                    value += "      Status: "+running[2]+"\n"
-        self.inventory_mle.values=value.split("\n")
-        self.inventory_mle.display()
-        return
+    def __init__(self, action=None, logger=None, *args, **keywords):
+        """ Initialize inventory form objects """
+        self.action = action
+        self.logger = logger
+        self.api_action = self.action['api_action']
+        # get list of all possible group views to display
+        self.views = deque()
+        possible_groups = set()
+        manifest = Template(self.api_action.plugin.manifest)
+        if self.action['cores']:
+            tools = self.api_action.inventory(choices=['core'])[1]['core']
+        else:
+            tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+        for tool in tools:
+            groups = manifest.option(tool, 'groups')[1].split(',')
+            for group in groups:
+                # don't do core because that's the purpose of all in views
+                if group != '' and group != 'core':
+                    possible_groups.add(group)
+        self.views += possible_groups
+        self.views.append('all groups')
+        super(InventoryForm, self).__init__(*args, **keywords)
+
+    def quit(self, *args, **kwargs):
+        """ Overridden to switch back to MAIN form """
+        self.parentApp.switchForm('MAIN')
+
+    def toggle_view(self, *args, **kwargs):
+        group = self.views.popleft()
+        new_display = []
+        new_display.append('Tools for group ' + group + ' found:')
+        manifest = Template(self.api_action.plugin.manifest)
+        cur_repo = ''
+        for i in range(1, len(self.all_tools) - 1):
+            val = self.all_tools[i]
+            # get repo val
+            if val.startswith("  Plugin:"):
+                new_display.append(val)
+                cur_repo = val.split(':', 1)[1].strip()
+            # determine if tool should be displayed in this group
+            elif val.startswith("    ") and not val.startswith("      "):
+                name = val.strip()
+                constraints = {"repo": cur_repo, "name": name}
+                t_section = self.api_action.p_helper \
+                            .constraint_options(constraints, [])[0]
+                t_section = t_section.keys()[0]
+                if group in manifest.option(t_section, 'groups')[1].split(','):
+                    new_display += self.all_tools[i:i+5]
+            elif val == '':
+                new_display.append(val)
+        # if all groups display all groups
+        if group == 'all groups':
+            self.display_val.values = self.all_tools
+        else:
+            self.display_val.values = new_display
+        # redraw
+        self.display()
+        # add group back into cycle
+        self.views.append(group)
 
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms,"^Q": self.exit})
-        self.add(npyscreen.TitleFixedText, name='Inventory items:', value='')
-        self.inventory_mle = self.add(npyscreen.Pager,
-                                      values=['Checking for plugins in the inventory, please wait...'])
+        self.add_handlers({"^T": self.quit, "^Q": self.quit,
+                           "^V": self.toggle_view})
+        self.add(npyscreen.TitleFixedText, name=self.action['title'], value='')
+        response = self.action['api_action'].inventory(choices=['repos',
+                                                                'core',
+                                                                'tools',
+                                                                'images',
+                                                                'built',
+                                                                'running',
+                                                                'enabled'])
+        if response[0]:
+            inventory = response[1]
+            if len(inventory['repos']) == 0:
+                value = "No tools were found.\n"
+            else:
+                value = "Tools for all groups found:\n"
+            tools = None
+            if self.action['cores'] and inventory['core']:
+                tools = inventory['core']
+            elif not self.action['cores'] and inventory['tools']:
+                tools = inventory['tools']
 
-    def exit(self, *args, **keywords):
-        self.parentApp.switchForm("MAIN")
-
-    def change_forms(self, *args, **keywords):
-        """ Toggles back to main """
-        change_to = "MAIN"
-
-        # Tell the VentApp object to change forms.
-        self.parentApp.change_form(change_to)
+            for repo in inventory['repos']:
+                s_value = ''
+                repo_name = repo.rsplit("/", 2)[1:]
+                if len(repo_name) == 1:
+                    repo_name = repo.split('/')
+                if tools:
+                    p_value = "\n  Plugin: " + repo + "\n"
+                    for tool in tools:
+                        t_name = tool.split(":")
+                        if (t_name[0] == repo_name[0] and
+                           t_name[1] == repo_name[1]):
+                            s_value += "    " + tools[tool] + "\n      Built: "
+                            s_value += inventory['built'][tool] + "\n"
+                            s_value += "      Enabled: "
+                            s_value += inventory['enabled'][tool] + "\n"
+                            s_value += "      Image name: "
+                            s_value += inventory['images'][tool] + "\n"
+                            s_value += "      Status: "
+                            s_value += inventory['running'][tool] + "\n"
+                if s_value:
+                    value += p_value + s_value
+        else:
+            value = "There was an issue with " + self.action['name']
+            value += " retrieval:\n" + str(response[1])
+            value += "\nPlease see vent.log for more details."
+        self.all_tools = value.split("\n")
+        self.display_val = self.add(npyscreen.Pager, values=value.split("\n"))

@@ -1,3 +1,65 @@
+# v0.4.4 (2017-08-25)
+
+bug fixes:
+- removed private credentials from getting logged into error messages
+- added ability to add options to existing sections in vent.cfg
+- fixed issue #792, wherein existing containers could not be deleted when rebuilding plugins:
+- fixed issue #805, wherein vent.cfg were not mounted in rq_worker
+
+improvements:
+- added tutorials and troubleshooting forms, and updated documentation
+- prevents installation of tools that have already been installed
+- tests can be run locally from a docker container
+- adds vent initialization status update when first vent is started
+- updates the manifest for existing images and containers in use when vent first starts
+- removes suplemon dependency
+
+
+# v0.4.3 (2017-08-11)
+
+improvements:
+- give ability for users to configure vent.cfg with various customizations:
+    - can set an option to use already running external services over locally provided containers (changes will be executed automatically after editing)
+    - can set a network-mapping option that can tell tools to use specific nics
+    - can set a start order for groups
+- implemented an option set under system commands for running network tap so that users can more easily utilize it
+- can toggle view by group for certain options
+- added ability to start, stop, list, and delete containers running network tap
+- can now build multiple tools defined in the same directory
+- fixed docker error with rmq_es_connector
+- can update a tool to latest version without having to stop and restart containers
+- changing the vent.template of a tool now triggers it to restart with new settings
+
+# v0.4.2 (2017-07-28)
+
+improvements:
+ - there is now a docker container that can run vent: `docker pull cyberreboot/vent`
+ - new core tool network tap that listens on a host bound nic for collection
+ - support for multi-state plugin pipelines
+ - vent can now save and restore hosts from a backup
+ - a user can now specify the location of where file drop watches
+ - file drop can now handle recursive directories
+ - data regarding finished jobs is now stored as status.json
+ - documentation set up and hosted using Read the Docs: http://vent.readthedocs.io/en/latest/
+ - various bug fixes
+
+# v0.4.1 (2017-07-13)
+
+improvements:
+ - core containers automatically restart if they fail
+ - added extra user action for destructive actions
+ - correctly mapped filedrop path from vent.cfg
+ - fixed incorrect image_id in the manifest
+ - more information is stored in the manifest now
+ - improvements to user experience and logging
+ - added basic GPU support
+
+# v0.4.0 (2017-06-08)
+
+improvements:
+ - complete rewrite to make things more flexible and efficient
+ - wrote an API that the CLI menu leverages
+
 # v0.3.1 (2016-12-29)
 
 improvements:

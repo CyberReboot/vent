@@ -1,11 +1,14 @@
 docker
 elasticsearch
 npyscreen
-pexpect
+paste
 pika
 pytest
 pytest-cov
 python-magic
 redis
 rq
+sphinx>=1.6.3
+urllib3==1.21.1
 watchdog
+web.py

@@ -7,32 +7,41 @@ def test_add():
     """ Test the add function """
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False)
+    assert isinstance(status, tuple)
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent.git', build=False)
+    assert isinstance(status, tuple)
     assert status[0] == True
     bad_instance = Plugin()
     status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
+    assert isinstance(status, tuple)
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
+    assert isinstance(status, tuple)
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')])
+    assert isinstance(status, tuple)
     assert status[0] == True
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False, tools=[('vent/', 'HEAD')], overrides=[('vent', 'HEAD')])
+    assert isinstance(status, tuple)
     assert status[0] == True
-
-def test_get_tool_matches():
-    """ Test the get_tool_matches function """
     instance = Plugin()
-    instance.tools = []
-    matches = instance.get_tool_matches()
-    assert matches == []
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')], user='foo', pw='foo')
+    assert isinstance(status, tuple)
+    assert status[0] == True
 
 def test_add_image():
     """ Test the add_image function """
-    Plugin.add_image('foo')
+    instance = Plugin()
+    status = instance.add_image('quay/redis', 'redis',  registry='quay.io')
+    assert isinstance(status, tuple)
+    assert status[0] == True
+    status = instance.add_image('alpine', 'alpine', tag='latest', groups='alpine')
+    assert isinstance(status, tuple)
+    assert status[0] == True
 
 def test_builder():
     """ Test the builder function """
@@ -44,77 +53,59 @@ def test_builder():
 def test_build_tools():
     """ Test the _build_tools function """
     instance = Plugin()
-    status = instance._build_tools(256)
+    status = instance._build_tools(False)
     assert status[0] == False
 
-def test_tools():
+def test_list_tools():
     """ Test the tools function """
     instance = Plugin()
-    tools = instance.tools()
+    tools = instance.list_tools()
 
 def test_remove():
     """ Test the remove function """
     instance = Plugin()
-    status = instance.remove()
+    status = instance.remove(groups='core', built='no')
     assert status[0] == True
 
 def test_versions():
     """ Test the versions function """
     instance = Plugin()
-    status = instance.add('https://github.com/cyberreboot/vent', build=False, branch='experimental')
+    status = instance.add('https://github.com/cyberreboot/vent', build=False, branch='master')
     assert status[0] == True
-    versions = instance.versions('elasticsearch', branch='experimental')
-    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', ['HEAD'])]
+    versions = instance.versions('elasticsearch', branch='master')
+    assert isinstance(versions, list)
+    assert isinstance(versions[0], tuple)
+    assert isinstance(versions[0][1], list)
+    assert versions[0][0] == 'cyberreboot:vent:/vent/core/elasticsearch:master:HEAD'
+    assert 'HEAD' in versions[0][1]
 
 def test_current_version():
     """ Test the current_version function """
     instance = Plugin()
-    versions = instance.current_version('elasticsearch', branch='experimental')
-    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', 'HEAD')]
+    versions = instance.current_version('elasticsearch', branch='master')
+    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'HEAD')]
 
 def test_state():
     """ Test the state function """
     instance = Plugin()
-    states = instance.state('elasticsearch', branch='experimental')
-    assert states == [('cyberreboot:vent:/vent/core/elasticsearch:experimental:HEAD', 'enabled')]
+    states = instance.state('elasticsearch', branch='master')
+    assert states == [('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'enabled')]
 
 def test_enable():
     """ Test the enable function """
     instance = Plugin()
-    status = instance.enable('elasticsearch', branch='experimental')
+    status = instance.enable('elasticsearch', branch='master')
     assert status[0] == True
 
 def test_disable():
     """ Test the disable function """
     instance = Plugin()
-    status = instance.disable('elasticsearch', branch='experimental')
+    status = instance.disable('elasticsearch', branch='master')
     assert status[0] == True
 
-def test_apply_path():
-    """ Test the apply_path function """
+def test_update():
+    """ Test the update function """
     instance = Plugin()
-    status = instance.apply_path('https://github.com/cyberreboot/vent')
-    assert status[0] == True
-    status = instance.apply_path('https://github.com/cyberreboot/vent.git')
-    assert status[0] == True
-
-def test_repo_branches():
-    """ Test the repo_branches function """
-    instance = Plugin()
-    status = instance.repo_branches('https://github.com/cyberreboot/vent')
-    assert status[0] == True
-    assert type(status[1]) == list
-
-def test_repo_commits():
-    """ Test the repo_commits function """
-    instance = Plugin()
-    commits = instance.repo_commits('https://github.com/cyberreboot/vent')
-    assert commits[0] == True
-    assert type(commits[1]) == list
-
-def test_repo_tools():
-    """ Test the repo_tools function """
-    instance = Plugin()
-    tools = instance.repo_tools('https://github.com/cyberreboot/vent', 'experimental', 'HEAD')
-    assert tools[0] == True
-    assert type(tools[1]) == list
+    status = instance.update()
+    assert isinstance(status, tuple)
+    assert status[0] == False

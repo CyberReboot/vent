@@ -1,7 +1,9 @@
 import errno
 import os
+import platform
 
 from vent.api.templates import Template
+
 
 class PathDirs:
     """ Global path directories for vent """
@@ -12,7 +14,8 @@ class PathDirs:
         self.base_dir = base_dir
         self.plugins_dir = base_dir + plugins_dir
         self.meta_dir = meta_dir
-        self.init_file = base_dir+"vent.init"
+        self.init_file = base_dir + "vent.init"
+        self.cfg_file = base_dir + "vent.cfg"
 
         # make sure the paths exists, if not create them
         self.ensure_dir(self.base_dir)
@@ -21,10 +24,12 @@ class PathDirs:
 
     @staticmethod
     def ensure_dir(path):
-        """ Tries to create directory, if fails, checks if path already exists """
+        """
+        Tries to create directory, if fails, checks if path already exists
+        """
         try:
             os.makedirs(path)
-        except OSError as e:
+        except OSError as e:  # pragma: no cover
             if e.errno == errno.EEXIST and os.path.isdir(path):
                 return (True, "exists")
             else:
@@ -37,25 +42,30 @@ class PathDirs:
         try:
             exists = os.path.isfile(path)
             if not exists:
-                with open (path, 'w+') as fname:
+                with open(path, 'w+') as fname:
                     fname.write("initialized")
                 return (True, path)
             return (True, "exists")
-        except OSError as e:
+        except OSError as e:  # pragma: no cover
             return (False, e)
 
     def host_config(self):
         """ Ensure the host configuration file exists """
-        default_file_dir = "/tmp/vent_files"
-        config = Template(template=os.path.join(self.base_dir, "vent.cfg"))
-        resp = config.section("main")
-        if resp[0]:
-            resp = config.option("main", "files")
-            if not resp[0]:
-                config.add_option("main", "files", default_file_dir)
-                self.ensure_dir(default_file_dir)
+        if platform.system() == 'Darwin':
+            default_file_dir = os.path.join(os.path.expanduser("~"),
+                                            "vent_files")
         else:
-            config.add_option("main", "files", default_file_dir)
-            self.ensure_dir(default_file_dir)
+            default_file_dir = "/tmp/vent_files"
+        status = self.ensure_dir(default_file_dir)
+        config = Template(template=self.cfg_file)
+        sections = {'main': {'files': default_file_dir},
+                    'network-mapping': {},
+                    'nvidia-docker-plugin': {'port': '3476'}}
+        for s in sections:
+            if sections[s]:
+                for option in sections[s]:
+                    config.add_option(s, option, sections[s][option])
+            else:
+                config.add_section(s)
         config.write_config()
-        return
+        return status

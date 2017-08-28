@@ -1,0 +1,13 @@
+[info]
+name = RMQ-ES-Connector
+groups = core
+
+[settings]
+instances = 1
+locally_active = on
+priority = 20
+
+[docker]
+command = #
+environment = ["PYTHONUNBUFFERED=0"]
+links = {"RabbitMQ":"rabbitmq", "Elasticsearch":"elasticsearch"}

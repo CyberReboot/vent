@@ -3,48 +3,62 @@ import threading
 import time
 
 from vent.api.actions import Action
-from vent.api.plugins import Plugin
+from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Tools
+
 
 class ChooseToolsForm(npyscreen.ActionForm):
     """ For picking which tools to add """
     tools_tc = {}
-    triggered = 0
+
     def repo_tools(self, branch):
         """ Set the appropriate repo dir and get the tools available of it """
         tools = []
-        plugin = Plugin()
-        t = plugin.repo_tools(self.parentApp.repo_value['repo'], branch, self.parentApp.repo_value['versions'][branch])
-        if t[0]:
-            for tool in t[1]:
+        m_helper = MenuHelper()
+        repo = self.parentApp.repo_value['repo']
+        version = self.parentApp.repo_value['versions'][branch]
+        status = m_helper.repo_tools(repo, branch, version)
+        if status[0]:
+            r_tools = status[1]
+            for tool in r_tools:
                 tools.append(tool[0])
         return tools
 
     def create(self):
-        self.add_handlers({"^Q": self.quit})
-        self.add(npyscreen.TitleText, name='Select which tools to add from each branch selected:', editable=False)
-
-    def while_waiting(self):
         """ Update with current tools for each branch at the version chosen """
-        if not self.triggered:
-            i = 4
-            for branch in self.parentApp.repo_value['versions']:
-                self.tools_tc[branch] = {}
-                title_text = self.add(npyscreen.TitleText, name='Branch: '+branch, editable=False, rely=i, relx=5, max_width=25)
-                title_text.display()
-                tools = self.repo_tools(branch)
+        self.add_handlers({"^Q": self.quit})
+        self.add(npyscreen.TitleText,
+                 name='Select which tools to add from each branch selected:',
+                 editable=False)
+        self.add(npyscreen.Textfield,
+                 value='NOTE tools you have already installed will be ignored',
+                 color='STANDOUT',
+                 editable=False)
+
+        i = 6
+        for branch in self.parentApp.repo_value['versions']:
+            self.tools_tc[branch] = {}
+            self.add(npyscreen.TitleText,
+                     name='Branch: ' + branch,
+                     editable=False,
+                     rely=i,
+                     relx=5,
+                     max_width=25)
+            tools = self.repo_tools(branch)
+            i += 1
+            for tool in tools:
+                value = True
+                if tool.startswith("/dev"):
+                    value = False
+                # tool in base directory
+                if tool == "" or tool.startswith(':'):
+                    tool = "/" + tool
+                self.tools_tc[branch][tool] = self.add(npyscreen.CheckBox,
+                                                       name=tool,
+                                                       value=value,
+                                                       relx=10)
                 i += 1
-                for tool in tools:
-                    value = True
-                    if tool.startswith("/dev"):
-                        value = False
-                    if tool == "":
-                        tool = "/"
-                    self.tools_tc[branch][tool] = self.add(npyscreen.CheckBox, name=tool, value=value, relx=10)
-                    self.tools_tc[branch][tool].display()
-                    i += 1
-                i += 2
-            self.triggered = 1
+            i += 2
 
     def quit(self, *args, **kwargs):
         self.parentApp.switchForm("MAIN")
@@ -73,8 +87,8 @@ class ChooseToolsForm(npyscreen.ActionForm):
                 if tools:
                     tool_str = ""
                 for tool in tools:
-                    # TODO limit length of tool_str to fit box
-                    tool_str = "Added: "+branch+"/"+tool+"\n"+tool_str
+                    pre_tool = "Added: " + branch + "/" + tool + "\n"
+                    tool_str = pre_tool + tool_str
                 npyscreen.notify_wait(tool_str, title=title)
                 time.sleep(1)
             return
@@ -85,19 +99,25 @@ class ChooseToolsForm(npyscreen.ActionForm):
             tools = []
             for tool in self.tools_tc[branch]:
                 if self.tools_tc[branch][tool].value:
+                    # get rid of temporary show for multiple tools in same
+                    # directory
                     if tool == '/':
-                        tools.append(('.',''))
+                        tools.append(('.', ''))
                     else:
-                        tools.append((tool,''))
+                        tools.append((tool, ''))
+            repo = self.parentApp.repo_value['repo']
+            version = self.parentApp.repo_value['versions'][branch]
+            build = self.parentApp.repo_value['build'][branch]
             thr = threading.Thread(target=api_action.add, args=(),
-                                   kwargs={'repo':self.parentApp.repo_value['repo'],
-                                           'branch':branch,
-                                           'tools':tools,
-                                           'version':self.parentApp.repo_value['versions'][branch],
-                                           'build':self.parentApp.repo_value['build'][branch]})
+                                   kwargs={'repo': repo,
+                                           'branch': branch,
+                                           'tools': tools,
+                                           'version': version,
+                                           'build': build})
             popup(original_tools, branch, thr,
-                  'Please wait, adding tools for the '+branch+' branch...')
-        npyscreen.notify_confirm("Done adding repository: "+self.parentApp.repo_value['repo'],
+                  'Please wait, adding tools for the ' + branch + ' branch...')
+        npyscreen.notify_confirm("Done adding repository: " +
+                                 self.parentApp.repo_value['repo'],
                                  title='Added Repository')
         self.quit()
 

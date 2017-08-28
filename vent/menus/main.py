@@ -1,59 +1,96 @@
-import docker
 import npyscreen
 import os
-import shutil
 import sys
-import threading
 import time
 
 from docker.errors import DockerException
+from npyscreen import notify_confirm
+from threading import Thread
 
 from vent.api.actions import Action
+from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Containers
-from vent.helpers.meta import Core
 from vent.helpers.meta import Cpu
+from vent.helpers.meta import DropLocation
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
+from vent.helpers.logs import Logger
+from vent.helpers.paths import PathDirs
+from vent.menus.add import AddForm
+from vent.menus.ntap import CreateNTap
+from vent.menus.ntap import DeleteNTap
+from vent.menus.ntap import ListNTap
+from vent.menus.ntap import NICsNTap
+from vent.menus.ntap import StartNTap
+from vent.menus.ntap import StopNTap
+from vent.menus.backup import BackupForm
+from vent.menus.editor import EditorForm
+from vent.menus.inventory_forms import InventoryCoreToolsForm
+from vent.menus.inventory_forms import InventoryToolsForm
+from vent.menus.logs import LogsForm
+from vent.menus.services import ServicesForm
+from vent.menus.tools import ToolForm
+
 
 class MainForm(npyscreen.FormBaseNewWithMenus):
     """ Main information landing form for the Vent CLI """
-    triggered = False
 
-    def exit(self, *args, **keywords):
+    @staticmethod
+    def exit(*args, **kwargs):
         os.system('reset')
         os.system('stty sane')
         try:
             sys.exit(0)
-        except SystemExit:
+        except SystemExit:  # pragma: no cover
             os._exit(0)
+
+    @staticmethod
+    def t_status(core):
+        """ Get status of tools for either plugins or core """
+        m_helper = MenuHelper()
+        repos, tools = m_helper.tools_status(core)
+        installed = 0
+        custom_installed = 0
+        built = 0
+        custom_built = 0
+        running = 0
+        custom_running = 0
+        normal = str(len(tools['normal']))
+        for tool in tools['running']:
+            if tool in tools['normal']:
+                running += 1
+            else:
+                custom_running += 1
+        for tool in tools['built']:
+            if tool in tools['normal']:
+                built += 1
+            else:
+                custom_built += 1
+        for tool in tools['installed']:
+            if tool in tools['normal']:
+                installed += 1
+            else:
+                custom_installed += 1
+        tools_str = str(running + custom_running) + "/" + normal + " running"
+        if custom_running > 0:
+            tools_str += " (" + str(custom_running) + " custom)"
+        tools_str += ", " + str(built + custom_built) + "/" + normal + " built"
+        if custom_built > 0:
+            tools_str += " (" + str(custom_built) + " custom)"
+        tools_str += ", " + str(installed + custom_installed) + "/" + normal
+        tools_str += " installed"
+        if custom_built > 0:
+            tools_str += " (" + str(custom_installed) + " custom)"
+        return tools_str, (running, custom_running, normal, repos)
 
     def while_waiting(self):
         """ Update fields periodically if nothing is happening """
-        def popup(message):
-            npyscreen.notify_confirm(str(message), title="Docker Error", form_color='DANGER', wrap=True)
-            self.exit()
-
-        # clean up forms with dynamic data
-        self.parentApp.remove_forms()
-        self.parentApp.add_forms()
-
-        if not self.triggered:
-            self.triggered = True
-            try:
-                self.api_action = Action()
-            except DockerException as de:
-                popup(de)
-
         # give a little extra time for file descriptors to close
         time.sleep(0.1)
 
-        try:
-            current_path = os.getcwd()
-        except:
-            self.exit()
         self.addfield.value = Timestamp()
         self.addfield.display()
         self.addfield2.value = Uptime()
@@ -65,46 +102,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.addfield3.labelColor = "DEFAULT"
         self.addfield3.display()
 
-        # set core value string
-        # !! TODO remove hardcoded experimental
-        core = Core(branch='experimental')
-        installed = 0
-        custom_installed = 0
-        built = 0
-        custom_built = 0
-        running = 0
-        custom_running = 0
-        normal = str(len(core['normal']))
-        for tool in core['running']:
-            if tool in core['normal']:
-                running += 1
-            else:
-                custom_running += 1
-        for tool in core['built']:
-            if tool in core['normal']:
-                built += 1
-            else:
-                custom_built += 1
-        for tool in core['installed']:
-            if tool in core['normal']:
-                installed += 1
-            else:
-                custom_installed += 1
-        core_str = str(running+custom_running)+"/"+normal+" running"
-        if custom_running > 0:
-            core_str += " ("+str(custom_running)+" custom)"
-        core_str += ", "+str(built+custom_built)+"/"+normal+" built"
-        if custom_built > 0:
-            core_str += " ("+str(custom_built)+" custom)"
-        core_str += ", "+str(installed+custom_installed)+"/"+normal+" installed"
-        if custom_built > 0:
-            core_str += " ("+str(custom_installed)+" custom)"
-        self.addfield5.value = core_str
-        if running+custom_running == 0:
+        # update core tool status
+        self.addfield5.value, values = MainForm.t_status(True)
+        if values[0] + values[1] == 0:
             color = "DANGER"
             self.addfield4.labelColor = "CAUTION"
             self.addfield4.value = "Idle"
-        elif running >= int(normal):
+        elif values[0] >= int(values[2]):
             color = "GOOD"
             self.addfield4.labelColor = color
             self.addfield4.value = "Ready to start jobs"
@@ -114,26 +118,58 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.addfield4.value = "Ready to start jobs"
         self.addfield5.labelColor = color
 
+        # update plugin tool status
+        plugin_str, values = MainForm.t_status(False)
+        plugin_str += ", " + str(values[3]) + " plugin(s) installed"
+        self.addfield6.value = plugin_str
+
         # get jobs
         jobs = Jobs()
-        # number of jobs, number of tool containers
-        self.addfield6.value = str(jobs[0])+" jobs running ("+str(jobs[1])+" tool containers), "+str(jobs[2])+" completed jobs"
 
-        # TODO check if there are jobs running and update addfield4
+        # number of jobs, number of tool containers
+        self.addfield7.value = str(jobs[0]) + " jobs running (" + str(jobs[1])
+        self.addfield7.value += " tool containers), " + str(jobs[2])
+        self.addfield7.value += " completed jobs"
+
         if jobs[0] > 0:
             self.addfield4.labelColor = "GOOD"
             self.addfield4.value = "Processing jobs"
-            self.addfield6.labelColor = "GOOD"
+            self.addfield7.labelColor = "GOOD"
         else:
-            self.addfield6.labelColor = "DEFAULT"
+            self.addfield7.labelColor = "DEFAULT"
         self.addfield4.display()
         self.addfield5.display()
         self.addfield6.display()
+        self.addfield7.display()
 
-        os.chdir(current_path)
+        # if file drop location changes deal with it
+        logger = Logger(__name__)
+        status = (False, None)
+        if self.file_drop.value != DropLocation()[1]:
+            logger.info("Starting: file drop restart")
+            try:
+                self.file_drop.value = DropLocation()[1]
+                logger.info("Path given: " + str(self.file_drop.value))
+                # restart if the path is valid
+                if DropLocation()[0]:
+                    status = self.api_action.clean(name='file_drop')
+                    status = self.api_action.prep_start(name='file_drop')
+                else:
+                    logger.error("file drop path name invalid" +
+                                 DropLocation()[1])
+                if status[0]:
+                    tool_d = status[1]
+                    status = self.api_action.start(tool_d)
+                    logger.info("Status of file drop restart: " +
+                                str(status[0]))
+            except Exception as e:  # pragma no cover
+                logger.error("file drop restart failed with error: " + str(e))
+            logger.info("Finished: file drop restart")
+        self.file_drop.display()
         return
 
-    def core_tools(self, action):
+    @staticmethod
+    def core_tools(action):
         """ Perform actions for core tools """
         def diff(first, second):
             """
@@ -163,78 +199,140 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 time.sleep(1)
             return
 
-        # !! TODO remove hardcoded experimental branch
         if action == 'install':
             original_images = Images()
-            thr = threading.Thread(target=self.api_action.cores, args=(),
-                                   kwargs={"action":"install",
-                                           "branch":"experimental"})
+            m_helper = MenuHelper()
+            thr = Thread(target=m_helper.cores, args=(),
+                         kwargs={"action": "install"})
             popup(original_images, "images", thr,
                   'Please wait, installing core containers...')
-            npyscreen.notify_confirm("Done installing core containers.",
-                                     title='Installed core containers')
-        elif action == 'build':
-            self.parentApp.change_form('BUILDCORETOOLS')
-        elif action == 'start':
-            self.parentApp.change_form('STARTCORETOOLS')
-        elif action == 'stop':
-            self.parentApp.change_form('STOPCORETOOLS')
-        elif action == 'clean':
-            self.parentApp.change_form('CLEANCORETOOLS')
-        elif action == "inventory":
-            self.parentApp.change_form('COREINVENTORY')
-        elif action == 'update':
-            self.parentApp.change_form('UPDATECORETOOLS')
-        elif action == 'remove':
-            self.parentApp.change_form('REMOVECORETOOLS')
+            notify_confirm("Done installing core containers (any"
+                           " already installed tools untouched).",
+                           title='Installed core containers')
+        return
+
+    def add_form(self, form, form_name, form_args):
+        """ Add new form and switch to it """
+        self.parentApp.addForm(form_name, form, **form_args)
+        self.parentApp.change_form(form_name)
+        return
+
+    def remove_forms(self, form_names):
+        """ Remove all forms supplied """
+        for form in form_names:
+            try:
+                self.parentApp.removeForm(form)
+            except Exception as e:  # pragma: no cover
+                pass
         return
 
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
-        def diff(first, second):
-            """
-            Get the elements that exist in the first list and not in the second
-            """
-            second = set(second)
-            return [item for item in first if item not in second]
+        form = ToolForm
+        s_action = action.split("_")[0]
+        if 'core' in action:
+            form_action = s_action + ' (only core tools are shown)'
+            form_name = s_action.title() + " core tools"
+            cores = True
+        else:
+            form_action = s_action + ' (only plugin tools are shown)'
+            form_name = s_action.title() + " tools"
+            cores = False
+        a_type = 'containers'
+        if s_action in ['build']:
+            a_type = 'images'
+        forms = [action.upper() + 'TOOLS']
+        form_args = {'color': 'CONTROL',
+                     'names': [s_action],
+                     'name': form_name,
+                     'action_dict': {'action_name': s_action,
+                                     'present_t': s_action + 'ing ' + a_type,
+                                     'past_t': s_action.title() + ' ' + a_type,
+                                     'action': form_action,
+                                     'type': a_type,
+                                     'cores': cores}}
+        # grammar rules
+        vowels = ['a', 'e', 'i', 'o', 'u']
 
-        def popup(original_containers, thr, title):
-            """
-            Start the thread and display a popup of the running containers
-            until the thread is finished
-            """
-            thr.start()
-            container_str = ""
-            while thr.is_alive():
-                containers = diff(Containers(), original_containers)
-                if containers:
-                    container_str = ""
-                for container in containers:
-                    # TODO limit length of container_str to fit box
-                    container_str += container[0]+": "+container[1]+"\n"
-                npyscreen.notify_wait(container_str, title=title)
-                time.sleep(1)
-            return
+        # consonant-vowel-consonant ending
+        # Eg: stop -> stopping
+        if s_action[-1] not in vowels and \
+           s_action[-2] in vowels and \
+           s_action[-3] not in vowels:
+                form_args['action_dict']['present_t'] = s_action + \
+                    s_action[-1] + 'ing ' + a_type
 
-        original_containers = Containers()
+        # word ends with a 'e'
+        # eg: remove -> removing
+        if s_action[-1] == 'e':
+                form_args['action_dict']['present_t'] = s_action[:-1] \
+                    + 'ing ' + a_type
+
+        if s_action == 'start':
+            form_args['names'].append('prep_start')
+        elif s_action == 'configure':
+            form_args['names'].pop()
+            form_args['names'].append('get_configure')
+            form_args['names'].append('save_configure')
+            form_args['names'].append('restart_tools')
         if action == 'add':
-            self.parentApp.change_form('ADD')
-        elif action == "build":
-            self.parentApp.change_form('BUILDTOOLS')
-        elif action == 'start':
-            self.parentApp.change_form('STARTTOOLS')
-        elif action == 'stop':
-            self.parentApp.change_form('STOPTOOLS')
-        elif action == 'clean':
-            self.parentApp.change_form('CLEANTOOLS')
+            form = AddForm
+            forms = ['ADD', 'ADDOPTIONS', 'CHOOSETOOLS']
+            form_args['name'] = "Add plugins"
+            form_args['name'] += "\t"*6 + "^Q to quit"
         elif action == "inventory":
-            self.parentApp.change_form('INVENTORY')
-        elif action == "update":
-            self.parentApp.change_form('UPDATETOOLS')
-        elif action == "remove":
-            self.parentApp.change_form('REMOVETOOLS')
-        # tutorial forms
-        elif action == "background":
+            form = InventoryToolsForm
+            forms = ['INVENTORY']
+            form_args = {'color': "STANDOUT", 'name': "Inventory of tools"}
+        elif action == 'logs':
+            form = LogsForm
+            forms = ['LOGS']
+            form_args = {'color': "STANDOUT", 'name': "Logs"}
+        elif action == 'services_core':
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "Core Services",
+                         'core': True}
+        elif action == 'services':
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "Plugin Services",
+                         'core': False}
+        elif action == 'services_external':
+            form = ServicesForm
+            forms = ['SERVICES']
+            form_args = {'color': "STANDOUT",
+                         'name': "External Services",
+                         'core': False,
+                         'external': True}
+        elif action == "inventory_core":
+            form = InventoryCoreToolsForm
+            forms = ['COREINVENTORY']
+            form_args = {'color': "STANDOUT",
+                         'name': "Inventory of core tools"}
+        form_args['name'] += "\t"*8 + "^T to toggle main"
+        if s_action in self.view_togglable:
+            form_args['name'] += "\t"*8 + "^V to toggle group view"
+        try:
+            self.remove_forms(forms)
+            thr = Thread(target=self.add_form, args=(),
+                         kwargs={'form': form,
+                                 'form_name': forms[0],
+                                 'form_args': form_args})
+            thr.start()
+            while thr.is_alive():
+                npyscreen.notify('Please wait, loading form...',
+                                 title='Loading')
+                time.sleep(1)
+        except Exception as e:  # pragma: no cover
+            pass
+        return
+
+    def switch_tutorial(self, action):
+        """ Tutorial forms """
+        if action == "background":
             self.parentApp.change_form('TUTORIALBACKGROUND')
         elif action == "terminology":
             self.parentApp.change_form('TUTORIALTERMINOLOGY')
@@ -248,46 +346,125 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.parentApp.change_form('TUTORIALADDINGPLUGINS')
         elif action == "adding_files":
             self.parentApp.change_form('TUTORIALADDINGFILES')
-        elif action == "setting_up_services":
-            self.parentApp.change_form('TUTORIALSETTINGUPSERVICES')
+        elif action == "basic_troubleshooting":
+            self.parentApp.change_form('TUTORIALTROUBLESHOOTING')
         return
 
     def system_commands(self, action):
         """ Perform system commands """
-        if action == "reset":
+        if action == 'backup':
+            status = self.api_action.backup()
+            if status[0]:
+                notify_confirm("Vent backup successful")
+            else:
+                notify_confirm("Vent backup could not be completed")
+        elif action == 'configure':
+            form_args = {'name': 'Change vent configuration',
+                         'get_configure': self.api_action.get_configure,
+                         'save_configure': self.api_action.save_configure,
+                         'restart_tools': self.api_action.restart_tools,
+                         'vent_cfg': True}
+            add_kargs = {'form': EditorForm,
+                         'form_name': 'CONFIGUREVENT',
+                         'form_args': form_args}
+            self.add_form(**add_kargs)
+        elif action == "reset":
             okay = npyscreen.notify_ok_cancel(
                     "This factory reset will remove ALL of Vent's user data, "
                     "containers, and images. Are you sure?",
                     title="Confirm system command")
             if okay:
-                d_cli = docker.from_env()
-                # remove containers
-                list = d_cli.containers.list(filters={'label':'vent'}, all=True)
-                for c in list:
-                    c.remove(force=True)
-                # remove images
-                list = d_cli.images.list(filters={'label':'vent'}, all=True)
-                for i in list:
-                    d_cli.images.remove(image=i.id, force=True)
-                # remove .vent folder
-                try:
-                    shutil.rmtree(os.path.join(os.path.expanduser('~'),'.vent'))
-                except Exception as e:
-                    npyscreen.notify_confirm("Error deleting Vent data: "+repr(e))
-                else:  # don't forget to indent the thing below when you uncomment code....
-                    npyscreen.notify_confirm("Vent reset complete. "
-                            "Press OK to exit Vent Manager console.")
-                self.exit()
-
+                status = self.api_action.reset()
+                if status[0]:
+                    notify_confirm("Vent reset complete. "
+                                   "Press OK to exit Vent Manager console.")
+                else:
+                    notify_confirm(status[1])
+                MainForm.exit()
+        elif action == "gpu":
+            gpu = Gpu(pull=True)
+            if gpu[0]:
+                notify_confirm("GPU detection successful. "
+                               "Found: " + gpu[1])
+            else:
+                if gpu[1] == "Unknown":
+                    notify_confirm("Unable to detect GPUs, try `make gpu` "
+                                   "from the vent repository directory. "
+                                   "Error: " + str(gpu[2]))
+                else:
+                    notify_confirm("No GPUs detected.")
+        elif action == 'restore':
+            backup_dir_home = os.path.expanduser('~')
+            backup_dirs = [f for f in os.listdir(backup_dir_home) if
+                           f.startswith('.vent-backup')]
+            form_args = {'restore': self.api_action.restore,
+                         'dirs': backup_dirs,
+                         'name': "Pick a version to restore from" + "\t"*8 +
+                                 "^T to toggle main",
+                         'color': 'CONTROL'}
+            add_kargs = {'form': BackupForm,
+                         'form_name': 'CHOOSEBACKUP',
+                         'form_args': form_args}
+            self.add_form(**add_kargs)
+        elif action == "swarm":
+            # !! TODO
+            # add notify_cancel_ok popup once implemented
             pass
         elif action == "upgrade":
             # !! TODO
+            # add notify_cancel_ok popup once implemented
             pass
+        elif action == "ntapcreate":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Create' + "\t"*6 +
+                                 '^T to toggle main'}
+            self.add_form(CreateNTap, "Network Tap Create", form_args)
+        elif action == "ntapdelete":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Delete' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(DeleteNTap, "Network Tap Delete", form_args)
+        elif action == "ntapstart":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Start' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(StartNTap, "Network Tap Start", form_args)
+        elif action == "ntapstop":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface Stop' + "\t"*6 +
+                                 '^T to toggle main' + "\t"*6 +
+                                 'Press arrow to navigate container list'}
+            self.add_form(StopNTap, "Network Tap Stop", form_args)
+        elif action == "ntaplist":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Network Tap Interface List' + "\t"*6 +
+                                  '^T to toggle main' + "\t"*6}
+            self.add_form(ListNTap, "Network Tap List", form_args)
+        elif action == "ntapnics":
+            form_args = {'color': 'CONTROL',
+                         'name': 'Available Network Interfaces' + "\t"*6 +
+                                  '^T to toggle main' + "\t"*6}
+            self.add_form(NICsNTap, "Available Network Interfaces", form_args)
         return
 
     def create(self):
         """ Override method for creating FormBaseNewWithMenu form """
-        self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
+        try:
+            self.api_action = Action()
+
+        except DockerException as de:  # pragma: no cover
+            notify_confirm(str(de),
+                           title="Docker Error",
+                           form_color='DANGER',
+                           wrap=True)
+            MainForm.exit()
+
+        self.add_handlers({"^T": self.help_form, "^Q": MainForm.exit})
+        # all forms that can toggle view by group
+        self.view_togglable = ['inventory', 'remove', 'update', 'enable',
+                               'disable', 'build']
 
         #######################
         # MAIN SCREEN WIDGETS #
@@ -297,10 +474,19 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                                  labelColor='DEFAULT', value=Timestamp())
         self.addfield2 = self.add(npyscreen.TitleFixedText, name='Uptime:',
                                   labelColor='DEFAULT', value=Uptime())
-        self.cpufield = self.add(npyscreen.TitleFixedText, name='Logical CPUs:',
+        self.cpufield = self.add(npyscreen.TitleFixedText,
+                                 name='Logical CPUs:',
                                  labelColor='DEFAULT', value=Cpu())
         self.gpufield = self.add(npyscreen.TitleFixedText, name='GPUs:',
-                                 labelColor='DEFAULT', value=Gpu())
+                                 labelColor='DEFAULT', value=Gpu()[1])
+        self.location = self.add(npyscreen.TitleFixedText,
+                                 name='User Data:',
+                                 value=PathDirs().meta_dir,
+                                 labelColor='DEFAULT')
+        self.file_drop = self.add(npyscreen.TitleFixedText,
+                                  name='File Drop:',
+                                  value=DropLocation()[1],
+                                  labelColor='DEFAULT')
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value="0 "+" running")
@@ -310,10 +496,14 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield5 = self.add(npyscreen.TitleFixedText,
                                   name='Core Tools:', labelColor='DANGER',
                                   value="Not built")
-        self.addfield6 = self.add(npyscreen.TitleFixedText, name='Jobs:',
-                                  value="0 jobs running (0 tool containers), 0 completed jobs", labelColor='DEFAULT')
-        self.multifield1 =  self.add(npyscreen.MultiLineEdit, max_height=22,
-                                     editable=False, value = """
+        self.addfield6 = self.add(npyscreen.TitleFixedText,
+                                  name='Plugin Tools:', labelColor='DEFAULT',
+                                  value="Not built")
+        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Jobs:',
+                                  value="0 jobs running (0 tool containers),"
+                                  " 0 completed jobs", labelColor='DEFAULT')
+        self.multifield1 = self.add(npyscreen.MultiLineEdit, max_height=22,
+                                    editable=False, value="""
 
             '.,
               'b      *
@@ -344,29 +534,38 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         # Core Tools Menu Items
         self.m2 = self.add_menu(name="Core Tools", shortcut="c")
         self.m2.addItem(text='Add all latest core tools',
-                        onSelect=self.core_tools,
+                        onSelect=MainForm.core_tools,
                         arguments=['install'], shortcut='i')
         self.m2.addItem(text='Build core tools',
-                        onSelect=self.core_tools,
-                        arguments=['build'], shortcut='b')
+                        onSelect=self.perform_action,
+                        arguments=['build_core'], shortcut='b')
         self.m2.addItem(text='Clean core tools',
-                        onSelect=self.core_tools,
-                        arguments=['clean'], shortcut='c')
+                        onSelect=self.perform_action,
+                        arguments=['clean_core'], shortcut='c')
+        self.m2.addItem(text='Configure core tools',
+                        onSelect=self.perform_action,
+                        arguments=['configure_core'], shortcut='t')
+        self.m2.addItem(text='Disable core tools',
+                        onSelect=self.perform_action,
+                        arguments=['disable_core'], shortcut='d')
+        self.m2.addItem(text='Enable core tools',
+                        onSelect=self.perform_action,
+                        arguments=['enable_core'], shortcut='e')
         self.m2.addItem(text='Inventory of core tools',
-                        onSelect=self.core_tools,
-                        arguments=['inventory'], shortcut='v')
+                        onSelect=self.perform_action,
+                        arguments=['inventory_core'], shortcut='v')
         self.m2.addItem(text='Remove core tools',
-                        onSelect=self.core_tools,
-                        arguments=['remove'], shortcut='r')
+                        onSelect=self.perform_action,
+                        arguments=['remove_core'], shortcut='r')
         self.m2.addItem(text='Start core tools',
-                        onSelect=self.core_tools,
-                        arguments=['start'], shortcut='s')
+                        onSelect=self.perform_action,
+                        arguments=['start_core'], shortcut='s')
         self.m2.addItem(text='Stop core tools',
-                        onSelect=self.core_tools,
-                        arguments=['stop'], shortcut='p')
+                        onSelect=self.perform_action,
+                        arguments=['stop_core'], shortcut='p')
         self.m2.addItem(text='Update core tools',
-                        onSelect=self.core_tools,
-                        arguments=['update'], shortcut='u')
+                        onSelect=self.perform_action,
+                        arguments=['update_core'], shortcut='u')
 
         # Plugin Menu Items
         self.m3 = self.add_menu(name="Plugins", shortcut="p")
@@ -379,6 +578,15 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Clean plugin tools',
                         onSelect=self.perform_action,
                         arguments=['clean'], shortcut='c')
+        self.m3.addItem(text='Configure plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['configure'], shortcut='t')
+        self.m3.addItem(text='Disable plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['disable'], shortcut='d')
+        self.m3.addItem(text='Enable plugin tools',
+                        onSelect=self.perform_action,
+                        arguments=['enable'], shortcut='e')
         self.m3.addItem(text='Inventory of installed plugins',
                         onSelect=self.perform_action,
                         arguments=['inventory'], shortcut='i')
@@ -397,66 +605,80 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # Log Menu Items
         self.m4 = self.add_menu(name="Logs", shortcut="l")
-        self.m4.addItem(text='Get container logs', arguments=[],
-                        onSelect=self.logs_form)
+        self.m4.addItem(text='Get container logs', arguments=['logs'],
+                        onSelect=self.perform_action)
 
         # Services Menu Items
         self.m5 = self.add_menu(name="Services Running", shortcut='s')
-        self.m5.addItem(text='Core Services', onSelect=self.services_form,
-                        arguments=['core'], shortcut='c')
-        self.m5.addItem(text='Plugin Services (To be implemented...)',
-                        onSelect=self.services_form,
-                        arguments=['plugins'], shortcut='p')
+        self.m5.addItem(text='Core Services', onSelect=self.perform_action,
+                        arguments=['services_core'], shortcut='c')
+        self.m5.addItem(text='External Services', onSelect=self.perform_action,
+                        arguments=['services_external'], shortcut='e')
+        self.m5.addItem(text='Plugin Services',
+                        onSelect=self.perform_action,
+                        arguments=['services'], shortcut='p')
 
         # System Commands Menu Items
-        self.m6 = self.add_menu(name="System Commands")
+        self.m6 = self.add_menu(name="System Commands", shortcut='y')
+        self.m6.addItem(text='Backup', onSelect=self.system_commands,
+                        arguments=['backup'], shortcut='b')
+        self.m6.addItem(text='Change vent configuration',
+                        onSelect=self.system_commands, arguments=['configure'],
+                        shortcut='c')
+        self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
+                        arguments=['gpu'], shortcut='g')
+        self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',
+                        onSelect=self.system_commands,
+                        arguments=['swarm'], shortcut='s')
         self.m6.addItem(text='Factory reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
+        self.s6 = self.m6.addNewSubmenu(name='Network Tap Interface',
+                                        shortcut='n')
+        self.m6.addItem(text='Restore', onSelect=self.system_commands,
+                        arguments=['restore'], shortcut='t')
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')
+        self.s6.addItem(text='Create', onSelect=self.system_commands,
+                        shortcut='c', arguments=['ntapcreate'])
+        self.s6.addItem(text='Delete', onSelect=self.system_commands,
+                        shortcut='d', arguments=['ntapdelete'])
+        self.s6.addItem(text='List', onSelect=self.system_commands,
+                        shortcut='l', arguments=['ntaplist'])
+        self.s6.addItem(text='NICs', onSelect=self.system_commands,
+                        shortcut='n', arguments=['ntapnics'])
+        self.s6.addItem(text='Start', onSelect=self.system_commands,
+                        shortcut='s', arguments=['ntapstart'])
+        self.s6.addItem(text='Stop', onSelect=self.system_commands,
+                        shortcut='t', arguments=['ntapstop'])
 
         # Tutorial Menu Items
         self.m7 = self.add_menu(name="Tutorials", shortcut="t")
         self.s1 = self.m7.addNewSubmenu(name="About Vent", shortcut='v')
-        self.s1.addItem(text="Background", onSelect=self.perform_action,
+        self.s1.addItem(text="Background", onSelect=self.switch_tutorial,
                         arguments=['background'], shortcut='b')
-        self.s1.addItem(text="Terminology", onSelect=self.perform_action,
+        self.s1.addItem(text="Terminology", onSelect=self.switch_tutorial,
                         arguments=['terminology'], shortcut='t')
-        self.s1.addItem(text="Getting Setup", onSelect=self.perform_action,
+        self.s1.addItem(text="Getting Setup", onSelect=self.switch_tutorial,
                         arguments=['setup'], shortcut='s')
         self.s2 = self.m7.addNewSubmenu(name="Working with Cores",
                                         shortcut='c')
-        self.s2.addItem(text="Building Cores", onSelect=self.perform_action,
+        self.s2.addItem(text="Building Cores", onSelect=self.switch_tutorial,
                         arguments=['building_cores'], shortcut='b')
-        self.s2.addItem(text="Starting Cores", onSelect=self.perform_action,
+        self.s2.addItem(text="Starting Cores", onSelect=self.switch_tutorial,
                         arguments=['starting_cores'], shortcut='c')
         self.s3 = self.m7.addNewSubmenu(name="Working with Plugins",
                                         shortcut='p')
-        self.s3.addItem(text="Adding Plugins", onSelect=self.perform_action,
+        self.s3.addItem(text="Adding Plugins", onSelect=self.switch_tutorial,
                         arguments=['adding_plugins'], shortcut='a')
         self.s4 = self.m7.addNewSubmenu(name="Files", shortcut='f')
-        self.s4.addItem(text="Adding Files", onSelect=self.perform_action,
+        self.s4.addItem(text="Adding Files", onSelect=self.switch_tutorial,
                         arguments=['adding_files'], shortcut='a')
-        self.s5 = self.m7.addNewSubmenu(name="Services", shortcut='s')
-        self.s5.addItem(text="Setting up Services",
-                        onSelect=self.perform_action,
-                        arguments=['setting_up_services'], shortcut='s')
+        self.s5 = self.m7.addNewSubmenu(name="Help", shortcut='s')
+        self.s5.addItem(text="Basic Troubleshooting",
+                        onSelect=self.switch_tutorial,
+                        arguments=['basic_troubleshooting'], shortcut='t')
 
-    def services_form(self, service_type):
-        """ Change to the services form for core or plugins """
-        # TODO break out services and add services from plugins
-        if service_type == 'core':
-            self.parentApp.change_form("SERVICES")
-        elif service_type == 'plugins':
-            self.parentApp.change_form("SERVICES")
-
-    def logs_form(self, *args, **keywords):
-        self.parentApp.change_form("LOGS")
-
-    def change_forms(self, *args, **keywords):
-        """ Toggles back and forth between help """
-        change_to = "HELP"
-
-        # Tell the VentApp object to change forms.
-        self.parentApp.change_form(change_to)
+    def help_form(self, *args, **keywords):
+        """ Toggles to help """
+        self.parentApp.change_form("HELP")

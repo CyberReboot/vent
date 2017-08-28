@@ -1,11 +1,12 @@
 try:
     # python2
     import ConfigParser
-except ImportError:
+except ImportError:  # pragma: no cover
     # python3
     import configparser as ConfigParser
 
 from vent.helpers.errors import ErrorHandler
+
 
 class Template:
     """ Handle parsing templates """
@@ -64,21 +65,19 @@ class Template:
         Creates an option for a section. If the section does
         not exist, it will create the section.
         """
-        # if duplicate section, and return error message
-        message = self.add_section(section)
-        if not message[0]:
-            return message
-        # check if section exists
-        if self.config.has_section(section):
-            if not self.config.has_option(section, option):
-                # if a value was provided, set to value
-                if value:
-                    self.config.set(section, option, value)
-                else:
-                    self.config.set(section, option)
-                return (True, self.config.options(section))
-            return (False, "Option: " + option + " already exists in " + section)
-        return (False, "Section: " + section + " does not exist. Did you want to force it?")
+        # check if section exists; create if not
+        if not self.config.has_section(section):
+            message = self.add_section(section)
+            if not message[0]:
+                return message
+
+        if not self.config.has_option(section, option):
+            if value:
+                self.config.set(section, option, value)
+            else:
+                self.config.set(section, option)
+            return(True, self.config.options(section))
+        return(False, "Option: {} already exists @ {}".format(option, section))
 
     @ErrorHandler
     def del_section(self, section):
@@ -136,7 +135,9 @@ class Template:
                 if not result[0] or result[1] != constraints[constraint]:
                     include = False
                 # handle group membership
-                if result[0] and constraint == 'groups' and constraints[constraint] in result[1]:
+                if (result[0] and
+                   constraint == 'groups' and
+                   constraints[constraint] in result[1]):
                     include = True
             if include:
                 sections[a_section] = {}
