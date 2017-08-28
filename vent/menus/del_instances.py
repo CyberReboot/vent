@@ -96,8 +96,8 @@ class DeleteForm(npyscreen.ActionForm):
                 if run:
                     # grab dependencies of tools that linked to previous one
                     if i == 0:
-                        dependent_tools = [self.manifest.option(section,
-                                                                'link_name')[1]]
+                        dependent_tools = [self.manifest.option(
+                                               section, 'link_name')[1]]
                         for dependency in Dependencies(dependent_tools):
                             self.clean(**dependency)
                             to_update.append(dependency)

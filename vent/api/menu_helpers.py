@@ -407,7 +407,7 @@ class MenuHelper:
                         container_check = not core_check
                     if container_check:
                         if ('vent.name' in container.attrs['Config']['Labels'] and
-                            'hidden' not in image.attrs['Labels']['vent.groups']):
+                                'hidden' not in image.attrs['Labels']['vent.groups']):
                             if core:
                                 all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'].replace('_', '-'))
                             else:

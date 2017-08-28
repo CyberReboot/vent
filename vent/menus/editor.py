@@ -40,13 +40,13 @@ class EditorForm(npyscreen.ActionForm):
 
         # setup checks
         self.just_downloaded = ('just_downloaded' in self.settings and
-                self.settings['just_downloaded'])
+                                self.settings['just_downloaded'])
         self.vent_cfg = ('vent_cfg' in self.settings and
-                self.settings['vent_cfg'])
+                         self.settings['vent_cfg'])
         self.registry_tool = ('from_registry' in self.settings and
-                self.settings['from_registry'])
+                              self.settings['from_registry'])
         self.instance_cfg = ('new_instance' in self.settings and
-                self.settings['new_instance'])
+                             self.settings['new_instance'])
 
         # get manifest info for tool that will be used throughout
         if not self.just_downloaded and not self.vent_cfg:
@@ -85,7 +85,8 @@ class EditorForm(npyscreen.ActionForm):
             with open(template_path) as vent_template:
                 self.config_val = vent_template.read()
         else:
-            self.config_val = keywords['get_configure'](**self.tool_identifier)[1]
+            self.config_val = keywords['get_configure'](
+                                  **self.tool_identifier)[1]
         super(EditorForm, self).__init__(*args, **keywords)
 
     def create(self):
@@ -150,14 +151,14 @@ class EditorForm(npyscreen.ActionForm):
                                              " message that may be helpful: " +
                                              str(e), title="Invalid input")
                     return
-        
+
         # get the number of instances and ensure user didn't malform that
         if re.search(r"instances\ *=", self.edit_space.value):
             try:
                 new_instances = int(re.split(r"instances\ *=\ *",
                                              self.edit_space.value)[1][0])
             except ValueError:
-                npyscreen.notify_confirm("You didn't specify a valid number" 
+                npyscreen.notify_confirm("You didn't specify a valid number"
                                          " for instances.")
                 return
             # user can't change instances when configuring new instnaces
@@ -268,7 +269,7 @@ class EditorForm(npyscreen.ActionForm):
                         self.settings['start_new'] = run
                         self.settings['new_instance'] = True
                         self.settings['name'] = "Configure new instance(s)" + \
-                                " for " + self.settings['tool_name']
+                            " for " + self.settings['tool_name']
                         self.parentApp.addForm('INSTANCEEDITOR' +
                                                self.settings['tool_name'],
                                                EditorForm, **self.settings)
@@ -278,7 +279,7 @@ class EditorForm(npyscreen.ActionForm):
                         return
                 except Exception as e:
                     npyscreen.notify_confirm("Trouble finding tools to add,"
-                                             " exiting" + str(e), title="Error")
+                                             " exiting", title="Error")
                     self.on_cancel()
             elif new_instances < old_instances:
                 try:
@@ -297,22 +298,23 @@ class EditorForm(npyscreen.ActionForm):
                         clean_section[0] = re.sub(r'[0-9]+$', '',
                                                   clean_section[0])
                         clean_section = ':'.join(clean_section)
-                        deleter_args = {'name': form_name,
-                                        'new_instances': new_instances,
-                                        'old_instances': old_instances,
-                                        'next_tool': self.settings['next_tool'],
-                                        'manifest': self.manifest,
-                                        'section': clean_section,
-                                        'clean': self.settings['clean'],
-                                        'prep_start': self.settings['prep_start'],
-                                        'start_tools': self.settings['start_tools']}
-                        self.parentApp.addForm('DELETER' + self.settings['tool_name'],
-                                               DeleteForm, **deleter_args)
+                        d_args = {'name': form_name,
+                                  'new_instances': new_instances,
+                                  'old_instances': old_instances,
+                                  'next_tool': self.settings['next_tool'],
+                                  'manifest': self.manifest,
+                                  'section': clean_section,
+                                  'clean': self.settings['clean'],
+                                  'prep_start': self.settings['prep_start'],
+                                  'start_tools': self.settings['start_tools']}
+                        self.parentApp.addForm('DELETER' +
+                                               self.settings['tool_name'],
+                                               DeleteForm, **d_args)
                         self.parentApp.change_form('DELETER' +
                                                    self.settings['tool_name'])
                 except Exception as e:
                     npyscreen.notify_confirm("Trouble finding instances to"
-                                             " delete, exiting" + str(e), title="Error")
+                                             " delete, exiting", title="Error")
                     self.on_cancel()
 
         if (new_instances == old_instances or
@@ -324,6 +326,7 @@ class EditorForm(npyscreen.ActionForm):
 
     def on_cancel(self):
         """ Don't save changes made to vent.template """
-        npyscreen.notify_confirm("No changes made to " + self.settings['tool_name'],
+        npyscreen.notify_confirm("No changes made to " +
+                                 self.settings['tool_name'],
                                  title="Configurations not saved")
         self.change_screens()
