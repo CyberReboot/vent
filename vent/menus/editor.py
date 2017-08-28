@@ -27,7 +27,7 @@ class EditorForm(npyscreen.ActionForm):
         | \w+\ *=\ *[\w,.:/#-]*$    # option-value pairs
         | \[[\w-]+\]$               # section headers
         """, re.VERBOSE)
-        self.p_helper = PluginHelper()
+        self.p_helper = PluginHelper(plugins_dir='.internals/')
         self.tool_identifier = {'name': tool_name,
                                 'branch': branch,
                                 'version': version}
@@ -77,6 +77,10 @@ class EditorForm(npyscreen.ActionForm):
                 template_path = os.path.join(path, 'vent.template')
             with open(template_path) as vent_template:
                 self.config_val = vent_template.read()
+            self.config_val = re.sub(r'instances\ *=\ *[0-9]+',
+                                     'instances = ' +
+                                     str(self.settings['new_instances']),
+                                     self.config_val)
         else:
             self.config_val = keywords['get_configure'](**self.tool_identifier)[1]
         super(EditorForm, self).__init__(*args, **keywords)
@@ -232,7 +236,9 @@ class EditorForm(npyscreen.ActionForm):
                     diff = str(new_instances - old_instances)
                     res = npyscreen.notify_yes_no("You will be creating " +
                                                   diff + " additional"
-                                                  " instance(s) is that okay?")
+                                                  " instance(s) is that okay?",
+                                                  title="Confirm new"
+                                                  " instance(s)")
                     if res:
                         if self.manifest.option(self.section,
                                                 'built')[1] == 'yes':
@@ -272,7 +278,9 @@ class EditorForm(npyscreen.ActionForm):
                     diff = str(old_instances - new_instances)
                     res = npyscreen.notify_yes_no("You will be deleting " +
                                                   diff + " instance(s), is"
-                                                  " that okay?")
+                                                  " that okay?",
+                                                  title="Confirm delete"
+                                                  " instance(s)")
                     if res:
                         form_name = 'Delete instances for ' + \
                                 self.settings['tool_name'] + '\t'*8 + \

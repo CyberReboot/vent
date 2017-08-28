@@ -722,17 +722,23 @@ class Plugin:
         for result in results:
             response, image_name = template.option(result, 'image_name')
             name = template.option(result, 'name')[1]
-
-            # check for container and remove
-            container_name = image_name.replace(':', '-').replace('/', '-')
-            if name[-1] in '0123456789':
-                container_name += name[-1]
             try:
-                container = self.d_client.containers.get(container_name)
-                response = container.remove(v=True, force=True)
-                self.logger.info(response)
-                self.logger.info("Removing plugin container: " +
-                                 container_name)
+                settings_dict = json.loads(template.option(result,
+                                                           'settings')[1])
+                instances = int(settings_dict['instances'])
+            except Exception:
+                instances = 1
+
+            try:
+                # check for container and remove
+                c_name = image_name.replace(':', '-').replace('/', '-')
+                for i in range(1, instances + 1):
+                    container_name = c_name + str(i) if i != 1 else c_name
+                    container = self.d_client.containers.get(container_name)
+                    response = container.remove(v=True, force=True)
+                    self.logger.info(response)
+                    self.logger.info("Removing plugin container: " +
+                                     container_name)
             except Exception as e:  # pragma: no cover
                 self.logger.warn("Unable to remove the plugin container: " +
                                  container_name + " because: " + str(e))
@@ -740,14 +746,8 @@ class Plugin:
             # check for image and remove
             try:
                 response = None
-                # due to problems with core image_id value in manifest file
-                groups = template.option(result, 'groups')
-                if groups[0] and "core" in groups[1]:
-                    response = self.d_client.images.remove(image_name)
-                else:
-                    image_id = template.option(result, 'image_id')[1]
-                    response = self.d_client.images.remove(image_id,
-                                                           force=True)
+                image_id = template.option(result, 'image_id')[1]
+                response = self.d_client.images.remove(image_id, force=True)
                 self.logger.info(response)
                 self.logger.info("Removing plugin image: " + image_name)
             except Exception as e:  # pragma: no cover
@@ -755,8 +755,12 @@ class Plugin:
                                  image_name + " because: " + str(e))
 
             # remove tool from the manifest
-            status = template.del_section(result)
-            self.logger.info("Removing plugin tool: " + result)
+            for i in range(1, instances + 1):
+                res = result.rsplit(':', 2)
+                res[0] += str(i) if i != 1 else ''
+                res = ':'.join(res)
+                status = template.del_section(res)
+                self.logger.info("Removing plugin tool: " + res)
         # TODO if all tools from a repo have been removed, remove the repo
         template.write_config()
         return status

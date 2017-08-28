@@ -50,6 +50,7 @@ class ToolForm(npyscreen.ActionForm):
         self.manifest = manifest
         self.views += possible_groups
         self.views.append('all groups')
+        self.no_instance = ['build', 'remove']
         super(ToolForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):
@@ -165,7 +166,7 @@ class ToolForm(npyscreen.ActionForm):
                             if instance_num not in '0123456789':
                                 ncore_list.append(tool)
                             # multiple instances share same image
-                            elif self.action['action_name'] != 'build':
+                            elif self.action['action_name'] not in self.no_instance:
                                 ncore_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
@@ -173,7 +174,7 @@ class ToolForm(npyscreen.ActionForm):
                             if instance_num not in '0123456789':
                                 ncore_list.append(tool)
                             # multiple instances share same image
-                            elif self.action['action_name'] != 'build':
+                            elif self.action['action_name'] not in self.no_instance:
                                 ncore_list.append(tool)
 
                 for tool in inventory['core']:
@@ -211,7 +212,7 @@ class ToolForm(npyscreen.ActionForm):
                             if instance_num not in '0123456789':
                                 core_list.append(tool)
                             # multiple instances share same image
-                            elif self.action['action_name'] != 'build':
+                            elif self.action['action_name'] not in self.no_instance:
                                 core_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
@@ -219,7 +220,7 @@ class ToolForm(npyscreen.ActionForm):
                             if instance_num not in '0123456789':
                                 core_list.append(tool)
                             # multiple instances share same image
-                            elif self.action['action_name'] != 'build':
+                            elif self.action['action_name'] not in self.no_instance:
                                 core_list.append(tool)
 
                 has_core[repo] = core_list

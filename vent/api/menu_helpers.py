@@ -370,7 +370,7 @@ class MenuHelper:
             repo = template.option(tool, "repo")
             if repo[0] and repo[1] in repos:
                 name = template.option(tool, "name")
-                if name[0] and name[1][-1] not in '0123456789':
+                if name[0]:
                     all_tools['installed'].append(name[1].replace('_', '-'))
 
         # get tools that have been built and/or are running
