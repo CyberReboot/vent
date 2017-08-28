@@ -12,7 +12,6 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 from vent.menus.editor import EditorForm
-from vent.menus.instances import InstanceForm
 
 
 class ToolForm(npyscreen.ActionForm):
@@ -375,10 +374,7 @@ class ToolForm(npyscreen.ActionForm):
                                  'clean': action.clean,
                                  'prep_start': action.prep_start,
                                  'start_tools': action.start,
-                                 'from_registry': registry_image,
-                                 'regular_tool': not registry_image,
-                                 'just_downloaded': False,
-                                 'new_instance': False}
+                                 'from_registry': registry_image}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
                         self.parentApp.addForm("EDITOR" + t[0], EditorForm,

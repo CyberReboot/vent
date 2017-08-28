@@ -369,11 +369,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 notify_confirm("Vent backup could not be completed")
         elif action == 'configure':
             form_args = {'name': 'Change vent configuration',
-                         'tool_name': '',
-                         'branch': '',
-                         'version': '',
-                         'repo': '',
-                         'next_tool': None,
                          'get_configure': self.api_action.get_configure,
                          'save_configure': self.api_action.save_configure,
                          'restart_tools': self.api_action.restart_tools,

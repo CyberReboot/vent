@@ -869,9 +869,8 @@ class Action:
             for section in template_dict:
                 return_str += "[" + section + "]\n"
                 for option in template_dict[section]:
-                    if option != 'instances':
-                        return_str += option + " = "
-                        return_str += template_dict[section][option] + "\n"
+                    return_str += option + " = "
+                    return_str += str(template_dict[section][option]) + "\n"
                 return_str += "\n"
             # only one newline at end of file
             status = (True, return_str[:-1])
@@ -1033,6 +1032,7 @@ class Action:
                         template_to_manifest(vent_template, manifest,
                                              tool, old_instances)
                     manifest.write_config()
+                    status = (True, manifest)
                 except Exception as e:  # pragma: no cover
                     self.logger.error("save_configure error: " + str(e))
                     status = (False, str(e))
