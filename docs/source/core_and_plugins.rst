@@ -101,14 +101,6 @@ Configure core/plugin tools
 Edit a tool's vent.template file found in the tool's respective folder.
 Read more about :ref:`venttemplate-label`.
 
-Another option you have is to configure the number of instances that are
-running of that tool. You can toggle between configuring the vent.template
-for a tool or the number of instances running for that tool by hitting
-CTRL-B. Configuring the number of instances running for a tool would be
-useful for scaling. An example would be if you wanted multiple workers
-to be handle all that tasks that you are processing or want different
-workers to work solely on CPU or GPU tasks.
-
 Disable core/plugin tools
 =========================
 Remove chosen tools from menus. For example, let's say there were ten tools but only

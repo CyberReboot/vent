@@ -36,8 +36,6 @@ def test_menu():
     CTRL_T = '^T'
     CTRL_X = '^X'
     CTRL_V = '^V'
-    CTRL_B = '^B'
-    CTRL_E = '^E'
     ENTER = curses.ascii.CR
     TAB = curses.ascii.TAB
     LEFT = curses.KEY_LEFT
@@ -92,35 +90,29 @@ def test_menu():
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
               TAB, ENTER, TAB, TAB, ENTER, ENTER, ENTER])
     # configure - quit in the middle of add
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, '2', TAB, TAB, ENTER, ENTER, TAB,
-              ENTER, ENTER, TAB, ENTER, CTRL_Q])
-    # configure - exit in the middle of add
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, '2', TAB, TAB, ENTER, ENTER, TAB,
-              ENTER, ENTER, TAB, ENTER, CTRL_E])
-    # configure - instances add (add an instance of file_drop)
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, '2', TAB, TAB, ENTER, ENTER, TAB,
-              ENTER, ENTER, TAB, ENTER, TAB, TAB, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN,
+              DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '3', TAB, TAB,
+              ENTER, ENTER, TAB, ENTER, ENTER, TAB, ENTER, CTRL_Q])
+    # configure - instances add (add an instance of rq_worker)
+    run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
+              SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN,
+              DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '3', TAB, TAB,
+              ENTER, ENTER, TAB, ENTER, ENTER, TAB, ENTER, TAB, TAB, ENTER])
     # configure - quit in the middle of delete
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, '1', TAB, TAB, ENTER, ENTER, TAB,
-              ENTER, CTRL_Q])
-    # configure - exit in the middle of delete
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, '1', TAB, TAB, ENTER, ENTER, TAB,
-              ENTER, CTRL_E])
+    run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN,
+              DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',
+              TAB, TAB, ENTER, ENTER, TAB, ENTER, CTRL_Q])
     # configure - instances delete (delete an instance of file_drop)
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, '1', TAB, TAB, ENTER, ENTER, TAB,
-              ENTER, SPACE, TAB, TAB, ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
+              SPACE, TAB, SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN,
+              DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',
+              TAB, TAB, ENTER, ENTER, TAB, ENTER, SPACE, TAB, TAB, ENTER])
     # configure - keep instances the same
     run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,

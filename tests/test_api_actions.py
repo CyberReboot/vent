@@ -18,7 +18,6 @@ def test_get_configure():
     status = instance.get_configure(name='elasticsearch')
     assert status[0]
     assert 'Elasticsearch' in status[1]
-    assert 'instances =' not in status[1]
 
 def test_save_configure():
     """ Test the save_configure function """
