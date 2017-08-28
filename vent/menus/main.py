@@ -322,9 +322,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         form_args['name'] += "\t"*8 + "^T to toggle main"
         if s_action in self.view_togglable:
             form_args['name'] += "\t"*8 + "^V to toggle group view"
-        if s_action == 'configure':
-            form_args['name'] += "\t"*8 + "^B to toggle configuring" \
-                    " instances or specific tool"
         try:
             self.remove_forms(forms)
             thr = Thread(target=self.add_form, args=(),
