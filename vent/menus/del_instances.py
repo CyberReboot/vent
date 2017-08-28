@@ -75,7 +75,8 @@ class DeleteForm(npyscreen.ActionForm):
 
     def quit(self, *args, **kargs):
         """ Quit without making any changes to the tool """
-        npyscreen.notify_confirm("No changes made")
+        npyscreen.notify_confirm("No changes made to instance(s)",
+                                 title="Instance confiugration cancelled")
         self.change_screens()
 
     def on_ok(self):
@@ -88,48 +89,52 @@ class DeleteForm(npyscreen.ActionForm):
         for i, val in enumerate(self.del_instances.values):
             # clean all tools for renmaing and relabeling purposes
             t = val.split(':')
+            section = self.display_to_section[val]
+            prev_running = self.manifest.option(section, 'running')
+            run = prev_running[0] and prev_running[1] == 'yes'
             if i in self.del_instances.value:
-                section = self.display_to_section[':'.join(t)]
-                # grab dependencies of tools that linked to previous one
-                if i == 0:
-                    dependent_tools = [self.manifest.option(section,
-                                                            'link_name')[1]]
-                    for dependency in Dependencies(dependent_tools):
-                        self.clean(**dependency)
-                        to_update.append(dependency)
-                self.clean(name=t[0], branch=t[1], version=t[2])
+                if run:
+                    # grab dependencies of tools that linked to previous one
+                    if i == 0:
+                        dependent_tools = [self.manifest.option(section,
+                                                                'link_name')[1]]
+                        for dependency in Dependencies(dependent_tools):
+                            self.clean(**dependency)
+                            to_update.append(dependency)
+                    self.clean(name=t[0], branch=t[1], version=t[2])
                 self.manifest.del_section(section)
             else:
                 try:
                     # update instances for tools remaining
-                    i_section = self.display_to_section[val]
+                    section = self.display_to_section[val]
                     settings_dict = json.loads(self.manifest.option
-                                               (i_section, 'settings')[1])
+                                               (section, 'settings')[1])
                     settings_dict['instances'] = self.new_instances
-                    self.manifest.set_option(i_section, 'settings',
+                    self.manifest.set_option(section, 'settings',
                                              json.dumps(settings_dict))
                     # check if tool name doesn't need to be shifted because
                     # it's already correct
                     identifier = str(shift_num) if shift_num != 1 else ''
                     new_section = re.sub(r'[0-9]', identifier,
-                                         i_section, 1)
-                    if i_section != new_section:
+                                         section, 1)
+                    if section != new_section:
                         # clean tool so that we can rename its container and
                         # labels with new information
                         self.clean(name=t[0], branch=t[1], version=t[2])
-                        prev_name = self.manifest.option(i_section, 'name')[1]
+                        prev_name = self.manifest.option(section, 'name')[1]
                         new_name = re.split(r'[0-9]', prev_name)[0] + \
                             identifier
-                        self.manifest.set_option(i_section, 'name', new_name)
+                        self.manifest.set_option(section, 'name', new_name)
                         # copy new contents into shifted version
                         self.manifest.add_section(new_section)
-                        for val_pair in self.manifest.section(i_section)[1]:
+                        for val_pair in self.manifest.section(section)[1]:
                             self.manifest.set_option(new_section, val_pair[0],
                                                      val_pair[1])
-                        self.manifest.del_section(i_section)
-                        to_update.append({'name': new_name,
-                                          'branch': t[1],
-                                          'version': t[2]})
+                        self.manifest.del_section(section)
+                        if run:
+                            to_update.append({'name': new_name,
+                                              'branch': t[1],
+                                              'version': t[2]})
                     shift_num += 1
                 except Exception as e:
                     npyscreen.notify_confirm("Trouble deleting tools"

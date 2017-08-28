@@ -868,6 +868,7 @@ class Action:
             # display all those options as they would in the file
             for section in template_dict:
                 return_str += "[" + section + "]\n"
+                # ensure instances shows up in configuration
                 for option in template_dict[section]:
                     return_str += option + " = "
                     return_str += str(template_dict[section][option]) + "\n"

@@ -6,6 +6,7 @@ import os
 import re
 
 from vent.api.plugin_helpers import PluginHelper
+from vent.api.templates import Template
 from vent.menus.del_instances import DeleteForm
 
 
@@ -75,12 +76,14 @@ class EditorForm(npyscreen.ActionForm):
                                              name + '.template')
             else:
                 template_path = os.path.join(path, 'vent.template')
+            # ensure instances is in the editor and that it is the right number
+            template = Template(template_path)
+            template.add_section('settings')
+            template.set_option('settings', 'instances',
+                                str(self.settings['new_instances']))
+            template.write_config()
             with open(template_path) as vent_template:
                 self.config_val = vent_template.read()
-            self.config_val = re.sub(r'instances\ *=\ *[0-9]+',
-                                     'instances = ' +
-                                     str(self.settings['new_instances']),
-                                     self.config_val)
         else:
             self.config_val = keywords['get_configure'](**self.tool_identifier)[1]
         super(EditorForm, self).__init__(*args, **keywords)
@@ -250,6 +253,10 @@ class EditorForm(npyscreen.ActionForm):
                                                           " instance(s)")
                         else:
                             run = False
+                        # get clean name (no instance numbers in it)
+                        new_name = self.settings['tool_name']
+                        new_name = re.sub(r'[0-9]+$', '', new_name)
+                        self.settings['tool_name'] = new_name
                         npyscreen.notify_wait("Pulling up default settings"
                                               " for " +
                                               self.settings['tool_name'] +
@@ -283,14 +290,19 @@ class EditorForm(npyscreen.ActionForm):
                                                   " instance(s)")
                     if res:
                         form_name = 'Delete instances for ' + \
-                                self.settings['tool_name'] + '\t'*8 + \
+                                re.sub(r'[0-9]+$', '',
+                                       self.settings['tool_name']) + '\t'*8 + \
                                 '^E to exit configuration process'
+                        clean_section = self.section.rsplit(':', 2)
+                        clean_section[0] = re.sub(r'[0-9]+$', '',
+                                                  clean_section[0])
+                        clean_section = ':'.join(clean_section)
                         deleter_args = {'name': form_name,
                                         'new_instances': new_instances,
                                         'old_instances': old_instances,
                                         'next_tool': self.settings['next_tool'],
                                         'manifest': self.manifest,
-                                        'section': self.section,
+                                        'section': clean_section,
                                         'clean': self.settings['clean'],
                                         'prep_start': self.settings['prep_start'],
                                         'start_tools': self.settings['start_tools']}

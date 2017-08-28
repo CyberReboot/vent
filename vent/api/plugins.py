@@ -419,6 +419,10 @@ class Plugin:
                 # need to get rid of . in match_path if multi_tool
                 vent_template = Template(join(match_path,
                                               tool_template))
+                # ensure template has instances defined in it
+                if not vent_template.option('settings', 'instances')[0]:
+                    vent_template.add_section('settings')
+                    vent_template.set_option('settings', 'instances', '1')
                 sections = vent_template.sections()
                 if sections[0]:
                     for header in sections[1]:
