@@ -1121,6 +1121,83 @@ class Action:
         self.logger.info("Finished: enable")
         return status
 
+    def tool_status_checker(self, tool_name):
+        """
+        Reads from the plugin manifest. Checks to see if:
+        1. plugin manifest exists
+        2. if the given tool is built
+        3. if the given tool is running
+
+        Args:
+            tool_name(str): tool name. Checks plugin manifest option `name`
+
+        Returns:
+            A tuple of success status, and a tuple containing:
+            bool describing if plugin manifest exists,
+            bool describing if tool is built,
+            bool describing if tool is running.
+            eg: (True, (True, True, False))
+        """
+        status = (True, None)
+        try:
+            # problem is that currently does not throw error if plugin_manifest
+            # does not exist
+            self.logger.info("Start: tool_status_checker")
+            manifest = Template(self.p_helper.manifest)
+            for section in manifest.sections()[1]:
+                if manifest.option(section, 'name')[1] == tool_name:
+                    status_tup = (True, manifest.option(section, 'built')[1],
+                                  manifest.option(section, 'running')[1])
+                    status = (True, status_tup)
+                    break
+
+        except Exception as e:
+            self.logger.error("Failed to check tool status: " + str(e))
+            status = (False, str(e))
+
+        self.logger.info("Status of tool status: " + str(status[0]))
+        self.logger.info("Finished: tool status")
+        return status
+
+    def tool_status_output(self, tool_name):
+        """
+        Function uses tool_status_checker to see tool status. Using that, it
+        will return messages to output
+
+        Args:
+            tool_name(str): tool name
+
+        Returns:
+            A tuple of success status and a string to display
+        """
+        status = (True, None)
+        try:
+            self.logger.info('Start: tool_status_output')
+            output = ''
+            tool_status = self.tool_status_checker(tool_name)[1]
+
+            # this means plugin_manifest doesn't exist because tool_status isn't
+            # a tuple but an error message. AKA template couldnt find plugin
+            # manifest as it doesn't exist
+            if not isinstance(tool_status, tuple):
+                output = "Please install core tools"
+
+            # this means the core tool isn't built
+            elif tool_status[1] == 'no':
+                output = "Please build core tool " + str(tool_name)
+
+            # this means the core tool isn't running
+            elif tool_status[2] == 'no':
+                output = "Please start core tool " + str(tool_name)
+            status = (True, output)
+        except Exception as e:
+            status = (False, e)
+            self.logger.info("Error: " + str(e))
+
+        self.logger.info("Status of tool_status_output: " + str(status[0]))
+        self.logger.info("Finished: tool_status_output")
+        return status
+
     @staticmethod
     def post_request(url, json_data):
         """

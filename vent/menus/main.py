@@ -352,6 +352,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def system_commands(self, action):
         """ Perform system commands """
+        # for network tap
+
         if action == 'backup':
             status = self.api_action.backup()
             if status[0]:
@@ -415,38 +417,84 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # add notify_cancel_ok popup once implemented
             pass
         elif action == "ntapcreate":
-            form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface Create' + "\t"*6 +
-                                 '^T to toggle main'}
-            self.add_form(CreateNTap, "Network Tap Create", form_args)
+            output = self.api_action.tool_status_output('network_tap')
+            if output[0]:
+                # this means there's some error to display. Otherwise, if there
+                # is no error, output[1] should be None
+                if output[1]:
+                    notify_confirm(output[1])
+                else:
+                    form_args = {'color': 'CONTROL',
+                                 'name': 'Network Tap Interface Create' + "\t"*6 +
+                                         '^T to toggle main'}
+                    self.add_form(CreateNTap, "Network Tap Create", form_args)
         elif action == "ntapdelete":
-            form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface Delete' + "\t"*6 +
-                                 '^T to toggle main' + "\t"*6 +
-                                 'Press arrow to navigate container list'}
-            self.add_form(DeleteNTap, "Network Tap Delete", form_args)
+            output = self.api_action.tool_status_output('network_tap')
+            if output[0]:
+                # this means there's some error to display. Otherwise, if there
+                # is no error, output[1] should be None
+                if output[1]:
+                    notify_confirm(output[1])
+                else:
+                    form_args = {'color': 'CONTROL',
+                                 'name': 'Network Tap Interface Delete' +
+                                         "\t"*6 + '^T to toggle main' + "\t"*6
+                                         + 'Press arrow to navigate container '
+                                         + 'list'}
+                    self.add_form(DeleteNTap, "Network Tap Delete", form_args)
         elif action == "ntapstart":
-            form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface Start' + "\t"*6 +
-                                 '^T to toggle main' + "\t"*6 +
-                                 'Press arrow to navigate container list'}
-            self.add_form(StartNTap, "Network Tap Start", form_args)
+            output = self.api_action.tool_status_output('network_tap')
+            if output[0]:
+                # this means there's some error to display. Otherwise, if there
+                # is no error, output[1] should be None
+                if output[1]:
+                    notify_confirm(output[1])
+                else:
+                    form_args = {'color': 'CONTROL',
+                                 'name': 'Network Tap Interface Start' + "\t"*6
+                                         + '^T to toggle main' + "\t"*6 +
+                                         'Press arrow to navigate container ' +
+                                         'list'}
+                    self.add_form(StartNTap, "Network Tap Start", form_args)
         elif action == "ntapstop":
-            form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface Stop' + "\t"*6 +
-                                 '^T to toggle main' + "\t"*6 +
-                                 'Press arrow to navigate container list'}
-            self.add_form(StopNTap, "Network Tap Stop", form_args)
+            output = self.api_action.tool_status_output('network_tap')
+            if output[0]:
+                # this means there's some error to display. Otherwise, if there
+                # is no error, output[1] should be None
+                if output[1]:
+                    notify_confirm(output[1])
+                else:
+                    form_args = {'color': 'CONTROL',
+                                 'name': 'Network Tap Interface Stop' + "\t"*6
+                                         + '^T to toggle main' + "\t"*6 +
+                                         'Press arrow to navigate ' +
+                                         'container list'}
+                    self.add_form(StopNTap, "Network Tap Stop", form_args)
         elif action == "ntaplist":
-            form_args = {'color': 'CONTROL',
-                         'name': 'Network Tap Interface List' + "\t"*6 +
-                                  '^T to toggle main' + "\t"*6}
-            self.add_form(ListNTap, "Network Tap List", form_args)
+            output = self.api_action.tool_status_output('network_tap')
+            if output[0]:
+                # this means there's some error to display. Otherwise, if there
+                # is no error, output[1] should be None
+                if output[1]:
+                    notify_confirm(output[1])
+                else:
+                    form_args = {'color': 'CONTROL',
+                                 'name': 'Network Tap Interface List' + "\t"*6
+                                         + '^T to toggle main' + "\t"*6}
+                    self.add_form(ListNTap, "Network Tap List", form_args)
         elif action == "ntapnics":
-            form_args = {'color': 'CONTROL',
-                         'name': 'Available Network Interfaces' + "\t"*6 +
-                                  '^T to toggle main' + "\t"*6}
-            self.add_form(NICsNTap, "Available Network Interfaces", form_args)
+            output = self.api_action.tool_status_output('network_tap')
+            if output[0]:
+                # this means there's some error to display. Otherwise, if there
+                # is no error, output[1] should be None
+                if output[1]:
+                    notify_confirm(output[1])
+                else:
+                    form_args = {'color': 'CONTROL',
+                                 'name': 'Available Network Interfaces' +
+                                         "\t"*6 + '^T to toggle main' + "\t"*6}
+                    self.add_form(NICsNTap, "Available Network Interfaces",
+                                  form_args)
         return
 
     def create(self):
