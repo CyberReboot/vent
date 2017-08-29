@@ -352,8 +352,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
     def system_commands(self, action):
         """ Perform system commands """
-        # for network tap
-
         if action == 'backup':
             status = self.api_action.backup()
             if status[0]:
@@ -425,8 +423,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     notify_confirm(output[1])
                 else:
                     form_args = {'color': 'CONTROL',
-                                 'name': 'Network Tap Interface Create' + "\t"*6 +
-                                         '^T to toggle main'}
+                                 'name': 'Network Tap Interface Create' +
+                                 "\t"*6 + '^T to toggle main'}
                     self.add_form(CreateNTap, "Network Tap Create", form_args)
         elif action == "ntapdelete":
             output = self.api_action.tool_status_output('network_tap')
@@ -438,9 +436,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 else:
                     form_args = {'color': 'CONTROL',
                                  'name': 'Network Tap Interface Delete' +
-                                         "\t"*6 + '^T to toggle main' + "\t"*6
-                                         + 'Press arrow to navigate container '
-                                         + 'list'}
+                                         "\t"*6 + '^T to toggle main' +
+                                         "\t"*6 + 'Press arrow to navigate' +
+                                         'container list'}
                     self.add_form(DeleteNTap, "Network Tap Delete", form_args)
         elif action == "ntapstart":
             output = self.api_action.tool_status_output('network_tap')
@@ -451,10 +449,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     notify_confirm(output[1])
                 else:
                     form_args = {'color': 'CONTROL',
-                                 'name': 'Network Tap Interface Start' + "\t"*6
-                                         + '^T to toggle main' + "\t"*6 +
-                                         'Press arrow to navigate container ' +
-                                         'list'}
+                                 'name': 'Network Tap Interface Start' +
+                                         "\t"*6 + '^T to toggle main' +
+                                         "\t"*6 + 'Press arrow to navigate '
+                                         'container list'}
                     self.add_form(StartNTap, "Network Tap Start", form_args)
         elif action == "ntapstop":
             output = self.api_action.tool_status_output('network_tap')
@@ -465,9 +463,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     notify_confirm(output[1])
                 else:
                     form_args = {'color': 'CONTROL',
-                                 'name': 'Network Tap Interface Stop' + "\t"*6
-                                         + '^T to toggle main' + "\t"*6 +
-                                         'Press arrow to navigate ' +
+                                 'name': 'Network Tap Interface Stop' +
+                                         "\t"*6 + '^T to toggle main' +
+                                         "\t"*6 + 'Press arrow to navigate ' +
                                          'container list'}
                     self.add_form(StopNTap, "Network Tap Stop", form_args)
         elif action == "ntaplist":
@@ -479,8 +477,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     notify_confirm(output[1])
                 else:
                     form_args = {'color': 'CONTROL',
-                                 'name': 'Network Tap Interface List' + "\t"*6
-                                         + '^T to toggle main' + "\t"*6}
+                                 'name': 'Network Tap Interface List' +
+                                         "\t"*6 +
+                                         '^T to toggle main' + "\t"*6}
                     self.add_form(ListNTap, "Network Tap List", form_args)
         elif action == "ntapnics":
             output = self.api_action.tool_status_output('network_tap')
