@@ -7,6 +7,7 @@ import time
 
 from threading import Thread
 
+from vent.api.actions import Action
 from vent.api.plugins import Plugin
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
@@ -43,24 +44,32 @@ class VentApp(npyscreen.NPSAppManaged):
         # setup initial runtime stuff
         if self.first_time[0] and self.first_time[1] != "exists":
             plugins = Plugin()
+            actions = Action()
             thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': True})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait("Please wait while Vent initializes...1/3",
+                npyscreen.notify_wait("Please wait while Vent initializes...1/4",
                                       title="Setting up things...")
                 time.sleep(1)
             thr.join()
             thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': False})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait("Please wait while Vent initializes...2/3",
+                npyscreen.notify_wait("Please wait while Vent initializes...2/4",
                                       title="Setting up things...")
                 time.sleep(1)
             thr.join()
             thr = Thread(target=plugins.auto_install, args=(), kwargs={})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait("Please wait while Vent initializes...3/3",
+                npyscreen.notify_wait("Please wait while Vent initializes...3/4",
+                                      title="Setting up things...")
+                time.sleep(1)
+            thr.join()
+            thr = Thread(target=actions.startup, args=(), kwargs={})
+            thr.start()
+            while thr.is_alive():
+                npyscreen.notify_wait("Please wait while Vent initializes...4/4",
                                       title="Setting up things...")
                 time.sleep(1)
             thr.join()

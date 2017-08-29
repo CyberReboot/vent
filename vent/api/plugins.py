@@ -820,7 +820,7 @@ class Plugin:
             status = template.set_option(result, 'enabled', 'no')
         template.write_config()
         return status
-
+    
     def auto_install(self):
         """
         Automatically detects images and installs them in the manifest if they

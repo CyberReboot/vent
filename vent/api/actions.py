@@ -7,6 +7,7 @@ import os
 import shutil
 import tempfile
 import urllib2
+import yaml
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
@@ -51,6 +52,7 @@ class Action:
                         tools.remove(tool)
                     i -= 1
             if tools is None or len(tools) > 0:
+                is_core = repo == 'https://github.com/cyberreboot/vent'
                 status = self.plugin.add(repo,
                                          tools=tools,
                                          overrides=overrides,
@@ -63,7 +65,8 @@ class Action:
                                          version_alias=version_alias,
                                          wild=wild,
                                          remove_old=remove_old,
-                                         disable_old=disable_old)
+                                         disable_old=disable_old,
+                                         core=is_core)
             else:
                 self.logger.info("no new tools to add, exiting")
                 status = (True, "previously installed")
@@ -1120,6 +1123,99 @@ class Action:
         self.logger.info("Status of enable: " + str(status[0]))
         self.logger.info("Finished: enable")
         return status
+
+    def startup(self):
+        """
+        Automatically detect if a startup file is specified and stand up a vent
+        host based on the specifications in that file
+        """
+        def rel_path(name, available_tools):
+            """
+            Helper function that extracts relative path to a tool
+            (from the main cloned directory) out of available_tools based on
+            the name it is given. This information will be used in adding
+            that tool.
+            """
+            for tool in available_tools:
+                if name in tool[0]:
+                    return tool[0]
+            return None
+
+        self.logger.info("Starting: startup")
+        status = (True, None)
+        try:
+            startup_path = os.path.join(os.path.expanduser("~"),
+                                        '.vent-startup.yml')
+            s_dict = None
+            with open(startup_path) as startup:
+                s_dict = yaml.load(startup.read())
+            tool_d = {}
+            extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
+            for repo in s_dict:
+                self.p_helper.clone(repo)
+                repo_path, org, r_name = self.p_helper.get_path(repo)
+                available_tools = self.p_helper.available_tools(repo_path)
+                for tool in s_dict[repo]:
+                    # check if we need to configure instances along the way
+                    instances = 1
+                    if 'settings' in s_dict[repo][tool]:
+                        settings_dict = json.loads(s_dict[repo][tool]
+                                                   ['settings'])
+                        if 'instances' in settings_dict:
+                            instances = int(settings_dict['instances'])
+                    # add the tool
+                    t_branch = 'master'
+                    t_version = 'HEAD'
+                    add_tools = None
+                    build_tool = False
+                    if 'branch' in s_dict[repo][tool]:
+                        t_branch = s_dict[repo][tool]['branch']
+                    if 'version' in s_dict[repo][tool]:
+                        t_version = s_dict[repo][tool]['version']
+                    if 'build' in s_dict[repo][tool]:
+                        build_tool = s_dict[repo][tool]['build']
+                    t_path = rel_path(tool, available_tools)
+                    add_tools = [(t_path, '')]
+                    self.add(repo, branch=t_branch, version=t_version,
+                             tools=add_tools, build=build_tool)
+                    manifest = Template(self.plugin.manifest)
+                    # update the manifest with extra defined runtime settings
+                    base_section = ':'.join([org, r_name, t_path,
+                                             t_branch, t_version])
+                    for i in range(1, instances + 1):
+                        i_section = base_section.rsplit(':', 2)
+                        i_section[0] += str(i) if i != 1 else ''
+                        i_section = ':'.join(i_section)
+                        for option in extra_options:
+                            if option in s_dict[repo][tool]:
+                                opt_dict = json.loads(manifest.option(
+                                                          i_section,
+                                                          option)[1])
+                                # stringify values for vent
+                                for v in s_dict[repo][tool][option]:
+                                    pval = s_dict[repo][tool][option][v]
+                                    s_dict[repo][tool][option][v] = json.dumps(
+                                                                        pval)
+                                opt_dict.update(s_dict[repo][tool][option])
+                                manifest.set_option(i_section, option,
+                                                    json.dumps(opt_dict))
+                    manifest.write_config()
+                    # start the tool, if necessary
+                    if 'start' in s_dict[repo][tool]:
+                        if s_dict[repo][tool]['start']:
+                            for i in range(1, instances + 1):
+                                i_name = tool + str(i) if i != 1 else tool
+                                tool_d.update(self.prep_start(
+                                                  name=i_name,
+                                                  branch=t_branch,
+                                                  version=t_version)[1])
+            if tool_d:
+                self.start(tool_d)
+        except Exception as e:
+            self.logger.error("startup failed with error " + str(e))
+            status = (False, str(e))
+        self.logger.info("startup finished with status " + str(status[0]))
+        self.logger.info("Finished: startup")
 
     @staticmethod
     def post_request(url, json_data):
