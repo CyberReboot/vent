@@ -1148,7 +1148,7 @@ class Action:
                                         '.vent-startup.yml')
             s_dict = None
             with open(startup_path) as startup:
-                s_dict = yaml.load(startup.read())
+                s_dict = yaml.safe_load(startup.read())
             tool_d = {}
             extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
             for repo in s_dict:
