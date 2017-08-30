@@ -1216,6 +1216,7 @@ class Action:
             status = (False, str(e))
         self.logger.info("startup finished with status " + str(status[0]))
         self.logger.info("Finished: startup")
+        return status
 
     @staticmethod
     def post_request(url, json_data):

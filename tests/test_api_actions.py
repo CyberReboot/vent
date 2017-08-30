@@ -207,7 +207,7 @@ def test_reset():
     instance = Action()
     status = instance.reset()
     assert isinstance(status, tuple)
-    assert status[0] == False
+    assert status[0]
 
 def test_logs():
     """ Test the logs function """
