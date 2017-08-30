@@ -1,0 +1,10 @@
+#!/usr/bin/env python2.7
+
+import os
+
+startup_path = os.path.join(os.path.expanduser("~"), ".vent-startup.yml")
+with open(startup_path, 'a') as startup_file:
+    startup_file.write('https://github.com/cyberreboot/vent:\n')
+    startup_file.write('  rabbitmq:\n')
+    startup_file.write('    build: yes\n')
+    startup_file.write('    start: yes')
