@@ -244,14 +244,24 @@ class PluginHelper:
                 self.logger.info(status)
                 chdir(cwd)
 
-            # set docker settings for container
-            manifest = Template(self.manifest)
-            status = manifest.option(section, 'docker')
-            self.logger.info(status)
             tool_d[c_name] = {'image': image_name,
                               'name': c_name}
-            if status[0]:
-                options_dict = json.loads(status[1])
+            # get rid of all commented sections in various runtime
+            # configurations
+            manifest = Template(self.manifest)
+            overall_dict = {}
+            for setting in ['info', 'docker', 'gpu', 'settings', 'service']:
+                option = manifest.option(section, setting)
+                if option[0]:
+                    overall_dict[setting] = {}
+                    settings_dict = json.loads(option[1])
+                    for opt in settings_dict:
+                        if not opt.startswith('#'):
+                            overall_dict[setting][opt] = \
+                                    settings_dict[opt]
+
+            if 'docker' in overall_dict:
+                options_dict = overall_dict['docker']
                 for option in options_dict:
                     options = options_dict[option]
                     # check for commands to evaluate
@@ -280,11 +290,9 @@ class PluginHelper:
                 tool_d[c_name]['labels'] = {}
 
             # get the service uri info
-            status = manifest.option(section, 'service')
-            self.logger.info(status)
-            if status[0]:
+            if 'service' in overall_dict:
                 try:
-                    options_dict = json.loads(status[1])
+                    options_dict = overall_dict['service']
                     for option in options_dict:
                         tool_d[c_name]['labels'][option] = options_dict[option]
                 except Exception as e:   # pragma: no cover
@@ -292,9 +300,7 @@ class PluginHelper:
                                       "docker: " + str(e))
 
             # check for gpu settings
-            status = manifest.option(section, 'gpu')
-            self.logger.info(status)
-            if status[0]:
+            if 'gpu' in overall_dict:
                 try:
                     options_dict = json.loads(status[1])
                     for option in options_dict:
@@ -407,11 +413,9 @@ class PluginHelper:
                 tool_d[c_name]['log_config'] = log_config
 
             # add label for priority
-            status = manifest.option(section, 'settings')
-            self.logger.info(status)
-            if status[0]:
+            if 'settings' in overall_dict:
                 try:
-                    options_dict = json.loads(status[1])
+                    options_dict = overall_dict['settings']
                     for option in options_dict:
                         if option == 'priority':
                             tool_d[c_name]['labels']['vent.priority'] = options_dict[option]

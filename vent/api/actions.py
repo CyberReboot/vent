@@ -13,6 +13,7 @@ from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
+from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Timestamp
 
 
@@ -440,7 +441,7 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            s, _ = self.p_helper.constraint_options(args, options)
+            s, manifest = self.p_helper.constraint_options(args, options)
             self.logger.info(s)
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
@@ -448,6 +449,7 @@ class Action:
                 try:
                     container = self.d_client.containers.get(container_name)
                     container.remove(force=True)
+                    manifest.set_option(section, 'running', 'no')
                     self.logger.info("cleaned " + str(container_name))
                 except Exception as e:  # pragma: no cover
                     self.logger.error("failed to clean " +
@@ -456,6 +458,7 @@ class Action:
         except Exception as e:  # pragma: no cover
             self.logger.error("clean failed with error: " + str(e))
             status = (False, e)
+        manifest.write_config()
         self.logger.info("Status of clean: " + str(status[0]))
         self.logger.info("Finished: clean")
         return status
@@ -862,8 +865,11 @@ class Action:
             for section in template_dict:
                 return_str += "[" + section + "]\n"
                 for option in template_dict[section]:
-                    return_str += option + " = "
-                    return_str += template_dict[section][option] + "\n"
+                    if option.startswith('#'):
+                        return_str += option + "\n"
+                    else:
+                        return_str += option + " = "
+                        return_str += template_dict[section][option] + "\n"
                 return_str += "\n"
             # only one newline at end of file
             status = (True, return_str[:-1])
@@ -922,26 +928,21 @@ class Action:
                     with open(template_path, 'w') as f:
                         f.write(config_val)
                     # save in plugin_manifest
-                    vent_template = Template(template_path)
-                    sections = vent_template.sections()
-                    if sections[0]:
-                        for section in sections[1]:
-                            section_dict = {}
-                            options = vent_template.options(section)
-                            if options[0]:
-                                for option in options[1]:
-                                    option_name = option
-                                    if option == 'name':
-                                        option_name = 'link_name'
-                                    opt_val = vent_template.option(section,
-                                                                   option)[1]
-                                    section_dict[option_name] = opt_val
-                            if section_dict:
-                                manifest.set_option(tool, section,
-                                                    json.dumps(section_dict))
-                            elif manifest.option(tool, section)[0]:
-                                manifest.del_option(tool, section)
-                        manifest.write_config()
+                    settings_dict = ParsedSections(template_path)
+                    self.logger.info("Test :" + str(settings_dict))
+                    for section in settings_dict:
+                        if section == 'info':
+                            if 'link_name' in settings_dict[section]:
+                                manifest.set_option(
+                                    tool, 'link_name',
+                                    settings_dict[section]['link_name'])
+                            if 'groups' in settings_dict[section]:
+                                manifest.set_option(
+                                    tool, 'groups',
+                                    settings_dict[section]['groups'])
+                        manifest.set_option(tool, section,
+                                            json.dumps(settings_dict[section]))
+                    manifest.write_config()
                 except Exception as e:  # pragma: no cover
                     self.logger.error("save_configure error: " + str(e))
                     status = (False, str(e))
