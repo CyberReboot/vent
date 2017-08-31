@@ -412,10 +412,8 @@ class Plugin:
                 tool_template = 'vent.template'
                 if match[0].find('@') >= 0:
                     tool_template = match[0].split('@')[1] + '.template'
-                # need to get rid of . in match_path if multi_tool
                 vent_template_path = join(match_path, tool_template)
                 settings_dict = ParsedSections(vent_template_path)
-                self.logger.info("Settings_dict: " + str(settings_dict))
                 for setting in settings_dict:
                     template.set_option(section, setting,
                                         json.dumps(settings_dict[setting]))
