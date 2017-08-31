@@ -41,8 +41,7 @@ class StopR:
             for container_id in payload['id']:
                 c.containers.get(container_id).stop()
         except Exception as e:  # pragma: no cover
-            return(False, payload)
-            #  return (False, 'unable to stop list of containers because: ' +
-            #          str(e))
+            return (False, 'unable to stop list of containers because: ' +
+                    str(e))
 
         return (True, 'container successfully stopped: ' + str(payload['id']))
