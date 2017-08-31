@@ -212,7 +212,7 @@ class ActionNTap(npyscreen.ActionForm):
 
         # format the data into something ncontrol likes
         else:
-            payload = {'id': x['id'] for x in self.ms.values}
+            payload = {'id': list(x['id'] for x in self.ms.values)}
 
         # grab the url that network-tap is listening to
         try:

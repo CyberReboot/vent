@@ -36,20 +36,12 @@ class StartR:
         except Exception as e:  # pragma: no cover
             return (False, 'unable to connect to docker because: ' + str(e))
 
-        # if user gives a list of id, start them all
-        if isinstance(payload['id'], list):
-            try:
-                for container_id in payload['id']:
-                    c.containers.get(container_id).start()
-            except Exception as e:  # pragma: no cover
-                return (False, 'unable to start list of containers because: ' +
-                        str(e))
-
-        # if user gives just one id, start it
-        else:
-            try:
-                c.containers.get(payload['id']).start()
-            except Exception as e:  # pragma: no cover
-                return (False, 'unable to start container because: ' + str(e))
+        # start containers chosen from CLI
+        try:
+            for container_id in payload['id']:
+                c.containers.get(container_id).start()
+        except Exception as e:  # pragma: no cover
+            return (False, 'unable to start list of containers because: ' +
+                    str(e))
 
         return (True, 'container successfully started: ' + str(payload['id']))
