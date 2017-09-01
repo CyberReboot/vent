@@ -23,11 +23,6 @@ class EditorForm(npyscreen.ActionForm):
         del self.settings['args']
         del self.settings['keywords']
         del self.settings['parentApp']
-        self.section_value = re.compile(r"""
-        \ *\#.*                        # comments
-        | \w+\ *=\ *[\w,.:/#-]*$    # option-value pairs
-        | \[[\w-]+\]$               # section headers
-        """, re.VERBOSE)
         self.p_helper = PluginHelper(plugins_dir='.internals/')
         self.tool_identifier = {'name': tool_name,
                                 'branch': branch,
@@ -126,31 +121,102 @@ class EditorForm(npyscreen.ActionForm):
         else:
             self.parentApp.change_form("MAIN")
 
-    def on_ok(self):
-        """ Save changes made to vent.template """
-        # ensure user didn't have any syntactical errors
-        for entry in self.edit_space.value.split('\n'):
+    def valid_input(self, val):
+        """ Ensure the input the user gave is of a valid format """
+        ip_value = re.compile(r'\ *(\d{1,3}\.){3}\d{1,3}$')
+        all_num = re.compile(r'\ *[\d,]+$')
+        sections_comments = re.compile(r"""
+        \ *\#.*                             # comments
+        | \[[\w-]+\]$                       # section headers
+        """, re.VERBOSE)
+        options_values = re.compile(r"[^# ]+\ *=[^[\]{}]*$")
+        line_num = 0
+        warning_str = ''
+        error_str = ''
+        trimmed_val = []
+        for entry in val.split('\n'):
+            line_num += 1
+            trimmed_val.append(re.sub(r',\ *}', '}', entry).strip())
+            # empty line
             if entry.strip() == '':
                 continue
-            match = self.section_value.match(entry)
-            if not match:
+            if options_values.match(entry):
+                value = entry.split('=', 1)[1]
+                # deal with potentially more equals signs
+                for val in value.split('='):
+                    # empty val means malformed equals signs
+                    if val == '':
+                        error_str += '-You have a misplaced equals sign on' \
+                            ' line ' + str(line_num) + '\n'
+                    # starts with a num
+                    if re.match('\ *\d', val):
+                        # bad ip syntax
+                        if val.find('.') >= 0 and not ip_value.match(val):
+                            error_str += '-You have an incorrectly' \
+                                ' formatted ip address (bad syntax) at' \
+                                ' line '+ str(line_num) + '\n'
+                        # possibly malformed numbers
+                        elif val.find('.') < 0 and not all_num.match(val):
+                            warning_str += '-Line starting with a number has' \
+                                ' characters mixed in at line ' + \
+                                str(line_num) + '\n'
+                        # bad ip values
+                        else:
+                            for num in val.strip().split('.'):
+                                num = int(num)
+                                if num > 255 or num < 0:
+                                    error_str += '-You have an incorrectly' \
+                                        ' formatted ip address (values' \
+                                        ' exceeding 255 or below 0) at' \
+                                        ' line ' + str(line_num) + '\n'
+                    if re.search(',$', val):
+                        error_s
+                        tr += '-You have an incorrect comma at the' \
+                                ' end of line ' + str(line_num) + '\n'
+            elif not sections_comments.match(entry):
+                lit_val = ''
                 try:
                     opt_val = entry.split('=', 1)
                     if opt_val[0].strip() == '':
-                        raise Exception("It appears you haven't written"
-                                        " anything before an equals sign"
-                                        " somewhere.")
-                    ast.literal_eval(opt_val[1].strip())
-                except Exception as e:
-                    npyscreen.notify_confirm("You didn't type in your input in"
-                                             " a syntactically correct format."
-                                             " Double check to make sure you"
-                                             " don't have extraneous"
-                                             " characters, have closed your"
-                                             " brackets, etc. Here's an error"
-                                             " message that may be helpful: " +
-                                             str(e), title="Invalid input")
-                    return
+                        error_str += '-You have nothing preceeding an' \
+                            ' equals sign at line ' + str(line_num) + '\n'
+                    else:
+                        lit_val = opt_val[1].strip()
+                except IndexError:
+                    lit_val = ''
+                    error_str += '-You have an incorrectly formatted' \
+                        ' section header at line ' + str(line_num) + '\n'
+                if lit_val:
+                    try:
+                        ast.literal_eval(lit_val)
+                    except SyntaxError:
+                        error_str += '-You have an incorrectly formatted' \
+                            ' list/dictionary at line ' + str(line_num) + \
+                            '\n'
+
+        if error_str:
+            npyscreen.notify_confirm("You have the following error(s) and"
+                                     " can't proceed until they are fixed:" +
+                                     "\n" + "-"*50 + "\n" + error_str,
+                                     title="Error in input")
+            return (False, '')
+        elif warning_str:
+            res = npyscreen.notify_yes_no("You have may have some error(s)"
+                                          " that you want to check before"
+                                          " proceeding:" + "\n" +"-"*50 +
+                                          "\n" + warning_str + "\n" + "-"*50 +
+                                          "\n" + "Do you want to continue?",
+                                          title="Double check")
+            return (res, '\n'.join(trimmed_val))
+        return (True, '\n'.join(trimmed_val))
+
+    def on_ok(self):
+        """ Save changes made to vent.template """
+        # ensure user didn't have any syntactical errors
+        good_input, trimmed_input = self.valid_input(self.edit_space.value)
+        if not good_input:
+            return
+        self.edit_space.value = trimmed_input
 
         # get the number of instances and ensure user didn't malform that
         if re.search(r"instances\ *=", self.edit_space.value):
