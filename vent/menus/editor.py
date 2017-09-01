@@ -121,14 +121,25 @@ class EditorForm(npyscreen.ActionForm):
         else:
             self.parentApp.change_form("MAIN")
 
-    def valid_input(self, val):
+    @staticmethod
+    def valid_input(val):
         """ Ensure the input the user gave is of a valid format """
+        # looks for 3 nums followed by a dot 3 times and then ending with
+        # 3 nums, can be proceeded by any number of spaces
         ip_value = re.compile(r'\ *(\d{1,3}\.){3}\d{1,3}$')
+        # looks for only numbers and commas (because priorities can have commas
+        # between them), can be proceeded by any number of spaces
         all_num = re.compile(r'\ *[\d,]+$')
         sections_comments = re.compile(r"""
-        \ *\#.*                             # comments
-        | \[[\w-]+\]$                       # section headers
+        \ *\#.*             # comments (any number of whitespace, then #
+                            # followed by anything)
+
+        | \[[\w-]+\]$       # section headers (any combination of chars, nums,
+                            # underscores, and dashes between brackets)
         """, re.VERBOSE)
+        # can't can be a comment on option side and value side can't have
+        # [, ], {, or } otherwise it is turned over to literal_eval for
+        # checkout
         options_values = re.compile(r"[^# ]+\ *=[^[\]{}]*$")
         line_num = 0
         warning_str = ''
@@ -136,10 +147,13 @@ class EditorForm(npyscreen.ActionForm):
         trimmed_val = []
         for entry in val.split('\n'):
             line_num += 1
+            # get rid of any extraneous commas at the end of a dict and remove
+            # extra whitespace from input
             trimmed_val.append(re.sub(r',\ *}', '}', entry).strip())
             # empty line
             if entry.strip() == '':
                 continue
+            # look at regular (non dictionary or list) option-value pairs
             if options_values.match(entry):
                 value = entry.split('=', 1)[1]
                 # deal with potentially more equals signs
@@ -148,13 +162,14 @@ class EditorForm(npyscreen.ActionForm):
                     if val == '':
                         error_str += '-You have a misplaced equals sign on' \
                             ' line ' + str(line_num) + '\n'
-                    # starts with a num
+                    # starts with a num; look for bad ip input or warn user
+                    # about having extraneous characters in number input
                     if re.match('\ *\d', val):
                         # bad ip syntax
                         if val.find('.') >= 0 and not ip_value.match(val):
                             error_str += '-You have an incorrectly' \
                                 ' formatted ip address (bad syntax) at' \
-                                ' line '+ str(line_num) + '\n'
+                                ' line ' + str(line_num) + '\n'
                         # possibly malformed numbers
                         elif val.find('.') < 0 and not all_num.match(val):
                             warning_str += '-Line starting with a number has' \
@@ -169,10 +184,13 @@ class EditorForm(npyscreen.ActionForm):
                                         ' formatted ip address (values' \
                                         ' exceeding 255 or below 0) at' \
                                         ' line ' + str(line_num) + '\n'
+                    # ensure no lines end with a comma (most likely extraneous
+                    # commas from groups or priorities)
                     if re.search(',$', val):
-                        error_s
-                        tr += '-You have an incorrect comma at the' \
-                                ' end of line ' + str(line_num) + '\n'
+                        error_str += '-You have an incorrect comma at the' \
+                            ' end of line ' + str(line_num) + '\n'
+            # see if input is a header or comment, otherwise try to
+            # literal_eval it to ensure correct structure
             elif not sections_comments.match(entry):
                 lit_val = ''
                 try:
@@ -203,7 +221,7 @@ class EditorForm(npyscreen.ActionForm):
         elif warning_str:
             res = npyscreen.notify_yes_no("You have may have some error(s)"
                                           " that you want to check before"
-                                          " proceeding:" + "\n" +"-"*50 +
+                                          " proceeding:" + "\n" + "-"*50 +
                                           "\n" + warning_str + "\n" + "-"*50 +
                                           "\n" + "Do you want to continue?",
                                           title="Double check")
@@ -213,19 +231,23 @@ class EditorForm(npyscreen.ActionForm):
     def on_ok(self):
         """ Save changes made to vent.template """
         # ensure user didn't have any syntactical errors
-        good_input, trimmed_input = self.valid_input(self.edit_space.value)
-        if not good_input:
+        input_is_good, trimmed_input = self.valid_input(self.edit_space.value)
+        if not input_is_good:
             return
         self.edit_space.value = trimmed_input
 
         # get the number of instances and ensure user didn't malform that
         if re.search(r"instances\ *=", self.edit_space.value):
             try:
-                new_instances = int(re.split(r"instances\ *=\ *",
-                                             self.edit_space.value)[1][0])
-            except ValueError:
+                # split out spaces
+                instances_val = re.split(r"instances\ *=\ *",
+                                         self.edit_space.value)[1]
+                instances_val = instances_val.split('\n')[0]
+                new_instances = int(re.match(r"\d+$", instances_val).group())
+            except AttributeError:
                 npyscreen.notify_confirm("You didn't specify a valid number"
-                                         " for instances.")
+                                         " for instances.", title="Invalid"
+                                         " instance number")
                 return
             # user can't change instances when configuring new instnaces
             if (self.instance_cfg and
@@ -343,7 +365,7 @@ class EditorForm(npyscreen.ActionForm):
                                                    self.settings['tool_name'])
                     else:
                         return
-                except Exception as e:
+                except Exception:
                     npyscreen.notify_confirm("Trouble finding tools to add,"
                                              " exiting", title="Error")
                     self.on_cancel()
