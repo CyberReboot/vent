@@ -126,10 +126,10 @@ class EditorForm(npyscreen.ActionForm):
         """ Ensure the input the user gave is of a valid format """
         # looks for 3 nums followed by a dot 3 times and then ending with
         # 3 nums, can be proceeded by any number of spaces
-        ip_value = re.compile(r'\ *(\d{1,3}\.){3}\d{1,3}$')
+        ip_value = re.compile(r'(\d{1,3}\.){3}\d{1,3}$')
         # looks for only numbers and commas (because priorities can have commas
         # between them), can be proceeded by any number of spaces
-        all_num = re.compile(r'\ *[\d,]+$')
+        all_num = re.compile(r'(\d,?\ *)+$')
         sections_comments = re.compile(r"""
         \ *\#.*             # comments (any number of whitespace, then #
                             # followed by anything)
@@ -158,6 +158,7 @@ class EditorForm(npyscreen.ActionForm):
                 value = entry.split('=', 1)[1]
                 # deal with potentially more equals signs
                 for val in value.split('='):
+                    val = val.strip()
                     # empty val means malformed equals signs
                     if val == '':
                         error_str += '-You have a misplaced equals sign on' \
@@ -176,7 +177,7 @@ class EditorForm(npyscreen.ActionForm):
                                 ' characters mixed in at line ' + \
                                 str(line_num) + '\n'
                         # bad ip values
-                        else:
+                        elif val.find('.') >= 0:
                             for num in val.strip().split('.'):
                                 num = int(num)
                                 if num > 255 or num < 0:
@@ -379,11 +380,11 @@ class EditorForm(npyscreen.ActionForm):
                                                   " instance(s)")
                     if res:
                         form_name = 'Delete instances for ' + \
-                                re.sub(r'[0-9]+$', '',
+                                re.sub(r'\d+$', '',
                                        self.settings['tool_name']) + '\t'*8 + \
                                 '^E to exit configuration process'
                         clean_section = self.section.rsplit(':', 2)
-                        clean_section[0] = re.sub(r'[0-9]+$', '',
+                        clean_section[0] = re.sub(r'\d+$', '',
                                                   clean_section[0])
                         clean_section = ':'.join(clean_section)
                         d_args = {'name': form_name,
@@ -400,7 +401,7 @@ class EditorForm(npyscreen.ActionForm):
                                                DeleteForm, **d_args)
                         self.parentApp.change_form('DELETER' +
                                                    self.settings['tool_name'])
-                except Exception as e:
+                except Exception:
                     npyscreen.notify_confirm("Trouble finding instances to"
                                              " delete, exiting", title="Error")
                     self.on_cancel()

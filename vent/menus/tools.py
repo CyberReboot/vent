@@ -1,5 +1,6 @@
 import json
 import npyscreen
+import re
 import time
 
 from collections import deque
@@ -162,16 +163,20 @@ class ToolForm(npyscreen.ActionForm):
                             disabled = True
                         if (not externally_active and not disabled and not
                                 show_disabled):
-                            instance_num = manifest.option(tool, 'name')[1][-1]
-                            if instance_num not in '0123456789':
+                            instance_num = re.search(r'\d+$',
+                                                     manifest.option(
+                                                         tool, 'name')[1])
+                            if not instance_num:
                                 ncore_list.append(tool)
                             # multiple instances share same image
                             elif self.action['action_name'] not in self.no_instance:
                                 ncore_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
-                            instance_num = manifest.option(tool, 'name')[1][-1]
-                            if instance_num not in '0123456789':
+                            instance_num = re.search(r'\d+$',
+                                                     manifest.option(
+                                                         tool, 'name')[1])
+                            if not instance_num:
                                 ncore_list.append(tool)
                             # multiple instances share same image
                             elif self.action['action_name'] not in self.no_instance:
@@ -208,16 +213,20 @@ class ToolForm(npyscreen.ActionForm):
                             disabled = True
                         if (not externally_active and not disabled and not
                                 show_disabled):
-                            instance_num = manifest.option(tool, 'name')[1][-1]
-                            if instance_num not in '0123456789':
+                            instance_num = re.search(r'\d+$',
+                                                     manifest.option(
+                                                         tool, 'name')[1])
+                            if not instance_num:
                                 core_list.append(tool)
                             # multiple instances share same image
                             elif self.action['action_name'] not in self.no_instance:
                                 core_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
-                            instance_num = manifest.option(tool, 'name')[1][-1]
-                            if instance_num not in '0123456789':
+                            instance_num = re.search(r'\d+$',
+                                                     manifest.option(
+                                                         tool, 'name')[1])
+                            if not instance_num:
                                 core_list.append(tool)
                             # multiple instances share same image
                             elif self.action['action_name'] not in self.no_instance:

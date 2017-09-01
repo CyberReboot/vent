@@ -450,8 +450,9 @@ class Action:
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
                 container_name = container_name.replace('/', '-')
-                if s[section]['name'][-1] in '0123456789':
-                    container_name += s[section]['name'][-1]
+                instance_num = re.search(r'\d+$', s[section]['name'])
+                if instance_num:
+                    container_name += instance_num.group()
                 try:
                     container = self.d_client.containers.get(container_name)
                     container.remove(force=True)
@@ -932,15 +933,15 @@ class Action:
         # ensure instances is an int and remove instances from config_val to
         # ensure correct info
         instances = int(instances)
-        config_val = re.sub(r'instances\ *=\ *\w+\n', '', config_val)
+        config_val = re.sub(r'instances\ *=\ *\d+\n', '', config_val)
         if not main_cfg:
             if not from_registry:
                 # creating new instances
                 if instances > 1:
                     fd, template_path = tempfile.mkstemp(suffix='.template')
                     # scrub name for clean section name
-                    if name[-1] in '0123456789':
-                        name = name[:-1]
+                    if re.search(r'\d+$', name):
+                        name = re.sub(r'\d+$', '', name)
                     t_identifier = {'name': name,
                                     'branch': branch,
                                     'version': version}

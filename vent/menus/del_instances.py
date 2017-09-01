@@ -115,8 +115,10 @@ class DeleteForm(npyscreen.ActionForm):
                     # check if tool name doesn't need to be shifted because
                     # it's already correct
                     identifier = str(shift_num) if shift_num != 1 else ''
-                    new_section = re.sub(r'[0-9]', identifier,
-                                         section, 1)
+                    new_section = section.rsplit(':', 2)
+                    new_section[0] = re.sub(r'\d+$', identifier,
+                                            new_section[0])
+                    new_section = ':'.join(new_section)
                     if section != new_section:
                         # clean tool so that we can rename its container and
                         # labels with new information

@@ -1,6 +1,7 @@
 import docker
 import fnmatch
 import json
+import re
 import requests
 import shlex
 
@@ -232,8 +233,9 @@ class PluginHelper:
             # initialize needed vars
             c_name = s[section]['image_name'].replace(':', '-')
             c_name = c_name.replace('/', '-')
-            if s[section]['name'][-1] in '0123456789':
-                c_name += s[section]['name'][-1]
+            instance_num = re.search(r'\d+$', s[section]['name'])
+            if instance_num:
+                c_name += instance_num.group()
             image_name = s[section]['image_name']
 
             # checkout the right version and branch of the repo

@@ -1,5 +1,6 @@
 import npyscreen
 import os
+import re
 import sys
 import time
 
@@ -67,7 +68,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             # check for multi instances too for running
             if tool in tools['normal']:
                 running += 1
-            elif tool[:-1] in tools['normal']:
+            elif re.sub(r'\d+$', '', tool) in tools['normal']:
                 running += 1
             else:
                 custom_running += 1
@@ -79,7 +80,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         for tool in tools['installed']:
             if tool in tools['normal']:
                 installed += 1
-            elif tool[:-1] not in tools['normal']:
+            elif re.sub(r'\d+$', '', tool) not in tools['normal']:
                 custom_installed += 1
         tools_str = str(running + custom_running) + "/" + run_str + " running"
         if custom_running > 0:
