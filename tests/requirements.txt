@@ -2,7 +2,7 @@ docker
 elasticsearch
 npyscreen
 paste
-pika==0.10.0
+pika
 pytest
 pytest-cov
 python-magic
