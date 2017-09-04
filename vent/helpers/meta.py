@@ -475,15 +475,12 @@ def DropLocation():
     return (True, drop_loc)
 
 
-def ParsedSections(file_path):
+def ParsedSections(file_val):
     """
     Get the sections and options of a file returned as a dictionary;
     implemented because config parser doesn't return comments
     """
     try:
-        file_val = ""
-        with open(file_path) as f:
-            file_val = f.read()
         template_dict = {}
         cur_section = ''
         for val in file_val.split("\n"):

@@ -928,8 +928,7 @@ class Action:
                     with open(template_path, 'w') as f:
                         f.write(config_val)
                     # save in plugin_manifest
-                    settings_dict = ParsedSections(template_path)
-                    self.logger.info("Test :" + str(settings_dict))
+                    settings_dict = ParsedSections(config_val)
                     for section in settings_dict:
                         if section == 'info':
                             if 'link_name' in settings_dict[section]:

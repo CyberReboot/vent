@@ -413,7 +413,12 @@ class Plugin:
                 if match[0].find('@') >= 0:
                     tool_template = match[0].split('@')[1] + '.template'
                 vent_template_path = join(match_path, tool_template)
-                settings_dict = ParsedSections(vent_template_path)
+                if os.path.exists(vent_template_path):
+                    with open(vent_template_path) as f:
+                        vent_template_val = f.read()
+                else:
+                    vent_template_val = ''
+                settings_dict = ParsedSections(vent_template_val)
                 for setting in settings_dict:
                     template.set_option(section, setting,
                                         json.dumps(settings_dict[setting]))

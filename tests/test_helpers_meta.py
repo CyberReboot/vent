@@ -10,6 +10,7 @@ from vent.helpers.meta import Docker
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
+from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Services
 from vent.helpers.meta import System
 from vent.helpers.meta import Timestamp
@@ -132,3 +133,16 @@ def test_jobs():
     assert isinstance(services, list)
     jobs = Jobs()
     assert isinstance(jobs, tuple)
+
+def test_parsed_sections():
+    """ Test the ParsedSections function """
+    test_val = '[docker]\nenvironment = ["TEST_VAR=5", "RANDOM_VAR=10"]\ntest = yes'
+    template_dict = ParsedSections(test_val)
+    assert isinstance(template_dict, dict)
+    assert len(template_dict) == 1
+    assert 'docker' in template_dict
+    assert len(template_dict['docker']) == 2
+    assert 'environment' in template_dict['docker']
+    assert template_dict['docker']['environment'] == '["TEST_VAR=5", "RANDOM_VAR=10"]'
+    assert 'test' in template_dict['docker']
+    assert template_dict['docker']['test'] == 'yes'
