@@ -43,7 +43,7 @@ class RmqEs():
                 connection = pika.BlockingConnection(params)
                 self.channel = connection.channel()
                 self.channel.exchange_declare(exchange='topic_recs',
-                                              type='topic')
+                                              exchange_type='topic')
 
                 result = self.channel.queue_declare(exclusive=True)
                 self.queue_name = result.method.queue
