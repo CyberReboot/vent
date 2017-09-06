@@ -1136,9 +1136,15 @@ class Action:
             the name it is given. This information will be used in adding
             that tool.
             """
+            multi_tool = '@' in name
             for tool in available_tools:
-                if name in tool[0]:
-                    return tool[0]
+                t_name = tool[0]
+                if multi_tool:
+                    if name.split('@')[-1] == t_name.split('@')[-1]:
+                        return t_name
+                else:
+                    if name == t_name.split('/')[-1]:
+                        return t_name
             return None
 
         self.logger.info("Starting: startup")
@@ -1156,49 +1162,64 @@ class Action:
                 repo_path, org, r_name = self.p_helper.get_path(repo)
                 available_tools = self.p_helper.available_tools(repo_path)
                 for tool in s_dict[repo]:
+                    # if we can't find the tool in that repo, skip over this
+                    # tool and notify in the logs
+                    t_path = rel_path(tool, available_tools)
+                    if not t_path:
+                        self.logger.error("Couldn't find tool " + tool + " in"
+                                          " repo " + repo)
+                        continue
                     # check if we need to configure instances along the way
                     instances = 1
                     if 'settings' in s_dict[repo][tool]:
-                        settings_dict = json.loads(s_dict[repo][tool]
-                                                   ['settings'])
-                        if 'instances' in settings_dict:
-                            instances = int(settings_dict['instances'])
+                        if 'instances' in s_dict[repo][tool]['settings']:
+                            instances = int(s_dict[repo][tool]
+                                            ['settings']['instances'])
                     # add the tool
                     t_branch = 'master'
                     t_version = 'HEAD'
                     add_tools = None
                     build_tool = False
+                    add_tools = [(t_path, '')]
                     if 'branch' in s_dict[repo][tool]:
                         t_branch = s_dict[repo][tool]['branch']
                     if 'version' in s_dict[repo][tool]:
                         t_version = s_dict[repo][tool]['version']
                     if 'build' in s_dict[repo][tool]:
                         build_tool = s_dict[repo][tool]['build']
-                    t_path = rel_path(tool, available_tools)
-                    add_tools = [(t_path, '')]
                     self.add(repo, branch=t_branch, version=t_version,
                              tools=add_tools, build=build_tool)
                     manifest = Template(self.plugin.manifest)
                     # update the manifest with extra defined runtime settings
                     base_section = ':'.join([org, r_name, t_path,
                                              t_branch, t_version])
-                    for i in range(1, instances + 1):
-                        i_section = base_section.rsplit(':', 2)
-                        i_section[0] += str(i) if i != 1 else ''
-                        i_section = ':'.join(i_section)
-                        for option in extra_options:
-                            if option in s_dict[repo][tool]:
-                                opt_dict = json.loads(manifest.option(
-                                                          i_section,
-                                                          option)[1])
-                                # stringify values for vent
-                                for v in s_dict[repo][tool][option]:
-                                    pval = s_dict[repo][tool][option][v]
-                                    s_dict[repo][tool][option][v] = json.dumps(
-                                                                        pval)
-                                opt_dict.update(s_dict[repo][tool][option])
-                                manifest.set_option(i_section, option,
-                                                    json.dumps(opt_dict))
+                    for option in extra_options:
+                        if option in s_dict[repo][tool]:
+                            opt_dict = manifest.option(base_section, option)
+                            # add new values defined into default options for
+                            # that tool, don't overwrite them
+                            if opt_dict[0]:
+                                opt_dict = json.loads(opt_dict[1])
+                            else:
+                                opt_dict = {}
+                            # stringify values for vent
+                            for v in s_dict[repo][tool][option]:
+                                pval = s_dict[repo][tool][option][v]
+                                s_dict[repo][tool][option][v] = json.dumps(
+                                                                    pval)
+                            opt_dict.update(s_dict[repo][tool][option])
+                            manifest.set_option(base_section, option,
+                                                json.dumps(opt_dict))
+                    # copy manifest info into new sections if necessary
+                    if instances > 1:
+                        for i in range(2, instances + 1):
+                            i_section = base_section.rsplit(':', 2)
+                            i_section[0] += str(i)
+                            i_section = ':'.join(i_section)
+                            manifest.add_section(i_section)
+                            for opt_val in manifest.section(base_section):
+                                manifest.set_option(i_section, opt_val[0],
+                                                    opt_val[1])
                     manifest.write_config()
                     # start the tool, if necessary
                     if 'start' in s_dict[repo][tool]:
@@ -1211,7 +1232,7 @@ class Action:
                                                   version=t_version)[1])
             if tool_d:
                 self.start(tool_d)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("startup failed with error " + str(e))
             status = (False, str(e))
         self.logger.info("startup finished with status " + str(status[0]))
