@@ -94,14 +94,19 @@ class AddForm(npyscreen.ActionForm):
                                            'registry': self.registry.value,
                                            'groups': self.groups.value})
             popup(thr, 'image', 'Please wait, adding image...')
-            npyscreen.notify_confirm('Done adding image.', title='Added image')
-            editor_args = {'save_configure': api_action.save_configure,
-                           'registry_download': True,
+            npyscreen.notif_confirm('Done adding image.', title='Added image')
+            editor_args = {'tool_name': self.image.value,
+                           'version': self.tag.value,
+                           'get_configure': api_action.get_configure,
+                           'save_configure': api_action.save_configure,
+                           'restart_tools': api_action.restart_tools,
+                           'clean': api_action.clean,
+                           'prep_start': api_action.prep_start,
+                           'start_tools': api_action.start,
+                           'from_registry': True,
+                           'just_downloaded': True,
                            'link_name': self.link_name.value,
-                           'groups': self.groups.value,
-                           'tool_name': self.image.value,
-                           'branch': '',
-                           'version': self.tag.value}
+                           'groups': self.groups.value}
             self.parentApp.addForm("CONFIGUREIMAGE", EditorForm,
                                    name="Specify vent.template settings for "
                                    "image pulled (optional)", **editor_args)
