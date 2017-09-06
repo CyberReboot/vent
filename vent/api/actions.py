@@ -455,10 +455,10 @@ class Action:
                     self.logger.error("failed to clean " +
                                       str(container_name) +
                                       " because: " + str(e))
+            manifest.write_config()
         except Exception as e:  # pragma: no cover
             self.logger.error("clean failed with error: " + str(e))
             status = (False, e)
-        manifest.write_config()
         self.logger.info("Status of clean: " + str(status[0]))
         self.logger.info("Finished: clean")
         return status
