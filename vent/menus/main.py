@@ -420,12 +420,12 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             output = self.api_action.tool_status_output('network_tap')
 
             # create a dict with substring as keys and forms as values
-            ntap_form = {'create' : CreateNTap,
-                         'delete' : DeleteNTap,
-                         'list' : ListNTap,
-                         'nics' : NICsNTap,
-                         'start' : StartNTap,
-                         'stop' : StopNTap}
+            ntap_form = {'create': CreateNTap,
+                         'delete': DeleteNTap,
+                         'list': ListNTap,
+                         'nics': NICsNTap,
+                         'start': StartNTap,
+                         'stop': StopNTap}
             if output[0]:
                 if output[1]:
                     notify_confirm(output[1])
@@ -433,8 +433,8 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                     # action regarding ntap come in the form of 'ntapcreate'
                     # 'ntapdelete', etc
                     tap_action = action.split('ntap')[1]
-                    form_args = {'color' : 'CONTROL',
-                                 'name': 'Network Tap Interface ' + \
+                    form_args = {'color': 'CONTROL',
+                                 'name': 'Network Tap Interface ' +
                                          tap_action + "\t"*6 +
                                          '^T to toggle main'}
                     self.add_form(ntap_form[tap_action], "Network Tap " +
