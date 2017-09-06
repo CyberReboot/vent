@@ -1140,8 +1140,6 @@ class Action:
         """
         status = (True, None)
         try:
-            # problem is that currently does not throw error if plugin_manifest
-            # does not exist
             self.logger.info("Start: tool_status_checker")
             manifest = Template(self.p_helper.manifest)
             for section in manifest.sections()[1]:
@@ -1151,7 +1149,7 @@ class Action:
                     status = (True, status_tup)
                     break
 
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             self.logger.error("Failed to check tool status: " + str(e))
             status = (False, str(e))
 
@@ -1190,7 +1188,7 @@ class Action:
             elif tool_status[2] == 'no':
                 output = "Please start core tool " + str(tool_name)
             status = (True, output)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             status = (False, e)
             self.logger.info("Error: " + str(e))
 
