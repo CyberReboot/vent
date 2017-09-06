@@ -36,19 +36,12 @@ class DeleteR:
         except Exception as e:  # pragma: no cover
             return (False, 'unable to connect to docker because: ' + str(e))
 
-        # if user gives a list of id, delete them all
-        if isinstance(payload['id'], list):
-            try:
-                for container_id in payload['id']:
-                    c.containers.get(container_id).remove()
-            except Exception as e:  # pragma: no cover
-                return (False, 'unable to delete list of containers because: '
-                        + str(e))
-        # if user gives just one id, delete it
-        else:
-            try:
-                c.containers.get(payload['id']).remove()
-            except Exception as e:  # pragma: no cover
-                return (False, 'unable to delete container because: ' + str(e))
+        # delete containers chosen from CLI
+        try:
+            for container_id in payload['id']:
+                c.containers.get(container_id).remove()
+        except Exception as e:  # pragma: no cover
+            return (False, 'unable to delete containers because: '
+                    + str(e))
 
         return (True, 'container successfully deleted: ' + str(payload['id']))
