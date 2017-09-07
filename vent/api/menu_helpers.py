@@ -377,6 +377,7 @@ class MenuHelper:
         try:
             d_client = docker.from_env()
             images = d_client.images.list(filters={'label': 'vent'})
+            print images
             for image in images:
                 try:
                     core_check = ("vent.groups" in image.attrs['Labels'] and
@@ -394,7 +395,7 @@ class MenuHelper:
                             else:
                                 all_tools['built'].append(image.attrs['Labels']['vent.name'])
                 except Exception as err:  # pragma: no cover
-                    pass
+                    print(str(err))
             containers = d_client.containers.list(filters={'label': 'vent'})
             for container in containers:
                 try:
