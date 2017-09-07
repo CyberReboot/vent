@@ -99,7 +99,7 @@ Stop and remove the chosen tools' containers.
 Configure core/plugin tools
 ===========================
 Edit a tool's vent.template file found in the tool's respective folder.
-Read more about :ref:`venttemplate-label`
+Read more about :ref:`venttemplate-label`.
 
 Disable core/plugin tools
 =========================
