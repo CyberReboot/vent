@@ -15,6 +15,7 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 from vent.helpers.meta import Timestamp
+from vent.helpers.paths import PathDirs
 
 
 class Action:
@@ -1129,24 +1130,6 @@ class Action:
         Automatically detect if a startup file is specified and stand up a vent
         host based on the specifications in that file
         """
-        def rel_path(name, available_tools):
-            """
-            Helper function that extracts relative path to a tool
-            (from the main cloned directory) out of available_tools based on
-            the name it is given. This information will be used in adding
-            that tool.
-            """
-            multi_tool = '@' in name
-            for tool in available_tools:
-                t_name = tool[0]
-                if multi_tool:
-                    if name.split('@')[-1] == t_name.split('@')[-1]:
-                        return t_name
-                else:
-                    if name == t_name.split('/')[-1]:
-                        return t_name
-            return None
-
         self.logger.info("Starting: startup")
         status = (True, None)
         try:
@@ -1164,11 +1147,14 @@ class Action:
                 for tool in s_dict[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
-                    t_path = rel_path(tool, available_tools)
+                    t_path = PathDirs.rel_path(tool, available_tools)
                     if not t_path:
                         self.logger.error("Couldn't find tool " + tool + " in"
                                           " repo " + repo)
                         continue
+                    # ensure no NoneType iteration errors
+                    if s_dict[repo][tool] is None:
+                        s_dict[repo][tool] = {}
                     # check if we need to configure instances along the way
                     instances = 1
                     if 'settings' in s_dict[repo][tool]:
@@ -1217,15 +1203,20 @@ class Action:
                             i_section[0] += str(i)
                             i_section = ':'.join(i_section)
                             manifest.add_section(i_section)
-                            for opt_val in manifest.section(base_section):
-                                manifest.set_option(i_section, opt_val[0],
-                                                    opt_val[1])
+                            for opt_val in manifest.section(base_section)[1]:
+                                if opt_val[0] == 'name':
+                                    manifest.set_option(i_section, opt_val[0],
+                                                        opt_val[1] + str(i))
+                                else:
+                                    manifest.set_option(i_section, opt_val[0],
+                                                        opt_val[1])
                     manifest.write_config()
                     # start the tool, if necessary
                     if 'start' in s_dict[repo][tool]:
                         if s_dict[repo][tool]['start']:
                             for i in range(1, instances + 1):
                                 i_name = tool + str(i) if i != 1 else tool
+                                i_name = i_name.replace('@', '')
                                 tool_d.update(self.prep_start(
                                                   name=i_name,
                                                   branch=t_branch,

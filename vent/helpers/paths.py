@@ -49,6 +49,23 @@ class PathDirs:
         except OSError as e:  # pragma: no cover
             return (False, e)
 
+    @staticmethod
+    def rel_path(name, available_tools):
+        """
+        Extracts relative path to a tool (from the main cloned directory) out
+        of available_tools based on the name it is given
+        """
+        multi_tool = '@' in name
+        for tool in available_tools:
+            t_name = tool[0]
+            if multi_tool:
+                if name.split('@')[-1] == t_name.split('@')[-1]:
+                    return t_name
+            else:
+                if name == t_name.split('/')[-1]:
+                    return t_name
+        return None
+
     def host_config(self):
         """ Ensure the host configuration file exists """
         if platform.system() == 'Darwin':
