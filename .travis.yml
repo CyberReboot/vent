@@ -12,7 +12,7 @@ python:
   - "2.7"
 before_script:
   - sleep 10
-  - echo -e "https://github.com/cyberreboot/vent:\n  rabbitmq:\n    build: yes\n    start: yes" >> ~/.vent_startup.yml
+  - echo -e "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
 script:
   - make test
   - bash <(curl -s https://codecov.io/bash)
