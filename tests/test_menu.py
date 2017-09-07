@@ -113,19 +113,6 @@ def test_menu():
               SPACE, TAB, SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN,
               DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',
               TAB, TAB, ENTER, ENTER, TAB, ENTER, SPACE, TAB, TAB, ENTER])
-    # configure - keep instances the same
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, '1', TAB, TAB, ENTER, ENTER, TAB,
-              ENTER, ENTER, ENTER])
-    # configure - quit in the middle of typing in instances
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, CTRL_Q])
-    # configure - exit in the middle of typing in instances
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_B, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, TAB, ENTER, CTRL_E])
     # clean - ok
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
