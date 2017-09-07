@@ -380,6 +380,7 @@ class MenuHelper:
             print images
             for image in images:
                 try:
+                    print(str(image.attrs))
                     core_check = ("vent.groups" in image.attrs['Labels'] and
                                   'core' in image.attrs['Labels']['vent.groups'])
                     image_check = None
