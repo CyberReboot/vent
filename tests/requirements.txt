@@ -1,4 +1,4 @@
-docker
+docker>=2.5.1
 elasticsearch
 npyscreen
 paste

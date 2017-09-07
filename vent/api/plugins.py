@@ -915,24 +915,24 @@ class Plugin:
         status = (True, None)
         for image in images:
             if ('Labels' in image.attrs and
-               'vent.section' in image.attrs['Labels'] and
-               not image.attrs['Labels']['vent.section'] in sections[1]):
-                section = image.attrs['Labels']['vent.section']
-                section_str = image.attrs['Labels']['vent.section'].split(":")
+               'vent.section' in image.attrs['Config']['Labels'] and
+               not image.attrs['Config']['Labels']['vent.section'] in sections[1]):
+                section = image.attrs['Config']['Labels']['vent.section']
+                section_str = image.attrs['Config']['Labels']['vent.section'].split(":")
                 template.add_section(section)
-                if 'vent.name' in image.attrs['Labels']:
+                if 'vent.name' in image.attrs['Config']['Labels']:
                     template.set_option(section,
                                         'name',
-                                        image.attrs['Labels']['vent.name'])
-                if 'vent.repo' in image.attrs['Labels']:
+                                        image.attrs['Config']['Labels']['vent.name'])
+                if 'vent.repo' in image.attrs['Config']['Labels']:
                     template.set_option(section,
                                         'repo',
-                                        image.attrs['Labels']['vent.repo'])
+                                        image.attrs['Config']['Labels']['vent.repo'])
                     git_path = join(self.path_dirs.plugins_dir,
                                     "/".join(section_str[:2]))
                     if not isdir(git_path):
                         # clone it down
-                        status = self.p_helper.clone(image.attrs['Labels']['vent.repo'])
+                        status = self.p_helper.clone(image.attrs['Config']['Labels']['vent.repo'])
                     template.set_option(section, 'path', join(git_path, section_str[-3][1:]))
                     # get template settings
                     # TODO account for template files not named vent.template
@@ -956,8 +956,8 @@ class Plugin:
                             if section_dict:
                                 template.set_option(section, s,
                                                     json.dumps(section_dict))
-                if ('vent.type' in image.attrs['Labels'] and
-                   image.attrs['Labels']['vent.type'] == 'repository'):
+                if ('vent.type' in image.attrs['Config']['Labels'] and
+                   image.attrs['Config']['Labels']['vent.type'] == 'repository'):
                     template.set_option(section, 'namespace', "/".join(section_str[:2]))
                     template.set_option(section, 'enabled', 'yes')
                     template.set_option(section, 'branch', section_str[-2])
@@ -965,10 +965,10 @@ class Plugin:
                     template.set_option(section, 'last_updated', str(datetime.utcnow()) + " UTC")
                     template.set_option(section, 'image_name', image.attrs['RepoTags'][0])
                     template.set_option(section, 'type', 'repository')
-                if 'vent.groups' in image.attrs['Labels']:
+                if 'vent.groups' in image.attrs['Config']['Labels']:
                     template.set_option(section,
                                         'groups',
-                                        image.attrs['Labels']['vent.groups'])
+                                        image.attrs['Config']['Labels']['vent.groups'])
                 template.set_option(section, 'built', 'yes')
                 template.set_option(section, 'image_id', image.attrs['Id'].split(":")[1][:12])
                 template.set_option(section, 'running', 'no')
