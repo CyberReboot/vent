@@ -8,6 +8,7 @@ import re
 import shutil
 import tempfile
 import urllib2
+import yaml
 
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
@@ -17,6 +18,7 @@ from vent.helpers.meta import Dependencies
 from vent.helpers.meta import Images
 from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Timestamp
+from vent.helpers.paths import PathDirs
 
 
 class Action:
@@ -25,6 +27,7 @@ class Action:
         self.plugin = Plugin(**kargs)
         self.d_client = self.plugin.d_client
         self.vent_config = self.plugin.path_dirs.cfg_file
+        self.startup_file = self.plugin.path_dirs.startup_file
         self.p_helper = self.plugin.p_helper
         self.queue = Queue.Queue()
         self.logger = Logger(__name__)
@@ -54,6 +57,7 @@ class Action:
                         tools.remove(tool)
                     i -= 1
             if tools is None or len(tools) > 0:
+                is_core = repo == 'https://github.com/cyberreboot/vent'
                 status = self.plugin.add(repo,
                                          tools=tools,
                                          overrides=overrides,
@@ -66,7 +70,8 @@ class Action:
                                          version_alias=version_alias,
                                          wild=wild,
                                          remove_old=remove_old,
-                                         disable_old=disable_old)
+                                         disable_old=disable_old,
+                                         core=is_core)
             else:
                 self.logger.info("no new tools to add, exiting")
                 status = (True, "previously installed")
@@ -1208,6 +1213,110 @@ class Action:
             status = (False, str(e))
         self.logger.info("Status of enable: " + str(status[0]))
         self.logger.info("Finished: enable")
+        return status
+
+    def startup(self):
+        """
+        Automatically detect if a startup file is specified and stand up a vent
+        host with all necessary tools based on the specifications in that file
+        """
+        self.logger.info("Starting: startup")
+        status = (True, None)
+        try:
+            s_dict = {}
+            if os.path.exists(self.startup_file):
+                with open(self.startup_file) as startup:
+                    s_dict = yaml.safe_load(startup.read())
+            tool_d = {}
+            extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
+            for repo in s_dict:
+                self.p_helper.clone(repo)
+                repo_path, org, r_name = self.p_helper.get_path(repo)
+                available_tools = self.p_helper.available_tools(repo_path)
+                for tool in s_dict[repo]:
+                    # if we can't find the tool in that repo, skip over this
+                    # tool and notify in the logs
+                    t_path = PathDirs.rel_path(tool, available_tools)
+                    if not t_path:
+                        self.logger.error("Couldn't find tool " + tool + " in"
+                                          " repo " + repo)
+                        continue
+                    # ensure no NoneType iteration errors
+                    if s_dict[repo][tool] is None:
+                        s_dict[repo][tool] = {}
+                    # check if we need to configure instances along the way
+                    instances = 1
+                    if 'settings' in s_dict[repo][tool]:
+                        if 'instances' in s_dict[repo][tool]['settings']:
+                            instances = int(s_dict[repo][tool]
+                                            ['settings']['instances'])
+                    # add the tool
+                    t_branch = 'master'
+                    t_version = 'HEAD'
+                    add_tools = None
+                    build_tool = False
+                    add_tools = [(t_path, '')]
+                    if 'branch' in s_dict[repo][tool]:
+                        t_branch = s_dict[repo][tool]['branch']
+                    if 'version' in s_dict[repo][tool]:
+                        t_version = s_dict[repo][tool]['version']
+                    if 'build' in s_dict[repo][tool]:
+                        build_tool = s_dict[repo][tool]['build']
+                    self.add(repo, branch=t_branch, version=t_version,
+                             tools=add_tools, build=build_tool)
+                    manifest = Template(self.plugin.manifest)
+                    # update the manifest with extra defined runtime settings
+                    base_section = ':'.join([org, r_name, t_path,
+                                             t_branch, t_version])
+                    for option in extra_options:
+                        if option in s_dict[repo][tool]:
+                            opt_dict = manifest.option(base_section, option)
+                            # add new values defined into default options for
+                            # that tool, don't overwrite them
+                            if opt_dict[0]:
+                                opt_dict = json.loads(opt_dict[1])
+                            else:
+                                opt_dict = {}
+                            # stringify values for vent
+                            for v in s_dict[repo][tool][option]:
+                                pval = s_dict[repo][tool][option][v]
+                                s_dict[repo][tool][option][v] = json.dumps(
+                                                                    pval)
+                            opt_dict.update(s_dict[repo][tool][option])
+                            manifest.set_option(base_section, option,
+                                                json.dumps(opt_dict))
+                    # copy manifest info into new sections if necessary
+                    if instances > 1:
+                        for i in range(2, instances + 1):
+                            i_section = base_section.rsplit(':', 2)
+                            i_section[0] += str(i)
+                            i_section = ':'.join(i_section)
+                            manifest.add_section(i_section)
+                            for opt_val in manifest.section(base_section)[1]:
+                                if opt_val[0] == 'name':
+                                    manifest.set_option(i_section, opt_val[0],
+                                                        opt_val[1] + str(i))
+                                else:
+                                    manifest.set_option(i_section, opt_val[0],
+                                                        opt_val[1])
+                    manifest.write_config()
+                    # start the tool, if necessary
+                    if 'start' in s_dict[repo][tool]:
+                        if s_dict[repo][tool]['start']:
+                            for i in range(1, instances + 1):
+                                i_name = tool + str(i) if i != 1 else tool
+                                i_name = i_name.replace('@', '')
+                                tool_d.update(self.prep_start(
+                                                  name=i_name,
+                                                  branch=t_branch,
+                                                  version=t_version)[1])
+            if tool_d:
+                self.start(tool_d)
+        except Exception as e:  # pragma: no cover
+            self.logger.error("startup failed with error " + str(e))
+            status = (False, str(e))
+        self.logger.info("startup finished with status " + str(status[0]))
+        self.logger.info("Finished: startup")
         return status
 
     def tool_status_checker(self, tool_name):

@@ -2,6 +2,18 @@ import os
 
 from vent.api.actions import Action
 
+def test_startup():
+    """
+    Test the startup function; uses the startup file configured in
+    .setup_travis in order to populate the startup file with fields
+    """
+    instance = Action()
+    status = instance.startup()
+    assert isinstance(status, tuple)
+    assert status[0]
+    with open(instance.plugin.manifest) as man:
+        assert 'rabbitmq' in man.read()
+
 def test_add():
     """ Test the add function """
     instance = Action()
@@ -208,7 +220,7 @@ def test_reset():
     instance = Action()
     status = instance.reset()
     assert isinstance(status, tuple)
-    assert status[0] == False
+    assert status[0]
 
 def test_logs():
     """ Test the logs function """

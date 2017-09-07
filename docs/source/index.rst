@@ -66,6 +66,8 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 
   new_release
 
+  vent_initialization
+
 .. toctree::
   :maxdepth: 2
   :caption: Vent Internals
