@@ -82,7 +82,7 @@ def test_menu():
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
               LEFT, ENTER])
     # configure - quit back to main
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_Q])
+    #run_menu([ENTER, CTRL_X, 'c', 't', CTRL_Q])
     # configure - toggle back to main
     run_menu([ENTER, CTRL_X, 'c', 't', CTRL_T])
     # configure - ok
