@@ -1209,7 +1209,7 @@ class Action:
     def startup(self):
         """
         Automatically detect if a startup file is specified and stand up a vent
-        host based on the specifications in that file
+        host with all necessary tools based on the specifications in that file
         """
         self.logger.info("Starting: startup")
         status = (True, None)
