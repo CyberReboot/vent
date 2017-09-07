@@ -12,6 +12,7 @@ from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.errors import ErrorHandler
 from vent.helpers.logs import Logger
+from vent.helpers.meta import Timestamp
 from vent.helpers.paths import PathDirs
 
 
@@ -328,6 +329,10 @@ class Plugin:
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
+            # keep track of whether or not to write an additional manifest
+            # entry for multiple instances, and how many additional entries
+            # to write
+            addtl_entries = 0
             # remove the .git for adding repo info to manifest
             if self.repo.endswith('.git'):
                 self.repo = self.repo[:-4]
@@ -414,6 +419,10 @@ class Plugin:
                 # need to get rid of . in match_path if multi_tool
                 vent_template = Template(join(match_path,
                                               tool_template))
+                # ensure template has instances defined in it
+                if not vent_template.option('settings', 'instances')[0]:
+                    vent_template.add_section('settings')
+                    vent_template.set_option('settings', 'instances', '1')
                 sections = vent_template.sections()
                 if sections[0]:
                     for header in sections[1]:
@@ -424,6 +433,11 @@ class Plugin:
                                 option_name = option
                                 if option == 'name':
                                     option_name = 'link_name'
+                                elif option == 'instances':
+                                    instances = vent_template.option(header,
+                                                                     option)[1]
+                                    if int(instances) > 1:
+                                        addtl_entries = int(instances) - 1
                                 option = vent_template.option(header, option)
                                 option_val = option[1]
                                 section_dict[option_name] = option_val
@@ -480,6 +494,19 @@ class Plugin:
                                              match_path,
                                              image_name,
                                              section)
+                # write additional entries for multiple instances
+                if addtl_entries > 0:
+                    # add 2 for naming conventions
+                    for i in range(2, addtl_entries + 2):
+                        addtl_section = section.rsplit(':', 2)
+                        addtl_section[0] += str(i)
+                        addtl_section = ':'.join(addtl_section)
+                        template.add_section(addtl_section)
+                        orig_vals = template.section(section)[1]
+                        for val in orig_vals:
+                            template.set_option(addtl_section, val[0], val[1])
+                        template.set_option(addtl_section, "name",
+                                            true_name.split('/')[-1]+str(i))
 
             # write out configuration to the manifest file
             template.write_config()
@@ -498,6 +525,35 @@ class Plugin:
         Build docker images and store results in template
         """
 
+        def set_instances(template, section, built, image_id=None):
+            """ Set build information for multiple instances """
+            self.logger.info("entering set_instances")
+            i = 2
+            while True:
+                addtl_section = section.rsplit(':', 2)
+                addtl_section[0] += str(i)
+                addtl_section = ':'.join(addtl_section)
+                self.logger.info(addtl_section)
+                if template.section(addtl_section)[0]:
+                    template.set_option(addtl_section, "built", built)
+                    if image_id:
+                        template.set_option(addtl_section, "image_id",
+                                            image_id)
+                    template.set_option(addtl_section,
+                                        "last_updated", Timestamp())
+                else:
+                    break
+                i += 1
+
+        # determine whether a tool should be considered a multi instance
+        try:
+            settings_dict = json.loads(template.option(section, 'settings')[1])
+            if int(settings_dict['instances']) > 1:
+                multi_instance = True
+            else:
+                multi_instance = False
+        except Exception:
+            multi_instance = False
         # !! TODO return status of whether it built successfully or not
         if self.build:
             cwd = getcwd()
@@ -534,6 +590,10 @@ class Plugin:
                             template.set_option(section, "last_updated",
                                                 str(datetime.utcnow()) +
                                                 " UTC")
+                            # set other instances too
+                            if multi_instance:
+                                set_instances(template, section, 'yes',
+                                              image_id)
                             status = (True, "Pulled " + image_name)
                             self.logger.info(str(status))
                         else:
@@ -541,6 +601,9 @@ class Plugin:
                             template.set_option(section, "last_updated",
                                                 str(datetime.utcnow()) +
                                                 " UTC")
+                            # set other instances too
+                            if multi_instace:
+                                set_instances(template, section, 'failed')
                             status = (False, "Failed to pull image " +
                                       str(output.split('\n')[-1]))
                             self.logger.warning(str(status))
@@ -597,17 +660,25 @@ class Plugin:
                     template.set_option(section, "last_updated",
                                         str(datetime.utcnow()) +
                                         " UTC")
+                    # set other instances too
+                    if multi_instance:
+                        set_instances(template, section, 'yes', image_id)
             except Exception as e:  # pragma: no cover
                 self.logger.error("unable to build image: " + str(image_name) +
                                   " because: " + str(e))
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
+                if multi_instance:
+                    set_instances(template, section, 'failed')
+
             chdir(cwd)
         else:
             template.set_option(section, "built", "no")
             template.set_option(section, "last_updated",
                                 str(datetime.utcnow()) + " UTC")
+            if multi_instance:
+                set_instances(template, section, 'no')
         template.set_option(section, 'running', 'no')
         return template
 
@@ -654,15 +725,24 @@ class Plugin:
         results, template = self.p_helper.constraint_options(args, [])
         for result in results:
             response, image_name = template.option(result, 'image_name')
-
-            # check for container and remove
-            container_name = image_name.replace(':', '-').replace('/', '-')
+            name = template.option(result, 'name')[1]
             try:
-                container = self.d_client.containers.get(container_name)
-                response = container.remove(v=True, force=True)
-                self.logger.info(response)
-                self.logger.info("Removing plugin container: " +
-                                 container_name)
+                settings_dict = json.loads(template.option(result,
+                                                           'settings')[1])
+                instances = int(settings_dict['instances'])
+            except Exception:
+                instances = 1
+
+            try:
+                # check for container and remove
+                c_name = image_name.replace(':', '-').replace('/', '-')
+                for i in range(1, instances + 1):
+                    container_name = c_name + str(i) if i != 1 else c_name
+                    container = self.d_client.containers.get(container_name)
+                    response = container.remove(v=True, force=True)
+                    self.logger.info(response)
+                    self.logger.info("Removing plugin container: " +
+                                     container_name)
             except Exception as e:  # pragma: no cover
                 self.logger.warn("Unable to remove the plugin container: " +
                                  container_name + " because: " + str(e))
@@ -670,14 +750,8 @@ class Plugin:
             # check for image and remove
             try:
                 response = None
-                # due to problems with core image_id value in manifest file
-                groups = template.option(result, 'groups')
-                if groups[0] and "core" in groups[1]:
-                    response = self.d_client.images.remove(image_name)
-                else:
-                    image_id = template.option(result, 'image_id')[1]
-                    response = self.d_client.images.remove(image_id,
-                                                           force=True)
+                image_id = template.option(result, 'image_id')[1]
+                response = self.d_client.images.remove(image_id, force=True)
                 self.logger.info(response)
                 self.logger.info("Removing plugin image: " + image_name)
             except Exception as e:  # pragma: no cover
@@ -685,8 +759,12 @@ class Plugin:
                                  image_name + " because: " + str(e))
 
             # remove tool from the manifest
-            status = template.del_section(result)
-            self.logger.info("Removing plugin tool: " + result)
+            for i in range(1, instances + 1):
+                res = result.rsplit(':', 2)
+                res[0] += str(i) if i != 1 else ''
+                res = ':'.join(res)
+                status = template.del_section(res)
+                self.logger.info("Removing plugin tool: " + res)
         # TODO if all tools from a repo have been removed, remove the repo
         template.write_config()
         return status
