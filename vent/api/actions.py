@@ -996,20 +996,53 @@ class Action:
                     with open(template_path, 'w') as f:
                         f.write(config_val)
                     # save in plugin_manifest
-                    settings_dict = ParsedSections(config_val)
-                    for section in settings_dict:
-                        if section == 'info':
-                            if 'link_name' in settings_dict[section]:
-                                manifest.set_option(
-                                    tool, 'link_name',
-                                    settings_dict[section]['link_name'])
-                            if 'groups' in settings_dict[section]:
-                                manifest.set_option(
-                                    tool, 'groups',
-                                    settings_dict[section]['groups'])
-                        manifest.set_option(tool, section,
-                                            json.dumps(settings_dict[section]))
+                    vent_template = Template(template_path)
+                    if instances > 1:
+                        # add instances as needed
+                        for i in range(1, instances + 1):
+                            i_section = tool.rsplit(':', 2)
+                            i_section[0] += str(i) if i != 1 else ''
+                            i_section = ':'.join(i_section)
+                            if not manifest.section(i_section)[0]:
+                                manifest.add_section(i_section)
+                                for val_pair in manifest.section(tool)[1]:
+                                    name = val_pair[0]
+                                    val = val_pair[1]
+                                    if name == 'name':
+                                        val += str(i)
+                                    elif name == 'last_updated':
+                                        val = Timestamp()
+                                    elif name == 'running':
+                                        val = 'no'
+                                    manifest.set_option(i_section, name, val)
+                                template_to_manifest(vent_template, manifest,
+                                                     i_section, instances)
+                            else:
+                                settings = manifest.option(i_section,
+                                                           'settings')
+                                if settings[0]:
+                                    settings_dict = json.loads(settings[1])
+                                    settings_dict['instances'] = str(instances)
+                                    manifest.set_option(i_section, 'settings',
+                                                        json.dumps(
+                                                            settings_dict))
+                                else:
+                                    inst = str(instances)
+                                    settings_dict = {'instances': inst}
+                                    manifest.set_option(i_section, 'settings',
+                                                        json.dumps(
+                                                            settings_dict))
+                    else:
+                        try:
+                            settings_str = manifest.option(tool, 'settings')[1]
+                            settings_dict = json.loads(settings_str)
+                            old_instances = int(settings_dict['instances'])
+                        except Exception:
+                            old_instances = 1
+                        template_to_manifest(vent_template, manifest,
+                                             tool, old_instances)
                     manifest.write_config()
+                    status = (True, manifest)
                 except Exception as e:  # pragma: no cover
                     self.logger.error("save_configure error: " + str(e))
                     status = (False, str(e))
