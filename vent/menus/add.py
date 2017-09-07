@@ -94,7 +94,7 @@ class AddForm(npyscreen.ActionForm):
                                            'registry': self.registry.value,
                                            'groups': self.groups.value})
             popup(thr, 'image', 'Please wait, adding image...')
-            npyscreen.notif_confirm('Done adding image.', title='Added image')
+            npyscreen.notify_confirm('Done adding image.', title='Added image')
             editor_args = {'tool_name': self.image.value,
                            'version': self.tag.value,
                            'get_configure': api_action.get_configure,
