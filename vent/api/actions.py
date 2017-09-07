@@ -1134,7 +1134,7 @@ class Action:
         status = (True, None)
         try:
             startup_path = os.path.join(os.path.expanduser("~"),
-                                        '.vent-startup.yml')
+                                        '.vent_startup.yml')
             s_dict = None
             with open(startup_path) as startup:
                 s_dict = yaml.safe_load(startup.read())
