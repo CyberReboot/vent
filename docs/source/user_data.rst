@@ -1,3 +1,5 @@
+.. _userdata-label:
+
 User Data
 #########
 
@@ -73,7 +75,10 @@ Vent to use rather than Vent's internal ``Elasticsearch``, we could write::
     Elasticsearch = {"ip_address": "172.10.5.3", "port": "9200",
     "locally_active": "yes"}
 
-If a port is not specified, then it defaults to core tool's default port
+If a port is not specified, then it defaults to core tool's default port.
+Also, you can toggle whether you want to use the local docker container
+that vent utilizes or the external service by switching locally_active
+between yes and no.
 
 -groups
 ^^^^^^^
