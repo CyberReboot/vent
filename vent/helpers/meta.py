@@ -477,8 +477,7 @@ def DropLocation():
 
 def ParsedSections(file_val):
     """
-    Get the sections and options of a file returned as a dictionary;
-    implemented because config parser doesn't return comments
+    Get the sections and options of a file returned as a dictionary
     """
     try:
         template_dict = {}
