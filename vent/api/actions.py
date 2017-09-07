@@ -26,6 +26,7 @@ class Action:
         self.plugin = Plugin(**kargs)
         self.d_client = self.plugin.d_client
         self.vent_config = self.plugin.path_dirs.cfg_file
+        self.startup_file = self.plugin.path_dirs.startup_file
         self.p_helper = self.plugin.p_helper
         self.queue = Queue.Queue()
         self.logger = Logger(__name__)
@@ -1214,11 +1215,10 @@ class Action:
         self.logger.info("Starting: startup")
         status = (True, None)
         try:
-            startup_path = os.path.join(os.path.expanduser("~"),
-                                        '.vent_startup.yml')
-            s_dict = None
-            with open(startup_path) as startup:
-                s_dict = yaml.safe_load(startup.read())
+            s_dict = {}
+            if os.path.exists(self.startup_file):
+                with open(self.startup_file) as startup:
+                    s_dict = yaml.safe_load(startup.read())
             tool_d = {}
             extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
             for repo in s_dict:
