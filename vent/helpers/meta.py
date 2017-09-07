@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import pkg_resources
 import platform
+import re
 import requests
 
 from subprocess import check_output, Popen, PIPE
@@ -472,6 +473,33 @@ def DropLocation():
     drop_loc = os.path.expanduser(drop_loc)
     drop_loc = os.path.abspath(drop_loc)
     return (True, drop_loc)
+
+
+def ParsedSections(file_val):
+    """
+    Get the sections and options of a file returned as a dictionary
+    """
+    try:
+        template_dict = {}
+        cur_section = ''
+        for val in file_val.split("\n"):
+            val = val.strip()
+            if val != '':
+                section_match = re.match(r"\[.+\]", val)
+                if section_match:
+                    cur_section = section_match.group()[1:-1]
+                    template_dict[cur_section] = {}
+                else:
+                    option, value = val.split('=', 1)
+                    option = option.strip()
+                    value = value.strip()
+                    if option.startswith('#'):
+                        template_dict[cur_section][val] = ''
+                    else:
+                        template_dict[cur_section][option] = value
+    except Exception:  # pragma: no cover
+        template_dict = {}
+    return template_dict
 
 
 def Dependencies(tools):

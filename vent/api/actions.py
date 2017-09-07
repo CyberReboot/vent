@@ -15,6 +15,7 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Dependencies
 from vent.helpers.meta import Images
+from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Timestamp
 
 
@@ -445,7 +446,7 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            s, _ = self.p_helper.constraint_options(args, options)
+            s, manifest = self.p_helper.constraint_options(args, options)
             self.logger.info(s)
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
@@ -456,11 +457,13 @@ class Action:
                 try:
                     container = self.d_client.containers.get(container_name)
                     container.remove(force=True)
+                    manifest.set_option(section, 'running', 'no')
                     self.logger.info("cleaned " + str(container_name))
                 except Exception as e:  # pragma: no cover
                     self.logger.error("failed to clean " +
                                       str(container_name) +
                                       " because: " + str(e))
+            manifest.write_config()
         except Exception as e:  # pragma: no cover
             self.logger.error("clean failed with error: " + str(e))
             status = (False, e)
@@ -871,6 +874,11 @@ class Action:
                 return_str += "[" + section + "]\n"
                 # ensure instances shows up in configuration
                 for option in template_dict[section]:
+                    if option.startswith('#'):
+                        return_str += option + "\n"
+                    else:
+                        return_str += option + " = "
+                        return_str += template_dict[section][option] + "\n"
                     return_str += option + " = "
                     return_str += str(template_dict[section][option]) + "\n"
                 return_str += "\n"
