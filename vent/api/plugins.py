@@ -759,16 +759,13 @@ class Plugin:
                                  image_name + " because: " + str(e))
 
             # remove tool from the manifest
-            if groups is None:
-                for i in range(1, instances + 1):
-                    res = result.rsplit(':', 2)
-                    res[0] += str(i) if i != 1 else ''
-                    res = ':'.join(res)
+            for i in range(1, instances + 1):
+                res = result.rsplit(':', 2)
+                res[0] += str(i) if i != 1 else ''
+                res = ':'.join(res)
+                if template.section(res)[0]:
                     status = template.del_section(res)
                     self.logger.info("Removing plugin tool: " + res)
-            else:
-                status = template.del_section(result)
-                self.logger.info("Removing plugin tool: " + result)
         # TODO if all tools from a repo have been removed, remove the repo
         template.write_config()
         return status

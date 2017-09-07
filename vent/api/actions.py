@@ -1309,6 +1309,7 @@ class Action:
             status = (False, str(e))
         self.logger.info("startup finished with status " + str(status[0]))
         self.logger.info("Finished: startup")
+        return status
 
     def tool_status_checker(self, tool_name):
         """
