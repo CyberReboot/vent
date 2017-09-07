@@ -91,6 +91,12 @@ Options that specify how the plugin will run.
   Allows to specify if the tool should process files that are outputs from
   other tools specifically.
 
+*instances*
+  Allows you to specify how many instantiations of a tool you want running.
+  For example, you could have two instances of rq_worker running. This would
+  create two rq_worker containers, which would be useful for scaling larger
+  amounts of work.
+
 |
 
 Example Custom Vent Plugin

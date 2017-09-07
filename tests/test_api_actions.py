@@ -36,6 +36,7 @@ def test_save_configure():
     instance = Action()
     status = instance.save_configure(name='elasticsearch',
                                      config_val='[info]\ntesting123 = testing123')
+    assert isinstance(status, tuple)
     assert status[0]
     template_path = os.path.join(instance.p_helper.path_dirs.plugins_dir,
                                  'cyberreboot', 'vent', 'vent', 'core',
@@ -44,6 +45,16 @@ def test_save_configure():
         assert 'testing123' in f.read()
     with open(instance.p_helper.manifest) as man:
         assert 'testing123' in man.read()
+
+    status = instance.save_configure(name='elasticsearch',
+                                     config_val='[docker]\nrandom = instance',
+                                     instances=2)
+    assert isinstance(status, tuple)
+    assert status[0]
+    with open(instance.p_helper.manifest) as man:
+        man_contents = man.read()
+        assert 'random' in man_contents
+        assert 'elasticsearch2' in man_contents
 
 def test_remove():
     """ Test the remove function """
@@ -156,6 +167,8 @@ def test_clean():
     """ Test the clean function """
     instance = Action()
     status = instance.clean()
+    assert isinstance(status, tuple)
+    status = instance.clean(name='rq_worker2')
     assert isinstance(status, tuple)
 
 def test_backup():
