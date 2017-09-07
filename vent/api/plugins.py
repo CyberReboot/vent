@@ -12,6 +12,7 @@ from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
 from vent.helpers.errors import ErrorHandler
 from vent.helpers.logs import Logger
+from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Timestamp
 from vent.helpers.paths import PathDirs
 
@@ -416,35 +417,18 @@ class Plugin:
                 tool_template = 'vent.template'
                 if match[0].find('@') >= 0:
                     tool_template = match[0].split('@')[1] + '.template'
-                # need to get rid of . in match_path if multi_tool
-                vent_template = Template(join(match_path,
-                                              tool_template))
-                # ensure template has instances defined in it
-                if not vent_template.option('settings', 'instances')[0]:
-                    vent_template.add_section('settings')
-                    vent_template.set_option('settings', 'instances', '1')
-                sections = vent_template.sections()
-                if sections[0]:
-                    for header in sections[1]:
-                        section_dict = {}
-                        options = vent_template.options(header)
-                        if options[0]:
-                            for option in options[1]:
-                                option_name = option
-                                if option == 'name':
-                                    option_name = 'link_name'
-                                elif option == 'instances':
-                                    instances = vent_template.option(header,
-                                                                     option)[1]
-                                    if int(instances) > 1:
-                                        addtl_entries = int(instances) - 1
-                                option = vent_template.option(header, option)
-                                option_val = option[1]
-                                section_dict[option_name] = option_val
-                        if section_dict:
-                            template.set_option(section, header,
-                                                json.dumps(section_dict))
+                vent_template_path = join(match_path, tool_template)
+                if os.path.exists(vent_template_path):
+                    with open(vent_template_path) as f:
+                        vent_template_val = f.read()
+                else:
+                    vent_template_val = ''
+                settings_dict = ParsedSections(vent_template_val)
+                for setting in settings_dict:
+                    template.set_option(section, setting,
+                                        json.dumps(settings_dict[setting]))
                 # TODO do we need this if we save as a dictionary?
+                vent_template = Template(vent_template_path)
                 vent_status, response = vent_template.option("info", "name")
                 if vent_status:
                     template.set_option(section, "link_name", response)
