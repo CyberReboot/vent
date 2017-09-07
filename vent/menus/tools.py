@@ -1,5 +1,6 @@
 import json
 import npyscreen
+import re
 import time
 
 from collections import deque
@@ -47,8 +48,10 @@ class ToolForm(npyscreen.ActionForm):
                 # don't do core because that's the purpose of all in views
                 if group != '' and group != 'core':
                     possible_groups.add(group)
+        self.manifest = manifest
         self.views += possible_groups
         self.views.append('all groups')
+        self.no_instance = ['build', 'remove']
         super(ToolForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):
@@ -56,13 +59,14 @@ class ToolForm(npyscreen.ActionForm):
         self.parentApp.switchForm('MAIN')
 
     def toggle_view(self, *args, **kwargs):
-        manifest = Template(self.api_action.plugin.manifest)
+        """ Toggles the view between different groups """
         group_to_display = self.views.popleft()
         self.cur_view.value = group_to_display
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
-                if group_to_display not in manifest.option(tool, 'groups')[1] \
-                        and group_to_display != 'all groups':
+                t_groups = self.manifest.option(tool, 'groups')[1]
+                if group_to_display not in t_groups and \
+                        group_to_display != 'all groups':
                     self.tools_tc[repo][tool].value = False
                     self.tools_tc[repo][tool].hidden = True
                 else:
@@ -159,10 +163,24 @@ class ToolForm(npyscreen.ActionForm):
                             disabled = True
                         if (not externally_active and not disabled and not
                                 show_disabled):
-                            ncore_list.append(tool)
+                            instance_num = re.search(r'\d+$',
+                                                     manifest.option(
+                                                         tool, 'name')[1])
+                            if not instance_num:
+                                ncore_list.append(tool)
+                            # multiple instances share same image
+                            elif self.action['action_name'] not in self.no_instance:
+                                ncore_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
-                            ncore_list.append(tool)
+                            instance_num = re.search(r'\d+$',
+                                                     manifest.option(
+                                                         tool, 'name')[1])
+                            if not instance_num:
+                                ncore_list.append(tool)
+                            # multiple instances share same image
+                            elif self.action['action_name'] not in self.no_instance:
+                                ncore_list.append(tool)
 
                 for tool in inventory['core']:
                     tool_repo_name = tool.split(":")
@@ -195,10 +213,24 @@ class ToolForm(npyscreen.ActionForm):
                             disabled = True
                         if (not externally_active and not disabled and not
                                 show_disabled):
-                            core_list.append(tool)
+                            instance_num = re.search(r'\d+$',
+                                                     manifest.option(
+                                                         tool, 'name')[1])
+                            if not instance_num:
+                                core_list.append(tool)
+                            # multiple instances share same image
+                            elif self.action['action_name'] not in self.no_instance:
+                                core_list.append(tool)
                         elif (not externally_active and disabled and
                                 show_disabled):
-                            core_list.append(tool)
+                            instance_num = re.search(r'\d+$',
+                                                     manifest.option(
+                                                         tool, 'name')[1])
+                            if not instance_num:
+                                core_list.append(tool)
+                            # multiple instances share same image
+                            elif self.action['action_name'] not in self.no_instance:
+                                core_list.append(tool)
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
@@ -344,12 +376,15 @@ class ToolForm(npyscreen.ActionForm):
                                  'tool_name': t[0],
                                  'branch': t[1],
                                  'version': t[2],
+                                 'repo': repo,
                                  'next_tool': None,
-                                 'get_configure': self.action['action_object1'],
-                                 'save_configure': self.action['action_object2'],
-                                 'restart_tools': self.action['action_object3'],
-                                 'from_registry': registry_image,
-                                 'registry_download': False}
+                                 'get_configure': action.get_configure,
+                                 'save_configure': action.save_configure,
+                                 'restart_tools': action.restart_tools,
+                                 'clean': action.clean,
+                                 'prep_start': action.prep_start,
+                                 'start_tools': action.start,
+                                 'from_registry': registry_image}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
                         self.parentApp.addForm("EDITOR" + t[0], EditorForm,
