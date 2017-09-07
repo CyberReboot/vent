@@ -498,6 +498,6 @@ def ParsedSections(file_val):
                         template_dict[cur_section][val] = ''
                     else:
                         template_dict[cur_section][option] = value
-    except Exception as e:  # pragma: no cover
+    except Exception:  # pragma: no cover
         template_dict = {}
     return template_dict
