@@ -64,12 +64,12 @@ With that said, here is an example .vent-startup.yml file that vent could use::
 
     https://github.com/cyberreboot/vent:
       rabbitmq:
-        build: yes 
-        start: yes 
+        build: yes
+        start: yes
       elasticsearch:
       rq_worker:
-        build: yes 
-        start: yes 
+        build: yes
+        start: yes
         settings:
           instances: 2
 

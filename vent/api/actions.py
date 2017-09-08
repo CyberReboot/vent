@@ -1300,7 +1300,10 @@ class Action:
                                     manifest.set_option(i_section, opt_val[0],
                                                         opt_val[1])
                     manifest.write_config()
-                    # start the tool, if necessary
+
+            # start tools, if necessary
+            for repo in s_dict:
+                for tool in s_dict[repo]:
                     if 'start' in s_dict[repo][tool]:
                         if s_dict[repo][tool]['start']:
                             for i in range(1, instances + 1):
