@@ -205,6 +205,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         # get all name maps
         for section in sections:
             link_name = config.get(section, 'link_name')
+            image_name = config.get(section, 'image_name')
             name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
 
         for section in sections:
