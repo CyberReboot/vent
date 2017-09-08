@@ -94,7 +94,7 @@ RUN tce-load -wic \
     && rm -rf /tmp/tce/optional/* \
     && curl -SL 'https://bootstrap.pypa.io/get-pip.py' | sudo python2 \
     && sudo pip install --no-cache-dir --upgrade pip==$PYTHON_PIP_VERSION \
-    && sudo pip install --no-cache-dir docker npyscreen pyyaml \
+    && sudo pip install --no-cache-dir docker>=2.5.1 npyscreen pyyaml \
     && sudo pip install --no-cache-dir git+git://github.com/cyberreboot/vent.git@master \
     && sudo pip uninstall -y pip \
     && sudo find /usr/local \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + \

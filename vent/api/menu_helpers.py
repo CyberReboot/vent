@@ -379,20 +379,20 @@ class MenuHelper:
             images = d_client.images.list(filters={'label': 'vent'})
             for image in images:
                 try:
-                    core_check = ("vent.groups" in image.attrs['Labels'] and
-                                  'core' in image.attrs['Labels']['vent.groups'])
+                    core_check = ("vent.groups" in image.attrs['Config']['Labels'] and
+                                  'core' in image.attrs['Config']['Labels']['vent.groups'])
                     image_check = None
                     if core:
                         image_check = core_check
                     else:
                         image_check = not core_check
                     if image_check:
-                        if ('vent.name' in image.attrs['Labels'] and
-                           'hidden' not in image.attrs['Labels']['vent.groups']):
+                        if ('vent.name' in image.attrs['Config']['Labels'] and
+                           'hidden' not in image.attrs['Config']['Labels']['vent.groups']):
                             if core:
-                                all_tools['built'].append(image.attrs['Labels']['vent.name'].replace('_', '-'))
+                                all_tools['built'].append(image.attrs['Config']['Labels']['vent.name'].replace('_', '-'))
                             else:
-                                all_tools['built'].append(image.attrs['Labels']['vent.name'])
+                                all_tools['built'].append(image.attrs['Config']['Labels']['vent.name'])
                 except Exception as err:  # pragma: no cover
                     pass
             containers = d_client.containers.list(filters={'label': 'vent'})
@@ -407,7 +407,7 @@ class MenuHelper:
                         container_check = not core_check
                     if container_check:
                         if ('vent.name' in container.attrs['Config']['Labels'] and
-                                'hidden' not in image.attrs['Labels']['vent.groups']):
+                                'hidden' not in image.attrs['Config']['Labels']['vent.groups']):
                             if core:
                                 all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'].replace('_', '-'))
                             else:
