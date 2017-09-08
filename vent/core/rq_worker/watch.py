@@ -201,6 +201,13 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         orig_path_d = {}
         path_cmd = {}
         labels_d = {}
+
+        # get all name maps
+        for section in sections:
+            link_name = config.get(section, 'link_name')
+            image_name = config.get(section, 'image_name')
+            name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
+
         for section in sections:
             path = path_copy
             orig_path = ''
@@ -209,7 +216,6 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
             labels = {'vent-plugin': '', 'file': path, 'vent.section': section, 'vent.repo': repo, 'vent.type': t_type}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
-            name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
             # doesn't matter if it's a repository or registry because both in manifest
             if config.has_option(section, 'groups'):
                 if 'replay' in config.get(section, 'groups'):

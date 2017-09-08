@@ -393,6 +393,8 @@ class Plugin:
                 # but new commit removed one that was in a previous commit
 
                 image_name = image_name.lower()
+                if image_name.endswith(":head"):
+                    image_name = image_name.split(":head")[0] + ":HEAD"
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
@@ -598,6 +600,7 @@ class Plugin:
                 if not pull:
                     # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
+                    image_name = image_name.replace('@', '-')
                     if image_name.endswith('HEAD'):
                         commit_id = template.option(section, "commit_id")
                         if commit_id[0]:
@@ -613,7 +616,6 @@ class Plugin:
                             file_tag = " -f Dockerfile ."
                         else:
                             file_tag = " -f Dockerfile." + specific_file + " ."
-                        image_name = image_name.replace('@', '-')
                     # update image name with new version for update
                     image_name = image_name.rsplit(':', 1)[0]+':'+self.version
                     output = check_output(shlex.split("docker build --label"
