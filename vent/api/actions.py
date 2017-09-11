@@ -126,15 +126,10 @@ class Action:
 
             # remove any dependant/child of the current container
             child_name = str(name) + '_child'
-            self.logger.info("HELLO " + child_name)
             d = docker.from_env()
             for container in d.containers.list():
-                #  if 'enp0s25' in container.attrs['Args']:
-                #      self.logger.info("WADDUP" + str(container))
                 if child_name in container.attrs['Config']['Labels'] \
                                                 ['vent.groups']:
-                    self.logger.info("WACK")
-                    #status = self.plugin.remove(name=child_name)
                     container.remove(force=True)
 
         except Exception as e:  # pragma: no cover
