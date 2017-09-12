@@ -330,6 +330,7 @@ def Jobs():
                         json.dump(new_file, outfile)
                         outfile.write("\n")
 
+                # delete any containers with 'vent-plugin' in the groups
                 if 'vent-plugin' in container.attrs['Config']['Labels']:
                     container.remove()
 
@@ -341,11 +342,6 @@ def Jobs():
             jobs[2] = len(set(file_names))
 
         jobs[3] = jobs[3] - jobs[1]
-
-        # delete any containers with 'vent-plugin' in the groups
-        for container in d_client.containers.list():
-            if 'vent-plugin' in container.attrs['Config']['Labels']:
-                container.remove()
 
     except Exception as e:  # pragma: no cover
         pass
