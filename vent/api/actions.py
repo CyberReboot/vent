@@ -126,8 +126,7 @@ class Action:
 
             # remove any dependant/child of the current container
             child_name = str(name) + '_child'
-            d = self.d_client
-            for container in d.containers.list():
+            for container in self.d_client.containers.list():
                 if child_name in container.attrs['Config']['Labels']\
                                                 ['vent.groups']:
                     container.remove(force=True)
