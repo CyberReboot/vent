@@ -126,9 +126,9 @@ class Action:
 
             # remove any dependant/child of the current container
             child_name = str(name) + '_child'
-            d = docker.from_env()
+            d = self.d_client
             for container in d.containers.list():
-                if child_name in container.attrs['Config']['Labels'] \
+                if child_name in container.attrs['Config']['Labels']\
                                                 ['vent.groups']:
                     container.remove(force=True)
 
