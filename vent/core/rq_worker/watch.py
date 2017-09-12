@@ -415,7 +415,6 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                                             'command': path_cmd[image],
                                             'labels': labels,
                                             'detach': True,
-                                            'remove': True,
                                             'log_config': log_config,
                                             'configs': configs[image]})
                         q.enqueue('watch.gpu_queue', q_str, ttl=2592000)
@@ -429,7 +428,6 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                                             command=path_cmd[image],
                                             labels=labels,
                                             detach=True,
-                                            remove=True,
                                             log_config=log_config,
                                             **configs[image])
         if failed_images:
