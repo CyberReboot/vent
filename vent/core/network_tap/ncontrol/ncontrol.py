@@ -28,7 +28,8 @@ class NControlServer(object):
 
     def __init__(self, port=8080, host='0.0.0.0'):  # pragma: no cover
         d_client = docker.from_env()
-        d_client.images.pull('cyberreboot/vent-ncapture', tag='master')
+        #d_client.images.pull('cyberreboot/vent-ncapture', tag='master')
+        d_client.images.pull('jeffwang93/test_ncontrol', tag='latest')
         nf_inst = NControl()
         urls = nf_inst.urls()
         app = web.application(urls, globals())

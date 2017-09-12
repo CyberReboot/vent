@@ -1,6 +1,6 @@
 [info]
 name = NetworkTap
-groups = core,collection,files,network
+groups = core,collection,files,network,test
 
 [service]
 uri_prefix = http://
