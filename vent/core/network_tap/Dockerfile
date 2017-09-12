@@ -14,7 +14,7 @@ EXPOSE 8080
 
 LABEL vent="" \
       vent.name="network_tap" \
-      vent.groups="core,collection,files,network,test" \
+      vent.groups="core,collection,files,network" \
       vent.section="cyberreboot:vent:/vent/core/network_tap:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
