@@ -1,6 +1,6 @@
 [info]
 name = NetworkCapture
-groups = collection,hidden,network
+groups = collection,hidden,network,network_tap_child
 
 [docker]
 network_mode = host

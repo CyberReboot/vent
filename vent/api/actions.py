@@ -123,6 +123,14 @@ class Action:
                                         branch=branch,
                                         version=version,
                                         built=built)
+
+            # remove any dependant/child of the current container
+            child_name = str(name) + '_child'
+            for container in self.d_client.containers.list():
+                if child_name in container.attrs['Config']['Labels']\
+                                                ['vent.groups']:
+                    container.remove(force=True)
+
         except Exception as e:  # pragma: no cover
             self.logger.error("remove failed with error: " + str(e))
             status = (False, e)
