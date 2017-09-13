@@ -1233,9 +1233,16 @@ class Action:
         try:
             s_dict = {}
             if os.path.exists(self.startup_file):
-                with open(self.startup_file) as startup:
+                # rewrite the yml file to exclusively lowercase
+                with open(self.startup_file, 'r') as startup:
+                    vent_startup = startup.read()
+                with open(self.startup_file, 'w') as startup:
+                    for line in vent_startup:
+                        startup.write(line.lower())
+                with open(self.startup_file, 'r') as startup:
                     s_dict = yaml.safe_load(startup.read())
             tool_d = {}
+            self.logger.info("HEY: " + str(s_dict))
             extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
             for repo in s_dict:
                 self.p_helper.clone(repo)
