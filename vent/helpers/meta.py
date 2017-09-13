@@ -330,6 +330,10 @@ def Jobs():
                         json.dump(new_file, outfile)
                         outfile.write("\n")
 
+                # delete any containers with 'vent-plugin' in the groups
+                if 'vent-plugin' in container.attrs['Config']['Labels']:
+                    container.remove()
+
         # add extra one to account for file that just finished if the file was
         # just created since file_names is processed near the beginning
         if file_status == 'w' and len(file_names) == 1:
