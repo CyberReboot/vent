@@ -1242,7 +1242,6 @@ class Action:
                 with open(self.startup_file, 'r') as startup:
                     s_dict = yaml.safe_load(startup.read())
             tool_d = {}
-            self.logger.info("HEY: " + str(s_dict))
             extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
             for repo in s_dict:
                 self.p_helper.clone(repo)
