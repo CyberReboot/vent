@@ -682,8 +682,8 @@ class Action:
 
         # remove containers
         try:
-            c_list = self.d_client.containers.list(filters={'label': 'vent'},
-                                                   all=True)
+            c_list = set(self.d_client.containers.list(
+                            filters={'label': 'vent'}, all=True))
             for c in c_list:
                 c.remove(force=True)
         except Exception as e:  # pragma: no cover
@@ -691,8 +691,8 @@ class Action:
 
         # remove images
         try:
-            i_list = self.d_client.images.list(filters={'label': 'vent'},
-                                               all=True)
+            i_list = set(self.d_client.images.list(filters={'label': 'vent'},
+                                                   all=True))
             for i in i_list:
                 self.d_client.images.remove(image=i.id, force=True)
         except Exception as e:  # pragma: no cover
