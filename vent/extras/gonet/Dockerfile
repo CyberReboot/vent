@@ -5,8 +5,6 @@ COPY main.go /app/main.go
 WORKDIR /app
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gonet .
 
-LABEL vent=""
-
 # final stage
 FROM scratch
 MAINTAINER Charlie Lewis <clewis@iqt.org>
