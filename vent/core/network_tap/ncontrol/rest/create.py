@@ -74,7 +74,6 @@ class CreateR:
 
         # spin up container with payload specifications
         if c:
-            # TODO read from template
             tool_d = {"network_mode": "host",
                       "volumes_from": [socket.gethostname()]}
 
