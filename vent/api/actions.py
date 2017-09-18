@@ -689,6 +689,7 @@ class Action:
         except Exception as e:  # pragma: no cover
             error_message += "Error removing Vent containers: " + str(e) + "\n"
 
+        # remove images
         try:
             i_list = set(self.d_client.images.list(filters={'label': 'vent'},
                                                    all=True))
