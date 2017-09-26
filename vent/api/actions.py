@@ -28,6 +28,7 @@ class Action:
         self.d_client = self.plugin.d_client
         self.vent_config = self.plugin.path_dirs.cfg_file
         self.startup_file = self.plugin.path_dirs.startup_file
+        self.plugin_config_file = self.plugin.path_dirs.plugin_config_file
         self.p_helper = self.plugin.p_helper
         self.queue = Queue.Queue()
         self.logger = Logger(__name__)
@@ -72,6 +73,8 @@ class Action:
                                          remove_old=remove_old,
                                          disable_old=disable_old,
                                          core=is_core)
+
+           
             else:
                 self.logger.info("no new tools to add, exiting")
                 status = (True, "previously installed")
@@ -181,6 +184,7 @@ class Action:
                                 group_orders[container_groups[i]].append((int(priority), container))
                             containers_remaining.remove(container)
 
+                        
             self.logger.info("group orders: " + str(group_orders))
             self.logger.info("containers remaining: " +
                              str(containers_remaining))
@@ -496,6 +500,7 @@ class Action:
         self.logger.info("Starting: build")
         self.logger.info(args)
         status = (True, None)
+        self.fill_config(repo)
         try:
             options = ['image_name', 'path']
             s, template = self.p_helper.constraint_options(args, options)
@@ -1506,3 +1511,49 @@ class Action:
             if found:
                 break
         return (True, str(url))
+
+    def fill_config(self, repo):
+        """
+        Will take a yml located in ___.
+        """
+        self.logger.info("Starting: fill_config")
+        status = (True, None)
+        # grab the path to the tool's home inside the internal vent folder by
+        # reading the manifest
+        manifest = self.p_helper.manifest
+        manifest_template = Template(manifest)
+
+        # parse the yml file
+        if os.path.exists(self.plugin_config_file):
+            c_dict = {}
+            with open(self.plugin_config_file) as config_file:
+                c_dict = yaml.safe_load(config_file.read())
+
+        for section in manifest_template.sections()[1]:
+            try:
+            # first try here
+            # dont work with core tools
+                if 'core' not in manifest_template.option(section, 'groups')[1]:
+                    # grab the name and path of the tool
+                    plugin_name = manifest_template.option(section, 'name')[1]
+                    plugin_path = manifest_template.option(section, 'path')[1]
+                    
+                    # there needs to be a config file in the plugin's directory. 
+                    # The file name should be the directory name + .config. Needs to
+                    # be cfg format
+                    plugin_config_path = plugin_path + '/config/' + plugin_name + '.config'
+                    plugin_template = Template(plugin_config_path)
+
+                    # have yml and config open
+                    # try and catch will error check for me
+                    plugin_options = c_dict[plugin_name]
+                    for section in plugin_options:
+                        for option in plugin_options[section]:
+                            plugin_template.set_option(section, option,
+                                    plugin_options[section][option])
+                    plugin_template.write_config()
+
+            except Exception as e:  # pragma: no cover
+                self.logger.info("Hello: " + str(e))
+
+        self.logger.info("Success")
