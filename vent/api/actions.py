@@ -73,8 +73,6 @@ class Action:
                                          remove_old=remove_old,
                                          disable_old=disable_old,
                                          core=is_core)
-
-           
             else:
                 self.logger.info("no new tools to add, exiting")
                 status = (True, "previously installed")
@@ -184,7 +182,6 @@ class Action:
                                 group_orders[container_groups[i]].append((int(priority), container))
                             containers_remaining.remove(container)
 
-                        
             self.logger.info("group orders: " + str(group_orders))
             self.logger.info("containers remaining: " +
                              str(containers_remaining))

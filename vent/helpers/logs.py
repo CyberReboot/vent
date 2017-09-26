@@ -15,7 +15,7 @@ def Logger(name, **kargs):
         path_dirs.meta_dir, "vent.log"))
     handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - '
-                                  '%(lineno)-d - %(message)s')
+                                  '%(message)s')
     handler.setFormatter(formatter)
     if not len(logger.handlers):
         logger.addHandler(handler)
