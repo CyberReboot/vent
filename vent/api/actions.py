@@ -498,9 +498,9 @@ class Action:
         """ Build a set of tools that match the parameters given """
         args = locals()
         self.logger.info("Starting: build")
+        self.fill_config(repo)
         self.logger.info(args)
         status = (True, None)
-        self.fill_config(repo)
         try:
             options = ['image_name', 'path']
             s, template = self.p_helper.constraint_options(args, options)
@@ -1514,7 +1514,8 @@ class Action:
 
     def fill_config(self, repo):
         """
-        Will take a yml located in ___.
+        Will take a yml located in home directory titled '.plugin_config.yml'.
+        It'll then fill in, using the yml, the plugin's config file
         """
         self.logger.info("Starting: fill_config")
         status = (True, None)
@@ -1534,6 +1535,7 @@ class Action:
             # first try here
             # dont work with core tools
                 if 'core' not in manifest_template.option(section, 'groups')[1]:
+                    self.logger.info('CHECK HERE: ' + str(section))
                     # grab the name and path of the tool
                     plugin_name = manifest_template.option(section, 'name')[1]
                     plugin_path = manifest_template.option(section, 'path')[1]
