@@ -1532,25 +1532,32 @@ class Action:
             # first try here
             # dont work with core tools
                 if 'core' not in manifest_template.option(section, 'groups')[1]:
-                    self.logger.info('CHECK HERE: ' + str(section))
                     # grab the name and path of the tool
-                    plugin_name = manifest_template.option(section, 'name')[1]
                     plugin_path = manifest_template.option(section, 'path')[1]
+
+                    # check to see if the name is empty
+                    if manifest_template.option(section, 'name')[1]:
+                        plugin_name = manifest_template.option(section, 'name')[1]
+                    else:
+                        plugin_name = plugin_path.split('/')[-1]
                     
                     # there needs to be a config file in the plugin's directory. 
                     # The file name should be the directory name + .config. Needs to
                     # be cfg format
                     plugin_config_path = plugin_path + '/config/' + plugin_name + '.config'
-                    plugin_template = Template(plugin_config_path)
 
-                    # have yml and config open
-                    # try and catch will error check for me
-                    plugin_options = c_dict[plugin_name]
-                    for section in plugin_options:
-                        for option in plugin_options[section]:
-                            plugin_template.set_option(section, option,
-                                    plugin_options[section][option])
-                    plugin_template.write_config()
+                    self.logger.info('CHECK HERE: ' + str(plugin_config_path))
+                    plugin_template = Template(plugin_config_path)
+                    
+                    # check to see if the config path exists
+                    if os.path.exists(plugin_config_path):
+                        self.logger.info('SUCCESS')
+                        plugin_options = c_dict[plugin_name]
+                        for section in plugin_options:
+                            for option in plugin_options[section]:
+                                plugin_template.set_option(section, option,
+                                        plugin_options[section][option])
+                        plugin_template.write_config()
 
             except Exception as e:  # pragma: no cover
                 status = (False, e)
