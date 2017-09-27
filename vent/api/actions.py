@@ -1556,5 +1556,5 @@ class Action:
                 status = (False, e)
                 self.logger.info("Failed to fill_config: " + str(e))
 
-        self.logger.info("Status of fill_config: " + str(status[1]))
+        self.logger.info("Status of fill_config: " + str(status[0]))
         self.logger.info("Finished: fill_config")
