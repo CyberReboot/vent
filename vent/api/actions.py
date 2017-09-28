@@ -28,7 +28,6 @@ class Action:
         self.d_client = self.plugin.d_client
         self.vent_config = self.plugin.path_dirs.cfg_file
         self.startup_file = self.plugin.path_dirs.startup_file
-        self.plugin_config_file = self.plugin.path_dirs.plugin_config_file
         self.p_helper = self.plugin.p_helper
         self.queue = Queue.Queue()
         self.logger = Logger(__name__)
