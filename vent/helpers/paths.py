@@ -18,7 +18,7 @@ class PathDirs:
         self.cfg_file = base_dir + "vent.cfg"
         self.startup_file = os.path.join(os.path.expanduser('~'),
                                          '.vent_startup.yml')
-        self.plugin_config_file = os.path.join(os.path.expanduser('~'), 
+        self.plugin_config_file = os.path.join(os.path.expanduser('~'),
                                                '.plugin_config.yml')
 
         # make sure the paths exists, if not create them

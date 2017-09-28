@@ -978,7 +978,7 @@ class Plugin:
         self.logger.info("Starting: fill_config")
         status = (True, None)
 
-        try: 
+        try:
             # parse the yml file
             if os.path.exists(self.plugin_config_file):
                 c_dict = {}
