@@ -321,7 +321,7 @@ class Plugin:
         else:
             response = (False, status)
 
-        self.logger.info("Status of _build_tools: " + str(respose[0]))
+        self.logger.info("Status of _build_tools: " + str(response[0]))
         self.logger.info("Finished: _build_tools")
         return response
 
@@ -675,7 +675,7 @@ class Plugin:
             if multi_instance:
                 set_instances(template, section, 'no')
         template.set_option(section, 'running', 'no')
-        self.logger.info("Status of _build_image: " + str(status[0]))
+        self.logger.info("Status of _build_image: " + str(status))
         self.logger.info("Finished: _build_image:")
         return template
 
