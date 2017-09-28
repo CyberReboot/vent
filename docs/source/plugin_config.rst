@@ -1,5 +1,5 @@
-Filling in Custom Configurations of Plugins
-###########################################
+Custom Configurations of Plugins
+################################
 
 Say your custom plugin, called ``example_plugin``, has a 
 ``example_plugin.config`` file that it needs filled out before the plugin is 
