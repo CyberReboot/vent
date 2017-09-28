@@ -495,7 +495,6 @@ class Action:
         """ Build a set of tools that match the parameters given """
         args = locals()
         self.logger.info("Starting: build")
-        #self.fill_config(repo)
         self.logger.info(args)
         status = (True, None)
         try:
@@ -1508,60 +1507,3 @@ class Action:
             if found:
                 break
         return (True, str(url))
-
-    def fill_config(self, repo):
-        """
-        Will take a yml located in home directory titled '.plugin_config.yml'.
-        It'll then fill in, using the yml, the plugin's config file
-        """
-        self.logger.info("Starting: fill_config")
-        status = (True, None)
-        # grab the path to the tool's home inside the internal vent folder by
-        # reading the manifest
-        manifest = self.p_helper.manifest
-        manifest_template = Template(manifest)
-
-        # parse the yml file
-        if os.path.exists(self.plugin_config_file):
-            c_dict = {}
-            with open(self.plugin_config_file) as config_file:
-                c_dict = yaml.safe_load(config_file.read())
-
-        for section in manifest_template.sections()[1]:
-            try:
-            # first try here
-            # dont work with core tools
-                if 'core' not in manifest_template.option(section, 'groups')[1]:
-                    # grab the name and path of the tool
-                    plugin_path = manifest_template.option(section, 'path')[1]
-
-                    # check to see if the name is empty
-                    if manifest_template.option(section, 'name')[1]:
-                        plugin_name = manifest_template.option(section, 'name')[1]
-                    else:
-                        plugin_name = plugin_path.split('/')[-1]
-                    
-                    # there needs to be a config file in the plugin's directory. 
-                    # The file name should be the directory name + .config. Needs to
-                    # be cfg format
-                    plugin_config_path = plugin_path + '/config/' + plugin_name + '.config'
-
-                    self.logger.info('CHECK HERE: ' + str(plugin_config_path))
-                    plugin_template = Template(plugin_config_path)
-                    
-                    # check to see if the config path exists
-                    if os.path.exists(plugin_config_path):
-                        self.logger.info('SUCCESS')
-                        plugin_options = c_dict[plugin_name]
-                        for section in plugin_options:
-                            for option in plugin_options[section]:
-                                plugin_template.set_option(section, option,
-                                        plugin_options[section][option])
-                        plugin_template.write_config()
-
-            except Exception as e:  # pragma: no cover
-                status = (False, e)
-                self.logger.info("Failed to fill_config: " + str(e))
-
-        self.logger.info("Status of fill_config: " + str(status[0]))
-        self.logger.info("Finished: fill_config")
