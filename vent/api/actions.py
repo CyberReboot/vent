@@ -495,7 +495,7 @@ class Action:
         """ Build a set of tools that match the parameters given """
         args = locals()
         self.logger.info("Starting: build")
-        self.fill_config(repo)
+        #self.fill_config(repo)
         self.logger.info(args)
         status = (True, None)
         try:
