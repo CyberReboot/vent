@@ -516,6 +516,7 @@ class Plugin:
         """
         self.logger.info("Starting: _build_image")
         status = True
+
         def set_instances(template, section, built, image_id=None):
             """ Set build information for multiple instances """
             self.logger.info("entering set_instances")
