@@ -36,5 +36,5 @@ Using this ``.plugin_config.yml``, you can fill in multiple tools' config files
 at the same time. 
 
 If you make a change to your config files and want to rebuild the images using
-these new settings, *clean* and then *build* the plugin tools in the ``plugins`` 
+these new settings, **clean** and then **build** the plugin tools in the ``plugins`` 
 submenu. Vent will fill in the config files with the new values.
