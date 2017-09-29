@@ -60,6 +60,8 @@ See `this`_ for a crash course on npyscreen: the GUI used by Vent!
 
   build_plugin
 
+  plugin_config
+
   initialization
 
   troubleshoot
