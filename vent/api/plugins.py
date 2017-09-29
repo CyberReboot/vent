@@ -274,7 +274,7 @@ class Plugin:
             response (tuple(bool, str)): If True, then the function performed
             as expected and the str is a string
         """
-
+        self.logger.info("Starting: _build_tools")
         response = (True, None)
         # TODO implement features: wild, remove_old, disable_old, limit_groups
 
@@ -322,13 +322,16 @@ class Plugin:
                     self._build_manifest(matches)
         else:
             response = (False, status)
+
+        self.logger.info("Status of _build_tools: " + str(response[0]))
+        self.logger.info("Finished: _build_tools")
         return response
 
     def _build_manifest(self, matches):
         """
         Builds and writes the manifest for the tools being added
         """
-
+        self.logger.info("Starting: _build_manifest")
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
@@ -501,6 +504,7 @@ class Plugin:
 
         # reset to repo directory
         chdir(self.path)
+        self.logger.info("Finished: _build_manifest")
         return
 
     def _build_image(self,
@@ -512,6 +516,8 @@ class Plugin:
         """
         Build docker images and store results in template
         """
+        self.logger.info("Starting: _build_image")
+        status = True
 
         def set_instances(template, section, built, image_id=None):
             """ Set build information for multiple instances """
@@ -542,6 +548,7 @@ class Plugin:
                 multi_instance = False
         except Exception:
             multi_instance = False
+            status = False
         # !! TODO return status of whether it built successfully or not
         if self.build:
             cwd = getcwd()
@@ -601,6 +608,7 @@ class Plugin:
                     except Exception as e:  # pragma: no cover
                         self.logger.warning("Failed to pull image, going to"
                                             " build instead: " + str(e))
+                        status = False
                 if not pull:
                     # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
@@ -661,6 +669,7 @@ class Plugin:
                                     str(datetime.utcnow()) + " UTC")
                 if multi_instance:
                     set_instances(template, section, 'failed')
+                status = False
 
             chdir(cwd)
         else:
@@ -670,6 +679,8 @@ class Plugin:
             if multi_instance:
                 set_instances(template, section, 'no')
         template.set_option(section, 'running', 'no')
+        self.logger.info("Status of _build_image: " + str(status))
+        self.logger.info("Finished: _build_image:")
         return template
 
     def list_tools(self):
