@@ -2,6 +2,7 @@ import docker
 import json
 import os
 import shlex
+import yaml
 
 from datetime import datetime
 from os import chdir, getcwd
@@ -29,6 +30,7 @@ class Plugin:
         self.p_helper = PluginHelper(**kargs)
         self.d_client = docker.from_env()
         self.logger = Logger(__name__)
+        self.plugin_config_file = self.path_dirs.plugin_config_file
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
@@ -558,6 +560,8 @@ class Plugin:
                 groups = template.option(section, "groups")
                 repo = template.option(section, "repo")
                 t_type = template.option(section, "type")
+                path = template.option(section, "path")
+                self.fill_config(path[1])
                 if groups[1] == "" or not groups[0]:
                     groups = (True, "none")
                 if not name[0]:
@@ -976,3 +980,38 @@ class Plugin:
         if status[0]:
             status = (True, add_sections)
         return status
+
+    def fill_config(self, path):
+        """
+        Will take a yml located in home directory titled '.plugin_config.yml'.
+        It'll then fill in, using the yml, the plugin's config file
+        """
+        self.logger.info("Starting: fill_config")
+        status = (True, None)
+
+        try:
+            # parse the yml file
+            if os.path.exists(self.plugin_config_file):
+                c_dict = {}
+                with open(self.plugin_config_file) as config_file:
+                    c_dict = yaml.safe_load(config_file.read())
+
+            # assume the name of the plugin is its directory
+            plugin_name = path.split('/')[-1]
+            plugin_config_path = path + '/config/' + plugin_name + '.config'
+
+            if os.path.exists(plugin_config_path):
+                plugin_template = Template(plugin_config_path)
+                plugin_options = c_dict[plugin_name]
+                for section in plugin_options:
+                    for option in plugin_options[section]:
+                        plugin_template.set_option(section, option,
+                                plugin_options[section][option])
+                plugin_template.write_config()
+
+        except Exception as e:  # pragma: no cover
+            status = (False, e)
+            self.logger.info("Failed to fill_config: " + str(e))
+
+        self.logger.info("Status of fill_config: " + str(status[0]))
+        self.logger.info("Finished: fill_config")
