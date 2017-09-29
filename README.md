@@ -80,6 +80,9 @@ deploy the ISO as a VM or on bare metal.
 ```
 vent
 ```
+documentation
+====
+Want to read the documentation for vent?  Great! You can find it [here](https://vent.readthedocs.io/en/latest/?badge=latest)
 
 contributing to vent
 ====
