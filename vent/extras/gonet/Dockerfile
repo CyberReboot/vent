@@ -10,3 +10,5 @@ FROM scratch
 MAINTAINER Charlie Lewis <clewis@iqt.org>
 COPY --from=builder /app/gonet /gonet
 CMD ["/gonet"]
+
+LABEL vent=""

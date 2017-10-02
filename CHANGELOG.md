@@ -1,3 +1,24 @@
+# v0.4.5 (2017-09-22)
+
+improvements:
+- Vent can automatically start up tools and plugins through a
+  `vent_startup.yml`. Read more about it [here]
+  (http://vent.readthedocs.io/en/latest/initialization.html)
+- multiple instances of `rq_worker` can exist and have its own specific options
+- `network-tap` actions will prompt the user to install, start, and run the tool
+  if it isn't already
+
+bug fixes:
+- actions regarding multiple checked items in any of the `network-tap` options
+  now work correctly
+- the job counter on the main Vent menu is now correctly counting the number of
+  finished jobs 
+- factory reset of Vent can now deal with image dependencies and will delete
+  them correctly
+- the `gonet` image is now removed with a factory reset of Vent
+- all `ncapture` containers are removed if `network-tap` is removed
+  
+
 # v0.4.4 (2017-08-25)
 
 bug fixes:

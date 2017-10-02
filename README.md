@@ -11,26 +11,7 @@ vent
 [![Github Release Downloads](https://img.shields.io/github/downloads/cyberreboot/vent/total.svg?maxAge=2592000)](https://github.com/CyberReboot/vent/releases)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/vent-elasticsearch.svg)](https://hub.docker.com/u/cyberreboot)
 
-            '.,
-              'b      *
-               '$    #.
-                $:   #:
-                *#  @):
-                :@,@):   ,.**:'
-      ,         :@@*: ..**'
-       '#o.    .:(@'.@*"'
-          'bq,..:,@@*'   ,*
-          ,p$q8,:@)'  .p*'
-         '    '@@Pp@@*'
-               Y7'.'
-              :@):.
-             .:@:'.
-           .::(@:.
-                       _
-      __   _____ _ __ | |_
-      \ \ / / _ \ '_ \| __|
-       \ V /  __/ | | | |_
-        \_/ \___|_| |_|\__|
+![Vent Logo](/docs/img/vent-logo.png)
 
 overview
 ====
@@ -80,10 +61,13 @@ deploy the ISO as a VM or on bare metal.
 ```
 vent
 ```
+documentation
+====
+Want to read the documentation for vent?  Great! You can find it [here](https://vent.readthedocs.io/en/latest/?badge=latest)
 
 contributing to vent
 ====
 
 Want to contribute?  Awesome!  Issue a pull request or see more details [here](https://github.com/CyberReboot/vent/blob/master/CONTRIBUTING.md).
 
-See [this](https://media.readthedocs.org/pdf/npyscreen/latest/npyscreen.pdf) for a crash course on npyscreen: the GUI used by Vent!
+See [this](https://media.readthedocs.org/pdf/npyscreen/latest/npyscreen.pdf) for a crash course on npyscreen: the TUI used by Vent!

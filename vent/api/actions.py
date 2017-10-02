@@ -682,8 +682,8 @@ class Action:
 
         # remove containers
         try:
-            c_list = self.d_client.containers.list(filters={'label': 'vent'},
-                                                   all=True)
+            c_list = set(self.d_client.containers.list(
+                            filters={'label': 'vent'}, all=True))
             for c in c_list:
                 c.remove(force=True)
         except Exception as e:  # pragma: no cover
@@ -691,10 +691,15 @@ class Action:
 
         # remove images
         try:
-            i_list = self.d_client.images.list(filters={'label': 'vent'},
-                                               all=True)
+            i_list = set(self.d_client.images.list(filters={'label': 'vent'},
+                                                   all=True))
             for i in i_list:
-                self.d_client.images.remove(image=i.id, force=True)
+                # delete tagged images only because they are the parents for
+                # the untagged images. Remove the parents and the children get
+                # removed automatically
+                if i.attrs['RepoTags']:
+                    self.d_client.images.remove(image=i.id, force=True)
+
         except Exception as e:  # pragma: no cover
             error_message += "Error deleting Vent images: " + str(e) + "\n"
 

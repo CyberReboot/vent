@@ -2,6 +2,7 @@ import docker
 import json
 import os
 import shlex
+import yaml
 
 from datetime import datetime
 from os import chdir, getcwd
@@ -29,6 +30,7 @@ class Plugin:
         self.p_helper = PluginHelper(**kargs)
         self.d_client = docker.from_env()
         self.logger = Logger(__name__)
+        self.plugin_config_file = self.path_dirs.plugin_config_file
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
             branch="master", build=True, user=None, pw=None, groups=None,
@@ -272,7 +274,7 @@ class Plugin:
             response (tuple(bool, str)): If True, then the function performed
             as expected and the str is a string
         """
-
+        self.logger.info("Starting: _build_tools")
         response = (True, None)
         # TODO implement features: wild, remove_old, disable_old, limit_groups
 
@@ -320,13 +322,16 @@ class Plugin:
                     self._build_manifest(matches)
         else:
             response = (False, status)
+
+        self.logger.info("Status of _build_tools: " + str(response[0]))
+        self.logger.info("Finished: _build_tools")
         return response
 
     def _build_manifest(self, matches):
         """
         Builds and writes the manifest for the tools being added
         """
-
+        self.logger.info("Starting: _build_manifest")
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
@@ -499,6 +504,7 @@ class Plugin:
 
         # reset to repo directory
         chdir(self.path)
+        self.logger.info("Finished: _build_manifest")
         return
 
     def _build_image(self,
@@ -510,6 +516,8 @@ class Plugin:
         """
         Build docker images and store results in template
         """
+        self.logger.info("Starting: _build_image")
+        status = True
 
         def set_instances(template, section, built, image_id=None):
             """ Set build information for multiple instances """
@@ -540,6 +548,7 @@ class Plugin:
                 multi_instance = False
         except Exception:
             multi_instance = False
+            status = False
         # !! TODO return status of whether it built successfully or not
         if self.build:
             cwd = getcwd()
@@ -551,6 +560,8 @@ class Plugin:
                 groups = template.option(section, "groups")
                 repo = template.option(section, "repo")
                 t_type = template.option(section, "type")
+                path = template.option(section, "path")
+                self.fill_config(path[1])
                 if groups[1] == "" or not groups[0]:
                     groups = (True, "none")
                 if not name[0]:
@@ -597,6 +608,7 @@ class Plugin:
                     except Exception as e:  # pragma: no cover
                         self.logger.warning("Failed to pull image, going to"
                                             " build instead: " + str(e))
+                        status = False
                 if not pull:
                     # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
@@ -657,6 +669,7 @@ class Plugin:
                                     str(datetime.utcnow()) + " UTC")
                 if multi_instance:
                     set_instances(template, section, 'failed')
+                status = False
 
             chdir(cwd)
         else:
@@ -666,6 +679,8 @@ class Plugin:
             if multi_instance:
                 set_instances(template, section, 'no')
         template.set_option(section, 'running', 'no')
+        self.logger.info("Status of _build_image: " + str(status))
+        self.logger.info("Finished: _build_image:")
         return template
 
     def list_tools(self):
@@ -965,3 +980,38 @@ class Plugin:
         if status[0]:
             status = (True, add_sections)
         return status
+
+    def fill_config(self, path):
+        """
+        Will take a yml located in home directory titled '.plugin_config.yml'.
+        It'll then fill in, using the yml, the plugin's config file
+        """
+        self.logger.info("Starting: fill_config")
+        status = (True, None)
+
+        try:
+            # parse the yml file
+            if os.path.exists(self.plugin_config_file):
+                c_dict = {}
+                with open(self.plugin_config_file) as config_file:
+                    c_dict = yaml.safe_load(config_file.read())
+
+            # assume the name of the plugin is its directory
+            plugin_name = path.split('/')[-1]
+            plugin_config_path = path + '/config/' + plugin_name + '.config'
+
+            if os.path.exists(plugin_config_path):
+                plugin_template = Template(plugin_config_path)
+                plugin_options = c_dict[plugin_name]
+                for section in plugin_options:
+                    for option in plugin_options[section]:
+                        plugin_template.set_option(section, option,
+                                plugin_options[section][option])
+                plugin_template.write_config()
+
+        except Exception as e:  # pragma: no cover
+            status = (False, e)
+            self.logger.info("Failed to fill_config: " + str(e))
+
+        self.logger.info("Status of fill_config: " + str(status[0]))
+        self.logger.info("Finished: fill_config")
