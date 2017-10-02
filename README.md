@@ -11,26 +11,7 @@ vent
 [![Github Release Downloads](https://img.shields.io/github/downloads/cyberreboot/vent/total.svg?maxAge=2592000)](https://github.com/CyberReboot/vent/releases)
 [![Docker Hub Downloads](https://img.shields.io/docker/pulls/cyberreboot/vent-elasticsearch.svg)](https://hub.docker.com/u/cyberreboot)
 
-            '.,
-              'b      *
-               '$    #.
-                $:   #:
-                *#  @):
-                :@,@):   ,.**:'
-      ,         :@@*: ..**'
-       '#o.    .:(@'.@*"'
-          'bq,..:,@@*'   ,*
-          ,p$q8,:@)'  .p*'
-         '    '@@Pp@@*'
-               Y7'.'
-              :@):.
-             .:@:'.
-           .::(@:.
-                       _
-      __   _____ _ __ | |_
-      \ \ / / _ \ '_ \| __|
-       \ V /  __/ | | | |_
-        \_/ \___|_| |_|\__|
+![Vent Logo](/docs/img/vent-logo.png)
 
 overview
 ====
