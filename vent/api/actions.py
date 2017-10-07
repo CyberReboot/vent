@@ -648,7 +648,8 @@ class Action:
                             vcfg_template.add_section(section)
                         except Exception as e:  # pragma: no cover
                             # okay if error because of already existing
-                            self.logger.error("Failed adding section " + str(e))
+                            self.logger.error("Failed adding section " +
+                                              str(e))
                             pass
                         vcfg_template.set_option(vals[0], vals[1])
                 vcfg_template.write_config()

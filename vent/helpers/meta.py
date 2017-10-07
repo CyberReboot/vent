@@ -17,6 +17,7 @@ from vent.helpers.logs import Logger
 
 logger = Logger(__name__)
 
+
 def Version():
     """ Get Vent version """
     version = ''
@@ -198,7 +199,8 @@ def GpuUsage(**kargs):
             ip_addr = ip_addr.split('\n')[1].split()[1]
             host = ip_addr
         except Exception as e:  # pragma: no cover
-            logger.error("Something with the ip addresses went wrong " + str(e))
+            logger.error("Something with the ip addresses"
+                         "went wrong " + str(e))
             pass
 
     # have to get the info separately to determine how much memory is availabe

@@ -9,6 +9,7 @@ import uuid
 from elasticsearch import Elasticsearch
 from vent.helpers.logs import Logger
 
+
 class RmqEs():
     """
     opens a connection to rabbitmq and receives messages based on the provided
