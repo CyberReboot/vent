@@ -152,7 +152,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     status = (True, None)
     images = []
     configs = {}
-    logger = Logger()
+    logger = Logger(__name__)
     try:
         d_client = docker.from_env()
 
