@@ -650,7 +650,6 @@ class Action:
                             # okay if error because of already existing
                             self.logger.error("Failed adding section " +
                                               str(e))
-                            pass
                         vcfg_template.set_option(vals[0], vals[1])
                 vcfg_template.write_config()
                 added_str += 'Restored: vent configuration file'

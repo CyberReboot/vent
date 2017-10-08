@@ -329,7 +329,6 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                                 except Exception as e:  # pragma no cover
                                     logger.error("Default gateway "
                                                  "went wrong " + str(e))
-                                    pass
                             nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:

@@ -85,7 +85,6 @@ class RmqEs():
                                    body=doc)
             except Exception as e:  # pragma: no cover
                 self.logger.error("Connection failed " + str(e))
-                pass
 
     def start(self):
         """ start the channel listener and start consuming messages """

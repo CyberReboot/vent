@@ -45,7 +45,6 @@ def Docker():
         docker_info['server'] = d_client.version()
     except Exception as e:  # pragma: no cover
         logger.error("Can't get docker info " + str(e))
-        pass
 
     # get operating system
     system = System()
@@ -84,7 +83,6 @@ def Containers(vent=True, running=True):
             containers.append((container.name, container.status))
     except Exception as e:  # pragma: no cover
         logger.error("Docker problem " + str(e))
-        pass
 
     return containers
 
@@ -97,7 +95,6 @@ def Cpu():
         cpu = str(multiprocessing.cpu_count())
     except Exception as e:  # pragma: no cover
         logger.error("Can't access CPU count' " + str(e))
-        pass
     return cpu
 
 
@@ -117,7 +114,6 @@ def Gpu(pull=False):
                 nvidia_image = d_client.images.list(name=image)
             except Exception as e:  # pragma: no cover
                 logger.error("Something with the GPU went wrong " + str(e))
-                pass
 
         if len(nvidia_image) > 0:
             cmd = 'nvidia-docker run --rm ' + image + ' nvidia-smi -L'
@@ -172,7 +168,6 @@ def GpuUsage(**kargs):
                     gpu_status['vent_usage']['mem_mb'][device] += int(container.attrs['Config']['Labels']['vent.gpu.mem_mb'])
     except Exception as e:  # pragma: no cover
         logger.error("Could not get running jobs " + str(e))
-        pass
 
     port = '3476'
     # default docker gateway
@@ -201,7 +196,6 @@ def GpuUsage(**kargs):
         except Exception as e:  # pragma: no cover
             logger.error("Something with the ip addresses"
                          "went wrong " + str(e))
-            pass
 
     # have to get the info separately to determine how much memory is availabe
     nd_url = 'http://' + host + ':' + port + '/v1.0/gpu/info/json'
@@ -256,7 +250,6 @@ def Images(vent=True):
             images.append((image.tags[0], image.short_id))
     except Exception as e:  # pragma: no cover
         logger.error("Something with the Images went wrong " + str(e))
-        pass
 
     return images
 
@@ -282,7 +275,6 @@ def Jobs():
         jobs[0] = len(files)
     except Exception as e:  # pragma: no cover
         logger.error("Could not get running jobs " + str(e))
-        pass
 
     # get finished jobs
     try:
@@ -358,7 +350,6 @@ def Jobs():
 
     except Exception as e:  # pragma: no cover
         logger.error("Could not get finished jobs " + str(e))
-        pass
 
     return tuple(jobs)
 
@@ -460,8 +451,7 @@ def Services(core, vent=True, external=False, **kargs):
                 except Exception:  # pragma: no cover
                     p = None
     except Exception as e:  # pragma: no cover
-        logger.error("Could not get ecternal services" + str(e))
-        pass
+        logger.error("Could not get external services" + str(e))
     return services
 
 
@@ -472,7 +462,6 @@ def Timestamp():
         timestamp = str(datetime.datetime.now())+" UTC"
     except Exception as e:  # pragma: no cover
         logger.error("Could not get current time " + str(e))
-        pass
     return timestamp
 
 
@@ -483,7 +472,6 @@ def Uptime():
         uptime = str(check_output(["uptime"], close_fds=True))[1:]
     except Exception as e:  # pragma: no cover
         logger.error("Could not get current uptime " + str(e))
-        pass
     return uptime
 
 
