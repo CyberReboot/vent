@@ -3,7 +3,6 @@ import docker
 import redis
 import socket
 import web
-import uuid
 
 
 class CreateR:
@@ -54,11 +53,14 @@ class CreateR:
             return 'payload missing iters'
 
         # connect to redis
-        r = None
-        try:
-            r = redis.StrictRedis(host='redis', port=6379, db=0)
-        except Exception as e:  # pragma: no cover
-            return (False, 'unable to connect to redis because: ' + str(e))
+        if 'metadata' in payload:
+            r = None
+            try:
+                r = redis.StrictRedis(host='redis', port=6379, db=0)
+            except Exception as e:  # pragma: no cover
+                return (False, 'unable to connect to redis because: ' + str(e))
+            if r:
+                r.hmset(payload['id'], ast.literal_eval(payload['metadata']))
 
         # connect to docker
         c = None
@@ -66,11 +68,6 @@ class CreateR:
             c = docker.from_env()
         except Exception as e:  # pragma: no cover
             return (False, 'unable to connect to docker because: ' + str(e))
-
-        # store payload in redis
-        if r:
-            uid = str(uuid.uuid4())
-            # !! TODO
 
         # spin up container with payload specifications
         if c:
