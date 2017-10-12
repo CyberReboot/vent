@@ -9,7 +9,7 @@ uri_postfix = /_plugin/head
 [settings]
 #public_ip = 192.168.99.100
 instances = 1
-locally_active = on
+#locally_active = on
 #external_host = 0.0.0.0
 priority = 10,1
 
