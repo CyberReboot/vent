@@ -4,7 +4,6 @@ groups = core
 
 [settings]
 instances = 1
-locally_active = on
 priority = 20
 
 [docker]

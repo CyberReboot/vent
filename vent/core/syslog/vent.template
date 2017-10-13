@@ -6,10 +6,7 @@ groups = core,logging,syslog
 uri_prefix = tcp://
 
 [settings]
-#public_ip = 192.168.99.100
 instances = 1
-locally_active = on
-#external_host = 0.0.0.0
 priority = 2,1,2
 
 [docker]
