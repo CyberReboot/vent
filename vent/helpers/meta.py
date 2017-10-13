@@ -13,6 +13,9 @@ from subprocess import check_output, Popen, PIPE
 
 from vent.api.templates import Template
 from vent.helpers.paths import PathDirs
+from vent.helpers.logs import Logger
+
+logger = Logger(__name__)
 
 
 def Version():
@@ -41,7 +44,7 @@ def Docker():
         d_client = docker.from_env()
         docker_info['server'] = d_client.version()
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Can't get docker info " + str(e))
 
     # get operating system
     system = System()
@@ -79,7 +82,7 @@ def Containers(vent=True, running=True):
         for container in c:
             containers.append((container.name, container.status))
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Docker problem " + str(e))
 
     return containers
 
@@ -87,16 +90,18 @@ def Containers(vent=True, running=True):
 def Cpu():
     """ Get number of available CPUs """
     cpu = "Unknown"
+
     try:
         cpu = str(multiprocessing.cpu_count())
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Can't access CPU count' " + str(e))
     return cpu
 
 
 def Gpu(pull=False):
     """ Check for support of GPUs, and return what's available """
     gpu = (False, "")
+
     try:
         image = 'nvidia/cuda:8.0-runtime'
         image_name, tag = image.split(":")
@@ -108,7 +113,7 @@ def Gpu(pull=False):
                 d_client.images.pull(image_name, tag=tag)
                 nvidia_image = d_client.images.list(name=image)
             except Exception as e:  # pragma: no cover
-                pass
+                logger.error("Something with the GPU went wrong " + str(e))
 
         if len(nvidia_image) > 0:
             cmd = 'nvidia-docker run --rm ' + image + ' nvidia-smi -L'
@@ -162,7 +167,7 @@ def GpuUsage(**kargs):
                         gpu_status['vent_usage']['mem_mb'][device] = 0
                     gpu_status['vent_usage']['mem_mb'][device] += int(container.attrs['Config']['Labels']['vent.gpu.mem_mb'])
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Could not get running jobs " + str(e))
 
     port = '3476'
     # default docker gateway
@@ -189,7 +194,8 @@ def GpuUsage(**kargs):
             ip_addr = ip_addr.split('\n')[1].split()[1]
             host = ip_addr
         except Exception as e:  # pragma: no cover
-            pass
+            logger.error("Something with the ip addresses"
+                         "went wrong " + str(e))
 
     # have to get the info separately to determine how much memory is availabe
     nd_url = 'http://' + host + ':' + port + '/v1.0/gpu/info/json'
@@ -232,7 +238,6 @@ def GpuUsage(**kargs):
 def Images(vent=True):
     """ Get images that are build, by default limit to vent images """
     images = []
-
     # TODO needs to also check images in the manifest that couldn't have the
     #      label added
     try:
@@ -244,7 +249,7 @@ def Images(vent=True):
         for image in i:
             images.append((image.tags[0], image.short_id))
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Something with the Images went wrong " + str(e))
 
     return images
 
@@ -269,7 +274,7 @@ def Jobs():
                     files.append(container.attrs['Config']['Labels']['file'])
         jobs[0] = len(files)
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Could not get running jobs " + str(e))
 
     # get finished jobs
     try:
@@ -344,7 +349,7 @@ def Jobs():
         jobs[3] = jobs[3] - jobs[1]
 
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Could not get finished jobs " + str(e))
 
     return tuple(jobs)
 
@@ -446,7 +451,7 @@ def Services(core, vent=True, external=False, **kargs):
                 except Exception:  # pragma: no cover
                     p = None
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Could not get external services" + str(e))
     return services
 
 
@@ -456,7 +461,7 @@ def Timestamp():
     try:
         timestamp = str(datetime.datetime.now())+" UTC"
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Could not get current time " + str(e))
     return timestamp
 
 
@@ -466,7 +471,7 @@ def Uptime():
     try:
         uptime = str(check_output(["uptime"], close_fds=True))[1:]
     except Exception as e:  # pragma: no cover
-        pass
+        logger.error("Could not get current uptime " + str(e))
     return uptime
 
 
