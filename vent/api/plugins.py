@@ -998,6 +998,8 @@ class Plugin:
 
             # assume the name of the plugin is its directory
             plugin_name = path.split('/')[-1]
+            if plugin_name == '':
+                plugin_name = path.split('/')[-2]
             plugin_config_path = path + '/config/' + plugin_name + '.config'
 
             if os.path.exists(plugin_config_path):
