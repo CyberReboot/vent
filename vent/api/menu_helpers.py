@@ -394,7 +394,7 @@ class MenuHelper:
                             else:
                                 all_tools['built'].append(image.attrs['Config']['Labels']['vent.name'])
                 except Exception as err:  # pragma: no cover
-                    pass
+                    self.logger.error("image_check went wrong " + str(err))
             containers = d_client.containers.list(filters={'label': 'vent'})
             for container in containers:
                 try:
@@ -413,7 +413,7 @@ class MenuHelper:
                             else:
                                 all_tools['running'].append(container.attrs['Config']['Labels']['vent.name'])
                 except Exception as err:  # pragma: no cover
-                    pass
+                    self.logger.error("core_check went wrong " + str(err))
         except Exception as e:  # pragma: no cover
-            pass
+            self.logger.error("Something with docker went wrong " + str(e))
         return (len(repos), all_tools)

@@ -7,6 +7,7 @@ import time
 import uuid
 
 from elasticsearch import Elasticsearch
+from vent.helpers.logs import Logger
 
 
 class RmqEs():
@@ -29,6 +30,7 @@ class RmqEs():
         """ initialize host information """
         self.es_host = es_host
         self.rmq_host = rmq_host
+        self.logger = Logger(__name__)
 
     def connections(self, wait):
         """
@@ -82,7 +84,7 @@ class RmqEs():
                                    str(uuid.uuid4()),
                                    body=doc)
             except Exception as e:  # pragma: no cover
-                pass
+                self.logger.error("Connection failed " + str(e))
 
     def start(self):
         """ start the channel listener and start consuming messages """

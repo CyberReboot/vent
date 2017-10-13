@@ -147,11 +147,12 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     from rq import Queue
     from subprocess import check_output, Popen, PIPE
     from string import punctuation
+    from vent.helpers.logs import Logger
 
     status = (True, None)
     images = []
     configs = {}
-
+    logger = Logger(__name__)
     try:
         d_client = docker.from_env()
 
@@ -326,7 +327,8 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                                     route.wait()
                                     host = h.strip()
                                 except Exception as e:  # pragma no cover
-                                    pass
+                                    logger.error("Default gateway "
+                                                 "went wrong " + str(e))
                             nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:
