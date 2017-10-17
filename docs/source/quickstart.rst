@@ -17,6 +17,9 @@ Getting Vent set up is quick and easy.
        docker pull cyberreboot/vent
        docker run -it vent_image_id
 
+  In order to avoid having to use sudo or run docker as root, adding your current
+  user to the docker group is the recommended way to work.
+
    - Using Git::
 
        git clone https://github.com/CyberReboot/vent
