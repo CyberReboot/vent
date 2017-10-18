@@ -60,10 +60,20 @@ class CreateR:
             except Exception as e:  # pragma: no cover
                 return (False, 'unable to connect to redis because: ' + str(e))
             if r:
+                metadata = {}
                 try:
-                    r.hmset(payload['id'], payload['metadata'])
+                    metadata = ast.literal_eval(payload['metadata'])
                 except Exception as e:  # pragma: no cover
-                    return (False, 'unable to store contents of the payload in redis because: ' + str(e))
+                    return (False, 'unable to convert metadata [ ' +
+                            payload['metadata'] + ' ] into a dict because: ' +
+                            str(e))
+                try:
+                    r.hmset(payload['id'], metadata)
+                except Exception as e:  # pragma: no cover
+                    return (False,
+                            'unable to store contents of the payload [ ' +
+                            metadata + ' ] in redis because: ' +
+                            str(e))
 
         # connect to docker
         c = None
