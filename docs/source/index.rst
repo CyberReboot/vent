@@ -5,7 +5,7 @@
 
 Overview
 ========
-Vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, Vent serves as a user-friendly platform to build custom ``plugins`` on to perform user-defined processing on incoming network data. Vent supports any filetype, but only processes filetypes based on the types of plugins installed for that instance of vent.
+Vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, Vent serves as a user-friendly platform to build custom ``plugins`` on to perform user-defined processing on incoming network data. Vent is filetype-agnostic in that the plugins installed within your specific vent instance determine what type of files your instance supports.
 
 Simply create your ``plugins``, point Vent to them, install them, and drop a file in Vent to begin processing!
 
