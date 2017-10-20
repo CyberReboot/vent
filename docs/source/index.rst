@@ -27,11 +27,18 @@ There's two ways to get Vent up and running on your machine:
 
     $ pip install vent
 
-2. Building from source (make is required)::
+2. Clone the repo::
 
     $ git clone --recursive https://github.com/CyberReboot/vent.git
     $ cd vent
-    $ make # (sudo may be required to install the vent command in the system bin path)
+
+3. Build from source (for sudo/root privileged users)::
+
+    $ make 
+
+   Users with limited permissions or require user-local installation can use the following::
+
+    $ sudo env "PATH=$PATH" make
 
 .. note:: If you already have ``docker-py`` installed on your machine, you may need to ``pip uninstall docker-py`` first. ``vent`` will install ``docker-py`` as part of the installation process. However, there are known incompatibilities of ``docker-py`` with older versions.
 
