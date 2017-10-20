@@ -5,7 +5,7 @@
 
 Overview
 ========
-Vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, Vent serves as a user-friendly platform to build custom ``plugins`` on to perform user-defined processing on incoming network data. Vent supports any filetype, but only processes filetypes based on the types of plugins installed for that instance of vent.
+Vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, Vent serves as a user-friendly platform to build custom ``plugins`` on to perform user-defined processing on incoming network data. Vent is filetype-agnostic in that the plugins installed within your specific vent instance determine what type of files your instance supports.
 
 Simply create your ``plugins``, point Vent to them, install them, and drop a file in Vent to begin processing!
 
@@ -27,11 +27,18 @@ There's two ways to get Vent up and running on your machine:
 
     $ pip install vent
 
-2. Building from source (make is required)::
+2. Clone the repo::
 
     $ git clone --recursive https://github.com/CyberReboot/vent.git
     $ cd vent
-    $ make # (sudo may be required to install the vent command in the system bin path)
+
+3. Build from source (for sudo/root privileged users)::
+
+    $ make 
+
+   Users with limited permissions or require user-local installation can use the following::
+
+    $ sudo env "PATH=$PATH" make
 
 .. note:: If you already have ``docker-py`` installed on your machine, you may need to ``pip uninstall docker-py`` first. ``vent`` will install ``docker-py`` as part of the installation process. However, there are known incompatibilities of ``docker-py`` with older versions.
 
