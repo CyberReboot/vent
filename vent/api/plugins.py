@@ -1001,8 +1001,8 @@ class Plugin:
             for tool in check_c_dict:
                 for section in check_c_dict[tool]:
                     for key in check_c_dict[tool][section]:
-                        if check_c_dict[tool][section][key] in os.environ:
-                            c_dict[tool][section][key] = os.getenv(check_c_dict[tool][section][key])
+                        if key in os.environ:
+                            c_dict[tool][section][key] = os.getenv(key)
 
             # assume the name of the plugin is its directory
             plugin_name = path.split('/')[-1]
