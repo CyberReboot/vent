@@ -426,12 +426,13 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
                     print(str(configs[image]))
-                    d_client.containers.run(image=image,
-                                            command=path_cmd[image],
-                                            labels=labels,
-                                            detach=True,
-                                            log_config=log_config,
-                                            **configs[image])
+                    c = d_client.containers.run(image=image,
+                                                command=path_cmd[image],
+                                                labels=labels,
+                                                detach=True,
+                                                log_config=log_config,
+                                                **configs[image])
+                    print("Plugin container attrs: "+str(c.attrs))
         if failed_images:
             status = (False, failed_images)
         else:
