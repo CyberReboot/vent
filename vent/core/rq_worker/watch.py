@@ -19,21 +19,17 @@ def gpu_queue(options):
     gpu_options = configs['gpu_options']
     devices = []
 
-    print(str(configs['devices']))
     # device specified, remove all other devices
     if 'device' in gpu_options:
         dev = '/dev/nvidia' + gpu_options['device'] + ':/dev/nvidia'
         dev += gpu_options['device'] + ':rwm'
         if 'devices' in configs:
             d = list(configs['devices'])
-            print(str(d))
             for device in d:
-                print(dev + " compared to " + device)
                 if any(str.isdigit(str(char)) for char in device):
                     if dev == device:
                         devices.append(device)
                     else:
-                        print(dev + " doesn't match, removing: " + device)
                         configs['devices'].remove(device)
     else:
         d = configs['devices']
@@ -120,7 +116,6 @@ def gpu_queue(options):
         del configs['gpu_options']
         params = options.copy()
         params.update(configs)
-        print(str(params))
         d_client.containers.run(**params)
         status = (True, None)
     except Exception as e:  # pragma: no cover
@@ -425,14 +420,12 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                 else:
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
-                    print(str(configs[image]))
-                    c = d_client.containers.run(image=image,
-                                                command=path_cmd[image],
-                                                labels=labels,
-                                                detach=True,
-                                                log_config=log_config,
-                                                **configs[image])
-                    print("Plugin container attrs: "+str(c.attrs))
+                    d_client.containers.run(image=image,
+                                            command=path_cmd[image],
+                                            labels=labels,
+                                            detach=True,
+                                            log_config=log_config,
+                                            **configs[image])
         if failed_images:
             status = (False, failed_images)
         else:
@@ -442,6 +435,5 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
         print("Failed to process job: " + str(e))
 
-    print(str(configs))
     print(str(status))
     return status
