@@ -996,6 +996,14 @@ class Plugin:
                 with open(self.plugin_config_file) as config_file:
                     c_dict = yaml.safe_load(config_file.read())
 
+            # check for environment variable overrides
+            check_c_dict = c_dict.copy()
+            for tool in check_c_dict:
+                for section in check_c_dict[tool]:
+                    for key in check_c_dict[tool][section]:
+                        if check_c_dict[tool][section][key] in os.environ:
+                            c_dict[tool][section][key] = os.getenv(check_c_dict[tool][section][key])
+
             # assume the name of the plugin is its directory
             plugin_name = path.split('/')[-1]
             if plugin_name == '':
