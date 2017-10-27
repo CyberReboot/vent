@@ -27,7 +27,7 @@ A configuration file used to customize Vent and its processes.
 -main
 ^^^^^
   *files*
-    The directory of ``File Drop``. For example, if ``files = /tmp/vent_files``,
+    The directory of ``File Drop``. For example, if ``files = /opt/vent_files``,
     Vent will monitor for any new files in that directory.
 
   *service_uri*

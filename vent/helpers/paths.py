@@ -76,7 +76,7 @@ class PathDirs:
             default_file_dir = os.path.join(os.path.expanduser("~"),
                                             "vent_files")
         else:
-            default_file_dir = "/tmp/vent_files"
+            default_file_dir = "/opt/vent_files"
         status = self.ensure_dir(default_file_dir)
         config = Template(template=self.cfg_file)
         sections = {'main': {'files': default_file_dir},

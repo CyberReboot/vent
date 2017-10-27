@@ -120,13 +120,13 @@ def test_jobs():
     assert isinstance(status, tuple)
     assert status[0]
     # run test job
-    with open('/tmp/vent_files/foo.matrix', 'w') as f:
+    with open('/opt/vent_files/foo.matrix', 'w') as f:
         f.write('24,23\n10,22')
     pcap = 'https://s3.amazonaws.com/tcpreplay-pcap-files/test.pcap'
     r = requests.get(pcap, stream=True)
 
     if r.status_code == 200:
-        with open('/tmp/vent_files/foo.pcap', 'wb') as f:
+        with open('/opt/vent_files/foo.pcap', 'wb') as f:
             r.raw.decode_content = True
             shutil.copyfileobj(r.raw, f)
     services = Services(True)
