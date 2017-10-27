@@ -4,15 +4,20 @@ def gpu_queue(options):
     """
     import docker
     import json
+    import os
     import time
 
     from vent.helpers.meta import GpuUsage
 
     status = (False, None)
+    if os.path.isdir("/root/.vent"):
+        path_dir = "/root/.vent"
+    else:
+        path_dir = "/vent"
 
     print("gpu queue", str(options))
-    print("gpu queue", str(GpuUsage(base_dir="/vent/",
-                                    meta_dir="/vent")))
+    print("gpu queue", str(GpuUsage(base_dir=path_dir+"/",
+                                    meta_dir=path_dir)))
 
     options = json.loads(options)
     configs = options['configs']
@@ -57,7 +62,7 @@ def gpu_queue(options):
     print("dedicated: ", dedicated)
     device = None
     while not device:
-        usage = GpuUsage(base_dir="/vent/", meta_dir="/vent")
+        usage = GpuUsage(base_dir=path_dir+"/", meta_dir=path_dir)
 
         if usage[0]:
             usage = usage[1]
@@ -148,6 +153,10 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     images = []
     configs = {}
     logger = Logger(__name__)
+
+    if os.path.isdir("/root/.vent"):
+        template_path = "/root/.vent/"
+
     try:
         d_client = docker.from_env()
 
