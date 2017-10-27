@@ -898,8 +898,6 @@ class Action:
                     else:
                         return_str += option + " = "
                         return_str += template_dict[section][option] + "\n"
-                    return_str += option + " = "
-                    return_str += str(template_dict[section][option]) + "\n"
                 return_str += "\n"
             # only one newline at end of file
             status = (True, return_str[:-1])
