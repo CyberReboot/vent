@@ -6,7 +6,7 @@ import requests
 import shlex
 
 from ast import literal_eval
-from os import chdir, getcwd, walk
+from os import chdir, environ, getcwd, walk
 from os.path import expanduser, join
 from subprocess import check_output, STDOUT
 
@@ -407,12 +407,22 @@ class PluginHelper:
                     tool_d[c_name]['log_config'] = log_config
                 # mount necessary directories
                 if 'files' in s[section]['groups']:
-                    if 'volumes' in tool_d[c_name]:
-                        tool_d[c_name]['volumes'][self.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
+                    # check if running in a docker container
+                    if 'VENT_CONTAINERIZED' in environ and environ['VENT_CONTAINERIZED'] == 'true':
+                        if 'volumes_from' in tool_d[c_name]:
+                            tool_d[c_name]['volumes_from'].append(environ['HOSTNAME'])
+                        else:
+                            tool_d[c_name]['volumes_from'] = [environ['HOSTNAME']]
                     else:
-                        tool_d[c_name]['volumes'] = {self.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
+                        if 'volumes' in tool_d[c_name]:
+                            tool_d[c_name]['volumes'][self.path_dirs.base_dir[:-1]] = {'bind': '/vent', 'mode': 'ro'}
+                        else:
+                            tool_d[c_name]['volumes'] = {self.path_dirs.base_dir[:-1]: {'bind': '/vent', 'mode': 'ro'}}
                     if files[0]:
-                        tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'rw'}
+                        if 'volumes' in tool_d[c_name]:
+                            tool_d[c_name]['volumes'][files[1]] = {'bind': '/files', 'mode': 'rw'}
+                        else:
+                            tool_d[c_name]['volumes'] = {files[1]: {'bind': '/files', 'mode': 'rw'}}
             else:
                 tool_d[c_name]['log_config'] = log_config
 

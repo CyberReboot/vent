@@ -10,5 +10,10 @@ RUN apk add --update \
 
 RUN pip install git+git://github.com/cyberreboot/vent.git@master
 
+RUN mkdir /root/.vent
+VOLUME ["/root/.vent"]
+
+ENV VENT_CONTAINERIZED true
+
 ENTRYPOINT ["vent"]
 CMD [""]
