@@ -22,7 +22,7 @@ class CreateR:
         # verify payload is in the correct format
         data = web.data()
         # default to no filter
-        payload = {'filter':''}
+        payload = {'filter': ''}
         try:
             payload = ast.literal_eval(data)
             if 'filter' not in payload:
