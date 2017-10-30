@@ -2,6 +2,7 @@ import ast
 import docker
 import redis
 import socket
+import urlparse
 import web
 
 
@@ -20,12 +21,17 @@ class CreateR:
 
         # verify payload is in the correct format
         data = web.data()
-        payload = {}
+        # default to no filter
+        payload = {'filter': ''}
         try:
             payload = ast.literal_eval(data)
+            if 'filter' not in payload:
+                payload['filter'] = ''
         except Exception as e:  # pragma: no cover
-            # !! TODO parse out url parms...
-            return 'malformed payload: ' + str(e)
+            # check if url encoded
+            data_dict = urlparse.parse_qs(data)
+            for key in data_dict:
+                payload[key] = data_dict[key][0]
 
         # payload should have the following fields:
         # - id
@@ -47,8 +53,6 @@ class CreateR:
             return 'payload missing id'
         if 'interval' not in payload:
             return 'payload missing interval'
-        if 'filter' not in payload:
-            return 'payload missing filter'
         if 'iters' not in payload:
             return 'payload missing iters'
 
@@ -65,14 +69,14 @@ class CreateR:
                     metadata = ast.literal_eval(payload['metadata'])
                 except Exception as e:  # pragma: no cover
                     return (False, 'unable to convert metadata [ ' +
-                            payload['metadata'] + ' ] into a dict because: ' +
+                            str(payload['metadata']) + ' ] into a dict because: ' +
                             str(e))
                 try:
                     r.hmset(payload['id'], metadata)
                 except Exception as e:  # pragma: no cover
                     return (False,
                             'unable to store contents of the payload [ ' +
-                            metadata + ' ] in redis because: ' +
+                            str(metadata) + ' ] in redis because: ' +
                             str(e))
 
         # connect to docker
