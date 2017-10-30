@@ -62,7 +62,10 @@ class CreateR:
             try:
                 r = redis.StrictRedis(host='redis', port=6379, db=0)
             except Exception as e:  # pragma: no cover
-                return (False, 'unable to connect to redis because: ' + str(e))
+                try:
+                    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+                except Exception as e:  # pragma: no cover
+                    return (False, 'unable to connect to redis because: ' + str(e))
             if r:
                 metadata = {}
                 try:
