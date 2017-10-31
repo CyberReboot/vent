@@ -1,5 +1,5 @@
 FROM alpine:3.6
-MAINTAINER Charlie Lewis <clewis@iqt.org>
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apk add --update \
     python \
