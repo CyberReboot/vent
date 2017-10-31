@@ -1,5 +1,4 @@
 FROM alpine:3.6
-MAINTAINER Charlie Lewis <clewis@iqt.org>
 
 RUN apk add --update \
     python \
@@ -12,7 +11,8 @@ RUN pip install -r requirements.txt
 
 EXPOSE 8080
 
-LABEL vent="" \
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
+      vent="" \
       vent.name="network_tap" \
       vent.groups="core,collection,files,network" \
       vent.section="cyberreboot:vent:/vent/core/network_tap:master:HEAD" \
