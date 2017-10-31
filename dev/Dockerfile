@@ -1,5 +1,5 @@
 FROM boot2docker/boot2docker:17.06.0-ce
-MAINTAINER Charlie Lewis <clewis@iqt.org>
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 # install perl5 for git submodules
 RUN curl -L -o /tmp/perl5.tcz "$TCL_REPO_BASE"/tcz/perl5.tcz \
