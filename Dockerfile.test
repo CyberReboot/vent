@@ -2,7 +2,7 @@ FROM elasticsearch:2-alpine
 FROM rabbitmq:3-management
 FROM redis:alpine
 FROM ubuntu:latest
-MAINTAINER Charlie Lewis <clewis@iqt.org>
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apt-get update && apt-get install -y \
     apt-transport-https \
