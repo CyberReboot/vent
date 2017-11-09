@@ -7,8 +7,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gonet .
 
 # final stage
 FROM scratch
-LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
+      vent=""
 COPY --from=builder /app/gonet /gonet
 CMD ["/gonet"]
 
-LABEL vent=""

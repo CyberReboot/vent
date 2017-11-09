@@ -1,6 +1,6 @@
 FROM rabbitmq:3-management
-LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
-LABEL vent="" \
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
+      vent="" \
       vent.name="rabbitmq" \
       vent.groups="core,messages,syslog" \
       vent.section="cyberreboot:vent:/vent/core/rabbitmq:master:HEAD" \

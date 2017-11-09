@@ -1,5 +1,11 @@
 FROM alpine:3.6
-LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
+      vent="" \
+      vent.name="file_drop" \
+      vent.groups="core,files" \
+      vent.section="cyberreboot:vent:/vent/core/file_drop:master:HEAD" \
+      vent.repo="https://github.com/cyberreboot/vent" \
+      vent.type="repository"
 
 RUN apk add --update \
     python \
@@ -10,13 +16,6 @@ COPY . /file-drop
 RUN pip install -r /file-drop/requirements.txt
 
 WORKDIR /file-drop
-
-LABEL vent="" \
-      vent.name="file_drop" \
-      vent.groups="core,files" \
-      vent.section="cyberreboot:vent:/vent/core/file_drop:master:HEAD" \
-      vent.repo="https://github.com/cyberreboot/vent" \
-      vent.type="repository"
 
 ENTRYPOINT ["python", "/file-drop/file_drop.py"]
 

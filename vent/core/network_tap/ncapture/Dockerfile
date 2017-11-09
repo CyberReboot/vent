@@ -1,5 +1,8 @@
 FROM alpine:3.6
-MAINTAINER Charlie Lewis <clewis@iqt.org>
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
+      vent="" \
+      vent.name="file-drop" \
+      vent.groups="collection,hidden,network,network_tap_child"
 
 RUN apk add --update \
     bash \
@@ -9,9 +12,5 @@ RUN apk add --update \
 VOLUME /tmp
 WORKDIR /tmp
 COPY run.sh run.sh
-
-LABEL vent="" \
-      vent.name="file-drop" \
-      vent.groups="collection,hidden,network,network_tap_child"
 
 CMD /tmp/run.sh
