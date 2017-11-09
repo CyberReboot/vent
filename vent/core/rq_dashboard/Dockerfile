@@ -1,5 +1,11 @@
 FROM alpine:3.6
-LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
+LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
+      vent="" \
+      vent.name="rq_dashboard" \
+      vent.groups="core" \
+      vent.section="cyberreboot:vent:/vent/core/rq_dashboard:master:HEAD" \
+      vent.repo="https://github.com/cyberreboot/vent" \
+      vent.type="repository"
 
 RUN apk add --update \
     git \
@@ -16,12 +22,5 @@ COPY run.sh /run.sh
 RUN chmod 755 /run.sh
 
 EXPOSE 9181
-
-LABEL vent="" \
-      vent.name="rq_dashboard" \
-      vent.groups="core" \
-      vent.section="cyberreboot:vent:/vent/core/rq_dashboard:master:HEAD" \
-      vent.repo="https://github.com/cyberreboot/vent" \
-      vent.type="repository"
 
 CMD ["/run.sh"]
