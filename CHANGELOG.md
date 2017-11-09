@@ -1,3 +1,17 @@
+# v0.4.6 (2017-11-09)
+
+improvements:
+- cleaned up logging
+- cleaned up docs
+- removed deprecated MAINTAINER instruction in dockerfiles
+- add more test coverage
+- allow for configuration files for plugins and overrides for environment variables
+- added an extra metadata field for network_tap
+
+bug fixes:
+- fixed issue where entries are duplicated in the editor
+- moved path from /tmp to /opt so that filedrop detects files, especially on osx
+
 # v0.4.5 (2017-09-22)
 
 improvements:
