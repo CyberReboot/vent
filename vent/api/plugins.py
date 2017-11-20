@@ -568,6 +568,7 @@ class Plugin:
                     name = (True, image_name)
                 # pull if '/' in image_name, fallback to build
                 pull = False
+                output = ""
                 if '/' in image_name and not build_local:
                     try:
                         self.logger.info("Trying to pull " + image_name)
@@ -664,7 +665,7 @@ class Plugin:
             except Exception as e:  # pragma: no cover
                 self.logger.info("current working directory: " + str(os.getcwd()))
                 self.logger.error("unable to build image: " + str(image_name) +
-                                  " because: " + str(e))
+                                  " because: " + str(e) + " and " + str(output))
                 template.set_option(section, "built", "failed")
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
