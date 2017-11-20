@@ -662,6 +662,7 @@ class Plugin:
                     if multi_instance:
                         set_instances(template, section, 'yes', image_id)
             except Exception as e:  # pragma: no cover
+                self.logger.info("current working directory: " + str(os.getcwd()))
                 self.logger.error("unable to build image: " + str(image_name) +
                                   " because: " + str(e))
                 template.set_option(section, "built", "failed")
