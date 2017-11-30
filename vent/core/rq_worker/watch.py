@@ -13,7 +13,7 @@ def gpu_queue(options):
     if os.path.isdir("/root/.vent"):
         path_dir = "/root/.vent"
     else:
-        path_dir = os.path.join(os.path.expanduser("~"), template_path)
+        path_dir = os.path.join(os.path.expanduser("~"), ".vent")
 
     print("gpu queue", str(options))
     print("gpu queue", str(GpuUsage(base_dir=path_dir+"/",
@@ -201,6 +201,7 @@ def file_queue(path, template_path=".vent/", r_host="redis"):
         failed_images = set()
         config = ConfigParser.RawConfigParser()
         config.optionxform = str
+        print("Path to manifest: "+ template_path+'plugin_manifest.cfg')
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
