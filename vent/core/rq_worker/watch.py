@@ -13,7 +13,7 @@ def gpu_queue(options):
     if os.path.isdir("/root/.vent"):
         path_dir = "/root/.vent"
     else:
-        path_dir = "/vent"
+        path_dir = os.path.join(os.path.expanduser("~"), template_path)
 
     print("gpu queue", str(options))
     print("gpu queue", str(GpuUsage(base_dir=path_dir+"/",
@@ -130,7 +130,7 @@ def gpu_queue(options):
     return status
 
 
-def file_queue(path, template_path="/vent/", r_host="redis"):
+def file_queue(path, template_path=".vent/", r_host="redis"):
     """
     Processes files that have been added from the rq-worker, starts plugins
     that match the mime type for the new file.
@@ -154,6 +154,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     configs = {}
     logger = Logger(__name__)
 
+    template_path = os.path.join(os.path.expanduser("~"), template_path)
     if os.path.isdir("/root/.vent"):
         template_path = "/root/.vent/"
 
