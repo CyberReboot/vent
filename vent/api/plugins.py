@@ -554,8 +554,6 @@ class Plugin:
             cwd = getcwd()
             chdir(match_path)
             try:
-                # currently can't use docker-py because it doesn't support
-                # labels on images yet
                 name = template.option(section, "name")
                 groups = template.option(section, "groups")
                 repo = template.option(section, "repo")
@@ -566,51 +564,84 @@ class Plugin:
                     groups = (True, "none")
                 if not name[0]:
                     name = (True, image_name)
-                # pull if '/' in image_name, fallback to build
                 pull = False
+                image_exists = False
                 output = ""
-                if '/' in image_name and not build_local:
+                cfg_template = Template(template=self.path_dirs.cfg_file)
+                use_existing_image = False
+                result = template.option('build-options',
+                                         'use_existing_images')
+                if result[0]:
+                    use_existing_image = result[1]
+                if use_existing_image == 'yes':
                     try:
-                        self.logger.info("Trying to pull " + image_name)
-                        output = check_output(shlex.split("docker pull " +
-                                                          image_name),
-                                              stderr=STDOUT,
-                                              close_fds=True)
-                        self.logger.info("Pulling " + name[1] + "\n" +
-                                         str(output))
-
+                        self.d_client.images.get(image_name)
                         i_attrs = self.d_client.images.get(image_name).attrs
                         image_id = i_attrs['Id'].split(':')[1][:12]
 
-                        if image_id:
-                            template.set_option(section, "built", "yes")
-                            template.set_option(section, "image_id", image_id)
-                            template.set_option(section, "last_updated",
-                                                str(datetime.utcnow()) +
-                                                " UTC")
-                            # set other instances too
-                            if multi_instance:
-                                set_instances(template, section, 'yes',
-                                              image_id)
-                            status = (True, "Pulled " + image_name)
-                            self.logger.info(str(status))
-                        else:
-                            template.set_option(section, "built", "failed")
-                            template.set_option(section, "last_updated",
-                                                str(datetime.utcnow()) +
-                                                " UTC")
-                            # set other instances too
-                            if multi_instace:
-                                set_instances(template, section, 'failed')
-                            status = (False, "Failed to pull image " +
-                                      str(output.split('\n')[-1]))
-                            self.logger.warning(str(status))
-                        pull = True
-                    except Exception as e:  # pragma: no cover
-                        self.logger.warning("Failed to pull image, going to"
-                                            " build instead: " + str(e))
+                        template.set_option(section, "built", "yes")
+                        template.set_option(section, "image_id", image_id)
+                        template.set_option(section, "last_updated",
+                                            str(datetime.utcnow()) + " UTC")
+                        # set other instances too
+                        if multi_instance:
+                            set_instances(template, section, 'yes', image_id)
+                        status = (True, "Found " + image_name)
+                        self.logger.info(str(status))
+                        image_exists = True
+                    except docker.errors.ImageNotFound:
+                        image_exists = False
+                    except Exception as e:  #pragma: no cover
+                        self.logger.warning("Failed to query Docker for images"
+                                            " because: " + str(e))
+                if not image_exists:
+                    # pull if '/' in image_name, fallback to build
+                    if '/' in image_name and not build_local:
+                        try:
+                            # currently can't use docker-py because it doesn't support
+                            # support labels on images yet
+                            self.logger.info("Trying to pull " + image_name)
+                            output = check_output(shlex.split("docker pull " +
+                                                              image_name),
+                                                  stderr=STDOUT,
+                                                  close_fds=True)
+                            self.logger.info("Pulling " + name[1] + "\n" +
+                                             str(output))
+
+                            i_attrs = self.d_client.images.get(image_name).attrs
+                            image_id = i_attrs['Id'].split(':')[1][:12]
+
+                            if image_id:
+                                template.set_option(section, "built", "yes")
+                                template.set_option(section,
+                                                    "image_id",
+                                                    image_id)
+                                template.set_option(section, "last_updated",
+                                                    str(datetime.utcnow()) +
+                                                    " UTC")
+                                # set other instances too
+                                if multi_instance:
+                                    set_instances(template, section, 'yes',
+                                                  image_id)
+                                status = (True, "Pulled " + image_name)
+                                self.logger.info(str(status))
+                            else:
+                                template.set_option(section, "built", "failed")
+                                template.set_option(section, "last_updated",
+                                                    str(datetime.utcnow()) +
+                                                    " UTC")
+                                # set other instances too
+                                if multi_instace:
+                                    set_instances(template, section, 'failed')
+                                status = (False, "Failed to pull image " +
+                                          str(output.split('\n')[-1]))
+                                self.logger.warning(str(status))
+                            pull = True
+                        except Exception as e:  # pragma: no cover
+                            self.logger.warning("Failed to pull image, going"
+                                                " to build instead: " + str(e))
                         status = False
-                if not pull:
+                if not pull and not image_exists:
                     # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
                     image_name = image_name.replace('@', '-')
