@@ -80,6 +80,12 @@ Also, you can toggle whether you want to use the local docker container
 that vent utilizes or the external service by switching locally_active
 between yes and no.
 
+-build-options
+^^^^^^^^^^^^^^
+  *use_existing_images*
+    If set to ``yes`` it will not try to rebuild or pull images that already
+    exist.
+
 -groups
 ^^^^^^^
   *start_order*
