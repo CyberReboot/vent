@@ -591,7 +591,7 @@ class Plugin:
                         image_exists = True
                     except docker.errors.ImageNotFound:
                         image_exists = False
-                    except Exception as e:  #pragma: no cover
+                    except Exception as e:  # pragma: no cover
                         self.logger.warning("Failed to query Docker for images"
                                             " because: " + str(e))
                 if not image_exists:
