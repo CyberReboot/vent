@@ -569,8 +569,8 @@ class Plugin:
                 output = ""
                 cfg_template = Template(template=self.path_dirs.cfg_file)
                 use_existing_image = False
-                result = template.option('build-options',
-                                         'use_existing_images')
+                result = cfg_template.option('build-options',
+                                             'use_existing_images')
                 if result[0]:
                     use_existing_image = result[1]
                 if use_existing_image == 'yes':
