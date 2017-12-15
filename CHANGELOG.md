@@ -1,3 +1,18 @@
+# v0.4.7 (2017-12-15)
+
+improvements:
+- more logging
+- logs the location the error occurred
+- updates b2d version
+- updates alpine version
+- allows option to not build existing images again
+- allows URI info to have more than one exposed service per tool
+
+bug fixes:
+- fixes timestamp error for rq_worker
+- fixes paths for rq_worker
+- fixes GPU paths for rq_worker
+
 # v0.4.6 (2017-11-09)
 
 improvements:
