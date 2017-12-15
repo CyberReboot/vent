@@ -384,10 +384,7 @@ def Services(core, vent=True, external=False, **kargs):
             else:
                 containers = d_client.containers.list()
             for c in containers:
-                uri_prefix = ''
-                uri_postfix = ''
-                uri_user = ''
-                uri_pw = ''
+                uris = {}
                 name = None
                 if vent and 'vent.name' in c.attrs['Config']['Labels']:
                     if ((core and
@@ -397,31 +394,52 @@ def Services(core, vent=True, external=False, **kargs):
                          'vent.groups' in c.attrs['Config']['Labels'] and
                          'core' not in c.attrs['Config']['Labels']['vent.groups'])):
                         name = c.attrs['Config']['Labels']['vent.name']
-                        if 'uri_prefix' in c.attrs['Config']['Labels']:
-                            uri_prefix = c.attrs['Config']['Labels']['uri_prefix']
-                        if 'uri_postfix' in c.attrs['Config']['Labels']:
-                            uri_postfix = c.attrs['Config']['Labels']['uri_postfix']
-                        if 'uri_user' in c.attrs['Config']['Labels']:
-                            uri_user = " user:"
-                            uri_user += c.attrs['Config']['Labels']['uri_user']
-                        if 'uri_pw' in c.attrs['Config']['Labels']:
-                            uri_pw = " pw:"
-                            uri_pw += c.attrs['Config']['Labels']['uri_pw']
+                        for label in c.attrs['Config']['Labels']:
+                            if label.startswith('uri'):
+                                logger.info(label)
+                                logger.info(c.attrs['Config']['Labels'][label])
+                                try:
+                                    val = int(label[-1])
+                                    if not val in uris:
+                                        uris[val] = {}
+                                    uris[val][label[:-1]] = c.attrs['Config']['Labels'][label]
+                                except Exception as e:  # pragma: no cover
+                                    logger.error("Malformed services section"
+                                                 " in the template file"
+                                                 + str(e))
                 else:
                     name = c.name
                 ports = c.attrs['NetworkSettings']['Ports']
                 p = []
+                port_num = 1
                 for port in ports:
                     if ports[port]:
-                        uri_creds = ''
-                        if uri_user or uri_pw:
-                            uri_creds = " - (" + uri_user + uri_pw + " )"
-                        host = ports[port][0]['HostIp']
-                        if services_uri[0] and host == '0.0.0.0':
-                            host = services_uri[1]
-                        p.append(uri_prefix + host + ":" +
-                                 ports[port][0]['HostPort'] + uri_postfix +
-                                 uri_creds)
+                        try:
+                            service_str = ''
+                            port_char = str(port_num)
+                            logger.info(str(uris))
+                            if 'uri_prefix'+port_char in uris[port_num]:
+                                service_str += uris[port_num]['uri_prefix'+port_char]
+                            host = ports[port][0]['HostIp']
+                            if services_uri[0] and host == '0.0.0.0':
+                                host = services_uri[1]
+                            service_str += host
+                            if 'uri_postfix'+port_char in uris[port_num]:
+                                service_str += uris[port_num]['uri_postfix'+port_char]
+                            uri_creds = ''
+                            if 'uri_user'+port_char in uris[port_num]:
+                                uri_creds += " user:"
+                                uri_creds += uris[port_num]['uri_user'+port_char]
+                            if 'uri_pw'+port_char in uris[port_num]:
+                                uri_creds += " pw:"
+                                uri_creds += uris[port_num]['uri_pw'+port_char]
+                            if uri_creds:
+                                service_str += " - (" + uri_creds + " )"
+                            p.append(service_str)
+                        except Exception as e:  # pragma: no cover
+                            logger.info("No services defined for exposed port " +
+                                        port_char + " because: " + str(e))
+                        port_num += 1
                 if p and name:
                     services.append((name, p))
         # look for external services

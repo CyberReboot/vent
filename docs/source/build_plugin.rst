@@ -65,8 +65,22 @@ All metadata about the custom plugin goes under this section.
 
 -service
 --------
-*uri_prefix*
-  Services a tool exposes that need a more specific URL
+Appending info to an exposed port for a running service, multiple exposed ports
+can be done for the same service (up to 9) by incrementing the value of 1 at
+the end of each settings to correspond to the order of the ports exposed for
+that service.
+
+*uri_prefix1*
+  Services a tool exposes that need a more specific URI at the beginning
+
+*uri_postfix1*
+  Services a tool exposes that need a more specific URI at the end
+
+*uri_user1*
+  Services a tool exposes that need a username
+
+*uri_pw1*
+  Services a tool exposes that need a password
 
 
 -settings

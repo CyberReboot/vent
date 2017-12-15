@@ -3,9 +3,10 @@ name = RabbitMQ
 groups = core,messages,syslog
 
 [service]
-uri_prefix = http://
-uri_user = guest
-uri_pw = guest
+uri_prefix1 = http://
+uri_user1 = guest
+uri_pw1 = guest
+uri_prefix2 = amqp://
 
 [settings]
 instances = 1

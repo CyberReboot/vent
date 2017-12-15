@@ -3,7 +3,7 @@ name = Syslog
 groups = core,logging,syslog
 
 [service]
-uri_prefix = tcp://
+uri_prefix1 = tcp://
 
 [settings]
 instances = 1

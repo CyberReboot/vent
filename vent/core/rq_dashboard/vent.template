@@ -3,8 +3,8 @@ name = RQ-Dashboard
 groups = core
 
 [service]
-uri_prefix = http://
-uri_postfix = /rq
+uri_prefix1 = http://
+uri_postfix1 = /rq
 
 [settings]
 instances = 1
