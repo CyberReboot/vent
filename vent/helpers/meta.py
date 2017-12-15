@@ -400,7 +400,7 @@ def Services(core, vent=True, external=False, **kargs):
                                 logger.info(c.attrs['Config']['Labels'][label])
                                 try:
                                     val = int(label[-1])
-                                    if not val in uris:
+                                    if val not in uris:
                                         uris[val] = {}
                                     uris[val][label[:-1]] = c.attrs['Config']['Labels'][label]
                                 except Exception as e:  # pragma: no cover
