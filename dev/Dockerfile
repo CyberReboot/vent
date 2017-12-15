@@ -1,4 +1,4 @@
-FROM boot2docker/boot2docker:17.11.0-ce
+FROM boot2docker/boot2docker:17.06.0-ce
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 # install perl5 for git submodules
