@@ -396,8 +396,6 @@ def Services(core, vent=True, external=False, **kargs):
                         name = c.attrs['Config']['Labels']['vent.name']
                         for label in c.attrs['Config']['Labels']:
                             if label.startswith('uri'):
-                                logger.info(label)
-                                logger.info(c.attrs['Config']['Labels'][label])
                                 try:
                                     val = int(label[-1])
                                     if val not in uris:
@@ -416,29 +414,28 @@ def Services(core, vent=True, external=False, **kargs):
                     if ports[port]:
                         try:
                             service_str = ''
-                            port_char = str(port_num)
-                            logger.info(str(uris))
-                            if 'uri_prefix'+port_char in uris[port_num]:
-                                service_str += uris[port_num]['uri_prefix'+port_char]
+                            if 'uri_prefix' in uris[port_num]:
+                                service_str += uris[port_num]['uri_prefix']
                             host = ports[port][0]['HostIp']
                             if services_uri[0] and host == '0.0.0.0':
                                 host = services_uri[1]
-                            service_str += host
-                            if 'uri_postfix'+port_char in uris[port_num]:
-                                service_str += uris[port_num]['uri_postfix'+port_char]
+                            service_str += host + ":"
+                            service_str += ports[port][0]['HostPort']
+                            if 'uri_postfix' in uris[port_num]:
+                                service_str += uris[port_num]['uri_postfix']
                             uri_creds = ''
-                            if 'uri_user'+port_char in uris[port_num]:
+                            if 'uri_user' in uris[port_num]:
                                 uri_creds += " user:"
-                                uri_creds += uris[port_num]['uri_user'+port_char]
-                            if 'uri_pw'+port_char in uris[port_num]:
+                                uri_creds += uris[port_num]['uri_user']
+                            if 'uri_pw' in uris[port_num]:
                                 uri_creds += " pw:"
-                                uri_creds += uris[port_num]['uri_pw'+port_char]
+                                uri_creds += uris[port_num]['uri_pw']
                             if uri_creds:
                                 service_str += " - (" + uri_creds + " )"
                             p.append(service_str)
                         except Exception as e:  # pragma: no cover
                             logger.info("No services defined for exposed port " +
-                                        port_char + " because: " + str(e))
+                                        str(port_num) + " because: " + str(e))
                         port_num += 1
                 if p and name:
                     services.append((name, p))
