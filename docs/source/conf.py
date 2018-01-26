@@ -48,7 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Vent'
-copyright = u'2015-2017, In-Q-Tel, Inc'
+copyright = u'2015-2018, In-Q-Tel, Inc'
 author = u'Cyber Reboot'
 
 # The version info for the project you're documenting, acts as replacement for
