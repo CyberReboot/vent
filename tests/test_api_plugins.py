@@ -36,9 +36,9 @@ def test_add():
 def test_add_image():
     """ Test the add_image function """
     instance = Plugin()
-    status = instance.add_image('quay/redis', 'redis',  registry='quay.io')
-    assert isinstance(status, tuple)
-    assert status[0] == True
+    #status = instance.add_image('quay/redis', 'redis',  registry='quay.io')
+    #assert isinstance(status, tuple)
+    #assert status[0] == True
     status = instance.add_image('alpine', 'alpine', tag='latest', groups='alpine')
     assert isinstance(status, tuple)
     assert status[0] == True
