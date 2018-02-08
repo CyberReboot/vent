@@ -10,5 +10,5 @@ redis==2.10.6
 rq==0.10.0
 sphinx>=1.6.3
 urllib3==1.22
-watchdog
+watchdog==0.8.3
 web.py
