@@ -3,7 +3,7 @@ elasticsearch==6.1.1
 npyscreen==4.10.5
 paste==2.0.3
 pika>=0.11.0
-pytest
+pytest==3.4.0
 pytest-cov
 python-magic
 redis
