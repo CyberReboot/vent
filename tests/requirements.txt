@@ -7,7 +7,7 @@ pytest==3.4.0
 pytest-cov==2.5.1
 python-magic==0.4.15
 redis==2.10.6
-rq
+rq==0.10.0
 sphinx>=1.6.3
 urllib3==1.21.1
 watchdog
