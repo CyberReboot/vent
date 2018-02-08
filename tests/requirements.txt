@@ -1,5 +1,5 @@
 docker>=2.5.1
-elasticsearch
+elasticsearch==6.1.1
 npyscreen
 paste
 pika>=0.11.0
