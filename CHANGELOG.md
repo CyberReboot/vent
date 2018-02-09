@@ -1,3 +1,12 @@
+# v0.4.8 (2018-02-09)
+
+improvements:
+- pinned versions for dependencies and updated them to the latest
+
+bug fixes:
+- rolled back boot2docker version to pre-debian until that can be better tested
+- removed quay test as it was brittle
+
 # v0.4.7 (2017-12-15)
 
 improvements:
