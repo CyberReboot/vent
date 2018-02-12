@@ -47,7 +47,7 @@ class RmqEs():
                 self.channel.exchange_declare(exchange='topic_recs',
                                               exchange_type='topic')
 
-                result = self.channel.queue_declare(exclusive=True)
+                result = self.channel.queue_declare(exclusive=False)
                 self.queue_name = result.method.queue
                 self.es_conn = Elasticsearch([{'host': self.es_host,
                                                'port': self.es_port}])
