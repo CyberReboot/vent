@@ -11,7 +11,10 @@ def gpu_queue(options):
 
     status = (False, None)
 
-    path_dir = "/vent"
+    if os.path.isdir("/root/.vent"):
+        path_dir = "/root/.vent"
+    else:
+        path_dir = "/vent"
 
     print("gpu queue", str(options))
     print("gpu queue", str(GpuUsage(base_dir=path_dir+"/",
@@ -151,6 +154,9 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     images = []
     configs = {}
     logger = Logger(__name__)
+
+    if os.path.isdir("/root/.vent"):
+        template_path = "/root/.vent/"
 
     try:
         d_client = docker.from_env()
