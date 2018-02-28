@@ -11,4 +11,4 @@ rq==0.10.0
 sphinx>=1.6.3
 urllib3==1.22
 watchdog==0.8.3
-web.py==0.38
+web.py==0.39
