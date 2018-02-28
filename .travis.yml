@@ -4,7 +4,6 @@ group: edge
 
 services:
   - docker
-  - rabbitmq
   - redis
   - elasticsearch
 language: python
