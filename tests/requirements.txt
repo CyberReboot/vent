@@ -3,7 +3,7 @@ elasticsearch==6.1.1
 npyscreen==4.10.5
 paste==2.0.3
 pika>=0.11.0
-pytest==3.4.0
+pytest==3.4.1
 pytest-cov==2.5.1
 python-magic==0.4.15
 redis==2.10.6
@@ -11,4 +11,4 @@ rq==0.10.0
 sphinx>=1.6.3
 urllib3==1.22
 watchdog==0.8.3
-web.py==0.38
+web.py==0.39
