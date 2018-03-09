@@ -1,3 +1,14 @@
+# v0.4.9 (2018-03-09)
+
+improvements:
+- explictily use the default rabbitmq port instead of a random one
+- update pytest version to 3.4.2
+- remove need for an extra rabbitmq server in the tests
+- update version of web.py to 0.39
+
+bug fixes:
+- fix root path of filedrop for running vent in a container
+
 # v0.4.8 (2018-02-09)
 
 improvements:
