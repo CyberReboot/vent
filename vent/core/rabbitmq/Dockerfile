@@ -1,4 +1,4 @@
-FROM rabbitmq:3-management
+FROM rabbitmq:3-management-alpine
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="rabbitmq" \
