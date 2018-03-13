@@ -251,7 +251,7 @@ class MenuHelper:
                 for branch in branches:
                     try:
                         branch_output = check_output(shlex
-                                                     .split("git rev-list " +
+                                                     .split("git rev-list origin/" +
                                                             branch),
                                                      stderr=STDOUT,
                                                      close_fds=True)
