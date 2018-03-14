@@ -59,6 +59,8 @@ class PathDirs:
         Extracts relative path to a tool (from the main cloned directory) out
         of available_tools based on the name it is given
         """
+        if name == '@' or name == '.' or name == '/':
+            name = ''
         multi_tool = '@' in name
         for tool in available_tools:
             t_name = tool[0]
