@@ -77,6 +77,7 @@ class CreateR:
                 try:
                     r.hmset(payload['id'], metadata)
                     r.hmset(ast.literal_eval(metadata['endpoint_data'])['ip-address'], {'poseidon_hash': payload['id']})
+                    r.sadd(ast.literal_eval(metadata['endpoint_data'])['ip-address'])
                 except Exception as e:  # pragma: no cover
                     return (False,
                             'unable to store contents of the payload [ ' +
