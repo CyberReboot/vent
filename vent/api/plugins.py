@@ -92,6 +92,7 @@ class Plugin:
         if (isinstance(self.tools, list) and
                 len(self.tools) == 0):
             self.tools = None
+        self.logger.info("Adding new tools: " + str(self.tools))
         self.overrides = overrides
         self.version = version
         self.branch = branch

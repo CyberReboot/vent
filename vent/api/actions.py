@@ -1255,7 +1255,7 @@ class Action:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
                     t_path = PathDirs.rel_path(tool, available_tools)
-                    if not t_path:
+                    if t_path is None:
                         self.logger.error("Couldn't find tool " + tool + " in"
                                           " repo " + repo)
                         continue
