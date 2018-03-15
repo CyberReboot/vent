@@ -403,7 +403,7 @@ def Services(core, vent=True, external=False, **kargs):
                                     uris[val][label[:-1]] = c.attrs['Config']['Labels'][label]
                                 except Exception as e:  # pragma: no cover
                                     logger.error("Malformed services section"
-                                                 " in the template file"
+                                                 " in the template file "
                                                  + str(e))
                 else:
                     name = c.name
