@@ -394,6 +394,8 @@ def Services(core, vent=True, external=False, **kargs):
                          'vent.groups' in c.attrs['Config']['Labels'] and
                          'core' not in c.attrs['Config']['Labels']['vent.groups'])):
                         name = c.attrs['Config']['Labels']['vent.name']
+                        if name == '':
+                            name = c.attrs['Config']['Labels']['vent.namespace'].split('/')[1]
                         for label in c.attrs['Config']['Labels']:
                             if label.startswith('uri'):
                                 try:
@@ -434,11 +436,12 @@ def Services(core, vent=True, external=False, **kargs):
                                 service_str += " - (" + uri_creds + " )"
                             p.append(service_str)
                         except Exception as e:  # pragma: no cover
-                            logger.info("No services defined for exposed port " +
+                            logger.info("No services defined for " + str(name) + " with exposed port " +
                                         str(port_num) + " because: " + str(e))
                         port_num += 1
                 if p and name:
                     services.append((name, p))
+                    logger.info(services)
         # look for external services
         else:
             ext_tools = template.section('external-services')[1]
