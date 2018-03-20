@@ -1,4 +1,5 @@
 OS=`uname -s`
+PIP=$(shell which pip2.7 || echo "pip2")
 
 build: clean
 	@echo
@@ -6,8 +7,8 @@ build: clean
 	@echo
 	env
 	docker version || true
-	pip2.7 -V
-	pip2.7 install -r tests/requirements.txt
+	$(PIP) -V
+	$(PIP) install -r tests/requirements.txt
 	$(MAKE) docs
 	python2.7 setup.py install
 
@@ -79,7 +80,7 @@ clean:
 	rm -rf core
 	find . -name "*.pyc" -type f -delete
 	find . -name "__pycache__" -delete
-	pip2.7 uninstall -y vent || true
+	$(PIP) uninstall -y vent || true
 
 test: build
 	pytest -l -s -v --cov=. -k 'not vendor' --cov-report term-missing
