@@ -30,13 +30,13 @@ A configuration file used to customize Vent and its processes.
     The directory of ``File Drop``. For example, if ``files = /opt/vent_files``,
     Vent will monitor for any new files in that directory.
 
-  *service_uri*
+  *services_uri*
     Override the default POST name for all services. So, let's say Vent has
     ``Elasticsearch`` at URL ``0.0.0.0:3772``.
 
     By adding::
 
-        service_uri = 5.5.5.5
+        services_uri = 5.5.5.5
 
     under the main section, the URL for ``Elasticsearch`` is now
     ``5.5.5.5:3772``.
