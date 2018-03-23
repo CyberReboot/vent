@@ -1,3 +1,18 @@
+# v0.5.0 (2018-03-23)
+
+improvements:
+- rabbit now uses alpine for the image
+- tcpdump terminates in the time interval correctly now
+- updates dependency versions
+
+bug fixes:
+- fixes an issue where git wouldn't get right the branches
+- fix for tools that are at the root of the repo
+- ncontrol keeps track of the requests being made in redis
+- improved logging
+- fixes a mistake in the docs
+- fixes naming conventions for multiple Dockerfiles at the root of a repo
+
 # v0.4.9 (2018-03-09)
 
 improvements:
