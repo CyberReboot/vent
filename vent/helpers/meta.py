@@ -409,6 +409,8 @@ def Services(core, vent=True, external=False, **kargs):
                                                  + str(e))
                 else:
                     name = c.name
+                if name and 'vent.repo' in c.attrs['Config']['Labels']:
+                    name = c.attrs['Config']['Labels']['vent.repo'].split("/")[-1] + ": " + name
                 ports = c.attrs['NetworkSettings']['Ports']
                 p = []
                 port_num = 1
@@ -469,7 +471,7 @@ def Services(core, vent=True, external=False, **kargs):
                 except Exception:  # pragma: no cover
                     p = None
     except Exception as e:  # pragma: no cover
-        logger.error("Could not get external services" + str(e))
+        logger.error("Could not get services " + str(e))
     return services
 
 
