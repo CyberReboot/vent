@@ -70,6 +70,8 @@ class PathDirs:
             else:
                 if name == t_name.split('/')[-1]:
                     return t_name
+                elif name == '' and t_name.split('@')[-1] == 'unspecified':
+                    return 'Dockerfile'
         return None
 
     def host_config(self):
