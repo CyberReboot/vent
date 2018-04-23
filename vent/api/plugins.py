@@ -1,4 +1,5 @@
 import docker
+import getpass
 import json
 import os
 import shlex
@@ -643,6 +644,8 @@ class Plugin:
                                                 " to build instead: " + str(e))
                         status = False
                 if not pull and not image_exists:
+                    # get username to label built image with
+                    username = getpass.getuser()
                     # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
                     image_name = image_name.replace('@', '-')
@@ -674,7 +677,9 @@ class Plugin:
                                                       " vent.name=" +
                                                       name[1] + " --label"
                                                       " vent.groups=" +
-                                                      groups[1] + " -t " +
+                                                      groups[1] + " --label" +
+                                                      " built-by=" +
+                                                      username + " -t " +
                                                       image_name +
                                                       commit_tag + file_tag),
                                           stderr=STDOUT,
