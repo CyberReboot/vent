@@ -677,8 +677,8 @@ class Plugin:
                                                       " vent.name=" +
                                                       name[1] + " --label"
                                                       " vent.groups=" +
-                                                      groups[1] + " --label" + 
-                                                      " built-by" +
+                                                      groups[1] + " --label" +
+                                                      " built-by=" +
                                                       username + " -t " +
                                                       image_name +
                                                       commit_tag + file_tag),
