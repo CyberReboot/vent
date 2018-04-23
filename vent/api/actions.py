@@ -171,7 +171,8 @@ class Action:
             username = getpass.getuser()
             for container in tool_d:
                 containers_remaining.append(container)
-                self.logger.info("User: " + username + " starting container: " + str(container))
+                self.logger.info("User: " + username +
+                                " starting container: " + str(container))
                 if 'labels' in tool_d[container]:
                     if 'vent.groups' in tool_d[container]['labels']:
                         groups += tool_d[container]['labels']['vent.groups'].split(',')
@@ -183,10 +184,14 @@ class Action:
                                     group_orders[container_groups[i]] = []
                                 group_orders[container_groups[i]].append((int(priority), container))
                             containers_remaining.remove(container)
-                    tool_d[container]['labels'].update({"started-by":username})
+                    tool_d[container]['labels'].update(
+                                            {"started-by": username}
+                                        )
 
                 else:
-                    tool_d[container].update({'labels':{"started-by":username}})
+                    tool_d[container].update(
+                                {'labels':{"started-by": username}}
+                            )
 
             self.logger.info("group orders: " + str(group_orders))
             self.logger.info("containers remaining: " +

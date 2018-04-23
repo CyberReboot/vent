@@ -644,7 +644,7 @@ class Plugin:
                                                 " to build instead: " + str(e))
                         status = False
                 if not pull and not image_exists:
-                    #get username to label built image with
+                    # get username to label built image with
                     username = getpass.getuser()
                     # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
