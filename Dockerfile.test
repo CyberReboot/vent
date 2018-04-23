@@ -22,6 +22,7 @@ RUN add-apt-repository \
 
 RUN apt-get update && apt-get install -y docker-ce
 
+RUN echo "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
 ADD . /vent
 WORKDIR /vent
 RUN pip install -r tests/requirements.txt
