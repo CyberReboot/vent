@@ -10,6 +10,7 @@ from rest.nics import NICsR
 from rest.nlist import ListR
 from rest.start import StartR
 from rest.stop import StopR
+from rest.update import UpdateR
 
 
 module_logger = logging.getLogger(__name__)
@@ -48,7 +49,8 @@ class NControl:
             '/list', ListR,
             '/nics', NICsR,
             '/start', StartR,
-            '/stop', StopR
+            '/stop', StopR,
+            '/update', UpdateR
         )
         return urls
 
