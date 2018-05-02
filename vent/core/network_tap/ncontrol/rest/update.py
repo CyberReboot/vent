@@ -1,7 +1,5 @@
 import ast
-import docker
 import redis
-import socket
 import urlparse
 import web
 
