@@ -19,6 +19,7 @@ class UpdateR:
 
         # verify payload is in the correct format
         data = web.data()
+        payload = {}
         try:
             payload = ast.literal_eval(data)
         except Exception as e:  # pragma: no cover
