@@ -1,5 +1,5 @@
-vent\.core\.network\_tap\.ncontrol package
-==========================================
+vent.core.network\_tap.ncontrol package
+=======================================
 
 Subpackages
 -----------
@@ -11,8 +11,8 @@ Subpackages
 Submodules
 ----------
 
-vent\.core\.network\_tap\.ncontrol\.ncontrol module
----------------------------------------------------
+vent.core.network\_tap.ncontrol.ncontrol module
+-----------------------------------------------
 
 .. automodule:: vent.core.network_tap.ncontrol.ncontrol
     :members:

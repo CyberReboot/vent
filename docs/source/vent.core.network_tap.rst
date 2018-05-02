@@ -1,5 +1,5 @@
-vent\.core\.network\_tap package
-================================
+vent.core.network\_tap package
+==============================
 
 Subpackages
 -----------
