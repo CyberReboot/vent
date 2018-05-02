@@ -1,5 +1,5 @@
-vent\.core package
-==================
+vent.core package
+=================
 
 Subpackages
 -----------

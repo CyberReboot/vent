@@ -55,6 +55,21 @@ def test_create_r():
     assert r.status == 200
 
 
+def test_update_r():
+    """ tests the restful endpoint: update """
+    # get web app
+    test_app = start_web_app()
+
+    r = test_app.post('/update', params='{}')
+    assert r.status == 200
+    r = test_app.post('/update', params={'id': 'foo'})
+    assert r.status == 200
+    r = test_app.post('/update', params={'id': 'foo',
+                                         'metadata': '{"foo": "bar"}'},
+                      headers={'Content-Type': 'application/json'})
+    assert r.status == 200
+
+
 def test_list_r():
     """ tests the restful endpoint: list """
     # get web app

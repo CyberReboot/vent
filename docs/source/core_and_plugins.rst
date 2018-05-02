@@ -37,6 +37,7 @@ The interface has six available actions:
 - **Start**: Start a network tap container if it is exited. Will run with the same
   options given to the container in ``create``.
 - **Stop**: Stop a network tap container.
+- **Update**: Update the metadata of a network tap container.
 
 rabbitmq
 ========

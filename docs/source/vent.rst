@@ -14,8 +14,8 @@ Subpackages
 Submodules
 ----------
 
-vent\.menu module
------------------
+vent.menu module
+----------------
 
 .. automodule:: vent.menu
     :members:
