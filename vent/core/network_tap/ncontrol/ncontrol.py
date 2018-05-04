@@ -15,6 +15,10 @@ from rest.update import UpdateR
 
 module_logger = logging.getLogger(__name__)
 
+# suppress logging
+o = sys.stdout
+sys.stdout = open('/dev/null', 'w')
+
 
 class NControlServer(object):
     """
