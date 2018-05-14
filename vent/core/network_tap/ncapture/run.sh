@@ -11,7 +11,7 @@ if [ $ITERS -gt "0" ]; then
     COUNTER=0
     while [ $COUNTER -lt $ITERS ]; do
         dt=$(date '+%Y-%m-%d_%H_%M_%S')
-        tcpdump -ni $NIC -s65535 -w 'trace_'"$ID"'_'"$dt"'.pcap' $FILTER &
+        tcpdump -ni $NIC -s0 -w 'trace_'"$ID"'_'"$dt"'.pcap' $FILTER &
         pid=$!
         sleep $INTERVAL
         kill $pid
@@ -22,7 +22,7 @@ else  # else do the capture until killed
     while true
     do
         dt=$(date '+%Y-%m-%d_%H_%M_%S')
-        tcpdump -ni $NIC -s65535 -w 'trace_'"$ID"'_'"$dt"'.pcap' $FILTER &
+        tcpdump -ni $NIC -s0 -w 'trace_'"$ID"'_'"$dt"'.pcap' $FILTER &
         pid=$!
         sleep $INTERVAL
         kill $pid
