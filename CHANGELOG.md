@@ -1,3 +1,12 @@
+# v0.5.2 (2018-05-18)
+
+improvements:
+- updated syslog-ng, also now uses Debian, which is more stable
+
+bug fixes:
+- fixed issue with file_drop path during high volume
+- fixed issue where ncapture wouldn't write out timestamps
+
 # v0.5.1 (2018-05-04)
 
 improvements:
