@@ -47,15 +47,16 @@ class GZHandler(PatternMatchingEventHandler):
             # TODO should directories be treated as bulk paths to send to a
             #      plugin?
             if not event.is_directory:
+                spath = event.src_path
                 # wait for long copies to finish
                 historicalSize = -1
-                while (historicalSize != os.path.getsize(event.src_path)):
-                    historicalSize = os.path.getsize(event.src_path)
+                while (historicalSize != os.path.getsize(spath)):
+                    historicalSize = os.path.getsize(spath)
                     time.sleep(0.1)
 
                 # check if the file was already queued and ignore
                 exists = False
-                print(uid+" started " + event.src_path)
+                print(uid+" started " + spath)
                 jobs = self.r.keys(pattern="rq:job*")
                 for job in jobs:
                     print(uid + " ***")
@@ -65,17 +66,17 @@ class GZHandler(PatternMatchingEventHandler):
                         print(uid + " " +
                               description.split("watch.file_queue('" +
                                                 hostname + "_")[1][:-2])
-                        print(uid + " " + event.src_path)
+                        print(uid + " " + spath)
                         if description.split("watch.file_queue('" +
                                              hostname +
-                                             "_")[1][:-2] == event.src_path:
+                                             "_")[1][:-2] == spath:
                             print(uid + " true")
                             exists = True
                     elif description.startswith("watch.gpu_queue('"):
                         print(uid + " " +
                               description.split('"file": "')[1].split('"')[0])
-                        print(uid + " " + event.src_path)
-                        if description.split('"file": "')[1].split('"')[0] == event.src_path:
+                        print(uid + " " + spath)
+                        if description.split('"file": "')[1].split('"')[0] == spath:
                             print(uid + " true")
                             exists = True
                     print(uid + " ***")
@@ -83,12 +84,12 @@ class GZHandler(PatternMatchingEventHandler):
                 if not exists:
                     # !! TODO this should be a configuration option in the
                     #         vent.template
-                    print(uid + " let's queue it " + event.src_path)
+                    print(uid + " let's queue it " + spath)
                     # let jobs be queued for up to 30 days
                     self.q.enqueue('watch.file_queue',
-                                   hostname + "_" + event.src_path,
+                                   hostname + "_" + spath,
                                    ttl=2592000)
-                print(uid + " end " + event.src_path)
+                print(uid + " end " + spath)
         except Exception as e:  # pragma: no cover
             print("file drop error: " + str(e))
 

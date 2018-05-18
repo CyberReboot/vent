@@ -1,3 +1,13 @@
+# v0.5.1 (2018-05-04)
+
+improvements:
+- added started-by and built-by labels for containers and images
+- added a new endpoint to network_tap to update the metadata
+- updataed version of pytest
+
+bug fixes:
+- fixed local tests
+
 # v0.5.0 (2018-03-23)
 
 improvements:
