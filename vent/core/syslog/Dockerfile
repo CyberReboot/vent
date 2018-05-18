@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM debian:stretch-slim
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="syslog" \
@@ -8,9 +8,7 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent.type="repository"
 
 
-RUN apk add --update \
-    syslog-ng \
-    && rm -rf /var/cache/apk/*
+RUN apt-get update -qq && apt-get install -y syslog-ng
 
 COPY syslog-ng.conf /etc/syslog-ng/syslog-ng.conf
 EXPOSE 514
