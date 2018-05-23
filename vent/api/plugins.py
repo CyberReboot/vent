@@ -1030,8 +1030,8 @@ class Plugin:
 
         try:
             # parse the yml file
+            c_dict = {}
             if os.path.exists(self.plugin_config_file):
-                c_dict = {}
                 with open(self.plugin_config_file) as config_file:
                     c_dict = yaml.safe_load(config_file.read())
 
