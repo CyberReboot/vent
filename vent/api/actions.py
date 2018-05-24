@@ -1338,7 +1338,10 @@ class Action:
                 for tool in s_dict[repo]:
                     if 'start' in s_dict[repo][tool]:
                         if s_dict[repo][tool]['start']:
-                            for i in range(1, instances + 1):
+                            local_instances = 1
+                            if 'settings' in s_dict[repo][tool] and 'instances' in s_dict[repo][tool]['settings']:
+                                local_instances = int(s_dict[repo][tool]['settings']['instances'])
+                            for i in range(1, local_instances + 1):
                                 i_name = tool + str(i) if i != 1 else tool
                                 i_name = i_name.replace('@', '')
                                 tool_d.update(self.prep_start(
