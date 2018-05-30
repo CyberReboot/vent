@@ -8,6 +8,7 @@
 .cache
 .coverage
 .DS_Store
+.pytest_cache
 .vent
 /build/
 dist

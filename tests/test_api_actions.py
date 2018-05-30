@@ -11,8 +11,10 @@ def test_startup():
     status = instance.startup()
     assert isinstance(status, tuple)
     assert status[0]
+    txt = None
     with open(instance.plugin.manifest) as man:
-        assert 'rabbitmq' in man.read()
+        txt = man.read()
+    assert 'rabbitmq' in txt
 
 def test_add():
     """ Test the add function """

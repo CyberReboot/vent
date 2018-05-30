@@ -1,6 +1,7 @@
 import json
 import os
-import watch
+
+from .watch import file_queue, gpu_queue
 
 from vent.api.actions import Action
 from vent.helpers.paths import PathDirs
@@ -16,11 +17,11 @@ def test_settings():
 def test_file_queue():
     """ Tests simulation of new file """
     path_dirs = PathDirs()
-    images = watch.file_queue('/tmp/foo')
+    images = file_queue('/tmp/foo')
     assert not images[0]
-    images = watch.file_queue('host_/tmp/foo',
-                              template_path=path_dirs.base_dir,
-                              r_host="localhost")
+    images = file_queue('host_/tmp/foo',
+                        template_path=path_dirs.base_dir,
+                        r_host="localhost")
     assert isinstance(images, tuple)
     assert images[0]
     assert isinstance(images[1], list)
@@ -31,9 +32,9 @@ def test_file_queue():
                           build=True)
     assert isinstance(status, tuple)
     assert status[0]
-    images = watch.file_queue('host_/tmp/foo.matrix',
-                              template_path=path_dirs.base_dir,
-                              r_host="localhost")
+    images = file_queue('host_/tmp/foo.matrix',
+                        template_path=path_dirs.base_dir,
+                        r_host="localhost")
     assert isinstance(images, tuple)
     assert images[0]
     assert isinstance(images[1], list)
@@ -42,5 +43,5 @@ def test_file_queue():
 def test_gpu_queue():
     """ Tests simulation of gpu job """
     options = json.dumps({'configs': {'devices': ['foo0', 'bar', 'baz3'], 'gpu_options': {'device': '0'}}, 'labels': {}, 'image': 'alpine:latest'})
-    status = watch.gpu_queue(options)
+    status = gpu_queue(options)
     assert isinstance(status, tuple)

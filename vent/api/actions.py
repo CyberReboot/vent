@@ -1,14 +1,13 @@
-import Queue
-
 import ast
 import docker
 import getpass
 import json
 import os
+import queue
 import re
 import shutil
 import tempfile
-import urllib2
+import urllib
 import yaml
 
 from vent.api.plugins import Plugin
@@ -30,7 +29,7 @@ class Action:
         self.vent_config = self.plugin.path_dirs.cfg_file
         self.startup_file = self.plugin.path_dirs.startup_file
         self.p_helper = self.plugin.p_helper
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.logger = Logger(__name__)
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
@@ -1453,9 +1452,9 @@ class Action:
             data = json.dumps(data)
 
             # create the post request and send it off
-            req = urllib2.Request(url, data)
+            req = urllib.request(url, data)
             req.add_header('Content-Type', 'application/json')
-            response = urllib2.urlopen(req, data)
+            response = urllib.request.urlopen(req, data)
 
             # return whatever the webpage returned
             return (True, response.read())
@@ -1476,7 +1475,7 @@ class Action:
             after a GET request or a failure message
         """
         try:
-            response = urllib2.urlopen(url)
+            response = urllib.request.urlopen(url)
             return (True, response.read())
         except Exception as e:  # pragma no cover
             return (False, "failed get request to " + url + " " + str(e))

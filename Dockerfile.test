@@ -1,7 +1,7 @@
 FROM elasticsearch:2-alpine
 FROM rabbitmq:3-management
 FROM redis:alpine
-FROM ubuntu:latest
+FROM ubuntu:16.04
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apt-get update && apt-get install -y \
@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     make \
-    python \
-    python-pip \
+    python3 \
+    python3-pip \
     software-properties-common
 
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
@@ -25,8 +25,8 @@ RUN apt-get update && apt-get install -y docker-ce
 RUN echo "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
 ADD . /vent
 WORKDIR /vent
-RUN pip install -r tests/requirements.txt
-RUN python2.7 setup.py install
+RUN pip3 install -r tests/requirements.txt
+RUN python3 setup.py install
 
 ENTRYPOINT ["pytest"]
 CMD ["-l", "-s", "-v", "--cov=.", "-k", "'not vendor'", "--cov-report", "term-missing"]

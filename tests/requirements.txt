@@ -1,7 +1,8 @@
 docker==3.3.0
 elasticsearch==6.2.0
+falcon==1.4.1
+falcon-cors==1.1.7
 npyscreen==4.10.5
-paste==2.0.3
 pika==0.11.2
 pytest==3.6.0
 pytest-cov==2.5.1
@@ -9,6 +10,4 @@ python-magic==0.4.15
 redis==2.10.6
 rq==0.10.0
 sphinx==1.7.5
-urllib3==1.22
 watchdog==0.8.3
-web.py==0.39
