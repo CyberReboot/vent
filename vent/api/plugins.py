@@ -428,7 +428,7 @@ class Plugin:
                     tool_template = match[0].split('@')[1] + '.template'
                 vent_template_path = join(match_path, tool_template)
                 if os.path.exists(vent_template_path):
-                    with open(vent_template_path) as f:
+                    with open(vent_template_path, 'r') as f:
                         vent_template_val = f.read()
                 else:
                     vent_template_val = ''
@@ -741,7 +741,7 @@ class Plugin:
                            'name': None,
                            'groups': None,
                            'image_name': None}
-                for option in options.keys():
+                for option in list(options.keys()):
                     exists, value = template.option(section, option)
                     if exists:
                         options[option] = value
@@ -1032,7 +1032,7 @@ class Plugin:
             # parse the yml file
             c_dict = {}
             if os.path.exists(self.plugin_config_file):
-                with open(self.plugin_config_file) as config_file:
+                with open(self.plugin_config_file, 'r') as config_file:
                     c_dict = yaml.safe_load(config_file.read())
 
             # check for environment variable overrides

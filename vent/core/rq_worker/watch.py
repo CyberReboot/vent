@@ -136,7 +136,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     Processes files that have been added from the rq-worker, starts plugins
     that match the mime type for the new file.
     """
-    import ConfigParser
+    import configparser
     import ast
     import docker
     import json
@@ -162,7 +162,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         d_client = docker.from_env()
 
         # get the correct path for binding
-        vent_config = ConfigParser.RawConfigParser()
+        vent_config = configparser.ConfigParser(interpolation=None)
         vent_config.optionxform = str
         vent_config.read(template_path+'vent.cfg')
         if (vent_config.has_section('main') and
@@ -199,7 +199,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         # against the path.
         # keep track of images that failed getting configurations for
         failed_images = set()
-        config = ConfigParser.RawConfigParser()
+        config = configparser.ConfigParser(interpolation=None)
         config.optionxform = str
         print("Path to manifest: "+ template_path+'plugin_manifest.cfg')
         config.read(template_path+'plugin_manifest.cfg')

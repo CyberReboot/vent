@@ -17,7 +17,7 @@ def routes():
              #start_r,
              #stop_r,
              #update_r]
-    return dict(zip(p, funcs))
+    return dict(list(zip(p, funcs)))
 
 def paths():
     return ['/create',

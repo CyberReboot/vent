@@ -281,7 +281,8 @@ class PluginHelper:
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error("unable to evaluate command specified in vent.template: " + str(e))
                                 i += 2
-                        options = "".join(cmds)
+                        options = "".join(str(cmds))
+                    # check for commands to evaluate
                     # store options set for docker
                     try:
                         tool_d[c_name][option] = literal_eval(options)
@@ -486,7 +487,7 @@ class PluginHelper:
             # look out for links to delete because they're defined externally
             links_to_delete = set()
             # check and update links, volumes_from, network_mode
-            for container in tool_d.keys():
+            for container in list(tool_d.keys()):
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
                         # add links to external services already running if
@@ -523,7 +524,7 @@ class PluginHelper:
                                 configure_local = True
                                 status = False
                         if configure_local:
-                            for c in tool_d.keys():
+                            for c in list(tool_d.keys()):
                                 if ('tmp_name' in tool_d[c] and
                                    tool_d[c]['tmp_name'] == link):
                                     tool_d[container]['links'][tool_d[c]['name']] = tool_d[container]['links'].pop(link)
@@ -531,7 +532,7 @@ class PluginHelper:
                     tmp_volumes_from = tool_d[container]['volumes_from']
                     tool_d[container]['volumes_from'] = []
                     for volumes_from in list(tmp_volumes_from):
-                        for c in tool_d.keys():
+                        for c in list(tool_d.keys()):
                             if ('tmp_name' in tool_d[c] and
                                tool_d[c]['tmp_name'] == volumes_from):
                                 tool_d[container]['volumes_from'].append(tool_d[c]['name'])
@@ -540,18 +541,18 @@ class PluginHelper:
                 if 'network_mode' in tool_d[container]:
                     if tool_d[container]['network_mode'].startswith('container:'):
                         network_c_name = tool_d[container]['network_mode'].split('container:')[1]
-                        for c in tool_d.keys():
+                        for c in list(tool_d.keys()):
                             if ('tmp_name' in tool_d[c] and
                                tool_d[c]['tmp_name'] == network_c_name):
                                 tool_d[container]['network_mode'] = 'container:' + tool_d[c]['name']
 
             # remove tmp_names
-            for c in tool_d.keys():
+            for c in list(tool_d.keys()):
                 if 'tmp_name' in tool_d[c]:
                     del tool_d[c]['tmp_name']
 
             # remove links section if all were externally configured
-            for c in tool_d.keys():
+            for c in list(tool_d.keys()):
                 if 'links' in tool_d[c]:
                     for link in links_to_delete:
                         if link in tool_d[c]['links']:
@@ -561,7 +562,7 @@ class PluginHelper:
                         del tool_d[c]['links']
 
             # remove containers that shouldn't be started
-            for c in tool_d.keys():
+            for c in list(tool_d.keys()):
                 deleted = False
                 if 'start' in tool_d[c] and not tool_d[c]['start']:
                     del tool_d[c]

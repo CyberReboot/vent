@@ -1,9 +1,4 @@
-try:
-    # python2
-    import ConfigParser
-except ImportError:  # pragma: no cover
-    # python3
-    import configparser as ConfigParser
+import configparser
 
 from vent.helpers.errors import ErrorHandler
 
@@ -11,7 +6,7 @@ from vent.helpers.errors import ErrorHandler
 class Template:
     """ Handle parsing templates """
     def __init__(self, template=None):
-        self.config = ConfigParser.RawConfigParser()
+        self.config = configparser.ConfigParser(interpolation=None)
         self.config.optionxform = str
         if template:
             self.config.read(template)
@@ -110,7 +105,7 @@ class Template:
 
     @ErrorHandler
     def write_config(self):
-        with open(self.template, 'wb') as configfile:
+        with open(self.template, 'w') as configfile:
             self.config.write(configfile)
         return
 

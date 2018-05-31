@@ -367,7 +367,7 @@ class ToolForm(npyscreen.ActionForm):
                         tool = action.p_helper.constraint_options(constraints,
                                                                   options)[0]
                         # only one tool should be returned
-                        name = tool.keys()[0]
+                        name = list(tool.keys())[0]
                         if tool[name]['type'] == 'registry':
                             registry_image = True
                         else:

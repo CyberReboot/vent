@@ -52,7 +52,7 @@ class InventoryForm(npyscreen.FormBaseNew):
                 constraints = {"repo": cur_repo, "name": name}
                 t_section = self.api_action.p_helper \
                             .constraint_options(constraints, [])[0]
-                t_section = t_section.keys()[0]
+                t_section = list(t_section.keys())[0]
                 if group in manifest.option(t_section, 'groups')[1].split(','):
                     new_display += self.all_tools[i:i+5]
             elif val == '':

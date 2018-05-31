@@ -7,7 +7,7 @@ import queue
 import re
 import shutil
 import tempfile
-import urllib
+import urllib.request
 import yaml
 
 from vent.api.plugins import Plugin
@@ -539,7 +539,7 @@ class Action:
         self.logger.info("Starting: backup")
         status = (True, None)
         # initialize all needed variables (names for backup files, etc.)
-        backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')))
+        backup_name = (b'.vent-backup-' + '-'.join(Timestamp().split(' ')))
         backup_dir = os.path.join(os.path.expanduser('~'), backup_name)
         backup_manifest = os.path.join(backup_dir, 'backup_manifest.cfg')
         backup_vcfg = os.path.join(backup_dir, 'backup_vcfg.cfg')
@@ -555,11 +555,11 @@ class Action:
         try:
             # backup manifest
             with open(backup_manifest, 'w') as bmanifest:
-                with open(manifest) as manifest_file:
+                with open(manifest, 'r') as manifest_file:
                     bmanifest.write(manifest_file.read())
             # backup vent.cfg
             with open(backup_vcfg, 'w') as bvcfg:
-                with open(self.vent_config) as vcfg_file:
+                with open(self.vent_config, 'r') as vcfg_file:
                     bvcfg.write(vcfg_file.read())
             self.logger.info("Backup information written to " + backup_dir)
             status = (True, backup_dir)
@@ -894,7 +894,7 @@ class Action:
             tools = self.p_helper.constraint_options(constraints, options)[0]
             if tools:
                 # should only be one tool
-                tool = tools.keys()[0]
+                tool = list(tools.keys())[0]
                 # load all vent.template options into dict
                 for section in tools[tool]:
                     template_dict[section] = json.loads(tools[tool][section])
@@ -986,7 +986,7 @@ class Action:
                     result = self.p_helper.constraint_options(t_identifier, [])
                     tools = result[0]
                     manifest = result[1]
-                    tool = tools.keys()[0]
+                    tool = list(tools.keys())[0]
                 else:
                     options = ['path', 'multi_tool', 'name']
                     self.logger.info(constraints)
@@ -996,7 +996,7 @@ class Action:
                     # only one tool in tools because perform this function for
                     # every tool
                     if tools:
-                        tool = tools.keys()[0]
+                        tool = list(tools.keys())[0]
                         if ('multi_tool' in tools[tool] and
                                 tools[tool]['multi_tool'] == 'yes'):
                             name = tools[tool]['name']
@@ -1017,7 +1017,7 @@ class Action:
                 tools, manifest = self.p_helper.constraint_options(constraints,
                                                                    options)
                 if tools:
-                    tool = tools.keys()[0]
+                    tool = list(tools.keys())[0]
                 else:
                     status = (False, "Couldn't save configuration")
             if status[0]:
@@ -1116,7 +1116,7 @@ class Action:
                                                           ['running',
                                                               'link_name'])
                 tools = result[0]
-                tool = tools.keys()[0]
+                tool = list(tools.keys())[0]
                 if ('running' in tools[tool] and
                         tools[tool]['running'] == 'yes'):
                     start_tools = [t_identifier]
