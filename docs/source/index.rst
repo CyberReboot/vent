@@ -15,8 +15,8 @@ Dependencies
 
     docker >= 1.13.1
     make (if building from source)
-    pip
-    python2.7.x
+    pip3
+    python3.6.x
 
 
 Getting Set Up
