@@ -277,11 +277,11 @@ class PluginHelper:
                                 try:
                                     cmds[i] = check_output(shlex.split(cmds[i]),
                                                            stderr=STDOUT,
-                                                           close_fds=True).strip()
+                                                           close_fds=True).strip().decode("utf-8")
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error("unable to evaluate command specified in vent.template: " + str(e))
                                 i += 2
-                        options = "".join(str(cmds))
+                        options = "".join(cmds)
                     # check for commands to evaluate
                     # store options set for docker
                     try:
@@ -655,7 +655,7 @@ class PluginHelper:
         del tool_d[container]['section']
         manifest = Template(self.manifest)
         try:
-            c = self.d_client.containers.get(container.decode("utf-8"))
+            c = self.d_client.containers.get(container)
             c.start()
             s_containers.append(container)
             manifest.set_option(section, 'running', 'yes')

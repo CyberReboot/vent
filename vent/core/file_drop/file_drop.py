@@ -56,11 +56,11 @@ class GZHandler(PatternMatchingEventHandler):
 
                 # check if the file was already queued and ignore
                 exists = False
-                print(uid+" started " + spath)
+                print(uid + " started " + spath)
                 jobs = self.r.keys(pattern="rq:job*")
                 for job in jobs:
                     print(uid + " ***")
-                    description = self.r.hget(job, 'description')
+                    description = self.r.hget(job, 'description').decode("utf-8")
                     print(uid + " " + description)
                     if description.startswith("watch.file_queue('"):
                         print(uid + " " +

@@ -197,13 +197,13 @@ class MenuHelper:
                                          close_fds=True)
             branch_output = branch_output.split(b"\n")
             for branch in branch_output:
-                b = branch.strip()
-                if b.startswith(b'*'):
-                    b = b[2:]
-                if "/" in b:
-                    branches.append(b.rsplit('/', 1)[1])
-                elif b:
-                    branches.append(b)
+                br = branch.strip()
+                if br.startswith(b'*'):
+                    br = br[2:]
+                if b"/" in br:
+                    branches.append(br.rsplit(b'/', 1)[1].decode("utf-8"))
+                elif br:
+                    branches.append(br.decode("utf-8"))
 
             branches = list(set(branches))
             self.logger.info("branches found: " + str(branches))
@@ -255,7 +255,7 @@ class MenuHelper:
                                                             branch),
                                                      stderr=STDOUT,
                                                      close_fds=True)
-                        branch_output = branch_output.split("\n")[:-1]
+                        branch_output = branch_output.decode("utf-8").split("\n")[:-1]
                         branch_output += ['HEAD']
                         commits.append((branch, branch_output))
                     except Exception as e:  # pragma: no cover
