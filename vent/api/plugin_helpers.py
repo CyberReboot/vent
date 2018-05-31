@@ -655,7 +655,7 @@ class PluginHelper:
         del tool_d[container]['section']
         manifest = Template(self.manifest)
         try:
-            c = self.d_client.containers.get(container)
+            c = self.d_client.containers.get(container.decode("utf-8"))
             c.start()
             s_containers.append(container)
             manifest.set_option(section, 'running', 'yes')

@@ -37,8 +37,6 @@ def test_create_r(client):
     r = client.simulate_post(
         '/create', params={'nic': 'eth1', 'id': 'foo', 'interval': '61'})
     assert r.status == '200 OK'
-    r = client.simulate_post('/create', params='{}')
-    assert r.status == '200 OK'
     r = client.simulate_post('/create', params={'id': 'foo',
                                          'interval': '60',
                                          'filter': '',
@@ -51,8 +49,6 @@ def test_create_r(client):
 
 def test_update_r(client):
     """ tests the restful endpoint: update """
-    r = client.simulate_post('/update', params='{}')
-    assert r.status == '200 OK'
     r = client.simulate_post('/update', params={'id': 'foo'})
     assert r.status == '200 OK'
     r = client.simulate_post('/update', params={'id': 'foo',

@@ -195,10 +195,10 @@ class MenuHelper:
             branch_output = check_output(shlex.split("git branch -a"),
                                          stderr=STDOUT,
                                          close_fds=True)
-            branch_output = branch_output.split("\n")
+            branch_output = branch_output.split(b"\n")
             for branch in branch_output:
                 b = branch.strip()
-                if b.startswith('*'):
+                if b.startswith(b'*'):
                     b = b[2:]
                 if "/" in b:
                     branches.append(b.rsplit('/', 1)[1])

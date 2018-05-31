@@ -539,7 +539,7 @@ class Action:
         self.logger.info("Starting: backup")
         status = (True, None)
         # initialize all needed variables (names for backup files, etc.)
-        backup_name = (b'.vent-backup-' + '-'.join(Timestamp().split(' ')))
+        backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')))
         backup_dir = os.path.join(os.path.expanduser('~'), backup_name)
         backup_manifest = os.path.join(backup_dir, 'backup_manifest.cfg')
         backup_vcfg = os.path.join(backup_dir, 'backup_vcfg.cfg')
