@@ -328,10 +328,9 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                                 try:
                                     route = Popen(('/sbin/ip', 'route'),
                                                   stdout=PIPE)
-                                    h = check_output(('awk', '/default/ {print$3}'),
-                                                     stdin=route.stdout)
+                                    host = check_output(('awk', '/default/ {print$3}'),
+                                                        stdin=route.stdout).strip().decode("utf-8")
                                     route.wait()
-                                    host = h.strip()
                                 except Exception as e:  # pragma no cover
                                     logger.error("Default gateway "
                                                  "went wrong " + str(e))

@@ -109,7 +109,7 @@ class MenuHelper:
                                     image_id = None
                                     cmd = "docker pull " + check_image
                                     output = check_output(shlex.split(cmd),
-                                                          stderr=STDOUT)
+                                                          stderr=STDOUT).decode("utf-8")
 
                                     # image_name in format of (bool, image_name)
                                     name = image_name[1]
@@ -191,7 +191,7 @@ class MenuHelper:
 
             check_output(shlex.split("git pull --all"),
                          stderr=STDOUT,
-                         close_fds=True)
+                         close_fds=True).decode("utf-8")
             branch_output = check_output(shlex.split("git branch -a"),
                                          stderr=STDOUT,
                                          close_fds=True)
@@ -211,7 +211,7 @@ class MenuHelper:
                 try:
                     check_output(shlex.split("git checkout " + branch),
                                  stderr=STDOUT,
-                                 close_fds=True)
+                                 close_fds=True).decode("utf-8")
                 except Exception as e:  # pragma: no cover
                     self.logger.error("repo_branches failed with error: " +
                                       str(e) + " on branch: " + str(branch))
@@ -254,8 +254,8 @@ class MenuHelper:
                                                      .split("git rev-list origin/" +
                                                             branch),
                                                      stderr=STDOUT,
-                                                     close_fds=True)
-                        branch_output = branch_output.decode("utf-8").split("\n")[:-1]
+                                                     close_fds=True).decode("utf-8")
+                        branch_output = branch_output.split("\n")[:-1]
                         branch_output += ['HEAD']
                         commits.append((branch, branch_output))
                     except Exception as e:  # pragma: no cover

@@ -83,14 +83,14 @@ class PluginHelper:
         try:
             status = check_output(shlex.split("git checkout " + branch),
                                   stderr=STDOUT,
-                                  close_fds=True)
+                                  close_fds=True).decode("utf-8")
             status = check_output(shlex.split("git pull"),
                                   stderr=STDOUT,
-                                  close_fds=True)
+                                  close_fds=True).decode("utf-8")
             status = check_output(shlex.split("git reset --hard " +
                                               version),
                                   stderr=STDOUT,
-                                  close_fds=True)
+                                  close_fds=True).decode("utf-8")
             response = (True, status)
         except Exception as e:  # pragma: no cover
             self.logger.error("checkout failed with error: " + str(e))
@@ -116,7 +116,7 @@ class PluginHelper:
                                              status[2] +
                                              " rev-parse"),
                                  stderr=STDOUT,
-                                 close_fds=True)
+                                 close_fds=True).decode("utf-8")
                     self.logger.info("path already exists: " + str(status[2]))
                     self.logger.info("Status of clone: " + str(status[0]))
                     self.logger.info("Finished: clone")
@@ -131,7 +131,7 @@ class PluginHelper:
 
             # ensure cloning still works even if ssl is broken
             cmd = "git config --global http.sslVerify false"
-            check_output(shlex.split(cmd), stderr=STDOUT, close_fds=True)
+            check_output(shlex.split(cmd), stderr=STDOUT, close_fds=True).decode("utf-8")
 
             # check if user and pw were supplied, typically for private repos
             if user and pw:
@@ -142,7 +142,7 @@ class PluginHelper:
             # clone repo and build tools
             check_output(shlex.split("git clone --recursive " + repo + " ."),
                          stderr=STDOUT,
-                         close_fds=True)
+                         close_fds=True).decode("utf-8")
 
             chdir(status[1])
             status = (True, status[1])
@@ -681,7 +681,7 @@ class PluginHelper:
                     else:
                         # now just requires ip, ifconfig
                         try:
-                            route = check_output(('ip', 'route')).split('\n')
+                            route = check_output(('ip', 'route')).decode("utf-8").split('\n')
                             default = ''
                             # grab the default network device.
                             for device in route:
@@ -690,7 +690,7 @@ class PluginHelper:
                                     break
 
                             # grab the IP address for the default device
-                            ip_addr = check_output(('ifconfig', default))
+                            ip_addr = check_output(('ifconfig', default)).decode("utf-8")
                             ip_addr = ip_addr.split('\n')[1].split()[1]
                             host = ip_addr
                         except Exception as e:  # pragma no cover
