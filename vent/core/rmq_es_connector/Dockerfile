@@ -9,13 +9,13 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
 
 
 RUN apk add --update \
-    python \
-    py2-pip \
+    python3 \
+    py3-pip \
     && rm -rf /var/cache/apk/*
 
 COPY requirements.txt /vent/requirements.txt
-RUN pip install -r /vent/requirements.txt
+RUN pip3 install -r /vent/requirements.txt
 COPY rmq_es_connector.py /vent/rmq_es_connector.py
 
-ENTRYPOINT ["python", "/vent/rmq_es_connector.py"]
+ENTRYPOINT ["python3", "/vent/rmq_es_connector.py"]
 CMD [""]
