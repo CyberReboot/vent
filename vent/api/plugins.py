@@ -1055,9 +1055,9 @@ class Plugin:
                 plugin_options = c_dict[plugin_name]
                 for section in plugin_options:
                     for option in plugin_options[section]:
-                        self.logger.info("fill_config section: " + section + " option: " + option + " value: " + plugin_options[section][option])
+                        self.logger.info("fill_config section: " + section + " option: " + option + " value: " + str(plugin_options[section][option]))
                         plugin_template.set_option(section, option,
-                                plugin_options[section][option])
+                                str(plugin_options[section][option]))
                 plugin_template.write_config()
 
         except Exception as e:  # pragma: no cover
