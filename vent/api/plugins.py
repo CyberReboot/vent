@@ -1035,7 +1035,6 @@ class Plugin:
                 with open(self.plugin_config_file, 'r') as config_file:
                     c_dict = yaml.safe_load(config_file.read())
 
-            self.logger.error("out of yaml:" + str(c_dict))
             # check for environment variable overrides
             check_c_dict = c_dict.copy()
             for tool in check_c_dict:
@@ -1044,7 +1043,6 @@ class Plugin:
                         if key in os.environ:
                             c_dict[tool][section][key] = os.getenv(key)
 
-            self.logger.error("processed:" + str(c_dict))
             # assume the name of the plugin is its directory
             plugin_name = path.split('/')[-1]
             if plugin_name == '':
