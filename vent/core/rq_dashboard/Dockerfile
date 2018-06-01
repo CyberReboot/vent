@@ -9,12 +9,12 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
 
 RUN apk add --update \
     git \
-    python \
-    py2-pip \
+    python3 \
+    py3-pip \
     && rm -rf /var/cache/apk/*
 
 # get newer for worker list fix
-RUN pip install git+https://github.com/mredar/rq-dashboard.git@bb5c8f93be5f1ac265bddd5d29fb98cf17fb2585
+RUN pip3 install git+https://github.com/mredar/rq-dashboard.git@bb5c8f93be5f1ac265bddd5d29fb98cf17fb2585
 
 COPY rq_dash_settings.py /rq_dash_settings.py
 

@@ -276,7 +276,7 @@ class TutorialTroubleshootingForm(TutorialForm):
            necessary to have the Docker daemon running.
         2) Is this the lastest version of Vent? Ways to get the latest
            Vent version:
-              Using pip:    'pip install vent && vent'
+              Using pip:    'pip3 install vent && vent'
               Using Docker: 'docker pull cyberreboot/vent'
                             'docker run -it vent_image_id'
               Using github: 'git clone https://github.com/CyberReboot/vent'

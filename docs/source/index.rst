@@ -25,7 +25,7 @@ There's two ways to get Vent up and running on your machine:
 
 1. Pip::
 
-    $ pip install vent
+    $ pip3 install vent
 
 2. Clone the repo::
 
@@ -34,13 +34,13 @@ There's two ways to get Vent up and running on your machine:
 
 3. Build from source (for sudo/root privileged users)::
 
-    $ make 
+    $ make
 
    Users with limited permissions or require user-local installation can use the following::
 
     $ sudo env "PATH=$PATH" make
 
-.. note:: If you already have ``docker-py`` installed on your machine, you may need to ``pip uninstall docker-py`` first. ``vent`` will install ``docker-py`` as part of the installation process. However, there are known incompatibilities of ``docker-py`` with older versions.
+.. note:: If you already have ``docker-py`` installed on your machine, you may need to ``pip3 uninstall docker-py`` first. ``vent`` will install ``docker-py`` as part of the installation process. However, there are known incompatibilities of ``docker-py`` with older versions.
 
 Once installed, it's simply::
 

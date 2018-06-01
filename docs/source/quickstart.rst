@@ -7,7 +7,7 @@ Getting Vent set up is quick and easy.
 
    - Using pip::
 
-       pip install vent && vent
+       pip3 install vent && vent
 
 
    Developer versions of Vent are available but may not be entirely stable.
