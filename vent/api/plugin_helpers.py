@@ -400,12 +400,12 @@ class PluginHelper:
                         else:
                             tool_d[c_name]['environment'] = ["VENT_NICS="+nics]
                 # send logs to syslog
-                #if ('syslog' not in s[section]['groups'] and
-                #   'core' in s[section]['groups']):
-                #    log_config['config']['tag'] = 'core'
-                #    tool_d[c_name]['log_config'] = log_config
-                #if 'syslog' not in s[section]['groups']:
-                #    tool_d[c_name]['log_config'] = log_config
+                if ('syslog' not in s[section]['groups'] and
+                   'core' in s[section]['groups']):
+                    log_config['config']['tag'] = 'core'
+                    tool_d[c_name]['log_config'] = log_config
+                if 'syslog' not in s[section]['groups']:
+                    tool_d[c_name]['log_config'] = log_config
                 # mount necessary directories
                 if 'files' in s[section]['groups']:
                     # check if running in a docker container

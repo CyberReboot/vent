@@ -1049,18 +1049,20 @@ class Plugin:
                 plugin_name = path.split('/')[-2]
             plugin_config_path = path + '/config/' + plugin_name + '.config'
 
+            self.logger.info("fill_config path: " + plugin_config_path)
             if os.path.exists(plugin_config_path):
                 plugin_template = Template(plugin_config_path)
                 plugin_options = c_dict[plugin_name]
                 for section in plugin_options:
                     for option in plugin_options[section]:
+                        self.logger.info("fill_config section: " + section + " option: " + option + " value: " + plugin_options[section][option])
                         plugin_template.set_option(section, option,
                                 plugin_options[section][option])
                 plugin_template.write_config()
 
         except Exception as e:  # pragma: no cover
             status = (False, e)
-            self.logger.info("Failed to fill_config: " + str(e))
+            self.logger.error("Failed to fill_config: " + str(e))
 
         self.logger.info("Status of fill_config: " + str(status[0]))
         self.logger.info("Finished: fill_config")
