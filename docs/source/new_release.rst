@@ -23,8 +23,6 @@ Get the latest clone of Vent from https://github.com/CyberReboot/vent
      python3 setup.py sdist upload
 
 6. Create a new github release. Tag and release title are the version number.
-   Since we already added changes to our ``CHANGELOG.md``, there's no need to
-   rewrite all that information so leave it blank. Attach the ISO and publish the release
 
 7. Finally, change the version number to the next version number with a ``dev``
    tag. Eg: ``0.4.4.dev``. Commit the version change, make a PR, and merge to ``master``.

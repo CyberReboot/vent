@@ -1,4 +1,5 @@
 from vent.api.menu_helpers import MenuHelper
+from vent.api.plugins import Plugin
 
 
 def test_cores():
@@ -24,6 +25,10 @@ def test_repo_branches():
 
 def test_repo_commits():
     """ Test the repo_commits function """
+    instance = Plugin()
+    status = instance.add('https://github.com/cyberreboot/vent', build=False)
+    assert isinstance(status, tuple)
+    assert status[0] == True
     instance = MenuHelper()
     status = instance.repo_commits('https://github.com/cyberreboot/vent')
     assert isinstance(status, tuple)
