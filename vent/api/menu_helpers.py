@@ -191,7 +191,7 @@ class MenuHelper:
 
             check_output(shlex.split("git pull --all"),
                          stderr=STDOUT,
-                         close_fds=True).decode("utf-8")
+                         close_fds=True)
             branch_output = check_output(shlex.split("git branch -a"),
                                          stderr=STDOUT,
                                          close_fds=True)
@@ -211,7 +211,7 @@ class MenuHelper:
                 try:
                     check_output(shlex.split("git checkout " + branch),
                                  stderr=STDOUT,
-                                 close_fds=True).decode("utf-8")
+                                 close_fds=True)
                 except Exception as e:  # pragma: no cover
                     self.logger.error("repo_branches failed with error: " +
                                       str(e) + " on branch: " + str(branch))
