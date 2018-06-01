@@ -1,14 +1,13 @@
-import Queue
-
 import ast
 import docker
 import getpass
 import json
 import os
+import queue
 import re
 import shutil
 import tempfile
-import urllib2
+import urllib.request
 import yaml
 
 from vent.api.plugins import Plugin
@@ -30,7 +29,7 @@ class Action:
         self.vent_config = self.plugin.path_dirs.cfg_file
         self.startup_file = self.plugin.path_dirs.startup_file
         self.p_helper = self.plugin.p_helper
-        self.queue = Queue.Queue()
+        self.queue = queue.Queue()
         self.logger = Logger(__name__)
 
     def add(self, repo, tools=None, overrides=None, version="HEAD",
@@ -556,11 +555,11 @@ class Action:
         try:
             # backup manifest
             with open(backup_manifest, 'w') as bmanifest:
-                with open(manifest) as manifest_file:
+                with open(manifest, 'r') as manifest_file:
                     bmanifest.write(manifest_file.read())
             # backup vent.cfg
             with open(backup_vcfg, 'w') as bvcfg:
-                with open(self.vent_config) as vcfg_file:
+                with open(self.vent_config, 'r') as vcfg_file:
                     bvcfg.write(vcfg_file.read())
             self.logger.info("Backup information written to " + backup_dir)
             status = (True, backup_dir)
@@ -895,7 +894,7 @@ class Action:
             tools = self.p_helper.constraint_options(constraints, options)[0]
             if tools:
                 # should only be one tool
-                tool = tools.keys()[0]
+                tool = list(tools.keys())[0]
                 # load all vent.template options into dict
                 for section in tools[tool]:
                     template_dict[section] = json.loads(tools[tool][section])
@@ -987,7 +986,7 @@ class Action:
                     result = self.p_helper.constraint_options(t_identifier, [])
                     tools = result[0]
                     manifest = result[1]
-                    tool = tools.keys()[0]
+                    tool = list(tools.keys())[0]
                 else:
                     options = ['path', 'multi_tool', 'name']
                     self.logger.info(constraints)
@@ -997,7 +996,7 @@ class Action:
                     # only one tool in tools because perform this function for
                     # every tool
                     if tools:
-                        tool = tools.keys()[0]
+                        tool = list(tools.keys())[0]
                         if ('multi_tool' in tools[tool] and
                                 tools[tool]['multi_tool'] == 'yes'):
                             name = tools[tool]['name']
@@ -1018,7 +1017,7 @@ class Action:
                 tools, manifest = self.p_helper.constraint_options(constraints,
                                                                    options)
                 if tools:
-                    tool = tools.keys()[0]
+                    tool = list(tools.keys())[0]
                 else:
                     status = (False, "Couldn't save configuration")
             if status[0]:
@@ -1117,7 +1116,7 @@ class Action:
                                                           ['running',
                                                               'link_name'])
                 tools = result[0]
-                tool = tools.keys()[0]
+                tool = list(tools.keys())[0]
                 if ('running' in tools[tool] and
                         tools[tool]['running'] == 'yes'):
                     start_tools = [t_identifier]
@@ -1453,9 +1452,9 @@ class Action:
             data = json.dumps(data)
 
             # create the post request and send it off
-            req = urllib2.Request(url, data)
+            req = urllib.request(url, data)
             req.add_header('Content-Type', 'application/json')
-            response = urllib2.urlopen(req, data)
+            response = urllib.request.urlopen(req, data)
 
             # return whatever the webpage returned
             return (True, response.read())
@@ -1476,7 +1475,7 @@ class Action:
             after a GET request or a failure message
         """
         try:
-            response = urllib2.urlopen(url)
+            response = urllib.request.urlopen(url)
             return (True, response.read())
         except Exception as e:  # pragma no cover
             return (False, "failed get request to " + url + " " + str(e))

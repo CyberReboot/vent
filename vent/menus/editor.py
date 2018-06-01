@@ -47,7 +47,7 @@ class EditorForm(npyscreen.ActionForm):
         if not self.just_downloaded and not self.vent_cfg:
             result = self.p_helper.constraint_options(self.tool_identifier, [])
             tool, self.manifest = result
-            self.section = tool.keys()[0]
+            self.section = list(tool.keys())[0]
 
         # get configuration information depending on type
         if self.just_downloaded:
@@ -77,7 +77,7 @@ class EditorForm(npyscreen.ActionForm):
             template.set_option('settings', 'instances',
                                 str(self.settings['new_instances']))
             template.write_config()
-            with open(template_path) as vent_template:
+            with open(template_path, 'r') as vent_template:
                 self.config_val = vent_template.read()
         else:
             self.config_val = keywords['get_configure'](

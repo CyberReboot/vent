@@ -181,7 +181,7 @@ def GpuUsage(**kargs):
     else:
         try:
             # now just requires ip, ifconfig
-            route = check_output(('ip', 'route')).split('\n')
+            route = check_output(('ip', 'route')).decode("utf-8").split('\n')
             default = ''
             # grab the default network device.
             for device in route:
@@ -190,7 +190,7 @@ def GpuUsage(**kargs):
                     break
 
             # grab the IP address for the default device
-            ip_addr = check_output(('ifconfig', default))
+            ip_addr = check_output(('ifconfig', default)).decode("utf-8")
             ip_addr = ip_addr.split('\n')[1].split()[1]
             host = ip_addr
         except Exception as e:  # pragma: no cover
@@ -489,7 +489,7 @@ def Uptime():
     """ Get the current uptime information """
     uptime = ""
     try:
-        uptime = str(check_output(["uptime"], close_fds=True))[1:]
+        uptime = check_output(["uptime"], close_fds=True).decode("utf-8")[1:]
     except Exception as e:  # pragma: no cover
         logger.error("Could not get current uptime " + str(e))
     return uptime

@@ -1,4 +1,4 @@
 [report]
 omit = setup.py
-omit = */conftest.py
-omit = */suplemon/*
+       */conftest.py
+       */suplemon/*

@@ -83,14 +83,14 @@ class PluginHelper:
         try:
             status = check_output(shlex.split("git checkout " + branch),
                                   stderr=STDOUT,
-                                  close_fds=True)
+                                  close_fds=True).decode("utf-8")
             status = check_output(shlex.split("git pull"),
                                   stderr=STDOUT,
-                                  close_fds=True)
+                                  close_fds=True).decode("utf-8")
             status = check_output(shlex.split("git reset --hard " +
                                               version),
                                   stderr=STDOUT,
-                                  close_fds=True)
+                                  close_fds=True).decode("utf-8")
             response = (True, status)
         except Exception as e:  # pragma: no cover
             self.logger.error("checkout failed with error: " + str(e))
@@ -116,7 +116,7 @@ class PluginHelper:
                                              status[2] +
                                              " rev-parse"),
                                  stderr=STDOUT,
-                                 close_fds=True)
+                                 close_fds=True).decode("utf-8")
                     self.logger.info("path already exists: " + str(status[2]))
                     self.logger.info("Status of clone: " + str(status[0]))
                     self.logger.info("Finished: clone")
@@ -131,7 +131,7 @@ class PluginHelper:
 
             # ensure cloning still works even if ssl is broken
             cmd = "git config --global http.sslVerify false"
-            check_output(shlex.split(cmd), stderr=STDOUT, close_fds=True)
+            check_output(shlex.split(cmd), stderr=STDOUT, close_fds=True).decode("utf-8")
 
             # check if user and pw were supplied, typically for private repos
             if user and pw:
@@ -142,7 +142,7 @@ class PluginHelper:
             # clone repo and build tools
             check_output(shlex.split("git clone --recursive " + repo + " ."),
                          stderr=STDOUT,
-                         close_fds=True)
+                         close_fds=True).decode("utf-8")
 
             chdir(status[1])
             status = (True, status[1])
@@ -277,11 +277,12 @@ class PluginHelper:
                                 try:
                                     cmds[i] = check_output(shlex.split(cmds[i]),
                                                            stderr=STDOUT,
-                                                           close_fds=True).strip()
+                                                           close_fds=True).strip().decode("utf-8")
                                 except Exception as e:  # pragma: no cover
                                     self.logger.error("unable to evaluate command specified in vent.template: " + str(e))
                                 i += 2
                         options = "".join(cmds)
+                    # check for commands to evaluate
                     # store options set for docker
                     try:
                         tool_d[c_name][option] = literal_eval(options)
@@ -486,7 +487,7 @@ class PluginHelper:
             # look out for links to delete because they're defined externally
             links_to_delete = set()
             # check and update links, volumes_from, network_mode
-            for container in tool_d.keys():
+            for container in list(tool_d.keys()):
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
                         # add links to external services already running if
@@ -523,7 +524,7 @@ class PluginHelper:
                                 configure_local = True
                                 status = False
                         if configure_local:
-                            for c in tool_d.keys():
+                            for c in list(tool_d.keys()):
                                 if ('tmp_name' in tool_d[c] and
                                    tool_d[c]['tmp_name'] == link):
                                     tool_d[container]['links'][tool_d[c]['name']] = tool_d[container]['links'].pop(link)
@@ -531,7 +532,7 @@ class PluginHelper:
                     tmp_volumes_from = tool_d[container]['volumes_from']
                     tool_d[container]['volumes_from'] = []
                     for volumes_from in list(tmp_volumes_from):
-                        for c in tool_d.keys():
+                        for c in list(tool_d.keys()):
                             if ('tmp_name' in tool_d[c] and
                                tool_d[c]['tmp_name'] == volumes_from):
                                 tool_d[container]['volumes_from'].append(tool_d[c]['name'])
@@ -540,18 +541,18 @@ class PluginHelper:
                 if 'network_mode' in tool_d[container]:
                     if tool_d[container]['network_mode'].startswith('container:'):
                         network_c_name = tool_d[container]['network_mode'].split('container:')[1]
-                        for c in tool_d.keys():
+                        for c in list(tool_d.keys()):
                             if ('tmp_name' in tool_d[c] and
                                tool_d[c]['tmp_name'] == network_c_name):
                                 tool_d[container]['network_mode'] = 'container:' + tool_d[c]['name']
 
             # remove tmp_names
-            for c in tool_d.keys():
+            for c in list(tool_d.keys()):
                 if 'tmp_name' in tool_d[c]:
                     del tool_d[c]['tmp_name']
 
             # remove links section if all were externally configured
-            for c in tool_d.keys():
+            for c in list(tool_d.keys()):
                 if 'links' in tool_d[c]:
                     for link in links_to_delete:
                         if link in tool_d[c]['links']:
@@ -561,7 +562,7 @@ class PluginHelper:
                         del tool_d[c]['links']
 
             # remove containers that shouldn't be started
-            for c in tool_d.keys():
+            for c in list(tool_d.keys()):
                 deleted = False
                 if 'start' in tool_d[c] and not tool_d[c]['start']:
                     del tool_d[c]
@@ -680,7 +681,7 @@ class PluginHelper:
                     else:
                         # now just requires ip, ifconfig
                         try:
-                            route = check_output(('ip', 'route')).split('\n')
+                            route = check_output(('ip', 'route')).decode("utf-8").split('\n')
                             default = ''
                             # grab the default network device.
                             for device in route:
@@ -689,7 +690,7 @@ class PluginHelper:
                                     break
 
                             # grab the IP address for the default device
-                            ip_addr = check_output(('ifconfig', default))
+                            ip_addr = check_output(('ifconfig', default)).decode("utf-8")
                             ip_addr = ip_addr.split('\n')[1].split()[1]
                             host = ip_addr
                         except Exception as e:  # pragma no cover

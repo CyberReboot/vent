@@ -428,7 +428,7 @@ class Plugin:
                     tool_template = match[0].split('@')[1] + '.template'
                 vent_template_path = join(match_path, tool_template)
                 if os.path.exists(vent_template_path):
-                    with open(vent_template_path) as f:
+                    with open(vent_template_path, 'r') as f:
                         vent_template_val = f.read()
                 else:
                     vent_template_val = ''
@@ -452,7 +452,7 @@ class Plugin:
                     cmd = "git rev-parse --short HEAD"
                     commit_id = check_output(shlex.split(cmd),
                                              stderr=STDOUT,
-                                             close_fds=True).strip()
+                                             close_fds=True).strip().decode("utf-8")
                     template.set_option(section, "commit_id", commit_id)
                 if head:
                     # no need to store previous commits if not HEAD, since
@@ -606,9 +606,9 @@ class Plugin:
                             output = check_output(shlex.split("docker pull " +
                                                               image_name),
                                                   stderr=STDOUT,
-                                                  close_fds=True)
+                                                  close_fds=True).decode("utf-8")
                             self.logger.info("Pulling " + name[1] + "\n" +
-                                             str(output))
+                                             output)
 
                             i_attrs = self.d_client.images.get(image_name).attrs
                             image_id = i_attrs['Id'].split(':')[1][:12]
@@ -683,9 +683,9 @@ class Plugin:
                                                       image_name +
                                                       commit_tag + file_tag),
                                           stderr=STDOUT,
-                                          close_fds=True)
+                                          close_fds=True).decode("utf-8")
                     self.logger.info("Building " + name[1] + "\n" +
-                                     str(output))
+                                     output)
                     image_id = ""
                     for line in output.split("\n"):
                         suc_str = "Successfully built "
@@ -741,7 +741,7 @@ class Plugin:
                            'name': None,
                            'groups': None,
                            'image_name': None}
-                for option in options.keys():
+                for option in list(options.keys()):
                     exists, value = template.option(section, option)
                     if exists:
                         options[option] = value
@@ -1032,7 +1032,7 @@ class Plugin:
             # parse the yml file
             c_dict = {}
             if os.path.exists(self.plugin_config_file):
-                with open(self.plugin_config_file) as config_file:
+                with open(self.plugin_config_file, 'r') as config_file:
                     c_dict = yaml.safe_load(config_file.read())
 
             # check for environment variable overrides
@@ -1055,12 +1055,12 @@ class Plugin:
                 for section in plugin_options:
                     for option in plugin_options[section]:
                         plugin_template.set_option(section, option,
-                                plugin_options[section][option])
+                                str(plugin_options[section][option]))
                 plugin_template.write_config()
 
         except Exception as e:  # pragma: no cover
             status = (False, e)
-            self.logger.info("Failed to fill_config: " + str(e))
+            self.logger.error("Failed to fill_config: " + str(e))
 
         self.logger.info("Status of fill_config: " + str(status[0]))
         self.logger.info("Finished: fill_config")

@@ -1,5 +1,5 @@
 OS=`uname -s`
-PIP=$(shell which pip2.7 || echo "pip2")
+PIP=$(shell which pip3 || echo "pip3")
 
 build: clean
 	@echo
@@ -10,7 +10,7 @@ build: clean
 	$(PIP) -V
 	$(PIP) install -r tests/requirements.txt
 	$(MAKE) docs
-	python2.7 setup.py install
+	python3 setup.py install
 
 docs: docs_clean
 	@echo "generating documentation"

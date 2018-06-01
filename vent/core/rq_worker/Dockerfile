@@ -12,13 +12,13 @@ RUN apk add --update \
     docker \
     git \
     libmagic \
-    python \
-    py2-pip \
+    python3 \
+    py3-pip \
     && rm -rf /var/cache/apk/*
 
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-RUN pip install git+git://github.com/cyberreboot/vent.git@master
+RUN pip3 install -r requirements.txt
+RUN pip3 install git+git://github.com/cyberreboot/vent.git@master
 COPY *.py /
 
 ENTRYPOINT ["rqworker", "-c", "settings"]

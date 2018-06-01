@@ -24,8 +24,8 @@ Simply create your `plugins`, point vent to them & install them, and drop a file
 docker>=1.13.1
 git
 make (if building from source)
-pip
-python2.7.x
+pip3
+python3.6.x
 ```
 
 ### option 1: running inside of a Docker container

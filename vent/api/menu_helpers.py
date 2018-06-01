@@ -109,7 +109,7 @@ class MenuHelper:
                                     image_id = None
                                     cmd = "docker pull " + check_image
                                     output = check_output(shlex.split(cmd),
-                                                          stderr=STDOUT)
+                                                          stderr=STDOUT).decode("utf-8")
 
                                     # image_name in format of (bool, image_name)
                                     name = image_name[1]
@@ -191,19 +191,19 @@ class MenuHelper:
 
             check_output(shlex.split("git pull --all"),
                          stderr=STDOUT,
-                         close_fds=True)
+                         close_fds=True).decode("utf-8")
             branch_output = check_output(shlex.split("git branch -a"),
                                          stderr=STDOUT,
                                          close_fds=True)
-            branch_output = branch_output.split("\n")
+            branch_output = branch_output.split(b"\n")
             for branch in branch_output:
-                b = branch.strip()
-                if b.startswith('*'):
-                    b = b[2:]
-                if "/" in b:
-                    branches.append(b.rsplit('/', 1)[1])
-                elif b:
-                    branches.append(b)
+                br = branch.strip()
+                if br.startswith(b'*'):
+                    br = br[2:]
+                if b"/" in br:
+                    branches.append(br.rsplit(b'/', 1)[1].decode("utf-8"))
+                elif br:
+                    branches.append(br.decode("utf-8"))
 
             branches = list(set(branches))
             self.logger.info("branches found: " + str(branches))
@@ -211,7 +211,7 @@ class MenuHelper:
                 try:
                     check_output(shlex.split("git checkout " + branch),
                                  stderr=STDOUT,
-                                 close_fds=True)
+                                 close_fds=True).decode("utf-8")
                 except Exception as e:  # pragma: no cover
                     self.logger.error("repo_branches failed with error: " +
                                       str(e) + " on branch: " + str(branch))
@@ -254,7 +254,7 @@ class MenuHelper:
                                                      .split("git rev-list origin/" +
                                                             branch),
                                                      stderr=STDOUT,
-                                                     close_fds=True)
+                                                     close_fds=True).decode("utf-8")
                         branch_output = branch_output.split("\n")[:-1]
                         branch_output += ['HEAD']
                         commits.append((branch, branch_output))

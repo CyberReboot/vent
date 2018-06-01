@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM python:3-alpine3.7
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="network_tap" \
@@ -7,17 +7,18 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 
-
 RUN apk add --update \
-    python \
-    py-pip \
+    gcc \
+    git \
+    linux-headers \
+    musl-dev \
+    python3-dev \
     && rm -rf /var/cache/apk/*
 
 COPY . /network-tap
-WORKDIR /network-tap/ncontrol
-RUN pip install -r requirements.txt
+WORKDIR /network-tap
+RUN pip3 install -r ncontrol/requirements.txt
 
 EXPOSE 8080
 
-ENTRYPOINT ["python", "ncontrol.py"]
-CMD [""]
+CMD ["/network-tap/startup.sh"]

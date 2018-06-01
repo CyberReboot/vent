@@ -1,5 +1,4 @@
-import file_drop
-
+from .file_drop import GZHandler
 from redis import Redis
 from redis import StrictRedis
 from rq import Queue
@@ -7,7 +6,7 @@ from rq import Queue
 
 def test_file_drop_GZHandler():
     """ Tests the GZZHandler for file drop """
-    a = file_drop.GZHandler()
+    a = GZHandler()
 
     class Event:
         """ Creates a mock event object for tests """
