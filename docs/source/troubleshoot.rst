@@ -15,7 +15,7 @@ Let's first get some basic possible errors out of the way.
 
    - Using pip::
 
-        pip install vent && vent
+        pip3 install vent && vent
 
 
 Pip installs the latest *stable* release of Vent. If a problem still persists,

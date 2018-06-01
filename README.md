@@ -37,7 +37,7 @@ docker run -it -v /var/run/docker.sock:/var/run/docker.sock cyberreboot/vent
 ### option 2: installing
 
 ```
-pip install vent
+pip3 install vent
 ```
 
 ### option 3: getting the bits and building
@@ -54,11 +54,6 @@ sudo env "PATH=$PATH" make
 ```
 
 _Note - If you already have `docker-py` installed on your machine, you may need to_ `pip uninstall docker-py` _first. `vent` will install `docker-py` as part of the installation process, however there are known incompatibilities of `docker-py` with older versions._
-
-### option 4: deploying with an ISO
-
-go to [releases](https://github.com/CyberReboot/vent/releases) and download the ISO from the latest release (or build your own: `cd dev && make`)
-deploy the ISO as a VM or on bare metal.
 
 ### running
 
