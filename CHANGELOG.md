@@ -1,3 +1,18 @@
+# v0.6.0 (2018-06-01)
+
+improvements:
+- upgraded all python2 to python3
+- removed b2d ISO as it's been moved to maintenance mode
+- moved from web.py to falcon for network_tap
+- upgraded syslog version
+- upgraded version of pytest
+- pin all versions of pip dependencies
+- upgraded version of rq
+- increased the number of concurrent connections to syslog
+
+bug fixes:
+- fixed issue where multiple instances of a plugin wouldn't get started
+
 # v0.5.2 (2018-05-18)
 
 improvements:
