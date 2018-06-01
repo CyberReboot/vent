@@ -1049,13 +1049,11 @@ class Plugin:
                 plugin_name = path.split('/')[-2]
             plugin_config_path = path + '/config/' + plugin_name + '.config'
 
-            self.logger.info("fill_config path: " + plugin_config_path)
             if os.path.exists(plugin_config_path):
                 plugin_template = Template(plugin_config_path)
                 plugin_options = c_dict[plugin_name]
                 for section in plugin_options:
                     for option in plugin_options[section]:
-                        self.logger.info("fill_config section: " + section + " option: " + option + " value: " + str(plugin_options[section][option]))
                         plugin_template.set_option(section, option,
                                 str(plugin_options[section][option]))
                 plugin_template.write_config()
