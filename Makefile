@@ -8,7 +8,7 @@ build: clean
 	env
 	docker version || true
 	$(PIP) -V
-	$(PIP) install -r tests/requirements.txt
+	$(PIP) install -r requirements.txt
 	$(MAKE) docs
 	python3 setup.py install
 
@@ -92,7 +92,9 @@ test-unit: build
 	pytest tests/unit/ -l -s -v --cov=. --cov-report term-missing
 
 test-plugins: build
+	rabbitmq-server --detached
 	pytest vent/ -l -s -v --cov=. --cov-report term-missing
+	rabbitmqctl shutdown
 
 test-local: test-local-clean clean
 	docker build -t vent-test -f Dockerfile.test .
