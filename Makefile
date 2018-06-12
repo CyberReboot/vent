@@ -92,9 +92,9 @@ test-unit: build
 	pytest tests/unit/ -l -s -v --cov=. --cov-report term-missing
 
 test-plugins: build
-	sudo rabbitmq-server --detached
+	sudo /sbin/service rabbitmq-server start
 	pytest vent/ -l -s -v --cov=. --cov-report term-missing
-	sudo rabbitmqctl shutdown
+	sudo /sbin/service rabbitmq-server stop
 
 test-local: test-local-clean clean
 	docker build -t vent-test -f Dockerfile.test .
