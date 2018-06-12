@@ -83,16 +83,16 @@ clean:
 	$(PIP) uninstall -y vent || true
 
 test: build
-	pytest -l -s -v --cov=. -k 'not vendor' --cov-report term-missing
+	pytest -l -s -v --cov=. --cov-report term-missing
 
 test-menu: build
-	pytest -l -s -v --cov=tests/menu -k 'not vendor' --cov-report term-missing
+	pytest tests/menu/ -l -s -v --cov=. --cov-report term-missing
 
 test-unit: build
-	pytest -l -s -v --cov=tests/unit -k 'not vendor' --cov-report term-missing
+	pytest tests/unit/ -l -s -v --cov=. --cov-report term-missing
 
 test-plugins: build
-	pytest -l -s -v --cov=vent -k 'not vendor' --cov-report term-missing
+	pytest vent/ -l -s -v --cov=. --cov-report term-missing
 
 test-local: test-local-clean clean
 	docker build -t vent-test -f Dockerfile.test .
