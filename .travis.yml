@@ -21,6 +21,9 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
 env:
-  - TEST_SUITE=menu
-  - TEST_SUITE=unit
-  - TEST_SUITE=plugins
+matrix:
+  include:
+  - env: TEST_SUITE=menu
+  - env: TEST_SUITE=unit
+  - service: rabbitmq
+    env: TEST_SUITE=plugins
