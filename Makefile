@@ -85,6 +85,15 @@ clean:
 test: build
 	pytest -l -s -v --cov=. -k 'not vendor' --cov-report term-missing
 
+test-menu: build
+	pytest -l -s -v --cov=tests/menu -k 'not vendor' --cov-report term-missing
+
+test-unit: build
+	pytest -l -s -v --cov=tests/unit -k 'not vendor' --cov-report term-missing
+
+test-plugins: build
+	pytest -l -s -v --cov=vent -k 'not vendor' --cov-report term-missing
+
 test-local: test-local-clean clean
 	docker build -t vent-test -f Dockerfile.test .
 	docker run -d --name vent-test-redis redis:alpine
