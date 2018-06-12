@@ -13,17 +13,14 @@ python:
 before_script:
   - sleep 10
   - echo -e "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
-script:
-  - "make test-$TEST_SUITE"
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
-env:
-matrix:
+jobs:
   include:
-  - env: TEST_SUITE=menu
-  - env: TEST_SUITE=unit
-  - service: rabbitmq
-    env: TEST_SUITE=plugins
+  - stage: test
+    script: make test-menu
+    script: make test-unit
+    script: make test-plugins
+  - stage: coverage
+    script: bash <(curl -s https://codecov.io/bash)
