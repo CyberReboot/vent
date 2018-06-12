@@ -116,7 +116,7 @@ def test_jobs():
     status = m_helper.cores('start')
     assert isinstance(status, tuple)
     assert status[0]
-    status = m_helper.api_action.add('https://github.com/cyberreboot/vent-plugins')
+    status = m_helper.api_action.add('https://github.com/cyberreboot/vent-plugins', tools=[('tcpdump_hex_parser',''), ('gpu_example','')])
     assert isinstance(status, tuple)
     assert status[0]
     # run test job

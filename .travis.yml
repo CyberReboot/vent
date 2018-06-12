@@ -7,14 +7,18 @@ services:
   - redis
   - elasticsearch
 language: python
+cache: pip
 python:
   - "3.6"
 before_script:
   - sleep 10
   - echo -e "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
-script:
-  - make test
-  - bash <(curl -s https://codecov.io/bash)
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
+jobs:
+  include:
+  - stage: test
+    script: make test-menu && bash <(curl -s https://codecov.io/bash)
+  - script: make test-unit && bash <(curl -s https://codecov.io/bash)
+  - script: make test-plugins && bash <(curl -s https://codecov.io/bash)
