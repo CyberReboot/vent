@@ -4,7 +4,6 @@ group: edge
 
 services:
   - docker
-  - rabbitmq
   - redis
   - elasticsearch
 language: python
@@ -16,6 +15,7 @@ before_script:
   - echo -e "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
 script:
   - "make test-$TEST_SUITE"
+after_success:
   - bash <(curl -s https://codecov.io/bash)
 before_install:
   - sudo apt-get update
