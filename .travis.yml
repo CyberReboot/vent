@@ -19,6 +19,6 @@ before_install:
 jobs:
   include:
   - stage: test
-    script: make test-menu
-  - script: make test-unit
-  - script: make test-plugins
+    script: make test-menu && bash <(curl -s https://codecov.io/bash)
+  - script: make test-unit && bash <(curl -s https://codecov.io/bash)
+  - script: make test-plugins && bash <(curl -s https://codecov.io/bash)

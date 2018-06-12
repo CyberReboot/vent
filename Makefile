@@ -87,17 +87,14 @@ test: build
 
 test-menu: build
 	pytest tests/menu/ -l -s -v --cov=. --cov-report term-missing
-	bash <(curl -s https://codecov.io/bash)
 
 test-unit: build
 	pytest tests/unit/ -l -s -v --cov=. --cov-report term-missing
-	bash <(curl -s https://codecov.io/bash)
 
 test-plugins: build
 	sudo service rabbitmq-server start &
 	pytest vent/ -l -s -v --cov=. --cov-report term-missing
 	sudo service rabbitmq-server stop
-	bash <(curl -s https://codecov.io/bash)
 
 test-local: test-local-clean clean
 	docker build -t vent-test -f Dockerfile.test .
