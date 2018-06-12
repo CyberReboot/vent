@@ -22,5 +22,3 @@ jobs:
     script: make test-menu
   - script: make test-unit
   - script: make test-plugins
-  - stage: coverage
-    script: bash <(curl -s https://codecov.io/bash)
