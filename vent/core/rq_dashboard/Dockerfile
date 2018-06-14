@@ -2,7 +2,7 @@ FROM alpine:3.7
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="rq_dashboard" \
-      vent.groups="core" \
+      vent.groups="core,monitoring" \
       vent.section="cyberreboot:vent:/vent/core/rq_dashboard:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
