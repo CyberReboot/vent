@@ -260,7 +260,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                     # other tools' output
                     if 'process_from_tool' in options_dict and not in_base:
                         for tool in options_dict['process_from_tool'].split(','):
-                            if tool.replace(' ', '-') in directory:
+                            if tool.replace(' ', '-') in directory.rsplit('/', 1)[1]:
                                 process_file = True
                     if 'ext_types' in options_dict and process_file:
                         ext_types = options_dict['ext_types'].split(',')
