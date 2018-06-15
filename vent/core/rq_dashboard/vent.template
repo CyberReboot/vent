@@ -1,6 +1,6 @@
 [info]
 name = RQ-Dashboard
-groups = core
+groups = core,monitoring
 
 [service]
 uri_prefix1 = http://

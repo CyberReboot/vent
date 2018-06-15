@@ -10,11 +10,7 @@ def gpu_queue(options):
     from vent.helpers.meta import GpuUsage
 
     status = (False, None)
-
-    if os.path.isdir("/root/.vent"):
-        path_dir = "/root/.vent"
-    else:
-        path_dir = "/vent"
+    path_dir = "/vent/.vent"
 
     print("gpu queue", str(options))
     print("gpu queue", str(GpuUsage(base_dir=path_dir+"/",
@@ -131,7 +127,7 @@ def gpu_queue(options):
     return status
 
 
-def file_queue(path, template_path="/vent/", r_host="redis"):
+def file_queue(path, template_path="/vent/.vent/", r_host="redis"):
     """
     Processes files that have been added from the rq-worker, starts plugins
     that match the mime type for the new file.
@@ -154,9 +150,6 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     images = []
     configs = {}
     logger = Logger(__name__)
-
-    if os.path.isdir("/root/.vent"):
-        template_path = "/root/.vent/"
 
     try:
         d_client = docker.from_env()
