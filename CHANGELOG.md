@@ -1,3 +1,15 @@
+# v0.6.1 (2018-06-15)
+
+improvements:
+- tests now run in parallel on travis
+- upgraded version of pytest
+- upgraded version of gevent
+- outputs the name and ID of the container in syslog now
+
+bug fixes:
+- fixed paths in rq_worker for both vent inside and outside of a container
+- fixed process_from_tool recursion issue
+
 # v0.6.0 (2018-06-01)
 
 improvements:
