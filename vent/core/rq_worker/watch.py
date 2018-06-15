@@ -10,6 +10,8 @@ def gpu_queue(options):
     from vent.helpers.meta import GpuUsage
 
     status = (False, None)
+    if (os.path.isfile("/root/.vent/vent.cfg") and os.path.isfile("/root/.vent/plugin_manifest.cfg")):
+        template_path = "/root/.vent"
     path_dir = "/vent"
 
     print("gpu queue", str(options))
@@ -151,6 +153,9 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     configs = {}
     logger = Logger(__name__)
 
+    if (os.path.isfile("/root/.vent/vent.cfg") and os.path.isfile("/root/.vent/plugin_manifest.cfg")):
+        template_path = "/root/.vent/"
+
     try:
         d_client = docker.from_env()
 
@@ -260,7 +265,12 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                     # other tools' output
                     if 'process_from_tool' in options_dict and not in_base:
                         for tool in options_dict['process_from_tool'].split(','):
-                            if tool.replace(' ', '-') in directory.rsplit('/', 1)[-1]:
+                            dir_pieces = directory.split('/')
+                            dir_check = dir_pieces
+                            for dir_piece in dir_pieces:
+                                if 'UTC' in dir_piece:
+                                    dir_check = dir_piece
+                            if tool.replace(' ', '-') in dir_check:
                                 process_file = True
                     if 'ext_types' in options_dict and process_file:
                         ext_types = options_dict['ext_types'].split(',')
