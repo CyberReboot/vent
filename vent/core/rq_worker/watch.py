@@ -11,8 +11,9 @@ def gpu_queue(options):
 
     status = (False, None)
     if (os.path.isfile("/root/.vent/vent.cfg") and os.path.isfile("/root/.vent/plugin_manifest.cfg")):
-        template_path = "/root/.vent"
-    path_dir = "/vent"
+        path_dir = "/root/.vent"
+    else:
+        path_dir = "/vent"
 
     print("gpu queue", str(options))
     print("gpu queue", str(GpuUsage(base_dir=path_dir+"/",
