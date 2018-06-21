@@ -7,6 +7,7 @@ import os
 import queue
 import re
 import shutil
+import sys
 import tempfile
 import urllib.request
 import yaml
@@ -1368,7 +1369,8 @@ class Action:
             if tool_d:
                 self.start(tool_d)
         except Exception as e:  # pragma: no cover
-            self.logger.error("startup failed with error " + str(e))
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            self.logger.error("startup failed with error " + str(e) + "at line: " + str(exc_tb.tb_lineno))
             status = (False, str(e))
         self.logger.info("startup finished with status " + str(status[0]))
         self.logger.info("Finished: startup")
