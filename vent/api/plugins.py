@@ -33,10 +33,10 @@ class Plugin:
         self.logger = Logger(__name__)
         self.plugin_config_file = self.path_dirs.plugin_config_file
 
-    def add(self, repo, tools=None, overrides=None, version="HEAD",
+    def add(self, repo, tools=None, overrides=None, version="HEAD", image=None,
             branch="master", build=True, user=None, pw=None, groups=None,
             version_alias=None, wild=None, remove_old=True, disable_old=True,
-            limit_groups=None, core=False):
+            limit_groups=None, core=False, update_repo=None):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -96,10 +96,12 @@ class Plugin:
         self.logger.info("Adding new tools: " + str(self.tools))
         self.overrides = overrides
         self.version = version
+        self.image = image
         self.branch = branch
         self.build = build
         self.groups = groups
         self.core = core
+        self.update_repo = update_repo
         self.path, self.org, self.name = self.p_helper.get_path(repo,
                                                                 core=core)
 
@@ -282,8 +284,11 @@ class Plugin:
 
         # check result of clone, ensure successful or that it already exists
         if status:
-            response = self.p_helper.checkout(branch=self.branch,
-                                              version=self.version)
+            if self.update_repo:
+                response = self.p_helper.checkout(branch=self.branch,
+                                                  version=self.version)
+            else:
+                response = (True, None)
             if response[0]:
                 search_groups = None
                 if self.core:
@@ -352,14 +357,19 @@ class Plugin:
             template = Template(template=self.manifest)
             # TODO check for special settings here first for the specific match
             self.version = match[1]
-            response = self.p_helper.checkout(branch=self.branch,
-                                              version=self.version)
+            if self.update_repo:
+                response = self.p_helper.checkout(branch=self.branch,
+                                                  version=self.version)
+            else:
+                response = (True, None)
             if response[0]:
                 section = self.org + ":" + self.name + ":" + true_name + ":"
                 section += self.branch + ":" + self.version
                 # need to get rid of temp identifiers for tools in same repo
                 match_path = self.path + match[0].split('@')[0]
-                if not self.core:
+                if self.image:
+                    image_name = self.image
+                elif not self.core:
                     image_name = self.org + "-" + self.name + "-"
                     if match[0] != '':
                         # if tool is in a subdir, add that to the name of the
@@ -402,6 +412,7 @@ class Plugin:
                 image_name = image_name.lower()
                 if image_name.endswith(":head"):
                     image_name = image_name.split(":head")[0] + ":HEAD"
+                    image_name = image_name.replace('@', '-')
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
@@ -416,8 +427,7 @@ class Plugin:
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
-                template.set_option(section, "image_name",
-                                    image_name.replace('@', '-'))
+                template.set_option(section, "image_name", image_name)
                 template.set_option(section, "type", "repository")
                 # save settings in vent.template to plugin_manifest
                 # watch for multiple tools in same directory
@@ -648,7 +658,6 @@ class Plugin:
                     username = getpass.getuser()
                     # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
-                    image_name = image_name.replace('@', '-')
                     if image_name.endswith('HEAD'):
                         commit_id = template.option(section, "commit_id")
                         if commit_id[0]:

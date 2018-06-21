@@ -244,7 +244,11 @@ class PluginHelper:
             # images built from registry won't have path
             if s[section]['path'] != '':
                 chdir(join(s[section]['path']))
-                status = self.checkout(branch=branch, version=version)
+
+                # TODO commenting out for now, should use update_repo
+                #status = self.checkout(branch=branch, version=version)
+                status = (True, None)
+
                 self.logger.info(status)
                 chdir(cwd)
 

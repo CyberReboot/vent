@@ -9,7 +9,6 @@ build: clean
 	docker version || true
 	$(PIP) -V
 	$(PIP) install -r requirements.txt
-	$(MAKE) docs
 	python3 setup.py install
 
 docs: docs_clean
