@@ -412,6 +412,7 @@ class Plugin:
                 image_name = image_name.lower()
                 if image_name.endswith(":head"):
                     image_name = image_name.split(":head")[0] + ":HEAD"
+                    image_name = image_name.replace('@', '-')
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
@@ -426,8 +427,7 @@ class Plugin:
                 template.set_option(section, "version", self.version)
                 template.set_option(section, "last_updated",
                                     str(datetime.utcnow()) + " UTC")
-                template.set_option(section, "image_name",
-                                    image_name.replace('@', '-'))
+                template.set_option(section, "image_name", image_name)
                 template.set_option(section, "type", "repository")
                 # save settings in vent.template to plugin_manifest
                 # watch for multiple tools in same directory
@@ -658,7 +658,6 @@ class Plugin:
                     username = getpass.getuser()
                     # see if additional tags needed for images tagged at HEAD
                     commit_tag = ""
-                    image_name = image_name.replace('@', '-')
                     if image_name.endswith('HEAD'):
                         commit_id = template.option(section, "commit_id")
                         if commit_id[0]:
