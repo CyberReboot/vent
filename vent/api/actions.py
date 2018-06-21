@@ -1,4 +1,5 @@
 import ast
+import copy
 import docker
 import getpass
 import json
@@ -32,9 +33,10 @@ class Action:
         self.queue = queue.Queue()
         self.logger = Logger(__name__)
 
-    def add(self, repo, tools=None, overrides=None, version="HEAD",
+    def add(self, repo, tools=None, overrides=None, version="HEAD", image=None,
             branch="master", build=True, user=None, pw=None, groups=None,
-            version_alias=None, wild=None, remove_old=True, disable_old=True):
+            version_alias=None, wild=None, remove_old=True, disable_old=True,
+            update_repo=None):
         """ Add a new set of tool(s) """
         self.logger.info("Starting: add")
         status = (True, None)
@@ -62,6 +64,7 @@ class Action:
                                          tools=tools,
                                          overrides=overrides,
                                          version=version,
+                                         image=image,
                                          branch=branch,
                                          build=build,
                                          user=user,
@@ -71,7 +74,8 @@ class Action:
                                          wild=wild,
                                          remove_old=remove_old,
                                          disable_old=disable_old,
-                                         core=is_core)
+                                         core=is_core,
+                                         update_repo=update_repo)
             else:
                 self.logger.info("no new tools to add, exiting")
                 status = (True, "previously installed")
@@ -1251,20 +1255,31 @@ class Action:
             s_dict = {}
             if os.path.exists(self.startup_file):
                 # rewrite the yml file to exclusively lowercase
-                with open(self.startup_file, 'r') as startup:
-                    vent_startup = startup.read()
-                with open(self.startup_file, 'w') as startup:
+                with open(self.startup_file, 'r') as sup:
+                    vent_startup = sup.read()
+                with open(self.startup_file, 'w') as sup:
                     for line in vent_startup:
-                        startup.write(line.lower())
-                with open(self.startup_file, 'r') as startup:
-                    s_dict = yaml.safe_load(startup.read())
+                        sup.write(line.lower())
+                with open(self.startup_file, 'r') as sup:
+                    s_dict = yaml.safe_load(sup.read())
+            if 'vent.cfg' in s_dict:
+                v_cfg = Template(self.vent_config)
+                self.logger.info("applying vent.cfg configurations")
+                for section in s_dict['vent.cfg']:
+                    for option in s_dict['vent.cfg'][section]:
+                        status = v_cfg.add_option(section, option, s_dict['vent.cfg'][section][option])
+                        if not status[0]:
+                            v_cfg.set_option(section, option, s_dict['vent.cfg'][section][option])
+                v_cfg.write_config()
+                del s_dict['vent.cfg']
             tool_d = {}
             extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
-            for repo in s_dict:
+            s_dict_c = copy.deepcopy(s_dict)
+            for repo in s_dict_c:
                 self.p_helper.clone(repo)
                 repo_path, org, r_name = self.p_helper.get_path(repo)
                 available_tools = self.p_helper.available_tools(repo_path)
-                for tool in s_dict[repo]:
+                for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
                     t_path = PathDirs.rel_path(tool, available_tools)
@@ -1273,7 +1288,7 @@ class Action:
                                           " repo " + repo)
                         continue
                     # ensure no NoneType iteration errors
-                    if s_dict[repo][tool] is None:
+                    if s_dict_c[repo][tool] is None:
                         s_dict[repo][tool] = {}
                     # check if we need to configure instances along the way
                     instances = 1
@@ -1284,6 +1299,7 @@ class Action:
                     # add the tool
                     t_branch = 'master'
                     t_version = 'HEAD'
+                    t_image = None
                     add_tools = None
                     build_tool = False
                     add_tools = [(t_path, '')]
@@ -1293,8 +1309,10 @@ class Action:
                         t_version = s_dict[repo][tool]['version']
                     if 'build' in s_dict[repo][tool]:
                         build_tool = s_dict[repo][tool]['build']
+                    if 'image' in s_dict[repo][tool]:
+                        t_image = s_dict[repo][tool]['image']
                     self.add(repo, branch=t_branch, version=t_version,
-                             tools=add_tools, build=build_tool)
+                             tools=add_tools, build=build_tool, image=t_image)
                     manifest = Template(self.plugin.manifest)
                     # update the manifest with extra defined runtime settings
                     base_section = ':'.join([org, r_name, t_path,

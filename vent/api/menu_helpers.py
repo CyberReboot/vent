@@ -44,8 +44,12 @@ class MenuHelper:
 
                 path = os.path.join(self.plugin.path_dirs.plugins_dir,
                                     'cyberreboot/vent')
-                response = self.p_helper.checkout(branch=branch,
-                                                  version=version)
+
+                # TODO commenting out for now, should use update_repo
+                #response = self.p_helper.checkout(branch=branch,
+                #                                  version=version)
+                response = (True, None)
+
                 self.logger.info("status of plugin checkout " +
                                  str(response))
                 matches = self.p_helper.available_tools(path,
@@ -298,7 +302,10 @@ class MenuHelper:
                                  " status: " + str(status))
                 return status
 
-            status = self.p_helper.checkout(branch=branch, version=version)
+            # TODO commenting out for now, should use update_repo
+            #status = self.p_helper.checkout(branch=branch, version=version)
+            status = (True, None)
+
             if status[0]:
                 path, _, _ = self.p_helper.get_path(repo)
                 tools = self.p_helper.available_tools(path, version=version)
@@ -351,7 +358,10 @@ class MenuHelper:
             status, _ = p_helper.clone(repo)
             if status:
                 p_helper.apply_path(repo)
-                p_helper.checkout(branch=branch, version=version)
+
+                # TODO commenting out for now, should use update_repo
+                #p_helper.checkout(branch=branch, version=version)
+
                 path, _, _ = p_helper.get_path(repo, core=core)
                 matches = None
                 if core:
