@@ -65,7 +65,7 @@ def Docker():
     return docker_info
 
 
-def Containers(vent=True, running=True):
+def Containers(vent=True, running=True, exclude_labels=None):
     """
     Get containers that are created, by default limit to vent containers that
     are running
@@ -80,7 +80,13 @@ def Containers(vent=True, running=True):
         else:
             c = d_client.containers.list(all=not running)
         for container in c:
-            containers.append((container.name, container.status))
+            include = True
+            if exclude_labels:
+                for label in exclude_labels:
+                    if 'vent.groups' in container.labels and label in container.labels['vent.groups']:
+                        include = False
+            if include:
+                containers.append((container.name, container.status))
     except Exception as e:  # pragma: no cover
         logger.error("Docker problem " + str(e))
 
