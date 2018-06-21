@@ -7,7 +7,6 @@ import os
 import queue
 import re
 import shutil
-import sys
 import tempfile
 import urllib.request
 import yaml
@@ -1268,8 +1267,7 @@ class Action:
                 self.logger.info("applying vent.cfg configurations")
                 for section in s_dict['vent.cfg']:
                     for option in s_dict['vent.cfg'][section]:
-                        v_status = v_cfg.add_option(section, option, s_dict['vent.cfg'][section][option])
-                        self.logger.info(str(v_status))
+                        v_status = v_cfg.add_option(section, option, value=s_dict['vent.cfg'][section][option])
                         if not v_status[0]:
                             v_cfg.set_option(section, option, s_dict['vent.cfg'][section][option])
                 v_cfg.write_config()
@@ -1370,8 +1368,7 @@ class Action:
             if tool_d:
                 self.start(tool_d)
         except Exception as e:  # pragma: no cover
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            self.logger.error("startup failed with error " + str(e) + " at line: " + str(exc_tb.tb_lineno))
+            self.logger.error("startup failed with error " + str(e))
             status = (False, str(e))
         self.logger.info("startup finished with status " + str(status[0]))
         self.logger.info("Finished: startup")
