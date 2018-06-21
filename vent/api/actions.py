@@ -1268,8 +1268,8 @@ class Action:
                 self.logger.info("applying vent.cfg configurations")
                 for section in s_dict['vent.cfg']:
                     for option in s_dict['vent.cfg'][section]:
-                        self.logger.info((str(option), str(section), str(s_dict['vent.cfg'][section])))
                         v_status = v_cfg.add_option(section, option, s_dict['vent.cfg'][section][option])
+                        self.logger.info(str(v_status))
                         if not v_status[0]:
                             v_cfg.set_option(section, option, s_dict['vent.cfg'][section][option])
                 v_cfg.write_config()
