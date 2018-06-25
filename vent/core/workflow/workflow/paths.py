@@ -5,6 +5,7 @@ import time
 
 from vent.helpers.meta import Containers
 
+
 class DataR(object):
     """
     This endpoint is for returning data.json
@@ -23,35 +24,24 @@ class DataR(object):
         for container in containers:
             node = {'renderer': 'focusedChild',
                     'name': container[0],
-                    'class': 'normal'
-                   }
+                    'class': 'normal'}
             nodes[0]['nodes'].append(node)
         return nodes
 
     def get_connections(self):
-        # TODO
-        connections = [{
-      "source": "cyberreboot-vent-rq-worker-master",
-      "target": "cyberreboot-crviz-master-HEAD",
-      "metrics": {
-        "normal": 400,
-        "danger": 99
-      },
-      "notices": [
-      ],
-      "class": "normal"
-    },
-    {
-      "source": "cyberreboot-poseidon-api-master-HEAD",
-      "target": "cyberreboot-vent-file-drop-master",
-      "metrics": {
-        "normal": 200,
-        "danger": 99
-      },
-      "notices": [
-      ],
-      "class": "normal"
-    }]
+        # TODO, example data
+        connections = [{"source": "cyberreboot-vent-rq-worker-master",
+                        "target": "cyberreboot-crviz-master-HEAD",
+                        "metrics": {"normal": 400,
+                                    "danger": 99},
+                        "notices": [],
+                        "class": "normal"},
+                       {"source": "cyberreboot-poseidon-api-master-HEAD",
+                        "target": "cyberreboot-vent-file-drop-master",
+                        "metrics": {"normal": 200,
+                                    "danger": 99},
+                        "notices": [],
+                        "class": "normal"}]
         return connections
 
     def build_data(self):
