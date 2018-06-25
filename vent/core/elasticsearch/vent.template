@@ -4,7 +4,6 @@ groups = core,search
 
 [service]
 uri_prefix1 = http://
-uri_postfix1 = /_plugin/head
 
 [settings]
 instances = 1
