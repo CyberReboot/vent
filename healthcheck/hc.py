@@ -6,6 +6,7 @@ app = Flask(__name__)
 health = HealthCheck(app, "/healthcheck")
 envdump = EnvironmentDump(app, "/environment")
 
+
 def application_data():
     return {"maintainer": "Charlie Lewis",
             "git_repo": "https://github.com/CyberReboot/vent",
