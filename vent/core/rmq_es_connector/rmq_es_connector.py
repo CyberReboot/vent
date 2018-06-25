@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import ast
+import json
 import os
 import pika
 import sys
@@ -7,7 +7,6 @@ import time
 import uuid
 
 from elasticsearch import Elasticsearch
-from vent.helpers.logs import Logger
 
 
 class RmqEs():
@@ -30,7 +29,6 @@ class RmqEs():
         """ initialize host information """
         self.es_host = es_host
         self.rmq_host = rmq_host
-        self.logger = Logger(__name__)
 
     def connections(self, wait):
         """
@@ -52,7 +50,7 @@ class RmqEs():
                 self.es_conn = Elasticsearch([{'host': self.es_host,
                                                'port': self.es_port}])
                 wait = False
-                print("connected to rabbitmq...")
+                print("connected to rabbitmq and elasticsearch...")
             except Exception as e:  # pragma: no cover
                 print(str(e))
                 print("waiting for connection to rabbitmq..." + str(e))
@@ -65,14 +63,16 @@ class RmqEs():
         an elasticsearch index
         """
         index = method.routing_key.split(".")[1]
+        index = index.replace('/', '-')
         failed = False
+        body = str(body)
         try:
-            doc = ast.literal_eval(body)
+            doc = json.loads(body)
         except Exception as e:  # pragma: no cover
             try:
                 body = body.strip().replace('"', '\"')
                 body = '{"log":"' + body + '"}'
-                doc = ast.literal_eval(body)
+                doc = json.loads(body)
             except Exception as e:  # pragma: no cover
                 failed = True
 
@@ -84,7 +84,7 @@ class RmqEs():
                                    str(uuid.uuid4()),
                                    body=doc)
             except Exception as e:  # pragma: no cover
-                self.logger.error("Connection failed " + str(e))
+                print("Failed to send document to elasticsearch because: " + str(e))
 
     def start(self):
         """ start the channel listener and start consuming messages """
