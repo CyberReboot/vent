@@ -15,7 +15,8 @@ RUN pip3 install --upgrade pip
 COPY healthcheck /healthcheck
 RUN pip3 install -r /healthcheck/requirements.txt
 ENV FLASK_APP /healthcheck/hc.py
-HEALTHCHECK --interval=15s --timeout=15s CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
+HEALTHCHECK --interval=15s --timeout=15s \
+ CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
 
 COPY . /vent
 RUN pip3 install /vent
