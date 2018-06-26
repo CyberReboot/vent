@@ -26,4 +26,4 @@ VOLUME ["/root/.vent"]
 
 ENV VENT_CONTAINERIZED true
 
-CMD  (flask run > /dev/null 2>&1) & (vent)
+CMD (flask run > /dev/null 2>&1) & (vent)

@@ -6,3 +6,6 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent.section="cyberreboot:vent:/vent/core/redis:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
+
+HEALTHCHECK --interval=15s --timeout=15s \
+ CMD redis-cli ping
