@@ -15,10 +15,19 @@ RUN apk add --update \
     python3-dev \
     && rm -rf /var/cache/apk/*
 
+RUN pip3 install --upgrade pip
+
+# healthcheck
+COPY healthcheck /healthcheck
+RUN pip3 install -r /healthcheck/requirements.txt
+ENV FLASK_APP /healthcheck/hc.py
+HEALTHCHECK --interval=15s --timeout=15s \
+ CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
+
 COPY . /network-tap
 WORKDIR /network-tap
 RUN pip3 install -r ncontrol/requirements.txt
 
 EXPOSE 8080
 
-CMD ["/network-tap/startup.sh"]
+CMD (flask run < /dev/null 2>&1) & (/network-tap/startup.sh)
