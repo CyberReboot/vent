@@ -7,6 +7,5 @@ instances = 1
 priority = 20
 
 [docker]
-command = #
 environment = ["PYTHONUNBUFFERED=0"]
 links = {"RabbitMQ":"rabbitmq", "Elasticsearch":"elasticsearch"}
