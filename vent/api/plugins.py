@@ -370,12 +370,12 @@ class Plugin:
                 if self.image:
                     image_name = self.image
                 elif not self.core:
-                    image_name = self.org + "-" + self.name + "-"
+                    image_name = self.org + "/" + self.name
                     if match[0] != '':
                         # if tool is in a subdir, add that to the name of the
                         # image
-                        image_name += '-'.join(match[0].split('/')[1:]) + "-"
-                    image_name += self.branch + ":" + self.version
+                        image_name += '-' + '-'.join(match[0].split('/')[1:])
+                    image_name += ':' + self.branch
                 else:
                     image_name = ('cyberreboot/vent-' +
                                   match[0].split('/')[-1] + ':' + self.branch)
@@ -410,9 +410,7 @@ class Plugin:
                 # but new commit removed one that was in a previous commit
 
                 image_name = image_name.lower()
-                if image_name.endswith(":head"):
-                    image_name = image_name.split(":head")[0] + ":HEAD"
-                    image_name = image_name.replace('@', '-')
+                image_name = image_name.replace('@', '-')
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
@@ -674,7 +672,7 @@ class Plugin:
                         else:
                             file_tag = " -f Dockerfile." + specific_file + " ."
                     # update image name with new version for update
-                    image_name = image_name.rsplit(':', 1)[0]+':'+self.version
+                    image_name = image_name.rsplit(':', 1)[0]+':'+self.branch
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.section=" +
