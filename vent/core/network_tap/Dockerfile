@@ -31,4 +31,4 @@ RUN pip3 install -r ncontrol/requirements.txt
 
 EXPOSE 8080
 
-CMD (flask run < /dev/null 2>&1) & (/network-tap/startup.sh)
+CMD (flask run > /dev/null 2>&1) & (/network-tap/startup.sh)
