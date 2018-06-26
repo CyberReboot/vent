@@ -10,6 +10,6 @@ envdump = EnvironmentDump(app, "/environment")
 def application_data():
     return {"maintainer": "Charlie Lewis",
             "git_repo": "https://github.com/CyberReboot/vent",
-            "app": "vent"}
+            "app": "workflow"}
 
 envdump.add_section("application", application_data)
