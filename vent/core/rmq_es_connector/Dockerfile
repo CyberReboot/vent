@@ -26,4 +26,4 @@ COPY requirements.txt /vent/requirements.txt
 RUN pip3 install -r /vent/requirements.txt
 COPY rmq_es_connector.py /vent/rmq_es_connector.py
 
-CMD (flask run > /dev/null 2>&1) & (python3 /vent/rmq_es_connector.py)
+CMD (flask run > /dev/null 2>&1) & (python3 /vent/rmq_es_connector.py "#")

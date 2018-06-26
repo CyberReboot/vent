@@ -8,6 +8,7 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent.type="repository"
 
 RUN apk add --update \
+    curl \
     gcc \
     git \
     linux-headers \
