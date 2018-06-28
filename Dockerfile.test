@@ -21,6 +21,7 @@ RUN add-apt-repository \
     stable"
 
 RUN apt-get update && apt-get install -y docker-ce
+RUN pip3 install --upgrade pip
 
 RUN echo "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
 ADD . /vent
