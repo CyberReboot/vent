@@ -1,3 +1,23 @@
+# v0.6.2 (2018-06-29)
+
+improvements:
+- upgraded version of docker
+- increase the number of client connections to syslog
+- add option to exclude labels from containers running by vent
+- upgraded verison of pika
+- upgraded version of pytest
+- upgraded version of gevent
+- upgraded version of elasticsearch
+- only pulls repo latest changes is specifically updating
+- add healthchecks to all images
+- add visibility containers (vizceral and workflow) still WIP
+- updated elasticsearch image to 6, removed head plugin, works best if you also have kibana now
+- only rebuild images if they can't be pulled or there are changes for them in .plugin_config.yml
+- be able to specify vent.cfg options in .vent_startup.yml files
+
+bug fixes:
+- no longer forces repos to be checked out to a specific commit
+
 # v0.6.1 (2018-06-15)
 
 improvements:
