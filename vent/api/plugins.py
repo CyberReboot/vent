@@ -370,12 +370,12 @@ class Plugin:
                 if self.image:
                     image_name = self.image
                 elif not self.core:
-                    image_name = self.org + "-" + self.name + "-"
+                    image_name = self.org + "/" + self.name
                     if match[0] != '':
                         # if tool is in a subdir, add that to the name of the
                         # image
-                        image_name += '-'.join(match[0].split('/')[1:]) + "-"
-                    image_name += self.branch + ":" + self.version
+                        image_name += '-' + '-'.join(match[0].split('/')[1:])
+                    image_name += ':' + self.branch
                 else:
                     image_name = ('cyberreboot/vent-' +
                                   match[0].split('/')[-1] + ':' + self.branch)
@@ -410,9 +410,7 @@ class Plugin:
                 # but new commit removed one that was in a previous commit
 
                 image_name = image_name.lower()
-                if image_name.endswith(":head"):
-                    image_name = image_name.split(":head")[0] + ":HEAD"
-                    image_name = image_name.replace('@', '-')
+                image_name = image_name.replace('@', '-')
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
@@ -571,7 +569,7 @@ class Plugin:
                 repo = template.option(section, "repo")
                 t_type = template.option(section, "type")
                 path = template.option(section, "path")
-                self.fill_config(path[1])
+                must_build = self.fill_config(path[1])
                 if groups[1] == "" or not groups[0]:
                     groups = (True, "none")
                 if not name[0]:
@@ -585,7 +583,7 @@ class Plugin:
                                              'use_existing_images')
                 if result[0]:
                     use_existing_image = result[1]
-                if use_existing_image == 'yes':
+                if use_existing_image == 'yes' and not must_build:
                     try:
                         self.d_client.images.get(image_name)
                         i_attrs = self.d_client.images.get(image_name).attrs
@@ -608,7 +606,7 @@ class Plugin:
                                             " because: " + str(e))
                 if not image_exists:
                     # pull if '/' in image_name, fallback to build
-                    if '/' in image_name and not build_local:
+                    if '/' in image_name and not build_local and not must_build:
                         try:
                             # currently can't use docker-py because it doesn't support
                             # support labels on images yet
@@ -674,7 +672,7 @@ class Plugin:
                         else:
                             file_tag = " -f Dockerfile." + specific_file + " ."
                     # update image name with new version for update
-                    image_name = image_name.rsplit(':', 1)[0]+':'+self.version
+                    image_name = image_name.rsplit(':', 1)[0]+':'+self.branch
                     output = check_output(shlex.split("docker build --label"
                                                       " vent --label"
                                                       " vent.section=" +
@@ -1036,6 +1034,7 @@ class Plugin:
         """
         self.logger.info("Starting: fill_config")
         status = (True, None)
+        must_build = False
 
         try:
             # parse the yml file
@@ -1057,6 +1056,8 @@ class Plugin:
             if plugin_name == '':
                 plugin_name = path.split('/')[-2]
             plugin_config_path = path + '/config/' + plugin_name + '.config'
+            self.logger.error("plugin_name: " + plugin_name)
+            self.logger.error("path: " + plugin_config_path)
 
             if os.path.exists(plugin_config_path):
                 plugin_template = Template(plugin_config_path)
@@ -1066,6 +1067,7 @@ class Plugin:
                         plugin_template.set_option(section, option,
                                 str(plugin_options[section][option]))
                 plugin_template.write_config()
+                must_build = True
 
         except Exception as e:  # pragma: no cover
             status = (False, e)
@@ -1073,3 +1075,4 @@ class Plugin:
 
         self.logger.info("Status of fill_config: " + str(status[0]))
         self.logger.info("Finished: fill_config")
+        return must_build
