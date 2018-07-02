@@ -10,7 +10,6 @@ language: python
 cache: pip
 python:
   - "3.6"
-  - "3.7"
 before_script:
   - sleep 10
   - echo -e "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
