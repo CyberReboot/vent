@@ -1,9 +1,31 @@
 import docker
 import falcon
 import json
+import redis
 import time
 
 from vent.helpers.meta import Containers
+
+
+class ConnectionnR(object):
+    """
+    This endpoint is for population connection data
+    """
+    def on_get(self, req, resp, from_conn, to_conn):
+        resp.content_type = falcon.MEDIA_TEXT
+        resp.status = falcon.HTTP_200
+        r = None
+        try:
+            r = redis.StrictRedis(host='redis', port=6379, db=0)
+        except Exception as e:  # pragma: no cover
+            try:
+                r = redis.StrictRedis(host='localhost', port=6379, db=0)
+            except Exception as e:  # pragma: no cover
+                resp.body = "(False, 'unable to connect to redis because: " + str(e) + "')"
+                return
+
+        resp.body = "OK"
+        return
 
 
 class DataR(object):

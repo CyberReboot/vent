@@ -1,10 +1,11 @@
 def routes():
-    from .paths import DataR
+    from .paths import ConnectionR, DataR
     p = paths()
     data_r = DataR()
-    funcs = [data_r]
+    connection_r = ConnectionR()
+    funcs = [connection_r, data_r]
     return dict(list(zip(p, funcs)))
 
 
 def paths():
-    return ['/data.json']
+    return ['/connection/{from_conn}/{to_conn}', '/data.json']
