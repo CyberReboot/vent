@@ -7,7 +7,7 @@ import time
 from vent.helpers.meta import Containers
 
 
-class ConnectionnR(object):
+class ConnectionR(object):
     """
     This endpoint is for population connection data
     """
