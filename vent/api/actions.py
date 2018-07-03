@@ -336,7 +336,6 @@ class Action:
                             t_name = template.option(t_sect, 'name')[1]
                             t_branch = template.option(t_sect, 'branch')[1]
                             t_version = template.option(t_sect, 'version')[1]
-                            self.logger.info(t_name + ', ' + t_branch + ', ' + t_version)
                             t_identifier = {'name': t_name,
                                             'branch': t_branch,
                                             'version': t_version}
@@ -1359,6 +1358,12 @@ class Action:
                             local_instances = 1
                             if 'settings' in s_dict[repo][tool] and 'instances' in s_dict[repo][tool]['settings']:
                                 local_instances = int(s_dict[repo][tool]['settings']['instances'])
+                            t_branch = 'master'
+                            t_version = 'HEAD'
+                            if 'branch' in s_dict[repo][tool]:
+                                t_branch = s_dict[repo][tool]['branch']
+                            if 'version' in s_dict[repo][tool]:
+                                t_version = s_dict[repo][tool]['version']
                             for i in range(1, local_instances + 1):
                                 i_name = tool + str(i) if i != 1 else tool
                                 i_name = i_name.replace('@', '')
