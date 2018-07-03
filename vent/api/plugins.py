@@ -1056,8 +1056,6 @@ class Plugin:
             if plugin_name == '':
                 plugin_name = path.split('/')[-2]
             plugin_config_path = path + '/config/' + plugin_name + '.config'
-            self.logger.error("plugin_name: " + plugin_name)
-            self.logger.error("path: " + plugin_config_path)
 
             if os.path.exists(plugin_config_path):
                 plugin_template = Template(plugin_config_path)

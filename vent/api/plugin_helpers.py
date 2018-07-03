@@ -448,6 +448,7 @@ class PluginHelper:
             # store section information for adding info to manifest later
             else:
                 tool_d[c_name]['section'] = section
+        self.logger.info("Start sections finished with: " + str(status) + " with dict of: " + str(tool_d))
         return status, tool_d
 
     def prep_start(self,
