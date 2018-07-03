@@ -1312,6 +1312,7 @@ class Action:
                         build_tool = s_dict[repo][tool]['build']
                     if 'image' in s_dict[repo][tool]:
                         t_image = s_dict[repo][tool]['image']
+                    self.logger.info("Startup: repo " + str(repo) + " tool: " + str(tool) + " branch: " + str(t_branch) + " version: " + str(t_version))
                     self.add(repo, branch=t_branch, version=t_version,
                              tools=add_tools, build=build_tool, image=t_image)
                     manifest = Template(self.plugin.manifest)
