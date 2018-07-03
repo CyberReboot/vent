@@ -284,6 +284,7 @@ class Plugin:
 
         # check result of clone, ensure successful or that it already exists
         if status:
+            # TODO check if the repo was already set to a branch/version other than master/HEAD
             if self.update_repo or self.branch != 'master' or self.version != 'HEAD':
                 response = self.p_helper.checkout(branch=self.branch,
                                                   version=self.version)
