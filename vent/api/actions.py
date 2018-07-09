@@ -1282,7 +1282,7 @@ class Action:
                 for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
-                    t_path = PathDirs.rel_path(tool, available_tools)
+                    t_path, t_path_cased = PathDirs.rel_path(tool, available_tools)
                     if t_path is None:
                         self.logger.error("Couldn't find tool " + tool + " in"
                                           " repo " + repo)
@@ -1302,7 +1302,7 @@ class Action:
                     t_image = None
                     add_tools = None
                     build_tool = False
-                    add_tools = [(t_path, '')]
+                    add_tools = [(t_path_cased, '')]
                     if 'branch' in s_dict[repo][tool]:
                         t_branch = s_dict[repo][tool]['branch']
                     if 'version' in s_dict[repo][tool]:

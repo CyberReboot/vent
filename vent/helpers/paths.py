@@ -63,16 +63,16 @@ class PathDirs:
             name = ''
         multi_tool = '@' in name
         for tool in available_tools:
-            t_name = tool[0]
+            t_name = tool[0].lower()
             if multi_tool:
                 if name.split('@')[-1] == t_name.split('@')[-1]:
-                    return t_name
+                    return t_name, t_name
             else:
                 if name == t_name.split('/')[-1]:
-                    return t_name
+                    return t_name, tool[0]
                 elif name == '' and t_name.split('@')[-1] == 'unspecified':
-                    return ''
-        return None
+                    return '', ''
+        return None, None
 
     def host_config(self):
         """ Ensure the host configuration file exists """
