@@ -1,3 +1,16 @@
+# v0.6.3 (2018-07-13)
+
+improvements:
+- better logging
+- upgraded version of pytest
+- locked python at 3.6 for gevent
+- upgraded verison of pyyaml
+- allow for cased paths with repos for tools
+- cleaned up old scripts and flakey tests
+
+bug fixes:
+- fix issue where plugins would only update on master branch
+
 # v0.6.2 (2018-06-29)
 
 improvements:
