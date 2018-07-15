@@ -23,7 +23,11 @@ class CreateR(object):
         # default to no filter
         payload = {}
         if req.content_length:
-            payload = json.load(req.stream)
+            try:
+                payload = json.load(req.stream)
+            except Exception as e:  # pragma: no cover
+                resp.body = 'malformed payload'
+                return
         else:
             resp.body = 'malformed payload'
             return
@@ -128,7 +132,11 @@ class DeleteR(object):
         # verify user input
         payload = {}
         if req.content_length:
-            payload = json.load(req.stream)
+            try:
+                payload = json.load(req.stream)
+            except Exception as e:  # pragma: no cover
+                resp.body = 'malformed payload'
+                return
         else:
             resp.body = 'malformed payload'
             return
@@ -261,7 +269,11 @@ class StartR(object):
         # verify user input
         payload = {}
         if req.content_length:
-            payload = json.load(req.stream)
+            try:
+                payload = json.load(req.stream)
+            except Exception as e:  # pragma: no cover
+                resp.body = 'malformed payload'
+                return
         else:
             resp.body = 'malformed payload'
             return
@@ -308,7 +320,11 @@ class StopR(object):
         # verify user input
         payload = {}
         if req.content_length:
-            payload = json.load(req.stream)
+            try:
+                payload = json.load(req.stream)
+            except Exception as e:  # pragma: no cover
+                resp.body = 'malformed payload'
+                return
         else:
             resp.body = 'malformed payload'
             return
@@ -354,7 +370,11 @@ class UpdateR(object):
         # verify payload is in the correct format
         payload = {}
         if req.content_length:
-            payload = json.load(req.stream)
+            try:
+                payload = json.load(req.stream)
+            except Exception as e:  # pragma: no cover
+                resp.body = 'malformed payload'
+                return
         else:
             resp.body = 'malformed payload'
             return
