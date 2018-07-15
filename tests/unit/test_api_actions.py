@@ -148,7 +148,7 @@ def test_update():
                           tools=[('vent/core/elasticsearch', '')])
     assert isinstance(status, tuple)
     assert status[0]
-    status = instance.update(name='elasticsearch', branch='master', new_version="aff1c29087372a44c60819b6af7d8a65fe4ef453")
+    status = instance.update(name='elasticsearch', branch='master', new_version="a45e8b3c79964c9a6953b6b45f079bd833edbf46")
     assert isinstance(status, tuple)
     assert status[0]
 
