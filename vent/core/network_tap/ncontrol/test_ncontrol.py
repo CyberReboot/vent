@@ -57,10 +57,24 @@ def test_update_r(client):
     assert r.status == '200 OK'
 
 
+def test_info_r(client):
+    """ tests the restful endpoint: info """
+    # test info
+    r = client.simulate_get('/info')
+    assert r.status == '200 OK'
+
+
 def test_list_r(client):
     """ tests the restful endpoint: list """
     # test list
     r = client.simulate_get('/list')
+    assert r.status == '200 OK'
+
+
+def test_nics_r(client):
+    """ tests the restful endpoint: nics """
+    # test nics
+    r = client.simulate_get('/nics')
     assert r.status == '200 OK'
 
 
