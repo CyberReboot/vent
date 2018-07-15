@@ -1,10 +1,11 @@
 #!/usr/bin/python
 import docker
 import falcon
-from falcon import testing
 import pytest
 
+from falcon import testing
 from .ncontrol import api
+from .prestart import pull_ncapture
 
 
 @pytest.fixture
@@ -12,46 +13,45 @@ def client():
     return testing.TestClient(api)
 
 
+def test_pull_ncapture():
+    pull_ncapture()
+
+
 def test_create_r(client):
     """ tests the restful endpoint: create """
     # test create
-    r = client.simulate_post('/create', params={'id': 'foo',
-                                         'interval': '60',
-                                         'filter': '',
-                                         'nic': 'eth1'},
-                      headers={'Content-Type': 'application/json'})
+    payload = {"id": "foo", "interval": "60", "filter": "", "nic": "eth1"}
+    r = client.simulate_post('/create', json=payload)
     assert r.status == '200 OK'
-    r = client.simulate_post('/create', params={'id': 'foo',
+    r = client.simulate_post('/create', json={'id': 'foo',
                                          'interval': '60',
                                          'iters': '1',
                                          'filter': '',
-                                         'nic': 'eth1'},
-                      headers={'Content-Type': 'application/json'})
+                                         'nic': 'eth1'})
     assert r.status == '200 OK'
-    r = client.simulate_post('/create', params={})
+    r = client.simulate_post('/create', json={})
     assert r.status == '200 OK'
-    r = client.simulate_post('/create', params={'nic': 'eth1'})
+    r = client.simulate_post('/create', json={'nic': 'eth1'})
     assert r.status == '200 OK'
-    r = client.simulate_post('/create', params={'nic': 'eth1', 'id': 'foo'})
+    r = client.simulate_post('/create', json={'nic': 'eth1', 'id': 'foo'})
     assert r.status == '200 OK'
     r = client.simulate_post(
-        '/create', params={'nic': 'eth1', 'id': 'foo', 'interval': '61'})
+        '/create', json={'nic': 'eth1', 'id': 'foo', 'interval': '61'})
     assert r.status == '200 OK'
-    r = client.simulate_post('/create', params={'id': 'foo',
+    r = client.simulate_post('/create', json={'id': 'foo',
                                          'interval': '60',
                                          'filter': '',
                                          'metadata': '{"foo": "bar"}',
                                          'iters': '1',
-                                         'nic': 'eth1'},
-                      headers={'Content-Type': 'application/json'})
+                                         'nic': 'eth1'})
     assert r.status == '200 OK'
 
 
 def test_update_r(client):
     """ tests the restful endpoint: update """
-    r = client.simulate_post('/update', params={'id': 'foo'})
+    r = client.simulate_post('/update', json={'id': 'foo'})
     assert r.status == '200 OK'
-    r = client.simulate_post('/update', params={'id': 'foo',
+    r = client.simulate_post('/update', json={'id': 'foo',
                                          'metadata': '{"foo": "bar"}'},
                       headers={'Content-Type': 'application/json'})
     assert r.status == '200 OK'
@@ -72,11 +72,11 @@ def test_stop_r(client):
     test_cont = d.containers.create('alpine')
 
     # test stop
-    r = client.simulate_post('/stop', params={})
+    r = client.simulate_post('/stop', json={})
     assert r.status == '200 OK'
-    r = client.simulate_post('/stop', params={'id': test_cont.attrs['Id']})
+    r = client.simulate_post('/stop', json={'id': test_cont.attrs['Id']})
     assert r.status == '200 OK'
-    r = client.simulate_post('/stop', params={'id': []})
+    r = client.simulate_post('/stop', json={'id': []})
     assert r.status == '200 OK'
 
 
@@ -88,11 +88,11 @@ def test_start_r(client):
     test_cont = d.containers.create('alpine')
 
     # test start
-    r = client.simulate_post('/start', params={})
+    r = client.simulate_post('/start', json={})
     assert r.status == '200 OK'
-    r = client.simulate_post('/start', params={'id': test_cont.attrs['Id']})
+    r = client.simulate_post('/start', json={'id': test_cont.attrs['Id']})
     assert r.status == '200 OK'
-    r = client.simulate_post('/start', params={'id': []})
+    r = client.simulate_post('/start', json={'id': []})
     assert r.status == '200 OK'
 
 
@@ -104,9 +104,9 @@ def test_delete_r(client):
     test_cont = d.containers.create('alpine')
 
     # test delete
-    r = client.simulate_post('/delete', params={})
+    r = client.simulate_post('/delete', json={})
     assert r.status == '200 OK'
-    r = client.simulate_post('/delete', params={'id': test_cont.attrs['Id']})
+    r = client.simulate_post('/delete', json={'id': test_cont.attrs['Id']})
     assert r.status == '200 OK'
-    r = client.simulate_post('/delete', params={'id': []})
+    r = client.simulate_post('/delete', json={'id': []})
     assert r.status == '200 OK'
