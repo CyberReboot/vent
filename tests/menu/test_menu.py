@@ -96,11 +96,11 @@ def test_menu():
     #          DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '3', TAB, TAB,
     #          ENTER, ENTER, TAB, ENTER, ENTER, TAB, ENTER, CTRL_Q])
     # configure - instances add (add an instance of rq_worker)
-    run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
-              SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN,
-              DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '3', TAB, TAB,
-              ENTER, ENTER, TAB, ENTER, ENTER, TAB, ENTER, TAB, TAB, ENTER])
+    #run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+    #          SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
+    #          SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN,
+    #          DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '3', TAB, TAB,
+    #          ENTER, ENTER, TAB, ENTER, ENTER, TAB, ENTER, TAB, TAB, ENTER])
     # configure - quit in the middle of delete
     #run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
     #          SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
@@ -108,11 +108,11 @@ def test_menu():
     #          DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',
     #          TAB, TAB, ENTER, ENTER, TAB, ENTER, CTRL_Q])
     # configure - instances delete (delete an instance of file_drop)
-    run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN,
-              DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',
-              TAB, TAB, ENTER, ENTER, TAB, ENTER, SPACE, TAB, TAB, ENTER])
+    #run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+    #          SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
+    #          SPACE, TAB, SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN,
+    #          DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',
+    #          TAB, TAB, ENTER, ENTER, TAB, ENTER, SPACE, TAB, TAB, ENTER])
     # clean - ok
     run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
               RIGHT, ENTER, ENTER, ENTER])
