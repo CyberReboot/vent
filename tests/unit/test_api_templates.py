@@ -21,9 +21,9 @@ def test_del_option():
     """ Test the del_option function """
     instance = Template()
     instance.del_option('foo', 'bar')
-    instance.add_option('foo', 'bar')
-    instance.del_option('foo', 'bar')
-    instance.del_option('foo', 'bar')
+    instance.add_option('foo', 'bar2')
+    instance.del_option('foo', 'bar2')
+    instance.del_option('foo', 'bar2')
 
 def test_del_section():
     """ Test the del_section function """
