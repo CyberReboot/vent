@@ -24,6 +24,13 @@ def test_add():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+def test_add_image():
+    """ Test the add image function """
+    instance = Action()
+    status = instance.add_image('alpine', 'alpine')
+    assert isinstance(status, tuple)
+    assert status[0] == True
+
 def test_get_configure():
     """ Test the get_configure function """
     instance = Action()
@@ -141,7 +148,7 @@ def test_update():
                           tools=[('vent/core/elasticsearch', '')])
     assert isinstance(status, tuple)
     assert status[0]
-    status = instance.update(name='elasticsearch', branch='master')
+    status = instance.update(name='elasticsearch', branch='master', new_version="a45e8b3c79964c9a6953b6b45f079bd833edbf46")
     assert isinstance(status, tuple)
     assert status[0]
 
@@ -234,6 +241,21 @@ def test_logs():
     status = instance.logs(c_type="core")
     assert isinstance(status, tuple)
     assert status[0] == True
+
+def test_tool_status_checker():
+    """ Test the tool_status_checker function """
+    instance = Action()
+    status = instance.tool_status_checker('elasticsearch')
+
+def test_tool_status_output():
+    """ Test the tool_status_output function """
+    instance = Action()
+    status = instance.tool_status_output('elasticsearch')
+
+def test_get_vent_tool_url():
+    """ Test the get_vent_tool_url function """
+    instance = Action()
+    status = instance.get_vent_tool_url('elasticsearch')
 
 def test_help():
     """ Test the help function """
