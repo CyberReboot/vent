@@ -23,7 +23,7 @@ def test_file_drop_GZHandler():
             self.is_directory = is_directory
             self.q = Queue(connection=Redis(host='localhost'),
                            default_timeout=86400)
-            self.r = StrictRedis(host='localhsot', port=6379, db=0)
+            self.r = StrictRedis(host='localhost', port=6379, db=0)
 
     b = Event("created", "/dev/null", False)
     c = Event("modified", "/etc/hosts", False)
