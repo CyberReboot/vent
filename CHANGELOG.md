@@ -1,3 +1,11 @@
+# v0.6.4 (2018-07-27)
+
+improvements:
+- upgraded version of rq
+- upgraded version of gevent
+- upgraded version of sphinx
+- improved tests
+
 # v0.6.3 (2018-07-13)
 
 improvements:
