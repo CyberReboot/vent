@@ -370,8 +370,7 @@ class PluginHelper:
                             syslog_address = 'tcp://' + ip_address + ':' + port
                             syslog_config = {'syslog-address': syslog_address,
                                              'syslog-facility': 'daemon',
-                                             'syslog-format': 'rfc5424',
-                                             'tag': '{{.Name}}/{{.ID}}/plugin'}
+                                             'tag': '{{.Name}}'}
                             log_config['config'].update(syslog_config)
                             externally_configured = True
                     except Exception as e:  # pragma: no cover
@@ -383,8 +382,7 @@ class PluginHelper:
                 log_config = {'type': 'syslog',
                               'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                          'syslog-facility': 'daemon',
-                                         'syslog-format': 'rfc5424',
-                                         'tag': '{{.Name}}/{{.ID}}/plugin'}}
+                                         'tag': '{{.Name}}'}}
             if 'groups' in s[section]:
                 # add labels for groups
                 tool_d[c_name]['labels']['vent.groups'] = s[section]['groups']
@@ -408,7 +406,7 @@ class PluginHelper:
                 # send logs to syslog
                 if ('syslog' not in s[section]['groups'] and
                    'core' in s[section]['groups']):
-                    log_config['config']['tag'] = '{{.Name}}/{{.ID}}/core'
+                    log_config['config']['tag'] = '{{.Name}}'
                     tool_d[c_name]['log_config'] = log_config
                 if 'syslog' not in s[section]['groups']:
                     tool_d[c_name]['log_config'] = log_config
