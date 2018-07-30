@@ -370,7 +370,7 @@ class PluginHelper:
                             syslog_address = 'tcp://' + ip_address + ':' + port
                             syslog_config = {'syslog-address': syslog_address,
                                              'syslog-facility': 'daemon',
-                                             'syslog-format': 'rfc5424micro',
+                                             'syslog-format': 'rfc5424',
                                              'tag': '{{.Name}}/{{.ID}}/plugin'}
                             log_config['config'].update(syslog_config)
                             externally_configured = True
@@ -383,7 +383,7 @@ class PluginHelper:
                 log_config = {'type': 'syslog',
                               'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                          'syslog-facility': 'daemon',
-                                         'syslog-format': 'rfc5424micro',
+                                         'syslog-format': 'rfc5424',
                                          'tag': '{{.Name}}/{{.ID}}/plugin'}}
             if 'groups' in s[section]:
                 # add labels for groups
