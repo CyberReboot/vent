@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3.8
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="rq_dashboard" \

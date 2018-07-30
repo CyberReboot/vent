@@ -1,4 +1,4 @@
-FROM python:3.6.6-alpine3.7
+FROM alpine3.8
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="workflow" \
