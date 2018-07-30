@@ -389,7 +389,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         log_config = {'type': 'syslog',
                       'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                  'syslog-facility': 'daemon',
-                                 'tag': '{{.Name}}/{{.ID}}/'+path.rsplit('.', 1)[-1]}}
+                                 'tag': '{{.Name}}'}}
 
         # setup gpu queue
         can_queue_gpu = True
