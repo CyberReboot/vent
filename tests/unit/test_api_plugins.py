@@ -3,35 +3,43 @@ import os
 from vent.api.plugins import Plugin
 from vent.api.templates import Template
 
+
 def test_add():
     """ Test the add function """
     instance = Plugin()
     status = instance.add('https://github.com/cyberreboot/vent', build=False)
     assert isinstance(status, tuple)
     assert status[0] == True
-    status = instance.add('https://github.com/cyberreboot/vent.git', build=False)
+    status = instance.add(
+        'https://github.com/cyberreboot/vent.git', build=False)
     assert isinstance(status, tuple)
     assert status[0] == True
     bad_instance = Plugin()
-    status = bad_instance.add('https://github.com/cyberreboot/vent', build=False)
+    status = bad_instance.add(
+        'https://github.com/cyberreboot/vent', build=False)
     assert isinstance(status, tuple)
     assert status[0] == True
     instance = Plugin()
-    status = instance.add('https://github.com/cyberreboot/vent', build=False, user='foo', pw='bar')
+    status = instance.add('https://github.com/cyberreboot/vent',
+                          build=False, user='foo', pw='bar')
     assert isinstance(status, tuple)
     assert status[0] == True
     instance = Plugin()
-    status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')])
+    status = instance.add('https://github.com/cyberreboot/vent',
+                          build=False, overrides=[('.', 'HEAD')])
     assert isinstance(status, tuple)
     assert status[0] == True
     instance = Plugin()
-    status = instance.add('https://github.com/cyberreboot/vent', build=False, tools=[('vent/', 'HEAD')], overrides=[('vent', 'HEAD')])
+    status = instance.add('https://github.com/cyberreboot/vent', build=False,
+                          tools=[('vent/', 'HEAD')], overrides=[('vent', 'HEAD')])
     assert isinstance(status, tuple)
     assert status[0] == True
     instance = Plugin()
-    status = instance.add('https://github.com/cyberreboot/vent', build=False, overrides=[('.', 'HEAD')], user='foo', pw='foo')
+    status = instance.add('https://github.com/cyberreboot/vent',
+                          build=False, overrides=[('.', 'HEAD')], user='foo', pw='foo')
     assert isinstance(status, tuple)
     assert status[0] == True
+
 
 def test_add_image():
     """ Test the add_image function """
@@ -39,16 +47,21 @@ def test_add_image():
     #status = instance.add_image('quay/redis', 'redis',  registry='quay.io')
     #assert isinstance(status, tuple)
     #assert status[0] == True
-    status = instance.add_image('alpine', 'alpine', tag='latest', groups='alpine')
+    status = instance.add_image(
+        'alpine', 'alpine', tag='latest', groups='alpine')
     assert isinstance(status, tuple)
     assert status[0] == True
+
 
 def test_builder():
     """ Test the builder function """
     instance = Plugin()
     template = Template(instance.manifest)
-    template = instance.builder(template, os.getcwd()+'/plugins/cyberreboot/vent', 'image_name', 'section')
-    template = instance.builder(template, 'bad_path', 'image_name', 'section', build=True, branch='master', version='HEAD')
+    template = instance.builder(template, os.getcwd(
+    )+'/plugins/cyberreboot/vent', 'image_name', 'section')
+    template = instance.builder(template, 'bad_path', 'image_name',
+                                'section', build=True, branch='master', version='HEAD')
+
 
 def test_build_tools():
     """ Test the _build_tools function """
@@ -56,10 +69,12 @@ def test_build_tools():
     status = instance._build_tools(False)
     assert status[0] == False
 
+
 def test_list_tools():
     """ Test the tools function """
     instance = Plugin()
     tools = instance.list_tools()
+
 
 def test_remove():
     """ Test the remove function """
@@ -67,10 +82,12 @@ def test_remove():
     status = instance.remove(groups='core', built='no')
     assert status[0] == True
 
+
 def test_versions():
     """ Test the versions function """
     instance = Plugin()
-    status = instance.add('https://github.com/cyberreboot/vent', build=False, branch='master')
+    status = instance.add(
+        'https://github.com/cyberreboot/vent', build=False, branch='master')
     assert status[0] == True
     versions = instance.versions('elasticsearch', branch='master')
     assert isinstance(versions, list)
@@ -79,17 +96,22 @@ def test_versions():
     assert versions[0][0] == 'cyberreboot:vent:/vent/core/elasticsearch:master:HEAD'
     assert 'HEAD' in versions[0][1]
 
+
 def test_current_version():
     """ Test the current_version function """
     instance = Plugin()
     versions = instance.current_version('elasticsearch', branch='master')
-    assert versions == [('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'HEAD')]
+    assert versions == [
+        ('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'HEAD')]
+
 
 def test_state():
     """ Test the state function """
     instance = Plugin()
     states = instance.state('elasticsearch', branch='master')
-    assert states == [('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'enabled')]
+    assert states == [
+        ('cyberreboot:vent:/vent/core/elasticsearch:master:HEAD', 'enabled')]
+
 
 def test_enable():
     """ Test the enable function """
@@ -97,11 +119,13 @@ def test_enable():
     status = instance.enable('elasticsearch', branch='master')
     assert status[0] == True
 
+
 def test_disable():
     """ Test the disable function """
     instance = Plugin()
     status = instance.disable('elasticsearch', branch='master')
     assert status[0] == True
+
 
 def test_update():
     """ Test the update function """

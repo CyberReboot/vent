@@ -1,14 +1,17 @@
-import docker
 import getpass
 import json
 import os
 import shlex
-import yaml
-
 from datetime import datetime
-from os import chdir, getcwd
-from os.path import isdir, join
-from subprocess import check_output, STDOUT
+from os import chdir
+from os import getcwd
+from os.path import isdir
+from os.path import join
+from subprocess import check_output
+from subprocess import STDOUT
+
+import docker
+import yaml
 
 from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
@@ -27,14 +30,14 @@ class Plugin:
     def __init__(self, **kargs):
         self.path_dirs = PathDirs(**kargs)
         self.manifest = join(self.path_dirs.meta_dir,
-                             "plugin_manifest.cfg")
+                             'plugin_manifest.cfg')
         self.p_helper = PluginHelper(**kargs)
         self.d_client = docker.from_env()
         self.logger = Logger(__name__)
         self.plugin_config_file = self.path_dirs.plugin_config_file
 
-    def add(self, repo, tools=None, overrides=None, version="HEAD", image=None,
-            branch="master", build=True, user=None, pw=None, groups=None,
+    def add(self, repo, tools=None, overrides=None, version='HEAD', image=None,
+            branch='master', build=True, user=None, pw=None, groups=None,
             version_alias=None, wild=None, remove_old=True, disable_old=True,
             limit_groups=None, core=False, update_repo=None):
         """
@@ -93,7 +96,7 @@ class Plugin:
         if (isinstance(self.tools, list) and
                 len(self.tools) == 0):
             self.tools = None
-        self.logger.info("Adding new tools: " + str(self.tools))
+        self.logger.info('Adding new tools: ' + str(self.tools))
         self.overrides = overrides
         self.version = version
         self.image = image
@@ -154,12 +157,12 @@ class Plugin:
             if '/' in image:
                 org, name = image.split('/')
             else:
-                org = "official"
+                org = 'official'
             if not tag:
-                tag = "latest"
+                tag = 'latest'
             if not registry:
-                registry = "docker.io"
-            full_image = registry + "/" + image + ":" + tag
+                registry = 'docker.io'
+            full_image = registry + '/' + image + ':' + tag
             image = self.d_client.images.pull(full_image)
             section = ':'.join([registry, org, name, '', tag])
             namespace = org + '/' + name
@@ -167,29 +170,29 @@ class Plugin:
             # set template section and options for tool at version and branch
             template = Template(template=self.manifest)
             template.add_section(section)
-            template.set_option(section, "name", name)
-            template.set_option(section, "pull_name", pull_name)
-            template.set_option(section, "namespace", namespace)
-            template.set_option(section, "path", "")
-            template.set_option(section, "repo", registry + '/' + org)
-            template.set_option(section, "enabled", "yes")
-            template.set_option(section, "branch", "")
-            template.set_option(section, "version", tag)
-            template.set_option(section, "last_updated",
-                                str(datetime.utcnow()) + " UTC")
-            template.set_option(section, "image_name",
+            template.set_option(section, 'name', name)
+            template.set_option(section, 'pull_name', pull_name)
+            template.set_option(section, 'namespace', namespace)
+            template.set_option(section, 'path', '')
+            template.set_option(section, 'repo', registry + '/' + org)
+            template.set_option(section, 'enabled', 'yes')
+            template.set_option(section, 'branch', '')
+            template.set_option(section, 'version', tag)
+            template.set_option(section, 'last_updated',
+                                str(datetime.utcnow()) + ' UTC')
+            template.set_option(section, 'image_name',
                                 image.attrs['RepoTags'][0])
-            template.set_option(section, "type", "registry")
-            template.set_option(section, "link_name", link_name)
-            template.set_option(section, "commit_id", "")
-            template.set_option(section, "built", "yes")
-            template.set_option(section, "image_id",
+            template.set_option(section, 'type', 'registry')
+            template.set_option(section, 'link_name', link_name)
+            template.set_option(section, 'commit_id', '')
+            template.set_option(section, 'built', 'yes')
+            template.set_option(section, 'image_id',
                                 image.attrs['Id'].split(':')[1][:12])
-            template.set_option(section, "groups", groups)
+            template.set_option(section, 'groups', groups)
 
             # write out configuration to the manifest file
             template.write_config()
-            status = (True, "Successfully added " + full_image)
+            status = (True, 'Successfully added ' + full_image)
         except Exception as e:  # pragma: no cover
             self.logger.error("Couldn't add image because " + str(e))
             status = (False, str(e))
@@ -208,12 +211,12 @@ class Plugin:
         Build tools
         """
 
-        self.logger.info("Starting: builder")
-        self.logger.info("install path: " + str(match_path))
-        self.logger.info("image name: " + str(image_name))
-        self.logger.info("build: " + str(build))
-        self.logger.info("branch: " + str(branch))
-        self.logger.info("version: " + str(version))
+        self.logger.info('Starting: builder')
+        self.logger.info('install path: ' + str(match_path))
+        self.logger.info('image name: ' + str(image_name))
+        self.logger.info('build: ' + str(build))
+        self.logger.info('branch: ' + str(branch))
+        self.logger.info('version: ' + str(version))
 
         if build:
             self.build = build
@@ -231,12 +234,12 @@ class Plugin:
             self.version = 'HEAD'
 
         cwd = getcwd()
-        self.logger.info("current working directory: " + str(cwd))
+        self.logger.info('current working directory: ' + str(cwd))
         try:
             chdir(match_path)
         except Exception as e:  # pragma: no cover
-            self.logger.error("unable to change to directory: " +
-                              str(match_path) + " because: " + str(e))
+            self.logger.error('unable to change to directory: ' +
+                              str(match_path) + ' because: ' + str(e))
             return None
 
         template = self._build_image(template, match_path, image_name, section)
@@ -245,25 +248,25 @@ class Plugin:
         # get untagged images
         untagged = None
         try:
-            untagged = self.d_client.images.list(filters={"label": "vent",
-                                                          "dangling": "true"})
+            untagged = self.d_client.images.list(filters={'label': 'vent',
+                                                          'dangling': 'true'})
         except Exception as e:  # pragma: no cover
-            self.logger.error("unabled to get images to remove: " + str(e))
+            self.logger.error('unabled to get images to remove: ' + str(e))
 
         # remove untagged images
         if untagged:
-            deleted_images = ""
+            deleted_images = ''
             for image in untagged:
                 deleted_images = '\n'.join([deleted_images, image.id])
                 try:
                     self.d_client.images.remove(image.id, force=True)
                 except Exception as e:  # pragma: no cover
-                    self.logger.warning("unable to remove image: " + image.id +
-                                        " because: " + str(e))
-            self.logger.info("removed dangling images:" + deleted_images)
+                    self.logger.warning('unable to remove image: ' + image.id +
+                                        ' because: ' + str(e))
+            self.logger.info('removed dangling images:' + deleted_images)
 
-        self.logger.info("template of builder: " + str(template))
-        self.logger.info("Finished: builder")
+        self.logger.info('template of builder: ' + str(template))
+        self.logger.info('Finished: builder')
         return template
 
     def _build_tools(self, status):
@@ -278,7 +281,7 @@ class Plugin:
             response (tuple(bool, str)): If True, then the function performed
             as expected and the str is a string
         """
-        self.logger.info("Starting: _build_tools")
+        self.logger.info('Starting: _build_tools')
         response = (True, None)
         # TODO implement features: wild, remove_old, disable_old, limit_groups
 
@@ -331,15 +334,15 @@ class Plugin:
         else:
             response = (False, status)
 
-        self.logger.info("Status of _build_tools: " + str(response[0]))
-        self.logger.info("Finished: _build_tools")
+        self.logger.info('Status of _build_tools: ' + str(response[0]))
+        self.logger.info('Finished: _build_tools')
         return response
 
     def _build_manifest(self, matches):
         """
         Builds and writes the manifest for the tools being added
         """
-        self.logger.info("Starting: _build_manifest")
+        self.logger.info('Starting: _build_manifest')
         # !! TODO check for pre-existing that conflict with request and
         #         disable and/or remove image
         for match in matches:
@@ -364,14 +367,14 @@ class Plugin:
             else:
                 response = (True, None)
             if response[0]:
-                section = self.org + ":" + self.name + ":" + true_name + ":"
-                section += self.branch + ":" + self.version
+                section = self.org + ':' + self.name + ':' + true_name + ':'
+                section += self.branch + ':' + self.version
                 # need to get rid of temp identifiers for tools in same repo
                 match_path = self.path + match[0].split('@')[0]
                 if self.image:
                     image_name = self.image
                 elif not self.core:
-                    image_name = self.org + "/" + self.name
+                    image_name = self.org + '/' + self.name
                     if match[0] != '':
                         # if tool is in a subdir, add that to the name of the
                         # image
@@ -402,9 +405,9 @@ class Plugin:
                             previous_commits = option[1]
 
                 # check if tool comes from multi directory
-                multi_tool = "no"
+                multi_tool = 'no'
                 if match[0].find('@') >= 0:
-                    multi_tool = "yes"
+                    multi_tool = 'yes'
 
                 # !! TODO
                 # check if section should be removed from config i.e. all tools
@@ -415,19 +418,19 @@ class Plugin:
 
                 # set template section & options for tool at version and branch
                 template.add_section(section)
-                template.set_option(section, "name", true_name.split('/')[-1])
-                template.set_option(section, "namespace", self.org + '/' +
+                template.set_option(section, 'name', true_name.split('/')[-1])
+                template.set_option(section, 'namespace', self.org + '/' +
                                     self.name)
-                template.set_option(section, "path", match_path)
-                template.set_option(section, "repo", self.repo)
-                template.set_option(section, "enabled", "yes")
-                template.set_option(section, "multi_tool", multi_tool)
-                template.set_option(section, "branch", self.branch)
-                template.set_option(section, "version", self.version)
-                template.set_option(section, "last_updated",
-                                    str(datetime.utcnow()) + " UTC")
-                template.set_option(section, "image_name", image_name)
-                template.set_option(section, "type", "repository")
+                template.set_option(section, 'path', match_path)
+                template.set_option(section, 'repo', self.repo)
+                template.set_option(section, 'enabled', 'yes')
+                template.set_option(section, 'multi_tool', multi_tool)
+                template.set_option(section, 'branch', self.branch)
+                template.set_option(section, 'version', self.version)
+                template.set_option(section, 'last_updated',
+                                    str(datetime.utcnow()) + ' UTC')
+                template.set_option(section, 'image_name', image_name)
+                template.set_option(section, 'type', 'repository')
                 # save settings in vent.template to plugin_manifest
                 # watch for multiple tools in same directory
                 # just wanted to store match path with @ for path for use in
@@ -447,28 +450,28 @@ class Plugin:
                                         json.dumps(settings_dict[setting]))
                 # TODO do we need this if we save as a dictionary?
                 vent_template = Template(vent_template_path)
-                vent_status, response = vent_template.option("info", "name")
+                vent_status, response = vent_template.option('info', 'name')
                 if vent_status:
-                    template.set_option(section, "link_name", response)
+                    template.set_option(section, 'link_name', response)
                 else:
                     template.set_option(section,
-                                        "link_name",
+                                        'link_name',
                                         true_name.split('/')[-1])
                 commit_id = None
                 if self.version == 'HEAD':
                     # remove @ in multi-tools
                     chdir(match_path)
-                    cmd = "git rev-parse --short HEAD"
+                    cmd = 'git rev-parse --short HEAD'
                     commit_id = check_output(shlex.split(cmd),
                                              stderr=STDOUT,
-                                             close_fds=True).strip().decode("utf-8")
-                    template.set_option(section, "commit_id", commit_id)
+                                             close_fds=True).strip().decode('utf-8')
+                    template.set_option(section, 'commit_id', commit_id)
                 if head:
                     # no need to store previous commits if not HEAD, since
                     # the version will always be the same commit ID
                     if previous_commit and previous_commit != commit_id:
                         if (previous_commits and
-                           previous_commit not in previous_commits):
+                                previous_commit not in previous_commits):
                             previous_commits = (previous_commit +
                                                 ',' +
                                                 previous_commits)
@@ -476,22 +479,22 @@ class Plugin:
                             previous_commits = previous_commit
                     if previous_commits and previous_commits != commit_id:
                         template.set_option(section,
-                                            "previous_versions",
+                                            'previous_versions',
                                             previous_commits)
 
                 if self.version_alias:
                     template.set_option(section,
-                                        "version_alias",
+                                        'version_alias',
                                         self.version_alias)
                 if self.groups:
-                    template.set_option(section, "groups", self.groups)
+                    template.set_option(section, 'groups', self.groups)
                 else:
-                    groups = vent_template.option("info", "groups")
+                    groups = vent_template.option('info', 'groups')
                     if groups[0]:
-                        template.set_option(section, "groups", groups[1])
+                        template.set_option(section, 'groups', groups[1])
                     # set groups to empty string if no groups defined for tool
                     else:
-                        template.set_option(section, "groups", '')
+                        template.set_option(section, 'groups', '')
                 template = self._build_image(template,
                                              match_path,
                                              image_name,
@@ -507,7 +510,7 @@ class Plugin:
                         orig_vals = template.section(section)[1]
                         for val in orig_vals:
                             template.set_option(addtl_section, val[0], val[1])
-                        template.set_option(addtl_section, "name",
+                        template.set_option(addtl_section, 'name',
                                             true_name.split('/')[-1]+str(i))
 
             # write out configuration to the manifest file
@@ -515,7 +518,7 @@ class Plugin:
 
         # reset to repo directory
         chdir(self.path)
-        self.logger.info("Finished: _build_manifest")
+        self.logger.info('Finished: _build_manifest')
         return
 
     def _build_image(self,
@@ -527,12 +530,12 @@ class Plugin:
         """
         Build docker images and store results in template
         """
-        self.logger.info("Starting: _build_image")
+        self.logger.info('Starting: _build_image')
         status = True
 
         def set_instances(template, section, built, image_id=None):
             """ Set build information for multiple instances """
-            self.logger.info("entering set_instances")
+            self.logger.info('entering set_instances')
             i = 2
             while True:
                 addtl_section = section.rsplit(':', 2)
@@ -540,12 +543,12 @@ class Plugin:
                 addtl_section = ':'.join(addtl_section)
                 self.logger.info(addtl_section)
                 if template.section(addtl_section)[0]:
-                    template.set_option(addtl_section, "built", built)
+                    template.set_option(addtl_section, 'built', built)
                     if image_id:
-                        template.set_option(addtl_section, "image_id",
+                        template.set_option(addtl_section, 'image_id',
                                             image_id)
                     template.set_option(addtl_section,
-                                        "last_updated", Timestamp())
+                                        'last_updated', Timestamp())
                 else:
                     break
                 i += 1
@@ -565,19 +568,19 @@ class Plugin:
             cwd = getcwd()
             chdir(match_path)
             try:
-                name = template.option(section, "name")
-                groups = template.option(section, "groups")
-                repo = template.option(section, "repo")
-                t_type = template.option(section, "type")
-                path = template.option(section, "path")
+                name = template.option(section, 'name')
+                groups = template.option(section, 'groups')
+                repo = template.option(section, 'repo')
+                t_type = template.option(section, 'type')
+                path = template.option(section, 'path')
                 must_build = self.fill_config(path[1])
-                if groups[1] == "" or not groups[0]:
-                    groups = (True, "none")
+                if groups[1] == '' or not groups[0]:
+                    groups = (True, 'none')
                 if not name[0]:
                     name = (True, image_name)
                 pull = False
                 image_exists = False
-                output = ""
+                output = ''
                 cfg_template = Template(template=self.path_dirs.cfg_file)
                 use_existing_image = False
                 result = cfg_template.option('build-options',
@@ -590,144 +593,146 @@ class Plugin:
                         i_attrs = self.d_client.images.get(image_name).attrs
                         image_id = i_attrs['Id'].split(':')[1][:12]
 
-                        template.set_option(section, "built", "yes")
-                        template.set_option(section, "image_id", image_id)
-                        template.set_option(section, "last_updated",
-                                            str(datetime.utcnow()) + " UTC")
+                        template.set_option(section, 'built', 'yes')
+                        template.set_option(section, 'image_id', image_id)
+                        template.set_option(section, 'last_updated',
+                                            str(datetime.utcnow()) + ' UTC')
                         # set other instances too
                         if multi_instance:
                             set_instances(template, section, 'yes', image_id)
-                        status = (True, "Found " + image_name)
+                        status = (True, 'Found ' + image_name)
                         self.logger.info(str(status))
                         image_exists = True
                     except docker.errors.ImageNotFound:
                         image_exists = False
                     except Exception as e:  # pragma: no cover
-                        self.logger.warning("Failed to query Docker for images"
-                                            " because: " + str(e))
+                        self.logger.warning('Failed to query Docker for images'
+                                            ' because: ' + str(e))
                 if not image_exists:
                     # pull if '/' in image_name, fallback to build
                     if '/' in image_name and not build_local and not must_build:
                         try:
                             # currently can't use docker-py because it doesn't support
                             # support labels on images yet
-                            self.logger.info("Trying to pull " + image_name)
-                            output = check_output(shlex.split("docker pull " +
+                            self.logger.info('Trying to pull ' + image_name)
+                            output = check_output(shlex.split('docker pull ' +
                                                               image_name),
                                                   stderr=STDOUT,
-                                                  close_fds=True).decode("utf-8")
-                            self.logger.info("Pulling " + name[1] + "\n" +
+                                                  close_fds=True).decode('utf-8')
+                            self.logger.info('Pulling ' + name[1] + '\n' +
                                              output)
 
-                            i_attrs = self.d_client.images.get(image_name).attrs
+                            i_attrs = self.d_client.images.get(
+                                image_name).attrs
                             image_id = i_attrs['Id'].split(':')[1][:12]
 
                             if image_id:
-                                template.set_option(section, "built", "yes")
+                                template.set_option(section, 'built', 'yes')
                                 template.set_option(section,
-                                                    "image_id",
+                                                    'image_id',
                                                     image_id)
-                                template.set_option(section, "last_updated",
+                                template.set_option(section, 'last_updated',
                                                     str(datetime.utcnow()) +
-                                                    " UTC")
+                                                    ' UTC')
                                 # set other instances too
                                 if multi_instance:
                                     set_instances(template, section, 'yes',
                                                   image_id)
-                                status = (True, "Pulled " + image_name)
+                                status = (True, 'Pulled ' + image_name)
                                 self.logger.info(str(status))
                             else:
-                                template.set_option(section, "built", "failed")
-                                template.set_option(section, "last_updated",
+                                template.set_option(section, 'built', 'failed')
+                                template.set_option(section, 'last_updated',
                                                     str(datetime.utcnow()) +
-                                                    " UTC")
+                                                    ' UTC')
                                 # set other instances too
                                 if multi_instace:
                                     set_instances(template, section, 'failed')
-                                status = (False, "Failed to pull image " +
+                                status = (False, 'Failed to pull image ' +
                                           str(output.split('\n')[-1]))
                                 self.logger.warning(str(status))
                             pull = True
                         except Exception as e:  # pragma: no cover
-                            self.logger.warning("Failed to pull image, going"
-                                                " to build instead: " + str(e))
+                            self.logger.warning('Failed to pull image, going'
+                                                ' to build instead: ' + str(e))
                         status = False
                 if not pull and not image_exists:
                     # get username to label built image with
                     username = getpass.getuser()
                     # see if additional tags needed for images tagged at HEAD
-                    commit_tag = ""
+                    commit_tag = ''
                     if image_name.endswith('HEAD'):
-                        commit_id = template.option(section, "commit_id")
+                        commit_id = template.option(section, 'commit_id')
                         if commit_id[0]:
-                            commit_tag = (" -t " + image_name[:-4] +
+                            commit_tag = (' -t ' + image_name[:-4] +
                                           str(commit_id[1]))
                     # see if additional file arg needed for building multiple
                     # images from same directory
-                    file_tag = " ."
+                    file_tag = ' .'
                     multi_tool = template.option(section, 'multi_tool')
                     if multi_tool[0] and multi_tool[1] == 'yes':
                         specific_file = template.option(section, 'name')[1]
                         if specific_file == 'unspecified':
-                            file_tag = " -f Dockerfile ."
+                            file_tag = ' -f Dockerfile .'
                         else:
-                            file_tag = " -f Dockerfile." + specific_file + " ."
+                            file_tag = ' -f Dockerfile.' + specific_file + ' .'
                     # update image name with new version for update
                     image_name = image_name.rsplit(':', 1)[0]+':'+self.branch
-                    output = check_output(shlex.split("docker build --label"
-                                                      " vent --label"
-                                                      " vent.section=" +
-                                                      section + " --label"
-                                                      " vent.repo=" +
-                                                      repo[1] + " --label"
-                                                      " vent.type=" +
-                                                      t_type[1] + " --label"
-                                                      " vent.name=" +
-                                                      name[1] + " --label"
-                                                      " vent.groups=" +
-                                                      groups[1] + " --label" +
-                                                      " built-by=" +
-                                                      username + " -t " +
+                    output = check_output(shlex.split('docker build --label'
+                                                      ' vent --label'
+                                                      ' vent.section=' +
+                                                      section + ' --label'
+                                                      ' vent.repo=' +
+                                                      repo[1] + ' --label'
+                                                      ' vent.type=' +
+                                                      t_type[1] + ' --label'
+                                                      ' vent.name=' +
+                                                      name[1] + ' --label'
+                                                      ' vent.groups=' +
+                                                      groups[1] + ' --label' +
+                                                      ' built-by=' +
+                                                      username + ' -t ' +
                                                       image_name +
                                                       commit_tag + file_tag),
                                           stderr=STDOUT,
-                                          close_fds=True).decode("utf-8")
-                    self.logger.info("Building " + name[1] + "\n" +
+                                          close_fds=True).decode('utf-8')
+                    self.logger.info('Building ' + name[1] + '\n' +
                                      output)
-                    image_id = ""
-                    for line in output.split("\n"):
-                        suc_str = "Successfully built "
+                    image_id = ''
+                    for line in output.split('\n'):
+                        suc_str = 'Successfully built '
                         if line.startswith(suc_str):
                             image_id = line.split(suc_str)[1].strip()
-                    template.set_option(section, "built", "yes")
-                    template.set_option(section, "image_id", image_id)
-                    template.set_option(section, "last_updated",
+                    template.set_option(section, 'built', 'yes')
+                    template.set_option(section, 'image_id', image_id)
+                    template.set_option(section, 'last_updated',
                                         str(datetime.utcnow()) +
-                                        " UTC")
+                                        ' UTC')
                     # set other instances too
                     if multi_instance:
                         set_instances(template, section, 'yes', image_id)
             except Exception as e:  # pragma: no cover
-                self.logger.info("current working directory: " + str(os.getcwd()))
-                self.logger.error("unable to build image: " + str(image_name) +
-                                  " because: " + str(e) + " and " + str(output))
-                template.set_option(section, "built", "failed")
-                template.set_option(section, "last_updated",
-                                    str(datetime.utcnow()) + " UTC")
+                self.logger.info(
+                    'current working directory: ' + str(os.getcwd()))
+                self.logger.error('unable to build image: ' + str(image_name) +
+                                  ' because: ' + str(e) + ' and ' + str(output))
+                template.set_option(section, 'built', 'failed')
+                template.set_option(section, 'last_updated',
+                                    str(datetime.utcnow()) + ' UTC')
                 if multi_instance:
                     set_instances(template, section, 'failed')
                 status = False
 
             chdir(cwd)
         else:
-            template.set_option(section, "built", "no")
-            template.set_option(section, "last_updated",
-                                str(datetime.utcnow()) + " UTC")
+            template.set_option(section, 'built', 'no')
+            template.set_option(section, 'last_updated',
+                                str(datetime.utcnow()) + ' UTC')
             if multi_instance:
                 set_instances(template, section, 'no')
         template.set_option(section, 'running', 'no')
-        self.logger.info("Status of _build_image: " + str(status))
-        self.logger.info("Finished: _build_image:")
+        self.logger.info('Status of _build_image: ' + str(status))
+        self.logger.info('Finished: _build_image:')
         return template
 
     def list_tools(self):
@@ -756,8 +761,8 @@ class Plugin:
                 tools.append(options)
         return tools
 
-    def remove(self, name=None, repo=None, namespace=None, branch="master",
-               groups=None, enabled="yes", version="HEAD", built="yes"):
+    def remove(self, name=None, repo=None, namespace=None, branch='master',
+               groups=None, enabled='yes', version='HEAD', built='yes'):
         """
         Remove tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be removed for the defaults.
@@ -789,11 +794,11 @@ class Plugin:
                     container = self.d_client.containers.get(container_name)
                     response = container.remove(v=True, force=True)
                     self.logger.info(response)
-                    self.logger.info("Removing plugin container: " +
+                    self.logger.info('Removing plugin container: ' +
                                      container_name)
             except Exception as e:  # pragma: no cover
-                self.logger.warn("Unable to remove the plugin container: " +
-                                 container_name + " because: " + str(e))
+                self.logger.warn('Unable to remove the plugin container: ' +
+                                 container_name + ' because: ' + str(e))
 
             # check for image and remove
             try:
@@ -801,10 +806,10 @@ class Plugin:
                 image_id = template.option(result, 'image_id')[1]
                 response = self.d_client.images.remove(image_id, force=True)
                 self.logger.info(response)
-                self.logger.info("Removing plugin image: " + image_name)
+                self.logger.info('Removing plugin image: ' + image_name)
             except Exception as e:  # pragma: no cover
-                self.logger.warn("Unable to remove the plugin image: " +
-                                 image_name + " because: " + str(e))
+                self.logger.warn('Unable to remove the plugin image: ' +
+                                 image_name + ' because: ' + str(e))
 
             # remove tool from the manifest
             for i in range(1, instances + 1):
@@ -813,7 +818,7 @@ class Plugin:
                 res = ':'.join(res)
                 if template.section(res)[0]:
                     status = template.del_section(res)
-                    self.logger.info("Removing plugin tool: " + res)
+                    self.logger.info('Removing plugin tool: ' + res)
         # TODO if all tools from a repo have been removed, remove the repo
         template.write_config()
         return status
@@ -844,20 +849,20 @@ class Plugin:
                 container = self.d_client.containers.get(container_name)
                 container.remove(v=True, force=True)
             except Exception as e:  # pragma: no cover
-                self.logger.info("Error updating: " + str(result) +
-                                 " because: " + str(e))
+                self.logger.info('Error updating: ' + str(result) +
+                                 ' because: ' + str(e))
 
             # TODO git pull
             # TODO build
             # TODO docker pull
             # TODO update tool in the manifest
 
-            self.logger.info("Updating plugin tool: " + result)
+            self.logger.info('Updating plugin tool: ' + result)
         template.write_config()
         return status
 
     # !! TODO name or group ?
-    def versions(self, name, namespace=None, branch="master"):
+    def versions(self, name, namespace=None, branch='master'):
         """
         Return available versions of a tool
         """
@@ -873,12 +878,12 @@ class Plugin:
             version_list = [results[result]['version']]
             if 'previous_versions' in results[result]:
                 version_list += (results[result]['previous_versions']) \
-                                .split(',')
+                    .split(',')
             versions.append((result, version_list))
         return versions
 
     # !! TODO name or group ?
-    def current_version(self, name, namespace=None, branch="master"):
+    def current_version(self, name, namespace=None, branch='master'):
         """
         Return current version for a given tool
         """
@@ -895,7 +900,7 @@ class Plugin:
         return versions
 
     # !! TODO name or group ?
-    def state(self, name, namespace=None, branch="master"):
+    def state(self, name, namespace=None, branch='master'):
         """
         Return state of a tool, disabled/enabled for each version
         """
@@ -915,7 +920,7 @@ class Plugin:
         return states
 
     # !! TODO name or group ?
-    def enable(self, name, namespace=None, branch="master", version="HEAD"):
+    def enable(self, name, namespace=None, branch='master', version='HEAD'):
         """
         Enable tool at a specific version, default to head
         """
@@ -932,7 +937,7 @@ class Plugin:
         return status
 
     # !! TODO name or group ?
-    def disable(self, name, namespace=None, branch="master", version="HEAD"):
+    def disable(self, name, namespace=None, branch='master', version='HEAD'):
         """
         Disable tool at a specific version, default to head
         """
@@ -960,10 +965,11 @@ class Plugin:
         status = (True, None)
         for image in images:
             if ('Labels' in image.attrs and
-               'vent.section' in image.attrs['Config']['Labels'] and
-               not image.attrs['Config']['Labels']['vent.section'] in sections[1]):
+                'vent.section' in image.attrs['Config']['Labels'] and
+                    not image.attrs['Config']['Labels']['vent.section'] in sections[1]):
                 section = image.attrs['Config']['Labels']['vent.section']
-                section_str = image.attrs['Config']['Labels']['vent.section'].split(":")
+                section_str = image.attrs['Config']['Labels']['vent.section'].split(
+                    ':')
                 template.add_section(section)
                 if 'vent.name' in image.attrs['Config']['Labels']:
                     template.set_option(section,
@@ -974,14 +980,17 @@ class Plugin:
                                         'repo',
                                         image.attrs['Config']['Labels']['vent.repo'])
                     git_path = join(self.path_dirs.plugins_dir,
-                                    "/".join(section_str[:2]))
+                                    '/'.join(section_str[:2]))
                     if not isdir(git_path):
                         # clone it down
-                        status = self.p_helper.clone(image.attrs['Config']['Labels']['vent.repo'])
-                    template.set_option(section, 'path', join(git_path, section_str[-3][1:]))
+                        status = self.p_helper.clone(
+                            image.attrs['Config']['Labels']['vent.repo'])
+                    template.set_option(section, 'path', join(
+                        git_path, section_str[-3][1:]))
                     # get template settings
                     # TODO account for template files not named vent.template
-                    v_template = Template(template=join(git_path, section_str[-3][1:], 'vent.template'))
+                    v_template = Template(template=join(
+                        git_path, section_str[-3][1:], 'vent.template'))
                     tool_sections = v_template.sections()
                     if tool_sections[0]:
                         for s in tool_sections[1]:
@@ -993,7 +1002,7 @@ class Plugin:
                                     if option == 'name':
                                         # get link name
                                         template.set_option(section,
-                                                            "link_name",
+                                                            'link_name',
                                                             v_template.option(s, option)[1])
                                         option_name = 'link_name'
                                     opt_val = v_template.option(s, option)[1]
@@ -1002,23 +1011,28 @@ class Plugin:
                                 template.set_option(section, s,
                                                     json.dumps(section_dict))
                 if ('vent.type' in image.attrs['Config']['Labels'] and
-                   image.attrs['Config']['Labels']['vent.type'] == 'repository'):
-                    template.set_option(section, 'namespace', "/".join(section_str[:2]))
+                        image.attrs['Config']['Labels']['vent.type'] == 'repository'):
+                    template.set_option(
+                        section, 'namespace', '/'.join(section_str[:2]))
                     template.set_option(section, 'enabled', 'yes')
                     template.set_option(section, 'branch', section_str[-2])
                     template.set_option(section, 'version', section_str[-1])
-                    template.set_option(section, 'last_updated', str(datetime.utcnow()) + " UTC")
-                    template.set_option(section, 'image_name', image.attrs['RepoTags'][0])
+                    template.set_option(section, 'last_updated', str(
+                        datetime.utcnow()) + ' UTC')
+                    template.set_option(
+                        section, 'image_name', image.attrs['RepoTags'][0])
                     template.set_option(section, 'type', 'repository')
                 if 'vent.groups' in image.attrs['Config']['Labels']:
                     template.set_option(section,
                                         'groups',
                                         image.attrs['Config']['Labels']['vent.groups'])
                 template.set_option(section, 'built', 'yes')
-                template.set_option(section, 'image_id', image.attrs['Id'].split(":")[1][:12])
+                template.set_option(section, 'image_id',
+                                    image.attrs['Id'].split(':')[1][:12])
                 template.set_option(section, 'running', 'no')
                 # check if image is running as a container
-                containers = self.d_client.containers.list(filters={'label': 'vent'})
+                containers = self.d_client.containers.list(
+                    filters={'label': 'vent'})
                 for container in containers:
                     if container.attrs['Image'] == image.attrs['Id']:
                         template.set_option(section, 'running', 'yes')
@@ -1033,7 +1047,7 @@ class Plugin:
         Will take a yml located in home directory titled '.plugin_config.yml'.
         It'll then fill in, using the yml, the plugin's config file
         """
-        self.logger.info("Starting: fill_config")
+        self.logger.info('Starting: fill_config')
         status = (True, None)
         must_build = False
 
@@ -1064,14 +1078,14 @@ class Plugin:
                 for section in plugin_options:
                     for option in plugin_options[section]:
                         plugin_template.set_option(section, option,
-                                str(plugin_options[section][option]))
+                                                   str(plugin_options[section][option]))
                 plugin_template.write_config()
                 must_build = True
 
         except Exception as e:  # pragma: no cover
             status = (False, e)
-            self.logger.error("Failed to fill_config: " + str(e))
+            self.logger.error('Failed to fill_config: ' + str(e))
 
-        self.logger.info("Status of fill_config: " + str(status[0]))
-        self.logger.info("Finished: fill_config")
+        self.logger.info('Status of fill_config: ' + str(status[0]))
+        self.logger.info('Finished: fill_config')
         return must_build

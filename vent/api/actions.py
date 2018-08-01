@@ -1,14 +1,15 @@
 import ast
 import copy
-import docker
 import getpass
 import json
 import os
-import queue
 import re
 import shutil
 import tempfile
 import urllib.request
+
+import docker
+import queue
 import yaml
 
 from vent.api.plugins import Plugin
@@ -24,6 +25,7 @@ from vent.helpers.paths import PathDirs
 
 class Action:
     """ Handle actions in menu """
+
     def __init__(self, **kargs):
         self.plugin = Plugin(**kargs)
         self.d_client = self.plugin.d_client
@@ -33,12 +35,12 @@ class Action:
         self.queue = queue.Queue()
         self.logger = Logger(__name__)
 
-    def add(self, repo, tools=None, overrides=None, version="HEAD", image=None,
-            branch="master", build=True, user=None, pw=None, groups=None,
+    def add(self, repo, tools=None, overrides=None, version='HEAD', image=None,
+            branch='master', build=True, user=None, pw=None, groups=None,
             version_alias=None, wild=None, remove_old=True, disable_old=True,
             update_repo=None):
         """ Add a new set of tool(s) """
-        self.logger.info("Starting: add")
+        self.logger.info('Starting: add')
         status = (True, None)
         try:
             # remove tools that are already installed from being added
@@ -53,7 +55,7 @@ class Action:
                     constraints = {'name': tool_name,
                                    'repo': repo.split('.git')[0]}
                     prev_installed, _ = self.p_helper. \
-                                        constraint_options(constraints, [])
+                        constraint_options(constraints, [])
                     # don't reinstall
                     if prev_installed:
                         tools.remove(tool)
@@ -77,13 +79,13 @@ class Action:
                                          core=is_core,
                                          update_repo=update_repo)
             else:
-                self.logger.info("no new tools to add, exiting")
-                status = (True, "previously installed")
+                self.logger.info('no new tools to add, exiting')
+                status = (True, 'previously installed')
         except Exception as e:  # pragma: no cover
-            self.logger.error("add failed with error: " + str(e))
+            self.logger.error('add failed with error: ' + str(e))
             status = (False, str(e))
-        self.logger.info("Status of add: " + str(status[0]))
-        self.logger.info("Finished: add")
+        self.logger.info('Status of add: ' + str(status[0]))
+        self.logger.info('Finished: add')
         return status
 
     def add_image(self,
@@ -93,7 +95,7 @@ class Action:
                   registry=None,
                   groups=None):
         """ Add a new image from a Docker registry """
-        self.logger.info("Starting: add image")
+        self.logger.info('Starting: add image')
         status = (True, None)
         try:
             status = self.plugin.add_image(image,
@@ -102,16 +104,16 @@ class Action:
                                            registry=registry,
                                            groups=groups)
         except Exception as e:  # pragma: no cover
-            self.logger.error("add image failed with error: " + str(e))
+            self.logger.error('add image failed with error: ' + str(e))
             status = (False, str(e))
-        self.logger.info("Status of add image: " + str(status[0]))
-        self.logger.info("Finished: add image")
+        self.logger.info('Status of add image: ' + str(status[0]))
+        self.logger.info('Finished: add image')
         return status
 
     def remove(self, repo=None, namespace=None, name=None, groups=None,
-               enabled="yes", branch="master", version="HEAD", built="yes"):
+               enabled='yes', branch='master', version='HEAD', built='yes'):
         """ Remove tools or a repo """
-        self.logger.info("Starting: remove")
+        self.logger.info('Starting: remove')
         status = (True, None)
         try:
             # don't want to include groups because constrained_sections will
@@ -132,30 +134,30 @@ class Action:
             child_name = str(name) + '_child'
             for container in self.d_client.containers.list():
                 if ('vent.groups' in container.attrs['Config']['Labels'] and
-                    child_name in container.attrs['Config']['Labels']['vent.groups']):
+                        child_name in container.attrs['Config']['Labels']['vent.groups']):
                     container.remove(force=True)
 
         except Exception as e:  # pragma: no cover
-            self.logger.error("remove failed with error: " + str(e))
+            self.logger.error('remove failed with error: ' + str(e))
             status = (False, e)
-        self.logger.info("Status of remove: " + str(status[0]))
-        self.logger.info("Finished: remove")
+        self.logger.info('Status of remove: ' + str(status[0]))
+        self.logger.info('Finished: remove')
         return status
 
     def prep_start(self,
                    repo=None,
                    name=None,
                    groups=None,
-                   enabled="yes",
-                   branch="master",
-                   version="HEAD"):
+                   enabled='yes',
+                   branch='master',
+                   version='HEAD'):
         """ Prep a bunch of containers to be started to they can be ordered """
         args = locals()
         del args['self']
-        self.logger.info("Starting: prep_start")
+        self.logger.info('Starting: prep_start')
         status = self.p_helper.prep_start(**args)
-        self.logger.info("Status of prep_start: " + str(status[0]))
-        self.logger.info("Finished: prep_start")
+        self.logger.info('Status of prep_start: ' + str(status[0]))
+        self.logger.info('Finished: prep_start')
         return status
 
     def start(self, tool_d):
@@ -164,7 +166,7 @@ class Action:
         are given, start all installed tools on the master branch at verison
         HEAD that are enabled
         """
-        self.logger.info("Starting: start")
+        self.logger.info('Starting: start')
         status = (True, None)
         try:
             # check start priorities (priority of groups alphabetical for now)
@@ -175,31 +177,35 @@ class Action:
             for container in tool_d:
                 containers_remaining.append(container)
                 self.logger.info(
-                                    "User: " + username +
-                                    " starting container: " + str(container)
-                                )
+                    'User: ' + username +
+                    ' starting container: ' + str(container)
+                )
                 if 'labels' in tool_d[container]:
                     if 'vent.groups' in tool_d[container]['labels']:
-                        groups += tool_d[container]['labels']['vent.groups'].split(',')
+                        groups += tool_d[container]['labels']['vent.groups'].split(
+                            ',')
                         if 'vent.priority' in tool_d[container]['labels']:
-                            priorities = tool_d[container]['labels']['vent.priority'].split(',')
-                            container_groups = tool_d[container]['labels']['vent.groups'].split(',')
+                            priorities = tool_d[container]['labels']['vent.priority'].split(
+                                ',')
+                            container_groups = tool_d[container]['labels']['vent.groups'].split(
+                                ',')
                             for i, priority in enumerate(priorities):
                                 if container_groups[i] not in group_orders:
                                     group_orders[container_groups[i]] = []
-                                group_orders[container_groups[i]].append((int(priority), container))
+                                group_orders[container_groups[i]].append(
+                                    (int(priority), container))
                             containers_remaining.remove(container)
                     tool_d[container]['labels'].update(
-                                            {"started-by": username}
-                                        )
+                        {'started-by': username}
+                    )
 
                 else:
                     tool_d[container].update(
-                                {'labels': {"started-by": username}}
-                            )
+                        {'labels': {'started-by': username}}
+                    )
 
-            self.logger.info("group orders: " + str(group_orders))
-            self.logger.info("containers remaining: " +
+            self.logger.info('group orders: ' + str(group_orders))
+            self.logger.info('containers remaining: ' +
                              str(containers_remaining))
             # start containers based on priorities
             p_results = self.p_helper.start_priority_containers(groups,
@@ -207,7 +213,8 @@ class Action:
                                                                 tool_d)
 
             # start the rest of the containers that didn't have any priorities
-            r_results = self.p_helper.start_remaining_containers(containers_remaining, tool_d)
+            r_results = self.p_helper.start_remaining_containers(
+                containers_remaining, tool_d)
             results = (p_results[0] + r_results[0],
                        p_results[1] + r_results[1])
 
@@ -216,11 +223,11 @@ class Action:
             else:
                 status = (True, results)
         except Exception as e:  # pragma: no cover
-            self.logger.error("start failed with error: " + str(e))
+            self.logger.error('start failed with error: ' + str(e))
             status = (False, str(e))
 
-        self.logger.info("Status of start: " + str(status[0]))
-        self.logger.info("Finished: start")
+        self.logger.info('Status of start: ' + str(status[0]))
+        self.logger.info('Finished: start')
         self.queue.put(status)
         return status
 
@@ -228,10 +235,10 @@ class Action:
                repo=None,
                name=None,
                groups=None,
-               enabled="yes",
-               branch="master",
-               version="HEAD",
-               new_version="HEAD"):
+               enabled='yes',
+               branch='master',
+               version='HEAD',
+               new_version='HEAD'):
         """
         Update a set of tools that match the parameters given, if no parameters
         are given, updated all installed tools on the master branch at verison
@@ -239,7 +246,7 @@ class Action:
         """
         args = locals()
         del args['new_version']
-        self.logger.info("Starting: update")
+        self.logger.info('Starting: update')
         self.logger.info(args)
         status = (True, None)
         try:
@@ -250,16 +257,16 @@ class Action:
             # get existing containers and images and states
             running_containers = Containers()
             built_images = Images()
-            self.logger.info("running docker containers: " +
+            self.logger.info('running docker containers: ' +
                              str(running_containers))
-            self.logger.info("built docker images: " + str(built_images))
+            self.logger.info('built docker images: ' + str(built_images))
 
             # if repo, pull and build
             # if registry image, pull
             for section in s:
                 try:
                     cwd = os.getcwd()
-                    self.logger.info("current working directory: " + str(cwd))
+                    self.logger.info('current working directory: ' + str(cwd))
                     os.chdir(s[section]['path'])
                     c_status = self.p_helper.checkout(branch=branch,
                                                       version=new_version)
@@ -276,10 +283,10 @@ class Action:
                     # exit if no changes were made
                     if (template.option(section, 'image_id')[1] ==
                             s[section]['image_id']):
-                        self.logger.info("No changes made through update")
-                        self.logger.info("Status of update: True")
-                        self.logger.info("Finished: update")
-                        return (True, "no changes made")
+                        self.logger.info('No changes made through update')
+                        self.logger.info('Status of update: True')
+                        self.logger.info('Finished: update')
+                        return (True, 'no changes made')
 
                     # update any new vent.template settings that may have been set
                     vent_template_path = s[section]['path']
@@ -332,7 +339,7 @@ class Action:
                         # once this tool is reset
                         prev_dependencies = []
                         for t_sect in template.sections()[1]:
-                            self.logger.info("Testing check tool: " + t_sect)
+                            self.logger.info('Testing check tool: ' + t_sect)
                             t_name = template.option(t_sect, 'name')[1]
                             t_branch = template.option(t_sect, 'branch')[1]
                             t_version = template.option(t_sect, 'version')[1]
@@ -344,8 +351,8 @@ class Action:
                             running = template.option(t_sect, 'running')
                             if (not running[0] or running[1] != 'yes' or
                                     t_name == s[section]['name']):
-                                self.logger.info("tool not dependency," +
-                                                 " skipping to next")
+                                self.logger.info('tool not dependency,' +
+                                                 ' skipping to next')
                                 continue
                             options = template.options(t_sect)[1]
                             self.logger.info(options)
@@ -356,11 +363,12 @@ class Action:
                                 if 'links' in d_settings:
                                     for link in json.loads(d_settings['links']):
                                         if link == s[section]['link_name']:
-                                            prev_dependencies.append(t_identifier)
+                                            prev_dependencies.append(
+                                                t_identifier)
 
                         # remove old containers, start new
-                        self.logger.info("running tools to be restarted: " +
-                                str(prev_dependencies))
+                        self.logger.info('running tools to be restarted: ' +
+                                         str(prev_dependencies))
                         for tool in prev_dependencies:
                             self.clean(**tool)
                             tool_d.update(self.prep_start(**tool)[1])
@@ -371,9 +379,10 @@ class Action:
                     # finish writing new manifest entry, including creating new
                     # section name and deleting old image
                     template.set_option(section, 'version', new_version)
-                    template.set_option(section, 'running', s[section]['running'])
+                    template.set_option(section, 'running',
+                                        s[section]['running'])
                     old_image = template.option(section, 'image_name')[1]
-                    self.logger.info("Testing old....   " + old_image)
+                    self.logger.info('Testing old....   ' + old_image)
                     new_image = old_image.rsplit(':', 1)[0]+':'+new_version
                     template.set_option(section, 'image_name', new_image)
                     # create new section
@@ -392,30 +401,30 @@ class Action:
                                                   version=new_version)[1])
                     self.start(tool_d)
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("unable to update: " + str(section) +
-                                      " because: " + str(e))
+                    self.logger.error('unable to update: ' + str(section) +
+                                      ' because: ' + str(e))
         except Exception as e:  # pragma: no cover
-            self.logger.error("update failed with error: " + str(e))
+            self.logger.error('update failed with error: ' + str(e))
             status = (False, e)
 
-        self.logger.info("Status of update: " + str(status[0]))
-        self.logger.info("Finished: update")
+        self.logger.info('Status of update: ' + str(status[0]))
+        self.logger.info('Finished: update')
         return status
 
     def stop(self,
              repo=None,
              name=None,
              groups=None,
-             enabled="yes",
-             branch="master",
-             version="HEAD"):
+             enabled='yes',
+             branch='master',
+             version='HEAD'):
         """
         Stop a set of tools that match the parameters given, if no parameters
         are given, stop all installed tools on the master branch at verison
         HEAD that are enabled
         """
         args = locals()
-        self.logger.info("Starting: stop")
+        self.logger.info('Starting: stop')
         self.logger.info(args)
         status = (True, None)
         try:
@@ -437,31 +446,31 @@ class Action:
                 try:
                     container = self.d_client.containers.get(container_name)
                     container.stop()
-                    self.logger.info("stopped " + str(container_name))
+                    self.logger.info('stopped ' + str(container_name))
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("failed to stop " + str(container_name) +
-                                      " because: " + str(e))
+                    self.logger.error('failed to stop ' + str(container_name) +
+                                      ' because: ' + str(e))
         except Exception as e:  # pragma: no cover
-            self.logger.error("stop failed with error: " + str(e))
+            self.logger.error('stop failed with error: ' + str(e))
             status = (False, e)
-        self.logger.info("Status of stop: " + str(status[0]))
-        self.logger.info("Finished: stop")
+        self.logger.info('Status of stop: ' + str(status[0]))
+        self.logger.info('Finished: stop')
         return status
 
     def clean(self,
               repo=None,
               name=None,
               groups=None,
-              enabled="yes",
-              branch="master",
-              version="HEAD"):
+              enabled='yes',
+              branch='master',
+              version='HEAD'):
         """
         Clean (stop and remove) a set of tools that match the parameters given,
         if no parameters are given, clean all installed tools on the master
         branch at verison HEAD that are enabled
         """
         args = locals()
-        self.logger.info("Starting: clean")
+        self.logger.info('Starting: clean')
         self.logger.info(args)
         status = (True, None)
         try:
@@ -487,29 +496,29 @@ class Action:
                     container = self.d_client.containers.get(container_name)
                     container.remove(force=True)
                     manifest.set_option(section, 'running', 'no')
-                    self.logger.info("cleaned " + str(container_name))
+                    self.logger.info('cleaned ' + str(container_name))
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("failed to clean " +
+                    self.logger.error('failed to clean ' +
                                       str(container_name) +
-                                      " because: " + str(e))
+                                      ' because: ' + str(e))
             manifest.write_config()
         except Exception as e:  # pragma: no cover
-            self.logger.error("clean failed with error: " + str(e))
+            self.logger.error('clean failed with error: ' + str(e))
             status = (False, e)
-        self.logger.info("Status of clean: " + str(status[0]))
-        self.logger.info("Finished: clean")
+        self.logger.info('Status of clean: ' + str(status[0]))
+        self.logger.info('Finished: clean')
         return status
 
     def build(self,
               repo=None,
               name=None,
               groups=None,
-              enabled="yes",
-              branch="master",
-              version="HEAD"):
+              enabled='yes',
+              branch='master',
+              version='HEAD'):
         """ Build a set of tools that match the parameters given """
         args = locals()
-        self.logger.info("Starting: build")
+        self.logger.info('Starting: build')
         self.logger.info(args)
         status = (True, None)
         try:
@@ -517,7 +526,7 @@ class Action:
             s, template = self.p_helper.constraint_options(args, options)
             self.logger.info(s)
             for section in s:
-                self.logger.info("Building " + str(section) + " ...")
+                self.logger.info('Building ' + str(section) + ' ...')
                 template = self.plugin.builder(template,
                                                s[section]['path'],
                                                s[section]['image_name'],
@@ -528,10 +537,10 @@ class Action:
             if len(s) > 0:
                 template.write_config()
         except Exception as e:  # pragma: no cover
-            self.logger.error("build failed with error: " + str(e))
+            self.logger.error('build failed with error: ' + str(e))
             status = (False, e)
-        self.logger.info("Status of build: " + str(status[0]))
-        self.logger.info("Finished: build")
+        self.logger.info('Status of build: ' + str(status[0]))
+        self.logger.info('Finished: build')
         return status
 
     def backup(self):
@@ -539,7 +548,7 @@ class Action:
         Saves the configuration information of the current running vent
         instance to be used for restoring at a later time
         """
-        self.logger.info("Starting: backup")
+        self.logger.info('Starting: backup')
         status = (True, None)
         # initialize all needed variables (names for backup files, etc.)
         backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')))
@@ -564,21 +573,21 @@ class Action:
             with open(backup_vcfg, 'w') as bvcfg:
                 with open(self.vent_config, 'r') as vcfg_file:
                     bvcfg.write(vcfg_file.read())
-            self.logger.info("Backup information written to " + backup_dir)
+            self.logger.info('Backup information written to ' + backup_dir)
             status = (True, backup_dir)
         except Exception as e:  # pragma: no cover
             self.logger.error("Couldn't backup vent: " + str(e))
             status = (False, str(e))
-        self.logger.info("Status of backup: " + str(status[0]))
-        self.logger.info("Finished: backup")
+        self.logger.info('Status of backup: ' + str(status[0]))
+        self.logger.info('Finished: backup')
         return status
 
     def restore(self, backup_dir):
         """
         Restores a vent configuration from a previously backed up version
         """
-        self.logger.info("Starting: restore")
-        self.logger.info("Directory given: " + backup_dir)
+        self.logger.info('Starting: restore')
+        self.logger.info('Directory given: ' + backup_dir)
         status = (True, None)
         # initialize needed variables
         added_str = ''
@@ -628,8 +637,8 @@ class Action:
                         new_manifest.write_config()
                         added_str += 'Restored: ' + t_info['name'] + '\n'
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("Problem restoring tool " + t_info['name'] +
-                                          " because " + str(e))
+                        self.logger.error('Problem restoring tool ' + t_info['name'] +
+                                          ' because ' + str(e))
                         failed_str += 'Failed: ' + t_info['name'] + '\n'
                 elif t_info['type'] == 'registry':
                     add_kargs = {'image': t_info['pull_name'],
@@ -648,8 +657,8 @@ class Action:
                         new_manifest.write_config()
                         added_str += 'Restored: ' + t_info['name'] + '\n'
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("Problem restoring tool " + t_info['name'] +
-                                          " because " + str(e))
+                        self.logger.error('Problem restoring tool ' + t_info['name'] +
+                                          ' because ' + str(e))
                         failed_str += 'Failed: ' + t_info['name'] + '\n'
 
             # restore backed up vent.cfg file
@@ -664,21 +673,21 @@ class Action:
                             vcfg_template.add_section(section)
                         except Exception as e:  # pragma: no cover
                             # okay if error because of already existing
-                            self.logger.error("Failed adding section " +
+                            self.logger.error('Failed adding section ' +
                                               str(e))
                         vcfg_template.set_option(vals[0], vals[1])
                 vcfg_template.write_config()
                 added_str += 'Restored: vent configuration file'
             except Exception as e:  # pragma: no cover
                 self.logger.error("Couldn't restore vent.cfg"
-                                  "because: " + str(e))
+                                  'because: ' + str(e))
                 failed_str += 'Failed: vent configuration file'
         else:
-            status = (False, "No backup directory found at specified path")
+            status = (False, 'No backup directory found at specified path')
         if status[0]:
             status = (True, failed_str + added_str)
-        self.logger.info("Status of restore: " + str(status[0]))
-        self.logger.info("Finished: restore")
+        self.logger.info('Status of restore: ' + str(status[0]))
+        self.logger.info('Finished: restore')
         return status
 
     @staticmethod
@@ -700,11 +709,11 @@ class Action:
         # remove containers
         try:
             c_list = set(self.d_client.containers.list(
-                            filters={'label': 'vent'}, all=True))
+                filters={'label': 'vent'}, all=True))
             for c in c_list:
                 c.remove(force=True)
         except Exception as e:  # pragma: no cover
-            error_message += "Error removing Vent containers: " + str(e) + "\n"
+            error_message += 'Error removing Vent containers: ' + str(e) + '\n'
 
         # remove images
         try:
@@ -718,7 +727,7 @@ class Action:
                     self.d_client.images.remove(image=i.id, force=True)
 
         except Exception as e:  # pragma: no cover
-            error_message += "Error deleting Vent images: " + str(e) + "\n"
+            error_message += 'Error deleting Vent images: ' + str(e) + '\n'
 
         # remove .vent folder
         try:
@@ -727,7 +736,7 @@ class Action:
                 os.chdir(os.path.expanduser('~'))
             shutil.rmtree(os.path.join(os.path.expanduser('~'), '.vent'))
         except Exception as e:  # pragma: no cover
-            error_message += "Error deleting Vent data: " + str(e) + "\n"
+            error_message += 'Error deleting Vent data: ' + str(e) + '\n'
 
         if error_message:
             status = (False, error_message)
@@ -744,17 +753,17 @@ class Action:
                     else:
                         log_entries[str(container.name)] = [log]
             except Exception as e:  # pragma: no cover
-                self.logger.error("Unable to get logs for " +
+                self.logger.error('Unable to get logs for ' +
                                   str(container.name) +
-                                  " because: " + str(e))
+                                  ' because: ' + str(e))
             return log_entries
 
-        self.logger.info("Starting: logs")
+        self.logger.info('Starting: logs')
         status = (True, None)
         log_entries = {}
         containers = self.d_client.containers.list(all=True,
                                                    filters={'label': 'vent'})
-        self.logger.info("containers found: " + str(containers))
+        self.logger.info('containers found: ' + str(containers))
         comp_c = containers
         if c_type:
             try:
@@ -762,8 +771,8 @@ class Action:
                           if (c_type
                               in c.attrs['Config']['Labels']['vent.groups'])]
             except Exception as e:  # pragma: no cover
-                self.logger.error("Unable to limit containers by: " +
-                                  str(c_type) + " because: " +
+                self.logger.error('Unable to limit containers by: ' +
+                                  str(c_type) + ' because: ' +
                                   str(e))
 
         if grep_list:
@@ -771,26 +780,26 @@ class Action:
                 for container in comp_c:
                     try:
                         # 'logs' stores each line containing the expression
-                        logs = [log for log in container.logs().split("\n")
+                        logs = [log for log in container.logs().split('\n')
                                 if expression in log]
                         log_entries = get_logs(logs, log_entries)
                     except Exception as e:  # pragma: no cover
-                        self.logger.info("Unable to get logs for " +
+                        self.logger.info('Unable to get logs for ' +
                                          str(container) +
-                                         " because: " + str(e))
+                                         ' because: ' + str(e))
         else:
             for container in comp_c:
                 try:
-                    logs = container.logs().split("\n")
+                    logs = container.logs().split('\n')
                     log_entries = get_logs(logs, log_entries)
                 except Exception as e:  # pragma: no cover
-                    self.logger.info("Unabled to get logs for " +
+                    self.logger.info('Unabled to get logs for ' +
                                      str(container) +
-                                     " because: " + str(e))
+                                     ' because: ' + str(e))
 
         status = (True, log_entries)
-        self.logger.info("Status of logs: " + str(status[0]))
-        self.logger.info("Finished: logs")
+        self.logger.info('Status of logs: ' + str(status[0]))
+        self.logger.info('Finished: logs')
         return status
 
     @staticmethod
@@ -800,25 +809,25 @@ class Action:
 
     def inventory(self, choices=None):
         """ Return a dictionary of the inventory items and status """
-        self.logger.info("Starting: inventory")
+        self.logger.info('Starting: inventory')
         status = (True, None)
-        self.logger.info("choices specified: " + str(choices))
+        self.logger.info('choices specified: ' + str(choices))
         if not choices:
-            return (False, "No choices made")
+            return (False, 'No choices made')
         try:
             # choices: repos, core, tools, images, built, running, enabled
             items = {'repos': [], 'core': {}, 'tools': {}, 'images': {},
                      'built': {}, 'running': {}, 'enabled': {}}
 
             tools = self.plugin.list_tools()
-            self.logger.info("found tools: " + str(tools))
+            self.logger.info('found tools: ' + str(tools))
             for choice in choices:
                 for tool in tools:
                     try:
                         if choice == 'repos':
                             if 'repo' in tool:
                                 if (tool['repo'] and
-                                   tool['repo'] not in items[choice]):
+                                        tool['repo'] not in items[choice]):
                                     items[choice].append(tool['repo'])
                         elif choice == 'core':
                             if 'groups' in tool and 'core' in tool['groups']:
@@ -826,7 +835,7 @@ class Action:
                         elif choice == 'tools':
                             if (('groups' in tool and
                                  'core' not in tool['groups']) or
-                               'groups' not in tool):
+                                    'groups' not in tool):
                                 items[choice][tool['section']] = tool['name']
                         elif choice == 'images':
                             # TODO also check against docker
@@ -838,11 +847,11 @@ class Action:
                             status = 'not running'
                             for container in containers:
                                 image_name = tool['image_name'] \
-                                             .rsplit(":" +
-                                                     tool['version'], 1)[0]
+                                    .rsplit(':' +
+                                            tool['version'], 1)[0]
                                 image_name = image_name.replace(':', '-')
                                 image_name = image_name.replace('/', '-')
-                                self.logger.info("image_name: " + image_name)
+                                self.logger.info('image_name: ' + image_name)
                                 if container[0] == image_name:
                                     status = container[1]
                                 # cores need to not have version, plugins need
@@ -857,34 +866,34 @@ class Action:
                             # unknown choice
                             pass
                     except Exception as e:  # pragma: no cover
-                        self.logger.error("unable to grab info about tool: " +
-                                          str(tool) + " because: " + str(e))
+                        self.logger.error('unable to grab info about tool: ' +
+                                          str(tool) + ' because: ' + str(e))
             status = (True, items)
         except Exception as e:  # pragma: no cover
-            self.logger.error("inventory failed with error: " + str(e))
+            self.logger.error('inventory failed with error: ' + str(e))
             status = (False, str(e))
-        self.logger.info("Status of inventory: " + str(status[0]))
-        self.logger.info("Finished: inventory")
+        self.logger.info('Status of inventory: ' + str(status[0]))
+        self.logger.info('Finished: inventory')
         return status
 
     def get_configure(self,
                       repo=None,
                       name=None,
                       groups=None,
-                      enabled="yes",
-                      branch="master",
-                      version="HEAD",
+                      enabled='yes',
+                      branch='master',
+                      version='HEAD',
                       main_cfg=False):
         """
         Get the vent.template settings for a given tool by looking at the
         plugin_manifest
         """
-        self.logger.info("Starting: get_configure")
+        self.logger.info('Starting: get_configure')
         constraints = locals()
         del constraints['main_cfg']
         status = (True, None)
         template_dict = {}
-        return_str = ""
+        return_str = ''
         if main_cfg:
             vent_cfg = Template(self.vent_config)
             for section in vent_cfg.sections()[1]:
@@ -906,29 +915,29 @@ class Action:
         if status[0]:
             # display all those options as they would in the file
             for section in template_dict:
-                return_str += "[" + section + "]\n"
+                return_str += '[' + section + ']\n'
                 # ensure instances shows up in configuration
                 for option in template_dict[section]:
                     if option.startswith('#'):
-                        return_str += option + "\n"
+                        return_str += option + '\n'
                     else:
-                        return_str += option + " = "
-                        return_str += template_dict[section][option] + "\n"
-                return_str += "\n"
+                        return_str += option + ' = '
+                        return_str += template_dict[section][option] + '\n'
+                return_str += '\n'
             # only one newline at end of file
             status = (True, return_str[:-1])
-        self.logger.info("Status of get_configure: " + str(status[0]))
-        self.logger.info("Finished: get_configure")
+        self.logger.info('Status of get_configure: ' + str(status[0]))
+        self.logger.info('Finished: get_configure')
         return status
 
     def save_configure(self,
                        repo=None,
                        name=None,
                        groups=None,
-                       enabled="yes",
-                       branch="master",
-                       version="HEAD",
-                       config_val="",
+                       enabled='yes',
+                       branch='master',
+                       version='HEAD',
+                       config_val='',
                        from_registry=False,
                        main_cfg=False,
                        instances=1):
@@ -962,7 +971,7 @@ class Action:
                     elif manifest.option(tool, section)[0]:
                         manifest.del_option(tool, section)
 
-        self.logger.info("Starting: save_configure")
+        self.logger.info('Starting: save_configure')
         constraints = locals()
         del constraints['config_val']
         del constraints['from_registry']
@@ -994,7 +1003,7 @@ class Action:
                     options = ['path', 'multi_tool', 'name']
                     self.logger.info(constraints)
                     tools, manifest = self.p_helper. \
-                            constraint_options(constraints, options)
+                        constraint_options(constraints, options)
                     self.logger.info(tools)
                     # only one tool in tools because perform this function for
                     # every tool
@@ -1077,7 +1086,7 @@ class Action:
                     manifest.write_config()
                     status = (True, manifest)
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("save_configure error: " + str(e))
+                    self.logger.error('save_configure error: ' + str(e))
                     status = (False, str(e))
             # close os file handle and remove temp file
             if from_registry or instances > 1:
@@ -1085,21 +1094,21 @@ class Action:
                     os.close(fd)
                     os.remove(template_path)
                 except Exception as e:  # pragma: no cover
-                    self.logger.error("save_configure error: " + str(e))
+                    self.logger.error('save_configure error: ' + str(e))
         else:
             with open(self.vent_config, 'w') as f:
                 f.write(config_val)
-        self.logger.info("Status of save_configure: " + str(status[0]))
-        self.logger.info("Finished: save_configure")
+        self.logger.info('Status of save_configure: ' + str(status[0]))
+        self.logger.info('Finished: save_configure')
         return status
 
     def restart_tools(self,
                       repo=None,
                       name=None,
                       groups=None,
-                      enabled="yes",
-                      branch="master",
-                      version="HEAD",
+                      enabled='yes',
+                      branch='master',
+                      version='HEAD',
                       main_cfg=False,
                       old_val='',
                       new_val=''):
@@ -1108,7 +1117,7 @@ class Action:
         vent.cfg or to vent.template. This includes tools that need to be
         restarted because they depend on other tools that were changed.
         """
-        self.logger.info("Starting: restart_tools")
+        self.logger.info('Starting: restart_tools')
         status = (True, None)
         if not main_cfg:
             try:
@@ -1186,22 +1195,22 @@ class Action:
                 if tool_d:
                     self.start(tool_d)
             except Exception as e:  # pragma: no cover
-                self.logger.error("Problem restarting tools: " + str(e))
+                self.logger.error('Problem restarting tools: ' + str(e))
                 status = (False, str(e))
-        self.logger.info("restart_tools finished with status: " +
+        self.logger.info('restart_tools finished with status: ' +
                          str(status[0]))
-        self.logger.info("Finished: restart_tools")
+        self.logger.info('Finished: restart_tools')
         return status
 
     def disable(self,
                 repo=None,
                 name=None,
                 groups=None,
-                enabled="yes",
-                branch="master",
-                version="HEAD"):
+                enabled='yes',
+                branch='master',
+                version='HEAD'):
         """ Take an enabled tool and disable it """
-        self.logger.info("Starting: disable")
+        self.logger.info('Starting: disable')
         constraints = locals()
         status = (True, None)
         try:
@@ -1210,23 +1219,23 @@ class Action:
                 manifest.set_option(tool, 'enabled', 'no')
                 manifest.write_config()
                 tool_name = manifest.option(tool, 'name')[1]
-                self.logger.info("Disabled tool: " + tool_name)
+                self.logger.info('Disabled tool: ' + tool_name)
         except Exception as e:  # pragma: no cover
-            self.logger.error("Troubling disabling tool because: " + str(e))
+            self.logger.error('Troubling disabling tool because: ' + str(e))
             status = (False, str(e))
-        self.logger.info("Status of disable: " + str(status[0]))
-        self.logger.info("Finished: disable")
+        self.logger.info('Status of disable: ' + str(status[0]))
+        self.logger.info('Finished: disable')
         return status
 
     def enable(self,
                repo=None,
                name=None,
                groups=None,
-               enabled="no",
-               branch="master",
-               version="HEAD"):
+               enabled='no',
+               branch='master',
+               version='HEAD'):
         """ Take a disabled tool and enable it """
-        self.logger.info("Starting: enable")
+        self.logger.info('Starting: enable')
         constraints = locals()
         status = (True, None)
         try:
@@ -1235,12 +1244,12 @@ class Action:
                 manifest.set_option(tool, 'enabled', 'yes')
                 manifest.write_config()
                 tool_name = manifest.option(tool, 'name')[1]
-                self.logger.info("Enabled tool: " + tool_name)
+                self.logger.info('Enabled tool: ' + tool_name)
         except Exception as e:  # pragma: no cover
-            self.logger.error("Troubling enabling tool because: " + str(e))
+            self.logger.error('Troubling enabling tool because: ' + str(e))
             status = (False, str(e))
-        self.logger.info("Status of enable: " + str(status[0]))
-        self.logger.info("Finished: enable")
+        self.logger.info('Status of enable: ' + str(status[0]))
+        self.logger.info('Finished: enable')
         return status
 
     def startup(self):
@@ -1248,7 +1257,7 @@ class Action:
         Automatically detect if a startup file is specified and stand up a vent
         host with all necessary tools based on the specifications in that file
         """
-        self.logger.info("Starting: startup")
+        self.logger.info('Starting: startup')
         status = (True, None)
         try:
             s_dict = {}
@@ -1263,10 +1272,11 @@ class Action:
                     s_dict = yaml.safe_load(sup.read())
             if 'vent.cfg' in s_dict:
                 v_cfg = Template(self.vent_config)
-                self.logger.info("applying vent.cfg configurations")
+                self.logger.info('applying vent.cfg configurations')
                 for section in s_dict['vent.cfg']:
                     for option in s_dict['vent.cfg'][section]:
-                        val = ("no", "yes")[s_dict['vent.cfg'][section][option]]
+                        val = ('no', 'yes')[
+                            s_dict['vent.cfg'][section][option]]
                         v_status = v_cfg.add_option(section, option, value=val)
                         if not v_status[0]:
                             v_cfg.set_option(section, option, val)
@@ -1282,10 +1292,11 @@ class Action:
                 for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
-                    t_path, t_path_cased = PathDirs.rel_path(tool, available_tools)
+                    t_path, t_path_cased = PathDirs.rel_path(
+                        tool, available_tools)
                     if t_path is None:
-                        self.logger.error("Couldn't find tool " + tool + " in"
-                                          " repo " + repo)
+                        self.logger.error("Couldn't find tool " + tool + ' in'
+                                          ' repo ' + repo)
                         continue
                     # ensure no NoneType iteration errors
                     if s_dict_c[repo][tool] is None:
@@ -1330,7 +1341,7 @@ class Action:
                             for v in s_dict[repo][tool][option]:
                                 pval = s_dict[repo][tool][option][v]
                                 s_dict[repo][tool][option][v] = json.dumps(
-                                                                    pval)
+                                    pval)
                             opt_dict.update(s_dict[repo][tool][option])
                             manifest.set_option(base_section, option,
                                                 json.dumps(opt_dict))
@@ -1357,7 +1368,8 @@ class Action:
                         if s_dict[repo][tool]['start']:
                             local_instances = 1
                             if 'settings' in s_dict[repo][tool] and 'instances' in s_dict[repo][tool]['settings']:
-                                local_instances = int(s_dict[repo][tool]['settings']['instances'])
+                                local_instances = int(
+                                    s_dict[repo][tool]['settings']['instances'])
                             t_branch = 'master'
                             t_version = 'HEAD'
                             if 'branch' in s_dict[repo][tool]:
@@ -1368,16 +1380,16 @@ class Action:
                                 i_name = tool + str(i) if i != 1 else tool
                                 i_name = i_name.replace('@', '')
                                 tool_d.update(self.prep_start(
-                                                  name=i_name,
-                                                  branch=t_branch,
-                                                  version=t_version)[1])
+                                    name=i_name,
+                                    branch=t_branch,
+                                    version=t_version)[1])
             if tool_d:
                 self.start(tool_d)
         except Exception as e:  # pragma: no cover
-            self.logger.error("startup failed with error " + str(e))
+            self.logger.error('startup failed with error ' + str(e))
             status = (False, str(e))
-        self.logger.info("startup finished with status " + str(status[0]))
-        self.logger.info("Finished: startup")
+        self.logger.info('startup finished with status ' + str(status[0]))
+        self.logger.info('Finished: startup')
         return status
 
     def tool_status_checker(self, tool_name):
@@ -1399,7 +1411,7 @@ class Action:
         """
         status = (True, None)
         try:
-            self.logger.info("Start: tool_status_checker")
+            self.logger.info('Start: tool_status_checker')
             manifest = Template(self.p_helper.manifest)
             for section in manifest.sections()[1]:
                 if manifest.option(section, 'name')[1] == tool_name:
@@ -1409,11 +1421,11 @@ class Action:
                     break
 
         except Exception as e:  # pragma: no cover
-            self.logger.error("Failed to check tool status: " + str(e))
+            self.logger.error('Failed to check tool status: ' + str(e))
             status = (False, str(e))
 
-        self.logger.info("Status of tool status: " + str(status[0]))
-        self.logger.info("Finished: tool status")
+        self.logger.info('Status of tool status: ' + str(status[0]))
+        self.logger.info('Finished: tool status')
         return status
 
     def tool_status_output(self, tool_name):
@@ -1437,22 +1449,22 @@ class Action:
             # a tuple but an error message. AKA template couldnt find plugin
             # manifest as it doesn't exist
             if not isinstance(tool_status, tuple):
-                output = "Please install core tools"
+                output = 'Please install core tools'
 
             # this means the core tool isn't built
             elif tool_status[1] == 'no':
-                output = "Please build core tool " + str(tool_name)
+                output = 'Please build core tool ' + str(tool_name)
 
             # this means the core tool isn't running
             elif tool_status[2] == 'no':
-                output = "Please start core tool " + str(tool_name)
+                output = 'Please start core tool ' + str(tool_name)
             status = (True, output)
         except Exception as e:  # pragma: no cover
             status = (False, e)
-            self.logger.info("Error: " + str(e))
+            self.logger.info('Error: ' + str(e))
 
-        self.logger.info("Status of tool_status_output: " + str(status[0]))
-        self.logger.info("Finished: tool_status_output")
+        self.logger.info('Status of tool_status_output: ' + str(status[0]))
+        self.logger.info('Finished: tool_status_output')
         return status
 
     @staticmethod
@@ -1483,8 +1495,8 @@ class Action:
             # return whatever the webpage returned
             return (True, response.read())
         except Exception as e:  # pragma: no cover
-            return (False, "failed post request to " + url + " " +
-                    ": " + str(e))
+            return (False, 'failed post request to ' + url + ' ' +
+                    ': ' + str(e))
 
     @staticmethod
     def get_request(url):
@@ -1502,7 +1514,7 @@ class Action:
             response = urllib.request.urlopen(url)
             return (True, response.read())
         except Exception as e:  # pragma no cover
-            return (False, "failed get request to " + url + " " + str(e))
+            return (False, 'failed get request to ' + url + ' ' + str(e))
 
     @staticmethod
     def get_vent_tool_url(tool_name):
@@ -1523,7 +1535,7 @@ class Action:
             d = docker.from_env()
             containers = d.containers.list(filters={'label': 'vent'}, all=True)
         except Exception as e:  # pragma no cover
-            return (False, "docker failed with error " + str(e))
+            return (False, 'docker failed with error ' + str(e))
 
         url = ''
         found = False
@@ -1538,7 +1550,7 @@ class Action:
                 for port in url:
                     h_port = url[port][0]['HostPort']
                     h_ip = url[port][0]['HostIp']
-                    url = "http://" + str(h_ip) + ":" + str(h_port)
+                    url = 'http://' + str(h_ip) + ':' + str(h_port)
                     found = True
                     break
             # no need to cycle every single container if we found our ports

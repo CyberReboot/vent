@@ -78,5 +78,3 @@ Congrats! Vent is setup and has successfully recognized the pcap file and ran a
 plugin that specifically deals with pcaps. You can now remove the
 ``tcpdump_hex_parser`` via the ``Plugins`` sub-menu and create and install your own
 :ref:`customventplugin-label`
-
-

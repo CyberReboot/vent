@@ -3,9 +3,10 @@ from vent.menus.tutorials import TutorialForm
 
 class TutorialAddingFilesForm(TutorialForm):
     """ Tutorial Adding Files form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize adding files tutorial form fields """
-        title = "Adding Files"
+        title = 'Adding Files'
         text = """
         In the main Vent menu, there is a field labeled 'File Drop'. The
         provided directory is where Vent will be watching. Just add the
@@ -36,7 +37,7 @@ class TutorialAddingFilesForm(TutorialForm):
         This, in turn, will cause Plugin B to start and process the newly
         created .csv2 file.
         """
-        next_tutorial = "TUTORIALTROUBLESHOOTING"
+        next_tutorial = 'TUTORIALTROUBLESHOOTING'
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -47,9 +48,10 @@ class TutorialAddingFilesForm(TutorialForm):
 
 class TutorialIntroForm(TutorialForm):
     """ Tutorial introduction landing form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize introduction landing tutorial form fields """
-        title = "Tutorial Introduction"
+        title = 'Tutorial Introduction'
         text = """
         Welcome to Vent!
 
@@ -79,7 +81,7 @@ class TutorialIntroForm(TutorialForm):
 
         NEXT UP: About Vent - Background
         """
-        next_tutorial = "TUTORIALBACKGROUND"
+        next_tutorial = 'TUTORIALBACKGROUND'
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -90,9 +92,10 @@ class TutorialIntroForm(TutorialForm):
 
 class TutorialAddingPluginsForm(TutorialForm):
     """ Tutorial Adding Plugins form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize adding plugins tutorial form fields """
-        title = "Adding Plugins"
+        title = 'Adding Plugins'
         text = """
         Adding custom Vent plugins is easy.
         From the main menu, hit '^X' to bring up the action menu.
@@ -118,7 +121,7 @@ class TutorialAddingPluginsForm(TutorialForm):
 
         For Docker: Give an image and name and hit OK.
         """
-        next_tutorial = "TUTORIALADDINGFILES"
+        next_tutorial = 'TUTORIALADDINGFILES'
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -129,11 +132,12 @@ class TutorialAddingPluginsForm(TutorialForm):
 
 class TutorialBackgroundForm(TutorialForm):
     """ Tutorial Background form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize background tutorial form fields """
-        title = "Vent Background"
+        title = 'Vent Background'
         text = """TODO"""
-        next_tutorial = "TUTORIALTERMINOLOGY"
+        next_tutorial = 'TUTORIALTERMINOLOGY'
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -144,9 +148,10 @@ class TutorialBackgroundForm(TutorialForm):
 
 class TutorialBuildingCoresForm(TutorialForm):
     """ Tutorial Building Cores form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize building cores tutorial form fields """
-        title = "Building Cores"
+        title = 'Building Cores'
         text = """
         Building Vent's core tools is a snap.
 
@@ -160,7 +165,7 @@ class TutorialBuildingCoresForm(TutorialForm):
 
         The build process will take a few minutes so please be patient.
         """
-        next_tutorial = "TUTORIALSTARTINGCORES"
+        next_tutorial = 'TUTORIALSTARTINGCORES'
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -171,9 +176,10 @@ class TutorialBuildingCoresForm(TutorialForm):
 
 class TutorialGettingSetupForm(TutorialForm):
     """ Tutorial Getting Setup form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize getting setup tutorial form fields """
-        title = "Getting Setup"
+        title = 'Getting Setup'
         text = """
         Here's a quick setup guide to quickly get Vent up and running.
         1) Enter the core tools submenu from the main action menu and
@@ -191,7 +197,7 @@ class TutorialGettingSetupForm(TutorialForm):
 
         Congrats! You have just started and processed files using Vent!
         """
-        next_tutorial = "TUTORIALBUILDINGCORES"
+        next_tutorial = 'TUTORIALBUILDINGCORES'
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -202,9 +208,10 @@ class TutorialGettingSetupForm(TutorialForm):
 
 class TutorialStartingCoresForm(TutorialForm):
     """ Tutorial Starting Cores form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize starting cores tutorial form fields """
-        title = "Starting Cores"
+        title = 'Starting Cores'
         text = """
         Once a core tool has been added and built, the only thing left is
         to start it, so it can begin doing work.
@@ -220,7 +227,7 @@ class TutorialStartingCoresForm(TutorialForm):
         Once the desired tools are selected, press OK and Vent will start
         up the core tools.
         """
-        next_tutorial = "TUTORIALADDINGPLUGINS"
+        next_tutorial = 'TUTORIALADDINGPLUGINS'
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -231,9 +238,10 @@ class TutorialStartingCoresForm(TutorialForm):
 
 class TutorialTerminologyForm(TutorialForm):
     """ Tutorial terminology form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize terminology tutorial form fields """
-        title = "Vent Terminology"
+        title = 'Vent Terminology'
         text = """
         Core Tool:   Main set of tools that Vent uses to do work. These
                      tools are the backbone of Vent.
@@ -254,7 +262,7 @@ class TutorialTerminologyForm(TutorialForm):
 
         Template Files: XXX TODO
         """
-        next_tutorial = "TUTORIALGETTINGSETUP"
+        next_tutorial = 'TUTORIALGETTINGSETUP'
         TutorialForm.__init__(self,
                               title,
                               text,
@@ -265,9 +273,10 @@ class TutorialTerminologyForm(TutorialForm):
 
 class TutorialTroubleshootingForm(TutorialForm):
     """ Tutorial troubleshooting form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize terminology tutorial form fields """
-        title = "Vent Troubleshooting"
+        title = 'Vent Troubleshooting'
         text = """
         Something not working as expected within Vent? Not a problem!
 
@@ -301,7 +310,7 @@ class TutorialTroubleshootingForm(TutorialForm):
         plugin containers and any information regarding the error should
         be displayed here.
         """
-        next_tutorial = "MAIN"
+        next_tutorial = 'MAIN'
         TutorialForm.__init__(self,
                               title,
                               text,

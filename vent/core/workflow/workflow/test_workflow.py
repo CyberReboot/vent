@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import falcon
-from falcon import testing
 import pytest
+from falcon import testing
 
 from .workflow import api
 

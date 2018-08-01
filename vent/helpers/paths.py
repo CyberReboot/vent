@@ -7,15 +7,16 @@ from vent.api.templates import Template
 
 class PathDirs:
     """ Global path directories for vent """
+
     def __init__(self,
-                 base_dir=os.path.join(os.path.expanduser("~"), ".vent/"),
-                 plugins_dir="plugins/",
-                 meta_dir=os.path.join(os.path.expanduser("~"), ".vent")):
+                 base_dir=os.path.join(os.path.expanduser('~'), '.vent/'),
+                 plugins_dir='plugins/',
+                 meta_dir=os.path.join(os.path.expanduser('~'), '.vent')):
         self.base_dir = base_dir
         self.plugins_dir = base_dir + plugins_dir
         self.meta_dir = meta_dir
-        self.init_file = base_dir + "vent.init"
-        self.cfg_file = base_dir + "vent.cfg"
+        self.init_file = base_dir + 'vent.init'
+        self.cfg_file = base_dir + 'vent.cfg'
         self.startup_file = os.path.join(os.path.expanduser('~'),
                                          '.vent_startup.yml')
         self.plugin_config_file = os.path.join(os.path.expanduser('~'),
@@ -35,7 +36,7 @@ class PathDirs:
             os.makedirs(path)
         except OSError as e:  # pragma: no cover
             if e.errno == errno.EEXIST and os.path.isdir(path):
-                return (True, "exists")
+                return (True, 'exists')
             else:
                 return (False, e)
         return (True, path)
@@ -47,9 +48,9 @@ class PathDirs:
             exists = os.path.isfile(path)
             if not exists:
                 with open(path, 'w+') as fname:
-                    fname.write("initialized")
+                    fname.write('initialized')
                 return (True, path)
-            return (True, "exists")
+            return (True, 'exists')
         except OSError as e:  # pragma: no cover
             return (False, e)
 
@@ -77,10 +78,10 @@ class PathDirs:
     def host_config(self):
         """ Ensure the host configuration file exists """
         if platform.system() == 'Darwin':
-            default_file_dir = os.path.join(os.path.expanduser("~"),
-                                            "vent_files")
+            default_file_dir = os.path.join(os.path.expanduser('~'),
+                                            'vent_files')
         else:
-            default_file_dir = "/opt/vent_files"
+            default_file_dir = '/opt/vent_files'
         status = self.ensure_dir(default_file_dir)
         config = Template(template=self.cfg_file)
         sections = {'main': {'files': default_file_dir},

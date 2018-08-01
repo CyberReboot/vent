@@ -1,19 +1,21 @@
 import datetime
-import docker
 import json
 import math
 import multiprocessing
 import os
-import pkg_resources
 import platform
 import re
+from subprocess import check_output
+from subprocess import PIPE
+from subprocess import Popen
+
+import docker
+import pkg_resources
 import requests
 
-from subprocess import check_output, Popen, PIPE
-
 from vent.api.templates import Template
-from vent.helpers.paths import PathDirs
 from vent.helpers.logs import Logger
+from vent.helpers.paths import PathDirs
 
 logger = Logger(__name__)
 
@@ -22,11 +24,11 @@ def Version():
     """ Get Vent version """
     version = ''
     try:
-        version = pkg_resources.require("vent")[0].version
+        version = pkg_resources.require('vent')[0].version
         if not version.startswith('v'):
             version = 'v' + version
     except Exception as e:  # pragma: no cover
-        version = "Error: " + str(e)
+        version = 'Error: ' + str(e)
     return version
 
 
@@ -88,14 +90,14 @@ def Containers(vent=True, running=True, exclude_labels=None):
             if include:
                 containers.append((container.name, container.status))
     except Exception as e:  # pragma: no cover
-        logger.error("Docker problem " + str(e))
+        logger.error('Docker problem ' + str(e))
 
     return containers
 
 
 def Cpu():
     """ Get number of available CPUs """
-    cpu = "Unknown"
+    cpu = 'Unknown'
 
     try:
         cpu = str(multiprocessing.cpu_count())
@@ -106,11 +108,11 @@ def Cpu():
 
 def Gpu(pull=False):
     """ Check for support of GPUs, and return what's available """
-    gpu = (False, "")
+    gpu = (False, '')
 
     try:
         image = 'nvidia/cuda:8.0-runtime'
-        image_name, tag = image.split(":")
+        image_name, tag = image.split(':')
         d_client = docker.from_env()
         nvidia_image = d_client.images.list(name=image)
 
@@ -119,7 +121,7 @@ def Gpu(pull=False):
                 d_client.images.pull(image_name, tag=tag)
                 nvidia_image = d_client.images.list(name=image)
             except Exception as e:  # pragma: no cover
-                logger.error("Something with the GPU went wrong " + str(e))
+                logger.error('Something with the GPU went wrong ' + str(e))
 
         if len(nvidia_image) > 0:
             cmd = 'nvidia-docker run --rm ' + image + ' nvidia-smi -L'
@@ -131,19 +133,19 @@ def Gpu(pull=False):
             gpus = proc.stdout.read()
             err = proc.stderr.read()
             if gpus:
-                gpu_str = ""
-                for line in gpus.strip().split("\n"):
-                    gpu_str += line.split(" (UUID: ")[0] + ", "
+                gpu_str = ''
+                for line in gpus.strip().split('\n'):
+                    gpu_str += line.split(' (UUID: ')[0] + ', '
                 gpu = (True, gpu_str[:-2])
             else:
                 if err:
-                    gpu = (False, "Unknown", str(err))
+                    gpu = (False, 'Unknown', str(err))
                 else:
-                    gpu = (False, "None")
+                    gpu = (False, 'None')
         else:
-            gpu = (False, "None")
+            gpu = (False, 'None')
     except Exception as e:  # pragma: no cover
-        gpu = (False, "Unknown", str(e))
+        gpu = (False, 'Unknown', str(e))
     return gpu
 
 
@@ -163,17 +165,18 @@ def GpuUsage(**kargs):
                                      filters={'label': 'vent-plugin'})
         for container in c:
             if ('vent.gpu' in container.attrs['Config']['Labels'] and
-               container.attrs['Config']['Labels']['vent.gpu'] == 'yes'):
+                    container.attrs['Config']['Labels']['vent.gpu'] == 'yes'):
                 device = container.attrs['Config']['Labels']['vent.gpu.device']
                 if ('vent.gpu.dedicated' in container.attrs['Config']['Labels'] and
-                   container.attrs['Config']['Labels']['vent.gpu.dedicated'] == 'yes'):
+                        container.attrs['Config']['Labels']['vent.gpu.dedicated'] == 'yes'):
                     gpu_status['vent_usage']['dedicated'].append(device)
                 elif 'vent.gpu.mem_mb' in container.attrs['Config']['Labels']:
                     if device not in gpu_status['vent_usage']['mem_mb']:
                         gpu_status['vent_usage']['mem_mb'][device] = 0
-                    gpu_status['vent_usage']['mem_mb'][device] += int(container.attrs['Config']['Labels']['vent.gpu.mem_mb'])
+                    gpu_status['vent_usage']['mem_mb'][device] += int(
+                        container.attrs['Config']['Labels']['vent.gpu.mem_mb'])
     except Exception as e:  # pragma: no cover
-        logger.error("Could not get running jobs " + str(e))
+        logger.error('Could not get running jobs ' + str(e))
 
     port = '3476'
     # default docker gateway
@@ -187,7 +190,7 @@ def GpuUsage(**kargs):
     else:
         try:
             # now just requires ip, ifconfig
-            route = check_output(('ip', 'route')).decode("utf-8").split('\n')
+            route = check_output(('ip', 'route')).decode('utf-8').split('\n')
             default = ''
             # grab the default network device.
             for device in route:
@@ -196,12 +199,12 @@ def GpuUsage(**kargs):
                     break
 
             # grab the IP address for the default device
-            ip_addr = check_output(('ifconfig', default)).decode("utf-8")
+            ip_addr = check_output(('ifconfig', default)).decode('utf-8')
             ip_addr = ip_addr.split('\n')[1].split()[1]
             host = ip_addr
         except Exception as e:  # pragma: no cover
-            logger.error("Something with the ip addresses"
-                         "went wrong " + str(e))
+            logger.error('Something with the ip addresses'
+                         'went wrong ' + str(e))
 
     # have to get the info separately to determine how much memory is availabe
     nd_url = 'http://' + host + ':' + port + '/v1.0/gpu/info/json'
@@ -214,10 +217,10 @@ def GpuUsage(**kargs):
                 gpu_status[i] = {'global_memory': 2**gm,
                                  'cores': device['Cores']}
         else:
-            usage = (False, "Unable to get GPU usage request error code: " +
+            usage = (False, 'Unable to get GPU usage request error code: ' +
                      str(r.status_code))
     except Exception as e:  # pragma: no cover
-        usage = (False, "Error: " + str(e))
+        usage = (False, 'Error: ' + str(e))
 
     # get actual status of each gpu
     nd_url = 'http://' + host + ':' + port + '/v1.0/gpu/status/json'
@@ -233,10 +236,10 @@ def GpuUsage(**kargs):
                 gpu_status[i]['processes'] = device['Processes']
             usage = (True, gpu_status)
         else:
-            usage = (False, "Unable to get GPU usage request error code: " +
+            usage = (False, 'Unable to get GPU usage request error code: ' +
                      str(r.status_code))
     except Exception as e:  # pragma: no cover
-        usage = (False, "Error: " + str(e))
+        usage = (False, 'Error: ' + str(e))
 
     return usage
 
@@ -255,7 +258,7 @@ def Images(vent=True):
         for image in i:
             images.append((image.tags[0], image.short_id))
     except Exception as e:  # pragma: no cover
-        logger.error("Something with the Images went wrong " + str(e))
+        logger.error('Something with the Images went wrong ' + str(e))
 
     return images
 
@@ -280,7 +283,7 @@ def Jobs():
                     files.append(container.attrs['Config']['Labels']['file'])
         jobs[0] = len(files)
     except Exception as e:  # pragma: no cover
-        logger.error("Could not get running jobs " + str(e))
+        logger.error('Could not get running jobs ' + str(e))
 
     # get finished jobs
     try:
@@ -293,7 +296,7 @@ def Jobs():
         tool_names = []
         finished_jobs = []
         path_dirs = PathDirs()
-        manifest = os.path.join(path_dirs.meta_dir, "status.json")
+        manifest = os.path.join(path_dirs.meta_dir, 'status.json')
 
         if os.path.exists(manifest):
             file_status = 'a'
@@ -339,7 +342,7 @@ def Jobs():
                     # create/append a json file with all wanted information
                     with open(manifest, file_status) as outfile:
                         json.dump(new_file, outfile)
-                        outfile.write("\n")
+                        outfile.write('\n')
 
                 # delete any containers with 'vent-plugin' in the groups
                 if 'vent-plugin' in container.attrs['Config']['Labels']:
@@ -355,7 +358,7 @@ def Jobs():
         jobs[3] = jobs[3] - jobs[1]
 
     except Exception as e:  # pragma: no cover
-        logger.error("Could not get finished jobs " + str(e))
+        logger.error('Could not get finished jobs ' + str(e))
 
     return tuple(jobs)
 
@@ -363,7 +366,7 @@ def Jobs():
 def Tools(**kargs):
     """ Get tools that exist in the manifest """
     path_dirs = PathDirs(**kargs)
-    manifest = os.path.join(path_dirs.meta_dir, "plugin_manifest.cfg")
+    manifest = os.path.join(path_dirs.meta_dir, 'plugin_manifest.cfg')
     template = Template(template=manifest)
     tools = template.sections()
     return tools[1]
@@ -379,7 +382,7 @@ def Services(core, vent=True, external=False, **kargs):
     services = []
     path_dirs = PathDirs(**kargs)
     template = Template(template=path_dirs.cfg_file)
-    services_uri = template.option("main", "services_uri")
+    services_uri = template.option('main', 'services_uri')
     try:
         # look for internal services
         if not external:
@@ -401,22 +404,25 @@ def Services(core, vent=True, external=False, **kargs):
                          'core' not in c.attrs['Config']['Labels']['vent.groups'])):
                         name = c.attrs['Config']['Labels']['vent.name']
                         if name == '':
-                            name = c.attrs['Config']['Labels']['vent.namespace'].split('/')[1]
+                            name = c.attrs['Config']['Labels']['vent.namespace'].split(
+                                '/')[1]
                         for label in c.attrs['Config']['Labels']:
                             if label.startswith('uri'):
                                 try:
                                     val = int(label[-1])
                                     if val not in uris:
                                         uris[val] = {}
-                                    uris[val][label[:-1]] = c.attrs['Config']['Labels'][label]
+                                    uris[val][label[:-1]
+                                              ] = c.attrs['Config']['Labels'][label]
                                 except Exception as e:  # pragma: no cover
-                                    logger.error("Malformed services section"
-                                                 " in the template file "
+                                    logger.error('Malformed services section'
+                                                 ' in the template file '
                                                  + str(e))
                 else:
                     name = c.name
                 if name and 'vent.repo' in c.attrs['Config']['Labels']:
-                    name = c.attrs['Config']['Labels']['vent.repo'].split("/")[-1] + ": " + name
+                    name = c.attrs['Config']['Labels']['vent.repo'].split(
+                        '/')[-1] + ': ' + name
                 ports = c.attrs['NetworkSettings']['Ports']
                 p = []
                 port_num = 1
@@ -429,23 +435,23 @@ def Services(core, vent=True, external=False, **kargs):
                             host = ports[port][0]['HostIp']
                             if services_uri[0] and host == '0.0.0.0':
                                 host = services_uri[1]
-                            service_str += host + ":"
+                            service_str += host + ':'
                             service_str += ports[port][0]['HostPort']
                             if 'uri_postfix' in uris[port_num]:
                                 service_str += uris[port_num]['uri_postfix']
                             uri_creds = ''
                             if 'uri_user' in uris[port_num]:
-                                uri_creds += " user:"
+                                uri_creds += ' user:'
                                 uri_creds += uris[port_num]['uri_user']
                             if 'uri_pw' in uris[port_num]:
-                                uri_creds += " pw:"
+                                uri_creds += ' pw:'
                                 uri_creds += uris[port_num]['uri_pw']
                             if uri_creds:
-                                service_str += " - (" + uri_creds + " )"
+                                service_str += ' - (' + uri_creds + ' )'
                             p.append(service_str)
                         except Exception as e:  # pragma: no cover
-                            logger.info("No services defined for " + str(name) + " with exposed port " +
-                                        str(port_num) + " because: " + str(e))
+                            logger.info('No services defined for ' + str(name) + ' with exposed port ' +
+                                        str(port_num) + ' because: ' + str(e))
                         port_num += 1
                 if p and name:
                     services.append((name, p))
@@ -477,34 +483,34 @@ def Services(core, vent=True, external=False, **kargs):
                 except Exception:  # pragma: no cover
                     p = None
     except Exception as e:  # pragma: no cover
-        logger.error("Could not get services " + str(e))
+        logger.error('Could not get services ' + str(e))
     return services
 
 
 def Timestamp():
     """ Get the current datetime in UTC """
-    timestamp = ""
+    timestamp = ''
     try:
-        timestamp = str(datetime.datetime.now())+" UTC"
+        timestamp = str(datetime.datetime.now())+' UTC'
     except Exception as e:  # pragma: no cover
-        logger.error("Could not get current time " + str(e))
+        logger.error('Could not get current time ' + str(e))
     return timestamp
 
 
 def Uptime():
     """ Get the current uptime information """
-    uptime = ""
+    uptime = ''
     try:
-        uptime = check_output(["uptime"], close_fds=True).decode("utf-8")[1:]
+        uptime = check_output(['uptime'], close_fds=True).decode('utf-8')[1:]
     except Exception as e:  # pragma: no cover
-        logger.error("Could not get current uptime " + str(e))
+        logger.error('Could not get current uptime ' + str(e))
     return uptime
 
 
 def DropLocation():
     """ Get the directory that file drop is watching """
     template = Template(template=PathDirs().cfg_file)
-    drop_loc = template.option("main", "files")[1]
+    drop_loc = template.option('main', 'files')[1]
     drop_loc = os.path.expanduser(drop_loc)
     drop_loc = os.path.abspath(drop_loc)
     return (True, drop_loc)
@@ -517,10 +523,10 @@ def ParsedSections(file_val):
     try:
         template_dict = {}
         cur_section = ''
-        for val in file_val.split("\n"):
+        for val in file_val.split('\n'):
             val = val.strip()
             if val != '':
-                section_match = re.match(r"\[.+\]", val)
+                section_match = re.match(r'\[.+\]', val)
                 if section_match:
                     cur_section = section_match.group()[1:-1]
                     template_dict[cur_section] = {}

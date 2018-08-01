@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 import curses
-import npyscreen
 import time
-
 from threading import Thread
+
+import npyscreen
 
 from vent.api.actions import Action
 from vent.api.plugins import Plugin
@@ -30,10 +29,10 @@ class VentApp(npyscreen.NPSAppManaged):
     repo_value = {}
     paths = PathDirs()
     first_time = paths.ensure_file(paths.init_file)
-    if first_time[0] and first_time[1] != "exists":
-        npyscreen.NPSAppManaged.STARTING_FORM = "TUTORIALINTRO"
+    if first_time[0] and first_time[1] != 'exists':
+        npyscreen.NPSAppManaged.STARTING_FORM = 'TUTORIALINTRO'
     else:
-        npyscreen.NPSAppManaged.STARTING_FORM = "MAIN"
+        npyscreen.NPSAppManaged.STARTING_FORM = 'MAIN'
 
     def onStart(self):
         """ Override onStart method for npyscreen """
@@ -42,86 +41,88 @@ class VentApp(npyscreen.NPSAppManaged):
         version = Version()
 
         # setup initial runtime stuff
-        if self.first_time[0] and self.first_time[1] != "exists":
+        if self.first_time[0] and self.first_time[1] != 'exists':
             plugins = Plugin()
             actions = Action()
-            thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': True})
+            thr = Thread(target=MainForm.t_status,
+                         args=(), kwargs={'core': True})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait("Please wait while Vent initializes...1/4",
-                                      title="Setting up things...")
+                npyscreen.notify_wait('Please wait while Vent initializes...1/4',
+                                      title='Setting up things...')
                 time.sleep(1)
             thr.join()
-            thr = Thread(target=MainForm.t_status, args=(), kwargs={'core': False})
+            thr = Thread(target=MainForm.t_status,
+                         args=(), kwargs={'core': False})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait("Please wait while Vent initializes...2/4",
-                                      title="Setting up things...")
+                npyscreen.notify_wait('Please wait while Vent initializes...2/4',
+                                      title='Setting up things...')
                 time.sleep(1)
             thr.join()
             thr = Thread(target=plugins.auto_install, args=(), kwargs={})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait("Please wait while Vent initializes...3/4",
-                                      title="Setting up things...")
+                npyscreen.notify_wait('Please wait while Vent initializes...3/4',
+                                      title='Setting up things...')
                 time.sleep(1)
             thr.join()
             thr = Thread(target=actions.startup, args=(), kwargs={})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait("Please wait while Vent initializes...4/4",
-                                      title="Setting up things...")
+                npyscreen.notify_wait('Please wait while Vent initializes...4/4',
+                                      title='Setting up things...')
                 time.sleep(1)
             thr.join()
 
-        quit_s = "\t"*4 + "^Q to quit"
-        tab_esc = "\t"*4 + "TAB to close menu popup"
-        self.addForm("MAIN",
+        quit_s = '\t'*4 + '^Q to quit'
+        tab_esc = '\t'*4 + 'TAB to close menu popup'
+        self.addForm('MAIN',
                      MainForm,
-                     name="Vent " + version +
-                     "\t\t\t\t\t^T for help" + quit_s + tab_esc,
-                     color="IMPORTANT")
-        self.addForm("HELP",
+                     name='Vent ' + version +
+                     '\t\t\t\t\t^T for help' + quit_s + tab_esc,
+                     color='IMPORTANT')
+        self.addForm('HELP',
                      HelpForm,
-                     name="Help\t\t\t\t\t\t\t\t^T to toggle previous" +
+                     name='Help\t\t\t\t\t\t\t\t^T to toggle previous' +
                      quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALINTRO",
+                     color='DANGER')
+        self.addForm('TUTORIALINTRO',
                      TutorialIntroForm,
-                     name="Vent Tutorial" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALBACKGROUND",
+                     name='Vent Tutorial' + quit_s,
+                     color='DANGER')
+        self.addForm('TUTORIALBACKGROUND',
                      TutorialBackgroundForm,
-                     name="About Vent" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALTERMINOLOGY",
+                     name='About Vent' + quit_s,
+                     color='DANGER')
+        self.addForm('TUTORIALTERMINOLOGY',
                      TutorialTerminologyForm,
-                     name="About Vent" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALGETTINGSETUP",
+                     name='About Vent' + quit_s,
+                     color='DANGER')
+        self.addForm('TUTORIALGETTINGSETUP',
                      TutorialGettingSetupForm,
-                     name="About Vent" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALBUILDINGCORES",
+                     name='About Vent' + quit_s,
+                     color='DANGER')
+        self.addForm('TUTORIALBUILDINGCORES',
                      TutorialBuildingCoresForm,
-                     name="Working with Cores" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALSTARTINGCORES",
+                     name='Working with Cores' + quit_s,
+                     color='DANGER')
+        self.addForm('TUTORIALSTARTINGCORES',
                      TutorialStartingCoresForm,
-                     name="Working with Cores" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALADDINGPLUGINS",
+                     name='Working with Cores' + quit_s,
+                     color='DANGER')
+        self.addForm('TUTORIALADDINGPLUGINS',
                      TutorialAddingPluginsForm,
-                     name="Working with Plugins" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALADDINGFILES",
+                     name='Working with Plugins' + quit_s,
+                     color='DANGER')
+        self.addForm('TUTORIALADDINGFILES',
                      TutorialAddingFilesForm,
-                     name="Files" + quit_s,
-                     color="DANGER")
-        self.addForm("TUTORIALTROUBLESHOOTING",
+                     name='Files' + quit_s,
+                     color='DANGER')
+        self.addForm('TUTORIALTROUBLESHOOTING',
                      TutorialTroubleshootingForm,
-                     name="Troubleshooting" + quit_s,
-                     color="DANGER")
+                     name='Troubleshooting' + quit_s,
+                     color='DANGER')
 
     def change_form(self, name):
         """ Changes the form (window) that is displayed """

@@ -1,9 +1,10 @@
 import ast
+import json
+import socket
+
 import docker
 import falcon
-import json
 import redis
-import socket
 
 
 class CreateR(object):
@@ -78,14 +79,18 @@ class CreateR(object):
                 try:
                     metadata = ast.literal_eval(payload['metadata'])
                 except Exception as e:  # pragma: no cover
-                    resp.body = "(False, 'unable to convert metadata [ " + str(payload['metadata']) + " ] into a dict because: " + str(e) + "')"
+                    resp.body = "(False, 'unable to convert metadata [ " + str(
+                        payload['metadata']) + ' ] into a dict because: ' + str(e) + "')"
                     return
                 try:
                     r.hmset(payload['id'], metadata)
-                    r.hmset(metadata['endpoint_data']['ip-address'], {'poseidon_hash': payload['id']})
-                    r.sadd('ip_addresses', metadata['endpoint_data']['ip-address'])
+                    r.hmset(metadata['endpoint_data']['ip-address'],
+                            {'poseidon_hash': payload['id']})
+                    r.sadd('ip_addresses',
+                           metadata['endpoint_data']['ip-address'])
                 except Exception as e:  # pragma: no cover
-                    resp.body = "(False, 'unable to store contents of the payload [ " + str(metadata) + " ] in redis because: " + str(e) + "')"
+                    resp.body = "(False, 'unable to store contents of the payload [ " + str(
+                        metadata) + ' ] in redis because: ' + str(e) + "')"
                     return
 
         # connect to docker
@@ -98,8 +103,8 @@ class CreateR(object):
 
         # spin up container with payload specifications
         if c:
-            tool_d = {"network_mode": "host",
-                      "volumes_from": [socket.gethostname()]}
+            tool_d = {'network_mode': 'host',
+                      'volumes_from': [socket.gethostname()]}
 
             cmd = '/tmp/run.sh ' + payload['nic'] + ' ' + payload['interval']
             cmd += ' ' + payload['id'] + ' ' + payload['iters'] + ' '
@@ -111,7 +116,8 @@ class CreateR(object):
                 resp.body = "(False, 'unable to start container because: " + str(e) + "')"
                 return
 
-        resp.body = "(True, 'successfully created and started filter: " + str(payload['id']) + " on container: " + str(container_id) + "')"
+        resp.body = "(True, 'successfully created and started filter: " + \
+            str(payload['id']) + ' on container: ' + str(container_id) + "')"
         return
 
 
@@ -162,7 +168,8 @@ class DeleteR(object):
             resp.body = "(False, 'unable to delete containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully deleted: " + str(payload['id']) + "')"
+        resp.body = "(True, 'container successfully deleted: " + \
+            str(payload['id']) + "')"
         return
 
 
@@ -202,14 +209,13 @@ class ListR(object):
         try:
             for c in containers.containers.list(all=True):
                 # TODO: maybe find a way to not have to hard code image name
-                if c.attrs["Config"]["Image"] == \
-                        "cyberreboot/vent-ncapture:master":
+                if c.attrs['Config']['Image'] == \
+                        'cyberreboot/vent-ncapture:master':
                     # the core container is not what we want
-                    if "core" not in c.attrs["Config"]["Labels"]\
-                       ["vent.groups"]:
+                    if 'core' not in c.attrs['Config']['Labels']['vent.groups']:
                         lst = {}
-                        lst['id'] = c.attrs["Id"][:12]
-                        lst['status'] = c.attrs["State"]["Status"]
+                        lst['id'] = c.attrs['Id'][:12]
+                        lst['status'] = c.attrs['State']['Status']
                         lst['args'] = c.attrs['Args']
                         container_list.append(lst)
         except Exception as e:  # pragma: no cover
@@ -240,7 +246,7 @@ class NICsR(object):
             return
 
         # start container to get network interfaces
-        nics = ""
+        nics = ''
         try:
             nics = d_client.containers.run('cyberreboot/gonet',
                                            network_mode='host')
@@ -299,7 +305,8 @@ class StartR(object):
             resp.body = "(False, 'unable to start list of containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully started: " + str(payload['id']) + "')"
+        resp.body = "(True, 'container successfully started: " + \
+            str(payload['id']) + "')"
         return
 
 
@@ -350,7 +357,8 @@ class StopR(object):
             resp.body = "(False, 'unable to stop list of containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully stopped: " + str(payload['id']) + "')"
+        resp.body = "(True, 'container successfully stopped: " + \
+            str(payload['id']) + "')"
         return
 
 
@@ -406,15 +414,19 @@ class UpdateR(object):
             try:
                 metadata = ast.literal_eval(payload['metadata'])
             except Exception as e:  # pragma: no cover
-                resp.body = "(False, 'unable to convert metadata [ " + str(payload['metadata']) + " ] into a dict because: " + str(e) + "')"
+                resp.body = "(False, 'unable to convert metadata [ " + str(
+                    payload['metadata']) + ' ] into a dict because: ' + str(e) + "')"
                 return
             try:
                 r.hmset(payload['id'], metadata)
-                r.hmset(metadata['endpoint_data']['ip-address'], {'poseidon_hash': payload['id']})
+                r.hmset(metadata['endpoint_data']['ip-address'],
+                        {'poseidon_hash': payload['id']})
                 r.sadd('ip_addresses', metadata['endpoint_data']['ip-address'])
             except Exception as e:  # pragma: no cover
-                resp.body = "(False, 'unable to store contents of the payload [ " + str(metadata) + " ] in redis because: " + str(e) + "')"
+                resp.body = "(False, 'unable to store contents of the payload [ " + str(
+                    metadata) + ' ] in redis because: ' + str(e) + "')"
                 return
 
-        resp.body = "(True, 'successfully updated filter: " + str(payload['id']) + "')"
+        resp.body = "(True, 'successfully updated filter: " + \
+            str(payload['id']) + "')"
         return

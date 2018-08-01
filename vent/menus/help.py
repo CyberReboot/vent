@@ -7,7 +7,7 @@ class HelpForm(npyscreen.ActionFormWithMenus):
     @staticmethod
     def switch(page):
         def popup(page):
-            info_str = ""
+            info_str = ''
             if page == 'Menu':
                 info_str = """
                 Menu interactions are simple! Here is a quick guide to get you
@@ -93,8 +93,8 @@ class HelpForm(npyscreen.ActionFormWithMenus):
 
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.change_forms, "^Q": self.exit})
-        self.addfield = self.add(npyscreen.TitleFixedText, name="Vent",
+        self.add_handlers({'^T': self.change_forms, '^Q': self.exit})
+        self.addfield = self.add(npyscreen.TitleFixedText, name='Vent',
                                  labelColor='DEFAULT', editable=False)
         self.multifield1 = self.add(npyscreen.MultiLineEdit, editable=False,
                                     value="""
@@ -119,23 +119,23 @@ class HelpForm(npyscreen.ActionFormWithMenus):
 
         PRO TIP: You can use TAB to cycle through options.
         """)
-        self.m2 = self.add_menu(name="Vent Basics", shortcut='b')
-        self.m2.addItem(text="Menu Interactions", onSelect=HelpForm.switch,
+        self.m2 = self.add_menu(name='Vent Basics', shortcut='b')
+        self.m2.addItem(text='Menu Interactions', onSelect=HelpForm.switch,
                         arguments=['Menu'], shortcut='m')
-        self.m2.addItem(text="Plugins", onSelect=HelpForm.switch,
+        self.m2.addItem(text='Plugins', onSelect=HelpForm.switch,
                         arguments=['Plugins'], shortcut='p')
-        self.m2.addItem(text="Tools", onSelect=HelpForm.switch,
+        self.m2.addItem(text='Tools', onSelect=HelpForm.switch,
                         arguments=['Tools'], shortcut='t')
-        self.m2.addItem(text="Filetypes", onSelect=HelpForm.switch,
+        self.m2.addItem(text='Filetypes', onSelect=HelpForm.switch,
                         arguments=['Filetypes'], shortcut='f')
-        self.m2.addItem(text="Core", onSelect=HelpForm.switch,
+        self.m2.addItem(text='Core', onSelect=HelpForm.switch,
                         arguments=['Core'], shortcut='c')
-        self.m2.addItem(text="Statuses", onSelect=HelpForm.switch,
+        self.m2.addItem(text='Statuses', onSelect=HelpForm.switch,
                         arguments=['Status'], shortcut='s')
-        self.m3 = self.add_menu(name="Working with Plugins", shortcut='p')
-        self.m3.addItem(text="Adding a Plugin", onSelect=HelpForm.switch,
+        self.m3 = self.add_menu(name='Working with Plugins', shortcut='p')
+        self.m3.addItem(text='Adding a Plugin', onSelect=HelpForm.switch,
                         arguments=['Plugin Adding'], shortcut='a')
-        self.m3.addItem(text="Building a Plugin", onSelect=HelpForm.switch,
+        self.m3.addItem(text='Building a Plugin', onSelect=HelpForm.switch,
                         arguments=['Plugin Building'], shortcut='b')
 
     def exit(self, *args, **keywords):

@@ -2,6 +2,7 @@ import os
 
 from vent.api.actions import Action
 
+
 def test_startup():
     """
     Test the startup function; uses the startup file configured in
@@ -14,6 +15,7 @@ def test_startup():
     with open(instance.plugin.manifest, 'r') as man:
         assert 'rabbitmq' in man.read()
 
+
 def test_add():
     """ Test the add function """
     instance = Action()
@@ -24,6 +26,7 @@ def test_add():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+
 def test_add_image():
     """ Test the add image function """
     instance = Action()
@@ -31,12 +34,14 @@ def test_add_image():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+
 def test_get_configure():
     """ Test the get_configure function """
     instance = Action()
     status = instance.get_configure(name='elasticsearch')
     assert status[0]
     assert 'Elasticsearch' in status[1]
+
 
 def test_save_configure():
     """ Test the save_configure function """
@@ -63,6 +68,7 @@ def test_save_configure():
         assert 'random' in man_contents
         assert 'elasticsearch2' in man_contents
 
+
 def test_remove():
     """ Test the remove function """
     instance = Action()
@@ -73,25 +79,27 @@ def test_remove():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+
 def test_build():
     """ Test the build function """
     instance = Action()
     status = instance.add('https://github.com/cyberreboot/vent-plugins',
                           branch='master',
-                          tools=[('kibana','')],
+                          tools=[('kibana', '')],
                           build=False)
     assert isinstance(status, tuple)
-    assert status[0] ==  True
+    assert status[0] == True
     status = instance.build(branch='master', name='kibana')
     assert isinstance(status, tuple)
     assert status[0] == True
+
 
 def test_prep_start():
     """ Test the prep_start function """
     instance = Action()
     status = instance.add('https://github.com/cyberreboot/vent-plugins',
                           branch='master',
-                          tools=[('kibana','')],
+                          tools=[('kibana', '')],
                           groups='foo')
     assert isinstance(status, tuple)
     assert status[0] == True
@@ -100,7 +108,7 @@ def test_prep_start():
     assert status[0] == True
     status = instance.add('https://github.com/cyberreboot/vent',
                           branch='master',
-                          tools=[('vent/core/file_drop',''),
+                          tools=[('vent/core/file_drop', ''),
                                  ('vent/core/redis', ''),
                                  ('vent/core/syslog', '')])
     assert isinstance(status, tuple)
@@ -109,12 +117,14 @@ def test_prep_start():
     assert isinstance(status, tuple)
     assert status[0] == True
 
+
 def test_start():
     """ Test the start function """
     instance = Action()
     status = instance.start({})
     assert isinstance(status, tuple)
     assert status[0] == True
+
 
 def test_disable():
     """ Test the disable function """
@@ -128,6 +138,7 @@ def test_disable():
     assert isinstance(status, tuple)
     assert status[0]
 
+
 def test_enable():
     """ Test the enable function """
     instance = Action()
@@ -140,6 +151,7 @@ def test_enable():
     assert isinstance(status, tuple)
     assert status[0]
 
+
 def test_update():
     """ Test the update function """
     instance = Action()
@@ -148,27 +160,32 @@ def test_update():
                           tools=[('vent/core/elasticsearch', '')])
     assert isinstance(status, tuple)
     assert status[0]
-    status = instance.update(name='elasticsearch', branch='master', new_version="a45e8b3c79964c9a6953b6b45f079bd833edbf46")
+    status = instance.update(name='elasticsearch', branch='master',
+                             new_version='a45e8b3c79964c9a6953b6b45f079bd833edbf46')
     assert isinstance(status, tuple)
     assert status[0]
+
 
 def test_restart_tools():
     instance = Action()
     status = instance.restart_tools(main_cfg=True, old_val='', new_val='')
     assert isinstance(status, tuple)
     assert status[0]
-    status = instance.restart_tools(main_cfg=True, old_val='junk', new_val='[ext]')
+    status = instance.restart_tools(
+        main_cfg=True, old_val='junk', new_val='[ext]')
     assert isinstance(status, tuple)
     assert status[0]
     status = instance.restart_tools()
     assert isinstance(status, tuple)
     assert status[0]
 
+
 def test_stop():
     """ Test the stop function """
     instance = Action()
     status = instance.stop()
     assert isinstance(status, tuple)
+
 
 def test_clean():
     """ Test the clean function """
@@ -177,6 +194,7 @@ def test_clean():
     assert isinstance(status, tuple)
     status = instance.clean(name='rq_worker2')
     assert isinstance(status, tuple)
+
 
 def test_backup():
     """ Test the backup function """
@@ -189,12 +207,14 @@ def test_backup():
     assert status[0] == True
     assert os.path.exists(status[1])
 
+
 def test_restore():
     """ Test the restore function """
     instance = Action()
     status = instance.restore('not a backup')
     assert isinstance(status, tuple)
     assert status[0] == False
+
 
 def test_inventory():
     """ Test the inventory function """
@@ -214,13 +234,16 @@ def test_inventory():
     assert status[0] == True
     assert isinstance(status[1], dict)
 
+
 def test_configure():
     """ Test the configure function """
     Action.configure()
 
+
 def test_upgrade():
     """ Test the upgrade function """
     Action.upgrade()
+
 
 def test_reset():
     """ Test the reset function """
@@ -228,6 +251,7 @@ def test_reset():
     status = instance.reset()
     assert isinstance(status, tuple)
     assert status[0]
+
 
 def test_logs():
     """ Test the logs function """
@@ -238,24 +262,28 @@ def test_logs():
     status = instance.logs(grep_list=['foo'])
     assert isinstance(status, tuple)
     assert status[0] == True
-    status = instance.logs(c_type="core")
+    status = instance.logs(c_type='core')
     assert isinstance(status, tuple)
     assert status[0] == True
+
 
 def test_tool_status_checker():
     """ Test the tool_status_checker function """
     instance = Action()
     status = instance.tool_status_checker('elasticsearch')
 
+
 def test_tool_status_output():
     """ Test the tool_status_output function """
     instance = Action()
     status = instance.tool_status_output('elasticsearch')
 
+
 def test_get_vent_tool_url():
     """ Test the get_vent_tool_url function """
     instance = Action()
     status = instance.get_vent_tool_url('elasticsearch')
+
 
 def test_help():
     """ Test the help function """

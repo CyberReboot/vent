@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import json
 import os
-import pika
 import sys
 import time
 import uuid
 
+import pika
 from elasticsearch import Elasticsearch
 
 
@@ -18,14 +18,14 @@ class RmqEs():
     es_conn = None
     es_host = None
     # get custom set port or else use default port
-    es_port = int(os.getenv("ELASTICSEARCH_CUSTOM_PORT", 9200))
+    es_port = int(os.getenv('ELASTICSEARCH_CUSTOM_PORT', 9200))
     rmq_host = None
     # get custom set port or else use default port
-    rmq_port = int(os.getenv("RABBITMQ_CUSTOM_PORT", 5672))
+    rmq_port = int(os.getenv('RABBITMQ_CUSTOM_PORT', 5672))
     channel = None
     queue_name = None
 
-    def __init__(self, es_host="elasticsearch", rmq_host="rabbitmq"):
+    def __init__(self, es_host='elasticsearch', rmq_host='rabbitmq'):
         """ initialize host information """
         self.es_host = es_host
         self.rmq_host = rmq_host
@@ -50,10 +50,10 @@ class RmqEs():
                 self.es_conn = Elasticsearch([{'host': self.es_host,
                                                'port': self.es_port}])
                 wait = False
-                print("connected to rabbitmq and elasticsearch...")
+                print('connected to rabbitmq and elasticsearch...')
             except Exception as e:  # pragma: no cover
                 print(str(e))
-                print("waiting for connection to rabbitmq..." + str(e))
+                print('waiting for connection to rabbitmq...' + str(e))
                 time.sleep(2)
                 wait = True
 
@@ -62,7 +62,7 @@ class RmqEs():
         callback triggered on rabiitmq message received and sends it to
         an elasticsearch index
         """
-        index = method.routing_key.split(".")[1]
+        index = method.routing_key.split('.')[1]
         index = index.replace('/', '-')
         failed = False
         body = str(body)
@@ -79,12 +79,12 @@ class RmqEs():
         if not failed:
             try:
                 self.es_conn.index(index=index,
-                                   doc_type=method.routing_key.split(".")[1],
-                                   id=method.routing_key + "." +
+                                   doc_type=method.routing_key.split('.')[1],
+                                   id=method.routing_key + '.' +
                                    str(uuid.uuid4()),
                                    body=doc)
             except Exception as e:  # pragma: no cover
-                print("Failed to send document to elasticsearch because: " + str(e))
+                print('Failed to send document to elasticsearch because: ' + str(e))
 
     def start(self):
         """ start the channel listener and start consuming messages """
@@ -93,7 +93,7 @@ class RmqEs():
         binding_keys = sys.argv[1:]
         if not binding_keys:
             print(sys.stderr,
-                  "Usage: {0!s} [binding_key]...".format(sys.argv[0]))
+                  'Usage: {0!s} [binding_key]...'.format(sys.argv[0]))
             sys.exit(0)
 
         for binding_key in binding_keys:
@@ -109,7 +109,8 @@ class RmqEs():
                                    no_ack=True)
         self.channel.start_consuming()
 
-if __name__ == "__main__":  # pragma: no cover
+
+if __name__ == '__main__':  # pragma: no cover
     rmq_es = RmqEs()
     rmq_es.start()
     rmq_es.consume()

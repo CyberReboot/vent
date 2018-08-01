@@ -10,13 +10,13 @@ def gpu_queue(options):
     from vent.helpers.meta import GpuUsage
 
     status = (False, None)
-    if (os.path.isfile("/root/.vent/vent.cfg") and os.path.isfile("/root/.vent/plugin_manifest.cfg")):
-        path_dir = "/root/.vent"
+    if (os.path.isfile('/root/.vent/vent.cfg') and os.path.isfile('/root/.vent/plugin_manifest.cfg')):
+        path_dir = '/root/.vent'
     else:
-        path_dir = "/vent"
+        path_dir = '/vent'
 
-    print("gpu queue", str(options))
-    print("gpu queue", str(GpuUsage(base_dir=path_dir+"/",
+    print('gpu queue', str(options))
+    print('gpu queue', str(GpuUsage(base_dir=path_dir+'/',
                                     meta_dir=path_dir)))
 
     options = json.loads(options)
@@ -44,7 +44,7 @@ def gpu_queue(options):
 
     # check if devices is still an empty list
     if not devices:
-        status = (False, "no valid devices match the requested device")
+        status = (False, 'no valid devices match the requested device')
         print(str(status))
         return status
 
@@ -52,17 +52,17 @@ def gpu_queue(options):
     dedicated = False
     # need a gpu to itself
     if ('dedicated' in configs['gpu_options'] and
-       configs['gpu_options']['dedicated'] == 'yes'):
+            configs['gpu_options']['dedicated'] == 'yes'):
         dedicated = True
     if 'mem_mb' in configs['gpu_options']:
         # TODO input error checking
         mem_needed = int(configs['gpu_options']['mem_mb'])
 
-    print("mem_needed: ", mem_needed)
-    print("dedicated: ", dedicated)
+    print('mem_needed: ', mem_needed)
+    print('dedicated: ', dedicated)
     device = None
     while not device:
-        usage = GpuUsage(base_dir=path_dir+"/", meta_dir=path_dir)
+        usage = GpuUsage(base_dir=path_dir+'/', meta_dir=path_dir)
 
         if usage[0]:
             usage = usage[1]
@@ -74,7 +74,7 @@ def gpu_queue(options):
         #  "dedicated": "yes",
         #  "enabled": "yes"}
         for d in devices:
-            dev = str(d.split(":")[0].split('nvidia')[1])
+            dev = str(d.split(':')[0].split('nvidia')[1])
             print(dev)
             # if the device is already dedicated, can't be used
             dedicated_gpus = usage['vent_usage']['dedicated']
@@ -82,16 +82,16 @@ def gpu_queue(options):
             for gpu in dedicated_gpus:
                 if dev in gpu:
                     is_dedicated = True
-            print("is_dedicated: ", is_dedicated)
+            print('is_dedicated: ', is_dedicated)
             if not is_dedicated:
                 ram_used = 0
                 if dev in usage['vent_usage']['mem_mb']:
                     ram_used = usage['vent_usage']['mem_mb'][dev]
                 # check for vent usage/processes running
                 if (dedicated and
-                   dev not in usage['vent_usage']['mem_mb'] and
-                   mem_needed <= usage[int(dev)]['global_memory'] and
-                   not usage[int(dev)]['processes']):
+                    dev not in usage['vent_usage']['mem_mb'] and
+                    mem_needed <= usage[int(dev)]['global_memory'] and
+                        not usage[int(dev)]['processes']):
                     device = dev
                 # check for ram constraints
                 elif mem_needed <= (usage[int(dev)]['global_memory'] - ram_used):
@@ -130,7 +130,7 @@ def gpu_queue(options):
     return status
 
 
-def file_queue(path, template_path="/vent/", r_host="redis"):
+def file_queue(path, template_path='/vent/', r_host='redis'):
     """
     Processes files that have been added from the rq-worker, starts plugins
     that match the mime type for the new file.
@@ -154,8 +154,8 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     configs = {}
     logger = Logger(__name__)
 
-    if (os.path.isfile("/root/.vent/vent.cfg") and os.path.isfile("/root/.vent/plugin_manifest.cfg")):
-        template_path = "/root/.vent/"
+    if (os.path.isfile('/root/.vent/vent.cfg') and os.path.isfile('/root/.vent/plugin_manifest.cfg')):
+        template_path = '/root/.vent/'
 
     try:
         d_client = docker.from_env()
@@ -165,7 +165,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         vent_config.optionxform = str
         vent_config.read(template_path+'vent.cfg')
         if (vent_config.has_section('main') and
-           vent_config.has_option('main', 'files')):
+                vent_config.has_option('main', 'files')):
             files = vent_config.get('main', 'files')
         else:
             files = '/'
@@ -200,7 +200,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         failed_images = set()
         config = configparser.ConfigParser(interpolation=None)
         config.optionxform = str
-        print("Path to manifest: "+ template_path+'plugin_manifest.cfg')
+        print('Path to manifest: ' + template_path+'plugin_manifest.cfg')
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
@@ -212,14 +212,16 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
         for section in sections:
             link_name = config.get(section, 'link_name')
             image_name = config.get(section, 'image_name')
-            name_maps[link_name] = image_name.replace(':', '-').replace('/', '-')
+            name_maps[link_name] = image_name.replace(
+                ':', '-').replace('/', '-')
 
         for section in sections:
             path = path_copy
             orig_path = ''
             repo = config.get(section, 'repo')
             t_type = config.get(section, 'type')
-            labels = {'vent-plugin': '', 'file': path, 'vent.section': section, 'vent.repo': repo, 'vent.type': t_type}
+            labels = {'vent-plugin': '', 'file': path,
+                      'vent.section': section, 'vent.repo': repo, 'vent.type': t_type}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
             # doesn't matter if it's a repository or registry because both in manifest
@@ -239,7 +241,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                                         n_map.append(vent_config.get(
                                             n_name, option))
                                 orig_path = path
-                                path = str(n_map[0]) + " " + path
+                                path = str(n_map[0]) + ' ' + path
                     except Exception as e:  # pragma: no cover
                         failed_images.add(image_name)
                         status = (False, str(e))
@@ -286,16 +288,19 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
             if image_name in configs:
                 if config.has_option(section, 'docker'):
                     try:
-                        options_dict = ast.literal_eval(config.get(section, 'docker'))
+                        options_dict = ast.literal_eval(
+                            config.get(section, 'docker'))
                         for option in options_dict:
                             try:
-                                configs[image_name][option] = ast.literal_eval(options_dict[option])
+                                configs[image_name][option] = ast.literal_eval(
+                                    options_dict[option])
                             except Exception as e:  # pragma: no cover
                                 configs[image_name][option] = options_dict[option]
                         if 'links' in configs[image_name]:
                             for link in configs[image_name]['links']:
                                 if link in name_maps:
-                                    configs[image_name]['links'][name_maps[link]] = configs[image_name]['links'].pop(link)
+                                    configs[image_name]['links'][name_maps[link]
+                                                                 ] = configs[image_name]['links'].pop(link)
                         # TODO network_mode
                         # TODO volumes_from
                         # TODO external services
@@ -320,24 +325,26 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                             port = ''
                             host = ''
                             if (vent_config.has_section('nvidia-docker-plugin') and
-                               vent_config.has_option('nvidia-docker-plugin', 'port')):
-                                port = vent_config.get('nvidia-docker-plugin', 'port')
+                                    vent_config.has_option('nvidia-docker-plugin', 'port')):
+                                port = vent_config.get(
+                                    'nvidia-docker-plugin', 'port')
                             else:
                                 port = '3476'
                             if (vent_config.has_section('nvidia-docker-plugin') and
-                               vent_config.has_option('nvidia-docker-plugin', 'host')):
-                                host = vent_config.get('nvidia-docker-plugin', 'host')
+                                    vent_config.has_option('nvidia-docker-plugin', 'host')):
+                                host = vent_config.get(
+                                    'nvidia-docker-plugin', 'host')
                             else:
                                 # grab the default gateway
                                 try:
                                     route = Popen(('/sbin/ip', 'route'),
                                                   stdout=PIPE)
                                     host = check_output(('awk', '/default/ {print$3}'),
-                                                        stdin=route.stdout).strip().decode("utf-8")
+                                                        stdin=route.stdout).strip().decode('utf-8')
                                     route.wait()
                                 except Exception as e:  # pragma no cover
-                                    logger.error("Default gateway "
-                                                 "went wrong " + str(e))
+                                    logger.error('Default gateway '
+                                                 'went wrong ' + str(e))
                             nd_url = 'http://' + host + ':' + port + '/v1.0/docker/cli'
                             params = {'vol': 'nvidia_driver'}
                             try:
@@ -346,9 +353,11 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                                     options = r.text.split()
                                     for option in options:
                                         if option.startswith('--volume-driver='):
-                                            configs[image_name]['volume_driver'] = option.split("=", 1)[1]
+                                            configs[image_name]['volume_driver'] = option.split('=', 1)[
+                                                1]
                                         elif option.startswith('--volume='):
-                                            vol = option.split("=", 1)[1].split(":")
+                                            vol = option.split('=', 1)[
+                                                1].split(':')
                                             if 'volumes' in configs[image_name]:
                                                 # !! TODO handle if volumes is a list
                                                 configs[image_name]['volumes'][vol[0]] = {'bind': vol[1],
@@ -358,14 +367,15 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                                                                                   {'bind': vol[1],
                                                                                    'mode': vol[2]}}
                                         elif option.startswith('--device='):
-                                            dev = option.split("=", 1)[1]
+                                            dev = option.split('=', 1)[1]
                                             if 'devices' in configs[image_name]:
                                                 configs[image_name]['devices'].append(dev +
-                                                                                      ":" +
+                                                                                      ':' +
                                                                                       dev +
-                                                                                      ":rwm")
+                                                                                      ':rwm')
                                             else:
-                                                configs[image_name]['devices'] = [dev + ":" + dev + ":rwm"]
+                                                configs[image_name]['devices'] = [
+                                                    dev + ':' + dev + ':rwm']
                                         else:
                                             # unable to parse option provided by
                                             # nvidia-docker-plugin
@@ -373,12 +383,12 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
                             except Exception as e:  # pragma: no cover
                                 failed_images.add(image_name)
                                 status = (False, str(e))
-                                print("Failure with nvidia-docker-plugin: " +
+                                print('Failure with nvidia-docker-plugin: ' +
                                       str(e))
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
-                    print("Unable to process gpu options: " + str(e))
+                    print('Unable to process gpu options: ' + str(e))
             path_cmd[image_name] = path
             orig_path_d[image_name] = orig_path
             labels_d[image_name] = labels
@@ -397,7 +407,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
         except Exception as e:  # pragma: no cover
             can_queue_gpu = False
-            print("Unable to connect to redis: " + str(e))
+            print('Unable to connect to redis: ' + str(e))
 
         # start containers
         for image in images:
@@ -447,7 +457,7 @@ def file_queue(path, template_path="/vent/", r_host="redis"):
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
         print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
-        print("Failed to process job: " + str(e))
+        print('Failed to process job: ' + str(e))
 
     print(str(status))
     return status

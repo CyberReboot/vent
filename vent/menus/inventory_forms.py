@@ -5,6 +5,7 @@ from vent.menus.inventory import InventoryForm
 
 class BaseInventoryForm(InventoryForm):
     """ Base form to inherit from """
+
     def __init__(self, action_dict=None, action_name=None, *args, **keywords):
         api_action = Action()
         action = {'api_action': api_action}
@@ -16,6 +17,7 @@ class BaseInventoryForm(InventoryForm):
 
 class InventoryToolsForm(BaseInventoryForm):
     """ Inventory Tools form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize inventory tools form objects """
         action_name = 'inventory'
@@ -31,6 +33,7 @@ class InventoryToolsForm(BaseInventoryForm):
 
 class InventoryCoreToolsForm(BaseInventoryForm):
     """ Inventory Core Tools form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize inventory core tools form objects """
         action_name = 'inventory core'

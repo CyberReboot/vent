@@ -6,8 +6,8 @@ import uuid
 from redis import Redis
 from redis import StrictRedis
 from rq import Queue
-from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
+from watchdog.observers import Observer
 
 
 class GZHandler(PatternMatchingEventHandler):
@@ -16,9 +16,9 @@ class GZHandler(PatternMatchingEventHandler):
     the values in patterns
     """
 
-    patterns = ["*"]
+    patterns = ['*']
     # want to ignore certain pcap files from splitter as they contain junk
-    ignore_patters = ["*-miscellaneous*"]
+    ignore_patters = ['*-miscellaneous*']
     # don't want to process files in on_modified for files that have already
     # been created and processed
     created_files = set()
@@ -27,7 +27,7 @@ class GZHandler(PatternMatchingEventHandler):
         q = Queue(connection=Redis(host='redis'), default_timeout=86400)
         r = StrictRedis(host='redis', port=6379, db=0)
     except Exception as e:  # pragma: no cover
-        print("Unable to connect to redis:", str(e))
+        print('Unable to connect to redis:', str(e))
 
     def process(self, event):
         """
@@ -39,9 +39,9 @@ class GZHandler(PatternMatchingEventHandler):
             path/to/observed/file
         """
         uid = str(uuid.uuid4())
-        hostname = os.environ.get("VENT_HOST")
+        hostname = os.environ.get('VENT_HOST')
         if not hostname:
-            hostname = ""
+            hostname = ''
 
         try:
             # TODO should directories be treated as bulk paths to send to a
@@ -56,30 +56,31 @@ class GZHandler(PatternMatchingEventHandler):
 
                 # check if the file was already queued and ignore
                 exists = False
-                print(uid + " started " + spath)
-                jobs = self.r.keys(pattern="rq:job*")
+                print(uid + ' started ' + spath)
+                jobs = self.r.keys(pattern='rq:job*')
                 for job in jobs:
-                    print(uid + " ***")
-                    description = self.r.hget(job, 'description').decode("utf-8")
-                    print(uid + " " + description)
+                    print(uid + ' ***')
+                    description = self.r.hget(
+                        job, 'description').decode('utf-8')
+                    print(uid + ' ' + description)
                     if description.startswith("watch.file_queue('"):
-                        print(uid + " " +
+                        print(uid + ' ' +
                               description.split("watch.file_queue('" +
-                                                hostname + "_")[1][:-2])
-                        print(uid + " " + spath)
+                                                hostname + '_')[1][:-2])
+                        print(uid + ' ' + spath)
                         if description.split("watch.file_queue('" +
                                              hostname +
-                                             "_")[1][:-2] == spath:
-                            print(uid + " true")
+                                             '_')[1][:-2] == spath:
+                            print(uid + ' true')
                             exists = True
                     elif description.startswith("watch.gpu_queue('"):
-                        print(uid + " " +
+                        print(uid + ' ' +
                               description.split('"file": "')[1].split('"')[0])
-                        print(uid + " " + spath)
+                        print(uid + ' ' + spath)
                         if description.split('"file": "')[1].split('"')[0] == spath:
-                            print(uid + " true")
+                            print(uid + ' true')
                             exists = True
-                    print(uid + " ***")
+                    print(uid + ' ***')
 
                 if not exists:
                     # !! TODO this should be a configuration option in the
@@ -87,11 +88,11 @@ class GZHandler(PatternMatchingEventHandler):
                     print(uid + " let's queue it " + spath)
                     # let jobs be queued for up to 30 days
                     self.q.enqueue('watch.file_queue',
-                                   hostname + "_" + spath,
+                                   hostname + '_' + spath,
                                    ttl=2592000)
-                print(uid + " end " + spath)
+                print(uid + ' end ' + spath)
         except Exception as e:  # pragma: no cover
-            print("file drop error: " + str(e))
+            print('file drop error: ' + str(e))
 
     def on_created(self, event):
         self.created_files.add(event.src_path)
@@ -107,6 +108,7 @@ class GZHandler(PatternMatchingEventHandler):
             # modification with docker mounts
             self.created_files.add(event.src_path)
             self.process(event)
+
 
 if __name__ == '__main__':  # pragma: no cover
     args = None

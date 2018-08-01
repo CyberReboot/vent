@@ -40,7 +40,7 @@ class AddOptionsForm(npyscreen.ActionForm):
 
     def create(self):
         """ Update with current branches and commits """
-        self.add_handlers({"^Q": self.quit})
+        self.add_handlers({'^Q': self.quit})
         self.add(npyscreen.TitleText, name='Branches:', editable=False)
 
         if not self.branches or not self.commits:
@@ -48,7 +48,7 @@ class AddOptionsForm(npyscreen.ActionForm):
             i = 3
             # check if repo_values returned successfully
             if (isinstance(repo_vals[0], list) and
-               isinstance(repo_vals[1], dict)):
+                    isinstance(repo_vals[1], dict)):
                 self.branches, self.commits = repo_vals
                 for branch in self.branches:
                     self.branch_cb[branch] = self.add(npyscreen.CheckBox,
@@ -79,7 +79,7 @@ class AddOptionsForm(npyscreen.ActionForm):
                 self.error.display()
 
     def quit(self, *args, **kwargs):
-        self.parentApp.switchForm("MAIN")
+        self.parentApp.switchForm('MAIN')
 
     def on_ok(self):
         """
@@ -94,12 +94,12 @@ class AddOptionsForm(npyscreen.ActionForm):
                 self.parentApp.repo_value['build'][branch] = self.build_tc[branch].values[self.build_tc[branch].value]
         if self.error:
             self.quit()
-        self.parentApp.addForm("CHOOSETOOLS",
+        self.parentApp.addForm('CHOOSETOOLS',
                                ChooseToolsForm,
-                               name="Choose tools to add for new plugin"
-                               "\t\t\t\t\t\t^Q to quit",
-                               color="CONTROL")
-        self.parentApp.change_form("CHOOSETOOLS")
+                               name='Choose tools to add for new plugin'
+                               '\t\t\t\t\t\t^Q to quit',
+                               color='CONTROL')
+        self.parentApp.change_form('CHOOSETOOLS')
 
     def on_cancel(self):
         self.quit()

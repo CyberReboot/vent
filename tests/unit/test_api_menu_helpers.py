@@ -16,12 +16,14 @@ def test_cores():
     cores = instance.cores('clean')
     assert cores[0] == True
 
+
 def test_repo_branches():
     """ Test the repo_branches function """
     instance = MenuHelper()
     status = instance.repo_branches('https://github.com/cyberreboot/vent')
     assert isinstance(status, tuple)
     assert status[0] == True
+
 
 def test_repo_commits():
     """ Test the repo_commits function """
@@ -35,6 +37,7 @@ def test_repo_commits():
     # flakey test on travis
     #assert status[0] == True
 
+
 def test_repo_tools():
     """ Test the repo_tools function """
     instance = MenuHelper()
@@ -42,6 +45,7 @@ def test_repo_tools():
                                  'master', 'HEAD')
     assert isinstance(status, tuple)
     assert status[0] == True
+
 
 def test_tools_status():
     """ Test the tools_status function """
