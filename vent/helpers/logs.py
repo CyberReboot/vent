@@ -12,7 +12,7 @@ def Logger(name, **kargs):
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     handler = logging.handlers.WatchedFileHandler(os.path.join(
-        path_dirs.meta_dir, "vent.log"))
+        path_dirs.meta_dir, 'vent.log'))
     handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s:%(lineno)-4d - '
                                   '%(levelname)s - %(message)s')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-
 import curses
+
 import npyscreen
 
 from vent.helpers.paths import PathDirs
@@ -8,6 +8,7 @@ from vent.menu import VentApp
 from vent.menus.main import MainForm
 
 npyscreen.TEST_SETTINGS['CONTINUE_AFTER_TEST_INPUT'] = False
+
 
 def run_menu(test_input):
     """ Actually run the menu and process any input """
@@ -24,11 +25,13 @@ def run_menu(test_input):
     except npyscreen.ExhaustedTestInput as e:
         pass
 
+
 def test_tools_status():
     """ Test the staticmethod tools_status """
     a, b = MainForm.t_status(True)
     assert isinstance(a, str)
     assert isinstance(b, tuple)
+
 
 def test_menu():
     """ Run menu tests """
@@ -90,25 +93,25 @@ def test_menu():
               SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
               TAB, ENTER, TAB, TAB, ENTER, ENTER, ENTER])
     # configure - quit in the middle of add
-    #run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+    # run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
     #          SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
     #          SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN,
     #          DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '3', TAB, TAB,
     #          ENTER, ENTER, TAB, ENTER, ENTER, TAB, ENTER, CTRL_Q])
     # configure - instances add (add an instance of rq_worker)
-    #run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+    # run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
     #          SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
     #          SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN,
     #          DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '3', TAB, TAB,
     #          ENTER, ENTER, TAB, ENTER, ENTER, TAB, ENTER, TAB, TAB, ENTER])
     # configure - quit in the middle of delete
-    #run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+    # run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
     #          SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
     #          SPACE, TAB, SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN,
     #          DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',
     #          TAB, TAB, ENTER, ENTER, TAB, ENTER, CTRL_Q])
     # configure - instances delete (delete an instance of file_drop)
-    #run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
+    # run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
     #          SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
     #          SPACE, TAB, SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN,
     #          DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',

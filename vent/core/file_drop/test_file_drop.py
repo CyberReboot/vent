@@ -1,7 +1,8 @@
-from .file_drop import GZHandler
 from redis import Redis
 from redis import StrictRedis
 from rq import Queue
+
+from .file_drop import GZHandler
 
 
 def test_file_drop_GZHandler():
@@ -25,8 +26,8 @@ def test_file_drop_GZHandler():
                            default_timeout=86400)
             self.r = StrictRedis(host='localhost', port=6379, db=0)
 
-    b = Event("created", "/dev/null", False)
-    c = Event("modified", "/etc/hosts", False)
+    b = Event('created', '/dev/null', False)
+    c = Event('modified', '/etc/hosts', False)
     a.process(b)
     a.process(b)
     a.process(b)

@@ -2,8 +2,8 @@
 import docker
 import falcon
 import pytest
-
 from falcon import testing
+
 from .ncontrol import api
 from .prestart import pull_ncapture
 
@@ -20,14 +20,14 @@ def test_pull_ncapture():
 def test_create_r(client):
     """ tests the restful endpoint: create """
     # test create
-    payload = {"id": "foo", "interval": "60", "filter": "", "nic": "eth1"}
+    payload = {'id': 'foo', 'interval': '60', 'filter': '', 'nic': 'eth1'}
     r = client.simulate_post('/create', json=payload)
     assert r.status == '200 OK'
     r = client.simulate_post('/create', json={'id': 'foo',
-                                         'interval': '60',
-                                         'iters': '1',
-                                         'filter': '',
-                                         'nic': 'eth1'})
+                                              'interval': '60',
+                                              'iters': '1',
+                                              'filter': '',
+                                              'nic': 'eth1'})
     assert r.status == '200 OK'
     r = client.simulate_post('/create', json={})
     assert r.status == '200 OK'
@@ -39,11 +39,11 @@ def test_create_r(client):
         '/create', json={'nic': 'eth1', 'id': 'foo', 'interval': '61'})
     assert r.status == '200 OK'
     r = client.simulate_post('/create', json={'id': 'foo',
-                                         'interval': '60',
-                                         'filter': '',
-                                         'metadata': '{"foo": "bar"}',
-                                         'iters': '1',
-                                         'nic': 'eth1'})
+                                              'interval': '60',
+                                              'filter': '',
+                                              'metadata': '{"foo": "bar"}',
+                                              'iters': '1',
+                                              'nic': 'eth1'})
     assert r.status == '200 OK'
 
 
@@ -52,8 +52,8 @@ def test_update_r(client):
     r = client.simulate_post('/update', json={'id': 'foo'})
     assert r.status == '200 OK'
     r = client.simulate_post('/update', json={'id': 'foo',
-                                         'metadata': '{"foo": "bar"}'},
-                      headers={'Content-Type': 'application/json'})
+                                              'metadata': '{"foo": "bar"}'},
+                             headers={'Content-Type': 'application/json'})
     assert r.status == '200 OK'
 
 

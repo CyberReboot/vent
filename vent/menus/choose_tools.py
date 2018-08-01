@@ -1,6 +1,7 @@
-import npyscreen
 import threading
 import time
+
+import npyscreen
 
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
@@ -26,7 +27,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
 
     def create(self):
         """ Update with current tools for each branch at the version chosen """
-        self.add_handlers({"^Q": self.quit})
+        self.add_handlers({'^Q': self.quit})
         self.add(npyscreen.TitleText,
                  name='Select which tools to add from each branch selected:',
                  editable=False)
@@ -48,11 +49,11 @@ class ChooseToolsForm(npyscreen.ActionForm):
             i += 1
             for tool in tools:
                 value = True
-                if tool.startswith("/dev"):
+                if tool.startswith('/dev'):
                     value = False
                 # tool in base directory
-                if tool == "" or tool.startswith(':'):
-                    tool = "/" + tool
+                if tool == '' or tool.startswith(':'):
+                    tool = '/' + tool
                 self.tools_tc[branch][tool] = self.add(npyscreen.CheckBox,
                                                        name=tool,
                                                        value=value,
@@ -61,7 +62,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
             i += 2
 
     def quit(self, *args, **kwargs):
-        self.parentApp.switchForm("MAIN")
+        self.parentApp.switchForm('MAIN')
 
     def on_ok(self):
         """
@@ -80,14 +81,14 @@ class ChooseToolsForm(npyscreen.ActionForm):
             the thread is finished
             """
             thr.start()
-            tool_str = "Adding tools..."
+            tool_str = 'Adding tools...'
             npyscreen.notify_wait(tool_str, title=title)
             while thr.is_alive():
                 tools = diff(Tools(), original_tools)
                 if tools:
-                    tool_str = ""
+                    tool_str = ''
                 for tool in tools:
-                    pre_tool = "Added: " + branch + "/" + tool + "\n"
+                    pre_tool = 'Added: ' + branch + '/' + tool + '\n'
                     tool_str = pre_tool + tool_str
                 npyscreen.notify_wait(tool_str, title=title)
                 time.sleep(1)
@@ -116,7 +117,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
                                            'build': build})
             popup(original_tools, branch, thr,
                   'Please wait, adding tools for the ' + branch + ' branch...')
-        npyscreen.notify_confirm("Done adding repository: " +
+        npyscreen.notify_confirm('Done adding repository: ' +
                                  self.parentApp.repo_value['repo'],
                                  title='Added Repository')
         self.quit()

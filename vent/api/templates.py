@@ -5,6 +5,7 @@ from vent.helpers.errors import ErrorHandler
 
 class Template:
     """ Handle parsing templates """
+
     def __init__(self, template=None):
         self.config = configparser.ConfigParser(interpolation=None)
         self.config.optionxform = str
@@ -23,14 +24,14 @@ class Template:
         # check if the named section exists
         if self.config.has_section(section):
             return (True, self.config.items(section))
-        return (False, "Section: " + section + " does not exist")
+        return (False, 'Section: ' + section + ' does not exist')
 
     @ErrorHandler
     def options(self, section):
         """ Returns a list of options for a section """
         if self.config.has_section(section):
             return (True, self.config.options(section))
-        return (False, "Section: " + section + " does not exist")
+        return (False, 'Section: ' + section + ' does not exist')
 
     @ErrorHandler
     def option(self, section, option):
@@ -38,8 +39,8 @@ class Template:
         if self.config.has_section(section):
             if self.config.has_option(section, option):
                 return (True, self.config.get(section, option))
-            return (False, "Option: " + option + " does not exist")
-        return (False, "Section: " + section + " does not exist")
+            return (False, 'Option: ' + option + ' does not exist')
+        return (False, 'Section: ' + section + ' does not exist')
 
     @ErrorHandler
     def add_section(self, section):
@@ -52,7 +53,7 @@ class Template:
             self.config.add_section(section)
             # return updated sections
             return (True, self.config.sections())
-        return (False, "Section: " + section + " already exists")
+        return (False, 'Section: ' + section + ' already exists')
 
     @ErrorHandler
     def add_option(self, section, option, value=None):
@@ -72,7 +73,7 @@ class Template:
             else:
                 self.config.set(section, option)
             return(True, self.config.options(section))
-        return(False, "Option: {} already exists @ {}".format(option, section))
+        return(False, 'Option: {} already exists @ {}'.format(option, section))
 
     @ErrorHandler
     def del_section(self, section):
@@ -80,7 +81,7 @@ class Template:
         if self.config.has_section(section):
             self.config.remove_section(section)
             return (True, self.config.sections())
-        return (False, "Section: " + section + " does not exist")
+        return (False, 'Section: ' + section + ' does not exist')
 
     @ErrorHandler
     def del_option(self, section, option):
@@ -89,8 +90,8 @@ class Template:
             if self.config.has_option(section, option):
                 self.config.remove_option(section, option)
                 return (True, self.config.options(section))
-            return (False, "Option: " + option + " does not exist")
-        return (False, "Section: " + section + " does not exist")
+            return (False, 'Option: ' + option + ' does not exist')
+        return (False, 'Section: ' + section + ' does not exist')
 
     @ErrorHandler
     def set_option(self, section, option, value):
@@ -101,7 +102,7 @@ class Template:
         if self.config.has_section(section):
             self.config.set(section, option, value)
             return (True, self.config.options(section))
-        return (False, "Section: " + section + " does not exist")
+        return (False, 'Section: ' + section + ' does not exist')
 
     @ErrorHandler
     def write_config(self):
@@ -131,8 +132,8 @@ class Template:
                     include = False
                 # handle group membership
                 if (result[0] and
-                   constraint == 'groups' and
-                   constraints[constraint] in result[1]):
+                    constraint == 'groups' and
+                        constraints[constraint] in result[1]):
                     include = True
             if include:
                 sections[a_section] = {}

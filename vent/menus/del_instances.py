@@ -1,6 +1,7 @@
 import json
-import npyscreen
 import re
+
+import npyscreen
 
 from vent.helpers.meta import Dependencies
 
@@ -10,6 +11,7 @@ class InstanceSelect(npyscreen.MultiSelect):
     A widget class for selecting an exact amount of instances to perform
     actions on
     """
+
     def __init__(self, *args, **kargs):
         """ Initialize an instance select object """
         self.instance_num = kargs['instance_num']
@@ -33,6 +35,7 @@ class InstanceSelect(npyscreen.MultiSelect):
 
 class DeleteForm(npyscreen.ActionForm):
     """ A form for selecting instances to delete and deleting them """
+
     def __init__(self, *args, **keywords):
         """ Initialize a delete form object """
         self.new_instances = int(keywords['new_instances'])
@@ -56,11 +59,11 @@ class DeleteForm(npyscreen.ActionForm):
 
     def create(self):
         """ Creates the necessary display for this form """
-        self.add_handlers({"^E": self.quit, "^Q": self.quit})
+        self.add_handlers({'^E': self.quit, '^Q': self.quit})
         to_delete = self.old_instances - self.new_instances
         self.add(npyscreen.Textfield, value='Select which instances to delete'
                  ' (you must select ' + str(to_delete) +
-                 ' instance(s) to delete):', editable=False, color="GOOD")
+                 ' instance(s) to delete):', editable=False, color='GOOD')
         self.del_instances = self.add(InstanceSelect,
                                       values=self.cur_instances,
                                       scroll_exit=True, rely=3,
@@ -71,18 +74,18 @@ class DeleteForm(npyscreen.ActionForm):
         if self.next_tool:
             self.parentApp.change_form(self.next_tool)
         else:
-            self.parentApp.change_form("MAIN")
+            self.parentApp.change_form('MAIN')
 
     def quit(self, *args, **kargs):
         """ Quit without making any changes to the tool """
-        npyscreen.notify_confirm("No changes made to instance(s)",
-                                 title="Instance confiugration cancelled")
+        npyscreen.notify_confirm('No changes made to instance(s)',
+                                 title='Instance confiugration cancelled')
         self.change_screens()
 
     def on_ok(self):
         """ Delete the instances that the user chose to delete """
-        npyscreen.notify_wait("Deleting instances given...",
-                              title="In progress")
+        npyscreen.notify_wait('Deleting instances given...',
+                              title='In progress')
         # keep track of number for shifting instances down for alignment
         shift_num = 1
         to_update = []
@@ -97,7 +100,7 @@ class DeleteForm(npyscreen.ActionForm):
                     # grab dependencies of tools that linked to previous one
                     if i == 0:
                         dependent_tools = [self.manifest.option(
-                                               section, 'link_name')[1]]
+                            section, 'link_name')[1]]
                         for dependency in Dependencies(dependent_tools):
                             self.clean(**dependency)
                             to_update.append(dependency)
@@ -139,16 +142,16 @@ class DeleteForm(npyscreen.ActionForm):
                                               'version': t[2]})
                     shift_num += 1
                 except Exception as e:
-                    npyscreen.notify_confirm("Trouble deleting tools"
-                                             " because " + str(e))
+                    npyscreen.notify_confirm('Trouble deleting tools'
+                                             ' because ' + str(e))
         self.manifest.write_config()
         tool_d = {}
         for tool in to_update:
             tool_d.update(self.prep_start(**tool)[1])
         if tool_d:
             self.start_tools(tool_d)
-        npyscreen.notify_confirm("Done deleting instances.",
-                                 title="Finished")
+        npyscreen.notify_confirm('Done deleting instances.',
+                                 title='Finished')
         self.change_screens()
 
     def on_cancel(self):

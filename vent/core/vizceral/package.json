@@ -1,21 +1,5 @@
 {
-  "name": "vent-workflow",
-  "version": "0.1.0",
-  "description": "Vent workflow app",
   "author": "Charlie Lewis <clewis@iqt.org>",
-  "scripts": {
-    "clean": "rimraf dist && mkdirp dist",
-    "lint": "eslint src --ext .js --ext .jsx --fix",
-    "copy:fonts": "cpx \"./node_modules/source-sans-pro/**/*\" ./dist/fonts",
-    "copy:json": "cpx \"./src/*.json\" ./dist",
-    "dev-server": "webpack-dev-server --host=0.0.0.0 --content-base dist/ --history-api-fallback",
-    "dev": "npm-run-all clean --parallel copy:* dev-server",
-    "validate": "npm ls"
-  },
-  "engines": {
-    "node": "~4.4.0"
-  },
-  "license": "Apache-2.0",
   "dependencies": {
     "bootstrap": "^3.3.7",
     "flux": "^3.1.0",
@@ -38,6 +22,7 @@
     "vizceral-react": "~4.5.5",
     "webfontloader": "^1.6.26"
   },
+  "description": "Vent workflow app",
   "devDependencies": {
     "babel-core": "^6.18.0",
     "babel-eslint": "^7.1.0",
@@ -49,10 +34,10 @@
     "css-loader": "^0.26.0",
     "eslint": "^3.9.0",
     "eslint-config-airbnb-base": "^10.0.1",
-    "eslint-plugin-import": "^2.0.1",
     "eslint-loader": "^1.6.0",
-    "eslint-plugin-react": "^6.4.1",
+    "eslint-plugin-import": "^2.0.1",
     "eslint-plugin-jsx-a11y": "^3.0.1",
+    "eslint-plugin-react": "^6.4.1",
     "file-loader": "^0.9.0",
     "html-loader": "^0.4.4",
     "html-webpack-plugin": "^2.24.0",
@@ -65,12 +50,27 @@
     "webpack": "^1.13.3",
     "webpack-dev-server": "^1.16.2"
   },
+  "engines": {
+    "node": "~4.4.0"
+  },
+  "license": "Apache-2.0",
+  "name": "vent-workflow",
+  "pre-commit": [
+    "lint",
+    "test"
+  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:CyberReboot/vent.git"
   },
-  "pre-commit": [
-    "lint",
-    "test"
-  ]
+  "scripts": {
+    "clean": "rimraf dist && mkdirp dist",
+    "copy:fonts": "cpx \"./node_modules/source-sans-pro/**/*\" ./dist/fonts",
+    "copy:json": "cpx \"./src/*.json\" ./dist",
+    "dev": "npm-run-all clean --parallel copy:* dev-server",
+    "dev-server": "webpack-dev-server --host=0.0.0.0 --content-base dist/ --history-api-fallback",
+    "lint": "eslint src --ext .js --ext .jsx --fix",
+    "validate": "npm ls"
+  },
+  "version": "0.1.0"
 }

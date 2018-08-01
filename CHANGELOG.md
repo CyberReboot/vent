@@ -163,12 +163,12 @@ bug fixes:
 - actions regarding multiple checked items in any of the `network-tap` options
   now work correctly
 - the job counter on the main Vent menu is now correctly counting the number of
-  finished jobs 
+  finished jobs
 - factory reset of Vent can now deal with image dependencies and will delete
   them correctly
 - the `gonet` image is now removed with a factory reset of Vent
 - all `ncapture` containers are removed if `network-tap` is removed
-  
+
 
 # v0.4.4 (2017-08-25)
 

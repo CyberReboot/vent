@@ -1,6 +1,7 @@
-import npyscreen
 import threading
 import time
+
+import npyscreen
 
 from vent.api.actions import Action
 from vent.api.plugin_helpers import PluginHelper
@@ -14,35 +15,35 @@ class AddForm(npyscreen.ActionForm):
 
     def create(self):
         """ Create widgets for AddForm """
-        self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.add_handlers({'^T': self.quit, '^Q': self.quit})
         self.add(npyscreen.Textfield,
                  value='Add a plugin from a Git repository or an image from a '
                        'Docker registry.',
                  editable=False,
-                 color="STANDOUT")
+                 color='STANDOUT')
         self.add(npyscreen.Textfield,
                  value='For Git repositories, you can optionally specify a '
                        'username and password',
                  editable=False,
-                 color="STANDOUT")
+                 color='STANDOUT')
         self.add(npyscreen.Textfield,
                  value='for private repositories.',
                  editable=False,
-                 color="STANDOUT")
+                 color='STANDOUT')
         self.add(npyscreen.Textfield,
                  value='For Docker images, specify a name for referencing the '
                        'image that is being',
                  editable=False,
-                 color="STANDOUT")
+                 color='STANDOUT')
         self.add(npyscreen.Textfield,
                  value='added and optionally override the tag and/or the '
                        'registry and specify',
                  editable=False,
-                 color="STANDOUT")
+                 color='STANDOUT')
         self.add(npyscreen.Textfield,
                  value='comma-separated groups this image should belong to.',
                  editable=False,
-                 color="STANDOUT")
+                 color='STANDOUT')
         self.nextrely += 1
         self.repo = self.add(npyscreen.TitleText,
                              name='Repository',
@@ -53,7 +54,7 @@ class AddForm(npyscreen.ActionForm):
         self.add(npyscreen.TitleText,
                  name='OR',
                  editable=False,
-                 labelColor="STANDOUT")
+                 labelColor='STANDOUT')
         self.nextrely += 1
         self.image = self.add(npyscreen.TitleText, name='Image')
         self.link_name = self.add(npyscreen.TitleText,
@@ -67,7 +68,7 @@ class AddForm(npyscreen.ActionForm):
 
     def quit(self, *args, **kwargs):
         """ Overridden to switch back to MAIN form """
-        self.parentApp.switchForm("MAIN")
+        self.parentApp.switchForm('MAIN')
 
     def on_ok(self):
         """ Add the repository """
@@ -107,14 +108,14 @@ class AddForm(npyscreen.ActionForm):
                            'just_downloaded': True,
                            'link_name': self.link_name.value,
                            'groups': self.groups.value}
-            self.parentApp.addForm("CONFIGUREIMAGE", EditorForm,
-                                   name="Specify vent.template settings for "
-                                   "image pulled (optional)", **editor_args)
-            self.parentApp.change_form("CONFIGUREIMAGE")
+            self.parentApp.addForm('CONFIGUREIMAGE', EditorForm,
+                                   name='Specify vent.template settings for '
+                                   'image pulled (optional)', **editor_args)
+            self.parentApp.change_form('CONFIGUREIMAGE')
         elif self.image.value:
-            npyscreen.notify_confirm("A name needs to be supplied for "
-                                     "the image being added!",
-                                     title="Specify a name for the image",
+            npyscreen.notify_confirm('A name needs to be supplied for '
+                                     'the image being added!',
+                                     title='Specify a name for the image',
                                      form_color='CAUTION')
         elif self.repo.value:
             self.parentApp.repo_value['repo'] = self.repo.value.lower()
@@ -124,16 +125,16 @@ class AddForm(npyscreen.ActionForm):
                                            'user': self.user.value,
                                            'pw': self.pw.value})
             popup(thr, 'repository', 'Please wait, adding repository...')
-            self.parentApp.addForm("ADDOPTIONS",
+            self.parentApp.addForm('ADDOPTIONS',
                                    AddOptionsForm,
-                                   name="Set options for new plugin"
-                                        "\t\t\t\t\t\t^Q to quit",
-                                   color="CONTROL")
+                                   name='Set options for new plugin'
+                                        '\t\t\t\t\t\t^Q to quit',
+                                   color='CONTROL')
             self.parentApp.change_form('ADDOPTIONS')
         else:
-            npyscreen.notify_confirm("Either a repository or an image "
-                                     "name must be specified!",
-                                     title="Specify plugin to add",
+            npyscreen.notify_confirm('Either a repository or an image '
+                                     'name must be specified!',
+                                     title='Specify plugin to add',
                                      form_color='CAUTION')
         return
 

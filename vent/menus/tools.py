@@ -1,10 +1,10 @@
 import json
-import npyscreen
 import re
 import time
-
 from collections import deque
 from threading import Thread
+
+import npyscreen
 
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
@@ -17,6 +17,7 @@ from vent.menus.editor import EditorForm
 
 class ToolForm(npyscreen.ActionForm):
     """ Tools form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize tool form objects """
         self.logger = Logger(__name__)
@@ -79,7 +80,7 @@ class ToolForm(npyscreen.ActionForm):
 
     def create(self, group_view=False):
         """ Update with current tools """
-        self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.add_handlers({'^T': self.quit, '^Q': self.quit})
         self.add(npyscreen.TitleText,
                  name='Select which tools to ' + self.action['action'] + ':',
                  editable=False)
@@ -89,7 +90,7 @@ class ToolForm(npyscreen.ActionForm):
                                      name='Group view:',
                                      value='all groups', editable=False,
                                      rely=3)
-            self.add_handlers({"^V": self.toggle_view})
+            self.add_handlers({'^V': self.toggle_view})
             i = 5
         else:
             i = 4
@@ -121,10 +122,10 @@ class ToolForm(npyscreen.ActionForm):
                 ncore_list = []
 
                 # splice the repo names for processing
-                if (repo.startswith("http")):
-                    repo_name = repo.rsplit("/", 2)[1:]
+                if (repo.startswith('http')):
+                    repo_name = repo.rsplit('/', 2)[1:]
                 else:
-                    repo_name = repo.split("/")
+                    repo_name = repo.split('/')
 
                 # determine if enabled or disabled tools should be shown
                 show_disabled = False
@@ -133,11 +134,11 @@ class ToolForm(npyscreen.ActionForm):
                         show_disabled = True
 
                 for tool in inventory['tools']:
-                    tool_repo_name = tool.split(":")
+                    tool_repo_name = tool.split(':')
 
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
-                       repo_name[1] == tool_repo_name[1]):
+                            repo_name[1] == tool_repo_name[1]):
                         # check to ensure tool not set to locally active = no
                         # in vent.cfg
                         externally_active = False
@@ -154,7 +155,7 @@ class ToolForm(npyscreen.ActionForm):
                                         externally_active = True
                                 except Exception as e:
                                     self.logger.error("Couldn't check ext"
-                                                      " because: " + str(e))
+                                                      ' because: ' + str(e))
                                     externally_active = False
                         # check to ensure not disabled
                         disabled = False
@@ -183,11 +184,11 @@ class ToolForm(npyscreen.ActionForm):
                                 ncore_list.append(tool)
 
                 for tool in inventory['core']:
-                    tool_repo_name = tool.split(":")
+                    tool_repo_name = tool.split(':')
 
                     # cross reference repo names
                     if (repo_name[0] == tool_repo_name[0] and
-                       repo_name[1] == tool_repo_name[1]):
+                            repo_name[1] == tool_repo_name[1]):
                         # check to ensure tool not set to locally active = no
                         # in vent.cfg
                         externally_active = False
@@ -204,7 +205,7 @@ class ToolForm(npyscreen.ActionForm):
                                         externally_active = True
                                 except Exception as e:
                                     self.logger.error("Couldn't check ext"
-                                                      " because: " + str(e))
+                                                      ' because: ' + str(e))
                                     externally_active = False
                         # check to ensure not disabled
                         disabled = False
@@ -247,12 +248,12 @@ class ToolForm(npyscreen.ActionForm):
                                                            rely=i, relx=5)
 
                         for tool in has_core[repo]:
-                            tool_name = tool.split(":", 2)[2].split("/")[-1]
-                            if tool_name == "":
-                                tool_name = "/"
+                            tool_name = tool.split(':', 2)[2].split('/')[-1]
+                            if tool_name == '':
+                                tool_name = '/'
                             self.tools_tc[repo][tool] = self.add(
-                                    npyscreen.CheckBox, name=tool_name,
-                                    value=True, relx=10)
+                                npyscreen.CheckBox, name=tool_name,
+                                value=True, relx=10)
                             i += 1
                         i += 3
                 else:
@@ -264,12 +265,12 @@ class ToolForm(npyscreen.ActionForm):
                                                            rely=i, relx=5)
 
                         for tool in has_non_core[repo]:
-                            tool_name = tool.split(":", 2)[2].split("/")[-1]
-                            if tool_name == "":
-                                tool_name = "/"
+                            tool_name = tool.split(':', 2)[2].split('/')[-1]
+                            if tool_name == '':
+                                tool_name = '/'
                             self.tools_tc[repo][tool] = self.add(
-                                    npyscreen.CheckBox, name=tool_name,
-                                    value=True, relx=10)
+                                npyscreen.CheckBox, name=tool_name,
+                                value=True, relx=10)
                             i += 1
                         i += 3
         return
@@ -291,16 +292,16 @@ class ToolForm(npyscreen.ActionForm):
             until the thread is finished
             """
             thr.start()
-            info_str = ""
+            info_str = ''
             while thr.is_alive():
                 if orig_type == 'containers':
                     info = diff(Containers(), original)
                 elif orig_type == 'images':
                     info = diff(Images(), original)
                 if info:
-                    info_str = ""
+                    info_str = ''
                 for entry in info:
-                    info_str = entry[0] + ": " + entry[1] + "\n" + info_str
+                    info_str = entry[0] + ': ' + entry[1] + '\n' + info_str
                 if self.action['action_name'] != 'configure':
                     npyscreen.notify_wait(info_str, title=title)
                     time.sleep(1)
@@ -312,9 +313,9 @@ class ToolForm(npyscreen.ActionForm):
                     running, failed = result[1]
                     r_str = ''
                     for container in running:
-                        r_str += container + ": successful\n"
+                        r_str += container + ': successful\n'
                     for container in failed:
-                        r_str += container + ": failed\n"
+                        r_str += container + ': failed\n'
                     npyscreen.notify_confirm(r_str)
             except Exception as e:  # pragma: no cover
                 pass
@@ -327,18 +328,18 @@ class ToolForm(npyscreen.ActionForm):
 
         tool_d = {}
         if self.action['action_name'] in ['clean', 'remove', 'stop', 'update']:
-            reconfirmation_str = ""
+            reconfirmation_str = ''
             if self.action['cores']:
-                reconfirmation_str = "Are you sure you want to "
+                reconfirmation_str = 'Are you sure you want to '
                 reconfirmation_str += self.action['action_name']
-                reconfirmation_str += " core containers?"
+                reconfirmation_str += ' core containers?'
             else:
-                reconfirmation_str = "Are you sure you want to "
+                reconfirmation_str = 'Are you sure you want to '
                 reconfirmation_str += self.action['action_name']
-                reconfirmation_str += " plugin containers?"
+                reconfirmation_str += ' plugin containers?'
 
             perform = npyscreen.notify_ok_cancel(reconfirmation_str,
-                                                 title="Confirm command")
+                                                 title='Confirm command')
             if not perform:
                 return
 
@@ -347,10 +348,10 @@ class ToolForm(npyscreen.ActionForm):
             for tool in self.tools_tc[repo]:
                 self.logger.info(tool)
                 if self.tools_tc[repo][tool].value:
-                    t = tool.split(":", 2)[2].split("/")[-1]
+                    t = tool.split(':', 2)[2].split('/')[-1]
                     if t.startswith('/:'):
-                        t = " "+t[1:]
-                    t = t.split(":")
+                        t = ' '+t[1:]
+                    t = t.split(':')
                     if self.action['action_name'] == 'start':
                         status = self.action['action_object2'](name=t[0],
                                                                branch=t[1],
@@ -387,9 +388,9 @@ class ToolForm(npyscreen.ActionForm):
                                  'from_registry': registry_image}
                         if tools_to_configure:
                             kargs['next_tool'] = tools_to_configure[-1]
-                        self.parentApp.addForm("EDITOR" + t[0], EditorForm,
+                        self.parentApp.addForm('EDITOR' + t[0], EditorForm,
                                                **kargs)
-                        tools_to_configure.append("EDITOR" + t[0])
+                        tools_to_configure.append('EDITOR' + t[0])
                     else:
                         kargs = {'name': t[0],
                                  'branch': t[1],
@@ -401,10 +402,12 @@ class ToolForm(npyscreen.ActionForm):
                         # version in manifest
                         if self.action['action_name'] == 'update':
                             if t[2] != 'HEAD':
-                                repo_commits = self.m_helper.repo_commits(repo)[1]
+                                repo_commits = self.m_helper.repo_commits(repo)[
+                                    1]
                                 for branch in repo_commits:
                                     if branch[0] == t[1]:
-                                        kargs.update({'new_version': branch[1][0]})
+                                        kargs.update(
+                                            {'new_version': branch[1][0]})
                             else:
                                 kargs.update({'new_version': 'HEAD'})
                         thr = Thread(target=self.action['action_object1'],
@@ -428,9 +431,9 @@ class ToolForm(npyscreen.ActionForm):
             if len(tools_to_configure) > 0:
                 self.parentApp.change_form(tools_to_configure[-1])
             else:
-                npyscreen.notify_confirm("No tools selected, returning to"
-                                         " main menu",
-                                         title="No action taken")
+                npyscreen.notify_confirm('No tools selected, returning to'
+                                         ' main menu',
+                                         title='No action taken')
                 self.quit()
 
     def on_cancel(self):

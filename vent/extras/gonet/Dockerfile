@@ -11,4 +11,3 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent=""
 COPY --from=builder /app/gonet /gonet
 CMD ["/gonet"]
-

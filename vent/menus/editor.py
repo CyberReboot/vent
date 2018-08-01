@@ -1,9 +1,10 @@
 import ast
 import copy
 import json
-import npyscreen
 import os
 import re
+
+import npyscreen
 
 from vent.api.plugin_helpers import PluginHelper
 from vent.api.templates import Template
@@ -12,6 +13,7 @@ from vent.menus.del_instances import DeleteForm
 
 class EditorForm(npyscreen.ActionForm):
     """ Form that can be used as a pseudo text editor in npyscreen """
+
     def __init__(self, repo='', tool_name='', branch='', version='',
                  next_tool=None, just_downloaded=False, vent_cfg=False,
                  from_registry=False, new_instance=False, *args, **keywords):
@@ -81,7 +83,7 @@ class EditorForm(npyscreen.ActionForm):
                 self.config_val = vent_template.read()
         else:
             self.config_val = keywords['get_configure'](
-                                  **self.tool_identifier)[1]
+                **self.tool_identifier)[1]
         super(EditorForm, self).__init__(*args, **keywords)
 
     def create(self):
@@ -119,7 +121,7 @@ class EditorForm(npyscreen.ActionForm):
         if self.settings['next_tool']:
             self.parentApp.change_form(self.settings['next_tool'])
         else:
-            self.parentApp.change_form("MAIN")
+            self.parentApp.change_form('MAIN')
 
     @staticmethod
     def valid_input(val):
@@ -140,7 +142,7 @@ class EditorForm(npyscreen.ActionForm):
         # can't can be a comment on option side and value side can't have
         # [, ], {, or } otherwise it is turned over to literal_eval for
         # checkout
-        options_values = re.compile(r"[^# ]+\ *=[^[\]{}]*$")
+        options_values = re.compile(r'[^# ]+\ *=[^[\]{}]*$')
         line_num = 0
         warning_str = ''
         error_str = ''
@@ -214,18 +216,18 @@ class EditorForm(npyscreen.ActionForm):
                             '\n'
 
         if error_str:
-            npyscreen.notify_confirm("You have the following error(s) and"
+            npyscreen.notify_confirm('You have the following error(s) and'
                                      " can't proceed until they are fixed:" +
-                                     "\n" + "-"*50 + "\n" + error_str,
-                                     title="Error in input")
+                                     '\n' + '-'*50 + '\n' + error_str,
+                                     title='Error in input')
             return (False, '')
         elif warning_str:
-            res = npyscreen.notify_yes_no("You have may have some error(s)"
-                                          " that you want to check before"
-                                          " proceeding:" + "\n" + "-"*50 +
-                                          "\n" + warning_str + "\n" + "-"*50 +
-                                          "\n" + "Do you want to continue?",
-                                          title="Double check")
+            res = npyscreen.notify_yes_no('You have may have some error(s)'
+                                          ' that you want to check before'
+                                          ' proceeding:' + '\n' + '-'*50 +
+                                          '\n' + warning_str + '\n' + '-'*50 +
+                                          '\n' + 'Do you want to continue?',
+                                          title='Double check')
             return (res, '\n'.join(trimmed_val))
         return (True, '\n'.join(trimmed_val))
 
@@ -238,24 +240,24 @@ class EditorForm(npyscreen.ActionForm):
         self.edit_space.value = trimmed_input
 
         # get the number of instances and ensure user didn't malform that
-        if re.search(r"instances\ *=", self.edit_space.value):
+        if re.search(r'instances\ *=', self.edit_space.value):
             try:
                 # split out spaces
-                instances_val = re.split(r"instances\ *=\ *",
+                instances_val = re.split(r'instances\ *=\ *',
                                          self.edit_space.value)[1]
                 instances_val = instances_val.split('\n')[0]
-                new_instances = int(re.match(r"\d+$", instances_val).group())
+                new_instances = int(re.match(r'\d+$', instances_val).group())
             except AttributeError:
                 npyscreen.notify_confirm("You didn't specify a valid number"
-                                         " for instances.", title="Invalid"
-                                         " instance number")
+                                         ' for instances.', title='Invalid'
+                                         ' instance number')
                 return
             # user can't change instances when configuring new instnaces
             if (self.instance_cfg and
                     self.settings['new_instances'] != new_instances):
                 npyscreen.notify_confirm("You can't change the number of"
-                                         " instnaces while configuring new"
-                                         " instances!", title="Illegal change")
+                                         ' instnaces while configuring new'
+                                         ' instances!', title='Illegal change')
                 return
             # get old number of instances
             try:
@@ -263,8 +265,8 @@ class EditorForm(npyscreen.ActionForm):
                     old_instances = self.settings['old_instances']
                 else:
                     settings_dict = json.loads(
-                                        self.manifest.option(self.section,
-                                                             'settings')[1])
+                        self.manifest.option(self.section,
+                                             'settings')[1])
                     old_instances = int(settings_dict['instances'])
             except Exception:
                 old_instances = 1
@@ -292,18 +294,18 @@ class EditorForm(npyscreen.ActionForm):
                              'old_val': self.config_val,
                              'new_val': self.edit_space.value}
             if self.vent_cfg:
-                wait_str = "Restarting tools affected by changes..."
+                wait_str = 'Restarting tools affected by changes...'
             else:
-                wait_str = "Restarting this tool with new settings..."
+                wait_str = 'Restarting this tool with new settings...'
                 restart_kargs.update(self.tool_identifier)
             npyscreen.notify_wait(wait_str,
-                                  title="Restarting with changes")
+                                  title='Restarting with changes')
             self.settings['restart_tools'](**restart_kargs)
 
         # start new instances if user wanted to
         if self.instance_cfg and self.settings['start_new']:
-            npyscreen.notify_wait("Starting new instances...",
-                                  title="Start")
+            npyscreen.notify_wait('Starting new instances...',
+                                  title='Start')
             tool_d = {}
             for i in range(self.settings['old_instances'] + 1,
                            self.settings['new_instances'] + 1):
@@ -327,38 +329,38 @@ class EditorForm(npyscreen.ActionForm):
             if new_instances > old_instances:
                 try:
                     diff = str(new_instances - old_instances)
-                    res = npyscreen.notify_yes_no("You will be creating " +
-                                                  diff + " additional"
-                                                  " instance(s) is that okay?",
-                                                  title="Confirm new"
-                                                  " instance(s)")
+                    res = npyscreen.notify_yes_no('You will be creating ' +
+                                                  diff + ' additional'
+                                                  ' instance(s) is that okay?',
+                                                  title='Confirm new'
+                                                  ' instance(s)')
                     if res:
                         if self.manifest.option(self.section,
                                                 'built')[1] == 'yes':
-                            run = npyscreen.notify_yes_no("Do you want to"
-                                                          " start these new"
-                                                          " tools upon"
-                                                          " creation?",
-                                                          title="Run new"
-                                                          " instance(s)")
+                            run = npyscreen.notify_yes_no('Do you want to'
+                                                          ' start these new'
+                                                          ' tools upon'
+                                                          ' creation?',
+                                                          title='Run new'
+                                                          ' instance(s)')
                         else:
                             run = False
                         # get clean name (no instance numbers in it)
                         new_name = self.settings['tool_name']
                         new_name = re.sub(r'[0-9]+$', '', new_name)
                         self.settings['tool_name'] = new_name
-                        npyscreen.notify_wait("Pulling up default settings"
-                                              " for " +
+                        npyscreen.notify_wait('Pulling up default settings'
+                                              ' for ' +
                                               self.settings['tool_name'] +
-                                              "...",
-                                              title="Gathering settings")
+                                              '...',
+                                              title='Gathering settings')
                         self.p_helper.clone(self.settings['repo'])
                         self.settings['new_instances'] = new_instances
                         self.settings['old_instances'] = old_instances
                         self.settings['start_new'] = run
                         self.settings['new_instance'] = True
-                        self.settings['name'] = "Configure new instance(s)" + \
-                            " for " + self.settings['tool_name']
+                        self.settings['name'] = 'Configure new instance(s)' + \
+                            ' for ' + self.settings['tool_name']
                         self.parentApp.addForm('INSTANCEEDITOR' +
                                                self.settings['tool_name'],
                                                EditorForm, **self.settings)
@@ -367,22 +369,22 @@ class EditorForm(npyscreen.ActionForm):
                     else:
                         return
                 except Exception:
-                    npyscreen.notify_confirm("Trouble finding tools to add,"
-                                             " exiting", title="Error")
+                    npyscreen.notify_confirm('Trouble finding tools to add,'
+                                             ' exiting', title='Error')
                     self.on_cancel()
             elif new_instances < old_instances:
                 try:
                     diff = str(old_instances - new_instances)
-                    res = npyscreen.notify_yes_no("You will be deleting " +
-                                                  diff + " instance(s), is"
-                                                  " that okay?",
-                                                  title="Confirm delete"
-                                                  " instance(s)")
+                    res = npyscreen.notify_yes_no('You will be deleting ' +
+                                                  diff + ' instance(s), is'
+                                                  ' that okay?',
+                                                  title='Confirm delete'
+                                                  ' instance(s)')
                     if res:
                         form_name = 'Delete instances for ' + \
-                                re.sub(r'\d+$', '',
-                                       self.settings['tool_name']) + '\t'*8 + \
-                                '^E to exit configuration process'
+                            re.sub(r'\d+$', '',
+                                   self.settings['tool_name']) + '\t'*8 + \
+                            '^E to exit configuration process'
                         clean_section = self.section.rsplit(':', 2)
                         clean_section[0] = re.sub(r'\d+$', '',
                                                   clean_section[0])
@@ -402,20 +404,20 @@ class EditorForm(npyscreen.ActionForm):
                         self.parentApp.change_form('DELETER' +
                                                    self.settings['tool_name'])
                 except Exception:
-                    npyscreen.notify_confirm("Trouble finding instances to"
-                                             " delete, exiting", title="Error")
+                    npyscreen.notify_confirm('Trouble finding instances to'
+                                             ' delete, exiting', title='Error')
                     self.on_cancel()
 
         if (new_instances == old_instances or
                 self.instance_cfg or self.vent_cfg):
-            npyscreen.notify_confirm("Done configuring " +
+            npyscreen.notify_confirm('Done configuring ' +
                                      self.settings['tool_name'],
-                                     title="Configurations saved")
+                                     title='Configurations saved')
             self.change_screens()
 
     def on_cancel(self):
         """ Don't save changes made to vent.template """
-        npyscreen.notify_confirm("No changes made to " +
+        npyscreen.notify_confirm('No changes made to ' +
                                  self.settings['tool_name'],
-                                 title="Configurations not saved")
+                                 title='Configurations not saved')
         self.change_screens()

@@ -19,6 +19,7 @@ def routes():
              update_r]
     return dict(list(zip(p, funcs)))
 
+
 def paths():
     return ['/create',
             '/delete',

@@ -5,6 +5,7 @@ from vent.helpers.meta import Services
 
 class ServicesForm(npyscreen.FormBaseNew):
     """ Services form for the Vent CLI """
+
     def __init__(self, *args, **keywords):
         """ Initialize service form objects """
         self.core = keywords['core']
@@ -20,17 +21,17 @@ class ServicesForm(npyscreen.FormBaseNew):
 
     def create(self):
         """ Override method for creating FormBaseNew form """
-        self.add_handlers({"^T": self.quit, "^Q": self.quit})
+        self.add_handlers({'^T': self.quit, '^Q': self.quit})
         self.services_tft = self.add(npyscreen.TitleFixedText,
                                      name='No services running.',
-                                     value="")
+                                     value='')
         services = Services(self.core, external=self.external)
         if services:
             self.services_tft.hidden = True
             for service in services:
-                value = ""
+                value = ''
                 for val in service[1]:
-                    value += val+", "
+                    value += val+', '
                 self.add(npyscreen.TitleFixedText,
                          name=service[0],
                          value=value[:-2])
