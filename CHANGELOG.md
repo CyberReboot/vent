@@ -1,3 +1,13 @@
+# v0.6.5 (2018-08-10)
+
+improvements:
+- upgraded version of pytest
+- improved syslog format to not be unnecessarily verbose
+- updated to alpine 3.8
+- linting
+- fixed syslog warnings
+- upgraded version of elasticsearch
+
 # v0.6.4 (2018-07-27)
 
 improvements:
