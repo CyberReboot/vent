@@ -6,6 +6,11 @@ ID="$3"
 ITERS="$4"
 FILTER="$5"
 
+# check if filter has '' surrounding it
+if [[ $FILTER =~ ^\'.*\'$ ]]; then
+    FILTER=${FILTER:1:${#FILTER}-2}
+fi
+
 # if ITERS is non-negative then do the capture ITERS times
 if [ $ITERS -gt "0" ]; then
     COUNTER=0
