@@ -55,6 +55,10 @@ class GZHandler(PatternMatchingEventHandler):
                     historicalSize = os.path.getsize(spath)
                     time.sleep(0.1)
 
+                if os.path.getsize(spath) == 0:
+                    print('file drop ignoring empty file: ' + str(spath))
+                    return
+
                 # check if the file was already queued and ignore
                 exists = False
                 print(uid + ' started ' + spath)
