@@ -1,3 +1,16 @@
+# v0.6.6 (2018-08-24)
+
+improvements:
+- upgraded version of gevent
+- upgraded version of pytest
+- upgraded version of sphinx
+- ncapture now uses a fork of tcpdump with the --no-payload flag instead of -s0
+
+bug fixes:
+- adds volume for syslog log file
+- typo fixed that now properly ignores misc pcaps
+- fixes filter for L2 capture
+
 # v0.6.5 (2018-08-10)
 
 improvements:
