@@ -768,7 +768,7 @@ class PluginHelper:
                 if not failed:
                     try:
                         self.d_client.containers.remove(container, force=True)
-                        self.logger.info('removed old existing container: ' = str(container))
+                        self.logger.info('removed old existing container: ' + str(container))
                     except Exception as e:
                         pass
                     cont_id = self.d_client.containers.run(detach=True,
