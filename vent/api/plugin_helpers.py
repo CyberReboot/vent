@@ -766,6 +766,11 @@ class PluginHelper:
                                           ' because nvidia-docker-plugin ' +
                                           'failed with: ' + str(r.status_code))
                 if not failed:
+                    try:
+                        self.d_client.containers.remove(container, force=True)
+                        self.logger.info('removed old existing container: ' + str(container))
+                    except Exception as e:
+                        pass
                     cont_id = self.d_client.containers.run(detach=True,
                                                            **tool_d[container])
                     s_containers.append(container)
