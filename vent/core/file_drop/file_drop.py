@@ -85,7 +85,8 @@ class GZHandler(PatternMatchingEventHandler):
                                                   body=message)
                             connection.close()
                         except Exception as e:
-                            print('failed to send rabbit message because: ' + str(e))
+                            print('failed to send rabbit message because: ' +
+                                  str(e))
 
                     return
 
