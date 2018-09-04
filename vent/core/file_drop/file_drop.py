@@ -67,7 +67,7 @@ class GZHandler(PatternMatchingEventHandler):
                         routing_key = 'poseidon.algos.decider'
 
                         message = {}
-                        message[key] = {'valid':False}
+                        message[key] = {'valid': False}
                         message = json.dumps(message)
 
                         # Send Rabbit message
@@ -81,8 +81,8 @@ class GZHandler(PatternMatchingEventHandler):
                                 exchange=exchange, exchange_type=exchange_type
                             )
                             channel.basic_publish(exchange=exchange,
-                                      routing_key=routing_key,
-                                      body=message)
+                                                  routing_key=routing_key,
+                                                  body=message)
                             connection.close()
                         except Exception as e:
                             print('failed to send rabbit message because: ' + str(e))
