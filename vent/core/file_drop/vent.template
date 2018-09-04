@@ -4,4 +4,4 @@ groups = core,files
 
 [docker]
 environment = ["PYTHONUNBUFFERED=0", "VENT_HOST=`hostname`"]
-links = {"Redis":"redis"}
+links = {"Redis":"redis", "RabbitMQ":"rabbit"}

@@ -1,8 +1,10 @@
+import json
 import os
 import sys
 import time
 import uuid
 
+import pika
 from redis import Redis
 from redis import StrictRedis
 from rq import Queue
@@ -57,6 +59,34 @@ class GZHandler(PatternMatchingEventHandler):
 
                 if os.path.getsize(spath) == 0:
                     print('file drop ignoring empty file: ' + str(spath))
+                    if spath.startswith('trace_'):
+                        key = spath.split('_')[1]
+                        # Rabbit settings
+                        exchange = 'topic-poseidon-internal'
+                        exchange_type = 'topic'
+                        routing_key = 'poseidon.algos.decider'
+
+                        message = {}
+                        message[key] = {'valid':False}
+                        message = json.dumps(message)
+
+                        # Send Rabbit message
+                        try:
+                            connection = pika.BlockingConnection(
+                                pika.ConnectionParameters(host='rabbit')
+                            )
+
+                            channel = connection.channel()
+                            channel.exchange_declare(
+                                exchange=exchange, exchange_type=exchange_type
+                            )
+                            channel.basic_publish(exchange=exchange,
+                                      routing_key=routing_key,
+                                      body=message)
+                            connection.close()
+                        except Exception as e:
+                            print('failed to send rabbit message because: ' + str(e))
+
                     return
 
                 # check if the file was already queued and ignore
