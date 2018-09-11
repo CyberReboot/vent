@@ -89,6 +89,8 @@ class CreateR(object):
                     r.sadd('mac_addresses',
                            metadata['endpoint_data']['mac'])
                     if metadata['endpoint_data']['ip-address'] != 'None':
+                        r.hmset(metadata['endpoint_data']['ip-address'],
+                                {'poseidon_hash': payload['id']})
                         r.sadd('ip_addresses',
                                metadata['endpoint_data']['ip-address'])
 
@@ -426,7 +428,7 @@ class UpdateR(object):
                 r.hmset(metadata['endpoint_data']['mac'],
                         {'poseidon_hash': payload['id']})
                 r.sadd('mac_addresses', metadata['endpoint_data']['mac'])
-                if metadata['endpoint_data']['ip_address'] != 'None':
+                if metadata['endpoint_data']['ip-address'] != 'None':
                     r.sadd('ip_addresses',
                            metadata['endpoint_data']['ip-address'])
             except Exception as e:  # pragma: no cover
