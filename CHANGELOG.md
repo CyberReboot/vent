@@ -1,3 +1,16 @@
+# v0.6.7 (2018-09-07)
+
+improvements:
+- upgraded version of pytest
+- upgraded version of pytest-cov
+- upgraded version of sphinx
+- upgraded version of watchdog
+- file_drop now checks for empty files and handles notifications for that
+- now uses the mac address as the key rather than the IP address for network_tap
+
+bug fixes:
+- remove previously created containers with the same name before starting new ones
+
 # v0.6.6 (2018-08-24)
 
 improvements:
