@@ -5,3 +5,6 @@ groups = core
 [settings]
 instances = 1
 priority = 3
+
+[docker]
+volumes = {'/opt/redis': {'bind': '/data', 'mode': 'rw'}}
