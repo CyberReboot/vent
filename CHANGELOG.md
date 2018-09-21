@@ -1,3 +1,12 @@
+# v0.6.8 (2018-09-21)
+
+improvements:
+- upgraded version of sphinx
+- persist Redis data
+
+bug fixes:
+- add back ip_addresses set
+
 # v0.6.7 (2018-09-07)
 
 improvements:
