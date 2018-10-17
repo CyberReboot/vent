@@ -797,8 +797,8 @@ class Plugin:
                     self.logger.info('Removing plugin container: ' +
                                      container_name)
             except Exception as e:  # pragma: no cover
-                self.logger.warn('Unable to remove the plugin container: ' +
-                                 container_name + ' because: ' + str(e))
+                self.logger.warning('Unable to remove the plugin container: ' +
+                                    container_name + ' because: ' + str(e))
 
             # check for image and remove
             try:
@@ -808,8 +808,8 @@ class Plugin:
                 self.logger.info(response)
                 self.logger.info('Removing plugin image: ' + image_name)
             except Exception as e:  # pragma: no cover
-                self.logger.warn('Unable to remove the plugin image: ' +
-                                 image_name + ' because: ' + str(e))
+                self.logger.warning('Unable to remove the plugin image: ' +
+                                    image_name + ' because: ' + str(e))
 
             # remove tool from the manifest
             for i in range(1, instances + 1):
