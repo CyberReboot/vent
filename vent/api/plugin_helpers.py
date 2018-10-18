@@ -508,6 +508,8 @@ class PluginHelper:
             links_to_delete = set()
             # check and update links, volumes_from, network_mode
             for container in list(tool_d.keys()):
+                if 'labels' not in tool_d[container] or  'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
+                    tool_d[container]['remove'] = True
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
                         # add links to external services already running if
