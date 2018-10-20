@@ -13,7 +13,6 @@ python:
 before_script:
   - sleep 10
   - echo -e "https://github.com/cyberreboot/vent:\n  rabbitmq:" >> ~/.vent_startup.yml
-  - pip show urllib3
 before_install:
   - sudo apt-get update
   - sudo apt-get install docker-ce
