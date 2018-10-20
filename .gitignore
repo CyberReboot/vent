@@ -1,3 +1,5 @@
+.eggs/
+.tox/
 *.egg-info
 *.bkp
 *.bak
