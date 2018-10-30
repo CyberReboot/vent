@@ -13,4 +13,3 @@ priority = 5
 [docker]
 environment = ["REMOTE_REDIS_HOST=redis"]
 links = {"Redis":"redis"}
-publish_all_ports = True
