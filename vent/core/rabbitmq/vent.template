@@ -9,8 +9,8 @@ uri_pw1 = guest
 uri_prefix2 = amqp://
 
 [settings]
-instances = 1
+instances = 3
 priority = 1,1,1
 
 [docker]
-ports = {'15672/tcp': ('127.0.0.1', None), '5672/tcp': ('0.0.0.0', 5672)}
+ports = {'15672/tcp': ('127.0.0.1', None), '5672/tcp': ('127.0.0.1', 5672)}
