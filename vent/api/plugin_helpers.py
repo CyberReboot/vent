@@ -494,6 +494,7 @@ class PluginHelper:
                        'type',
                        'version']
             vent_config = Template(template=self.path_dirs.cfg_file)
+            manifest = Template(self.manifest)
             files = vent_config.option('main', 'files')
             files = (files[0], expanduser(files[1]))
             s, _ = self.constraint_options(args, options)
@@ -506,12 +507,25 @@ class PluginHelper:
 
             # look out for links to delete because they're defined externally
             links_to_delete = set()
+
+            # get instances for each tool
+            tool_instances = {}
+            sections = manifest.sections()[1]
+            for section in sections:
+                settings = manifest.option(section, 'settings')
+                if settings[0]:
+                    settings = json.loads(settings[1])
+                    if 'instances' in settings:
+                        l_name = manifest.option(section, 'link_name')
+                        if l_name[0]:
+                            tool_instances[l_name[1]] = int(settings['instances'])
+
             # check and update links, volumes_from, network_mode
             for container in list(tool_d.keys()):
-                if 'labels' not in tool_d[container] or  'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
+                if 'labels' not in tool_d[container] or 'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
                     tool_d[container]['remove'] = True
                 if 'links' in tool_d[container]:
-                    for link in tool_d[container]['links']:
+                    for link in list(tool_d[container]['links'].keys()):
                         # add links to external services already running if
                         # necessary, by default configure local services too
                         configure_local = True
@@ -553,6 +567,9 @@ class PluginHelper:
                                         tool_d[c]['tmp_name'] == link):
                                     tool_d[container]['links'][tool_d[c]['name']
                                                                ] = tool_d[container]['links'].pop(link)
+                                    if link in tool_instances and tool_instances[link] > 1:
+                                        for i in range(2, tool_instances[link] + 1):
+                                            tool_d[container]['links'][tool_d[c]['name'] + str(i)] = tool_d[container]['links'][tool_d[c]['name']] + str(i)
                 if 'volumes_from' in tool_d[container]:
                     tmp_volumes_from = tool_d[container]['volumes_from']
                     tool_d[container]['volumes_from'] = []

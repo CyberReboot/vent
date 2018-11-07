@@ -349,7 +349,7 @@ class Plugin:
             # keep track of whether or not to write an additional manifest
             # entry for multiple instances, and how many additional entries
             # to write
-            addtl_entries = 0
+            addtl_entries = 1
             # remove the .git for adding repo info to manifest
             if self.repo.endswith('.git'):
                 self.repo = self.repo[:-4]
@@ -451,6 +451,9 @@ class Plugin:
                 # TODO do we need this if we save as a dictionary?
                 vent_template = Template(vent_template_path)
                 vent_status, response = vent_template.option('info', 'name')
+                instances = vent_template.option('settings', 'instances')
+                if instances[0]:
+                    addtl_entries = int(instances[1])
                 if vent_status:
                     template.set_option(section, 'link_name', response)
                 else:
@@ -500,9 +503,9 @@ class Plugin:
                                              image_name,
                                              section)
                 # write additional entries for multiple instances
-                if addtl_entries > 0:
+                if addtl_entries > 1:
                     # add 2 for naming conventions
-                    for i in range(2, addtl_entries + 2):
+                    for i in range(2, addtl_entries + 1):
                         addtl_section = section.rsplit(':', 2)
                         addtl_section[0] += str(i)
                         addtl_section = ':'.join(addtl_section)
