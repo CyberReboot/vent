@@ -261,6 +261,7 @@ class PluginHelper:
 
             tool_d[c_name] = {'image': image_name,
                               'name': c_name}
+            self.logger.info('C_NAMES: {0}'.format(c_name))
             # get rid of all commented sections in various runtime
             # configurations
             manifest = Template(self.manifest)
