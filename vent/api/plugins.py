@@ -451,6 +451,9 @@ class Plugin:
                 # TODO do we need this if we save as a dictionary?
                 vent_template = Template(vent_template_path)
                 vent_status, response = vent_template.option('info', 'name')
+                instances = vent_template.option('settings', 'instances')
+                if instances[0]:
+                    addtl_entries = int(instances[1])
                 if vent_status:
                     template.set_option(section, 'link_name', response)
                 else:

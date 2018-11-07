@@ -13,7 +13,7 @@ def test_startup():
     assert isinstance(status, tuple)
     assert status[0]
     with open(instance.plugin.manifest, 'r') as man:
-        assert 'rabbitmq' in man.read()
+        assert 'redis' in man.read()
 
 
 def test_add():
