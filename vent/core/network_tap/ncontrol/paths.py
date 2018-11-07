@@ -117,7 +117,7 @@ class CreateR(object):
             cmd += payload['filter'] + '"'
             try:
                 container_id = c.containers.run(image='cyberreboot/vent-ncapture:master',
-                                                command=cmd, detach=True, **tool_d)
+                                                command=cmd, remove=True, detach=True, **tool_d)
             except Exception as e:  # pragma: no cover
                 resp.body = "(False, 'unable to start container because: " + str(e) + "')"
                 return
@@ -255,7 +255,7 @@ class NICsR(object):
         nics = ''
         try:
             nics = d_client.containers.run('cyberreboot/gonet',
-                                           network_mode='host')
+                                           network_mode='host', remove=True)
         except Exception as e:  # pragma: no cover
             resp.body = "(False, 'Failure because: " + str(e) + "')"
             return

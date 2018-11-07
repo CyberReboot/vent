@@ -1,3 +1,17 @@
+# v0.6.9 (2018-10-22)
+
+improvements:
+- removes exited plugin containers
+- remove deprecated warn logger statements
+- upgraded version of sphinx
+- upgraded version of pytest
+- upgraded version of docker
+- upgraded version of gevent
+- upgraded version of gunicorn
+
+bug fixes:
+- updated gitignore to remove stale eggs
+
 # v0.6.8 (2018-09-21)
 
 improvements:

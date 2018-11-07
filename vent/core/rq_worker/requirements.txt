@@ -1,4 +1,4 @@
-docker==3.4.1
+docker==3.5.1
 python-magic==0.4.15
 rq==0.12.0
-vent==0.6.7
+vent==0.6.8

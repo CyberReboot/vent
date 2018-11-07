@@ -508,6 +508,8 @@ class PluginHelper:
             links_to_delete = set()
             # check and update links, volumes_from, network_mode
             for container in list(tool_d.keys()):
+                if 'labels' not in tool_d[container] or  'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
+                    tool_d[container]['remove'] = True
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
                         # add links to external services already running if
@@ -608,8 +610,8 @@ class PluginHelper:
                                         tool_config['locally_active'] == 'no'):
                                     del tool_d[c]
                             except Exception as e:  # pragma: no cover
-                                self.logger.warn('Locally running container ' +
-                                                 name + ' may be redundant')
+                                self.logger.warning('Locally running container ' +
+                                                    name + ' may be redundant')
 
             if status:
                 status = (True, tool_d)
@@ -768,7 +770,8 @@ class PluginHelper:
                 if not failed:
                     try:
                         self.d_client.containers.remove(container, force=True)
-                        self.logger.info('removed old existing container: ' + str(container))
+                        self.logger.info(
+                            'removed old existing container: ' + str(container))
                     except Exception as e:
                         pass
                     cont_id = self.d_client.containers.run(detach=True,
