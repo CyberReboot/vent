@@ -32,7 +32,7 @@ def test_version():
     """ Test the version function """
     version = Version()
     # currently broken due to something that urllib is doing
-    #assert version.startswith('v')
+    assert version.startswith('v')
 
 
 def test_system():
