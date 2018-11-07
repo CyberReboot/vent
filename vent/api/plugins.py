@@ -505,7 +505,7 @@ class Plugin:
                 # write additional entries for multiple instances
                 if addtl_entries > 0:
                     # add 2 for naming conventions
-                    for i in range(2, addtl_entries + 2):
+                    for i in range(2, addtl_entries + 1):
                         addtl_section = section.rsplit(':', 2)
                         addtl_section[0] += str(i)
                         addtl_section = ':'.join(addtl_section)
