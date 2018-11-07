@@ -349,7 +349,7 @@ class Plugin:
             # keep track of whether or not to write an additional manifest
             # entry for multiple instances, and how many additional entries
             # to write
-            addtl_entries = 0
+            addtl_entries = 1
             # remove the .git for adding repo info to manifest
             if self.repo.endswith('.git'):
                 self.repo = self.repo[:-4]
@@ -503,7 +503,7 @@ class Plugin:
                                              image_name,
                                              section)
                 # write additional entries for multiple instances
-                if addtl_entries > 0:
+                if addtl_entries > 1:
                     # add 2 for naming conventions
                     for i in range(2, addtl_entries + 1):
                         addtl_section = section.rsplit(':', 2)
