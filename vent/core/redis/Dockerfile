@@ -1,4 +1,4 @@
-FROM redis:4-alpine
+FROM redis:5-alpine
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="redis" \
