@@ -1,14 +1,14 @@
-docker==3.5.1
+docker==3.6.0
 elasticsearch==6.3.1
 falcon==1.4.1
 falcon-cors==1.1.7
 npyscreen==4.10.5
 pika==0.12.0
-pytest==4.0.0
+pytest==4.0.1
 pytest-cov==2.6.0
 python-magic==0.4.15
 pyyaml==3.13
 redis==3.0.1
-rq==0.12.0
+rq==0.13.0
 sphinx==1.8.2
 watchdog==0.9.0
