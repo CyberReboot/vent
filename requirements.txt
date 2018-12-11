@@ -9,6 +9,6 @@ pytest-cov==2.6.0
 python-magic==0.4.15
 pyyaml==3.13
 redis==2.10.6
-rq==0.12.0
+rq==0.13.0
 sphinx==1.8.2
 watchdog==0.9.0
