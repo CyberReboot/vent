@@ -1,3 +1,19 @@
+# v0.7.0 (2018-12-14)
+
+improvements:
+- upgraded version of pytest
+- upgraded version of sphinx
+- upgraded version of redis
+- upgraded version of elastic
+- upgraded version of docker
+- upgraded version of six
+- upgraded version of rq
+- bind core tool ports to localhost interface or not at all where applicable
+
+bug fixes:
+- multiple linked containers
+- fix multiple instances of the same tool
+
 # v0.6.9 (2018-10-22)
 
 improvements:
