@@ -143,6 +143,8 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
     import requests
     import os
     import sys
+    import time
+    import uuid
 
     from redis import Redis
     from rq import Queue
@@ -438,6 +440,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                             'command': path_cmd[image],
                                             'labels': labels,
                                             'detach': True,
+                                            'name': image+'_'+str(int(time.time()))+'_'+str(uuid.uuid4())[:4],
                                             'log_config': log_config,
                                             'configs': configs[image]})
                         q.enqueue('watch.gpu_queue', q_str, ttl=2592000)
@@ -450,6 +453,9 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                             command=path_cmd[image],
                                             labels=labels,
                                             detach=True,
+                                            name=image+'_' +
+                                            str(int(time.time()))+'_' +
+                                            str(uuid.uuid4())[:4],
                                             log_config=log_config,
                                             **configs[image])
         if failed_images:
