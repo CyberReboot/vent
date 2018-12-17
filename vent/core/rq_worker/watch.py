@@ -418,6 +418,8 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                 orig_path = orig_path_d[image]
                 labels = labels_d[image]
                 configs[image]['remove'] = True
+                name = image + '_' + \
+                    str(int(time.time()))+'_'+str(uuid.uuid4())[:4]
 
                 if orig_path:
                     # replay_pcap is special so we can't bind it like normal
@@ -440,7 +442,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                             'command': path_cmd[image],
                                             'labels': labels,
                                             'detach': True,
-                                            'name': image+'_'+str(int(time.time()))+'_'+str(uuid.uuid4())[:4],
+                                            'name': name,
                                             'log_config': log_config,
                                             'configs': configs[image]})
                         q.enqueue('watch.gpu_queue', q_str, ttl=2592000)
@@ -453,9 +455,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                             command=path_cmd[image],
                                             labels=labels,
                                             detach=True,
-                                            name=image+'_' +
-                                            str(int(time.time()))+'_' +
-                                            str(uuid.uuid4())[:4],
+                                            name=name,
                                             log_config=log_config,
                                             **configs[image])
         if failed_images:
