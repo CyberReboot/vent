@@ -756,9 +756,15 @@ class PluginHelper:
                             elif option.startswith('--volume='):
                                 vol = option.split('=', 1)[1].split(':')
                                 if 'volumes' in tool_d[container]:
-                                    # !! TODO handle if volumes is a list
-                                    tool_d[container]['volumes'][vol[0]] = {'bind': vol[1],
-                                                                            'mode': vol[2]}
+                                    if isinstance(tool_d[container]['volumes'], list):
+                                        if len(vol) == 2:
+                                            c_vol = vol[0] + ":" + vol[1] + ":rw"
+                                        else:
+                                            c_vol = vol[0] + ":" + vol[1] + ":" + vol[2]
+                                        tool_d[container]['volumes'].append(c_vol)
+                                    else: # Dictionary
+                                        tool_d[container]['volumes'][vol[0]] = {'bind': vol[1],
+                                                                                'mode': vol[2]}
                                 else:
                                     tool_d[container]['volumes'] = {vol[0]:
                                                                     {'bind': vol[1],
