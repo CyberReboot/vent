@@ -14,9 +14,7 @@
 
 ## Overview
 
-vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, vent serves as a user-friendly platform to build custom `plugins` that perform user-defined processing on incoming network data. vent is filetype-agnostic in that the plugins installed within your specific vent instance determine what type of files your instance supports.
-
-Simply create your `plugins`, point vent to them & install them, and drop a file in vent to begin processing!
+vent is a library that includes a CLI designed to serve as a general platform for analyzing network traffic. Built with some basic functionality, vent serves as a user-friendly platform to build custom `plugins` that perform user-defined processing on incoming network data. See this blog post - [Introducing vent](https://blog.cyberreboot.org/introducing-vent-1d883727b624)
 
 ## Dependencies
 
@@ -62,6 +60,14 @@ _Note - If you already have `docker-py` installed on your machine, you may need 
 ``` bash
 vent
 ```
+
+## Plugins
+
+vent supports custom `plugins` that perform  user-defined processing on incoming data.
+
+vent is filetype-agnostic in that the plugins installed within your specific vent instance determine what type of files your instance supports.  Simply create your `plugins`, point vent to them & install them, and drop a file in vent to begin processing!
+
+The [vent-plugins](https://github.com/CyberReboot/vent-plugins) repository showcases a number of example plugins and contains details on how to create your own.
 
 ## Documentation
 
