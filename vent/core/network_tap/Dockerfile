@@ -18,9 +18,9 @@ RUN apk add --update \
     musl-dev \
     python3 \
     python3-dev \
-    && pip3 install --upgrade pip \
-    && pip3 install -r requirements.txt \
-    && pip3 install -r /healthcheck/requirements.txt \
+    && pip3 install --no-cache-dir --upgrade pip \
+    && pip3 install --no-cache-dir -r requirements.txt \
+    && pip3 install --no-cache-dir -r /healthcheck/requirements.txt \
     && apk del \
     gcc \
     git \

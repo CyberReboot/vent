@@ -13,17 +13,17 @@ RUN apk add --update \
     py3-pip \
     && rm -rf /var/cache/apk/*
 
-RUN pip3 install --upgrade pip
+RUN pip3 install --no-cache-dir --upgrade pip
 
 # healthcheck
 COPY healthcheck /healthcheck
-RUN pip3 install -r /healthcheck/requirements.txt
+RUN pip3 install --no-cache-dir -r /healthcheck/requirements.txt
 ENV FLASK_APP /healthcheck/hc.py
 HEALTHCHECK --interval=15s --timeout=15s \
  CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
 
 COPY . /file-drop
-RUN pip3 install -r /file-drop/requirements.txt
+RUN pip3 install --no-cache-dir -r /file-drop/requirements.txt
 
 WORKDIR /file-drop
 
