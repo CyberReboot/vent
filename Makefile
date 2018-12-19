@@ -8,7 +8,7 @@ build: clean
 	env
 	docker version || true
 	$(PIP) -V
-	$(PIP) install -r requirements.txt
+	$(PIP) install -r test-requirements.txt
 	python3 setup.py install
 
 docs: docs_clean
