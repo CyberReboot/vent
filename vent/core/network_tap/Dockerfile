@@ -7,8 +7,21 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 
+COPY ncontrol/requirements.txt requirements.txt
+COPY healthcheck /healthcheck
+
 RUN apk add --update \
     curl \
+    gcc \
+    git \
+    linux-headers \
+    musl-dev \
+    python3 \
+    python3-dev \
+    && pip3 install --upgrade pip \
+    && pip3 install -r requirements.txt \
+    && pip3 install -r /healthcheck/requirements.txt \
+    && apk del \
     gcc \
     git \
     linux-headers \
@@ -16,18 +29,13 @@ RUN apk add --update \
     python3-dev \
     && rm -rf /var/cache/apk/*
 
-RUN pip3 install --upgrade pip
-
 # healthcheck
-COPY healthcheck /healthcheck
-RUN pip3 install -r /healthcheck/requirements.txt
 ENV FLASK_APP /healthcheck/hc.py
 HEALTHCHECK --interval=15s --timeout=15s \
  CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
 
 COPY . /network-tap
 WORKDIR /network-tap
-RUN pip3 install -r ncontrol/requirements.txt
 
 EXPOSE 8080
 
