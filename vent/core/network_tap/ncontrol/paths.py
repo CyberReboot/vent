@@ -83,14 +83,14 @@ class CreateR(object):
                         payload['metadata']) + ' ] into a dict because: ' + str(e) + "')"
                     return
                 try:
-                    r.hmset(payload['id'], metadata)
+                    r.hmset(payload['id'], str(metadata))
                     r.hmset(metadata['endpoint_data']['mac'],
-                            {'poseidon_hash': payload['id']})
+                            str({'poseidon_hash': payload['id']}))
                     r.sadd('mac_addresses',
                            metadata['endpoint_data']['mac'])
                     if metadata['endpoint_data']['ip-address'] != 'None':
                         r.hmset(metadata['endpoint_data']['ip-address'],
-                                {'poseidon_hash': payload['id']})
+                                str({'poseidon_hash': payload['id']}))
                         r.sadd('ip_addresses',
                                metadata['endpoint_data']['ip-address'])
 
@@ -424,16 +424,18 @@ class UpdateR(object):
                     payload['metadata']) + ' ] into a dict because: ' + str(e) + "')"
                 return
             try:
-                r.hmset(payload['id'], metadata)
+                r.hmset(payload['id'], str(metadata))
                 r.hmset(metadata['endpoint_data']['mac'],
-                        {'poseidon_hash': payload['id']})
+                        str({'poseidon_hash': payload['id']}))
                 r.sadd('mac_addresses', metadata['endpoint_data']['mac'])
                 if metadata['endpoint_data']['ip-address'] != 'None':
+                    r.hmset(metadata['endpoint_data']['ip-address'],
+                            str({'poseidon_hash': payload['id']}))
                     r.sadd('ip_addresses',
                            metadata['endpoint_data']['ip-address'])
             except Exception as e:  # pragma: no cover
-                resp.body = "(False, 'unable to store contents of the payload [ " + str(
-                    metadata) + ' ] in redis because: ' + str(e) + "')"
+                resp.body = "(False, 'unable to store contents of the payload " + str(
+                    metadata) + ' in redis because: ' + str(e) + "')"
                 return
 
         resp.body = "(True, 'successfully updated filter: " + \
