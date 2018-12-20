@@ -83,16 +83,19 @@ class CreateR(object):
                         payload['metadata']) + ' ] into a dict because: ' + str(e) + "')"
                     return
                 try:
-                    r.hmset(payload['id'], metadata)
+                    redis_metadata = {}
+                    for key in metadata:
+                        redis_metadata[key] = str(metadata[key])
+                    r.hmset(payload['id'], redis_metadata)
                     r.hmset(metadata['endpoint_data']['mac'],
                             {'poseidon_hash': payload['id']})
                     r.sadd('mac_addresses',
-                           str(metadata['endpoint_data']['mac']))
+                           metadata['endpoint_data']['mac'])
                     if metadata['endpoint_data']['ip-address'] != 'None':
                         r.hmset(metadata['endpoint_data']['ip-address'],
                                 {'poseidon_hash': payload['id']})
                         r.sadd('ip_addresses',
-                               str(metadata['endpoint_data']['ip-address']))
+                               metadata['endpoint_data']['ip-address'])
 
                 except Exception as e:  # pragma: no cover
                     resp.body = "(False, 'unable to store contents of the payload " + str(
@@ -424,15 +427,18 @@ class UpdateR(object):
                     payload['metadata']) + ' ] into a dict because: ' + str(e) + "')"
                 return
             try:
-                r.hmset(payload['id'], metadata)
+                redis_metadata = {}
+                for key in metadata:
+                    redis_metadata[key] = str(metadata[key])
+                r.hmset(payload['id'], redis_metadata)
                 r.hmset(metadata['endpoint_data']['mac'],
                         {'poseidon_hash': payload['id']})
-                r.sadd('mac_addresses', str(metadata['endpoint_data']['mac']))
+                r.sadd('mac_addresses', metadata['endpoint_data']['mac'])
                 if metadata['endpoint_data']['ip-address'] != 'None':
                     r.hmset(metadata['endpoint_data']['ip-address'],
                             {'poseidon_hash': payload['id']})
                     r.sadd('ip_addresses',
-                           str(metadata['endpoint_data']['ip-address']))
+                           metadata['endpoint_data']['ip-address'])
             except Exception as e:  # pragma: no cover
                 resp.body = "(False, 'unable to store contents of the payload " + str(
                     metadata) + ' in redis because: ' + str(e) + "')"
