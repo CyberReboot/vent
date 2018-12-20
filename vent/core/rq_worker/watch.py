@@ -418,7 +418,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                 orig_path = orig_path_d[image]
                 labels = labels_d[image]
                 configs[image]['remove'] = True
-                name = image + '_' + \
+                name = image.replace('/', '-') + '_' + \
                     str(int(time.time()))+'_'+str(uuid.uuid4())[:4]
 
                 if orig_path:
