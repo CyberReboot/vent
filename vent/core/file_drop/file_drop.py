@@ -58,8 +58,9 @@ class GZHandler(PatternMatchingEventHandler):
                     time.sleep(0.1)
 
                 if os.path.getsize(spath) == 0:
-                    print('file drop ignoring empty file: ' + str(spath))
-                    if spath.startswith('trace_'):
+                    spath = str(spath)
+                    print('file drop ignoring empty file: {0}'.format(spath))
+                    if spath.startswith('/files/trace_'):
                         key = spath.split('_')[1]
                         # Rabbit settings
                         exchange = 'topic-poseidon-internal'
@@ -67,7 +68,7 @@ class GZHandler(PatternMatchingEventHandler):
                         routing_key = 'poseidon.algos.decider'
 
                         message = {}
-                        message[key] = {'valid': False}
+                        message[key] = {'valid': False, 'source': 'file_drop'}
                         message = json.dumps(message)
 
                         # Send Rabbit message
