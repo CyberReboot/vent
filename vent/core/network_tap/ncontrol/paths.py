@@ -91,11 +91,16 @@ class CreateR(object):
                             {'poseidon_hash': payload['id']})
                     r.sadd('mac_addresses',
                            metadata['endpoint_data']['mac'])
-                    if metadata['endpoint_data']['ip-address'] != 'None':
-                        r.hmset(metadata['endpoint_data']['ip-address'],
+                    if metadata['endpoint_data']['ipv4'] != 'None' and metadata['endpoint_data']['ipv4']:
+                        r.hmset(metadata['endpoint_data']['ipv4'],
                                 {'poseidon_hash': payload['id']})
                         r.sadd('ip_addresses',
-                               metadata['endpoint_data']['ip-address'])
+                               metadata['endpoint_data']['ipv4'])
+                    if metadata['endpoint_data']['ipv6'] != 'None' and metadata['endpoint_data']['ipv6']:
+                        r.hmset(metadata['endpoint_data']['ipv6'],
+                                {'poseidon_hash': payload['id']})
+                        r.sadd('ip_addresses',
+                               metadata['endpoint_data']['ipv6'])
 
                 except Exception as e:  # pragma: no cover
                     resp.body = "(False, 'unable to store contents of the payload " + str(
@@ -434,11 +439,16 @@ class UpdateR(object):
                 r.hmset(metadata['endpoint_data']['mac'],
                         {'poseidon_hash': payload['id']})
                 r.sadd('mac_addresses', metadata['endpoint_data']['mac'])
-                if metadata['endpoint_data']['ip-address'] != 'None':
-                    r.hmset(metadata['endpoint_data']['ip-address'],
+                if metadata['endpoint_data']['ipv4'] != 'None' and metadata['endpoint_data']['ipv4']:
+                    r.hmset(metadata['endpoint_data']['ipv4'],
                             {'poseidon_hash': payload['id']})
                     r.sadd('ip_addresses',
-                           metadata['endpoint_data']['ip-address'])
+                           metadata['endpoint_data']['ipv4'])
+                if metadata['endpoint_data']['ipv6'] != 'None' and metadata['endpoint_data']['ipv6']:
+                    r.hmset(metadata['endpoint_data']['ipv6'],
+                            {'poseidon_hash': payload['id']})
+                    r.sadd('ip_addresses',
+                           metadata['endpoint_data']['ipv6'])
             except Exception as e:  # pragma: no cover
                 resp.body = "(False, 'unable to store contents of the payload " + str(
                     metadata) + ' in redis because: ' + str(e) + "')"
