@@ -91,12 +91,12 @@ class CreateR(object):
                             {'poseidon_hash': payload['id']})
                     r.sadd('mac_addresses',
                            metadata['endpoint_data']['mac'])
-                    if metadata['endpoint_data']['ipv4'] != 'None' and metadata['endpoint_data']['ipv4'] != None and metadata['endpoint_data']['ipv4'] != 0:
+                    if metadata['endpoint_data']['ipv4'] != 'None' and metadata['endpoint_data']['ipv4']:
                         r.hmset(metadata['endpoint_data']['ipv4'],
                                 {'poseidon_hash': payload['id']})
                         r.sadd('ip_addresses',
                                metadata['endpoint_data']['ipv4'])
-                    if metadata['endpoint_data']['ipv6'] != 'None' and metadata['endpoint_data']['ipv6'] != None and metadata['endpoint_data']['ipv6'] != 0:
+                    if metadata['endpoint_data']['ipv6'] != 'None' and metadata['endpoint_data']['ipv6']:
                         r.hmset(metadata['endpoint_data']['ipv6'],
                                 {'poseidon_hash': payload['id']})
                         r.sadd('ip_addresses',
@@ -439,12 +439,12 @@ class UpdateR(object):
                 r.hmset(metadata['endpoint_data']['mac'],
                         {'poseidon_hash': payload['id']})
                 r.sadd('mac_addresses', metadata['endpoint_data']['mac'])
-                if metadata['endpoint_data']['ipv4'] != 'None' and metadata['endpoint_data']['ipv4'] != None and metadata['endpoint_data']['ipv4'] != 0:
+                if metadata['endpoint_data']['ipv4'] != 'None' and metadata['endpoint_data']['ipv4']:
                     r.hmset(metadata['endpoint_data']['ipv4'],
                             {'poseidon_hash': payload['id']})
                     r.sadd('ip_addresses',
                            metadata['endpoint_data']['ipv4'])
-                if metadata['endpoint_data']['ipv6'] != 'None' and metadata['endpoint_data']['ipv6'] != None and metadata['endpoint_data']['ipv6'] != 0:
+                if metadata['endpoint_data']['ipv6'] != 'None' and metadata['endpoint_data']['ipv6']:
                     r.hmset(metadata['endpoint_data']['ipv6'],
                             {'poseidon_hash': payload['id']})
                     r.sadd('ip_addresses',
