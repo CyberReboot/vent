@@ -10,5 +10,5 @@ python-magic==0.4.15
 pyyaml==3.13
 redis==3.0.1
 rq==0.13.0
-sphinx==1.8.2
+sphinx==1.8.3
 watchdog==0.9.0
