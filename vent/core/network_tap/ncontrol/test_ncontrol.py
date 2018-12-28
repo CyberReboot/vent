@@ -47,16 +47,6 @@ def test_create_r(client):
     assert r.status == '200 OK'
 
 
-def test_update_r(client):
-    """ tests the restful endpoint: update """
-    r = client.simulate_post('/update', json={'id': 'foo'})
-    assert r.status == '200 OK'
-    r = client.simulate_post('/update', json={'id': 'foo',
-                                              'metadata': '{"foo": "bar"}'},
-                             headers={'Content-Type': 'application/json'})
-    assert r.status == '200 OK'
-
-
 def test_info_r(client):
     """ tests the restful endpoint: info """
     # test info
