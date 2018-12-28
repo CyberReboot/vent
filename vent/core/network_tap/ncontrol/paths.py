@@ -4,7 +4,6 @@ import socket
 
 import docker
 import falcon
-import redis
 
 
 class CreateR(object):
@@ -47,7 +46,6 @@ class CreateR(object):
         # -1 then loops until killed, otherwise completes iters number of
         # captures (and creates that many pcap files) should keep track of
         # container id, container name, and id of filter and filter + whatever
-        # else is in payload in redis
 
         # verify payload has necessary information
         if 'nic' not in payload:
@@ -62,50 +60,6 @@ class CreateR(object):
         if 'iters' not in payload:
             resp.body = 'payload missing iters'
             return
-
-        # connect to redis
-        if 'metadata' in payload:
-            r = None
-            try:
-                r = redis.StrictRedis(host='redis', port=6379, db=0)
-            except Exception as e:  # pragma: no cover
-                try:
-                    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-                except Exception as e:  # pragma: no cover
-                    resp.body = "(False, 'unable to connect to redis because: " + str(e) + "')"
-                    return
-            if r:
-                metadata = {}
-                try:
-                    metadata = ast.literal_eval(payload['metadata'])
-                except Exception as e:  # pragma: no cover
-                    resp.body = "(False, 'unable to convert metadata [ " + str(
-                        payload['metadata']) + ' ] into a dict because: ' + str(e) + "')"
-                    return
-                try:
-                    redis_metadata = {}
-                    for key in metadata:
-                        redis_metadata[key] = str(metadata[key])
-                    r.hmset(payload['id'], redis_metadata)
-                    r.hmset(metadata['endpoint_data']['mac'],
-                            {'poseidon_hash': payload['id']})
-                    r.sadd('mac_addresses',
-                           metadata['endpoint_data']['mac'])
-                    if metadata['endpoint_data']['ipv4'] != 'None' and metadata['endpoint_data']['ipv4']:
-                        r.hmset(metadata['endpoint_data']['ipv4'],
-                                {'poseidon_hash': payload['id']})
-                        r.sadd('ip_addresses',
-                               metadata['endpoint_data']['ipv4'])
-                    if metadata['endpoint_data']['ipv6'] != 'None' and metadata['endpoint_data']['ipv6']:
-                        r.hmset(metadata['endpoint_data']['ipv6'],
-                                {'poseidon_hash': payload['id']})
-                        r.sadd('ip_addresses',
-                               metadata['endpoint_data']['ipv6'])
-
-                except Exception as e:  # pragma: no cover
-                    resp.body = "(False, 'unable to store contents of the payload " + str(
-                        metadata) + ' in redis because: ' + str(e) + "')"
-                    return
 
         # connect to docker
         c = None
@@ -412,47 +366,6 @@ class UpdateR(object):
         if 'metadata' not in payload:
             resp.body = 'payload missing metadata'
             return
-
-        # connect to redis
-        r = None
-        try:
-            r = redis.StrictRedis(host='redis', port=6379, db=0)
-        except Exception as e:  # pragma: no cover
-            try:
-                r = redis.StrictRedis(host='localhost', port=6379, db=0)
-            except Exception as e:  # pragma: no cover
-                resp.body = "(False, 'unable to connect to redis because: " + str(e) + "')"
-                return
-        if r:
-            metadata = {}
-            try:
-                metadata = ast.literal_eval(payload['metadata'])
-            except Exception as e:  # pragma: no cover
-                resp.body = "(False, 'unable to convert metadata [ " + str(
-                    payload['metadata']) + ' ] into a dict because: ' + str(e) + "')"
-                return
-            try:
-                redis_metadata = {}
-                for key in metadata:
-                    redis_metadata[key] = str(metadata[key])
-                r.hmset(payload['id'], redis_metadata)
-                r.hmset(metadata['endpoint_data']['mac'],
-                        {'poseidon_hash': payload['id']})
-                r.sadd('mac_addresses', metadata['endpoint_data']['mac'])
-                if metadata['endpoint_data']['ipv4'] != 'None' and metadata['endpoint_data']['ipv4']:
-                    r.hmset(metadata['endpoint_data']['ipv4'],
-                            {'poseidon_hash': payload['id']})
-                    r.sadd('ip_addresses',
-                           metadata['endpoint_data']['ipv4'])
-                if metadata['endpoint_data']['ipv6'] != 'None' and metadata['endpoint_data']['ipv6']:
-                    r.hmset(metadata['endpoint_data']['ipv6'],
-                            {'poseidon_hash': payload['id']})
-                    r.sadd('ip_addresses',
-                           metadata['endpoint_data']['ipv6'])
-            except Exception as e:  # pragma: no cover
-                resp.body = "(False, 'unable to store contents of the payload " + str(
-                    metadata) + ' in redis because: ' + str(e) + "')"
-                return
 
         resp.body = "(True, 'successfully updated filter: " + \
             str(payload['id']) + "')"
