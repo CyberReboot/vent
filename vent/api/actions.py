@@ -18,7 +18,6 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Dependencies
 from vent.helpers.meta import Images
-from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Timestamp
 from vent.helpers.paths import PathDirs
 
