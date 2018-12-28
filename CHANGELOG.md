@@ -1,3 +1,14 @@
+# v0.7.1 (2018-12-28)
+
+improvements:
+- added more readme details about plugins
+- handles case where volumes is a list instead of a dict
+- broke up log files in unique names and directories
+- no longer needs to store updates in redis for network_tap
+- reduced image sizes
+- broke out ip address into ipv4 and ipv6
+- upgraded version of sphinx
+
 # v0.7.0 (2018-12-14)
 
 improvements:
