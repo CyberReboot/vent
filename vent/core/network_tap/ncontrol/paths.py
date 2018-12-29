@@ -79,12 +79,13 @@ class CreateR(object):
             try:
                 container = c.containers.run(image='cyberreboot/vent-ncapture:master',
                                              command=cmd, remove=True, detach=True, **tool_d)
+                resp.body = "(True, 'successfully created and started filter: " + \
+                    str(payload['id']) + ' on container: ' + \
+                    str(container.id) + "')"
             except Exception as e:  # pragma: no cover
                 resp.body = "(False, 'unable to start container because: " + str(e) + "')"
                 return
 
-        resp.body = "(True, 'successfully created and started filter: " + \
-            str(payload['id']) + ' on container: ' + str(container.id) + "')"
         return
 
 
@@ -217,11 +218,11 @@ class NICsR(object):
         try:
             nics = d_client.containers.run('cyberreboot/gonet',
                                            network_mode='host', remove=True)
+            resp.body = str(nics.id)
         except Exception as e:  # pragma: no cover
             resp.body = "(False, 'Failure because: " + str(e) + "')"
             return
 
-        resp.body = nics.id
         return
 
 
