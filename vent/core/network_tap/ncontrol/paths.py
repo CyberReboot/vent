@@ -77,14 +77,14 @@ class CreateR(object):
             cmd += ' ' + payload['id'] + ' ' + payload['iters'] + ' "'
             cmd += payload['filter'] + '"'
             try:
-                container_id = c.containers.run(image='cyberreboot/vent-ncapture:master',
-                                                command=cmd, remove=True, detach=True, **tool_d)
+                container = c.containers.run(image='cyberreboot/vent-ncapture:master',
+                                             command=cmd, remove=True, detach=True, **tool_d)
             except Exception as e:  # pragma: no cover
                 resp.body = "(False, 'unable to start container because: " + str(e) + "')"
                 return
 
         resp.body = "(True, 'successfully created and started filter: " + \
-            str(payload['id']) + ' on container: ' + str(container_id) + "')"
+            str(payload['id']) + ' on container: ' + str(container.id) + "')"
         return
 
 
@@ -221,7 +221,7 @@ class NICsR(object):
             resp.body = "(False, 'Failure because: " + str(e) + "')"
             return
 
-        resp.body = nics
+        resp.body = nics.id
         return
 
 
