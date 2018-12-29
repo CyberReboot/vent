@@ -25,10 +25,10 @@ class CreateR(object):
             try:
                 payload = json.load(req.stream)
             except Exception as e:  # pragma: no cover
-                resp.body = 'malformed payload'
+                resp.body = "(False, 'malformed payload')"
                 return
         else:
-            resp.body = 'malformed payload'
+            resp.body = "(False, 'malformed payload')"
             return
 
         if 'filter' not in payload:
@@ -48,16 +48,16 @@ class CreateR(object):
 
         # verify payload has necessary information
         if 'nic' not in payload:
-            resp.body = 'payload missing nic'
+            resp.body = "(False, 'payload missing nic')"
             return
         if 'id' not in payload:
-            resp.body = 'payload missing id'
+            resp.body = "(False, 'payload missing id')"
             return
         if 'interval' not in payload:
-            resp.body = 'payload missing interval'
+            resp.body = "(False, 'payload missing interval')"
             return
         if 'iters' not in payload:
-            resp.body = 'payload missing iters'
+            resp.body = "(False, 'payload missing iters')"
             return
 
         # connect to docker
