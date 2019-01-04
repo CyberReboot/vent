@@ -1487,9 +1487,9 @@ class Action:
             data = json.dumps(data)
 
             # create the post request and send it off
-            req = urllib.request(url, data)
+            req = urllib.request.Request(url, data)
             req.add_header('Content-Type', 'application/json')
-            response = urllib.request.urlopen(req, data)
+            response = urllib.request.urlopen(req, data.encode('utf-8'))
 
             # return whatever the webpage returned
             return (True, response.read())
