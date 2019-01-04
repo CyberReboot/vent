@@ -1530,11 +1530,12 @@ class Action:
             tool name or a failure mesage. An example return url is
             http://0.0.0.0:37728. Works well with send_request and get_request.
         """
+        status = (False, '')
         try:
             d = docker.from_env()
             containers = d.containers.list(filters={'label': 'vent'}, all=True)
         except Exception as e:  # pragma no cover
-            return (False, 'docker failed with error ' + str(e))
+            status = (False, 'docker failed with error ' + str(e))
 
         url = ''
         found = False
@@ -1551,8 +1552,9 @@ class Action:
                     h_ip = url[port][0]['HostIp']
                     url = 'http://' + str(h_ip) + ':' + str(h_port)
                     found = True
+                    status = (True, str(url))
                     break
             # no need to cycle every single container if we found our ports
             if found:
                 break
-        return (True, str(url))
+        return status

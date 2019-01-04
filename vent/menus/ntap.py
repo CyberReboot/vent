@@ -54,12 +54,10 @@ class CreateNTap(npyscreen.ActionForm):
         payload[self.filter.name] = self.filter.value
         payload[self.iters.name] = self.iters.value
 
-        # create an action object and have it do the work
-        self.api_action = Action()
         try:
-            url = self.api_action.get_vent_tool_url('network-tap')[1] + \
+            url = Action().get_vent_tool_url('network-tap')[1] + \
                 '/create'
-            request = self.api_action.post_request(url, str(payload))
+            request = Action().post_request(url, str(payload))
 
             if request[0]:
                 npyscreen.notify_confirm('Success: ' + str(request[1]))
@@ -68,7 +66,7 @@ class CreateNTap(npyscreen.ActionForm):
             else:
                 npyscreen.notify_confirm('Failure: ' + str(request[1]))
         except Exception as e:  # pragma: no cover
-            npyscreen.notify_confirm('Failure: ' + str(e))
+            npyscreen.notify_confirm('Failure: {0}'.format(str(e)))
 
         return
 
@@ -94,9 +92,8 @@ class NICsNTap(npyscreen.ActionForm):
         self.nextrely += 1
 
         try:
-            self.api_action = Action()
-            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/nics'
-            request = self.api_action.get_request(url)
+            url = Action().get_vent_tool_url('network-tap')[1] + '/nics'
+            request = Action().get_request(url)
 
             if request[0]:
                 box = self.add(npyscreen.BoxTitle,
@@ -136,9 +133,8 @@ class ListNTap(npyscreen.ActionForm):
         self.nextrely += 1
 
         try:
-            self.api_action = Action()
-            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/list'
-            request = self.api_action.get_request(url)
+            url = Action().get_vent_tool_url('network-tap')[1] + '/list'
+            request = Action().get_request(url)
 
             if request[0]:
                 box = self.add(npyscreen.BoxTitle,
@@ -186,12 +182,10 @@ class ActionNTap(npyscreen.ActionForm):
         self.nextrely += 1
 
         try:
-            self.api_action = Action()
-
             # display all containers by sending a get request to ntap/list
             # nlist returns tuple and get_request returns tuple
-            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/list'
-            request = self.api_action.get_request(url)
+            url = Action().get_vent_tool_url('network-tap')[1] + '/list'
+            request = Action().get_request(url)
 
             # create selection for containers
             if request[0]:
@@ -222,10 +216,9 @@ class ActionNTap(npyscreen.ActionForm):
         # grab the url that network-tap is listening to
         try:
             npyscreen.notify_wait('Please wait. Currently working')
-            self.api_action = Action()
-            url = self.api_action.get_vent_tool_url('network-tap')[1] + '/' \
+            url = Action().get_vent_tool_url('network-tap')[1] + '/' \
                 + self.n_action
-            request = self.api_action.post_request(url, payload)
+            request = Action().post_request(url, payload)
 
             if request[0]:
                 npyscreen.notify_confirm('Success: ' + str(request[1]))
