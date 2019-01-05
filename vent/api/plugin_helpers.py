@@ -421,6 +421,9 @@ class PluginHelper:
                     tool_d[c_name]['log_config'] = log_config
                 # mount necessary directories
                 if 'files' in s[section]['groups']:
+                    ulimits = []
+                    ulimits.append(docker.types.Ulimit(name='nofile', soft=1048576, hard=1048576))
+                    tool_d[c_name]['ulimits'] = ulimits
                     # check if running in a docker container
                     if 'VENT_CONTAINERIZED' in environ and environ['VENT_CONTAINERIZED'] == 'true':
                         if 'volumes_from' in tool_d[c_name]:
