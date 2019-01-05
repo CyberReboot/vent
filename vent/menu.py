@@ -15,7 +15,6 @@ from vent.menus.main import MainForm
 from vent.menus.tutorial_forms import TutorialAddingFilesForm
 from vent.menus.tutorial_forms import TutorialAddingPluginsForm
 from vent.menus.tutorial_forms import TutorialBackgroundForm
-from vent.menus.tutorial_forms import TutorialBuildingCoresForm
 from vent.menus.tutorial_forms import TutorialGettingSetupForm
 from vent.menus.tutorial_forms import TutorialIntroForm
 from vent.menus.tutorial_forms import TutorialStartingCoresForm
@@ -76,7 +75,7 @@ class VentApp(npyscreen.NPSAppManaged):
             thr.join()
 
         quit_s = '\t'*4 + '^Q to quit'
-        tab_esc = '\t'*4 + 'TAB to close menu popup'
+        tab_esc = '\t'*4 + 'ESC to close menu popup'
         self.addForm('MAIN',
                      MainForm,
                      name='Vent ' + version +
@@ -102,10 +101,6 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm('TUTORIALGETTINGSETUP',
                      TutorialGettingSetupForm,
                      name='About Vent' + quit_s,
-                     color='DANGER')
-        self.addForm('TUTORIALBUILDINGCORES',
-                     TutorialBuildingCoresForm,
-                     name='Working with Cores' + quit_s,
                      color='DANGER')
         self.addForm('TUTORIALSTARTINGCORES',
                      TutorialStartingCoresForm,

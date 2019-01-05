@@ -1,6 +1,6 @@
 [info]
 name = RMQ-ES-Connector
-groups = core
+groups = connector
 
 [settings]
 instances = 1

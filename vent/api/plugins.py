@@ -175,7 +175,6 @@ class Plugin:
             template.set_option(section, 'namespace', namespace)
             template.set_option(section, 'path', '')
             template.set_option(section, 'repo', registry + '/' + org)
-            template.set_option(section, 'enabled', 'yes')
             template.set_option(section, 'branch', '')
             template.set_option(section, 'version', tag)
             template.set_option(section, 'last_updated',
@@ -423,7 +422,6 @@ class Plugin:
                                     self.name)
                 template.set_option(section, 'path', match_path)
                 template.set_option(section, 'repo', self.repo)
-                template.set_option(section, 'enabled', 'yes')
                 template.set_option(section, 'multi_tool', multi_tool)
                 template.set_option(section, 'branch', self.branch)
                 template.set_option(section, 'version', self.version)
@@ -749,7 +747,6 @@ class Plugin:
         if exists:
             for section in sections:
                 options = {'section': section,
-                           'enabled': None,
                            'built': None,
                            'version': None,
                            'repo': None,
@@ -765,7 +762,7 @@ class Plugin:
         return tools
 
     def remove(self, name=None, repo=None, namespace=None, branch='master',
-               groups=None, enabled='yes', version='HEAD', built='yes'):
+               groups=None, version='HEAD', built='yes'):
         """
         Remove tool (name) or repository, repository is the url. If no
         arguments are specified, all tools will be removed for the defaults.
@@ -864,7 +861,6 @@ class Plugin:
         template.write_config()
         return status
 
-    # !! TODO name or group ?
     def versions(self, name, namespace=None, branch='master'):
         """
         Return available versions of a tool
@@ -885,7 +881,6 @@ class Plugin:
             versions.append((result, version_list))
         return versions
 
-    # !! TODO name or group ?
     def current_version(self, name, namespace=None, branch='master'):
         """
         Return current version for a given tool
@@ -901,60 +896,6 @@ class Plugin:
         for result in results:
             versions.append((result, results[result]['version']))
         return versions
-
-    # !! TODO name or group ?
-    def state(self, name, namespace=None, branch='master'):
-        """
-        Return state of a tool, disabled/enabled for each version
-        """
-
-        # initialize
-        args = locals()
-        states = []
-        options = ['enabled']
-
-        # get resulting dict of sections with options that match constraints
-        results, _ = self.p_helper.constraint_options(args, options)
-        for result in results:
-            if results[result]['enabled'] == 'yes':
-                states.append((result, 'enabled'))
-            else:
-                states.append((result, 'disabled'))
-        return states
-
-    # !! TODO name or group ?
-    def enable(self, name, namespace=None, branch='master', version='HEAD'):
-        """
-        Enable tool at a specific version, default to head
-        """
-
-        # initialize
-        args = locals()
-        status = (False, None)
-
-        # get resulting dict of sections with options that match constraints
-        results, template = self.p_helper.constraint_options(args, [])
-        for result in results:
-            status = template.set_option(result, 'enabled', 'yes')
-        template.write_config()
-        return status
-
-    # !! TODO name or group ?
-    def disable(self, name, namespace=None, branch='master', version='HEAD'):
-        """
-        Disable tool at a specific version, default to head
-        """
-
-        # initialize
-        args = locals()
-        status = (False, None)
-
-        # get resulting dict of sections with options that match constraints
-        results, template = self.p_helper.constraint_options(args, [])
-        for result in results:
-            status = template.set_option(result, 'enabled', 'no')
-        template.write_config()
-        return status
 
     def auto_install(self):
         """
@@ -1017,7 +958,6 @@ class Plugin:
                         image.attrs['Config']['Labels']['vent.type'] == 'repository'):
                     template.set_option(
                         section, 'namespace', '/'.join(section_str[:2]))
-                    template.set_option(section, 'enabled', 'yes')
                     template.set_option(section, 'branch', section_str[-2])
                     template.set_option(section, 'version', section_str[-1])
                     template.set_option(section, 'last_updated', str(

@@ -230,7 +230,6 @@ class PluginHelper:
                        s,
                        files,
                        groups,
-                       enabled,
                        branch,
                        version):
         """ Run through sections for prep_start """
@@ -470,13 +469,12 @@ class PluginHelper:
                    repo=None,
                    name=None,
                    groups=None,
-                   enabled='yes',
                    branch='master',
                    version='HEAD'):
         """
         Start a set of tools that match the parameters given, if no parameters
         are given, start all installed tools on the master branch at verison
-        HEAD that are enabled
+        HEAD
         """
         args = locals()
         self.logger.info('Starting: prep_start')
@@ -501,7 +499,6 @@ class PluginHelper:
             status, tool_d = self.start_sections(s,
                                                  files,
                                                  groups,
-                                                 enabled,
                                                  branch,
                                                  version)
 
@@ -518,7 +515,8 @@ class PluginHelper:
                     if 'instances' in settings:
                         l_name = manifest.option(section, 'link_name')
                         if l_name[0]:
-                            tool_instances[l_name[1]] = int(settings['instances'])
+                            tool_instances[l_name[1]] = int(
+                                settings['instances'])
 
             # check and update links, volumes_from, network_mode
             for container in list(tool_d.keys()):
@@ -569,7 +567,8 @@ class PluginHelper:
                                                                ] = tool_d[container]['links'].pop(link)
                                     if link in tool_instances and tool_instances[link] > 1:
                                         for i in range(2, tool_instances[link] + 1):
-                                            tool_d[container]['links'][tool_d[c]['name'] + str(i)] = tool_d[container]['links'][tool_d[c]['name']] + str(i)
+                                            tool_d[container]['links'][tool_d[c]['name'] + str(
+                                                i)] = tool_d[container]['links'][tool_d[c]['name']] + str(i)
                 if 'volumes_from' in tool_d[container]:
                     tmp_volumes_from = tool_d[container]['volumes_from']
                     tool_d[container]['volumes_from'] = []
@@ -758,11 +757,14 @@ class PluginHelper:
                                 if 'volumes' in tool_d[container]:
                                     if isinstance(tool_d[container]['volumes'], list):
                                         if len(vol) == 2:
-                                            c_vol = vol[0] + ":" + vol[1] + ":rw"
+                                            c_vol = vol[0] + \
+                                                ':' + vol[1] + ':rw'
                                         else:
-                                            c_vol = vol[0] + ":" + vol[1] + ":" + vol[2]
-                                        tool_d[container]['volumes'].append(c_vol)
-                                    else: # Dictionary
+                                            c_vol = vol[0] + ':' + \
+                                                vol[1] + ':' + vol[2]
+                                        tool_d[container]['volumes'].append(
+                                            c_vol)
+                                    else:  # Dictionary
                                         tool_d[container]['volumes'][vol[0]] = {'bind': vol[1],
                                                                                 'mode': vol[2]}
                                 else:

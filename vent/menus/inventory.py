@@ -78,8 +78,7 @@ class InventoryForm(npyscreen.FormBaseNew):
                                                                 'tools',
                                                                 'images',
                                                                 'built',
-                                                                'running',
-                                                                'enabled'])
+                                                                'running'])
         if response[0]:
             inventory = response[1]
             if len(inventory['repos']) == 0:
@@ -105,8 +104,6 @@ class InventoryForm(npyscreen.FormBaseNew):
                                 t_name[1] == repo_name[1]):
                             s_value += '    ' + tools[tool] + '\n      Built: '
                             s_value += inventory['built'][tool] + '\n'
-                            s_value += '      Enabled: '
-                            s_value += inventory['enabled'][tool] + '\n'
                             s_value += '      Image name: '
                             s_value += inventory['images'][tool] + '\n'
                             s_value += '      Status: '

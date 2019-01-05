@@ -110,7 +110,7 @@ class Action:
         return status
 
     def remove(self, repo=None, namespace=None, name=None, groups=None,
-               enabled='yes', branch='master', version='HEAD', built='yes'):
+               branch='master', version='HEAD', built='yes'):
         """ Remove tools or a repo """
         self.logger.info('Starting: remove')
         status = (True, None)
@@ -124,7 +124,6 @@ class Action:
                                         repo=repo,
                                         namespace=namespace,
                                         groups=groups,
-                                        enabled=enabled,
                                         branch=branch,
                                         version=version,
                                         built=built)
@@ -147,7 +146,6 @@ class Action:
                    repo=None,
                    name=None,
                    groups=None,
-                   enabled='yes',
                    branch='master',
                    version='HEAD'):
         """ Prep a bunch of containers to be started to they can be ordered """
@@ -163,7 +161,7 @@ class Action:
         """
         Start a set of tools that match the parameters given, if no parameters
         are given, start all installed tools on the master branch at verison
-        HEAD that are enabled
+        HEAD
         """
         self.logger.info('Starting: start')
         status = (True, None)
@@ -234,14 +232,13 @@ class Action:
                repo=None,
                name=None,
                groups=None,
-               enabled='yes',
                branch='master',
                version='HEAD',
                new_version='HEAD'):
         """
         Update a set of tools that match the parameters given, if no parameters
         are given, updated all installed tools on the master branch at verison
-        HEAD that are enabled
+        HEAD
         """
         args = locals()
         del args['new_version']
@@ -414,13 +411,12 @@ class Action:
              repo=None,
              name=None,
              groups=None,
-             enabled='yes',
              branch='master',
              version='HEAD'):
         """
         Stop a set of tools that match the parameters given, if no parameters
         are given, stop all installed tools on the master branch at verison
-        HEAD that are enabled
+        HEAD
         """
         args = locals()
         self.logger.info('Starting: stop')
@@ -460,13 +456,12 @@ class Action:
               repo=None,
               name=None,
               groups=None,
-              enabled='yes',
               branch='master',
               version='HEAD'):
         """
         Clean (stop and remove) a set of tools that match the parameters given,
         if no parameters are given, clean all installed tools on the master
-        branch at verison HEAD that are enabled
+        branch at verison HEAD
         """
         args = locals()
         self.logger.info('Starting: clean')
@@ -512,7 +507,6 @@ class Action:
               repo=None,
               name=None,
               groups=None,
-              enabled='yes',
               branch='master',
               version='HEAD'):
         """ Build a set of tools that match the parameters given """
@@ -689,17 +683,6 @@ class Action:
         self.logger.info('Finished: restore')
         return status
 
-    @staticmethod
-    def configure():
-        # TODO
-        # tools, core, etc.
-        return
-
-    @staticmethod
-    def upgrade():
-        # TODO
-        return
-
     def reset(self):
         """ Factory reset all of Vent's user data, containers, and images """
         status = (True, None)
@@ -801,11 +784,6 @@ class Action:
         self.logger.info('Finished: logs')
         return status
 
-    @staticmethod
-    def help():
-        # TODO
-        return
-
     def inventory(self, choices=None):
         """ Return a dictionary of the inventory items and status """
         self.logger.info('Starting: inventory')
@@ -814,9 +792,9 @@ class Action:
         if not choices:
             return (False, 'No choices made')
         try:
-            # choices: repos, core, tools, images, built, running, enabled
+            # choices: repos, core, tools, images, built, running
             items = {'repos': [], 'core': {}, 'tools': {}, 'images': {},
-                     'built': {}, 'running': {}, 'enabled': {}}
+                     'built': {}, 'running': {}}
 
             tools = self.plugin.list_tools()
             self.logger.info('found tools: ' + str(tools))
@@ -859,8 +837,6 @@ class Action:
                                         '-' + tool['version']:
                                     status = container[1]
                             items[choice][tool['section']] = status
-                        elif choice == 'enabled':
-                            items[choice][tool['section']] = tool['enabled']
                         else:
                             # unknown choice
                             pass
@@ -879,7 +855,6 @@ class Action:
                       repo=None,
                       name=None,
                       groups=None,
-                      enabled='yes',
                       branch='master',
                       version='HEAD',
                       main_cfg=False):
@@ -933,7 +908,6 @@ class Action:
                        repo=None,
                        name=None,
                        groups=None,
-                       enabled='yes',
                        branch='master',
                        version='HEAD',
                        config_val='',
@@ -1105,7 +1079,6 @@ class Action:
                       repo=None,
                       name=None,
                       groups=None,
-                      enabled='yes',
                       branch='master',
                       version='HEAD',
                       main_cfg=False,
@@ -1199,56 +1172,6 @@ class Action:
         self.logger.info('restart_tools finished with status: ' +
                          str(status[0]))
         self.logger.info('Finished: restart_tools')
-        return status
-
-    def disable(self,
-                repo=None,
-                name=None,
-                groups=None,
-                enabled='yes',
-                branch='master',
-                version='HEAD'):
-        """ Take an enabled tool and disable it """
-        self.logger.info('Starting: disable')
-        constraints = locals()
-        status = (True, None)
-        try:
-            tools, manifest = self.p_helper.constraint_options(constraints, [])
-            for tool in tools:
-                manifest.set_option(tool, 'enabled', 'no')
-                manifest.write_config()
-                tool_name = manifest.option(tool, 'name')[1]
-                self.logger.info('Disabled tool: ' + tool_name)
-        except Exception as e:  # pragma: no cover
-            self.logger.error('Troubling disabling tool because: ' + str(e))
-            status = (False, str(e))
-        self.logger.info('Status of disable: ' + str(status[0]))
-        self.logger.info('Finished: disable')
-        return status
-
-    def enable(self,
-               repo=None,
-               name=None,
-               groups=None,
-               enabled='no',
-               branch='master',
-               version='HEAD'):
-        """ Take a disabled tool and enable it """
-        self.logger.info('Starting: enable')
-        constraints = locals()
-        status = (True, None)
-        try:
-            tools, manifest = self.p_helper.constraint_options(constraints, [])
-            for tool in tools:
-                manifest.set_option(tool, 'enabled', 'yes')
-                manifest.write_config()
-                tool_name = manifest.option(tool, 'name')[1]
-                self.logger.info('Enabled tool: ' + tool_name)
-        except Exception as e:  # pragma: no cover
-            self.logger.error('Troubling enabling tool because: ' + str(e))
-            status = (False, str(e))
-        self.logger.info('Status of enable: ' + str(status[0]))
-        self.logger.info('Finished: enable')
         return status
 
     def startup(self):
@@ -1389,81 +1312,6 @@ class Action:
             status = (False, str(e))
         self.logger.info('startup finished with status ' + str(status[0]))
         self.logger.info('Finished: startup')
-        return status
-
-    def tool_status_checker(self, tool_name):
-        """
-        Reads from the plugin manifest. Checks to see if:
-        1. plugin manifest exists
-        2. if the given tool is built
-        3. if the given tool is running
-
-        Args:
-            tool_name(str): tool name. Checks plugin manifest option `name`
-
-        Returns:
-            A tuple of success status, and a tuple containing:
-            bool describing if plugin manifest exists,
-            bool describing if tool is built,
-            bool describing if tool is running.
-            eg: (True, (True, True, False))
-        """
-        status = (True, None)
-        try:
-            self.logger.info('Start: tool_status_checker')
-            manifest = Template(self.p_helper.manifest)
-            for section in manifest.sections()[1]:
-                if manifest.option(section, 'name')[1] == tool_name:
-                    status_tup = (True, manifest.option(section, 'built')[1],
-                                  manifest.option(section, 'running')[1])
-                    status = (True, status_tup)
-                    break
-
-        except Exception as e:  # pragma: no cover
-            self.logger.error('Failed to check tool status: ' + str(e))
-            status = (False, str(e))
-
-        self.logger.info('Status of tool status: ' + str(status[0]))
-        self.logger.info('Finished: tool status')
-        return status
-
-    def tool_status_output(self, tool_name):
-        """
-        Function uses tool_status_checker to see tool status. Using that, it
-        will return messages to output
-
-        Args:
-            tool_name(str): tool name
-
-        Returns:
-            A tuple of success status and a string to display
-        """
-        status = (True, None)
-        try:
-            self.logger.info('Start: tool_status_output')
-            output = ''
-            tool_status = self.tool_status_checker(tool_name)[1]
-
-            # this means plugin_manifest doesn't exist because tool_status isn't
-            # a tuple but an error message. AKA template couldnt find plugin
-            # manifest as it doesn't exist
-            if not isinstance(tool_status, tuple):
-                output = 'Please install core tools'
-
-            # this means the core tool isn't built
-            elif tool_status[1] == 'no':
-                output = 'Please build core tool ' + str(tool_name)
-
-            # this means the core tool isn't running
-            elif tool_status[2] == 'no':
-                output = 'Please start core tool ' + str(tool_name)
-            status = (True, output)
-        except Exception as e:  # pragma: no cover
-            status = (False, e)
-            self.logger.info('Error: ' + str(e))
-
-        self.logger.info('Status of tool_status_output: ' + str(status[0]))
-        self.logger.info('Finished: tool_status_output')
         return status
 
     @staticmethod

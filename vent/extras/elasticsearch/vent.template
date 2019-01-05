@@ -1,6 +1,6 @@
 [info]
 name = Elasticsearch
-groups = core,search
+groups = search
 
 [service]
 uri_prefix1 = http://

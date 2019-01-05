@@ -1,6 +1,6 @@
 [info]
 name = Workflow
-groups = core,files,monitoring,workflow
+groups = files,monitoring,workflow
 
 [service]
 uri_prefix1 = http://

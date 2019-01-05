@@ -52,7 +52,7 @@ class ToolForm(npyscreen.ActionForm):
         self.manifest = manifest
         self.views += possible_groups
         self.views.append('all groups')
-        self.no_instance = ['build', 'remove']
+        self.no_instance = ['remove']
         super(ToolForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):
@@ -84,7 +84,7 @@ class ToolForm(npyscreen.ActionForm):
         self.add(npyscreen.TitleText,
                  name='Select which tools to ' + self.action['action'] + ':',
                  editable=False)
-        togglable = ['remove', 'enable', 'disable', 'build']
+        togglable = ['remove']
         if self.action['action_name'] in togglable:
             self.cur_view = self.add(npyscreen.TitleText,
                                      name='Group view:',
@@ -99,7 +99,6 @@ class ToolForm(npyscreen.ActionForm):
             response = self.action['api_action'].inventory(choices=['repos',
                                                                     'tools',
                                                                     'built',
-                                                                    'enabled',
                                                                     'running',
                                                                     'core'])
         else:
@@ -127,12 +126,6 @@ class ToolForm(npyscreen.ActionForm):
                 else:
                     repo_name = repo.split('/')
 
-                # determine if enabled or disabled tools should be shown
-                show_disabled = False
-                if 'action_name' in self.action:
-                    if self.action['action_name'] == 'enable':
-                        show_disabled = True
-
                 for tool in inventory['tools']:
                     tool_repo_name = tool.split(':')
 
@@ -157,23 +150,8 @@ class ToolForm(npyscreen.ActionForm):
                                     self.logger.error("Couldn't check ext"
                                                       ' because: ' + str(e))
                                     externally_active = False
-                        # check to ensure not disabled
-                        disabled = False
                         manifest = Template(self.api_action.plugin.manifest)
-                        if manifest.option(tool, 'enabled')[1] == 'no':
-                            disabled = True
-                        if (not externally_active and not disabled and not
-                                show_disabled):
-                            instance_num = re.search(r'\d+$',
-                                                     manifest.option(
-                                                         tool, 'name')[1])
-                            if not instance_num:
-                                ncore_list.append(tool)
-                            # multiple instances share same image
-                            elif self.action['action_name'] not in self.no_instance:
-                                ncore_list.append(tool)
-                        elif (not externally_active and disabled and
-                                show_disabled):
+                        if not externally_active:
                             instance_num = re.search(r'\d+$',
                                                      manifest.option(
                                                          tool, 'name')[1])
@@ -207,23 +185,8 @@ class ToolForm(npyscreen.ActionForm):
                                     self.logger.error("Couldn't check ext"
                                                       ' because: ' + str(e))
                                     externally_active = False
-                        # check to ensure not disabled
-                        disabled = False
                         manifest = Template(self.api_action.plugin.manifest)
-                        if manifest.option(tool, 'enabled')[1] == 'no':
-                            disabled = True
-                        if (not externally_active and not disabled and not
-                                show_disabled):
-                            instance_num = re.search(r'\d+$',
-                                                     manifest.option(
-                                                         tool, 'name')[1])
-                            if not instance_num:
-                                core_list.append(tool)
-                            # multiple instances share same image
-                            elif self.action['action_name'] not in self.no_instance:
-                                core_list.append(tool)
-                        elif (not externally_active and disabled and
-                                show_disabled):
+                        if not externally_active:
                             instance_num = re.search(r'\d+$',
                                                      manifest.option(
                                                          tool, 'name')[1])
