@@ -109,15 +109,15 @@ class DeleteR(object):
             try:
                 payload = json.load(req.stream)
             except Exception as e:  # pragma: no cover
-                resp.body = 'malformed payload'
+                resp.body = "(False, 'malformed payload')"
                 return
         else:
-            resp.body = 'malformed payload'
+            resp.body = "(False, 'malformed payload')"
             return
 
         # verify payload has a container ID
         if 'id' not in payload:
-            resp.body = 'payload missing id'
+            resp.body = "(False, 'payload missing id')"
             return
 
         # connect to docker and stop the given container
@@ -136,8 +136,7 @@ class DeleteR(object):
             resp.body = "(False, 'unable to delete containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully deleted: " + \
-            str(payload['id']) + "')"
+        resp.body = "(True, " + str(payload['id']) + ")"
         return
 
 
@@ -218,7 +217,7 @@ class NICsR(object):
         try:
             nics = d_client.containers.run('cyberreboot/gonet',
                                            network_mode='host', remove=True)
-            resp.body = str(nics.id)
+            resp.body = "(True, " + str(nics.id) + ")"
         except Exception as e:  # pragma: no cover
             resp.body = "(False, 'Failure because: " + str(e) + "')"
             return
@@ -246,10 +245,10 @@ class StartR(object):
             try:
                 payload = json.load(req.stream)
             except Exception as e:  # pragma: no cover
-                resp.body = 'malformed payload'
+                resp.body = "(False, 'malformed payload')"
                 return
         else:
-            resp.body = 'malformed payload'
+            resp.body = "(False, 'malformed payload')"
             return
 
         # verify payload has a container ID
@@ -273,8 +272,7 @@ class StartR(object):
             resp.body = "(False, 'unable to start list of containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully started: " + \
-            str(payload['id']) + "')"
+        resp.body = "(True, " + str(payload['id']) + ")"
         return
 
 
@@ -298,10 +296,10 @@ class StopR(object):
             try:
                 payload = json.load(req.stream)
             except Exception as e:  # pragma: no cover
-                resp.body = 'malformed payload'
+                resp.body = "(False, 'malformed payload')"
                 return
         else:
-            resp.body = 'malformed payload'
+            resp.body = "(False, 'malformed payload')"
             return
 
         # verify payload has a container ID
@@ -325,6 +323,5 @@ class StopR(object):
             resp.body = "(False, 'unable to stop list of containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully stopped: " + \
-            str(payload['id']) + "')"
+        resp.body = "(True, " + str(payload['id']) + ")"
         return
