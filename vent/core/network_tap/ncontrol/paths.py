@@ -136,8 +136,7 @@ class DeleteR(object):
             resp.body = "(False, 'unable to delete containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully deleted: " + \
-            str(payload['id']) + "')"
+        resp.body = "(True, " + str(payload['id']) + ")"
         return
 
 
@@ -273,8 +272,7 @@ class StartR(object):
             resp.body = "(False, 'unable to start list of containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully started: " + \
-            str(payload['id']) + "')"
+        resp.body = "(True, " + str(payload['id']) + ")"
         return
 
 
@@ -325,6 +323,5 @@ class StopR(object):
             resp.body = "(False, 'unable to stop list of containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, 'container successfully stopped: " + \
-            str(payload['id']) + "')"
+        resp.body = "(True, " + str(payload['id']) + ")"
         return
