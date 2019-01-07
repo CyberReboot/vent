@@ -109,15 +109,15 @@ class DeleteR(object):
             try:
                 payload = json.load(req.stream)
             except Exception as e:  # pragma: no cover
-                resp.body = 'malformed payload'
+                resp.body = "(False, 'malformed payload')"
                 return
         else:
-            resp.body = 'malformed payload'
+            resp.body = "(False, 'malformed payload')"
             return
 
         # verify payload has a container ID
         if 'id' not in payload:
-            resp.body = 'payload missing id'
+            resp.body = "(False, 'payload missing id')"
             return
 
         # connect to docker and stop the given container
@@ -218,7 +218,7 @@ class NICsR(object):
         try:
             nics = d_client.containers.run('cyberreboot/gonet',
                                            network_mode='host', remove=True)
-            resp.body = str(nics.id)
+            resp.body = "(True, " + str(nics.id) + ")"
         except Exception as e:  # pragma: no cover
             resp.body = "(False, 'Failure because: " + str(e) + "')"
             return
@@ -246,10 +246,10 @@ class StartR(object):
             try:
                 payload = json.load(req.stream)
             except Exception as e:  # pragma: no cover
-                resp.body = 'malformed payload'
+                resp.body = "(False, 'malformed payload')"
                 return
         else:
-            resp.body = 'malformed payload'
+            resp.body = "(False, 'malformed payload')"
             return
 
         # verify payload has a container ID
@@ -298,10 +298,10 @@ class StopR(object):
             try:
                 payload = json.load(req.stream)
             except Exception as e:  # pragma: no cover
-                resp.body = 'malformed payload'
+                resp.body = "(False, 'malformed payload')"
                 return
         else:
-            resp.body = 'malformed payload'
+            resp.body = "(False, 'malformed payload')"
             return
 
         # verify payload has a container ID
