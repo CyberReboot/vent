@@ -29,18 +29,3 @@ def test_checkout():
     status = instance.checkout()
     assert isinstance(status, tuple)
     assert status[0] == True
-
-
-def test_available_tools():
-    """ Test the available_tools function """
-    instance = PluginHelper()
-    path, _, _ = instance.get_path('https://github.com/cyberreboot/vent')
-    matches = instance.available_tools(path)
-    assert isinstance(matches, list)
-
-
-def test_tool_matches():
-    """ Test the tool_matches function """
-    instance = PluginHelper()
-    matches = instance.tool_matches(tools=[])
-    assert matches == []

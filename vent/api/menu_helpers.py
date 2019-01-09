@@ -9,9 +9,10 @@ import docker
 
 from vent.api.actions import Action
 from vent.api.plugin_helpers import PluginHelper
-from vent.api.templates import Template
 from vent.helpers.logs import Logger
+from vent.helpers.meta import AvailableTools
 from vent.helpers.meta import Tools
+from vent.helpers.templates import Template
 
 
 class MenuHelper:
@@ -54,15 +55,13 @@ class MenuHelper:
 
                 self.logger.info('status of plugin checkout ' +
                                  str(response))
-                matches = self.p_helper.available_tools(path,
-                                                        version=version,
-                                                        groups='core')
+                matches = AvailableTools(path, version=version, groups='core')
                 for match in matches:
                     name = match[0].rsplit('/')[-1]
                     constraints = {'name': name,
                                    'repo': core_repo}
-                    prev_installed, _ = self.p_helper. \
-                        constraint_options(constraints, [])
+                    prev_installed, _ = Template(
+                        self.p_helper.manifest).constrain_opts(constraints, [])
                     if not prev_installed:
                         tools.append((match[0], ''))
                 # only add stuff not already installed or repo specification
@@ -311,7 +310,7 @@ class MenuHelper:
 
             if status[0]:
                 path, _, _ = self.p_helper.get_path(repo)
-                tools = self.p_helper.available_tools(path, version=version)
+                tools = AvailableTools(path, version=version)
             else:
                 self.logger.info('checkout failed. Exiting repo_tools with'
                                  ' status: ' + str(status))
@@ -368,10 +367,10 @@ class MenuHelper:
                 path, _, _ = p_helper.get_path(repo, core=core)
                 matches = None
                 if core:
-                    matches = p_helper.available_tools(path, version=version,
-                                                       groups='core')
+                    matches = AvailableTools(path, version=version,
+                                             groups='core')
                 else:
-                    matches = p_helper.available_tools(path, version=version)
+                    matches = AvailableTools(path, version=version)
                 for match in matches:
                     if core:
                         all_tools['normal'].append(

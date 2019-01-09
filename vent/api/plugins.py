@@ -14,12 +14,14 @@ import docker
 import yaml
 
 from vent.api.plugin_helpers import PluginHelper
-from vent.api.templates import Template
 from vent.helpers.errors import ErrorHandler
 from vent.helpers.logs import Logger
+from vent.helpers.meta import AvailableTools
 from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Timestamp
+from vent.helpers.meta import ToolMatches
 from vent.helpers.paths import PathDirs
+from vent.helpers.templates import Template
 
 
 class Plugin:
@@ -38,8 +40,7 @@ class Plugin:
 
     def add(self, repo, tools=None, overrides=None, version='HEAD', image=None,
             branch='master', build=True, user=None, pw=None, groups=None,
-            version_alias=None, wild=None, remove_old=True, disable_old=True,
-            limit_groups=None, core=False, update_repo=None):
+            core=False, update_repo=None):
         """
         Adds a plugin of tool(s)
         tools is a list of tuples, where the pair is a tool name (path to
@@ -56,22 +57,7 @@ class Plugin:
         build is a boolean of whether or not to build the tools now user is the
         username for a private repo if needed pw is the password to go along
         with the username for a private repo groups is globally set for all
-        tools version_alias is globally set for all tools and is a mapping
-        from a friendly version tag to the real version commit ID wild lets
-        you specify individual overrides for additional values in the tuple
-        of tools or overrides.  wild is a list containing one or more
-        of the following: branch, build, groups, version_alias
-        the order of the items in the wild list will expect values to be
-        tacked on in the same order to the tuple for tools and overrides in
-        additional to the tool name and version
-        remove_old lets you specify whether or not to remove previously found
-        tools that match to ones being added currently (note does not stop
-        currently running instances of the older version)
-        disable_old lets you specify whether or not to disable previously found
-        tools that match to ones being added currently (note does not stop
-        currently running instances of the older version)
-        limit_groups is a list of groups to build tools for that match group
-        names in vent.template of each tool if exists
+        tools.
         Examples:
         - repo=fe:
         (get all tools from repo 'fe' at version 'HEAD' on branch 'master')
@@ -107,13 +93,6 @@ class Plugin:
         self.update_repo = update_repo
         self.path, self.org, self.name = self.p_helper.get_path(repo,
                                                                 core=core)
-
-        # TODO these need to be implemented
-        self.version_alias = version_alias
-        self.wild = wild
-        self.remove_old = remove_old
-        self.disable_old = disable_old
-        self.limit_groups = limit_groups
 
         status = (True, None)
         status_code, _ = self.p_helper.clone(self.repo, user=user, pw=pw)
@@ -282,7 +261,6 @@ class Plugin:
         """
         self.logger.info('Starting: _build_tools')
         response = (True, None)
-        # TODO implement features: wild, remove_old, disable_old, limit_groups
 
         # check result of clone, ensure successful or that it already exists
         if status:
@@ -299,24 +277,24 @@ class Plugin:
                 matches = []
                 if self.tools is None and self.overrides is None:
                     # get all tools
-                    matches = self.p_helper.available_tools(self.path, version=self.version,
-                                                            groups=search_groups)
+                    matches = AvailableTools(self.path, version=self.version,
+                                             groups=search_groups)
                 elif self.tools is None:
                     # there's only something in overrides
                     # grab all the tools then apply overrides
-                    matches = self.p_helper.available_tools(self.path, version=self.version,
-                                                            groups=search_groups)
+                    matches = AvailableTools(self.path, version=self.version,
+                                             groups=search_groups)
                     # !! TODO apply overrides to matches
                 elif self.overrides is None:
                     # there's only something in tools
                     # only grab the tools specified
-                    matches = PluginHelper.tool_matches(tools=self.tools,
-                                                        version=self.version)
+                    matches = ToolMatches(tools=self.tools,
+                                          version=self.version)
                 else:
                     # both tools and overrides were specified
                     # grab only the tools specified, with the overrides applied
-                    o_matches = PluginHelper.tool_matches(tools=self.tools,
-                                                          version=self.version)
+                    o_matches = ToolMatches(tools=self.tools,
+                                            version=self.version)
                     matches = o_matches
                     for override in self.overrides:
                         override_t = None
@@ -482,11 +460,6 @@ class Plugin:
                         template.set_option(section,
                                             'previous_versions',
                                             previous_commits)
-
-                if self.version_alias:
-                    template.set_option(section,
-                                        'version_alias',
-                                        self.version_alias)
                 if self.groups:
                     template.set_option(section, 'groups', self.groups)
                 else:
@@ -775,7 +748,7 @@ class Plugin:
         status = (True, None)
 
         # get resulting dict of sections with options that match constraints
-        results, template = self.p_helper.constraint_options(args, [])
+        results, template = Template(self.manifest).constrain_opts(args, [])
         for result in results:
             response, image_name = template.option(result, 'image_name')
             name = template.option(result, 'name')[1]
@@ -840,7 +813,8 @@ class Plugin:
         options = ['branch', 'groups', 'image_name']
 
         # get resulting dict of sections with options that match constraints
-        results, template = self.p_helper.constraint_options(args, options)
+        results, template = Template(
+            self.manifest).constrain_opts(args, options)
         for result in results:
             # check for container and remove
             try:
@@ -872,7 +846,7 @@ class Plugin:
         options = ['version', 'previous_versions']
 
         # get resulting dict of sections with options that match constraints
-        results, _ = self.p_helper.constraint_options(args, options)
+        results, _ = Template(self.manifest).constrain_opts(args, options)
         for result in results:
             version_list = [results[result]['version']]
             if 'previous_versions' in results[result]:
@@ -892,7 +866,7 @@ class Plugin:
         options = ['version']
 
         # get resulting dict of sections with options that match constraints
-        results, _ = self.p_helper.constraint_options(args, options)
+        results, _ = Template(self.manifest).constrain_opts(args, options)
         for result in results:
             versions.append((result, results[result]['version']))
         return versions
@@ -992,7 +966,7 @@ class Plugin:
         """
         self.logger.info('Starting: fill_config')
         status = (True, None)
-        must_build = False
+        config_override = False
 
         try:
             # parse the yml file
@@ -1023,7 +997,7 @@ class Plugin:
                         plugin_template.set_option(section, option,
                                                    str(plugin_options[section][option]))
                 plugin_template.write_config()
-                must_build = True
+                config_override = True
 
         except Exception as e:  # pragma: no cover
             status = (False, e)
@@ -1031,4 +1005,4 @@ class Plugin:
 
         self.logger.info('Status of fill_config: ' + str(status[0]))
         self.logger.info('Finished: fill_config')
-        return must_build
+        return config_override

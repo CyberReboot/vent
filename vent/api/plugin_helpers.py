@@ -15,10 +15,10 @@ from subprocess import STDOUT
 import docker
 import requests
 
-from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
+from vent.helpers.templates import Template
 
 
 class PluginHelper:
@@ -30,19 +30,6 @@ class PluginHelper:
         self.manifest = join(self.path_dirs.meta_dir,
                              'plugin_manifest.cfg')
         self.logger = Logger(__name__)
-
-    def constraint_options(self, constraint_dict, options):
-        """ Return result of constraints and options against a template """
-        constraints = {}
-        template = Template(template=self.manifest)
-        for constraint in constraint_dict:
-            if constraint != 'self':
-                if (constraint_dict[constraint] or
-                        constraint_dict[constraint] == ''):
-                    constraints[constraint] = constraint_dict[constraint]
-        results = template.constrained_sections(constraints=constraints,
-                                                options=options)
-        return results, template
 
     def get_path(self, repo, core=False):
         """ Return the path for the repo """
@@ -164,67 +151,6 @@ class PluginHelper:
         self.logger.info('Status of clone: ' + str(status))
         self.logger.info('Finished: clone')
         return status
-
-    def available_tools(self, path, version='HEAD', groups=None):
-        """
-        Return list of possible tools in repo for the given version and branch
-        """
-        matches = []
-        if groups:
-            groups = groups.split(',')
-        for root, _, filenames in walk(path):
-            files = fnmatch.filter(filenames, 'Dockerfile*')
-            # append additional identifiers to tools if multiple in same
-            # directory
-            add_info = len(files) > 1
-            for f in files:
-                # !! TODO deal with wild/etc.?
-                addtl_info = ''
-                if add_info:
-                    # @ will be delimiter symbol for multi-tools
-                    try:
-                        addtl_info = '@' + f.split('.')[1]
-                    except Exception as e:
-                        addtl_info = '@unspecified'
-                if groups:
-                    if add_info and not addtl_info == '@unspecified':
-                        tool_template = addtl_info.split('@')[1] + '.template'
-                    else:
-                        tool_template = 'vent.template'
-                    try:
-                        template = Template(template=join(root,
-                                                          tool_template))
-                        for group in groups:
-                            template_groups = template.option('info', 'groups')
-                            if (template_groups[0] and
-                                    group in template_groups[1]):
-                                matches.append((root.split(path)[1] +
-                                                addtl_info, version))
-                    except Exception as e:  # pragma: no cover
-                        self.logger.info('error: ' + str(e))
-                else:
-                    matches.append((root.split(path)[1] +
-                                    addtl_info, version))
-        return matches
-
-    @staticmethod
-    def tool_matches(tools=None, version='HEAD'):
-        """ Get the tools paths and versions that were specified """
-        matches = []
-        if tools:
-            for tool in tools:
-                match_version = version
-                if tool[1] != '':
-                    match_version = tool[1]
-                match = ''
-                if tool[0].endswith('/'):
-                    match = tool[0][:-1]
-                elif tool[0] != '.':
-                    match = tool[0]
-                if not match.startswith('/') and match != '':
-                    match = '/'+match
-                matches.append((match, match_version))
-        return matches
 
     def start_sections(self,
                        s,
@@ -422,7 +348,8 @@ class PluginHelper:
                 # mount necessary directories
                 if 'files' in s[section]['groups']:
                     ulimits = []
-                    ulimits.append(docker.types.Ulimit(name='nofile', soft=1048576, hard=1048576))
+                    ulimits.append(docker.types.Ulimit(
+                        name='nofile', soft=1048576, hard=1048576))
                     tool_d[c_name]['ulimits'] = ulimits
                     # check if running in a docker container
                     if 'VENT_CONTAINERIZED' in environ and environ['VENT_CONTAINERIZED'] == 'true':
@@ -498,7 +425,7 @@ class PluginHelper:
             manifest = Template(self.manifest)
             files = vent_config.option('main', 'files')
             files = (files[0], expanduser(files[1]))
-            s, _ = self.constraint_options(args, options)
+            s, _ = manifest.constrain_opts(args, options)
             status, tool_d = self.start_sections(s,
                                                  files,
                                                  groups,

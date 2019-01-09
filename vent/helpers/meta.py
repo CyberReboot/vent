@@ -1,10 +1,16 @@
 import datetime
+import fnmatch
 import json
 import math
 import multiprocessing
-import os
 import platform
 import re
+from os import environ
+from os import walk
+from os.path import abspath
+from os.path import exists
+from os.path import expanduser
+from os.path import join
 from subprocess import check_output
 from subprocess import PIPE
 from subprocess import Popen
@@ -13,9 +19,9 @@ import docker
 import pkg_resources
 import requests
 
-from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
+from vent.helpers.templates import Template
 
 logger = Logger(__name__)
 
@@ -53,13 +59,13 @@ def Docker():
     docker_info['os'] = system
 
     # check if native or using docker-machine
-    if 'DOCKER_MACHINE_NAME' in os.environ:
+    if 'DOCKER_MACHINE_NAME' in environ:
         # using docker-machine
-        docker_info['env'] = os.environ['DOCKER_MACHINE_NAME']
+        docker_info['env'] = environ['DOCKER_MACHINE_NAME']
         docker_info['type'] = 'docker-machine'
-    elif 'DOCKER_HOST' in os.environ:
+    elif 'DOCKER_HOST' in environ:
         # not native
-        docker_info['env'] = os.environ['DOCKER_HOST']
+        docker_info['env'] = environ['DOCKER_HOST']
         docker_info['type'] = 'remote'
     else:
         # using "local" server
@@ -296,9 +302,9 @@ def Jobs():
         tool_names = []
         finished_jobs = []
         path_dirs = PathDirs()
-        manifest = os.path.join(path_dirs.meta_dir, 'status.json')
+        manifest = join(path_dirs.meta_dir, 'status.json')
 
-        if os.path.exists(manifest):
+        if exists(manifest):
             file_status = 'a'
         else:
             file_status = 'w'
@@ -366,10 +372,71 @@ def Jobs():
 def Tools(**kargs):
     """ Get tools that exist in the manifest """
     path_dirs = PathDirs(**kargs)
-    manifest = os.path.join(path_dirs.meta_dir, 'plugin_manifest.cfg')
+    manifest = join(path_dirs.meta_dir, 'plugin_manifest.cfg')
     template = Template(template=manifest)
     tools = template.sections()
     return tools[1]
+
+
+def AvailableTools(path, version='HEAD', groups=None):
+    """
+    Return list of possible tools in repo for the given version and branch
+    """
+    matches = []
+    if groups:
+        groups = groups.split(',')
+    for root, _, filenames in walk(path):
+        files = fnmatch.filter(filenames, 'Dockerfile*')
+        # append additional identifiers to tools if multiple in same
+        # directory
+        add_info = len(files) > 1
+        for f in files:
+            addtl_info = ''
+            if add_info:
+                # @ will be delimiter symbol for multi-tools
+                try:
+                    addtl_info = '@' + f.split('.')[1]
+                except Exception as e:
+                    addtl_info = '@unspecified'
+            if groups:
+                if add_info and not addtl_info == '@unspecified':
+                    tool_template = addtl_info.split('@')[1] + '.template'
+                else:
+                    tool_template = 'vent.template'
+                try:
+                    template = Template(template=join(root,
+                                                      tool_template))
+                    for group in groups:
+                        template_groups = template.option('info', 'groups')
+                        if (template_groups[0] and
+                                group in template_groups[1]):
+                            matches.append((root.split(path)[1] +
+                                            addtl_info, version))
+                except Exception as e:  # pragma: no cover
+                    logger.info('error: ' + str(e))
+            else:
+                matches.append((root.split(path)[1] +
+                                addtl_info, version))
+    return matches
+
+
+def ToolMatches(tools=None, version='HEAD'):
+    """ Get the tools paths and versions that were specified """
+    matches = []
+    if tools:
+        for tool in tools:
+            match_version = version
+            if tool[1] != '':
+                match_version = tool[1]
+            match = ''
+            if tool[0].endswith('/'):
+                match = tool[0][:-1]
+            elif tool[0] != '.':
+                match = tool[0]
+            if not match.startswith('/') and match != '':
+                match = '/'+match
+            matches.append((match, match_version))
+    return matches
 
 
 def Services(core, vent=True, external=False, **kargs):
@@ -511,8 +578,8 @@ def DropLocation():
     """ Get the directory that file drop is watching """
     template = Template(template=PathDirs().cfg_file)
     drop_loc = template.option('main', 'files')[1]
-    drop_loc = os.path.expanduser(drop_loc)
-    drop_loc = os.path.abspath(drop_loc)
+    drop_loc = expanduser(drop_loc)
+    drop_loc = abspath(drop_loc)
     return (True, drop_loc)
 
 
@@ -551,7 +618,7 @@ def Dependencies(tools):
     dependencies = []
     if tools:
         path_dirs = PathDirs()
-        man = Template(os.path.join(path_dirs.meta_dir, 'plugin_manifest.cfg'))
+        man = Template(join(path_dirs.meta_dir, 'plugin_manifest.cfg'))
         for section in man.sections()[1]:
             # don't worry about dealing with tool if it's not running
             running = man.option(section, 'running')

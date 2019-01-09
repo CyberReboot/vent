@@ -13,13 +13,14 @@ import queue
 import yaml
 
 from vent.api.plugins import Plugin
-from vent.api.templates import Template
 from vent.helpers.logs import Logger
+from vent.helpers.meta import AvailableTools
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Dependencies
 from vent.helpers.meta import Images
 from vent.helpers.meta import Timestamp
 from vent.helpers.paths import PathDirs
+from vent.helpers.templates import Template
 
 
 class Action:
@@ -36,7 +37,6 @@ class Action:
 
     def add(self, repo, tools=None, overrides=None, version='HEAD', image=None,
             branch='master', build=True, user=None, pw=None, groups=None,
-            version_alias=None, wild=None, remove_old=True, disable_old=True,
             update_repo=None):
         """ Add a new set of tool(s) """
         self.logger.info('Starting: add')
@@ -53,8 +53,8 @@ class Action:
                         tool_name = tool[0].rsplit('/', 1)[-1]
                     constraints = {'name': tool_name,
                                    'repo': repo.split('.git')[0]}
-                    prev_installed, _ = self.p_helper. \
-                        constraint_options(constraints, [])
+                    prev_installed, _ = Template(
+                        self.p_helper.manifest).constrain_opts(constraints, [])
                     # don't reinstall
                     if prev_installed:
                         tools.remove(tool)
@@ -71,10 +71,6 @@ class Action:
                                          user=user,
                                          pw=pw,
                                          groups=groups,
-                                         version_alias=version_alias,
-                                         wild=wild,
-                                         remove_old=remove_old,
-                                         disable_old=disable_old,
                                          core=is_core,
                                          update_repo=update_repo)
             else:
@@ -248,7 +244,8 @@ class Action:
         try:
             options = ['path', 'image_name', 'image_id', 'running',
                        'multi_tool', 'name', 'link_name']
-            s, template = self.p_helper.constraint_options(args, options)
+            s, template = Template(
+                self.p_helper.manifest).constrain_opts(args, options)
 
             # get existing containers and images and states
             running_containers = Containers()
@@ -433,7 +430,8 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            s, _ = self.p_helper.constraint_options(args, options)
+            s, _ = Template(self.p_helper.manifest).constrain_opts(
+                args, options)
             self.logger.info(s)
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
@@ -478,7 +476,8 @@ class Action:
                        'image_name',
                        'branch',
                        'version']
-            s, manifest = self.p_helper.constraint_options(args, options)
+            s, manifest = Template(
+                self.p_helper.manifest).constrain_opts(args, options)
             self.logger.info(s)
             for section in s:
                 container_name = s[section]['image_name'].replace(':', '-')
@@ -516,7 +515,8 @@ class Action:
         status = (True, None)
         try:
             options = ['image_name', 'path']
-            s, template = self.p_helper.constraint_options(args, options)
+            s, template = Template(
+                self.p_helper.manifest).constrain_opts(args, options)
             self.logger.info(s)
             for section in s:
                 self.logger.info('Building ' + str(section) + ' ...')
@@ -877,7 +877,8 @@ class Action:
         else:
             # all possible vent.template options stored in plugin_manifest
             options = ['info', 'service', 'settings', 'docker', 'gpu']
-            tools = self.p_helper.constraint_options(constraints, options)[0]
+            tools = Template(self.p_helper.manifest).constrain_opts(
+                constraints, options)[0]
             if tools:
                 # should only be one tool
                 tool = list(tools.keys())[0]
@@ -968,15 +969,16 @@ class Action:
                     t_identifier = {'name': name,
                                     'branch': branch,
                                     'version': version}
-                    result = self.p_helper.constraint_options(t_identifier, [])
+                    result = Template(self.p_helper.manifest).constrain_opts(
+                        t_identifier, [])
                     tools = result[0]
                     manifest = result[1]
                     tool = list(tools.keys())[0]
                 else:
                     options = ['path', 'multi_tool', 'name']
                     self.logger.info(constraints)
-                    tools, manifest = self.p_helper. \
-                        constraint_options(constraints, options)
+                    tools, manifest = Template(
+                        self.p_helper.manifest).constrain_opts(constraints, options)
                     self.logger.info(tools)
                     # only one tool in tools because perform this function for
                     # every tool
@@ -999,8 +1001,8 @@ class Action:
                 options = ['namespace']
                 constraints.update({'type': 'registry'})
                 del constraints['branch']
-                tools, manifest = self.p_helper.constraint_options(constraints,
-                                                                   options)
+                tools, manifest = Template(self.p_helper.manifest).constrain_opts(constraints,
+                                                                                  options)
                 if tools:
                     tool = list(tools.keys())[0]
                 else:
@@ -1096,9 +1098,9 @@ class Action:
                 t_identifier = {'name': name,
                                 'branch': branch,
                                 'version': version}
-                result = self.p_helper.constraint_options(t_identifier,
-                                                          ['running',
-                                                              'link_name'])
+                result = Template(self.p_helper.manifest).constrain_opts(t_identifier,
+                                                                         ['running',
+                                                                          'link_name'])
                 tools = result[0]
                 tool = list(tools.keys())[0]
                 if ('running' in tools[tool] and
@@ -1210,7 +1212,7 @@ class Action:
             for repo in s_dict_c:
                 self.p_helper.clone(repo)
                 repo_path, org, r_name = self.p_helper.get_path(repo)
-                available_tools = self.p_helper.available_tools(repo_path)
+                available_tools = AvailableTools(repo_path)
                 for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs

@@ -8,10 +8,10 @@ import npyscreen
 
 from vent.api.actions import Action
 from vent.api.menu_helpers import MenuHelper
-from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
+from vent.helpers.templates import Template
 from vent.menus.editor import EditorForm
 
 
@@ -328,8 +328,8 @@ class ToolForm(npyscreen.ActionForm):
                                        'repo': repo}
                         options = ['type']
                         action = self.action['api_action']
-                        tool = action.p_helper.constraint_options(constraints,
-                                                                  options)[0]
+                        tool = self.manifest.constrain_opts(constraints,
+                                                            options)[0]
                         # only one tool should be returned
                         name = list(tool.keys())[0]
                         if tool[name]['type'] == 'registry':

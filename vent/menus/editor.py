@@ -7,7 +7,7 @@ import re
 import npyscreen
 
 from vent.api.plugin_helpers import PluginHelper
-from vent.api.templates import Template
+from vent.helpers.templates import Template
 from vent.menus.del_instances import DeleteForm
 
 
@@ -47,7 +47,8 @@ class EditorForm(npyscreen.ActionForm):
 
         # get manifest info for tool that will be used throughout
         if not self.just_downloaded and not self.vent_cfg:
-            result = self.p_helper.constraint_options(self.tool_identifier, [])
+            result = Template(self.p_helper.manifest).constrain_opts(
+                self.tool_identifier, [])
             tool, self.manifest = result
             self.section = list(tool.keys())[0]
 

@@ -142,3 +142,16 @@ class Template:
                     if result[0]:
                         sections[a_section][option] = result[1]
         return sections
+
+    @ErrorHandler
+    def constrain_opts(self, constraint_dict, options):
+        """ Return result of constraints and options against a template """
+        constraints = {}
+        for constraint in constraint_dict:
+            if constraint != 'self':
+                if (constraint_dict[constraint] or
+                        constraint_dict[constraint] == ''):
+                    constraints[constraint] = constraint_dict[constraint]
+        results = self.constrained_sections(constraints=constraints,
+                                            options=options)
+        return results, self.template
