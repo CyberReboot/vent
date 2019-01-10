@@ -1,4 +1,5 @@
 import ast
+import copy
 import getpass
 import json
 import re
@@ -8,6 +9,7 @@ from datetime import datetime
 from os import chdir
 from os import environ
 from os import getcwd
+from os import mkdir
 from os.path import exists
 from os.path import expanduser
 from os.path import join
@@ -15,6 +17,7 @@ from subprocess import check_output
 from subprocess import STDOUT
 
 import docker
+import yaml
 
 from vent.helpers.logs import Logger
 from vent.helpers.meta import AvailableTools
@@ -504,6 +507,7 @@ class Repository:
         return status
 
     def update(self, repo, tools=None):
+        # TODO
         return
 
 
@@ -528,6 +532,10 @@ class Image:
                 tag = 'latest'
             if not registry:
                 registry = 'docker.io'
+            if not link_name:
+                link_name = name
+            if not groups:
+                groups = ''
             full_image = registry + '/' + image + ':' + tag
             image = self.d_client.images.pull(full_image)
             section = ':'.join([registry, org, name, '', tag])
@@ -565,6 +573,7 @@ class Image:
         return status
 
     def update(self, image):
+        # TODO
         return
 
 
@@ -1336,26 +1345,71 @@ class Tools:
 
 class System:
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.d_client = docker.from_env()
+        self.path_dirs = PathDirs(**kwargs)
+        self.manifest = join(self.path_dirs.meta_dir,
+                             'plugin_manifest.cfg')
+        self.vent_config = self.path_dirs.cfg_file
+        self.startup_file = self.path_dirs.startup_file
+        self.logger = Logger(__name__)
 
     def backup(self):
+        """
+        Saves the configuration information of the current running vent
+        instance to be used for restoring at a later time
+        """
+        status = (True, None)
+        # initialize all needed variables (names for backup files, etc.)
+        backup_name = ('.vent-backup-' + '-'.join(Timestamp().split(' ')))
+        backup_dir = join(expanduser('~'), backup_name)
+        backup_manifest = join(backup_dir, 'backup_manifest.cfg')
+        backup_vcfg = join(backup_dir, 'backup_vcfg.cfg')
+        manifest = self.manifest
+
+        # create new backup directory
+        try:
+            mkdir(backup_dir)
+        except Exception as e:  # pragma: no cover
+            self.logger.error(str(e))
+            return (False, str(e))
+        # create new files in backup directory
+        try:
+            # backup manifest
+            with open(backup_manifest, 'w') as bmanifest:
+                with open(manifest, 'r') as manifest_file:
+                    bmanifest.write(manifest_file.read())
+            # backup vent.cfg
+            with open(backup_vcfg, 'w') as bvcfg:
+                with open(self.vent_config, 'r') as vcfg_file:
+                    bvcfg.write(vcfg_file.read())
+            self.logger.info('Backup information written to ' + backup_dir)
+            status = (True, backup_dir)
+        except Exception as e:  # pragma: no cover
+            self.logger.error("Couldn't backup vent: " + str(e))
+            status = (False, str(e))
         # TODO #266
-        return
+        return status
 
     def configure(self):
+        # TODO
         return
 
     def gpu(self):
+        # TODO
         return
 
     def history(self):
         # TODO #255
         return
 
-    def restore(self):
+    def restore(self, backup_dir):
+        """
+        Restores a vent configuration from a previously backed up version
+        """
         # TODO #266
-        return
+        status = (True, None)
+        return status
 
     def reset(self):
         """ Factory reset all of Vent's user data, containers, and images """
@@ -1403,28 +1457,156 @@ class System:
         return
 
     def start(self):
+        # startup based on startup file
+        if exists(self.startup_file):
+            self._startuo()
+        # TODO
         return
 
+    def _startup(self):
+        """
+        Automatically detect if a startup file is specified and stand up a vent
+        host with all necessary tools based on the specifications in that file
+        """
+        status = (True, None)
+        try:
+            s_dict = {}
+            # rewrite the yml file to exclusively lowercase
+            with open(self.startup_file, 'r') as sup:
+                vent_startup = sup.read()
+            with open(self.startup_file, 'w') as sup:
+                for line in vent_startup:
+                    sup.write(line.lower())
+            with open(self.startup_file, 'r') as sup:
+                s_dict = yaml.safe_load(sup.read())
+            if 'vent.cfg' in s_dict:
+                v_cfg = Template(self.vent_config)
+                self.logger.info('applying vent.cfg configurations')
+                for section in s_dict['vent.cfg']:
+                    for option in s_dict['vent.cfg'][section]:
+                        val = ('no', 'yes')[
+                            s_dict['vent.cfg'][section][option]]
+                        v_status = v_cfg.add_option(section, option, value=val)
+                        if not v_status[0]:
+                            v_cfg.set_option(section, option, val)
+                v_cfg.write_config()
+                del s_dict['vent.cfg']
+            tool_d = {}
+            extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
+            s_dict_c = copy.deepcopy(s_dict)
+            tools = Tools()
+            # TODO check for repo or image type
+            for repo in s_dict_c:
+                # TODO
+                self.p_helper.clone(repo)
+                repo_path, org, r_name = self.path_dirs.get_path(repo)
+                available_tools = AvailableTools(repo_path)
+                for tool in s_dict_c[repo]:
+                    # if we can't find the tool in that repo, skip over this
+                    # tool and notify in the logs
+                    t_path, t_path_cased = PathDirs.rel_path(
+                        tool, available_tools)
+                    if t_path is None:
+                        self.logger.error("Couldn't find tool " + tool + ' in'
+                                          ' repo ' + repo)
+                        continue
+                    # ensure no NoneType iteration errors
+                    if s_dict_c[repo][tool] is None:
+                        s_dict[repo][tool] = {}
+                    # check if we need to configure instances along the way
+                    instances = 1
+                    if 'settings' in s_dict[repo][tool]:
+                        if 'instances' in s_dict[repo][tool]['settings']:
+                            instances = int(s_dict[repo][tool]
+                                            ['settings']['instances'])
+                    # add the tool
+                    t_branch = 'master'
+                    t_version = 'HEAD'
+                    t_image = None
+                    add_tools = None
+                    build_tool = False
+                    add_tools = [(t_path_cased, '')]
+                    if 'branch' in s_dict[repo][tool]:
+                        t_branch = s_dict[repo][tool]['branch']
+                    if 'version' in s_dict[repo][tool]:
+                        t_version = s_dict[repo][tool]['version']
+                    if 'build' in s_dict[repo][tool]:
+                        build_tool = s_dict[repo][tool]['build']
+                    if 'image' in s_dict[repo][tool]:
+                        t_image = s_dict[repo][tool]['image']
+                    self.add(repo, branch=t_branch, version=t_version,
+                             tools=add_tools, build=build_tool, image=t_image)
+                    manifest = Template(self.plugin.manifest)
+                    # update the manifest with extra defined runtime settings
+                    base_section = ':'.join([org, r_name, t_path,
+                                             t_branch, t_version])
+                    for option in extra_options:
+                        if option in s_dict[repo][tool]:
+                            opt_dict = manifest.option(base_section, option)
+                            # add new values defined into default options for
+                            # that tool, don't overwrite them
+                            if opt_dict[0]:
+                                opt_dict = json.loads(opt_dict[1])
+                            else:
+                                opt_dict = {}
+                            # stringify values for vent
+                            for v in s_dict[repo][tool][option]:
+                                pval = s_dict[repo][tool][option][v]
+                                s_dict[repo][tool][option][v] = json.dumps(
+                                    pval)
+                            opt_dict.update(s_dict[repo][tool][option])
+                            manifest.set_option(base_section, option,
+                                                json.dumps(opt_dict))
+                    # copy manifest info into new sections if necessary
+                    if instances > 1:
+                        for i in range(2, instances + 1):
+                            i_section = base_section.rsplit(':', 2)
+                            i_section[0] += str(i)
+                            i_section = ':'.join(i_section)
+                            manifest.add_section(i_section)
+                            for opt_val in manifest.section(base_section)[1]:
+                                if opt_val[0] == 'name':
+                                    manifest.set_option(i_section, opt_val[0],
+                                                        opt_val[1] + str(i))
+                                else:
+                                    manifest.set_option(i_section, opt_val[0],
+                                                        opt_val[1])
+                    manifest.write_config()
+
+            # start tools, if necessary
+            for repo in s_dict:
+                for tool in s_dict[repo]:
+                    if 'start' in s_dict[repo][tool]:
+                        if s_dict[repo][tool]['start']:
+                            local_instances = 1
+                            if 'settings' in s_dict[repo][tool] and 'instances' in s_dict[repo][tool]['settings']:
+                                local_instances = int(
+                                    s_dict[repo][tool]['settings']['instances'])
+                            t_branch = 'master'
+                            t_version = 'HEAD'
+                            if 'branch' in s_dict[repo][tool]:
+                                t_branch = s_dict[repo][tool]['branch']
+                            if 'version' in s_dict[repo][tool]:
+                                t_version = s_dict[repo][tool]['version']
+                            for i in range(1, local_instances + 1):
+                                i_name = tool + str(i) if i != 1 else tool
+                                i_name = i_name.replace('@', '')
+                                tool_d.update(self.prep_start(
+                                    name=i_name,
+                                    branch=t_branch,
+                                    version=t_version)[1])
+            if tool_d:
+                self.start(tool_d)
+        except Exception as e:  # pragma: no cover
+            self.logger.error('Startup failed because: {0}'.format(str(e)))
+            status = (False, str(e))
+        return status
+
     def stop(self):
+        # TODO
         return
 
     def upgrade(self):
         ''' Upgrades Vent itself, and core containers '''
+        # TODO
         return
-
-
-'''
-class Logs:
-
-class ConfigurationFiles:
-
-logs
-services running
-vent.template
-startup_config
-plugin_config
-vent.cfg
-version locking
-offline
-compose
-'''
