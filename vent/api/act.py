@@ -3,6 +3,7 @@ import getpass
 import json
 import re
 import shlex
+import shutil
 from datetime import datetime
 from os import chdir
 from os import environ
@@ -502,9 +503,6 @@ class Repository:
             status = (False, e_str)
         return status
 
-    def remove(self, repo, tools=None):
-        return
-
     def update(self, repo, tools=None):
         return
 
@@ -565,9 +563,6 @@ class Image:
                 'Failed to add image because: {0}'.format(str(e)))
             status = (False, str(e))
         return status
-
-    def remove(self, image):
-        return
 
     def update(self, image):
         return
@@ -632,10 +627,64 @@ class Tools:
         return status
 
     def configure(self, tool):
+        # TODO
         return
 
     def inventory(self):
+        # TODO
         return
+
+    def remove(self, repo, name):
+        args = locals()
+        status = (True, None)
+
+        # get resulting dict of sections with options that match constraints
+        results, template = Template(
+            template=self.manifest).constrain_opts(args, [])
+        for result in results:
+            response, image_name = template.option(result, 'image_name')
+            name = template.option(result, 'name')[1]
+            try:
+                settings_dict = json.loads(template.option(result,
+                                                           'settings')[1])
+                instances = int(settings_dict['instances'])
+            except Exception:
+                instances = 1
+
+            try:
+                # check for container and remove
+                c_name = image_name.replace(':', '-').replace('/', '-')
+                for i in range(1, instances + 1):
+                    container_name = c_name + str(i) if i != 1 else c_name
+                    container = self.d_client.containers.get(container_name)
+                    response = container.remove(v=True, force=True)
+                    self.logger.info(
+                        'Removing container: {0}'.format(container_name))
+            except Exception as e:  # pragma: no cover
+                self.logger.warning('Unable to remove the container: ' +
+                                    container_name + ' because: ' + str(e))
+
+            # check for image and remove
+            try:
+                response = None
+                image_id = template.option(result, 'image_id')[1]
+                response = self.d_client.images.remove(image_id, force=True)
+                self.logger.info('Removing image: ' + image_name)
+            except Exception as e:  # pragma: no cover
+                self.logger.warning('Unable to remove the image: ' +
+                                    image_name + ' because: ' + str(e))
+
+            # remove tool from the manifest
+            for i in range(1, instances + 1):
+                res = result.rsplit(':', 2)
+                res[0] += str(i) if i != 1 else ''
+                res = ':'.join(res)
+                if template.section(res)[0]:
+                    status = template.del_section(res)
+                    self.logger.info('Removing tool: ' + res)
+        # TODO if all tools from a repo have been removed, remove the repo
+        template.write_config()
+        return status
 
     def start(self, repo, name):
         args = locals()
@@ -1133,7 +1182,6 @@ class Tools:
         try:
             # try to start an existing container first
             c = self.d_client.containers.get(container)
-            # TODO check if it's already running first
             c.start()
             s_containers.append(container)
             manifest.set_option(section, 'running', 'yes')
@@ -1254,13 +1302,45 @@ class Tools:
                               ' because: ' + str(e))
         return s_containers, f_containers
 
-    def stop(self, tool):
-        return
+    def stop(self, repo, name):
+        args = locals()
+        status = (True, None)
+        try:
+            # !! TODO need to account for plugin containers that have random
+            #         names, use labels perhaps
+            options = ['name',
+                       'namespace',
+                       'built',
+                       'groups',
+                       'path',
+                       'image_name',
+                       'branch',
+                       'version']
+            s, _ = Template(template=self.manifest).constrain_opts(args,
+                                                                   options)
+            for section in s:
+                container_name = s[section]['image_name'].replace(':', '-')
+                container_name = container_name.replace('/', '-')
+                try:
+                    container = self.d_client.containers.get(container_name)
+                    container.stop()
+                    self.logger.info('Stopped {0}'.format(str(container_name)))
+                except Exception as e:  # pragma: no cover
+                    self.logger.error('Failed to stop ' + str(container_name) +
+                                      ' because: ' + str(e))
+        except Exception as e:  # pragma: no cover
+            self.logger.error('Stop failed with error: ' + str(e))
+            status = (False, e)
+        return status
 
 
 class System:
 
+    def __init__(self):
+        self.d_client = docker.from_env()
+
     def backup(self):
+        # TODO #266
         return
 
     def configure(self):
@@ -1270,15 +1350,56 @@ class System:
         return
 
     def history(self):
+        # TODO #255
         return
 
     def restore(self):
+        # TODO #266
         return
 
     def reset(self):
-        return
+        """ Factory reset all of Vent's user data, containers, and images """
+        status = (True, None)
+        error_message = ''
+
+        # remove containers
+        try:
+            c_list = set(self.d_client.containers.list(
+                filters={'label': 'vent'}, all=True))
+            for c in c_list:
+                c.remove(force=True)
+        except Exception as e:  # pragma: no cover
+            error_message += 'Error removing Vent containers: ' + str(e) + '\n'
+
+        # remove images
+        try:
+            i_list = set(self.d_client.images.list(filters={'label': 'vent'},
+                                                   all=True))
+            for i in i_list:
+                # delete tagged images only because they are the parents for
+                # the untagged images. Remove the parents and the children get
+                # removed automatically
+                if i.attrs['RepoTags']:
+                    self.d_client.images.remove(image=i.id, force=True)
+
+        except Exception as e:  # pragma: no cover
+            error_message += 'Error deleting Vent images: ' + str(e) + '\n'
+
+        # remove .vent folder
+        try:
+            cwd = getcwd()
+            if cwd.startswith(join(expanduser('~'), '.vent')):
+                chdir(expanduser('~'))
+            shutil.rmtree(join(expanduser('~'), '.vent'))
+        except Exception as e:  # pragma: no cover
+            error_message += 'Error deleting Vent data: ' + str(e) + '\n'
+
+        if error_message:
+            status = (False, error_message)
+        return status
 
     def rollback(self):
+        # TODO #266
         return
 
     def start(self):
