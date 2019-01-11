@@ -6,7 +6,8 @@ from threading import Thread
 
 import npyscreen
 
-from vent.api.actions import Action
+from vent.api.act import System
+from vent.api.menu_helpers import MenuHelper
 from vent.api.plugins import Plugin
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
@@ -42,36 +43,32 @@ class VentApp(npyscreen.NPSAppManaged):
         # setup initial runtime stuff
         if self.first_time[0] and self.first_time[1] != 'exists':
             plugins = Plugin()
-            actions = Action()
-            thr = Thread(target=MainForm.t_status,
+            system = System()
+            menu_helper = MenuHelper()
+            thr = Thread(target=menu_helper.t_status,
                          args=(), kwargs={'core': True})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait('Please wait while Vent initializes...1/4',
+                npyscreen.notify_wait('Please wait while Vent initializes...1/2',
                                       title='Setting up things...')
                 time.sleep(1)
             thr.join()
-            thr = Thread(target=MainForm.t_status,
+            thr = Thread(target=menu_helper.t_status,
                          args=(), kwargs={'core': False})
             thr.start()
             while thr.is_alive():
-                npyscreen.notify_wait('Please wait while Vent initializes...2/4',
+                npyscreen.notify_wait('Please wait while Vent initializes...2/2',
                                       title='Setting up things...')
                 time.sleep(1)
             thr.join()
-            thr = Thread(target=plugins.auto_install, args=(), kwargs={})
+            thr = Thread(target=system.start, args=(), kwargs={})
             thr.start()
+            countdown = 30
             while thr.is_alive():
-                npyscreen.notify_wait('Please wait while Vent initializes...3/4',
+                npyscreen.notify_wait('Completing initialization:...' + str(countdown),
                                       title='Setting up things...')
                 time.sleep(1)
-            thr.join()
-            thr = Thread(target=actions.startup, args=(), kwargs={})
-            thr.start()
-            while thr.is_alive():
-                npyscreen.notify_wait('Please wait while Vent initializes...4/4',
-                                      title='Setting up things...')
-                time.sleep(1)
+                countdown -= 1
             thr.join()
 
         quit_s = '\t'*4 + '^Q to quit'

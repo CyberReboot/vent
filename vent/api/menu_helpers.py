@@ -1,4 +1,5 @@
 import os
+import re
 import shlex
 from datetime import datetime
 from os import chdir
@@ -23,6 +24,50 @@ class MenuHelper:
         self.plugin = self.api_action.plugin
         self.p_helper = self.api_action.p_helper
         self.logger = Logger(__name__)
+
+    def t_status(self, core):
+        """ Get status of tools for either plugins or core """
+        repos, tools = self.tools_status(core)
+        installed = 0
+        custom_installed = 0
+        built = 0
+        custom_built = 0
+        running = 0
+        custom_running = 0
+        normal = str(len(tools['normal']))
+        # determine how many extra instances should be shown for running
+        norm = set(tools['normal'])
+        inst = set(tools['installed'])
+        run_str = str(len(tools['normal']) + len(inst - norm))
+        for tool in tools['running']:
+            # check for multi instances too for running
+            if tool in tools['normal']:
+                running += 1
+            elif re.sub(r'\d+$', '', tool) in tools['normal']:
+                running += 1
+            else:
+                custom_running += 1
+        for tool in tools['built']:
+            if tool in tools['normal']:
+                built += 1
+            else:
+                custom_built += 1
+        for tool in tools['installed']:
+            if tool in tools['normal']:
+                installed += 1
+            elif re.sub(r'\d+$', '', tool) not in tools['normal']:
+                custom_installed += 1
+        tools_str = str(running + custom_running) + '/' + run_str + ' running'
+        if custom_running > 0:
+            tools_str += ' (' + str(custom_running) + ' custom)'
+        tools_str += ', ' + str(built + custom_built) + '/' + normal + ' built'
+        if custom_built > 0:
+            tools_str += ' (' + str(custom_built) + ' custom)'
+        tools_str += ', ' + str(installed + custom_installed) + '/' + normal
+        tools_str += ' installed'
+        if custom_built > 0:
+            tools_str += ' (' + str(custom_installed) + ' custom)'
+        return tools_str, (running, custom_running, normal, repos)
 
     def cores(self, action, branch='master', version='HEAD'):
         """
