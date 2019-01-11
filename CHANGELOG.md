@@ -1,3 +1,13 @@
+# v0.7.2 (2019-01-11)
+
+improvements:
+- fixed responses from network_tap
+- upgraded version of gevent
+- upgraded version of pytest
+- upgraded version of pytest-cov
+- upgraded version of docker
+- added file limits to fix too many open files issues
+
 # v0.7.1 (2018-12-28)
 
 improvements:
