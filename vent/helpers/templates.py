@@ -155,3 +155,27 @@ class Template:
         results = self.constrained_sections(constraints=constraints,
                                             options=options)
         return results, self.template
+
+    @ErrorHandler
+    def list_tools(self):
+        """
+        Return list of tuples of all tools
+        """
+        tools = []
+        exists, sections = self.sections()
+        if exists:
+            for section in sections:
+                options = {'section': section,
+                           'built': None,
+                           'version': None,
+                           'repo': None,
+                           'branch': None,
+                           'name': None,
+                           'groups': None,
+                           'image_name': None}
+                for option in list(options.keys()):
+                    exists, value = self.option(section, option)
+                    if exists:
+                        options[option] = value
+                tools.append(options)
+        return tools

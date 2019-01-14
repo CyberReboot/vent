@@ -39,10 +39,7 @@ class ToolForm(npyscreen.ActionForm):
         self.views = deque()
         possible_groups = set()
         manifest = Template(self.api_action.plugin.manifest)
-        if self.action['cores']:
-            tools = self.api_action.inventory(choices=['core'])[1]['core']
-        else:
-            tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+        tools = self.api_action.inventory(choices=['tools'])[1]['tools']
         for tool in tools:
             groups = manifest.option(tool, 'groups')[1].split(',')
             for group in groups:
@@ -99,11 +96,9 @@ class ToolForm(npyscreen.ActionForm):
             response = self.action['api_action'].inventory(choices=['repos',
                                                                     'tools',
                                                                     'built',
-                                                                    'running',
-                                                                    'core'])
+                                                                    'running'])
         else:
-            response = self.action['api_action'].inventory(choices=['core',
-                                                                    'repos',
+            response = self.action['api_action'].inventory(choices=['repos',
                                                                     'tools'])
         if response[0]:
             inventory = response[1]

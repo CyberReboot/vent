@@ -7,7 +7,7 @@ import npyscreen
 from docker.errors import DockerException
 from npyscreen import notify_confirm
 
-from vent.api.actions import Action
+from vent.api.act import System
 from vent.api.menu_helpers import MenuHelper
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
@@ -25,12 +25,6 @@ from vent.menus.editor import EditorForm
 from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
-from vent.menus.ntap import CreateNTap
-from vent.menus.ntap import DeleteNTap
-from vent.menus.ntap import ListNTap
-from vent.menus.ntap import NICsNTap
-from vent.menus.ntap import StartNTap
-from vent.menus.ntap import StopNTap
 from vent.menus.services import ServicesForm
 from vent.menus.tools import ToolForm
 
@@ -108,65 +102,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             try:
                 self.file_drop.value = DropLocation()[1]
                 logger.info('Path given: ' + str(self.file_drop.value))
-                # restart if the path is valid
-                if DropLocation()[0]:
-                    status = self.api_action.clean(name='file_drop')
-                    status = self.api_action.prep_start(name='file_drop')
-                else:
-                    logger.error('file drop path name invalid' +
-                                 DropLocation()[1])
-                if status[0]:
-                    tool_d = status[1]
-                    status = self.api_action.start(tool_d)
-                    logger.info('Status of file drop restart: ' +
-                                str(status[0]))
             except Exception as e:  # pragma no cover
                 logger.error('file drop restart failed with error: ' + str(e))
             logger.info('Finished: file drop restart')
         self.file_drop.display()
-        return
-
-    @staticmethod
-    def core_tools(action):
-        """ Perform actions for core tools """
-        def diff(first, second):
-            """
-            Get the elements that exist in the first list and not in the second
-            """
-            second = set(second)
-            return [item for item in first if item not in second]
-
-        def popup(original, orig_type, thr, title):
-            """
-            Start the thread and display a popup of info
-            until the thread is finished
-            """
-            thr.start()
-            info_str = ''
-            while thr.is_alive():
-                if orig_type == 'containers':
-                    info = diff(Containers(), original)
-                elif orig_type == 'images':
-                    info = diff(Images(), original)
-                if info:
-                    info_str = ''
-                for entry in info:
-                    # TODO limit length of info_str to fit box
-                    info_str += entry[0]+': '+entry[1]+'\n'
-                npyscreen.notify_wait(info_str, title=title)
-                time.sleep(1)
-            return
-
-        if action == 'install':
-            original_images = Images()
-            m_helper = MenuHelper()
-            thr = Thread(target=m_helper.cores, args=(),
-                         kwargs={'action': 'install'})
-            popup(original_images, 'images', thr,
-                  'Please wait, installing core containers...')
-            notify_confirm('Done installing core containers (any'
-                           ' already installed tools untouched).',
-                           title='Installed core containers')
         return
 
     def add_form(self, form, form_name, form_args):
@@ -187,15 +126,9 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     def perform_action(self, action):
         """ Perform actions in the api from the CLI """
         form = ToolForm
-        s_action = action.split('_')[0]
-        if 'core' in action:
-            form_action = s_action + ' (only core tools are shown)'
-            form_name = s_action.title() + ' core tools'
-            cores = True
-        else:
-            form_action = s_action + ' (only plugin tools are shown)'
-            form_name = s_action.title() + ' tools'
-            cores = False
+        s_action = form_action = action.split('_')[0]
+        form_name = s_action.title() + ' tools'
+        cores = False
         a_type = 'containers'
         forms = [action.upper() + 'TOOLS']
         form_args = {'color': 'CONTROL',
@@ -224,9 +157,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form_args['action_dict']['present_t'] = s_action[:-1] \
                 + 'ing ' + a_type
 
-        if s_action == 'start':
-            form_args['names'].append('prep_start')
-        elif s_action == 'configure':
+        if s_action == 'configure':
             form_args['names'].pop()
             form_args['names'].append('get_configure')
             form_args['names'].append('save_configure')
@@ -244,12 +175,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form = LogsForm
             forms = ['LOGS']
             form_args = {'color': 'STANDOUT', 'name': 'Logs'}
-        elif action == 'services_core':
-            form = ServicesForm
-            forms = ['SERVICES']
-            form_args = {'color': 'STANDOUT',
-                         'name': 'Core Services',
-                         'core': True}
         elif action == 'services':
             form = ServicesForm
             forms = ['SERVICES']
@@ -263,11 +188,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                          'name': 'External Services',
                          'core': False,
                          'external': True}
-        elif action == 'inventory_core':
-            form = InventoryCoreToolsForm
-            forms = ['COREINVENTORY']
-            form_args = {'color': 'STANDOUT',
-                         'name': 'Inventory of core tools'}
         form_args['name'] += '\t'*8 + '^T to toggle main'
         if s_action in self.view_togglable:
             form_args['name'] += '\t'*8 + '^V to toggle group view'
@@ -312,7 +232,10 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                 notify_confirm('Vent backup successful')
             else:
                 notify_confirm('Vent backup could not be completed')
+        elif action == 'start':
+            status = self.api
         elif action == 'configure':
+            # TODO
             form_args = {'name': 'Change vent configuration',
                          'get_configure': self.api_action.get_configure,
                          'save_configure': self.api_action.save_configure,
@@ -365,7 +288,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
     def create(self):
         """ Override method for creating FormBaseNewWithMenu form """
         try:
-            self.api_action = Action()
+            self.api_action = System()
 
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
@@ -442,25 +365,25 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # Tool Menu Items
         self.m3 = self.add_menu(name='Tools', shortcut='p')
-        self.m3.addItem(text='Add new tool',
+        self.m3.addItem(text='Add New Tool',
                         onSelect=self.perform_action,
                         arguments=['add'], shortcut='a')
-        self.m3.addItem(text='Configure tools',
+        self.m3.addItem(text='Configure Tools',
                         onSelect=self.perform_action,
                         arguments=['configure'], shortcut='t')
-        self.m3.addItem(text='Inventory of installed tools',
+        self.m3.addItem(text='Inventory',
                         onSelect=self.perform_action,
                         arguments=['inventory'], shortcut='i')
-        self.m3.addItem(text='Remove tools',
+        self.m3.addItem(text='Remove Tools',
                         onSelect=self.perform_action,
                         arguments=['remove'], shortcut='r')
-        self.m3.addItem(text='Start tools',
+        self.m3.addItem(text='Start Tools',
                         onSelect=self.perform_action,
                         arguments=['start'], shortcut='s')
-        self.m3.addItem(text='Stop tools',
+        self.m3.addItem(text='Stop Tools',
                         onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
-        self.m3.addItem(text='Update tools',
+        self.m3.addItem(text='Update Tools',
                         onSelect=self.perform_action,
                         arguments=['update'], shortcut='u')
 
@@ -481,18 +404,22 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m6 = self.add_menu(name='System Commands', shortcut='y')
         self.m6.addItem(text='Backup', onSelect=self.system_commands,
                         arguments=['backup'], shortcut='b')
-        self.m6.addItem(text='Change vent configuration',
+        self.m6.addItem(text='Change Vent Configuration',
                         onSelect=self.system_commands, arguments=['configure'],
                         shortcut='c')
         self.m6.addItem(text='Detect GPUs', onSelect=self.system_commands,
                         arguments=['gpu'], shortcut='g')
-        self.m6.addItem(text='Enable Swarm Mode (To Be Implemented...)',
-                        onSelect=self.system_commands,
-                        arguments=['swarm'], shortcut='s')
-        self.m6.addItem(text='Factory reset', onSelect=self.system_commands,
+        self.m6.addItem(text='Factory Reset', onSelect=self.system_commands,
                         arguments=['reset'], shortcut='r')
-        self.m6.addItem(text='Restore', onSelect=self.system_commands,
+        self.m6.addItem(text='Restore (To Be Implemented...', onSelect=self.system_commands,
                         arguments=['restore'], shortcut='t')
+
+        # TODO this should be either or depending on whether or not it's running already
+        self.m6.addItem(text='Start', onSelect=self.system_commands,
+                        arguments=['start'], shortcut='s')
+        self.m6.addItem(text='Stop', onSelect=self.system_commands,
+                        arguments=['stop'], shortcut='o')
+
         self.m6.addItem(text='Upgrade (To Be Implemented...)',
                         onSelect=self.system_commands,
                         arguments=['upgrade'], shortcut='u')

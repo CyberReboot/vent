@@ -29,19 +29,3 @@ class InventoryToolsForm(BaseInventoryForm):
                                    action_name,
                                    *args,
                                    **keywords)
-
-
-class InventoryCoreToolsForm(BaseInventoryForm):
-    """ Inventory Core Tools form for the Vent CLI """
-
-    def __init__(self, *args, **keywords):
-        """ Initialize inventory core tools form objects """
-        action_name = 'inventory core'
-        action_dict = {'title': 'Inventory of core tools:',
-                       'name': 'inventory core',
-                       'cores': True}
-        BaseInventoryForm.__init__(self,
-                                   action_dict,
-                                   action_name,
-                                   *args,
-                                   **keywords)

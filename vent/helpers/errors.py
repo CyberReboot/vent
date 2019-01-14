@@ -1,5 +1,7 @@
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 def ErrorHandler(function):
     def wrapper(*args, **kwargs):

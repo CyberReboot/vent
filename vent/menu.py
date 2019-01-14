@@ -63,7 +63,7 @@ class VentApp(npyscreen.NPSAppManaged):
             thr.join()
             thr = Thread(target=system.start, args=(), kwargs={})
             thr.start()
-            countdown = 30
+            countdown = 60
             while thr.is_alive():
                 npyscreen.notify_wait('Completing initialization:...' + str(countdown),
                                       title='Setting up things...')

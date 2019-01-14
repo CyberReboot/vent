@@ -33,8 +33,6 @@ class TutorialForm(npyscreen.ActionFormWithMenus):
         self.m2.addItem(text='Getting Setup', onSelect=self.switch,
                         arguments=['TUTORIALGETTINGSETUP'], shortcut='s')
         self.m3 = self.add_menu(name='Working with Cores', shortcut='c')
-        self.m3.addItem(text='Building Cores', onSelect=self.switch,
-                        arguments=['TUTORIALBUILDINGCORES'], shortcut='b')
         self.m3.addItem(text='Starting Cores', onSelect=self.switch,
                         arguments=['TUTORIALSTARTINGCORES'], shortcut='c')
         self.m4 = self.add_menu(name='Working with Plugins', shortcut='p')

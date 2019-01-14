@@ -21,6 +21,7 @@ import yaml
 
 from vent.helpers.logs import Logger
 from vent.helpers.meta import AvailableTools
+from vent.helpers.meta import Containers
 from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import ToolMatches
@@ -639,9 +640,62 @@ class Tools:
         # TODO
         return
 
-    def inventory(self):
-        # TODO
-        return
+    def inventory(self, choices=None):
+        """ Return a dictionary of the inventory items and status """
+        status = (True, None)
+        if not choices:
+            return (False, 'No choices made')
+        try:
+            # choices: repos, tools, images, built, running, enabled
+            items = {'repos': [], 'tools': {}, 'images': {},
+                     'built': {}, 'running': {}, 'enabled': {}}
+
+            tools = Template(self.manifest).list_tools()
+            for choice in choices:
+                for tool in tools:
+                    try:
+                        if choice == 'repos':
+                            if 'repo' in tool:
+                                if (tool['repo'] and
+                                        tool['repo'] not in items[choice]):
+                                    items[choice].append(tool['repo'])
+                        elif choice == 'tools':
+                            items[choice][tool['section']] = tool['name']
+                        elif choice == 'images':
+                            # TODO also check against docker
+                            items[choice][tool['section']] = tool['image_name']
+                        elif choice == 'built':
+                            items[choice][tool['section']] = tool['built']
+                        elif choice == 'running':
+                            containers = Containers()
+                            status = 'not running'
+                            for container in containers:
+                                image_name = tool['image_name'] \
+                                    .rsplit(':' +
+                                            tool['version'], 1)[0]
+                                image_name = image_name.replace(':', '-')
+                                image_name = image_name.replace('/', '-')
+                                self.logger.info('image_name: ' + image_name)
+                                if container[0] == image_name:
+                                    status = container[1]
+                                elif container[0] == image_name + \
+                                        '-' + tool['version']:
+                                    status = container[1]
+                            items[choice][tool['section']] = status
+                        elif choice == 'enabled':
+                            items[choice][tool['section']] = tool['enabled']
+                        else:
+                            # unknown choice
+                            pass
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error('Unable to grab info about tool: ' +
+                                          str(tool) + ' because: ' + str(e))
+            status = (True, items)
+        except Exception as e:  # pragma: no cover
+            self.logger.error(
+                'Inventory failed with error: {0}'.format(str(e)))
+            status = (False, str(e))
+        return status
 
     def remove(self, repo, name):
         args = locals()

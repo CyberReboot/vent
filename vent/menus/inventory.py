@@ -17,10 +17,7 @@ class InventoryForm(npyscreen.FormBaseNew):
         self.views = deque()
         possible_groups = set()
         manifest = Template(self.api_action.plugin.manifest)
-        if self.action['cores']:
-            tools = self.api_action.inventory(choices=['core'])[1]['core']
-        else:
-            tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+        tools = self.api_action.inventory(choices=['tools'])[1]['tools']
         for tool in tools:
             groups = manifest.option(tool, 'groups')[1].split(',')
             for group in groups:
@@ -73,7 +70,6 @@ class InventoryForm(npyscreen.FormBaseNew):
                            '^V': self.toggle_view})
         self.add(npyscreen.TitleFixedText, name=self.action['title'], value='')
         response = self.action['api_action'].inventory(choices=['repos',
-                                                                'core',
                                                                 'tools',
                                                                 'images',
                                                                 'built',
@@ -85,9 +81,7 @@ class InventoryForm(npyscreen.FormBaseNew):
             else:
                 value = 'Tools for all groups found:\n'
             tools = None
-            if self.action['cores'] and inventory['core']:
-                tools = inventory['core']
-            elif not self.action['cores'] and inventory['tools']:
+            if inventory['tools']:
                 tools = inventory['tools']
 
             for repo in inventory['repos']:
