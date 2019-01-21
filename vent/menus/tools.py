@@ -6,7 +6,8 @@ from threading import Thread
 
 import npyscreen
 
-from vent.api.actions import Action
+from vent.api.act import System
+from vent.api.act import Tools
 from vent.api.menu_helpers import MenuHelper
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
@@ -22,7 +23,7 @@ class ToolForm(npyscreen.ActionForm):
         """ Initialize tool form objects """
         self.logger = Logger(__name__)
         self.logger.info(str(keywords['names']))
-        self.api_action = Action()
+        self.api_action = System()
         self.m_helper = MenuHelper()
         action = {'api_action': self.api_action}
         self.tools_tc = {}
@@ -38,8 +39,8 @@ class ToolForm(npyscreen.ActionForm):
         # get list of all possible group views to display
         self.views = deque()
         possible_groups = set()
-        manifest = Template(self.api_action.plugin.manifest)
-        tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+        manifest = Template(self.api_action.manifest)
+        tools = Tools().inventory(choices=['tools'])[1]['tools']
         for tool in tools:
             groups = manifest.option(tool, 'groups')[1].split(',')
             for group in groups:
@@ -93,13 +94,12 @@ class ToolForm(npyscreen.ActionForm):
             i = 4
 
         if self.action['action_name'] == 'start':
-            response = self.action['api_action'].inventory(choices=['repos',
-                                                                    'tools',
-                                                                    'built',
-                                                                    'running'])
+            response = Tools().inventory(choices=['repos',
+                                                  'tools',
+                                                  'built',
+                                                  'running'])
         else:
-            response = self.action['api_action'].inventory(choices=['repos',
-                                                                    'tools'])
+            response = Tools().inventory(choices=['repos', 'tools'])
         if response[0]:
             inventory = response[1]
 
@@ -145,7 +145,7 @@ class ToolForm(npyscreen.ActionForm):
                                     self.logger.error("Couldn't check ext"
                                                       ' because: ' + str(e))
                                     externally_active = False
-                        manifest = Template(self.api_action.plugin.manifest)
+                        manifest = Template(self.api_action.manifest)
                         if not externally_active:
                             instance_num = re.search(r'\d+$',
                                                      manifest.option(
@@ -155,41 +155,6 @@ class ToolForm(npyscreen.ActionForm):
                             # multiple instances share same image
                             elif self.action['action_name'] not in self.no_instance:
                                 ncore_list.append(tool)
-
-                for tool in inventory['core']:
-                    tool_repo_name = tool.split(':')
-
-                    # cross reference repo names
-                    if (repo_name[0] == tool_repo_name[0] and
-                            repo_name[1] == tool_repo_name[1]):
-                        # check to ensure tool not set to locally active = no
-                        # in vent.cfg
-                        externally_active = False
-                        vent_cfg_file = self.action['api_action'].vent_config
-                        vent_cfg = Template(vent_cfg_file)
-                        tool_pairs = vent_cfg.section('external-services')[1]
-                        for ext_tool in tool_pairs:
-                            if ext_tool[0].lower() == inventory['core'][tool]:
-                                try:
-                                    ext_tool_options = json.loads(ext_tool[1])
-                                    loc = 'locally_active'
-                                    if (loc in ext_tool_options and
-                                            ext_tool_options[loc] == 'no'):
-                                        externally_active = True
-                                except Exception as e:
-                                    self.logger.error("Couldn't check ext"
-                                                      ' because: ' + str(e))
-                                    externally_active = False
-                        manifest = Template(self.api_action.plugin.manifest)
-                        if not externally_active:
-                            instance_num = re.search(r'\d+$',
-                                                     manifest.option(
-                                                         tool, 'name')[1])
-                            if not instance_num:
-                                core_list.append(tool)
-                            # multiple instances share same image
-                            elif self.action['action_name'] not in self.no_instance:
-                                core_list.append(tool)
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
@@ -340,8 +305,6 @@ class ToolForm(npyscreen.ActionForm):
                                  'get_configure': action.get_configure,
                                  'save_configure': action.save_configure,
                                  'restart_tools': action.restart_tools,
-                                 'clean': action.clean,
-                                 'prep_start': action.prep_start,
                                  'start_tools': action.start,
                                  'from_registry': registry_image}
                         if tools_to_configure:

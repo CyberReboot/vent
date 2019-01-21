@@ -14,7 +14,7 @@ from vent.menus.del_instances import DeleteForm
 class EditorForm(npyscreen.ActionForm):
     """ Form that can be used as a pseudo text editor in npyscreen """
 
-    def __init__(self, repo='', tool_name='', branch='', version='',
+    def __init__(self, repo='', tool_name='',
                  next_tool=None, just_downloaded=False, vent_cfg=False,
                  from_registry=False, new_instance=False, *args, **keywords):
         """ Initialize EditorForm objects """
@@ -26,9 +26,7 @@ class EditorForm(npyscreen.ActionForm):
         del self.settings['keywords']
         del self.settings['parentApp']
         self.p_helper = PluginHelper(plugins_dir='.internals/')
-        self.tool_identifier = {'name': tool_name,
-                                'branch': branch,
-                                'version': version}
+        self.tool_identifier = {'name': tool_name}
         self.settings.update(self.tool_identifier)
         del self.settings['name']
         self.settings['tool_name'] = tool_name
@@ -316,11 +314,7 @@ class EditorForm(npyscreen.ActionForm):
                 i_section[0] = re.sub(r'[0-9]', '', i_section[0]) + str(i)
                 i_section = ':'.join(i_section)
                 t_name = self.manifest.option(i_section, 'name')[1]
-                t_branch = self.manifest.option(i_section, 'branch')[1]
-                t_version = self.manifest.option(i_section, 'version')[1]
-                t_id = {'name': t_name,
-                        'branch': t_branch,
-                        'version': t_version}
+                t_id = {'name': t_name}
                 tool_d.update(self.settings['prep_start'](**t_id)[1])
             if tool_d:
                 self.settings['start_tools'](tool_d)

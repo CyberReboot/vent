@@ -22,7 +22,6 @@ from vent.helpers.paths import PathDirs
 from vent.menus.add import AddForm
 from vent.menus.backup import BackupForm
 from vent.menus.editor import EditorForm
-from vent.menus.inventory_forms import InventoryCoreToolsForm
 from vent.menus.inventory_forms import InventoryToolsForm
 from vent.menus.logs import LogsForm
 from vent.menus.services import ServicesForm
