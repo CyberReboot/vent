@@ -1,7 +1,6 @@
 dist: xenial
 
 services:
-  - rabbitmq
   - redis
   - elasticsearch
 language: python
