@@ -136,7 +136,7 @@ class DeleteR(object):
             resp.body = "(False, 'unable to delete containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, " + str(payload['id']) + ")"
+        resp.body = '(True, ' + str(payload['id']) + ')'
         return
 
 
@@ -217,7 +217,7 @@ class NICsR(object):
         try:
             nics = d_client.containers.run('cyberreboot/gonet',
                                            network_mode='host', remove=True)
-            resp.body = "(True, " + str(nics.id) + ")"
+            resp.body = '(True, ' + str(nics.id) + ')'
         except Exception as e:  # pragma: no cover
             resp.body = "(False, 'Failure because: " + str(e) + "')"
             return
@@ -272,7 +272,7 @@ class StartR(object):
             resp.body = "(False, 'unable to start list of containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, " + str(payload['id']) + ")"
+        resp.body = '(True, ' + str(payload['id']) + ')'
         return
 
 
@@ -323,5 +323,5 @@ class StopR(object):
             resp.body = "(False, 'unable to stop list of containers because: " + str(e) + "')"
             return
 
-        resp.body = "(True, " + str(payload['id']) + ")"
+        resp.body = '(True, ' + str(payload['id']) + ')'
         return

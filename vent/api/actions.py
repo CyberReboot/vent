@@ -3,13 +3,13 @@ import copy
 import getpass
 import json
 import os
+import queue
 import re
 import shutil
 import tempfile
 import urllib.request
 
 import docker
-import queue
 import yaml
 
 from vent.api.plugins import Plugin
