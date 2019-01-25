@@ -2,12 +2,12 @@ from setuptools import setup
 
 setup(
     name='vent',
-    version='v0.7.3.dev',
+    version='v0.7.3',
     packages=['vent', 'vent.core', 'vent.core.file_drop',
               'vent.core.rq_worker', 'vent.core.rq_dashboard', 'vent.menus',
               'vent.core.network_tap', 'vent.core.network_tap.ncontrol',
               'vent.core.rmq_es_connector', 'vent.helpers', 'vent.api'],
-    install_requires=['docker>=3.6.0', 'npyscreen>=4.10.5', 'pyyaml>=3.13'],
+    install_requires=['docker>=3.7.0', 'npyscreen>=4.10.5', 'pyyaml>=3.13'],
     scripts=['bin/vent'],
     license='Apache License 2.0',
     author='arpit',
