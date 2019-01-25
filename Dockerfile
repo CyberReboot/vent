@@ -1,15 +1,13 @@
 FROM alpine:3.8
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
-RUN apk add --update \
+RUN apk --no-cache add --update \
     curl \
-    docker \
+    #docker \
     git \
     python3 \
-    py3-pip \
-    && rm -rf /var/cache/apk/*
-
-RUN pip3 install --no-cache-dir --upgrade pip==18.1
+    py3-pip && \
+    pip3 install --no-cache-dir --upgrade pip==18.1
 
 # healthcheck
 COPY healthcheck /healthcheck
