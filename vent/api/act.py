@@ -470,7 +470,6 @@ class Repository:
     def _clone(self, user=None, pw=None):
         status = (True, None)
         try:
-
             # if path already exists, ignore
             try:
                 path, _, _ = self.path_dirs.get_path(self.repo)
@@ -1609,7 +1608,7 @@ class System:
         status = (True, None)
         # startup based on startup file
         if exists(self.startup_file):
-            status = self._startuo()
+            status = self._startup()
         else:
             tools = Tools()
             status = tools.new('core', None)
@@ -1636,7 +1635,6 @@ class System:
                 s_dict = yaml.safe_load(sup.read())
             if 'vent.cfg' in s_dict:
                 v_cfg = Template(self.vent_config)
-                self.logger.info('applying vent.cfg configurations')
                 for section in s_dict['vent.cfg']:
                     for option in s_dict['vent.cfg'][section]:
                         val = ('no', 'yes')[
@@ -1649,13 +1647,15 @@ class System:
             tool_d = {}
             extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
             s_dict_c = copy.deepcopy(s_dict)
-            tools = Tools()
             # TODO check for repo or image type
+            self.logger.info('startup file dict: {0}'.format(s_dict_c))
             for repo in s_dict_c:
-                # TODO
-                Repository(System().manifest)._clone(repo)
+                repository = Repository(System().manifest)
+                repository.repo = repo
+                repository._clone()
                 repo_path, org, r_name = self.path_dirs.get_path(repo)
                 available_tools = AvailableTools(repo_path)
+                self.logger.info('tools found: {0}'.format(available_tools))
                 for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
@@ -1689,9 +1689,9 @@ class System:
                         build_tool = s_dict[repo][tool]['build']
                     if 'image' in s_dict[repo][tool]:
                         t_image = s_dict[repo][tool]['image']
-                    self.add(repo, branch=t_branch, version=t_version,
-                             tools=add_tools, build=build_tool, image=t_image)
-                    manifest = Template(self.plugin.manifest)
+                    Repository(System()).add(repo, branch=t_branch, version=t_version,
+                                             tools=add_tools, build=build_tool, image=t_image)
+                    manifest = Template(self.manifest)
                     # update the manifest with extra defined runtime settings
                     base_section = ':'.join([org, r_name, t_path,
                                              t_branch, t_version])

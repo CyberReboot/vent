@@ -1,12 +1,27 @@
+# v0.7.3 (2019-01-25)
+
+improvements:
+- upgraded version of pytest
+- updated version of pre-commit modules
+- upgraded version of pika
+- updated test build to use xenial
+- cleaned up apk usage
+
+bug fixes:
+- fixed pre-commit stuff
+- pinned pip to a version
+
 # v0.7.2 (2019-01-11)
 
 improvements:
-- fixed responses from network_tap
 - upgraded version of gevent
 - upgraded version of pytest
 - upgraded version of pytest-cov
 - upgraded version of docker
 - added file limits to fix too many open files issues
+
+bug fixes:
+- fixed responses from network_tap
 
 # v0.7.1 (2018-12-28)
 
