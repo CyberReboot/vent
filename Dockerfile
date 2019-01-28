@@ -3,7 +3,7 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apk --no-cache add --update \
     curl \
-    #docker \
+    docker \
     git \
     python3 \
     py3-pip && \
