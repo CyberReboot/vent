@@ -422,8 +422,9 @@ def AvailableTools(path, tools=None, branch='master', version='HEAD'):
             matches = get_dockerfiles(matches, path, tool=name)
     else:
         status = Checkout(path, branch=branch, version=version)
-        logger.error('Unable to checkout: {0} {1} {2} because: {3}'.format(
-            path, branch, version, status[1]))
+        if not status[0]:
+            logger.error('Unable to checkout: {0} {1} {2} because: {3}'.format(
+                path, branch, version, status[1]))
         matches = get_dockerfiles(matches, path)
     return matches
 

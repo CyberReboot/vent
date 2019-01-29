@@ -1628,7 +1628,6 @@ class System:
             extra_options = ['info', 'service', 'settings', 'docker', 'gpu']
             s_dict_c = copy.deepcopy(s_dict)
             # TODO check for repo or image type
-            self.logger.info('startup file dict: {0}'.format(s_dict_c))
             for repo in s_dict_c:
                 repository = Repository(System().manifest)
                 repository.repo = repo
@@ -1645,7 +1644,6 @@ class System:
                     get_tools.append((tool, t_branch, t_version))
 
                 available_tools = AvailableTools(repo_path, tools=get_tools)
-                self.logger.info('tools found: {0}'.format(available_tools))
                 for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
