@@ -1643,6 +1643,8 @@ class System:
                         t_version = s_dict[repo][tool]['version']
                     get_tools.append((tool, t_branch, t_version))
 
+                self.logger.info(
+                    'get tools: {0}'.format(get_tools))
                 available_tools = AvailableTools(repo_path, tools=get_tools)
                 self.logger.info(
                     'available tools: {0}'.format(available_tools))
