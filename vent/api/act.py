@@ -1644,6 +1644,8 @@ class System:
                     get_tools.append((tool, t_branch, t_version))
 
                 available_tools = AvailableTools(repo_path, tools=get_tools)
+                self.logger.info(
+                    'available tools: {0}'.format(available_tools))
                 for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
@@ -1734,12 +1736,7 @@ class System:
                             for i in range(1, local_instances + 1):
                                 i_name = tool + str(i) if i != 1 else tool
                                 i_name = i_name.replace('@', '')
-                                tool_d.update(self.prep_start(
-                                    name=i_name,
-                                    branch=t_branch,
-                                    version=t_version)[1])
-            if tool_d:
-                self.start(tool_d)
+                                repository.start(repo, tool)
         except Exception as e:  # pragma: no cover
             self.logger.error('Startup failed because: {0}'.format(str(e)))
             status = (False, str(e))
@@ -1987,7 +1984,6 @@ class System:
         vent.cfg or to vent.template. This includes tools that need to be
         restarted because they depend on other tools that were changed.
         """
-        self.logger.info('Starting: restart_tools')
         status = (True, None)
         if not main_cfg:
             try:
