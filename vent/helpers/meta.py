@@ -428,7 +428,7 @@ def AvailableTools(path, tools=None, branch='master', version='HEAD'):
     return matches
 
 
-def Checkout(path, branch='master', version='HEAD'):
+def Checkout(path, branch='master', version='HEAD', **kargs):
     status = (True, None)
     path_dirs = PathDirs(**kargs)
     status = path_dirs.apply_path(path)
