@@ -7,7 +7,7 @@ RUN apk --no-cache add --update \
     git \
     python3 \
     py3-pip && \
-    pip3 install --no-cache-dir --upgrade pip==18.1
+    pip3 install --no-cache-dir --upgrade pip==19.0.1
 
 # healthcheck
 COPY healthcheck /healthcheck
