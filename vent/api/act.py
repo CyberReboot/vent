@@ -23,6 +23,7 @@ import yaml
 
 from vent.helpers.logs import Logger
 from vent.helpers.meta import AvailableTools
+from vent.helpers.meta import Checkout
 from vent.helpers.meta import Containers
 from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Timestamp
@@ -94,8 +95,8 @@ class Repository:
         status = (True, None)
         matches = []
         path, _, _ = self.path_dirs.get_path(self.repo)
-        status = self._checkout(path, branch=self.branch,
-                                version=self.version)
+        status = Checkout(path, branch=self.branch,
+                          version=self.version)
         if status[0]:
             search_groups = None
             if self.core:
@@ -445,27 +446,6 @@ class Repository:
         template.set_option(section, 'running', 'no')
 
         return status, template
-
-    def _checkout(self, path, branch='master', version='HEAD'):
-        status = (True, None)
-        status = self.path_dirs.apply_path(path)
-        if status[0]:
-            try:
-                check_output(shlex.split('git checkout ' + branch),
-                             stderr=STDOUT,
-                             close_fds=True).decode('utf-8')
-                check_output(shlex.split('git pull'), stderr=STDOUT,
-                             close_fds=True).decode('utf-8')
-                if version:
-                    check_output(shlex.split('git reset --hard ' + version),
-                                 stderr=STDOUT,
-                                 close_fds=True).decode('utf-8')
-                chdir(status[1])
-            except Exception as e:  # pragma: no cover
-                self.logger.error(
-                    'Checkout failed with error: {0}'.format(str(e)))
-                status = (False, str(e))
-        return status
 
     def _clone(self, user=None, pw=None):
         status = (True, None)
@@ -1654,7 +1634,17 @@ class System:
                 repository.repo = repo
                 repository._clone()
                 repo_path, org, r_name = self.path_dirs.get_path(repo)
-                available_tools = AvailableTools(repo_path)
+                get_tools = []
+                for tool in s_dict_c[repo]:
+                    t_branch = 'master'
+                    t_version = 'HEAD'
+                    if 'branch' in s_dict[repo][tool]:
+                        t_branch = s_dict[repo][tool]['branch']
+                    if 'version' in s_dict[repo][tool]:
+                        t_version = s_dict[repo][tool]['version']
+                    get_tools.append((tool, t_branch, t_version))
+
+                available_tools = AvailableTools(repo_path, tools=get_tools)
                 self.logger.info('tools found: {0}'.format(available_tools))
                 for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this

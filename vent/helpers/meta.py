@@ -5,6 +5,8 @@ import math
 import multiprocessing
 import platform
 import re
+import shlex
+from os import chdir
 from os import environ
 from os import walk
 from os.path import abspath
@@ -14,6 +16,7 @@ from os.path import join
 from subprocess import check_output
 from subprocess import PIPE
 from subprocess import Popen
+from subprocess import STDOUT
 
 import docker
 import pkg_resources
@@ -378,46 +381,74 @@ def Tools(**kargs):
     return tools[1]
 
 
-def AvailableTools(path, version='HEAD', groups=None):
+def AvailableTools(path, tools=None, branch='master', version='HEAD'):
     """
-    Return list of possible tools in repo for the given version and branch
+    Return list of possible tools in repo for the given version and branch or
+    take a list of tools to get paths for specific version and branch
+    tools is a list of tuples: (tool name, branch, version)
     """
-    matches = []
-    if groups:
-        groups = groups.split(',')
-    for root, _, filenames in walk(path):
-        files = fnmatch.filter(filenames, 'Dockerfile*')
-        # append additional identifiers to tools if multiple in same
-        # directory
-        add_info = len(files) > 1
-        for f in files:
-            addtl_info = ''
-            if add_info:
-                # @ will be delimiter symbol for multi-tools
-                try:
-                    addtl_info = '@' + f.split('.')[1]
-                except Exception as e:
-                    addtl_info = '@unspecified'
-            if groups:
-                if add_info and not addtl_info == '@unspecified':
-                    tool_template = addtl_info.split('@')[1] + '.template'
+    def get_dockerfiles(matches, path, tool=None):
+        for root, _, filenames in walk(path):
+            files = fnmatch.filter(filenames, 'Dockerfile*')
+            # append additional identifiers to tools if multiple in same
+            # directory
+            add_info = len(files) > 1
+            for f in files:
+                addtl_info = ''
+                if add_info:
+                    # @ will be delimiter symbol for multi-tools
+                    try:
+                        addtl_info = '@' + f.split('.')[1]
+                    except Exception as e:
+                        addtl_info = '@unspecified'
+                if tool:
+                    if root.split(path)[1].rsplit('/', 1)[-1] == tool:
+                        matches.append((root.split(path)[1] + addtl_info,
+                                        version))
                 else:
-                    tool_template = 'vent.template'
-                try:
-                    template = Template(template=join(root,
-                                                      tool_template))
-                    for group in groups:
-                        template_groups = template.option('info', 'groups')
-                        if (template_groups[0] and
-                                group in template_groups[1]):
-                            matches.append((root.split(path)[1] +
-                                            addtl_info, version))
-                except Exception as e:  # pragma: no cover
-                    logger.info('error: ' + str(e))
-            else:
-                matches.append((root.split(path)[1] +
-                                addtl_info, version))
+                    matches.append((root.split(path)[1] + addtl_info, version))
+        return matches
+
+    matches = []
+    if tools:
+        for tool in tools:
+            name = tool[0]
+            branch = tool[1]
+            version = tool[2]
+            status = Checkout(path, branch=branch, version=version)
+            if not status[0]:
+                logger.error('Unable to checkout: {0} {1} {2} because: {3}'.format(
+                    path, branch, version, status[1]))
+            matches = get_dockerfiles(matches, path, tool=name)
+    else:
+        status = Checkout(path, branch=branch, version=version)
+        logger.error('Unable to checkout: {0} {1} {2} because: {3}'.format(
+            path, branch, version, status[1]))
+        matches = get_dockerfiles(matches, path)
     return matches
+
+
+def Checkout(path, branch='master', version='HEAD'):
+    status = (True, None)
+    path_dirs = PathDirs(**kargs)
+    status = path_dirs.apply_path(path)
+    if status[0]:
+        try:
+            check_output(shlex.split('git checkout ' + branch),
+                         stderr=STDOUT,
+                         close_fds=True).decode('utf-8')
+            check_output(shlex.split('git pull'), stderr=STDOUT,
+                         close_fds=True).decode('utf-8')
+            if version:
+                check_output(shlex.split('git reset --hard ' + version),
+                             stderr=STDOUT,
+                             close_fds=True).decode('utf-8')
+            chdir(status[1])
+        except Exception as e:  # pragma: no cover
+            logger.error(
+                'Checkout failed with error: {0}'.format(str(e)))
+            status = (False, str(e))
+    return status
 
 
 def ToolMatches(tools=None, version='HEAD'):
