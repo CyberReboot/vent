@@ -405,8 +405,8 @@ def AvailableTools(path, tools=None, branch='master', version='HEAD'):
                     if root.split(path)[1].rsplit('/', 1)[-1].lower() == tool:
                         matches.append((root.split(path)[1] + addtl_info,
                                         version))
-                    elif tool.startswith('@'):
-                        logger.info('tool with @: {0}'.format(tool))
+                    elif tool == '@':
+                        matches.append(('/' + addtl_info, version))
                 else:
                     matches.append((root.split(path)[1] + addtl_info, version))
         return matches
