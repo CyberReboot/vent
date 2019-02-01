@@ -406,7 +406,7 @@ def AvailableTools(path, tools=None, branch='master', version='HEAD'):
                         matches.append((root.split(path)[1] + addtl_info,
                                         version))
                     elif tool == '@':
-                        matches.append(('/' + addtl_info, version))
+                        matches.append(('' + addtl_info, version))
                 else:
                     matches.append((root.split(path)[1] + addtl_info, version))
         return matches

@@ -1653,6 +1653,8 @@ class System:
                     # tool and notify in the logs
                     t_path, t_path_cased = PathDirs.rel_path(
                         tool, available_tools)
+                    self.logger.info('each tool: {0} {1} {2}', format(
+                        tool, t_path, t_path_cased))
                     if t_path is None:
                         self.logger.error("Couldn't find tool " + tool + ' in'
                                           ' repo ' + repo)
