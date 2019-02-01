@@ -402,9 +402,11 @@ def AvailableTools(path, tools=None, branch='master', version='HEAD'):
                     except Exception as e:
                         addtl_info = '@unspecified'
                 if tool:
-                    if root.split(path)[1].rsplit('/', 1)[-1] == tool:
+                    if root.split(path)[1].rsplit('/', 1)[-1].lower() == tool:
                         matches.append((root.split(path)[1] + addtl_info,
                                         version))
+                    elif tool.startswith('@'):
+                        logger.info('tool with @: {0}'.format(tool))
                 else:
                     matches.append((root.split(path)[1] + addtl_info, version))
         return matches
