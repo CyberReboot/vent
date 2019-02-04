@@ -730,11 +730,15 @@ class Tools:
         template.write_config()
         return status
 
-    def start(self, repo, name):
-        args = locals()
-        del args['self']
-        tool_d = {}
-        tool_d.update(self._prep_start(**args)[1])
+    def start(self, repo, name, is_tool_d=False):
+        if not is_tool_d:
+            args = locals()
+            del args['self']
+            del args['is_tool_d']
+            tool_d = {}
+            tool_d.update(self._prep_start(**args)[1])
+        else:
+            repo = tool_d
         status = (True, None)
         try:
             # check start priorities (priority of groups alphabetical for now)
@@ -1724,6 +1728,8 @@ class System:
                                                         opt_val[1])
                     manifest.write_config()
 
+            tool_d = {}
+            tools = Tools()
             # start tools, if necessary
             for repo in s_dict:
                 for tool in s_dict[repo]:
@@ -1742,7 +1748,11 @@ class System:
                             for i in range(1, local_instances + 1):
                                 i_name = tool + str(i) if i != 1 else tool
                                 i_name = i_name.replace('@', '')
-                                Tools().start(repo, tool)
+                                # TODO these need to happen in the right order based on priority
+                                tool_d.update(tools._prep_start(repo, tool)[1])
+
+            if tool_d:
+                tools.start(tool_d, None, is_tool_d=True)
         except Exception as e:  # pragma: no cover
             self.logger.error('Startup failed because: {0}'.format(str(e)))
             status = (False, str(e))
