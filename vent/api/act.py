@@ -731,14 +731,14 @@ class Tools:
         return status
 
     def start(self, repo, name, is_tool_d=False):
-        if not is_tool_d:
+        if is_tool_d:
+            tool_d = repo
+        else:
             args = locals()
             del args['self']
             del args['is_tool_d']
             tool_d = {}
             tool_d.update(self._prep_start(**args)[1])
-        else:
-            repo = tool_d
         status = (True, None)
         try:
             # check start priorities (priority of groups alphabetical for now)
@@ -2075,6 +2075,7 @@ class System:
                     self.clean(**tool)
                     tool_d.update(self.prep_start(**tool)[1])
                 if tool_d:
+                    # TODO fix the arguments
                     self.start(tool_d)
             except Exception as e:  # pragma: no cover
                 self.logger.error('Problem restarting tools: ' + str(e))
