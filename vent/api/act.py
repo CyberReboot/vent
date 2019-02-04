@@ -1683,6 +1683,8 @@ class System:
                         build_tool = s_dict[repo][tool]['build']
                     if 'image' in s_dict[repo][tool]:
                         t_image = s_dict[repo][tool]['image']
+                    self.logger.info('adding: {0} {1} {2} {3} {4}'.format(
+                        repo, add_tools, t_branch, t_version, t_image))
                     repository.add(
                         repo, add_tools, branch=t_branch, version=t_version, image_name=t_image)
                     manifest = Template(self.manifest)
@@ -1740,7 +1742,7 @@ class System:
                             for i in range(1, local_instances + 1):
                                 i_name = tool + str(i) if i != 1 else tool
                                 i_name = i_name.replace('@', '')
-                                repository.start(repo, tool)
+                                Tools().start(repo, tool)
         except Exception as e:  # pragma: no cover
             self.logger.error('Startup failed because: {0}'.format(str(e)))
             status = (False, str(e))
