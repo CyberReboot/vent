@@ -1,3 +1,14 @@
+# v0.7.4 (2019-02-08)
+
+improvements:
+- upgraded version of redis
+- upgraded to latest version of pip
+- upgraded version of pytest
+- upgraded version of sphinx
+
+bug fixes:
+- docker was accidentally removed, it has been readded correctly
+
 # v0.7.3 (2019-01-25)
 
 improvements:
