@@ -816,6 +816,7 @@ class Tools:
             files = vent_config.option('main', 'files')
             files = (files[0], expanduser(files[1]))
             s, _ = manifest.constrain_opts(args, options)
+            self.logger.info('prep start s: {0}'.format(s))
             status, tool_d = self._start_sections(s, files)
 
             # look out for links to delete because they're defined externally
@@ -922,6 +923,7 @@ class Tools:
 
             # remove containers that shouldn't be started
             for c in list(tool_d.keys()):
+                self.logger.info('tools: {0}'.format(c))
                 deleted = False
                 if 'start' in tool_d[c] and not tool_d[c]['start']:
                     del tool_d[c]
@@ -948,6 +950,7 @@ class Tools:
                 status = (True, tool_d)
             else:
                 status = (False, tool_d)
+            self.logger.info('tool_d: {0}'.format(tool_d))
         except Exception as e:  # pragma: no cover
             self.logger.error('_prep_start failed with error: '+str(e))
             status = (False, e)
