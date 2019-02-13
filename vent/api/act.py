@@ -359,7 +359,10 @@ class Repository:
                 if '/' in image_name and not build_local and not config_override:
                     # special case for vent images
                     if image_name.startswith('cyberreboot/vent'):
-                        image_name = image_name.replace('vent-vent-', 'vent-')
+                        image_name = image_name.replace(
+                            'vent-vent-core-', 'vent-')
+                        image_name = image_name.replace(
+                            'vent-vent-extras-', 'vent-')
                     try:
                         image = self.d_client.images.pull(image_name)
                         i_attrs = self.d_client.images.get(
