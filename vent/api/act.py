@@ -816,7 +816,6 @@ class Tools:
             files = vent_config.option('main', 'files')
             files = (files[0], expanduser(files[1]))
             s, _ = manifest.constrain_opts(args, options)
-            self.logger.info('prep start s: {0}'.format(s))
             status, tool_d = self._start_sections(s, files)
 
             # look out for links to delete because they're defined externally
@@ -923,7 +922,6 @@ class Tools:
 
             # remove containers that shouldn't be started
             for c in list(tool_d.keys()):
-                self.logger.info('tools: {0}'.format(c))
                 deleted = False
                 if 'start' in tool_d[c] and not tool_d[c]['start']:
                     del tool_d[c]
@@ -950,7 +948,6 @@ class Tools:
                 status = (True, tool_d)
             else:
                 status = (False, tool_d)
-            self.logger.info('tool_d: {0}'.format(tool_d))
         except Exception as e:  # pragma: no cover
             self.logger.error('_prep_start failed with error: '+str(e))
             status = (False, e)
@@ -1752,7 +1749,6 @@ class System:
                             for i in range(1, local_instances + 1):
                                 i_name = tool + str(i) if i != 1 else tool
                                 i_name = i_name.replace('@', '')
-                                # TODO these need to happen in the right order based on priority
                                 tool_d.update(
                                     tools._prep_start(repo, i_name)[1])
 
