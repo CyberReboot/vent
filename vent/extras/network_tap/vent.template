@@ -1,6 +1,6 @@
 [info]
 name = NetworkTap
-groups = collection,files,network
+groups = files,network
 
 [service]
 uri_prefix1 = http://

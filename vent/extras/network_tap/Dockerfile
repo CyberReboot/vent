@@ -2,8 +2,8 @@ FROM alpine:3.8
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="network_tap" \
-      vent.groups="core,collection,files,network" \
-      vent.section="cyberreboot:vent:/vent/core/network_tap:master:HEAD" \
+      vent.groups="files,network" \
+      vent.section="cyberreboot:vent:/vent/extras/network_tap:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 

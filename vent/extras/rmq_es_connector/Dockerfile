@@ -2,8 +2,8 @@ FROM alpine:3.8
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="rmq_es_connector" \
-      vent.groups="core" \
-      vent.section="cyberreboot:vent:/vent/core/rmq_es_connector:master:HEAD" \
+      vent.groups="connector" \
+      vent.section="cyberreboot:vent:/vent/extras/rmq_es_connector:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 
