@@ -777,6 +777,8 @@ class Tools:
                     )
 
             # start containers based on priorities
+            self.logger.info(
+                'groups: {0}, group orders: {1}'.format(groups, group_orders))
             p_results = self._start_priority_containers(groups,
                                                         group_orders,
                                                         tool_d)
@@ -1191,6 +1193,8 @@ class Tools:
             if group in all_groups:
                 all_groups.remove(group)
             if group in group_orders:
+                self.logger.info('cfg priority groups: {0}, group: {1}'.format(
+                    group_orders[group], group))
                 for cont_t in sorted(group_orders[group]):
                     if cont_t[1] not in s_conts:
                         s_conts, f_conts = self._start_container(cont_t[1],
@@ -1200,6 +1204,8 @@ class Tools:
         # start tools that haven't been specified in the vent.cfg, if any
         for group in all_groups:
             if group in group_orders:
+                self.logger.info('priority groups: {0}, group: {1}'.format(
+                    group_orders[group], group))
                 for cont_t in sorted(group_orders[group]):
                     if cont_t[1] not in s_conts:
                         s_conts, f_conts = self._start_container(cont_t[1],
