@@ -8,7 +8,6 @@ import npyscreen
 
 from vent.api.act import System
 from vent.api.menu_helpers import MenuHelper
-from vent.api.plugins import Plugin
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
 from vent.menus.help import HelpForm
@@ -42,7 +41,6 @@ class VentApp(npyscreen.NPSAppManaged):
 
         # setup initial runtime stuff
         if self.first_time[0] and self.first_time[1] != 'exists':
-            plugins = Plugin()
             system = System()
             menu_helper = MenuHelper()
             thr = Thread(target=menu_helper.t_status,

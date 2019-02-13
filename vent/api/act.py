@@ -754,9 +754,7 @@ class Tools:
             for container in tool_d:
                 containers_remaining.append(container)
                 self.logger.info(
-                    'User: ' + username +
-                    ' starting container: ' + str(container)
-                )
+                    "User: '{0}' starting container: {1}".format(username, container))
                 if 'labels' in tool_d[container]:
                     if 'vent.groups' in tool_d[container]['labels']:
                         groups += tool_d[container]['labels']['vent.groups'].split(
@@ -1652,18 +1650,12 @@ class System:
                         t_version = s_dict[repo][tool]['version']
                     get_tools.append((tool, t_branch, t_version))
 
-                self.logger.info(
-                    'get tools: {0}'.format(get_tools))
                 available_tools = AvailableTools(repo_path, tools=get_tools)
-                self.logger.info(
-                    'available tools: {0}'.format(available_tools))
                 for tool in s_dict_c[repo]:
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
                     t_path, t_path_cased = PathDirs.rel_path(
                         tool, available_tools)
-                    self.logger.info('each tool: {0} {1} {2}'.format(
-                        tool, t_path, t_path_cased))
                     if t_path is None:
                         self.logger.error("Couldn't find tool " + tool + ' in'
                                           ' repo ' + repo)
@@ -1692,8 +1684,6 @@ class System:
                         build_tool = s_dict[repo][tool]['build']
                     if 'image' in s_dict[repo][tool]:
                         t_image = s_dict[repo][tool]['image']
-                    self.logger.info('adding: {0} {1} {2} {3} {4}'.format(
-                        repo, add_tools, t_branch, t_version, t_image))
                     repository.add(
                         repo, add_tools, branch=t_branch, version=t_version, image_name=t_image)
                     manifest = Template(self.manifest)
@@ -1736,7 +1726,6 @@ class System:
             tool_d = {}
             tools = Tools()
             # start tools, if necessary
-            self.logger.info('s_dict: {0}'.format(s_dict))
             for repo in s_dict:
                 for tool in s_dict[repo]:
                     if 'start' in s_dict[repo][tool]:
