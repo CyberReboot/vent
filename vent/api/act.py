@@ -197,6 +197,11 @@ class Repository:
         image_name = image_name.lower()
         image_name = image_name.replace('@', '-')
 
+        # special case for vent images
+        if image_name.startswith('cyberreboot/vent'):
+            image_name = image_name.replace('vent-vent-core-', 'vent-')
+            image_name = image_name.replace('vent-vent-extras-', 'vent-')
+
         # set template section & options for tool at version and branch
         template.add_section(section)
         template.set_option(section, 'name', true_name.split('/')[-1])
@@ -357,12 +362,6 @@ class Repository:
             if not image_exists:
                 # pull if '/' in image_name, fallback to build
                 if '/' in image_name and not build_local and not config_override:
-                    # special case for vent images
-                    if image_name.startswith('cyberreboot/vent'):
-                        image_name = image_name.replace(
-                            'vent-vent-core-', 'vent-')
-                        image_name = image_name.replace(
-                            'vent-vent-extras-', 'vent-')
                     try:
                         image = self.d_client.images.pull(image_name)
                         i_attrs = self.d_client.images.get(
