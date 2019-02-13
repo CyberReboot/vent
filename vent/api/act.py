@@ -1753,7 +1753,8 @@ class System:
                                 i_name = tool + str(i) if i != 1 else tool
                                 i_name = i_name.replace('@', '')
                                 # TODO these need to happen in the right order based on priority
-                                tool_d.update(tools._prep_start(repo, tool)[1])
+                                tool_d.update(
+                                    tools._prep_start(repo, i_name)[1])
 
             if tool_d:
                 tools.start(tool_d, None, is_tool_d=True)
