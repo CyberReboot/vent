@@ -8,7 +8,6 @@ from docker.errors import DockerException
 from npyscreen import notify_confirm
 
 from vent.api.act import System
-from vent.api.menu_helpers import MenuHelper
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
@@ -55,25 +54,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         else:
             self.addfield3.labelColor = 'DEFAULT'
         self.addfield3.display()
-
-        _, values = MenuHelper().t_status(True)
-        if values[0] + values[1] == 0:
-            color = 'DANGER'
-            self.addfield4.labelColor = 'CAUTION'
-            self.addfield4.value = 'Idle'
-        elif values[0] >= int(values[2]):
-            color = 'GOOD'
-            self.addfield4.labelColor = color
-            self.addfield4.value = 'Ready to start jobs'
-        else:
-            color = 'CAUTION'
-            self.addfield4.labelColor = color
-            self.addfield4.value = 'Ready to start jobs'
-
-        # update tool status
-        plugin_str, values = MenuHelper().t_status(False)
-        plugin_str += ', ' + str(values[3]) + ' plugin(s) installed'
-        self.addfield5.value = plugin_str
 
         # get jobs
         jobs = Jobs()

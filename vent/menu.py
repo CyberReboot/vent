@@ -7,7 +7,6 @@ from threading import Thread
 import npyscreen
 
 from vent.api.act import System
-from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
 from vent.menus.help import HelpForm
@@ -42,23 +41,6 @@ class VentApp(npyscreen.NPSAppManaged):
         # setup initial runtime stuff
         if self.first_time[0] and self.first_time[1] != 'exists':
             system = System()
-            #menu_helper = MenuHelper()
-            # thr = Thread(target=menu_helper.t_status,
-            #             args=(), kwargs={'core': True})
-            # thr.start()
-            # while thr.is_alive():
-            #    npyscreen.notify_wait('Please wait while Vent initializes...1/2',
-            #                          title='Setting up things...')
-            #    time.sleep(1)
-            # thr.join()
-            # thr = Thread(target=menu_helper.t_status,
-            #             args=(), kwargs={'core': False})
-            # thr.start()
-            # while thr.is_alive():
-            #    npyscreen.notify_wait('Please wait while Vent initializes...2/2',
-            #                          title='Setting up things...')
-            #    time.sleep(1)
-            # thr.join()
             thr = Thread(target=system.start, args=(), kwargs={})
             thr.start()
             countdown = 60

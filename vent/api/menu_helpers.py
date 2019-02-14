@@ -411,11 +411,7 @@ class MenuHelper:
 
                 path, _, _ = p_helper.get_path(repo, core=core)
                 matches = None
-                if core:
-                    matches = AvailableTools(path, version=version,
-                                             groups='core')
-                else:
-                    matches = AvailableTools(path, version=version)
+                matches = AvailableTools(path, version=version)
                 for match in matches:
                     if core:
                         all_tools['normal'].append(
