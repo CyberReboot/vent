@@ -1,4 +1,4 @@
-from vent.api.plugin_helpers import PluginHelper
+from vent.legacy.plugin_helpers import PluginHelper
 
 
 def test_get_path():

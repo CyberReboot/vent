@@ -1,6 +1,6 @@
 import os
 
-from vent.api.actions import Action
+from vent.legacy.actions import Action
 
 
 def test_startup():

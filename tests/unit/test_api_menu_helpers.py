@@ -1,5 +1,5 @@
-from vent.api.menu_helpers import MenuHelper
-from vent.api.plugins import Plugin
+from vent.legacy.menu_helpers import MenuHelper
+from vent.legacy.plugins import Plugin
 
 
 def test_cores():

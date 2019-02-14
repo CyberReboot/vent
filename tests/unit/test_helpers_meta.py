@@ -4,7 +4,6 @@ import shutil
 import docker
 import requests
 
-from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Docker
@@ -19,6 +18,7 @@ from vent.helpers.meta import Tools
 from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
+from vent.legacy.menu_helpers import MenuHelper
 
 
 def test_run_containers():

@@ -1,4 +1,4 @@
-from vent.api.templates import Template
+from vent.legacy.templates import Template
 
 
 def test_options():
