@@ -1,7 +1,7 @@
 import os
 
+from vent.helpers.templates import Template
 from vent.legacy.plugins import Plugin
-from vent.legacy.templates import Template
 
 
 def test_add():
