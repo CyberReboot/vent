@@ -29,6 +29,64 @@ from vent.helpers.templates import Template
 logger = Logger(__name__)
 
 
+def Logs(c_type=None, grep_list=None):
+    """ Generically filter logs stored in log containers """
+    def get_logs(logs, log_entries):
+        try:
+            for log in logs:
+                if str(container.name) in log_entries:
+                    log_entries[str(container.name)].append(log)
+                else:
+                    log_entries[str(container.name)] = [log]
+        except Exception as e:  # pragma: no cover
+            logger.error('Unable to get logs for ' +
+                         str(container.name) +
+                         ' because: ' + str(e))
+        return log_entries
+
+    status = (True, None)
+    log_entries = {}
+    d_client = docker.from_env()
+    containers = d_client.containers.list(all=True,
+                                          filters={'label': 'vent'})
+    logger.debug('containers found: ' + str(containers))
+    comp_c = containers
+    if c_type:
+        try:
+            comp_c = [c for c in containers
+                      if (c_type
+                          in c.attrs['Config']['Labels']['vent.groups'])]
+        except Exception as e:  # pragma: no cover
+            logger.error('Unable to limit containers by: ' +
+                         str(c_type) + ' because: ' +
+                         str(e))
+
+    if grep_list:
+        for expression in grep_list:
+            for container in comp_c:
+                try:
+                    # 'logs' stores each line containing the expression
+                    logs = [log for log in container.logs().split('\n')
+                            if expression in log]
+                    log_entries = get_logs(logs, log_entries)
+                except Exception as e:  # pragma: no cover
+                    logger.info('Unable to get logs for ' +
+                                str(container) +
+                                ' because: ' + str(e))
+    else:
+        for container in comp_c:
+            try:
+                logs = container.logs().split('\n')
+                log_entries = get_logs(logs, log_entries)
+            except Exception as e:  # pragma: no cover
+                logger.info('Unabled to get logs for ' +
+                            str(container) +
+                            ' because: ' + str(e))
+
+    status = (True, log_entries)
+    return status
+
+
 def Version():
     """ Get Vent version """
     version = ''
