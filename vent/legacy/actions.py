@@ -3,16 +3,15 @@ import copy
 import getpass
 import json
 import os
-import queue
 import re
 import shutil
 import tempfile
 import urllib.request
 
 import docker
+import queue
 import yaml
 
-from vent.api.plugins import Plugin
 from vent.helpers.logs import Logger
 from vent.helpers.meta import AvailableTools
 from vent.helpers.meta import Containers
@@ -21,6 +20,7 @@ from vent.helpers.meta import Images
 from vent.helpers.meta import Timestamp
 from vent.helpers.paths import PathDirs
 from vent.helpers.templates import Template
+from vent.legacy.plugins import Plugin
 
 
 class Action:

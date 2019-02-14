@@ -3,9 +3,9 @@ import time
 
 import npyscreen
 
-from vent.api.actions import Action
-from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Tools
+from vent.legacy.actions import Action
+from vent.legacy.menu_helpers import MenuHelper
 
 
 class ChooseToolsForm(npyscreen.ActionForm):

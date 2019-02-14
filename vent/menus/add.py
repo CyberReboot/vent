@@ -3,8 +3,8 @@ import time
 
 import npyscreen
 
-from vent.api.actions import Action
-from vent.api.plugin_helpers import PluginHelper
+from vent.legacy.actions import Action
+from vent.legacy.plugin_helpers import PluginHelper
 from vent.menus.add_options import AddOptionsForm
 from vent.menus.editor import EditorForm
 

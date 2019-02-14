@@ -7,7 +7,7 @@ import npyscreen
 from docker.errors import DockerException
 from npyscreen import notify_confirm
 
-from vent.api.act import System
+from vent.api.system import System
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu

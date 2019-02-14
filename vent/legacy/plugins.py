@@ -13,7 +13,6 @@ from subprocess import STDOUT
 import docker
 import yaml
 
-from vent.api.plugin_helpers import PluginHelper
 from vent.helpers.errors import ErrorHandler
 from vent.helpers.logs import Logger
 from vent.helpers.meta import AvailableTools
@@ -22,6 +21,7 @@ from vent.helpers.meta import Timestamp
 from vent.helpers.meta import ToolMatches
 from vent.helpers.paths import PathDirs
 from vent.helpers.templates import Template
+from vent.legacy.plugin_helpers import PluginHelper
 
 
 class Plugin:

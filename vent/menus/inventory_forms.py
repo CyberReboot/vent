@@ -1,5 +1,5 @@
-from vent.api.actions import Action
 from vent.helpers.logs import Logger
+from vent.legacy.actions import Action
 from vent.menus.inventory import InventoryForm
 
 

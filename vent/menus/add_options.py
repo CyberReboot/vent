@@ -1,6 +1,6 @@
 import npyscreen
 
-from vent.api.menu_helpers import MenuHelper
+from vent.legacy.menu_helpers import MenuHelper
 from vent.menus.choose_tools import ChooseToolsForm
 
 

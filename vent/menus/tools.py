@@ -6,13 +6,13 @@ from threading import Thread
 
 import npyscreen
 
-from vent.api.act import System
-from vent.api.act import Tools
-from vent.api.menu_helpers import MenuHelper
+from vent.api.system import System
+from vent.api.tools import Tools
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 from vent.helpers.templates import Template
+from vent.legacy.menu_helpers import MenuHelper
 from vent.menus.editor import EditorForm
 
 

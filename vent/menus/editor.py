@@ -6,8 +6,8 @@ import re
 
 import npyscreen
 
-from vent.api.plugin_helpers import PluginHelper
 from vent.helpers.templates import Template
+from vent.legacy.plugin_helpers import PluginHelper
 from vent.menus.del_instances import DeleteForm
 
 

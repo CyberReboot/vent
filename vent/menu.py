@@ -6,7 +6,7 @@ from threading import Thread
 
 import npyscreen
 
-from vent.api.act import System
+from vent.api.system import System
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
 from vent.menus.help import HelpForm

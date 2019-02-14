@@ -8,12 +8,12 @@ from subprocess import STDOUT
 
 import docker
 
-from vent.api.actions import Action
-from vent.api.plugin_helpers import PluginHelper
 from vent.helpers.logs import Logger
 from vent.helpers.meta import AvailableTools
 from vent.helpers.meta import Tools
 from vent.helpers.templates import Template
+from vent.legacy.actions import Action
+from vent.legacy.plugin_helpers import PluginHelper
 
 
 class MenuHelper:
