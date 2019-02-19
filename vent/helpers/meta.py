@@ -439,7 +439,7 @@ def Tools(**kargs):
     return tools[1]
 
 
-def AvailableTools(path, tools=None, branch='master', version='HEAD'):
+def AvailableTools(path, tools=None, branch='master', version='HEAD', core=False):
     """
     Return list of possible tools in repo for the given version and branch or
     take a list of tools to get paths for specific version and branch
@@ -452,21 +452,25 @@ def AvailableTools(path, tools=None, branch='master', version='HEAD'):
             # directory
             add_info = len(files) > 1
             for f in files:
-                addtl_info = ''
-                if add_info:
-                    # @ will be delimiter symbol for multi-tools
-                    try:
-                        addtl_info = '@' + f.split('.')[1]
-                    except Exception as e:
-                        addtl_info = '@unspecified'
-                if tool:
-                    if root.split(path)[1].rsplit('/', 1)[-1].lower() == tool:
-                        matches.append((root.split(path)[1] + addtl_info,
-                                        version))
-                    elif tool == '@':
-                        matches.append(('' + addtl_info, version))
+                if core and 'core' not in root:
+                    pass
                 else:
-                    matches.append((root.split(path)[1] + addtl_info, version))
+                    addtl_info = ''
+                    if add_info:
+                        # @ will be delimiter symbol for multi-tools
+                        try:
+                            addtl_info = '@' + f.split('.')[1]
+                        except Exception as e:
+                            addtl_info = '@unspecified'
+                    if tool:
+                        if root.split(path)[1].rsplit('/', 1)[-1].lower() == tool:
+                            matches.append((root.split(path)[1] + addtl_info,
+                                            version))
+                        elif tool == '@':
+                            matches.append(('' + addtl_info, version))
+                    else:
+                        matches.append(
+                            (root.split(path)[1] + addtl_info, version))
         return matches
 
     matches = []

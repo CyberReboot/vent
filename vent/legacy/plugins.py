@@ -271,19 +271,14 @@ class Plugin:
             else:
                 response = (True, None)
             if response[0]:
-                search_groups = None
-                if self.core:
-                    search_groups = 'core'
                 matches = []
                 if self.tools is None and self.overrides is None:
                     # get all tools
-                    matches = AvailableTools(self.path, version=self.version,
-                                             groups=search_groups)
+                    matches = AvailableTools(self.path, version=self.version)
                 elif self.tools is None:
                     # there's only something in overrides
                     # grab all the tools then apply overrides
-                    matches = AvailableTools(self.path, version=self.version,
-                                             groups=search_groups)
+                    matches = AvailableTools(self.path, version=self.version)
                     # !! TODO apply overrides to matches
                 elif self.overrides is None:
                     # there's only something in tools

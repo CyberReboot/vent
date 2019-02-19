@@ -53,7 +53,7 @@ class Repository:
         original_path = status[1]
         if status[0] and len(matches) > 0:
             repo, org, name = self.path_dirs.get_path(self.repo)
-            cmd = 'git rev-parse --short HEAD'
+            cmd = 'git rev-parse --short ' + self.version
             commit_id = ''
             try:
                 commit_id = check_output(shlex.split(cmd), stderr=STDOUT,
@@ -86,18 +86,15 @@ class Repository:
         status = Checkout(path, branch=self.branch,
                           version=self.version)
         if status[0]:
-            search_groups = None
-            if self.core:
-                search_groups = 'core'
             if self.tools is None and self.overrides is None:
                 # get all tools
-                matches = AvailableTools(path, version=self.version,
-                                         groups=search_groups)
+                matches = AvailableTools(
+                    path, branch=self.branch, version=self.version, core=self.core)
             elif self.tools is None:
                 # there's only something in overrides
                 # grab all the tools then apply overrides
-                matches = AvailableTools(path, version=self.version,
-                                         groups=search_groups)
+                matches = AvailableTools(
+                    path, branch=self.branch, version=self.version, core=self.core)
                 # !! TODO apply overrides to matches
             elif self.overrides is None:
                 # there's only something in tools

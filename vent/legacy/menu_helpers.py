@@ -100,7 +100,7 @@ class MenuHelper:
 
                 self.logger.info('status of plugin checkout ' +
                                  str(response))
-                matches = AvailableTools(path, version=version, groups='core')
+                matches = AvailableTools(path, version=version)
                 for match in matches:
                     name = match[0].rsplit('/')[-1]
                     constraints = {'name': name,
