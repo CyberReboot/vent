@@ -8,7 +8,7 @@ pytest==4.2.1
 pytest-cov==2.6.1
 python-magic==0.4.15
 pyyaml==3.13
-redis==3.1.0
+redis==3.2.0
 rq==0.13.0
 sphinx==1.8.4
 watchdog==0.9.0
