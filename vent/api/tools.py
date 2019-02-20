@@ -4,7 +4,6 @@ import json
 import re
 import shlex
 from os import environ
-from os import getcwd
 from os.path import expanduser
 from os.path import join
 from subprocess import check_output
@@ -426,7 +425,6 @@ class Tools:
             image_name = s[section]['image_name']
 
             # checkout the right version and branch of the repo
-            cwd = getcwd()
             tool_d[c_name] = {'image': image_name,
                               'name': c_name}
             # get rid of all commented sections in various runtime

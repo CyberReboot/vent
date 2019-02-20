@@ -1,4 +1,3 @@
-import fnmatch
 import json
 import re
 import shlex
@@ -6,7 +5,6 @@ from ast import literal_eval
 from os import chdir
 from os import environ
 from os import getcwd
-from os import walk
 from os.path import expanduser
 from os.path import join
 from subprocess import check_output

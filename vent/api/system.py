@@ -313,7 +313,6 @@ class System:
                     t_version = 'HEAD'
                     t_image = None
                     add_tools = None
-                    build_tool = False
                     add_tools = [(t_path_cased, '')]
                     if 'branch' in s_dict[repo][tool]:
                         t_branch = s_dict[repo][tool]['branch']

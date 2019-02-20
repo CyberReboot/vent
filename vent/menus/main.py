@@ -13,7 +13,6 @@ from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import DropLocation
 from vent.helpers.meta import Gpu
-from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
@@ -75,7 +74,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         # if file drop location changes deal with it
         logger = Logger(__name__)
-        status = (False, None)
         if self.file_drop.value != DropLocation()[1]:
             logger.info('Starting: file drop restart')
             try:

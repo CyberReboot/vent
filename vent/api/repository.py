@@ -306,7 +306,6 @@ class Repository:
         try:
             name = template.option(section, 'name')
             groups = template.option(section, 'groups')
-            repo = template.option(section, 'repo')
             t_type = template.option(section, 'type')
             path = template.option(section, 'path')
             status, config_override = self.path_dirs.override_config(path[1])
@@ -390,13 +389,11 @@ class Repository:
 
                 # see if additional file arg needed for building multiple
                 # images from same directory
-                file_tag = ' .'
+                file_tag = 'Dockerfile'
                 multi_tool = template.option(section, 'multi_tool')
                 if multi_tool[0] and multi_tool[1] == 'yes':
                     specific_file = template.option(section, 'name')[1]
-                    if specific_file == 'unspecified':
-                        file_tag = 'Dockerfile'
-                    else:
+                    if specific_file != 'unspecified':
                         file_tag = 'Dockerfile.' + specific_file
 
                 # update image name with new version for update
@@ -409,7 +406,9 @@ class Repository:
                 labels['vent.name'] = name[1]
                 labels['vent.groups'] = groups[1]
                 labels['built-by'] = username
-                image = self.d_client.images.build(path='.', tag=image_name,
+                image = self.d_client.images.build(path='.',
+                                                   dockerfile=file_tag,
+                                                   tag=image_name,
                                                    labels=labels, rm=True)
                 image_id = image[0].id.split(':')[1][:12]
                 template.set_option(section, 'built', 'yes')

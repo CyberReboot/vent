@@ -1,5 +1,4 @@
 from datetime import datetime
-from os.path import join
 
 import docker
 
