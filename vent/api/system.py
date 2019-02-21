@@ -318,8 +318,6 @@ class System:
                         t_branch = s_dict[repo][tool]['branch']
                     if 'version' in s_dict[repo][tool]:
                         t_version = s_dict[repo][tool]['version']
-                    if 'build' in s_dict[repo][tool]:
-                        build_tool = s_dict[repo][tool]['build']
                     if 'image' in s_dict[repo][tool]:
                         t_image = s_dict[repo][tool]['image']
                     repository.add(
