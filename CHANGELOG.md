@@ -1,3 +1,11 @@
+# v0.7.5 (2019-02-22)
+
+improvements:
+- upgraded to alpine 3.9
+- upgraded elasticsearch to 6.6.0
+- upgraded version of pytest
+- upgraded version of redis
+
 # v0.7.4 (2019-02-08)
 
 improvements:
