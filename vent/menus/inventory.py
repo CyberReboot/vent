@@ -16,7 +16,7 @@ class InventoryForm(npyscreen.FormBaseNew):
         # get list of all possible group views to display
         self.views = deque()
         possible_groups = set()
-        manifest = Template(self.api_action.plugin.manifest)
+        manifest = Template(self.api_action.manifest)
         tools = self.api_action.inventory(choices=['tools'])[1]['tools']
         for tool in tools:
             groups = manifest.option(tool, 'groups')[1].split(',')
@@ -36,7 +36,7 @@ class InventoryForm(npyscreen.FormBaseNew):
         group = self.views.popleft()
         new_display = []
         new_display.append('Tools for group ' + group + ' found:')
-        manifest = Template(self.api_action.plugin.manifest)
+        manifest = Template(self.api_action.manifest)
         cur_repo = ''
         for i in range(1, len(self.all_tools) - 1):
             val = self.all_tools[i]
@@ -48,10 +48,10 @@ class InventoryForm(npyscreen.FormBaseNew):
             elif val.startswith('    ') and not val.startswith('      '):
                 name = val.strip()
                 constraints = {'repo': cur_repo, 'name': name}
-                t_section = self.manifest.constrain_opts(constraints, [])[0]
+                t_section = manifest.constrain_opts(constraints, [])[0]
                 t_section = list(t_section.keys())[0]
                 if group in manifest.option(t_section, 'groups')[1].split(','):
-                    new_display += self.all_tools[i:i+5]
+                    new_display += self.all_tools[i:i+4]
             elif val == '':
                 new_display.append(val)
         # if all groups display all groups

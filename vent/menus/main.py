@@ -13,7 +13,6 @@ from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import DropLocation
 from vent.helpers.meta import Gpu
-from vent.helpers.meta import Jobs
 from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 from vent.helpers.paths import PathDirs

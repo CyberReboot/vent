@@ -21,7 +21,6 @@ class ToolForm(npyscreen.ActionForm):
     def __init__(self, *args, **keywords):
         """ Initialize tool form objects """
         self.logger = Logger(__name__)
-        self.logger.info(str(keywords['names']))
         self.api_action = System()
         self.tools_inst = Tools()
         action = {'api_action': self.tools_inst}
@@ -268,7 +267,6 @@ class ToolForm(npyscreen.ActionForm):
         tools_to_configure = []
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
-                self.logger.info(tool)
                 if self.tools_tc[repo][tool].value:
                     t = tool.split(':', 2)[2].split('/')[-1]
                     if t.startswith('/:'):

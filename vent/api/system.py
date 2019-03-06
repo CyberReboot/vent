@@ -652,7 +652,7 @@ class System:
                         self.clean(**tool_identifier)
                         start_d.update(self.prep_start(**tool_identifier)[1])
                     if start_d:
-                        self.start(start_d)
+                        Tools().start(start_d)
             except Exception as e:  # pragma: no cover
                 self.logger.error('Trouble restarting tool ' + name +
                                   ' because: ' + str(e))
@@ -707,7 +707,7 @@ class System:
                     tool_d.update(self.prep_start(**tool)[1])
                 if tool_d:
                     # TODO fix the arguments
-                    self.start(tool_d)
+                    Tools().start(tool_d)
             except Exception as e:  # pragma: no cover
                 self.logger.error('Problem restarting tools: ' + str(e))
                 status = (False, str(e))

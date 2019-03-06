@@ -177,5 +177,6 @@ class Template:
                     exists, value = self.option(section, option)
                     if exists:
                         options[option] = value
-                tools.append(options)
+                if 'core' not in options['groups'] and 'hidden' not in options['groups']:
+                    tools.append(options)
         return tools

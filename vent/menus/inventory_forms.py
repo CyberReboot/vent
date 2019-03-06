@@ -1,5 +1,5 @@
+from vent.api.tools import Tools
 from vent.helpers.logs import Logger
-from vent.legacy.actions import Action
 from vent.menus.inventory import InventoryForm
 
 
@@ -7,7 +7,7 @@ class BaseInventoryForm(InventoryForm):
     """ Base form to inherit from """
 
     def __init__(self, action_dict=None, action_name=None, *args, **keywords):
-        api_action = Action()
+        api_action = Tools()
         action = {'api_action': api_action}
         if action_dict:
             action.update(action_dict)
