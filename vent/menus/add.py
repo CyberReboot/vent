@@ -90,7 +90,7 @@ class AddForm(npyscreen.ActionForm):
 
         if self.image.value and self.link_name.value:
             api_action = Tools()
-            api_image = Image()
+            api_image = Image(System().manifest)
             thr = threading.Thread(target=api_image.add, args=(),
                                    kwargs={'image': self.image.value,
                                            'link_name': self.link_name.value,
