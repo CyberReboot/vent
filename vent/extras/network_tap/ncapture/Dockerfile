@@ -1,7 +1,7 @@
 FROM alpine:3.9
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
-      vent.name="file-drop" \
+      vent.name="ncapture" \
       vent.groups="collection,hidden,network,network_tap_child"
 RUN apk add --update \
     bash \
