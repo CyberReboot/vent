@@ -178,8 +178,6 @@ class PathDirs:
                 plugin_template.write_config()
                 config_override = True
         except Exception as e:  # pragma: no cover
-            self.logger.error(
-                'Failed to override config because: {0}'.format(str(e)))
             status = (False, str(e))
 
         return status, config_override

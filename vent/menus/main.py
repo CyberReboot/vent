@@ -54,24 +54,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             self.addfield3.labelColor = 'DEFAULT'
         self.addfield3.display()
 
-        # get jobs
-        jobs = Jobs()
-
-        # number of jobs, number of tool containers
-        self.addfield7.value = str(jobs[0]) + ' jobs running (' + str(jobs[1])
-        self.addfield7.value += ' tool containers), ' + str(jobs[2])
-        self.addfield7.value += ' completed jobs'
-
-        if jobs[0] > 0:
-            self.addfield4.labelColor = 'GOOD'
-            self.addfield4.value = 'Processing jobs'
-            self.addfield7.labelColor = 'GOOD'
-        else:
-            self.addfield7.labelColor = 'DEFAULT'
-        self.addfield4.display()
-        self.addfield5.display()
-        self.addfield7.display()
-
         # if file drop location changes deal with it
         logger = Logger(__name__)
         if self.file_drop.value != DropLocation()[1]:
@@ -210,7 +192,19 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             else:
                 notify_confirm('Vent backup could not be completed')
         elif action == 'start':
-            status = self.api
+            status = self.api_action.start()
+            if status[0]:
+                notify_confirm('System start complete. '
+                               'Press OK.')
+            else:
+                notify_confirm(status[1])
+        elif action == 'stop':
+            status = self.api_action.stop()
+            if status[0]:
+                notify_confirm('System stop complete. '
+                               'Press OK.')
+            else:
+                notify_confirm(status[1])
         elif action == 'configure':
             # TODO
             form_args = {'name': 'Change vent configuration',
@@ -266,7 +260,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         """ Override method for creating FormBaseNewWithMenu form """
         try:
             self.api_action = System()
-
         except DockerException as de:  # pragma: no cover
             notify_confirm(str(de),
                            title='Docker Error',
@@ -302,15 +295,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.addfield3 = self.add(npyscreen.TitleFixedText, name='Containers:',
                                   labelColor='DEFAULT',
                                   value='0 '+' running')
-        self.addfield4 = self.add(npyscreen.TitleFixedText, name='Status:',
-                                  labelColor='CAUTION',
-                                  value='Idle')
-        self.addfield5 = self.add(npyscreen.TitleFixedText,
-                                  name='Tools:', labelColor='DANGER',
-                                  value='None')
-        self.addfield7 = self.add(npyscreen.TitleFixedText, name='Jobs:',
-                                  value='0 jobs running (0 tool containers),'
-                                  ' 0 completed jobs', labelColor='DEFAULT')
         self.multifield1 = self.add(npyscreen.MultiLineEdit, max_height=22,
                                     editable=False, value="""
 

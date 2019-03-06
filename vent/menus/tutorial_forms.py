@@ -154,17 +154,13 @@ class TutorialGettingSetupForm(TutorialForm):
         title = 'Getting Setup'
         text = """
         Here's a quick setup guide to quickly get Vent up and running.
-        1) Enter the core tools submenu from the main action menu and
-           'add all latest core tools'
-        2) Build all core tools
-        3) Start all core tools
 
-        Now, Vent has the tools to work. Now we need to add plugin tools
-        to process files placed into File Drop.
-        4) Hit '^X' to open the main action menu and go to the Plugins
+        First we need to add plugin tools to process files placed into File
+        Drop.
+        1) Hit '^X' to open the main action menu and go to the Tools
            submenu
-        5) Add and build new plugins using either Git or Docker
-        6) Now, drop any files that the plugins process into the File Drop
+        2) Add and build new tools using either Git or Docker
+        3) Now, drop any files that the plugins process into the File Drop
            directory.
 
         Congrats! You have just started and processed files using Vent!

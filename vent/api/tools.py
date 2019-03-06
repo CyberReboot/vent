@@ -1,8 +1,10 @@
 import ast
+import copy
 import getpass
 import json
 import re
 import shlex
+from os import chdir
 from os import environ
 from os.path import expanduser
 from os.path import join
@@ -144,8 +146,9 @@ class Tools:
         status = (True, None)
 
         # get resulting dict of sections with options that match constraints
-        results, template = Template(
-            template=self.manifest).constrain_opts(args, [])
+        template = Template(template=self.manifest)
+        results, _ = template.constrain_opts(args, [])
+
         for result in results:
             response, image_name = template.option(result, 'image_name')
             name = template.option(result, 'name')[1]
@@ -207,6 +210,16 @@ class Tools:
             groups = []
             containers_remaining = []
             username = getpass.getuser()
+
+            # remove tools that have the hidden label
+            tool_d_copy = copy.deepcopy(tool_d)
+            for container in tool_d_copy:
+                if 'labels' in tool_d_copy[container] and 'vent.groups' in tool_d_copy[container]['labels']:
+                    groups_copy = tool_d_copy[container]['labels']['vent.groups'].split(
+                        ',')
+                    if 'hidden' in groups_copy:
+                        del tool_d[container]
+
             for container in tool_d:
                 containers_remaining.append(container)
                 self.logger.info(
@@ -837,4 +850,98 @@ class Tools:
         except Exception as e:  # pragma: no cover
             self.logger.error('Stop failed with error: ' + str(e))
             status = (False, e)
+        return status
+
+    def repo_commits(self, repo):
+        """ Get the commit IDs for all of the branches of a repository """
+        commits = []
+        try:
+            status = self.path_dirs.apply_path(repo)
+            # switch to directory where repo will be cloned to
+            if status[0]:
+                cwd = status[1]
+            else:
+                self.logger.error('apply_path failed. Exiting repo_commits with'
+                                  ' status: ' + str(status))
+                return status
+
+            status = self.repo_branches(repo)
+            if status[0]:
+                branches = status[1]
+                for branch in branches:
+                    try:
+                        branch_output = check_output(shlex
+                                                     .split('git rev-list origin/' +
+                                                            branch),
+                                                     stderr=STDOUT,
+                                                     close_fds=True).decode('utf-8')
+                        branch_output = branch_output.split('\n')[:-1]
+                        branch_output += ['HEAD']
+                        commits.append((branch, branch_output))
+                    except Exception as e:  # pragma: no cover
+                        self.logger.error('repo_commits failed with error: ' +
+                                          str(e) + ' on branch: ' +
+                                          str(branch))
+                        status = (False, e)
+                        return status
+            else:
+                self.logger.error('repo_branches failed. Exiting repo_commits'
+                                  ' with status: ' + str(status))
+                return status
+
+            chdir(cwd)
+            status = (True, commits)
+        except Exception as e:  # pragma: no cover
+            self.logger.error('repo_commits failed with error: ' + str(e))
+            status = (False, e)
+
+        return status
+
+    def repo_branches(self, repo):
+        """ Get the branches of a repository """
+        branches = []
+        try:
+            # switch to directory where repo will be cloned to
+            status = self.path_dirs.apply_path(repo)
+            if status[0]:
+                cwd = status[1]
+            else:
+                self.logger.error('apply_path failed. Exiting repo_branches'
+                                  ' with status ' + str(status))
+                return status
+
+            check_output(shlex.split('git pull --all'),
+                         stderr=STDOUT,
+                         close_fds=True)
+            branch_output = check_output(shlex.split('git branch -a'),
+                                         stderr=STDOUT,
+                                         close_fds=True)
+            branch_output = branch_output.split(b'\n')
+            for branch in branch_output:
+                br = branch.strip()
+                if br.startswith(b'*'):
+                    br = br[2:]
+                if b'/' in br:
+                    branches.append(br.rsplit(b'/', 1)[1].decode('utf-8'))
+                elif br:
+                    branches.append(br.decode('utf-8'))
+
+            branches = list(set(branches))
+            for branch in branches:
+                try:
+                    check_output(shlex.split('git checkout ' + branch),
+                                 stderr=STDOUT,
+                                 close_fds=True)
+                except Exception as e:  # pragma: no cover
+                    self.logger.error('repo_branches failed with error: ' +
+                                      str(e) + ' on branch: ' + str(branch))
+                    status = (False, e)
+                    return status
+
+            chdir(cwd)
+            status = (True, branches)
+        except Exception as e:  # pragma: no cover
+            self.logger.error('repo_branches failed with error: ' + str(e))
+            status = (False, e)
+
         return status

@@ -12,7 +12,6 @@ from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
 from vent.helpers.templates import Template
-from vent.legacy.menu_helpers import MenuHelper
 from vent.menus.editor import EditorForm
 
 
@@ -24,8 +23,8 @@ class ToolForm(npyscreen.ActionForm):
         self.logger = Logger(__name__)
         self.logger.info(str(keywords['names']))
         self.api_action = System()
-        self.m_helper = MenuHelper()
-        action = {'api_action': self.api_action}
+        self.tools_inst = Tools()
+        action = {'api_action': self.tools_inst}
         self.tools_tc = {}
         self.repo_widgets = {}
         if keywords['action_dict']:
@@ -33,14 +32,14 @@ class ToolForm(npyscreen.ActionForm):
         if keywords['names']:
             i = 1
             for name in keywords['names']:
-                action['action_object'+str(i)] = getattr(self.api_action, name)
+                action['action_object'+str(i)] = getattr(self.tools_inst, name)
                 i += 1
         self.action = action
         # get list of all possible group views to display
         self.views = deque()
         possible_groups = set()
         manifest = Template(self.api_action.manifest)
-        tools = Tools().inventory(choices=['tools'])[1]['tools']
+        tools = self.tools_inst.inventory(choices=['tools'])[1]['tools']
         for tool in tools:
             groups = manifest.option(tool, 'groups')[1].split(',')
             for group in groups:
@@ -94,12 +93,12 @@ class ToolForm(npyscreen.ActionForm):
             i = 4
 
         if self.action['action_name'] == 'start':
-            response = Tools().inventory(choices=['repos',
-                                                  'tools',
-                                                  'built',
-                                                  'running'])
+            response = self.tools_inst.inventory(choices=['repos',
+                                                          'tools',
+                                                          'built',
+                                                          'running'])
         else:
-            response = Tools().inventory(choices=['repos', 'tools'])
+            response = self.tools_inst.inventory(choices=['repos', 'tools'])
         if response[0]:
             inventory = response[1]
 
@@ -130,7 +129,7 @@ class ToolForm(npyscreen.ActionForm):
                         # check to ensure tool not set to locally active = no
                         # in vent.cfg
                         externally_active = False
-                        vent_cfg_file = self.action['api_action'].vent_config
+                        vent_cfg_file = self.api_action.vent_config
                         vent_cfg = Template(vent_cfg_file)
                         tool_pairs = vent_cfg.section('external-services')[1]
                         for ext_tool in tool_pairs:
@@ -276,7 +275,7 @@ class ToolForm(npyscreen.ActionForm):
                         t = ' '+t[1:]
                     t = t.split(':')
                     if self.action['action_name'] == 'start':
-                        status = self.action['action_object2'](name=t[0],
+                        status = self.action['action_object1'](name=t[0],
                                                                branch=t[1],
                                                                version=t[2])
                         if status[0]:
@@ -312,6 +311,8 @@ class ToolForm(npyscreen.ActionForm):
                         self.parentApp.addForm('EDITOR' + t[0], EditorForm,
                                                **kargs)
                         tools_to_configure.append('EDITOR' + t[0])
+                    elif self.action['action_name'] == 'remove':
+                        status = self.action['action_object1'](repo, t[0])
                     else:
                         kargs = {'name': t[0],
                                  'branch': t[1],
@@ -323,7 +324,7 @@ class ToolForm(npyscreen.ActionForm):
                         # version in manifest
                         if self.action['action_name'] == 'update':
                             if t[2] != 'HEAD':
-                                repo_commits = self.m_helper.repo_commits(repo)[
+                                repo_commits = self.tools_inst.repo_commits(repo)[
                                     1]
                                 for branch in repo_commits:
                                     if branch[0] == t[1]:

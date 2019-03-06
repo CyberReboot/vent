@@ -269,6 +269,7 @@ class Repository:
 
     def _build_image(self, template, match_path, image_name, section, build_local=False):
         status = (True, None)
+        output = ''
 
         def set_instances(template, section, built, image_id=None):
             """ Set build information for multiple instances """
@@ -315,7 +316,6 @@ class Repository:
                 name = (True, image_name)
             pull = False
             image_exists = False
-            output = ''
             cfg_template = Template(template=self.path_dirs.cfg_file)
             use_existing_image = False
             result = cfg_template.option('build-options',
