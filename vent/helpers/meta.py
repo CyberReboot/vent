@@ -430,7 +430,7 @@ def Jobs():
     return tuple(jobs)
 
 
-def Tools(**kargs):
+def ManifestTools(**kargs):
     """ Get tools that exist in the manifest """
     path_dirs = PathDirs(**kargs)
     manifest = join(path_dirs.meta_dir, 'plugin_manifest.cfg')

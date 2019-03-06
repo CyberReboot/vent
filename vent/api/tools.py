@@ -16,6 +16,7 @@ import docker
 from vent.api.image import Image
 from vent.api.repository import Repository
 from vent.helpers.logs import Logger
+from vent.helpers.meta import AvailableTools
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
@@ -942,6 +943,39 @@ class Tools:
             status = (True, branches)
         except Exception as e:  # pragma: no cover
             self.logger.error('repo_branches failed with error: ' + str(e))
+            status = (False, e)
+
+        return status
+
+    def repo_tools(self, repo, branch, version):
+        """ Get available tools for a repository branch at a version """
+        try:
+            tools = []
+            status = self.path_dirs.apply_path(repo)
+            # switch to directory where repo will be cloned to
+            if status[0]:
+                cwd = status[1]
+            else:
+                self.logger.error('apply_path failed. Exiting repo_tools with'
+                                  ' status: ' + str(status))
+                return status
+
+            # TODO commenting out for now, should use update_repo
+            #status = self.p_helper.checkout(branch=branch, version=version)
+            status = (True, None)
+
+            if status[0]:
+                path, _, _ = self.path_dirs.get_path(repo)
+                tools = AvailableTools(path, version=version)
+            else:
+                self.logger.error('checkout failed. Exiting repo_tools with'
+                                  ' status: ' + str(status))
+                return status
+
+            chdir(cwd)
+            status = (True, tools)
+        except Exception as e:  # pragma: no cover
+            self.logger.error('repo_tools failed with error: ' + str(e))
             status = (False, e)
 
         return status

@@ -1,6 +1,6 @@
 import npyscreen
 
-from vent.legacy.menu_helpers import MenuHelper
+from vent.api.tools import Tools
 from vent.menus.choose_tools import ChooseToolsForm
 
 
@@ -19,7 +19,7 @@ class AddOptionsForm(npyscreen.ActionForm):
         """
         branches = []
         commits = {}
-        m_helper = MenuHelper()
+        m_helper = Tools()
         status = m_helper.repo_branches(self.parentApp.repo_value['repo'])
         # branches and commits must both be retrieved successfully
         if status[0]:

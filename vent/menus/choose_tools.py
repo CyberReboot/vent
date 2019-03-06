@@ -3,9 +3,9 @@ import time
 
 import npyscreen
 
-from vent.helpers.meta import Tools
+from vent.api.tools import Tools
+from vent.helpers.meta import ManifestTools
 from vent.legacy.actions import Action
-from vent.legacy.menu_helpers import MenuHelper
 
 
 class ChooseToolsForm(npyscreen.ActionForm):
@@ -15,7 +15,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
     def repo_tools(self, branch):
         """ Set the appropriate repo dir and get the tools available of it """
         tools = []
-        m_helper = MenuHelper()
+        m_helper = Tools()
         repo = self.parentApp.repo_value['repo']
         version = self.parentApp.repo_value['versions'][branch]
         status = m_helper.repo_tools(repo, branch, version)
@@ -84,7 +84,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
             tool_str = 'Adding tools...'
             npyscreen.notify_wait(tool_str, title=title)
             while thr.is_alive():
-                tools = diff(Tools(), original_tools)
+                tools = diff(ManifestTools(), original_tools)
                 if tools:
                     tool_str = ''
                 for tool in tools:
@@ -94,7 +94,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
                 time.sleep(1)
             return
 
-        original_tools = Tools()
+        original_tools = ManifestTools()
         for branch in self.tools_tc:
             api_action = Action()
             tools = []
