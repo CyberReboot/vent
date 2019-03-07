@@ -1,3 +1,18 @@
+# v0.8.0 (2019-03-07)
+
+improvements:
+- major rewrite reducing number of lines of code
+- removed Docker binary from images
+- moved non-critical tools to extras directory
+- without a startup file, vent will not auto install/build/start core tools
+
+bug fixes:
+- removed shell outs to Docker
+- fixed checkout of different branches where locations have changed
+- fixed same name tools in different directories
+- instances in template files now take effect
+- fixed issue where template and startup files might disagree on number of instances
+
 # v0.7.5 (2019-02-22)
 
 improvements:
