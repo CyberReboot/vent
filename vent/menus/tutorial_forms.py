@@ -165,7 +165,7 @@ class TutorialGettingSetupForm(TutorialForm):
 
         Congrats! You have just started and processed files using Vent!
         """
-        next_tutorial = 'TUTORIALBUILDINGCORES'
+        next_tutorial = 'TUTORIALSTARTINGCORES'
         TutorialForm.__init__(self,
                               title,
                               text,
