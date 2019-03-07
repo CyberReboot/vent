@@ -1,17 +1,19 @@
 FROM alpine:3.9
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
-      vent.name="rq_dashboard" \
-      vent.groups="core,monitoring" \
-      vent.section="cyberreboot:vent:/vent/core/rq_dashboard:master:HEAD" \
+      vent.name="workflow" \
+      vent.groups="files,monitoring,workflow" \
+      vent.section="cyberreboot:vent:/vent/workflow:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 
 RUN apk add --update \
     curl \
+    gcc \
     git \
-    python3 \
-    py3-pip \
+    linux-headers \
+    musl-dev \
+    python3-dev \
     && rm -rf /var/cache/apk/*
 
 RUN pip3 install --no-cache-dir --upgrade pip==19.0.3
@@ -23,14 +25,12 @@ ENV FLASK_APP /healthcheck/hc.py
 HEALTHCHECK --interval=15s --timeout=15s \
  CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
 
-# get newer for worker list fix
-RUN pip3 install --no-cache-dir git+https://github.com/mredar/rq-dashboard.git@bb5c8f93be5f1ac265bddd5d29fb98cf17fb2585
+COPY requirements.txt /workflow/requirements.txt
+WORKDIR /workflow
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY rq_dash_settings.py /rq_dash_settings.py
+COPY . /workflow
 
-COPY run.sh /run.sh
-RUN chmod 755 /run.sh
+EXPOSE 8080
 
-EXPOSE 9181
-
-CMD (flask run > /dev/null 2>&1) & (/run.sh)
+CMD (flask run > /dev/null 2>&1) & (gunicorn -b :8080 -k gevent -w 4 --reload workflow.workflow)

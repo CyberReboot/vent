@@ -142,3 +142,41 @@ class Template:
                     if result[0]:
                         sections[a_section][option] = result[1]
         return sections
+
+    @ErrorHandler
+    def constrain_opts(self, constraint_dict, options):
+        """ Return result of constraints and options against a template """
+        constraints = {}
+        for constraint in constraint_dict:
+            if constraint != 'self':
+                if (constraint_dict[constraint] or
+                        constraint_dict[constraint] == ''):
+                    constraints[constraint] = constraint_dict[constraint]
+        results = self.constrained_sections(constraints=constraints,
+                                            options=options)
+        return results, self.template
+
+    @ErrorHandler
+    def list_tools(self):
+        """
+        Return list of tuples of all tools
+        """
+        tools = []
+        exists, sections = self.sections()
+        if exists:
+            for section in sections:
+                options = {'section': section,
+                           'built': None,
+                           'version': None,
+                           'repo': None,
+                           'branch': None,
+                           'name': None,
+                           'groups': None,
+                           'image_name': None}
+                for option in list(options.keys()):
+                    exists, value = self.option(section, option)
+                    if exists:
+                        options[option] = value
+                if 'core' not in options['groups'] and 'hidden' not in options['groups']:
+                    tools.append(options)
+        return tools

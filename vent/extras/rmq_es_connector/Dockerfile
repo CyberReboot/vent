@@ -1,19 +1,16 @@
 FROM alpine:3.9
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
-      vent.name="workflow" \
-      vent.groups="core,files,monitoring,workflow" \
-      vent.section="cyberreboot:vent:/vent/core/workflow:master:HEAD" \
+      vent.name="rmq_es_connector" \
+      vent.groups="connector" \
+      vent.section="cyberreboot:vent:/vent/extras/rmq_es_connector:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 
 RUN apk add --update \
     curl \
-    gcc \
-    git \
-    linux-headers \
-    musl-dev \
-    python3-dev \
+    python3 \
+    py3-pip \
     && rm -rf /var/cache/apk/*
 
 RUN pip3 install --no-cache-dir --upgrade pip==19.0.3
@@ -25,12 +22,8 @@ ENV FLASK_APP /healthcheck/hc.py
 HEALTHCHECK --interval=15s --timeout=15s \
  CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
 
-COPY requirements.txt /workflow/requirements.txt
-WORKDIR /workflow
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY requirements.txt /vent/requirements.txt
+RUN pip3 install --no-cache-dir -r /vent/requirements.txt
+COPY rmq_es_connector.py /vent/rmq_es_connector.py
 
-COPY . /workflow
-
-EXPOSE 8080
-
-CMD (flask run > /dev/null 2>&1) & (gunicorn -b :8080 -k gevent -w 4 --reload workflow.workflow)
+CMD (flask run > /dev/null 2>&1) & (python3 /vent/rmq_es_connector.py "#")

@@ -4,18 +4,17 @@ import shutil
 import docker
 import requests
 
-from vent.api.menu_helpers import MenuHelper
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Cpu
 from vent.helpers.meta import Docker
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
+from vent.helpers.meta import ManifestTools
 from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Services
 from vent.helpers.meta import System
 from vent.helpers.meta import Timestamp
-from vent.helpers.meta import Tools
 from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
@@ -74,7 +73,7 @@ def test_images():
 
 def test_tools():
     """ Test the tools function """
-    tools = Tools()
+    tools = ManifestTools()
     assert isinstance(tools, list)
 
 
@@ -120,20 +119,6 @@ def test_jobs():
     assert isinstance(jobs, tuple)
     path = PathDirs()
     status = path.host_config()
-    assert isinstance(status, tuple)
-    assert status[0]
-    m_helper = MenuHelper()
-    status = m_helper.cores('install')
-    assert isinstance(status, tuple)
-    assert status[0]
-    status = m_helper.cores('build')
-    assert isinstance(status, tuple)
-    assert status[0]
-    status = m_helper.cores('start')
-    assert isinstance(status, tuple)
-    assert status[0]
-    status = m_helper.api_action.add('https://github.com/cyberreboot/vent-plugins', tools=[
-                                     ('tcpdump_hex_parser', ''), ('gpu_example', '')])
     assert isinstance(status, tuple)
     assert status[0]
     # run test job

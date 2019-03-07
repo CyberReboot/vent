@@ -1,13 +1,13 @@
 [info]
 name = Elasticsearch
-groups = core,search
+groups = search
 
 [service]
 uri_prefix1 = http://
 
 [settings]
 instances = 1
-priority = 10,1
+priority = 10
 
 [docker]
 #command = -Des.network.host=0.0.0.0

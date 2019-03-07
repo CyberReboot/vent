@@ -6,8 +6,7 @@ from threading import Thread
 
 import npyscreen
 
-from vent.api.actions import Action
-from vent.api.plugins import Plugin
+from vent.api.system import System
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
 from vent.menus.help import HelpForm
@@ -15,7 +14,6 @@ from vent.menus.main import MainForm
 from vent.menus.tutorial_forms import TutorialAddingFilesForm
 from vent.menus.tutorial_forms import TutorialAddingPluginsForm
 from vent.menus.tutorial_forms import TutorialBackgroundForm
-from vent.menus.tutorial_forms import TutorialBuildingCoresForm
 from vent.menus.tutorial_forms import TutorialGettingSetupForm
 from vent.menus.tutorial_forms import TutorialIntroForm
 from vent.menus.tutorial_forms import TutorialStartingCoresForm
@@ -42,41 +40,19 @@ class VentApp(npyscreen.NPSAppManaged):
 
         # setup initial runtime stuff
         if self.first_time[0] and self.first_time[1] != 'exists':
-            plugins = Plugin()
-            actions = Action()
-            thr = Thread(target=MainForm.t_status,
-                         args=(), kwargs={'core': True})
+            system = System()
+            thr = Thread(target=system.start, args=(), kwargs={})
             thr.start()
+            countdown = 60
             while thr.is_alive():
-                npyscreen.notify_wait('Please wait while Vent initializes...1/4',
+                npyscreen.notify_wait('Completing initialization:...' + str(countdown),
                                       title='Setting up things...')
                 time.sleep(1)
-            thr.join()
-            thr = Thread(target=MainForm.t_status,
-                         args=(), kwargs={'core': False})
-            thr.start()
-            while thr.is_alive():
-                npyscreen.notify_wait('Please wait while Vent initializes...2/4',
-                                      title='Setting up things...')
-                time.sleep(1)
-            thr.join()
-            thr = Thread(target=plugins.auto_install, args=(), kwargs={})
-            thr.start()
-            while thr.is_alive():
-                npyscreen.notify_wait('Please wait while Vent initializes...3/4',
-                                      title='Setting up things...')
-                time.sleep(1)
-            thr.join()
-            thr = Thread(target=actions.startup, args=(), kwargs={})
-            thr.start()
-            while thr.is_alive():
-                npyscreen.notify_wait('Please wait while Vent initializes...4/4',
-                                      title='Setting up things...')
-                time.sleep(1)
+                countdown -= 1
             thr.join()
 
         quit_s = '\t'*4 + '^Q to quit'
-        tab_esc = '\t'*4 + 'TAB to close menu popup'
+        tab_esc = '\t'*4 + 'ESC to close menu popup'
         self.addForm('MAIN',
                      MainForm,
                      name='Vent ' + version +
@@ -102,10 +78,6 @@ class VentApp(npyscreen.NPSAppManaged):
         self.addForm('TUTORIALGETTINGSETUP',
                      TutorialGettingSetupForm,
                      name='About Vent' + quit_s,
-                     color='DANGER')
-        self.addForm('TUTORIALBUILDINGCORES',
-                     TutorialBuildingCoresForm,
-                     name='Working with Cores' + quit_s,
                      color='DANGER')
         self.addForm('TUTORIALSTARTINGCORES',
                      TutorialStartingCoresForm,

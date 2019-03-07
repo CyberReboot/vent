@@ -1,6 +1,6 @@
 import npyscreen
 
-from vent.api.menu_helpers import MenuHelper
+from vent.api.tools import Tools
 from vent.menus.choose_tools import ChooseToolsForm
 
 
@@ -19,7 +19,7 @@ class AddOptionsForm(npyscreen.ActionForm):
         """
         branches = []
         commits = {}
-        m_helper = MenuHelper()
+        m_helper = Tools()
         status = m_helper.repo_branches(self.parentApp.repo_value['repo'])
         # branches and commits must both be retrieved successfully
         if status[0]:
@@ -59,11 +59,6 @@ class AddOptionsForm(npyscreen.ActionForm):
                                                       relx=10, max_width=30,
                                                       name='Commit:',
                                                       values=self.commits[branch])
-                    self.build_tc[branch] = self.add(npyscreen.TitleCombo,
-                                                     value=0, rely=i+1,
-                                                     relx=45, max_width=25,
-                                                     name='Build:',
-                                                     values=[True, False])
                     i += 3
             else:
                 self.error = self.add(npyscreen.MultiLineEdit,
@@ -91,7 +86,7 @@ class AddOptionsForm(npyscreen.ActionForm):
             if self.branch_cb[branch].value:
                 # process checkboxes
                 self.parentApp.repo_value['versions'][branch] = self.commit_tc[branch].values[self.commit_tc[branch].value]
-                self.parentApp.repo_value['build'][branch] = self.build_tc[branch].values[self.build_tc[branch].value]
+                self.parentApp.repo_value['build'][branch] = True
         if self.error:
             self.quit()
         self.parentApp.addForm('CHOOSETOOLS',

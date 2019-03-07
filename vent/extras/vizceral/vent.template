@@ -1,6 +1,6 @@
 [info]
 name = Vizceral
-groups = core,monitoring,visualization,workflow
+groups = monitoring,visualization,workflow
 
 [settings]
 priority = 16

@@ -48,9 +48,6 @@ class HelpForm(npyscreen.ActionFormWithMenus):
                 The filetypes Vent can support are entirely based on the
                 installed Plugins. Each plugin is ultimately responsible for
                 doing some form of processing."""
-            elif page == 'Core':
-                info_str = """
-                Core Tools are tools that Vent comes with out of the box. """
             elif page == 'Status':
                 info_str = """
                 You'll notice Vent offers several status types amongst
@@ -111,7 +108,7 @@ class HelpForm(npyscreen.ActionFormWithMenus):
 
         For a detailed explanation of Vent Concepts, check out the General
         section in our Help Menu. Topics include: Vent Plugins, Tools,
-        Filetypes, Core, and Statuses! Use ^X to access the menu and ESC to
+        Filetypes, and Statuses! Use ^X to access the menu and ESC to
         close it.
 
         Select CANCEL or ^Q to return to the Main Menu. Select OK or ^T to
@@ -128,8 +125,6 @@ class HelpForm(npyscreen.ActionFormWithMenus):
                         arguments=['Tools'], shortcut='t')
         self.m2.addItem(text='Filetypes', onSelect=HelpForm.switch,
                         arguments=['Filetypes'], shortcut='f')
-        self.m2.addItem(text='Core', onSelect=HelpForm.switch,
-                        arguments=['Core'], shortcut='c')
         self.m2.addItem(text='Statuses', onSelect=HelpForm.switch,
                         arguments=['Status'], shortcut='s')
         self.m3 = self.add_menu(name='Working with Plugins', shortcut='p')

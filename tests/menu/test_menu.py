@@ -26,13 +26,6 @@ def run_menu(test_input):
         pass
 
 
-def test_tools_status():
-    """ Test the staticmethod tools_status """
-    a, b = MainForm.t_status(True)
-    assert isinstance(a, str)
-    assert isinstance(b, tuple)
-
-
 def test_menu():
     """ Run menu tests """
     CTRL_Q = '^Q'
@@ -48,50 +41,12 @@ def test_menu():
     BACKSPACE = curses.ascii.BS
 
     # go through help menus
-    run_menu([ENTER, CTRL_T, CTRL_X, 'b', 'm', ENTER, ENTER, CTRL_X, 'b', 'p',
-              ENTER, ENTER, CTRL_X, 'b', 't', ENTER, ENTER, CTRL_X, 'b', 'f',
-              ENTER, ENTER, CTRL_X, 'b', 'c', ENTER, ENTER, CTRL_X, 'b', 's',
-              ENTER, ENTER, CTRL_X, 'p', 'a', ENTER, ENTER, CTRL_X, 'p', 'b',
-              ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_T, CTRL_X, 'p', 'a',
+              ENTER, ENTER, ENTER, ENTER, ENTER, ENTER, ENTER, ENTER, ENTER])
 
     # go to help menu and leave again
     run_menu([ENTER, CTRL_T, RIGHT, ENTER])
 
-    # go through the core tools menus
-    # install
-    run_menu([ENTER, CTRL_X, 'c', 'i', ENTER])
-    # build - ok
-    run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              RIGHT, ENTER, ENTER, ENTER])
-    # build - cancel
-    run_menu([ENTER, CTRL_X, 'c', 'b', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              ENTER])
-    # build - quit back to main
-    run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_Q])
-    # build - toggle to main
-    run_menu([ENTER, CTRL_X, 'c', 'b', CTRL_T])
-    # start - ok
-    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, TAB, ENTER, ENTER, ENTER, ENTER, ENTER])
-    # start - cancel
-    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, ENTER])
-    # start - quit back to main
-    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
-    # start - toggle to main
-    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
-    # configure - cancel
-    run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
-              LEFT, ENTER])
-    # configure - quit back to main
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_Q])
-    # configure - toggle back to main
-    run_menu([ENTER, CTRL_X, 'c', 't', CTRL_T])
-    # configure - ok
-    run_menu([ENTER, CTRL_X, 'c', 't', TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB,
-              SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB,
-              TAB, ENTER, TAB, TAB, ENTER, ENTER, ENTER])
     # configure - quit in the middle of add
     # run_menu([ENTER, CTRL_X, 'c', 't', SPACE, TAB, SPACE, TAB, SPACE, TAB,
     #          SPACE, TAB, SPACE, TAB, SPACE, TAB, SPACE, TAB, TAB, SPACE, TAB,
@@ -116,51 +71,6 @@ def test_menu():
     #          SPACE, TAB, SPACE, TAB, TAB, ENTER, DOWN, DOWN, DOWN, DOWN, DOWN,
     #          DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, DOWN, LEFT, BACKSPACE, '2',
     #          TAB, TAB, ENTER, ENTER, TAB, ENTER, SPACE, TAB, TAB, ENTER])
-    # clean - ok
-    run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              RIGHT, ENTER, ENTER, ENTER])
-    # clean - cancel
-    run_menu([ENTER, CTRL_X, 'c', 'c', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              ENTER])
-    # clean - quit back to main
-    run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_Q])
-    # clean - toggle to main
-    run_menu([ENTER, CTRL_X, 'c', 'c', CTRL_T])
-    # inventory - quit back to main
-    run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_Q])
-    # inventory - toggle to main
-    run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_T])
-    # inventory - toggle group view
-    run_menu([ENTER, CTRL_X, 'c', 'v', CTRL_V, CTRL_V, CTRL_V, CTRL_V, CTRL_V,
-              CTRL_V, CTRL_V, CTRL_V, CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              RIGHT, ENTER, ENTER, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 's', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_Q])
-    run_menu([ENTER, CTRL_X, 'c', 's', CTRL_T])
-    # services running - core services
-    run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
-    # services running - external services
-    run_menu([ENTER, CTRL_X, 's', 'e', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'p', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'p', CTRL_Q])
-    run_menu([ENTER, CTRL_X, 'c', 'p', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'u', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'u', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'u', CTRL_Q])
-    run_menu([ENTER, CTRL_X, 'c', 'u', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 'r', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'r', ENTER])
-    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_Q])
-    run_menu([ENTER, CTRL_X, 'c', 'r', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'c', 't', TAB, ENTER, ENTER, ENTER])
 
     # go through the plugins menus
     run_menu([ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
@@ -179,14 +89,6 @@ def test_menu():
               ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'a', CTRL_T, CTRL_T, TAB, TAB, TAB, TAB, TAB,
               TAB, TAB, TAB, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'b', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'b', TAB, TAB, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'b', CTRL_Q])
-    run_menu([ENTER, CTRL_X, 'p', 'b', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'p', 'c', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'c', TAB, TAB, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_Q])
-    run_menu([ENTER, CTRL_X, 'p', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'i', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 's', TAB, TAB, RIGHT, ENTER, ENTER, ENTER,
               ENTER, ENTER])
@@ -194,28 +96,17 @@ def test_menu():
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 's', CTRL_T])
     # services running - plugin services
-    run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'p', RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'p', ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'p', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'p', CTRL_T])
-    run_menu([ENTER, CTRL_X, 'p', 'u', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'u', TAB, TAB, ENTER])
-    run_menu([ENTER, CTRL_X, 'p', 'u', CTRL_Q])
-    run_menu([ENTER, CTRL_X, 'p', 'u', CTRL_T])
     run_menu([ENTER, CTRL_X, 'p', 'r', TAB, TAB, RIGHT, ENTER, ENTER, ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'r', ENTER])
     run_menu([ENTER, CTRL_X, 'p', 'r', CTRL_Q])
     run_menu([ENTER, CTRL_X, 'p', 'r', CTRL_T])
 
-    # go through the logs menus
-    run_menu([ENTER, CTRL_X, 'l', DOWN, ENTER, CTRL_T])
-    run_menu([ENTER, CTRL_X, 'l', DOWN, ENTER, CTRL_Q])
-
     # go through the services running menus
-    run_menu([ENTER, CTRL_X, 's', 'c', CTRL_T])
     run_menu([ENTER, CTRL_X, 's', 'e', CTRL_T])
-    run_menu([ENTER, CTRL_X, 's', 'p', CTRL_T])
 
     # go through the system commands menus
     # causes .coverage file to not exist
@@ -235,35 +126,16 @@ def test_menu():
               ENTER])
     run_menu([ENTER, CTRL_X, DOWN, DOWN, DOWN, DOWN, ENTER, 't', SPACE, TAB,
               TAB, ENTER, ENTER, ENTER])
-    # system commands - network tap interface - create
-    run_menu([ENTER, CTRL_X, 'y', 'n', 'c', 'lo', TAB, 'foo', TAB, '5', TAB,
-              TAB, '1', TAB, TAB, ENTER, ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
-              ENTER])
-    # system commands - network tap interface - nics
-    run_menu([ENTER, CTRL_X, 'y', 'n', 'n', TAB, ENTER])
-    run_menu([ENTER, CTRL_X, 'y', 'n', 'n', TAB, TAB, ENTER])
-    run_menu([ENTER, CTRL_X, 'y', 'n', 'n', CTRL_T])
 
     # go through the tutorials menus
     run_menu([ENTER, CTRL_X, 't', 'v', 'b', RIGHT, ENTER])
     run_menu([ENTER, CTRL_X, 't', 'v', 't', RIGHT, ENTER])
     run_menu([ENTER, CTRL_X, 't', 'v', 's', RIGHT, ENTER])
-    run_menu([ENTER, CTRL_X, 't', 'c', 'b', RIGHT, ENTER])
     run_menu([ENTER, CTRL_X, 't', 'c', 'c', RIGHT, ENTER])
     run_menu([ENTER, CTRL_X, 't', 'p', 'a', RIGHT, ENTER])
     run_menu([ENTER, CTRL_X, 't', 'f', 'a', RIGHT, ENTER])
-    run_menu([ENTER, CTRL_X, 't', 's', 's', RIGHT, ENTER])
+    run_menu([ENTER, CTRL_X, 't', 's', 't', RIGHT, ENTER])
 
     # exit
     # causes .coverage file to not exist
     # run_menu([ENTER, CTRL_Q])
-
-    # extra complete run
-    run_menu([ENTER, CTRL_X, 'c', 'i', ENTER, ENTER, CTRL_X, 'c', 'b', TAB,
-              TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER,
-              ENTER, CTRL_X, 'c', 's', ENTER, ENTER, TAB, TAB, TAB, TAB, TAB,
-              TAB, TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, ENTER, ENTER,
-              ENTER, CTRL_X, 'p', 'a', TAB, TAB, TAB, TAB, TAB, TAB, TAB, TAB,
-              TAB, ENTER, SPACE, TAB, TAB, TAB, TAB, ENTER, TAB, TAB, TAB, TAB,
-              TAB, TAB, TAB, TAB, ENTER, ENTER, ENTER, CTRL_X, 's', 'c',
-              CTRL_T])
