@@ -91,6 +91,7 @@ class AddForm(npyscreen.ActionForm):
         if self.image.value and self.link_name.value:
             api_action = Tools()
             api_image = Image(System().manifest)
+            api_system = System()
             thr = threading.Thread(target=api_image.add, args=(),
                                    kwargs={'image': self.image.value,
                                            'link_name': self.link_name.value,
@@ -101,10 +102,9 @@ class AddForm(npyscreen.ActionForm):
             npyscreen.notify_confirm('Done adding image.', title='Added image')
             editor_args = {'tool_name': self.image.value,
                            'version': self.tag.value,
-                           'get_configure': api_action.get_configure,
-                           'save_configure': api_action.save_configure,
-                           'restart_tools': api_action.restart_tools,
-                           'prep_start': api_action.prep_start,
+                           'get_configure': api_system.get_configure,
+                           'save_configure': api_system.save_configure,
+                           'restart_tools': api_system.restart_tools,
                            'start_tools': api_action.start,
                            'from_registry': True,
                            'just_downloaded': True,

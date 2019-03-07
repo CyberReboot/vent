@@ -5,7 +5,6 @@ import npyscreen
 
 from vent.api.tools import Tools
 from vent.helpers.meta import ManifestTools
-from vent.legacy.actions import Action
 
 
 class ChooseToolsForm(npyscreen.ActionForm):
@@ -96,7 +95,6 @@ class ChooseToolsForm(npyscreen.ActionForm):
 
         original_tools = ManifestTools()
         for branch in self.tools_tc:
-            api_action = Action()
             tools = []
             for tool in self.tools_tc[branch]:
                 if self.tools_tc[branch][tool].value:
@@ -108,13 +106,11 @@ class ChooseToolsForm(npyscreen.ActionForm):
                         tools.append((tool, ''))
             repo = self.parentApp.repo_value['repo']
             version = self.parentApp.repo_value['versions'][branch]
-            build = self.parentApp.repo_value['build'][branch]
-            thr = threading.Thread(target=api_action.add, args=(),
-                                   kwargs={'repo': repo,
-                                           'branch': branch,
-                                           'tools': tools,
-                                           'version': version,
-                                           'build': build})
+            api_action = Tools(version=version, branch=branch)
+            thr = threading.Thread(target=api_action.new, args=(),
+                                   kwargs={'tool_type': 'repo',
+                                           'uri': repo,
+                                           'tools': tools})
             popup(original_tools, branch, thr,
                   'Please wait, adding tools for the ' + branch + ' branch...')
         npyscreen.notify_confirm('Done adding repository: ' +

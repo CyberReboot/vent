@@ -31,7 +31,12 @@ class ToolForm(npyscreen.ActionForm):
         if keywords['names']:
             i = 1
             for name in keywords['names']:
-                action['action_object'+str(i)] = getattr(self.tools_inst, name)
+                try:
+                    action['action_object' +
+                           str(i)] = getattr(self.tools_inst, name)
+                except AttributeError:
+                    action['action_object' +
+                           str(i)] = getattr(self.api_action, name)
                 i += 1
         self.action = action
         # get list of all possible group views to display
@@ -272,12 +277,8 @@ class ToolForm(npyscreen.ActionForm):
                     if t.startswith('/:'):
                         t = ' '+t[1:]
                     t = t.split(':')
-                    if self.action['action_name'] == 'start':
-                        status = self.action['action_object1'](name=t[0],
-                                                               branch=t[1],
-                                                               version=t[2])
-                        if status[0]:
-                            tool_d.update(status[1])
+                    if self.action['action_name'] in ['start', 'stop']:
+                        status = self.action['action_object1'](repo, t[0])
                     elif self.action['action_name'] == 'configure':
                         constraints = {'name': t[0],
                                        'branch': t[1],
@@ -299,9 +300,9 @@ class ToolForm(npyscreen.ActionForm):
                                  'version': t[2],
                                  'repo': repo,
                                  'next_tool': None,
-                                 'get_configure': action.get_configure,
-                                 'save_configure': action.save_configure,
-                                 'restart_tools': action.restart_tools,
+                                 'get_configure': self.api_action.get_configure,
+                                 'save_configure': self.api_action.save_configure,
+                                 'restart_tools': self.api_action.restart_tools,
                                  'start_tools': action.start,
                                  'from_registry': registry_image}
                         if tools_to_configure:
@@ -336,12 +337,6 @@ class ToolForm(npyscreen.ActionForm):
                         popup(originals, self.action['type'], thr,
                               'Please wait, ' + self.action['present_t'] +
                               '...')
-        if self.action['action_name'] == 'start':
-            thr = Thread(target=self.action['action_object1'],
-                         args=(),
-                         kwargs={'tool_d': tool_d})
-            popup(originals, self.action['type'], thr,
-                  'Please wait, ' + self.action['present_t'] + '...')
 
         if self.action['action_name'] != 'configure':
             npyscreen.notify_confirm('Done ' + self.action['present_t'] + '.',

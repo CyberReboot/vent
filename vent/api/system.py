@@ -2,6 +2,7 @@ import copy
 import json
 import re
 import shutil
+import tempfile
 from datetime import datetime
 from os import chdir
 from os import close
@@ -500,6 +501,8 @@ class System:
         # ensure correct info
         instances = int(instances)
         config_val = re.sub(r'instances\ *=\ *\d+\n', '', config_val)
+        api_system = System()
+        manifest = api_system.manifest
         if not main_cfg:
             if not from_registry:
                 # creating new instances
@@ -511,17 +514,14 @@ class System:
                     t_identifier = {'name': name,
                                     'branch': branch,
                                     'version': version}
-                    result = Template(System().manifest).constrain_opts(
+                    result = Template(manifest).constrain_opts(
                         t_identifier, [])
                     tools = result[0]
-                    manifest = result[1]
                     tool = list(tools.keys())[0]
                 else:
                     options = ['path', 'multi_tool', 'name']
-                    self.logger.info(constraints)
-                    tools, manifest = Template(
-                        System().manifest).constrain_opts(constraints, options)
-                    self.logger.info(tools)
+                    tools, _ = Template(manifest).constrain_opts(
+                        constraints, options)
                     # only one tool in tools because perform this function for
                     # every tool
                     if tools:
@@ -542,9 +542,8 @@ class System:
                 fd, template_path = tempfile.mkstemp(suffix='.template')
                 options = ['namespace']
                 constraints.update({'type': 'registry'})
-                del constraints['branch']
-                tools, manifest = Template(System().manifest).constrain_opts(constraints,
-                                                                             options)
+                tools, _ = Template(manifest).constrain_opts(constraints,
+                                                             options)
                 if tools:
                     tool = list(tools.keys())[0]
                 else:
@@ -556,6 +555,7 @@ class System:
                         f.write(config_val)
                     # save in plugin_manifest
                     vent_template = Template(template_path)
+                    manifest = Template(manifest)
                     if instances > 1:
                         # add instances as needed
                         for i in range(1, instances + 1):
@@ -647,12 +647,13 @@ class System:
                     start_tools = [t_identifier]
                     dependent_tools = [tools[tool]['link_name']]
                     start_tools += Dependencies(dependent_tools)
+                    # TODO
                     start_d = {}
                     for tool_identifier in start_tools:
                         self.clean(**tool_identifier)
                         start_d.update(self.prep_start(**tool_identifier)[1])
                     if start_d:
-                        Tools().start(start_d)
+                        Tools().start(start_d, '', is_tool_d=True)
             except Exception as e:  # pragma: no cover
                 self.logger.error('Trouble restarting tool ' + name +
                                   ' because: ' + str(e))
@@ -711,9 +712,6 @@ class System:
             except Exception as e:  # pragma: no cover
                 self.logger.error('Problem restarting tools: ' + str(e))
                 status = (False, str(e))
-        self.logger.info('restart_tools finished with status: ' +
-                         str(status[0]))
-        self.logger.info('Finished: restart_tools')
         return status
 
     def upgrade(self):

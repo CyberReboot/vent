@@ -51,7 +51,7 @@ class Tools:
                     else:
                         tool_name = tool[0].rsplit('/', 1)[-1]
                     constraints = {'name': tool_name,
-                                   'repo': repo.split('.git')[0]}
+                                   'repo': uri.split('.git')[0]}
                     prev_installed, _ = Template(template=self.manifest).constrain_opts(constraints,
                                                                                         [])
                     # don't reinstall
@@ -72,6 +72,8 @@ class Tools:
             if tool_type == 'core':
                 uri = 'https://github.com/cyberreboot/vent'
                 core = True
+            else:
+                core = False
             status = Repository(self.manifest).add(uri, tools,
                                                    overrides=overrides,
                                                    version=self.version,

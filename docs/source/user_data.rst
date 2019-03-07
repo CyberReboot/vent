@@ -113,12 +113,7 @@ the problem is.
 Directories
 ===========
 
-.internals
-----------
-This is a folder that Vent clones to when dealing with core tools. So when Vent
-adds or builds core tools, this is the working directory.
-
 plugins
--------
-This folder deals with any plugin tools with the same philosophy as the
-``.internals`` directory.
+----------
+This is a folder that Vent clones to when dealing with tools. So when Vent
+adds or builds tools, this is the working directory.

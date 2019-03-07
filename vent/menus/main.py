@@ -268,7 +268,7 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
 
         self.add_handlers({'^T': self.help_form, '^Q': MainForm.exit})
         # all forms that can toggle view by group
-        self.view_togglable = ['inventory', 'remove', 'update']
+        self.view_togglable = ['inventory', 'remove']
 
         #######################
         # MAIN SCREEN WIDGETS #
@@ -343,9 +343,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
         self.m3.addItem(text='Stop Tools',
                         onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
-        self.m3.addItem(text='Update Tools',
-                        onSelect=self.perform_action,
-                        arguments=['update'], shortcut='u')
 
         # Log Menu Items
         self.m4 = self.add_menu(name='Logs', shortcut='l')

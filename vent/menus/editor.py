@@ -6,8 +6,9 @@ import re
 
 import npyscreen
 
+from vent.api.repository import Repository
+from vent.api.system import System
 from vent.helpers.templates import Template
-from vent.legacy.plugin_helpers import PluginHelper
 from vent.menus.del_instances import DeleteForm
 
 
@@ -25,7 +26,6 @@ class EditorForm(npyscreen.ActionForm):
         del self.settings['args']
         del self.settings['keywords']
         del self.settings['parentApp']
-        self.p_helper = PluginHelper(plugins_dir='.internals/')
         self.tool_identifier = {'name': tool_name}
         self.settings.update(self.tool_identifier)
         del self.settings['name']
@@ -45,7 +45,7 @@ class EditorForm(npyscreen.ActionForm):
 
         # get manifest info for tool that will be used throughout
         if not self.just_downloaded and not self.vent_cfg:
-            result = Template(self.p_helper.manifest).constrain_opts(
+            result = Template(System().manifest).constrain_opts(
                 self.tool_identifier, [])
             tool, self.manifest = result
             self.section = list(tool.keys())[0]
@@ -349,7 +349,8 @@ class EditorForm(npyscreen.ActionForm):
                                               self.settings['tool_name'] +
                                               '...',
                                               title='Gathering settings')
-                        self.p_helper.clone(self.settings['repo'])
+                        Repository(System().manifest)._clone(
+                            self.settings['repo'])
                         self.settings['new_instances'] = new_instances
                         self.settings['old_instances'] = old_instances
                         self.settings['start_new'] = run
