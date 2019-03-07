@@ -502,7 +502,7 @@ def Checkout(path, branch='master', version='HEAD', **kargs):
             check_output(shlex.split('git checkout ' + branch),
                          stderr=STDOUT,
                          close_fds=True).decode('utf-8')
-            check_output(shlex.split('git pull'), stderr=STDOUT,
+            check_output(shlex.split('git pull origin ' + version), stderr=STDOUT,
                          close_fds=True).decode('utf-8')
             if version:
                 check_output(shlex.split('git reset --hard ' + version),

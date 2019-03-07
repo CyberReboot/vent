@@ -913,9 +913,6 @@ class Tools:
                                   ' with status ' + str(status))
                 return status
 
-            check_output(shlex.split('git pull --all'),
-                         stderr=STDOUT,
-                         close_fds=True)
             branch_output = check_output(shlex.split('git branch -a'),
                                          stderr=STDOUT,
                                          close_fds=True)
