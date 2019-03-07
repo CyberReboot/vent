@@ -48,11 +48,8 @@ def test_menu():
     BACKSPACE = curses.ascii.BS
 
     # go through help menus
-    run_menu([ENTER, CTRL_T, CTRL_X, 'b', 'm', ENTER, ENTER, CTRL_X, 'b', 'p',
-              ENTER, ENTER, CTRL_X, 'b', 't', ENTER, ENTER, CTRL_X, 'b', 'f',
-              ENTER, ENTER, CTRL_X, 'b', 'c', ENTER, ENTER, CTRL_X, 'b', 's',
-              ENTER, ENTER, CTRL_X, 'p', 'a', ENTER, ENTER, CTRL_X, 'p', 'b',
-              ENTER, ENTER, ENTER])
+    run_menu([ENTER, CTRL_T, CTRL_X, 'p', 'a',
+              ENTER, ENTER, ENTER, ENTER, ENTER, ENTER, ENTER, ENTER, ENTER])
 
     # go to help menu and leave again
     run_menu([ENTER, CTRL_T, RIGHT, ENTER])
