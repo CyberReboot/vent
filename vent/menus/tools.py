@@ -253,7 +253,7 @@ class ToolForm(npyscreen.ActionForm):
             originals = Containers()
 
         tool_d = {}
-        if self.action['action_name'] in ['clean', 'remove', 'stop', 'update']:
+        if self.action['action_name'] in ['remove', 'stop', 'update']:
             reconfirmation_str = ''
             if self.action['cores']:
                 reconfirmation_str = 'Are you sure you want to '

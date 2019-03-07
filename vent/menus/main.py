@@ -138,13 +138,13 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             forms = ['SERVICES']
             form_args = {'color': 'STANDOUT',
                          'name': 'Plugin Services',
-                         'core': False}
+                         'core': True}
         elif action == 'services_external':
             form = ServicesForm
             forms = ['SERVICES']
             form_args = {'color': 'STANDOUT',
                          'name': 'External Services',
-                         'core': False,
+                         'core': True,
                          'external': True}
         form_args['name'] += '\t'*8 + '^T to toggle main'
         if s_action in self.view_togglable:
