@@ -26,13 +26,6 @@ def run_menu(test_input):
         pass
 
 
-def test_tools_status():
-    """ Test the staticmethod tools_status """
-    a, b = MainForm.t_status(True)
-    assert isinstance(a, str)
-    assert isinstance(b, tuple)
-
-
 def test_menu():
     """ Run menu tests """
     CTRL_Q = '^Q'
