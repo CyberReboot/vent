@@ -9,7 +9,6 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
 
 RUN apk add --update \
     curl \
-    docker \
     git \
     libmagic \
     python3 \
