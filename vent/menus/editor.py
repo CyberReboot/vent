@@ -60,9 +60,6 @@ class EditorForm(npyscreen.ActionForm):
             self.settings['tool_name'] = 'vent configuration'
         elif self.instance_cfg:
             path = self.manifest.option(self.section, 'path')[1]
-            # defaults in .internals
-            path = path.replace('.vent/plugins',
-                                '.vent/.internals')
             multi_tool = self.manifest.option(self.section, 'multi_tool')
             if multi_tool[0] and multi_tool[1] == 'yes':
                 name = self.manifest.option(self.section, 'name')[1]
