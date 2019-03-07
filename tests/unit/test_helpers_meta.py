@@ -18,7 +18,6 @@ from vent.helpers.meta import Timestamp
 from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
-from vent.legacy.menu_helpers import MenuHelper
 
 
 def test_run_containers():
@@ -120,20 +119,6 @@ def test_jobs():
     assert isinstance(jobs, tuple)
     path = PathDirs()
     status = path.host_config()
-    assert isinstance(status, tuple)
-    assert status[0]
-    m_helper = MenuHelper()
-    status = m_helper.cores('install')
-    assert isinstance(status, tuple)
-    assert status[0]
-    status = m_helper.cores('build')
-    assert isinstance(status, tuple)
-    assert status[0]
-    status = m_helper.cores('start')
-    assert isinstance(status, tuple)
-    assert status[0]
-    status = m_helper.api_action.add('https://github.com/cyberreboot/vent-plugins', tools=[
-                                     ('tcpdump_hex_parser', ''), ('gpu_example', '')])
     assert isinstance(status, tuple)
     assert status[0]
     # run test job
