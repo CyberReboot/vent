@@ -6,15 +6,16 @@ import re
 
 import npyscreen
 
-from vent.api.plugin_helpers import PluginHelper
-from vent.api.templates import Template
+from vent.api.repository import Repository
+from vent.api.system import System
+from vent.helpers.templates import Template
 from vent.menus.del_instances import DeleteForm
 
 
 class EditorForm(npyscreen.ActionForm):
     """ Form that can be used as a pseudo text editor in npyscreen """
 
-    def __init__(self, repo='', tool_name='', branch='', version='',
+    def __init__(self, repo='', tool_name='',
                  next_tool=None, just_downloaded=False, vent_cfg=False,
                  from_registry=False, new_instance=False, *args, **keywords):
         """ Initialize EditorForm objects """
@@ -25,10 +26,7 @@ class EditorForm(npyscreen.ActionForm):
         del self.settings['args']
         del self.settings['keywords']
         del self.settings['parentApp']
-        self.p_helper = PluginHelper(plugins_dir='.internals/')
-        self.tool_identifier = {'name': tool_name,
-                                'branch': branch,
-                                'version': version}
+        self.tool_identifier = {'name': tool_name}
         self.settings.update(self.tool_identifier)
         del self.settings['name']
         self.settings['tool_name'] = tool_name
@@ -47,7 +45,8 @@ class EditorForm(npyscreen.ActionForm):
 
         # get manifest info for tool that will be used throughout
         if not self.just_downloaded and not self.vent_cfg:
-            result = self.p_helper.constraint_options(self.tool_identifier, [])
+            result = Template(System().manifest).constrain_opts(
+                self.tool_identifier, [])
             tool, self.manifest = result
             self.section = list(tool.keys())[0]
 
@@ -61,9 +60,6 @@ class EditorForm(npyscreen.ActionForm):
             self.settings['tool_name'] = 'vent configuration'
         elif self.instance_cfg:
             path = self.manifest.option(self.section, 'path')[1]
-            # defaults in .internals
-            path = path.replace('.vent/plugins',
-                                '.vent/.internals')
             multi_tool = self.manifest.option(self.section, 'multi_tool')
             if multi_tool[0] and multi_tool[1] == 'yes':
                 name = self.manifest.option(self.section, 'name')[1]
@@ -315,11 +311,7 @@ class EditorForm(npyscreen.ActionForm):
                 i_section[0] = re.sub(r'[0-9]', '', i_section[0]) + str(i)
                 i_section = ':'.join(i_section)
                 t_name = self.manifest.option(i_section, 'name')[1]
-                t_branch = self.manifest.option(i_section, 'branch')[1]
-                t_version = self.manifest.option(i_section, 'version')[1]
-                t_id = {'name': t_name,
-                        'branch': t_branch,
-                        'version': t_version}
+                t_id = {'name': t_name}
                 tool_d.update(self.settings['prep_start'](**t_id)[1])
             if tool_d:
                 self.settings['start_tools'](tool_d)
@@ -354,7 +346,8 @@ class EditorForm(npyscreen.ActionForm):
                                               self.settings['tool_name'] +
                                               '...',
                                               title='Gathering settings')
-                        self.p_helper.clone(self.settings['repo'])
+                        Repository(System().manifest)._clone(
+                            self.settings['repo'])
                         self.settings['new_instances'] = new_instances
                         self.settings['old_instances'] = old_instances
                         self.settings['start_new'] = run

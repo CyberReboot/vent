@@ -2,7 +2,7 @@ from collections import deque
 
 import npyscreen
 
-from vent.api.templates import Template
+from vent.helpers.templates import Template
 
 
 class InventoryForm(npyscreen.FormBaseNew):
@@ -16,11 +16,8 @@ class InventoryForm(npyscreen.FormBaseNew):
         # get list of all possible group views to display
         self.views = deque()
         possible_groups = set()
-        manifest = Template(self.api_action.plugin.manifest)
-        if self.action['cores']:
-            tools = self.api_action.inventory(choices=['core'])[1]['core']
-        else:
-            tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+        manifest = Template(self.api_action.manifest)
+        tools = self.api_action.inventory(choices=['tools'])[1]['tools']
         for tool in tools:
             groups = manifest.option(tool, 'groups')[1].split(',')
             for group in groups:
@@ -39,7 +36,7 @@ class InventoryForm(npyscreen.FormBaseNew):
         group = self.views.popleft()
         new_display = []
         new_display.append('Tools for group ' + group + ' found:')
-        manifest = Template(self.api_action.plugin.manifest)
+        manifest = Template(self.api_action.manifest)
         cur_repo = ''
         for i in range(1, len(self.all_tools) - 1):
             val = self.all_tools[i]
@@ -51,11 +48,10 @@ class InventoryForm(npyscreen.FormBaseNew):
             elif val.startswith('    ') and not val.startswith('      '):
                 name = val.strip()
                 constraints = {'repo': cur_repo, 'name': name}
-                t_section = self.api_action.p_helper \
-                    .constraint_options(constraints, [])[0]
+                t_section = manifest.constrain_opts(constraints, [])[0]
                 t_section = list(t_section.keys())[0]
                 if group in manifest.option(t_section, 'groups')[1].split(','):
-                    new_display += self.all_tools[i:i+5]
+                    new_display += self.all_tools[i:i+4]
             elif val == '':
                 new_display.append(val)
         # if all groups display all groups
@@ -74,12 +70,10 @@ class InventoryForm(npyscreen.FormBaseNew):
                            '^V': self.toggle_view})
         self.add(npyscreen.TitleFixedText, name=self.action['title'], value='')
         response = self.action['api_action'].inventory(choices=['repos',
-                                                                'core',
                                                                 'tools',
                                                                 'images',
                                                                 'built',
-                                                                'running',
-                                                                'enabled'])
+                                                                'running'])
         if response[0]:
             inventory = response[1]
             if len(inventory['repos']) == 0:
@@ -87,9 +81,7 @@ class InventoryForm(npyscreen.FormBaseNew):
             else:
                 value = 'Tools for all groups found:\n'
             tools = None
-            if self.action['cores'] and inventory['core']:
-                tools = inventory['core']
-            elif not self.action['cores'] and inventory['tools']:
+            if inventory['tools']:
                 tools = inventory['tools']
 
             for repo in inventory['repos']:
@@ -105,8 +97,6 @@ class InventoryForm(npyscreen.FormBaseNew):
                                 t_name[1] == repo_name[1]):
                             s_value += '    ' + tools[tool] + '\n      Built: '
                             s_value += inventory['built'][tool] + '\n'
-                            s_value += '      Enabled: '
-                            s_value += inventory['enabled'][tool] + '\n'
                             s_value += '      Image name: '
                             s_value += inventory['images'][tool] + '\n'
                             s_value += '      Status: '

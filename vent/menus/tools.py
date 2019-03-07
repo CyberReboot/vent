@@ -6,12 +6,12 @@ from threading import Thread
 
 import npyscreen
 
-from vent.api.actions import Action
-from vent.api.menu_helpers import MenuHelper
-from vent.api.templates import Template
+from vent.api.system import System
+from vent.api.tools import Tools
 from vent.helpers.logs import Logger
 from vent.helpers.meta import Containers
 from vent.helpers.meta import Images
+from vent.helpers.templates import Template
 from vent.menus.editor import EditorForm
 
 
@@ -21,10 +21,9 @@ class ToolForm(npyscreen.ActionForm):
     def __init__(self, *args, **keywords):
         """ Initialize tool form objects """
         self.logger = Logger(__name__)
-        self.logger.info(str(keywords['names']))
-        self.api_action = Action()
-        self.m_helper = MenuHelper()
-        action = {'api_action': self.api_action}
+        self.api_action = System()
+        self.tools_inst = Tools()
+        action = {'api_action': self.tools_inst}
         self.tools_tc = {}
         self.repo_widgets = {}
         if keywords['action_dict']:
@@ -32,17 +31,19 @@ class ToolForm(npyscreen.ActionForm):
         if keywords['names']:
             i = 1
             for name in keywords['names']:
-                action['action_object'+str(i)] = getattr(self.api_action, name)
+                try:
+                    action['action_object' +
+                           str(i)] = getattr(self.tools_inst, name)
+                except AttributeError:
+                    action['action_object' +
+                           str(i)] = getattr(self.api_action, name)
                 i += 1
         self.action = action
         # get list of all possible group views to display
         self.views = deque()
         possible_groups = set()
-        manifest = Template(self.api_action.plugin.manifest)
-        if self.action['cores']:
-            tools = self.api_action.inventory(choices=['core'])[1]['core']
-        else:
-            tools = self.api_action.inventory(choices=['tools'])[1]['tools']
+        manifest = Template(self.api_action.manifest)
+        tools = self.tools_inst.inventory(choices=['tools'])[1]['tools']
         for tool in tools:
             groups = manifest.option(tool, 'groups')[1].split(',')
             for group in groups:
@@ -52,7 +53,7 @@ class ToolForm(npyscreen.ActionForm):
         self.manifest = manifest
         self.views += possible_groups
         self.views.append('all groups')
-        self.no_instance = ['build', 'remove']
+        self.no_instance = ['remove']
         super(ToolForm, self).__init__(*args, **keywords)
 
     def quit(self, *args, **kwargs):
@@ -84,7 +85,7 @@ class ToolForm(npyscreen.ActionForm):
         self.add(npyscreen.TitleText,
                  name='Select which tools to ' + self.action['action'] + ':',
                  editable=False)
-        togglable = ['remove', 'enable', 'disable', 'build']
+        togglable = ['remove']
         if self.action['action_name'] in togglable:
             self.cur_view = self.add(npyscreen.TitleText,
                                      name='Group view:',
@@ -96,16 +97,12 @@ class ToolForm(npyscreen.ActionForm):
             i = 4
 
         if self.action['action_name'] == 'start':
-            response = self.action['api_action'].inventory(choices=['repos',
-                                                                    'tools',
-                                                                    'built',
-                                                                    'enabled',
-                                                                    'running',
-                                                                    'core'])
+            response = self.tools_inst.inventory(choices=['repos',
+                                                          'tools',
+                                                          'built',
+                                                          'running'])
         else:
-            response = self.action['api_action'].inventory(choices=['core',
-                                                                    'repos',
-                                                                    'tools'])
+            response = self.tools_inst.inventory(choices=['repos', 'tools'])
         if response[0]:
             inventory = response[1]
 
@@ -127,12 +124,6 @@ class ToolForm(npyscreen.ActionForm):
                 else:
                     repo_name = repo.split('/')
 
-                # determine if enabled or disabled tools should be shown
-                show_disabled = False
-                if 'action_name' in self.action:
-                    if self.action['action_name'] == 'enable':
-                        show_disabled = True
-
                 for tool in inventory['tools']:
                     tool_repo_name = tool.split(':')
 
@@ -142,7 +133,7 @@ class ToolForm(npyscreen.ActionForm):
                         # check to ensure tool not set to locally active = no
                         # in vent.cfg
                         externally_active = False
-                        vent_cfg_file = self.action['api_action'].vent_config
+                        vent_cfg_file = self.api_action.vent_config
                         vent_cfg = Template(vent_cfg_file)
                         tool_pairs = vent_cfg.section('external-services')[1]
                         for ext_tool in tool_pairs:
@@ -157,13 +148,8 @@ class ToolForm(npyscreen.ActionForm):
                                     self.logger.error("Couldn't check ext"
                                                       ' because: ' + str(e))
                                     externally_active = False
-                        # check to ensure not disabled
-                        disabled = False
-                        manifest = Template(self.api_action.plugin.manifest)
-                        if manifest.option(tool, 'enabled')[1] == 'no':
-                            disabled = True
-                        if (not externally_active and not disabled and not
-                                show_disabled):
+                        manifest = Template(self.api_action.manifest)
+                        if not externally_active:
                             instance_num = re.search(r'\d+$',
                                                      manifest.option(
                                                          tool, 'name')[1])
@@ -172,66 +158,6 @@ class ToolForm(npyscreen.ActionForm):
                             # multiple instances share same image
                             elif self.action['action_name'] not in self.no_instance:
                                 ncore_list.append(tool)
-                        elif (not externally_active and disabled and
-                                show_disabled):
-                            instance_num = re.search(r'\d+$',
-                                                     manifest.option(
-                                                         tool, 'name')[1])
-                            if not instance_num:
-                                ncore_list.append(tool)
-                            # multiple instances share same image
-                            elif self.action['action_name'] not in self.no_instance:
-                                ncore_list.append(tool)
-
-                for tool in inventory['core']:
-                    tool_repo_name = tool.split(':')
-
-                    # cross reference repo names
-                    if (repo_name[0] == tool_repo_name[0] and
-                            repo_name[1] == tool_repo_name[1]):
-                        # check to ensure tool not set to locally active = no
-                        # in vent.cfg
-                        externally_active = False
-                        vent_cfg_file = self.action['api_action'].vent_config
-                        vent_cfg = Template(vent_cfg_file)
-                        tool_pairs = vent_cfg.section('external-services')[1]
-                        for ext_tool in tool_pairs:
-                            if ext_tool[0].lower() == inventory['core'][tool]:
-                                try:
-                                    ext_tool_options = json.loads(ext_tool[1])
-                                    loc = 'locally_active'
-                                    if (loc in ext_tool_options and
-                                            ext_tool_options[loc] == 'no'):
-                                        externally_active = True
-                                except Exception as e:
-                                    self.logger.error("Couldn't check ext"
-                                                      ' because: ' + str(e))
-                                    externally_active = False
-                        # check to ensure not disabled
-                        disabled = False
-                        manifest = Template(self.api_action.plugin.manifest)
-                        if manifest.option(tool, 'enabled')[1] == 'no':
-                            disabled = True
-                        if (not externally_active and not disabled and not
-                                show_disabled):
-                            instance_num = re.search(r'\d+$',
-                                                     manifest.option(
-                                                         tool, 'name')[1])
-                            if not instance_num:
-                                core_list.append(tool)
-                            # multiple instances share same image
-                            elif self.action['action_name'] not in self.no_instance:
-                                core_list.append(tool)
-                        elif (not externally_active and disabled and
-                                show_disabled):
-                            instance_num = re.search(r'\d+$',
-                                                     manifest.option(
-                                                         tool, 'name')[1])
-                            if not instance_num:
-                                core_list.append(tool)
-                            # multiple instances share same image
-                            elif self.action['action_name'] not in self.no_instance:
-                                core_list.append(tool)
 
                 has_core[repo] = core_list
                 has_non_core[repo] = ncore_list
@@ -327,7 +253,7 @@ class ToolForm(npyscreen.ActionForm):
             originals = Containers()
 
         tool_d = {}
-        if self.action['action_name'] in ['clean', 'remove', 'stop', 'update']:
+        if self.action['action_name'] in ['remove', 'stop', 'update']:
             reconfirmation_str = ''
             if self.action['cores']:
                 reconfirmation_str = 'Are you sure you want to '
@@ -346,18 +272,13 @@ class ToolForm(npyscreen.ActionForm):
         tools_to_configure = []
         for repo in self.tools_tc:
             for tool in self.tools_tc[repo]:
-                self.logger.info(tool)
                 if self.tools_tc[repo][tool].value:
                     t = tool.split(':', 2)[2].split('/')[-1]
                     if t.startswith('/:'):
                         t = ' '+t[1:]
                     t = t.split(':')
-                    if self.action['action_name'] == 'start':
-                        status = self.action['action_object2'](name=t[0],
-                                                               branch=t[1],
-                                                               version=t[2])
-                        if status[0]:
-                            tool_d.update(status[1])
+                    if self.action['action_name'] in ['start', 'stop']:
+                        status = self.action['action_object1'](repo, t[0])
                     elif self.action['action_name'] == 'configure':
                         constraints = {'name': t[0],
                                        'branch': t[1],
@@ -365,8 +286,8 @@ class ToolForm(npyscreen.ActionForm):
                                        'repo': repo}
                         options = ['type']
                         action = self.action['api_action']
-                        tool = action.p_helper.constraint_options(constraints,
-                                                                  options)[0]
+                        tool = self.manifest.constrain_opts(constraints,
+                                                            options)[0]
                         # only one tool should be returned
                         name = list(tool.keys())[0]
                         if tool[name]['type'] == 'registry':
@@ -379,11 +300,9 @@ class ToolForm(npyscreen.ActionForm):
                                  'version': t[2],
                                  'repo': repo,
                                  'next_tool': None,
-                                 'get_configure': action.get_configure,
-                                 'save_configure': action.save_configure,
-                                 'restart_tools': action.restart_tools,
-                                 'clean': action.clean,
-                                 'prep_start': action.prep_start,
+                                 'get_configure': self.api_action.get_configure,
+                                 'save_configure': self.api_action.save_configure,
+                                 'restart_tools': self.api_action.restart_tools,
                                  'start_tools': action.start,
                                  'from_registry': registry_image}
                         if tools_to_configure:
@@ -391,6 +310,8 @@ class ToolForm(npyscreen.ActionForm):
                         self.parentApp.addForm('EDITOR' + t[0], EditorForm,
                                                **kargs)
                         tools_to_configure.append('EDITOR' + t[0])
+                    elif self.action['action_name'] == 'remove':
+                        status = self.action['action_object1'](repo, t[0])
                     else:
                         kargs = {'name': t[0],
                                  'branch': t[1],
@@ -402,7 +323,7 @@ class ToolForm(npyscreen.ActionForm):
                         # version in manifest
                         if self.action['action_name'] == 'update':
                             if t[2] != 'HEAD':
-                                repo_commits = self.m_helper.repo_commits(repo)[
+                                repo_commits = self.tools_inst.repo_commits(repo)[
                                     1]
                                 for branch in repo_commits:
                                     if branch[0] == t[1]:
@@ -416,12 +337,6 @@ class ToolForm(npyscreen.ActionForm):
                         popup(originals, self.action['type'], thr,
                               'Please wait, ' + self.action['present_t'] +
                               '...')
-        if self.action['action_name'] == 'start':
-            thr = Thread(target=self.action['action_object1'],
-                         args=(),
-                         kwargs={'tool_d': tool_d})
-            popup(originals, self.action['type'], thr,
-                  'Please wait, ' + self.action['present_t'] + '...')
 
         if self.action['action_name'] != 'configure':
             npyscreen.notify_confirm('Done ' + self.action['present_t'] + '.',

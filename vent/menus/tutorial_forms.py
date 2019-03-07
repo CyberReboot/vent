@@ -146,34 +146,6 @@ class TutorialBackgroundForm(TutorialForm):
                               **keywords)
 
 
-class TutorialBuildingCoresForm(TutorialForm):
-    """ Tutorial Building Cores form for the Vent CLI """
-
-    def __init__(self, *args, **keywords):
-        """ Initialize building cores tutorial form fields """
-        title = 'Building Cores'
-        text = """
-        Building Vent's core tools is a snap.
-
-        At the main menu, press '^X' to bring up the action menu.
-        Highlight core tools and press 'Enter'.
-        Now highlight 'Build core tools' and press 'Enter'.
-        This will bring up a form with a list of core tools that are
-        able to be built. By default, all tools are selected, but it is
-        possible to select which tools to build using the arrow keys and
-        the 'Space' key.
-
-        The build process will take a few minutes so please be patient.
-        """
-        next_tutorial = 'TUTORIALSTARTINGCORES'
-        TutorialForm.__init__(self,
-                              title,
-                              text,
-                              next_tutorial,
-                              *args,
-                              **keywords)
-
-
 class TutorialGettingSetupForm(TutorialForm):
     """ Tutorial Getting Setup form for the Vent CLI """
 
@@ -182,22 +154,18 @@ class TutorialGettingSetupForm(TutorialForm):
         title = 'Getting Setup'
         text = """
         Here's a quick setup guide to quickly get Vent up and running.
-        1) Enter the core tools submenu from the main action menu and
-           'add all latest core tools'
-        2) Build all core tools
-        3) Start all core tools
 
-        Now, Vent has the tools to work. Now we need to add plugin tools
-        to process files placed into File Drop.
-        4) Hit '^X' to open the main action menu and go to the Plugins
+        First we need to add plugin tools to process files placed into File
+        Drop.
+        1) Hit '^X' to open the main action menu and go to the Tools
            submenu
-        5) Add and build new plugins using either Git or Docker
-        6) Now, drop any files that the plugins process into the File Drop
+        2) Add and build new tools using either Git or Docker
+        3) Now, drop any files that the plugins process into the File Drop
            directory.
 
         Congrats! You have just started and processed files using Vent!
         """
-        next_tutorial = 'TUTORIALBUILDINGCORES'
+        next_tutorial = 'TUTORIALSTARTINGCORES'
         TutorialForm.__init__(self,
                               title,
                               text,

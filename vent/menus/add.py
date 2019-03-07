@@ -3,8 +3,10 @@ import time
 
 import npyscreen
 
-from vent.api.actions import Action
-from vent.api.plugin_helpers import PluginHelper
+from vent.api.image import Image
+from vent.api.repository import Repository
+from vent.api.system import System
+from vent.api.tools import Tools
 from vent.menus.add_options import AddOptionsForm
 from vent.menus.editor import EditorForm
 
@@ -87,8 +89,10 @@ class AddForm(npyscreen.ActionForm):
             return
 
         if self.image.value and self.link_name.value:
-            api_action = Action()
-            thr = threading.Thread(target=api_action.add_image, args=(),
+            api_action = Tools()
+            api_image = Image(System().manifest)
+            api_system = System()
+            thr = threading.Thread(target=api_image.add, args=(),
                                    kwargs={'image': self.image.value,
                                            'link_name': self.link_name.value,
                                            'tag': self.tag.value,
@@ -98,11 +102,9 @@ class AddForm(npyscreen.ActionForm):
             npyscreen.notify_confirm('Done adding image.', title='Added image')
             editor_args = {'tool_name': self.image.value,
                            'version': self.tag.value,
-                           'get_configure': api_action.get_configure,
-                           'save_configure': api_action.save_configure,
-                           'restart_tools': api_action.restart_tools,
-                           'clean': api_action.clean,
-                           'prep_start': api_action.prep_start,
+                           'get_configure': api_system.get_configure,
+                           'save_configure': api_system.save_configure,
+                           'restart_tools': api_system.restart_tools,
                            'start_tools': api_action.start,
                            'from_registry': True,
                            'just_downloaded': True,
@@ -119,10 +121,10 @@ class AddForm(npyscreen.ActionForm):
                                      form_color='CAUTION')
         elif self.repo.value:
             self.parentApp.repo_value['repo'] = self.repo.value.lower()
-            p_helper = PluginHelper()
-            thr = threading.Thread(target=p_helper.clone, args=(),
-                                   kwargs={'repo': self.repo.value.lower(),
-                                           'user': self.user.value,
+            api_repo = Repository(System().manifest)
+            api_repo.repo = self.repo.value.lower()
+            thr = threading.Thread(target=api_repo._clone, args=(),
+                                   kwargs={'user': self.user.value,
                                            'pw': self.pw.value})
             popup(thr, 'repository', 'Please wait, adding repository...')
             self.parentApp.addForm('ADDOPTIONS',

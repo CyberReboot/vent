@@ -3,9 +3,8 @@ import time
 
 import npyscreen
 
-from vent.api.actions import Action
-from vent.api.menu_helpers import MenuHelper
-from vent.helpers.meta import Tools
+from vent.api.tools import Tools
+from vent.helpers.meta import ManifestTools
 
 
 class ChooseToolsForm(npyscreen.ActionForm):
@@ -15,7 +14,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
     def repo_tools(self, branch):
         """ Set the appropriate repo dir and get the tools available of it """
         tools = []
-        m_helper = MenuHelper()
+        m_helper = Tools()
         repo = self.parentApp.repo_value['repo']
         version = self.parentApp.repo_value['versions'][branch]
         status = m_helper.repo_tools(repo, branch, version)
@@ -84,7 +83,7 @@ class ChooseToolsForm(npyscreen.ActionForm):
             tool_str = 'Adding tools...'
             npyscreen.notify_wait(tool_str, title=title)
             while thr.is_alive():
-                tools = diff(Tools(), original_tools)
+                tools = diff(ManifestTools(), original_tools)
                 if tools:
                     tool_str = ''
                 for tool in tools:
@@ -94,9 +93,8 @@ class ChooseToolsForm(npyscreen.ActionForm):
                 time.sleep(1)
             return
 
-        original_tools = Tools()
+        original_tools = ManifestTools()
         for branch in self.tools_tc:
-            api_action = Action()
             tools = []
             for tool in self.tools_tc[branch]:
                 if self.tools_tc[branch][tool].value:
@@ -108,13 +106,11 @@ class ChooseToolsForm(npyscreen.ActionForm):
                         tools.append((tool, ''))
             repo = self.parentApp.repo_value['repo']
             version = self.parentApp.repo_value['versions'][branch]
-            build = self.parentApp.repo_value['build'][branch]
-            thr = threading.Thread(target=api_action.add, args=(),
-                                   kwargs={'repo': repo,
-                                           'branch': branch,
-                                           'tools': tools,
-                                           'version': version,
-                                           'build': build})
+            api_action = Tools(version=version, branch=branch)
+            thr = threading.Thread(target=api_action.new, args=(),
+                                   kwargs={'tool_type': 'repo',
+                                           'uri': repo,
+                                           'tools': tools})
             popup(original_tools, branch, thr,
                   'Please wait, adding tools for the ' + branch + ' branch...')
         npyscreen.notify_confirm('Done adding repository: ' +

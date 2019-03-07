@@ -1,6 +1,6 @@
 import npyscreen
 
-from vent.api.actions import Action
+from vent.helpers.meta import Logs
 
 
 class LogsForm(npyscreen.FormBaseNew):
@@ -17,8 +17,7 @@ class LogsForm(npyscreen.FormBaseNew):
         msg = 'Checking for container logs, please wait...'
         self.logs_mle = self.add(npyscreen.Pager,
                                  values=[msg])
-        self.action = Action()
-        response = self.action.logs()
+        response = Logs()
         if response[0]:
             value = 'Logs for each Vent container found:\n'
             logs = response[1]

@@ -1,23 +1,90 @@
 import datetime
+import fnmatch
 import json
 import math
 import multiprocessing
-import os
 import platform
 import re
+import shlex
+from os import chdir
+from os import environ
+from os import walk
+from os.path import abspath
+from os.path import exists
+from os.path import expanduser
+from os.path import join
 from subprocess import check_output
 from subprocess import PIPE
 from subprocess import Popen
+from subprocess import STDOUT
 
 import docker
 import pkg_resources
 import requests
 
-from vent.api.templates import Template
 from vent.helpers.logs import Logger
 from vent.helpers.paths import PathDirs
+from vent.helpers.templates import Template
 
 logger = Logger(__name__)
+
+
+def Logs(c_type=None, grep_list=None):
+    """ Generically filter logs stored in log containers """
+    def get_logs(logs, log_entries):
+        try:
+            for log in logs:
+                if str(container.name) in log_entries:
+                    log_entries[str(container.name)].append(log)
+                else:
+                    log_entries[str(container.name)] = [log]
+        except Exception as e:  # pragma: no cover
+            logger.error('Unable to get logs for ' +
+                         str(container.name) +
+                         ' because: ' + str(e))
+        return log_entries
+
+    status = (True, None)
+    log_entries = {}
+    d_client = docker.from_env()
+    containers = d_client.containers.list(all=True,
+                                          filters={'label': 'vent'})
+    logger.debug('containers found: ' + str(containers))
+    comp_c = containers
+    if c_type:
+        try:
+            comp_c = [c for c in containers
+                      if (c_type
+                          in c.attrs['Config']['Labels']['vent.groups'])]
+        except Exception as e:  # pragma: no cover
+            logger.error('Unable to limit containers by: ' +
+                         str(c_type) + ' because: ' +
+                         str(e))
+
+    if grep_list:
+        for expression in grep_list:
+            for container in comp_c:
+                try:
+                    # 'logs' stores each line containing the expression
+                    logs = [log for log in container.logs().split('\n')
+                            if expression in log]
+                    log_entries = get_logs(logs, log_entries)
+                except Exception as e:  # pragma: no cover
+                    logger.info('Unable to get logs for ' +
+                                str(container) +
+                                ' because: ' + str(e))
+    else:
+        for container in comp_c:
+            try:
+                logs = container.logs().split('\n')
+                log_entries = get_logs(logs, log_entries)
+            except Exception as e:  # pragma: no cover
+                logger.info('Unabled to get logs for ' +
+                            str(container) +
+                            ' because: ' + str(e))
+
+    status = (True, log_entries)
+    return status
 
 
 def Version():
@@ -53,13 +120,13 @@ def Docker():
     docker_info['os'] = system
 
     # check if native or using docker-machine
-    if 'DOCKER_MACHINE_NAME' in os.environ:
+    if 'DOCKER_MACHINE_NAME' in environ:
         # using docker-machine
-        docker_info['env'] = os.environ['DOCKER_MACHINE_NAME']
+        docker_info['env'] = environ['DOCKER_MACHINE_NAME']
         docker_info['type'] = 'docker-machine'
-    elif 'DOCKER_HOST' in os.environ:
+    elif 'DOCKER_HOST' in environ:
         # not native
-        docker_info['env'] = os.environ['DOCKER_HOST']
+        docker_info['env'] = environ['DOCKER_HOST']
         docker_info['type'] = 'remote'
     else:
         # using "local" server
@@ -296,9 +363,9 @@ def Jobs():
         tool_names = []
         finished_jobs = []
         path_dirs = PathDirs()
-        manifest = os.path.join(path_dirs.meta_dir, 'status.json')
+        manifest = join(path_dirs.meta_dir, 'status.json')
 
-        if os.path.exists(manifest):
+        if exists(manifest):
             file_status = 'a'
         else:
             file_status = 'w'
@@ -363,13 +430,109 @@ def Jobs():
     return tuple(jobs)
 
 
-def Tools(**kargs):
+def ManifestTools(**kargs):
     """ Get tools that exist in the manifest """
     path_dirs = PathDirs(**kargs)
-    manifest = os.path.join(path_dirs.meta_dir, 'plugin_manifest.cfg')
+    manifest = join(path_dirs.meta_dir, 'plugin_manifest.cfg')
     template = Template(template=manifest)
     tools = template.sections()
     return tools[1]
+
+
+def AvailableTools(path, tools=None, branch='master', version='HEAD', core=False):
+    """
+    Return list of possible tools in repo for the given version and branch or
+    take a list of tools to get paths for specific version and branch
+    tools is a list of tuples: (tool name, branch, version)
+    """
+    def get_dockerfiles(matches, path, tool=None):
+        for root, _, filenames in walk(path):
+            files = fnmatch.filter(filenames, 'Dockerfile*')
+            # append additional identifiers to tools if multiple in same
+            # directory
+            add_info = len(files) > 1
+            for f in files:
+                if core and 'core' not in root:
+                    pass
+                else:
+                    addtl_info = ''
+                    if add_info:
+                        # @ will be delimiter symbol for multi-tools
+                        try:
+                            addtl_info = '@' + f.split('.')[1]
+                        except Exception as e:
+                            addtl_info = '@unspecified'
+                    if tool:
+                        if root.split(path)[1].rsplit('/', 1)[-1].lower() == tool:
+                            matches.append((root.split(path)[1] + addtl_info,
+                                            version))
+                        elif tool == '@':
+                            matches.append(('' + addtl_info, version))
+                    else:
+                        matches.append(
+                            (root.split(path)[1] + addtl_info, version))
+        return matches
+
+    matches = []
+    if tools:
+        for tool in tools:
+            name = tool[0]
+            branch = tool[1]
+            version = tool[2]
+            status = Checkout(path, branch=branch, version=version)
+            if not status[0]:
+                logger.error('Unable to checkout: {0} {1} {2} because: {3}'.format(
+                    path, branch, version, status[1]))
+            matches = get_dockerfiles(matches, path, tool=name)
+    else:
+        status = Checkout(path, branch=branch, version=version)
+        if not status[0]:
+            logger.error('Unable to checkout: {0} {1} {2} because: {3}'.format(
+                path, branch, version, status[1]))
+        matches = get_dockerfiles(matches, path)
+    return matches
+
+
+def Checkout(path, branch='master', version='HEAD', **kargs):
+    status = (True, None)
+    path_dirs = PathDirs(**kargs)
+    status = path_dirs.apply_path(path)
+    if status[0]:
+        try:
+            check_output(shlex.split('git checkout ' + branch),
+                         stderr=STDOUT,
+                         close_fds=True).decode('utf-8')
+            check_output(shlex.split('git pull origin ' + version), stderr=STDOUT,
+                         close_fds=True).decode('utf-8')
+            if version:
+                check_output(shlex.split('git reset --hard ' + version),
+                             stderr=STDOUT,
+                             close_fds=True).decode('utf-8')
+            chdir(status[1])
+        except Exception as e:  # pragma: no cover
+            logger.error(
+                'Checkout failed with error: {0}'.format(str(e)))
+            status = (False, str(e))
+    return status
+
+
+def ToolMatches(tools=None, version='HEAD'):
+    """ Get the tools paths and versions that were specified """
+    matches = []
+    if tools:
+        for tool in tools:
+            match_version = version
+            if tool[1] != '':
+                match_version = tool[1]
+            match = ''
+            if tool[0].endswith('/'):
+                match = tool[0][:-1]
+            elif tool[0] != '.':
+                match = tool[0]
+            if not match.startswith('/') and match != '':
+                match = '/'+match
+            matches.append((match, match_version))
+    return matches
 
 
 def Services(core, vent=True, external=False, **kargs):
@@ -511,8 +674,8 @@ def DropLocation():
     """ Get the directory that file drop is watching """
     template = Template(template=PathDirs().cfg_file)
     drop_loc = template.option('main', 'files')[1]
-    drop_loc = os.path.expanduser(drop_loc)
-    drop_loc = os.path.abspath(drop_loc)
+    drop_loc = expanduser(drop_loc)
+    drop_loc = abspath(drop_loc)
     return (True, drop_loc)
 
 
@@ -551,7 +714,7 @@ def Dependencies(tools):
     dependencies = []
     if tools:
         path_dirs = PathDirs()
-        man = Template(os.path.join(path_dirs.meta_dir, 'plugin_manifest.cfg'))
+        man = Template(join(path_dirs.meta_dir, 'plugin_manifest.cfg'))
         for section in man.sections()[1]:
             # don't worry about dealing with tool if it's not running
             running = man.option(section, 'running')
