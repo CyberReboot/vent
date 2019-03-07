@@ -10,11 +10,11 @@ from vent.helpers.meta import Docker
 from vent.helpers.meta import Gpu
 from vent.helpers.meta import Images
 from vent.helpers.meta import Jobs
+from vent.helpers.meta import ManifestTools
 from vent.helpers.meta import ParsedSections
 from vent.helpers.meta import Services
 from vent.helpers.meta import System
 from vent.helpers.meta import Timestamp
-from vent.helpers.meta import Tools
 from vent.helpers.meta import Uptime
 from vent.helpers.meta import Version
 from vent.helpers.paths import PathDirs
@@ -74,7 +74,7 @@ def test_images():
 
 def test_tools():
     """ Test the tools function """
-    tools = Tools()
+    tools = ManifestTools()
     assert isinstance(tools, list)
 
 
