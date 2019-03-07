@@ -344,11 +344,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
                         onSelect=self.perform_action,
                         arguments=['stop'], shortcut='p')
 
-        # Log Menu Items
-        self.m4 = self.add_menu(name='Logs', shortcut='l')
-        self.m4.addItem(text='Get container logs', arguments=['logs'],
-                        onSelect=self.perform_action)
-
         # Services Menu Items
         self.m5 = self.add_menu(name='Services Running', shortcut='s')
         self.m5.addItem(text='External Services', onSelect=self.perform_action,
