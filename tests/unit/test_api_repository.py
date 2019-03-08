@@ -1,4 +1,4 @@
-from vent.api.image import Image
+from vent.api.repository import Repository
 from vent.api.system import System
 
 
