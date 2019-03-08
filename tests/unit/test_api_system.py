@@ -22,7 +22,7 @@ def test_history():
 def test_restore():
     """ Test the restore function """
     system = System()
-    system.restore()
+    system.restore('foo')
 
 
 def test_rollback():
