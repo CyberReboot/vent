@@ -20,7 +20,6 @@ from vent.menus.add import AddForm
 from vent.menus.backup import BackupForm
 from vent.menus.editor import EditorForm
 from vent.menus.inventory_forms import InventoryToolsForm
-from vent.menus.logs import LogsForm
 from vent.menus.services import ServicesForm
 from vent.menus.tools import ToolForm
 
@@ -129,10 +128,6 @@ class MainForm(npyscreen.FormBaseNewWithMenus):
             form = InventoryToolsForm
             forms = ['INVENTORY']
             form_args = {'color': 'STANDOUT', 'name': 'Inventory of tools'}
-        elif action == 'logs':
-            form = LogsForm
-            forms = ['LOGS']
-            form_args = {'color': 'STANDOUT', 'name': 'Logs'}
         elif action == 'services':
             form = ServicesForm
             forms = ['SERVICES']

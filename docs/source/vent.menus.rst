@@ -76,14 +76,6 @@ vent.menus.inventory\_forms module
     :undoc-members:
     :show-inheritance:
 
-vent.menus.logs module
-----------------------
-
-.. automodule:: vent.menus.logs
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 vent.menus.main module
 ----------------------
 
