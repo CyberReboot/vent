@@ -31,6 +31,12 @@ def test_rollback():
     system.rollback()
 
 
+def test_stop():
+    """ Test the stop function """
+    system = System()
+    system.stop()
+
+
 def test_upgrade():
     """ Test the upgrade function """
     system = System()
