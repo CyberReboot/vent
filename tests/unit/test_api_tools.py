@@ -13,3 +13,21 @@ def test_new():
     tools.new('image', 'redis')
     tools.new('core', '')
     tools.new('repo', 'https://github.com/cyberreboot/poseidon')
+
+
+def test_inventory():
+    """ Test the inventory function """
+    tools = Tools()
+    tools.inventory()
+
+
+def test_stop():
+    """ Test the stop function """
+    tools = Tools()
+    tools.stop('https://github.com/cyberreboot/poseidon', 'api')
+
+
+def test_remove():
+    """ Test the remove function """
+    tools = Tools()
+    tools.remove('https://github.com/cyberreboot/poseidon', 'api')
