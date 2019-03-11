@@ -3,7 +3,6 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="rq_dashboard" \
       vent.groups="monitoring" \
-      vent.section="cyberreboot:vent:/vent/extras/rq_dashboard:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 

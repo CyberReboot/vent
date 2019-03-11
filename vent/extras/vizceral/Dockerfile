@@ -3,7 +3,6 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="vizceral" \
       vent.groups="monitoring,visualization,workflow" \
-      vent.section="cyberreboot:vent:/vent/extras/vizceral:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 
