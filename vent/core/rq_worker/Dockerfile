@@ -3,7 +3,6 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="rq_worker" \
       vent.groups="core,files" \
-      vent.section="cyberreboot:vent:/vent/core/rq_worker:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 

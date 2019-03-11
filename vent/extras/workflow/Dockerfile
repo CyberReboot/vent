@@ -3,7 +3,6 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="workflow" \
       vent.groups="files,monitoring,workflow" \
-      vent.section="cyberreboot:vent:/vent/workflow:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 

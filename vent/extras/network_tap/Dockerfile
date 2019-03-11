@@ -3,7 +3,6 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="network_tap" \
       vent.groups="files,network" \
-      vent.section="cyberreboot:vent:/vent/extras/network_tap:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 

@@ -3,7 +3,6 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="file_drop" \
       vent.groups="core,files" \
-      vent.section="cyberreboot:vent:/vent/core/file_drop:master:HEAD" \
       vent.repo="https://github.com/cyberreboot/vent" \
       vent.type="repository"
 
