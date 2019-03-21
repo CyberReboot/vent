@@ -1,3 +1,11 @@
+# v0.8.1 (2019-03-21)
+
+improvements:
+- upgraded version of pyyaml
+- upgraded version of docker
+- upgraded version of pytest
+- upgraded version of redis
+
 # v0.8.0 (2019-03-07)
 
 improvements:
