@@ -104,8 +104,7 @@ class RmqEs():
     def consume(self):  # pragma: no cover
         """ start consuming rabbitmq messages """
         print(' [*] Waiting for logs. To exit press CTRL+C')
-        self.channel.basic_consume(self.queue_name, self.callback,
-                                   no_ack=True)
+        self.channel.basic_consume(self.queue_name, self.callback)
         self.channel.start_consuming()
 
 
