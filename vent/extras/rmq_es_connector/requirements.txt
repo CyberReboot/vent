@@ -1,2 +1,2 @@
 elasticsearch==6.3.1
-pika==0.13.1
+pika==1.0.0
