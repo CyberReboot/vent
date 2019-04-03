@@ -435,11 +435,16 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                 else:
                     configs[image]['volumes'] = volumes
 
+                command = path_cmd[image]
+                if 'command' in configs[image]:
+                    command = configs[image]['command'] + ' ' + command
+                    del configs[image]['command']
+
                 if 'vent.gpu' in labels and labels['vent.gpu'] == 'yes':
                     if can_queue_gpu:
                         # queue up containers requiring a gpu
                         q_str = json.dumps({'image': image,
-                                            'command': path_cmd[image],
+                                            'command': command,
                                             'labels': labels,
                                             'detach': True,
                                             'name': name,
@@ -452,7 +457,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
                     d_client.containers.run(image=image,
-                                            command=path_cmd[image],
+                                            command=command,
                                             labels=labels,
                                             detach=True,
                                             name=name,
