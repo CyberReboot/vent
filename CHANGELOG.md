@@ -1,3 +1,15 @@
+# v0.8.2 (2019-04-04)
+
+improvements:
+- upgraded version of docker
+- upgraded version of pika
+- upgraded version of pytest
+- upgraded version of sphinx
+- upgraded version of watchdog
+
+bug fixes:
+- fixed an issue where overriding the docker command for rq_worker was failing
+
 # v0.8.1 (2019-03-21)
 
 improvements:
