@@ -1,2 +1,2 @@
-elasticsearch==6.3.1
+elasticsearch==7.0.0
 pika==1.0.0
