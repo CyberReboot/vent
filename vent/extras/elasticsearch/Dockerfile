@@ -1,4 +1,4 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.6.0
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.0.0
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent="" \
       vent.name="elasticsearch" \
