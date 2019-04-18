@@ -122,7 +122,7 @@ def gpu_queue(options):
         del configs['gpu_options']
         params = options.copy()
         params.update(configs)
-        d_client.containers.run(**params)
+        container = d_client.containers.run(**params)
         status = (True, None)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
@@ -227,27 +227,6 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                       'vent.section': section, 'vent.repo': repo, 'vent.type': t_type}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
-            # doesn't matter if it's a repository or registry because both in manifest
-            if config.has_option(section, 'groups'):
-                if 'replay' in config.get(section, 'groups'):
-                    try:
-                        # read the vent.cfg file to grab the network-mapping
-                        # specified. For replay_pcap
-                        n_name = 'network-mapping'
-                        n_map = []
-                        if vent_config.has_section(n_name):
-                            # make sure that the options aren't empty
-                            if vent_config.options(n_name):
-                                options = vent_config.options(n_name)
-                                for option in options:
-                                    if vent_config.get(n_name, option):
-                                        n_map.append(vent_config.get(
-                                            n_name, option))
-                                orig_path = path
-                                path = str(n_map[0]) + ' ' + path
-                    except Exception as e:  # pragma: no cover
-                        failed_images.add(image_name)
-                        status = (False, str(e))
             if config.has_option(section, 'service'):
                 try:
                     options_dict = json.loads(config.get(section, 'service'))
@@ -304,7 +283,6 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                 if link in name_maps:
                                     configs[image_name]['links'][name_maps[link]
                                                                  ] = configs[image_name]['links'].pop(link)
-                        # TODO network_mode
                         # TODO volumes_from
                         # TODO external services
                     except Exception as e:   # pragma: no cover
@@ -448,6 +426,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                             'labels': labels,
                                             'detach': True,
                                             'name': name,
+                                            'network': 'vent',
                                             'log_config': log_config,
                                             'configs': configs[image]})
                         q.enqueue('watch.gpu_queue', q_str, ttl=2592000)
@@ -461,6 +440,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                             labels=labels,
                                             detach=True,
                                             name=name,
+                                            network='vent',
                                             log_config=log_config,
                                             **configs[image])
         if failed_images:

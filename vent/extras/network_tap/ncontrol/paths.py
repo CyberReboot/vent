@@ -70,7 +70,7 @@ class CreateR(object):
 
         # spin up container with payload specifications
         if c:
-            tool_d = {'network_mode': 'host',
+            tool_d = {'network': 'host',
                       'volumes_from': [socket.gethostname()]}
 
             cmd = '/tmp/run.sh ' + payload['nic'] + ' ' + payload['interval']
@@ -79,6 +79,8 @@ class CreateR(object):
             try:
                 container = c.containers.run(image='cyberreboot/vent-ncapture:master',
                                              command=cmd, remove=True, detach=True, **tool_d)
+                vent_bridge = c.networks.list('vent')[0]
+                vent_bridge.connect(container)
                 resp.body = "(True, 'successfully created and started filter: " + \
                     str(payload['id']) + ' on container: ' + \
                     str(container.id) + "')"

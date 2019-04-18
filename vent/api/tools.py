@@ -225,6 +225,7 @@ class Tools:
 
             for container in tool_d:
                 containers_remaining.append(container)
+                tool_d[container]['network'] = 'vent'
                 self.logger.info(
                     "User: '{0}' starting container: {1}".format(username, container))
                 if 'labels' in tool_d[container]:
@@ -309,7 +310,7 @@ class Tools:
                             tool_instances[l_name[1]] = int(
                                 settings['instances'])
 
-            # check and update links, volumes_from, network_mode
+            # check and update links, volumes_from
             for container in list(tool_d.keys()):
                 if 'labels' not in tool_d[container] or 'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
                     tool_d[container]['remove'] = True
@@ -370,15 +371,6 @@ class Tools:
                                     tool_d[c]['name'])
                                 tmp_volumes_from.remove(volumes_from)
                     tool_d[container]['volumes_from'] += tmp_volumes_from
-                if 'network_mode' in tool_d[container]:
-                    if tool_d[container]['network_mode'].startswith('container:'):
-                        network_c_name = tool_d[container]['network_mode'].split('container:')[
-                            1]
-                        for c in list(tool_d.keys()):
-                            if ('tmp_name' in tool_d[c] and
-                                    tool_d[c]['tmp_name'] == network_c_name):
-                                tool_d[container]['network_mode'] = 'container:' + \
-                                    tool_d[c]['name']
 
             # remove tmp_names
             for c in list(tool_d.keys()):
