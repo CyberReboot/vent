@@ -2,6 +2,7 @@ import copy
 import json
 import re
 import shutil
+import sys
 import tempfile
 from datetime import datetime
 from os import chdir
@@ -421,6 +422,8 @@ class System:
             if tool_d:
                 tools.start(tool_d, None, is_tool_d=True)
         except Exception as e:  # pragma: no cover
+            self.logger.error('Error on line {}'.format(
+                sys.exc_info()[-1].tb_lineno))
             self.logger.error('Startup failed because: {0}'.format(str(e)))
             status = (False, str(e))
         return status
