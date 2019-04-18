@@ -1,3 +1,12 @@
+# v0.8.3 (2019-04-18)
+
+improvements:
+- upgraded version of rq
+- upgraded version of sphinx
+- upgraded version of elasticsearch
+- upgraded version of pika
+- upgraded version of pytest
+
 # v0.8.2 (2019-04-04)
 
 improvements:
