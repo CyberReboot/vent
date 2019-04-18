@@ -358,7 +358,7 @@ class System:
                     if 'image' in s_dict[repo][tool]:
                         t_image = s_dict[repo][tool]['image']
                     repository.add(
-                        repo, add_tools, branch=t_branch, version=t_version, image_name=t_image)
+                        repo, tools=add_tools, branch=t_branch, version=t_version, image_name=t_image)
                     manifest = Template(self.manifest)
                     # update the manifest with extra defined runtime settings
                     base_section = ':'.join([org, r_name, t_path,
