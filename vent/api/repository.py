@@ -67,8 +67,6 @@ class Repository:
                     match, template, repo, org, name, commit_id)
                 if not status[0]:
                     break
-                self.logger.info('template: {0} {1} {2} {3}'.format(
-                    template, match_path, image_name, section))
                 status, template = self._build_image(template,
                                                      match_path,
                                                      image_name,
@@ -408,9 +406,6 @@ class Repository:
                 labels['vent.name'] = name[1]
                 labels['vent.groups'] = groups[1]
                 labels['built-by'] = username
-                self.logger.info('file tag: {0}'.format(file_tag))
-                self.logger.info('image name: {0}'.format(image_name))
-                self.logger.info('labels: {0}'.format(labels))
                 image = self.d_client.images.build(path='.',
                                                    dockerfile=file_tag,
                                                    tag=image_name,

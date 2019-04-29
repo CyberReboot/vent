@@ -287,7 +287,7 @@ class System:
         host with all necessary tools based on the specifications in that file
         """
         status = (True, None)
-        if True:
+        try:
             s_dict = {}
             # rewrite the yml file to exclusively lowercase
             with open(self.startup_file, 'r') as sup:
@@ -328,10 +328,7 @@ class System:
                     get_tools.append((tool, t_branch, t_version))
 
                 available_tools = AvailableTools(repo_path, tools=get_tools)
-                self.logger.info(
-                    'available tools: {0}'.format(available_tools))
                 for tool in s_dict_c[repo]:
-                    self.logger.info('tool: {0}'.format(tool))
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
                     t_path, t_path_cased = PathDirs.rel_path(
@@ -425,19 +422,9 @@ class System:
 
             if tool_d:
                 tools.start(tool_d, None, is_tool_d=True)
-        # except Exception as e:  # pragma: no cover
-        #    self.logger.error('Error on line {}'.format(
-        #        sys.exc_info()[-1].tb_lineno))
-        #    exc_type, exc_obj, tb = sys.exc_info()
-        #    f = tb.tb_frame
-        #    lineno = tb.tb_lineno
-        #    filename = f.f_code.co_filename
-        #    linecache.checkcache(filename)
-        #    line = linecache.getline(filename, lineno, f.f_globals)
-        #    self.logger.error('EXCEPTION IN ({}, LINE {} "{}"): {}'.format(
-        #        filename, lineno, line.strip(), exc_obj))
-        #    self.logger.error('Startup failed because: {0}'.format(str(e)))
-        #    status = (False, str(e))
+        except Exception as e:  # pragma: no cover
+            self.logger.error('Startup failed because: {0}'.format(str(e)))
+            status = (False, str(e))
         return status
 
     def stop(self):
