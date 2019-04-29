@@ -328,7 +328,10 @@ class System:
                     get_tools.append((tool, t_branch, t_version))
 
                 available_tools = AvailableTools(repo_path, tools=get_tools)
+                self.logger.info(
+                    'available tools: {0}'.format(available_tools))
                 for tool in s_dict_c[repo]:
+                    self.logger.info('tool: {0}'.format(tool))
                     # if we can't find the tool in that repo, skip over this
                     # tool and notify in the logs
                     t_path, t_path_cased = PathDirs.rel_path(
