@@ -67,6 +67,8 @@ class Repository:
                     match, template, repo, org, name, commit_id)
                 if not status[0]:
                     break
+                self.logger.info('template: {0} {1} {2} {3}'.format(
+                    template, match_path, image_name, section))
                 status, template = self._build_image(template,
                                                      match_path,
                                                      image_name,
