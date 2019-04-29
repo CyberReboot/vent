@@ -406,6 +406,9 @@ class Repository:
                 labels['vent.name'] = name[1]
                 labels['vent.groups'] = groups[1]
                 labels['built-by'] = username
+                self.logger.info('file tag: {0}'.format(file_tag))
+                self.logger.info('image name: {0}'.format(image_name))
+                self.logger.info('labels: {0}'.format(labels))
                 image = self.d_client.images.build(path='.',
                                                    dockerfile=file_tag,
                                                    tag=image_name,
