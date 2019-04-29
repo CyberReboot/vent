@@ -510,9 +510,12 @@ def Checkout(path, branch='master', version='HEAD', **kargs):
                              close_fds=True).decode('utf-8')
             chdir(status[1])
         except Exception as e:  # pragma: no cover
-            logger.error(
-                'Checkout failed with error: {0}'.format(str(e)))
-            status = (False, str(e))
+            if str(e).endswith('exit status 128.'):
+                status = (True, 'Repo has already been checked out.')
+            else:
+                logger.error(
+                    'Checkout failed with error: {0}'.format(str(e)))
+                status = (False, str(e))
     return status
 
 
