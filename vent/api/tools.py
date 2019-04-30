@@ -809,6 +809,7 @@ class Tools:
                 except Exception as e:
                     pass
                 # if 'links' in tool_d[container]
+                self.logger.info('params: {0}'.format(tool_d[container]))
                 cont_id = self.d_client.containers.run(detach=True,
                                                        **tool_d[container])
                 s_containers.append(container)
