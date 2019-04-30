@@ -314,9 +314,12 @@ class Tools:
             for container in list(tool_d.keys()):
                 if 'labels' not in tool_d[container] or 'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
                     tool_d[container]['remove'] = True
+                if 'syslog' not in s[section]['groups']:
+                    if not 'links' in tool_d[container]:
+                        tool_d[container]['links'] = {'Syslog': 'syslog'}
+                    else:
+                        tool_d[container]['links']['Syslog'] = 'syslog'
                 if 'links' in tool_d[container]:
-                    self.logger.info('links: {0}'.format(
-                        tool_d[container]['links']))
                     for link in list(tool_d[container]['links'].keys()):
                         # add links to external services already running if
                         # necessary, by default configure local services too
@@ -561,7 +564,7 @@ class Tools:
                         externally_configured = False
             if not externally_configured:
                 log_config = {'type': 'syslog',
-                              'config': {'syslog-address': 'tcp:/0.0.0.0:514',
+                              'config': {'syslog-address': 'tcp://syslog:514',
                                          'syslog-facility': 'daemon',
                                          'tag': '{{.Name}}'}}
             if 'groups' in s[section]:
