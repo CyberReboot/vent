@@ -803,6 +803,7 @@ class Tools:
                         'removed old existing container: ' + str(container))
                 except Exception as e:
                     pass
+                self.logger.info('params: {0}'.format(tool_d[container]))
                 cont_id = self.d_client.containers.run(detach=True,
                                                        **tool_d[container])
                 s_containers.append(container)
