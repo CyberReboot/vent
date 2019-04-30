@@ -314,11 +314,12 @@ class Tools:
             for container in list(tool_d.keys()):
                 if 'labels' not in tool_d[container] or 'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
                     tool_d[container]['remove'] = True
-                if 'syslog' not in s[section]['groups']:
-                    if not 'links' in tool_d[container]:
-                        tool_d[container]['links'] = {'Syslog': 'syslog'}
-                    else:
-                        tool_d[container]['links']['Syslog'] = 'syslog'
+                for section in s:
+                    if not 'groups' in s[section] or 'syslog' not in s[section]['groups']:
+                        if not 'links' in tool_d[container]:
+                            tool_d[container]['links'] = {'Syslog': 'syslog'}
+                        else:
+                            tool_d[container]['links']['Syslog'] = 'syslog'
                 if 'links' in tool_d[container]:
                     for link in list(tool_d[container]['links'].keys()):
                         # add links to external services already running if
