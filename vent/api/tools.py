@@ -312,6 +312,8 @@ class Tools:
 
             # check and update links, volumes_from
             for container in list(tool_d.keys()):
+                self.logger.info('links: {0}'.format(
+                    tool_d[container]['links']))
                 if 'labels' not in tool_d[container] or 'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
                     tool_d[container]['remove'] = True
                 if 'links' in tool_d[container]:
@@ -559,7 +561,7 @@ class Tools:
                         externally_configured = False
             if not externally_configured:
                 log_config = {'type': 'syslog',
-                              'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                              'config': {'syslog-address': 'tcp:/0.0.0.0:514',
                                          'syslog-facility': 'daemon',
                                          'tag': '{{.Name}}'}}
             if 'groups' in s[section]:
@@ -587,7 +589,6 @@ class Tools:
                 if ('syslog' not in s[section]['groups'] and
                         'core' in s[section]['groups']):
                     log_config['config']['tag'] = '{{.Name}}'
-                    tool_d[c_name]['log_config'] = log_config
                 if 'syslog' not in s[section]['groups']:
                     tool_d[c_name]['log_config'] = log_config
                 # mount necessary directories
@@ -803,7 +804,7 @@ class Tools:
                         'removed old existing container: ' + str(container))
                 except Exception as e:
                     pass
-                self.logger.info('params: {0}'.format(tool_d[container]))
+                # if 'links' in tool_d[container]
                 cont_id = self.d_client.containers.run(detach=True,
                                                        **tool_d[container])
                 s_containers.append(container)
