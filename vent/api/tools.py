@@ -312,11 +312,11 @@ class Tools:
 
             # check and update links, volumes_from
             for container in list(tool_d.keys()):
-                self.logger.info('links: {0}'.format(
-                    tool_d[container]['links']))
                 if 'labels' not in tool_d[container] or 'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
                     tool_d[container]['remove'] = True
                 if 'links' in tool_d[container]:
+                    self.logger.info('links: {0}'.format(
+                        tool_d[container]['links']))
                     for link in list(tool_d[container]['links'].keys()):
                         # add links to external services already running if
                         # necessary, by default configure local services too
