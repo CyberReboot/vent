@@ -808,10 +808,28 @@ class Tools:
                         'removed old existing container: ' + str(container))
                 except Exception as e:
                     pass
-                # if 'links' in tool_d[container]
+                change_networking = False
+                links = []
+                network_name = ''
+                if 'links' in tool_d[container]:
+                    for link in tool_d[container]['links']:
+                        links.append((link, tool_d[container]['link'][link]))
+                    if 'network' in tool_d[container]:
+                        network_name = tool_d[container]['network']
+                        del tool_d[container]['network']
+                    del tool_d[container]['links']
+                    change_networking = True
                 self.logger.info('params: {0}'.format(tool_d[container]))
                 cont_id = self.d_client.containers.run(detach=True,
                                                        **tool_d[container])
+                if change_networking:
+                    network_to_attach = self.d_client.networks.list(
+                        names=[network_name])
+                    if len(network_to_attach) > 0:
+                        network_to_attach[0].connect(cont_id, links=links)
+                        network_to_detach = self.d_client.networks.list(names=[
+                                                                        'bridge'])
+                        network_to_detach[0].disconnect(cont_id)
                 s_containers.append(container)
                 manifest.set_option(section, 'running', 'yes')
                 self.logger.info('started ' + str(container) +
@@ -959,7 +977,7 @@ class Tools:
                 return status
 
             # TODO commenting out for now, should use update_repo
-            #status = self.p_helper.checkout(branch=branch, version=version)
+            # status = self.p_helper.checkout(branch=branch, version=version)
             status = (True, None)
 
             if status[0]:
