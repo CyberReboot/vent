@@ -79,8 +79,6 @@ class CreateR(object):
             try:
                 container = c.containers.run(image='cyberreboot/vent-ncapture:master',
                                              command=cmd, remove=True, detach=True, **tool_d)
-                vent_bridge = c.networks.list('vent')[0]
-                vent_bridge.connect(container)
                 resp.body = "(True, 'successfully created and started filter: " + \
                     str(payload['id']) + ' on container: ' + \
                     str(container.id) + "')"
