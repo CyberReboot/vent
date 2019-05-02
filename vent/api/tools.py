@@ -312,6 +312,8 @@ class Tools:
 
             # check and update links, volumes_from
             for container in list(tool_d.keys()):
+                if 'labels' not in tool_d[container] or 'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
+                    tool_d[container]['auto_remove'] = True
                 if 'links' in tool_d[container]:
                     for link in list(tool_d[container]['links'].keys()):
                         # add links to external services already running if

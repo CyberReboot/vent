@@ -23,7 +23,7 @@ def gpu_queue(options):
     configs = options['configs']
     gpu_options = configs['gpu_options']
     devices = []
-    options['remove'] = True
+    options['auto_remove'] = True
 
     # device specified, remove all other devices
     if 'device' in gpu_options:
@@ -378,7 +378,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
         # TODO add group label
         # TODO get group and name for syslog tag
         log_config = {'type': 'syslog',
-                      'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                      'config': {'syslog-address': 'tcp://127.0.0.1:514',
                                  'syslog-facility': 'daemon',
                                  'tag': '{{.Name}}'}}
 
@@ -395,7 +395,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
             if image not in failed_images:
                 orig_path = orig_path_d[image]
                 labels = labels_d[image]
-                configs[image]['remove'] = True
+                configs[image]['auto_remove'] = True
                 name = image.replace('/', '-').replace(':', '-') + '_' + \
                     str(int(time.time()))+'_'+str(uuid.uuid4())[:4]
 
