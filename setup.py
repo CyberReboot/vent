@@ -7,7 +7,7 @@ setup(
               'vent.core.rq_worker', 'vent.extras.rq_dashboard', 'vent.menus',
               'vent.extras.network_tap', 'vent.extras.network_tap.ncontrol',
               'vent.extras.rmq_es_connector', 'vent.helpers', 'vent.api'],
-    install_requires=['docker>=3.7.2', 'npyscreen>=4.10.5', 'pyyaml>=3.13'],
+    install_requires=['docker>=3.7.2', 'npyscreen>=4.10.5', 'pyyaml>=5.1'],
     scripts=['bin/vent'],
     license='Apache License 2.0',
     author='arpit',
