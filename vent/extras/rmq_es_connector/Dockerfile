@@ -12,7 +12,7 @@ RUN apk add --update \
     py3-pip \
     && rm -rf /var/cache/apk/*
 
-RUN pip3 install --no-cache-dir --upgrade pip==19.0.3
+RUN pip3 install --no-cache-dir --upgrade pip==19.1
 
 # healthcheck
 COPY healthcheck /healthcheck

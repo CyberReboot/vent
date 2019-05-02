@@ -225,6 +225,7 @@ class Tools:
 
             for container in tool_d:
                 containers_remaining.append(container)
+                tool_d[container]['network'] = 'vent'
                 self.logger.info(
                     "User: '{0}' starting container: {1}".format(username, container))
                 if 'labels' in tool_d[container]:
@@ -309,10 +310,10 @@ class Tools:
                             tool_instances[l_name[1]] = int(
                                 settings['instances'])
 
-            # check and update links, volumes_from, network_mode
+            # check and update links, volumes_from
             for container in list(tool_d.keys()):
                 if 'labels' not in tool_d[container] or 'vent.groups' not in tool_d[container]['labels'] or 'core' not in tool_d[container]['labels']['vent.groups']:
-                    tool_d[container]['remove'] = True
+                    tool_d[container]['auto_remove'] = True
                 if 'links' in tool_d[container]:
                     for link in list(tool_d[container]['links'].keys()):
                         # add links to external services already running if
@@ -370,15 +371,6 @@ class Tools:
                                     tool_d[c]['name'])
                                 tmp_volumes_from.remove(volumes_from)
                     tool_d[container]['volumes_from'] += tmp_volumes_from
-                if 'network_mode' in tool_d[container]:
-                    if tool_d[container]['network_mode'].startswith('container:'):
-                        network_c_name = tool_d[container]['network_mode'].split('container:')[
-                            1]
-                        for c in list(tool_d.keys()):
-                            if ('tmp_name' in tool_d[c] and
-                                    tool_d[c]['tmp_name'] == network_c_name):
-                                tool_d[container]['network_mode'] = 'container:' + \
-                                    tool_d[c]['name']
 
             # remove tmp_names
             for c in list(tool_d.keys()):
@@ -567,7 +559,7 @@ class Tools:
                         externally_configured = False
             if not externally_configured:
                 log_config = {'type': 'syslog',
-                              'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                              'config': {'syslog-address': 'tcp://127.0.0.1:514',
                                          'syslog-facility': 'daemon',
                                          'tag': '{{.Name}}'}}
             if 'groups' in s[section]:
@@ -595,7 +587,6 @@ class Tools:
                 if ('syslog' not in s[section]['groups'] and
                         'core' in s[section]['groups']):
                     log_config['config']['tag'] = '{{.Name}}'
-                    tool_d[c_name]['log_config'] = log_config
                 if 'syslog' not in s[section]['groups']:
                     tool_d[c_name]['log_config'] = log_config
                 # mount necessary directories
@@ -698,6 +689,7 @@ class Tools:
     def _start_container(self, container, tool_d, s_containers, f_containers):
         """ Start container that was passed in and return status """
         # use section to add info to manifest
+        # TODO need to check that section exists
         section = tool_d[container]['section']
         del tool_d[container]['section']
         manifest = Template(self.manifest)
@@ -811,8 +803,32 @@ class Tools:
                         'removed old existing container: ' + str(container))
                 except Exception as e:
                     pass
-                cont_id = self.d_client.containers.run(detach=True,
+                change_networking = False
+                links = []
+                network_name = ''
+                if 'links' in tool_d[container]:
+                    for link in tool_d[container]['links']:
+                        links.append((link, tool_d[container]['links'][link]))
+                    if 'network' in tool_d[container]:
+                        network_name = tool_d[container]['network']
+                        del tool_d[container]['network']
+                    del tool_d[container]['links']
+                    change_networking = True
+                cont = self.d_client.containers.create(detach=True,
                                                        **tool_d[container])
+                cont_id = cont.id
+                if change_networking:
+                    network_to_attach = self.d_client.networks.list(
+                        names=[network_name])
+                    if len(network_to_attach) > 0:
+                        self.logger.info('Attaching to network: "{0}" with the following links: {1}'.format(
+                            network_name, links))
+                        network_to_attach[0].connect(cont_id, links=links)
+                        self.logger.info('Detaching from network: bridge')
+                        network_to_detach = self.d_client.networks.list(names=[
+                                                                        'bridge'])
+                        network_to_detach[0].disconnect(cont_id)
+                cont.start()
                 s_containers.append(container)
                 manifest.set_option(section, 'running', 'yes')
                 self.logger.info('started ' + str(container) +
@@ -960,7 +976,7 @@ class Tools:
                 return status
 
             # TODO commenting out for now, should use update_repo
-            #status = self.p_helper.checkout(branch=branch, version=version)
+            # status = self.p_helper.checkout(branch=branch, version=version)
             status = (True, None)
 
             if status[0]:

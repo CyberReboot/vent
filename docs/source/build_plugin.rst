@@ -22,13 +22,7 @@ Look below for examples of a ``vent.template`` file.
 
 -docker
 -------
-All possible options and their explanations are the same as the parameters for the python `Docker container run command`_.
-
-For example, if we wanted the plugin's container to use the host network stack,
-the following would be written in the ``vent.template`` file::
-
-    [docker]
-    network_mode = host
+All possible options (except network_mode and remove) and their explanations are the same as the parameters for the python `Docker container run command`_.
 
 .. _Docker container run command: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.run
 

@@ -23,7 +23,7 @@ def gpu_queue(options):
     configs = options['configs']
     gpu_options = configs['gpu_options']
     devices = []
-    options['remove'] = True
+    options['auto_remove'] = True
 
     # device specified, remove all other devices
     if 'device' in gpu_options:
@@ -122,7 +122,7 @@ def gpu_queue(options):
         del configs['gpu_options']
         params = options.copy()
         params.update(configs)
-        d_client.containers.run(**params)
+        container = d_client.containers.run(**params)
         status = (True, None)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
@@ -203,7 +203,8 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
         failed_images = set()
         config = configparser.ConfigParser(interpolation=None)
         config.optionxform = str
-        print('Path to manifest: ' + template_path+'plugin_manifest.cfg')
+        logger.debug('Path to manifest: ' +
+                     template_path+'plugin_manifest.cfg')
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
@@ -227,27 +228,6 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                       'vent.section': section, 'vent.repo': repo, 'vent.type': t_type}
             image_name = config.get(section, 'image_name')
             link_name = config.get(section, 'link_name')
-            # doesn't matter if it's a repository or registry because both in manifest
-            if config.has_option(section, 'groups'):
-                if 'replay' in config.get(section, 'groups'):
-                    try:
-                        # read the vent.cfg file to grab the network-mapping
-                        # specified. For replay_pcap
-                        n_name = 'network-mapping'
-                        n_map = []
-                        if vent_config.has_section(n_name):
-                            # make sure that the options aren't empty
-                            if vent_config.options(n_name):
-                                options = vent_config.options(n_name)
-                                for option in options:
-                                    if vent_config.get(n_name, option):
-                                        n_map.append(vent_config.get(
-                                            n_name, option))
-                                orig_path = path
-                                path = str(n_map[0]) + ' ' + path
-                    except Exception as e:  # pragma: no cover
-                        failed_images.add(image_name)
-                        status = (False, str(e))
             if config.has_option(section, 'service'):
                 try:
                     options_dict = json.loads(config.get(section, 'service'))
@@ -304,7 +284,6 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                 if link in name_maps:
                                     configs[image_name]['links'][name_maps[link]
                                                                  ] = configs[image_name]['links'].pop(link)
-                        # TODO network_mode
                         # TODO volumes_from
                         # TODO external services
                     except Exception as e:   # pragma: no cover
@@ -386,12 +365,12 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                             except Exception as e:  # pragma: no cover
                                 failed_images.add(image_name)
                                 status = (False, str(e))
-                                print('Failure with nvidia-docker-plugin: ' +
-                                      str(e))
+                                logger.error('Failure with nvidia-docker-plugin: ' +
+                                             str(e))
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
-                    print('Unable to process gpu options: ' + str(e))
+                    logger.error('Unable to process gpu options: ' + str(e))
             path_cmd[image_name] = path
             orig_path_d[image_name] = orig_path
             labels_d[image_name] = labels
@@ -400,7 +379,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
         # TODO add group label
         # TODO get group and name for syslog tag
         log_config = {'type': 'syslog',
-                      'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                      'config': {'syslog-address': 'tcp://127.0.0.1:514',
                                  'syslog-facility': 'daemon',
                                  'tag': '{{.Name}}'}}
 
@@ -410,14 +389,14 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
         except Exception as e:  # pragma: no cover
             can_queue_gpu = False
-            print('Unable to connect to redis: ' + str(e))
+            logger.error('Unable to connect to redis: ' + str(e))
 
         # start containers
         for image in images:
             if image not in failed_images:
                 orig_path = orig_path_d[image]
                 labels = labels_d[image]
-                configs[image]['remove'] = True
+                configs[image]['auto_remove'] = True
                 name = image.replace('/', '-').replace(':', '-') + '_' + \
                     str(int(time.time()))+'_'+str(uuid.uuid4())[:4]
 
@@ -448,6 +427,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                             'labels': labels,
                                             'detach': True,
                                             'name': name,
+                                            'network': 'vent',
                                             'log_config': log_config,
                                             'configs': configs[image]})
                         q.enqueue('watch.gpu_queue', q_str, ttl=2592000)
@@ -456,21 +436,47 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                 else:
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
-                    d_client.containers.run(image=image,
-                                            command=command,
-                                            labels=labels,
-                                            detach=True,
-                                            name=name,
-                                            log_config=log_config,
-                                            **configs[image])
+                    # TODO check for links
+                    change_networking = False
+                    links = []
+                    network_name = ''
+                    configs[image]['network'] = 'vent'
+                    if 'links' in configs[image]:
+                        for link in configs[image]['links']:
+                            links.append((link, configs[image]['links'][link]))
+                        if 'network' in configs[image]:
+                            network_name = configs[image]['network']
+                            del configs[image]['network']
+                        del configs[image]['links']
+                        change_networking = True
+                    cont = d_client.containers.create(image=image,
+                                                      command=command,
+                                                      labels=labels,
+                                                      detach=True,
+                                                      name=name,
+                                                      log_config=log_config,
+                                                      **configs[image])
+                    cont_id = cont.id
+                    if change_networking:
+                        network_to_attach = d_client.networks.list(
+                            names=[network_name])
+                        if len(network_to_attach) > 0:
+                            logger.info('Attaching to network: "{0}" with the following links: {1}'.format(
+                                network_name, links))
+                            network_to_attach[0].connect(cont_id, links=links)
+                            logger.info('Detaching from network: bridge')
+                            network_to_detach = d_client.networks.list(names=[
+                                                                       'bridge'])
+                            network_to_detach[0].disconnect(cont_id)
+                    cont.start()
         if failed_images:
             status = (False, failed_images)
         else:
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
-        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
-        print('Failed to process job: ' + str(e))
+        logger.error('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
+        logger.error('Failed to process job: ' + str(e))
 
-    print(str(status))
+    logger.info(str(status))
     return status
