@@ -695,6 +695,7 @@ class Tools:
     def _start_container(self, container, tool_d, s_containers, f_containers):
         """ Start container that was passed in and return status """
         # use section to add info to manifest
+        # TODO need to check that section exists
         section = tool_d[container]['section']
         del tool_d[container]['section']
         manifest = Template(self.manifest)
@@ -813,7 +814,7 @@ class Tools:
                 network_name = ''
                 if 'links' in tool_d[container]:
                     for link in tool_d[container]['links']:
-                        links.append((link, tool_d[container]['link'][link]))
+                        links.append((link, tool_d[container]['links'][link]))
                     if 'network' in tool_d[container]:
                         network_name = tool_d[container]['network']
                         del tool_d[container]['network']
