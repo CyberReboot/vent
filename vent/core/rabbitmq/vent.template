@@ -6,4 +6,4 @@ groups = core,messages,syslog
 priority = 1
 
 [docker]
-ports = {'15672/tcp': ('127.0.0.1', None), '5672/tcp': ('0.0.0.0', 5672)}
+ports = {'15672/tcp': ('127.0.0.1', None)}
