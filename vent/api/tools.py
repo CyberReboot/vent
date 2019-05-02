@@ -557,7 +557,7 @@ class Tools:
                         externally_configured = False
             if not externally_configured:
                 log_config = {'type': 'syslog',
-                              'config': {'syslog-address': 'tcp://0.0.0.0:514',
+                              'config': {'syslog-address': 'tcp://127.0.0.1:514',
                                          'syslog-facility': 'daemon',
                                          'tag': '{{.Name}}'}}
             if 'groups' in s[section]:
