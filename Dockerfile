@@ -1,5 +1,4 @@
 FROM alpine:3.9
-
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apk --no-cache add --update \
