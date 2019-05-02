@@ -1,4 +1,4 @@
-FROM docker/compose:1.24
+FROM docker/compose:1.24.0
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apk --no-cache add --update \
