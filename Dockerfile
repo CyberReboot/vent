@@ -1,16 +1,10 @@
-FROM alpine:3.9
+FROM docker/compose:1.24
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apk --no-cache add --update \
     curl \
-    gcc \
     git \
-    libc-dev \
-    libffi-dev \
-    make \
-    openssl-dev \
     python3 \
-    python3-dev \
     py3-pip && \
     pip3 install --no-cache-dir --upgrade pip==19.0.3
 
@@ -23,7 +17,6 @@ HEALTHCHECK --interval=15s --timeout=15s \
 
 COPY . /vent
 RUN pip3 install --no-cache-dir /vent
-RUN pip3 install --no-cache-dir docker-compose
 
 RUN mkdir /root/.vent
 VOLUME ["/root/.vent"]

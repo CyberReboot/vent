@@ -22,7 +22,7 @@ Look below for examples of a ``vent.template`` file.
 
 -docker
 -------
-All possible options (except links and network_mode) and their explanations are the same as the parameters for the python `Docker container run command`_.
+All possible options (except network_mode and remove) and their explanations are the same as the parameters for the python `Docker container run command`_.
 
 .. _Docker container run command: https://docker-py.readthedocs.io/en/stable/containers.html#docker.models.containers.ContainerCollection.run
 
