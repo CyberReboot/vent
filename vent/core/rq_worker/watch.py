@@ -203,7 +203,8 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
         failed_images = set()
         config = configparser.ConfigParser(interpolation=None)
         config.optionxform = str
-        print('Path to manifest: ' + template_path+'plugin_manifest.cfg')
+        logger.debug('Path to manifest: ' +
+                     template_path+'plugin_manifest.cfg')
         config.read(template_path+'plugin_manifest.cfg')
         sections = config.sections()
         name_maps = {}
@@ -364,12 +365,12 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                             except Exception as e:  # pragma: no cover
                                 failed_images.add(image_name)
                                 status = (False, str(e))
-                                print('Failure with nvidia-docker-plugin: ' +
-                                      str(e))
+                                logger.error('Failure with nvidia-docker-plugin: ' +
+                                             str(e))
                 except Exception as e:   # pragma: no cover
                     failed_images.add(image_name)
                     status = (False, str(e))
-                    print('Unable to process gpu options: ' + str(e))
+                    logger.error('Unable to process gpu options: ' + str(e))
             path_cmd[image_name] = path
             orig_path_d[image_name] = orig_path
             labels_d[image_name] = labels
@@ -388,7 +389,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
         except Exception as e:  # pragma: no cover
             can_queue_gpu = False
-            print('Unable to connect to redis: ' + str(e))
+            logger.error('Unable to connect to redis: ' + str(e))
 
         # start containers
         for image in images:
@@ -436,22 +437,46 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                     if 'gpu_options' in configs[image]:
                         del configs[image]['gpu_options']
                     # TODO check for links
-                    d_client.containers.run(image=image,
-                                            command=command,
-                                            labels=labels,
-                                            detach=True,
-                                            name=name,
-                                            network='vent',
-                                            log_config=log_config,
-                                            **configs[image])
+                    change_networking = False
+                    links = []
+                    network_name = ''
+                    configs[image]['network'] = 'vent'
+                    if 'links' in configs[image]:
+                        for link in configs[image]['links']:
+                            links.append((link, configs[image]['links'][link]))
+                        if 'network' in configs[image]:
+                            network_name = configs[image]['network']
+                            del configs[image]['network']
+                        del configs[image]['links']
+                        change_networking = True
+                    cont = d_client.containers.create(image=image,
+                                                      command=command,
+                                                      labels=labels,
+                                                      detach=True,
+                                                      name=name,
+                                                      log_config=log_config,
+                                                      **configs[image])
+                    cont_id = cont.id
+                    if change_networking:
+                        network_to_attach = d_client.networks.list(
+                            names=[network_name])
+                        if len(network_to_attach) > 0:
+                            logger.info('Attaching to network: "{0}" with the following links: {1}'.format(
+                                network_name, links))
+                            network_to_attach[0].connect(cont_id, links=links)
+                            logger.info('Detaching from network: bridge')
+                            network_to_detach = d_client.networks.list(names=[
+                                                                       'bridge'])
+                            network_to_detach[0].disconnect(cont_id)
+                    cont.start()
         if failed_images:
             status = (False, failed_images)
         else:
             status = (True, images)
     except Exception as e:  # pragma: no cover
         status = (False, str(e))
-        print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
-        print('Failed to process job: ' + str(e))
+        logger.error('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
+        logger.error('Failed to process job: ' + str(e))
 
-    print(str(status))
+    logger.info(str(status))
     return status
