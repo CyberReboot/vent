@@ -1,4 +1,5 @@
-FROM docker/compose:1.24.0
+FROM alpine:3.9
+
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apk --no-cache add --update \
@@ -23,5 +24,4 @@ VOLUME ["/root/.vent"]
 
 ENV VENT_CONTAINERIZED true
 
-ENTRYPOINT ["/bin/sh", "-c"]
 CMD (flask run > /dev/null 2>&1) & (vent)
