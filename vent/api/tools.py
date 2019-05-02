@@ -820,14 +820,16 @@ class Tools:
                         del tool_d[container]['network']
                     del tool_d[container]['links']
                     change_networking = True
-                self.logger.info('params: {0}'.format(tool_d[container]))
                 cont_id = self.d_client.containers.run(detach=True,
                                                        **tool_d[container])
                 if change_networking:
                     network_to_attach = self.d_client.networks.list(
                         names=[network_name])
                     if len(network_to_attach) > 0:
+                        self.logger.info('Attaching to network: {0} with the following link: {1}'.format(
+                            network_name, links))
                         network_to_attach[0].connect(cont_id, links=links)
+                        self.logger.info('Detaching from network: bridge')
                         network_to_detach = self.d_client.networks.list(names=[
                                                                         'bridge'])
                         network_to_detach[0].disconnect(cont_id)
