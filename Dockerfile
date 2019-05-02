@@ -23,4 +23,5 @@ VOLUME ["/root/.vent"]
 
 ENV VENT_CONTAINERIZED true
 
+ENTRYPOINT ["/bin/sh", "-c"]
 CMD (flask run > /dev/null 2>&1) & (vent)
