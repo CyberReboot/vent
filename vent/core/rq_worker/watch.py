@@ -23,7 +23,6 @@ def gpu_queue(options):
     configs = options['configs']
     gpu_options = configs['gpu_options']
     devices = []
-    options['remove'] = True
 
     # device specified, remove all other devices
     if 'device' in gpu_options:
@@ -395,7 +394,6 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
             if image not in failed_images:
                 orig_path = orig_path_d[image]
                 labels = labels_d[image]
-                configs[image]['remove'] = True
                 name = image.replace('/', '-').replace(':', '-') + '_' + \
                     str(int(time.time()))+'_'+str(uuid.uuid4())[:4]
 
