@@ -312,12 +312,6 @@ class Tools:
 
             # check and update links, volumes_from
             for container in list(tool_d.keys()):
-                for section in s:
-                    if not 'groups' in s[section] or 'syslog' not in s[section]['groups']:
-                        if not 'links' in tool_d[container]:
-                            tool_d[container]['links'] = {'Syslog': 'syslog'}
-                        else:
-                            tool_d[container]['links']['Syslog'] = 'syslog'
                 if 'links' in tool_d[container]:
                     for link in list(tool_d[container]['links'].keys()):
                         # add links to external services already running if
@@ -563,7 +557,7 @@ class Tools:
                         externally_configured = False
             if not externally_configured:
                 log_config = {'type': 'syslog',
-                              'config': {'syslog-address': 'tcp://syslog:514',
+                              'config': {'syslog-address': 'tcp://0.0.0.0:514',
                                          'syslog-facility': 'daemon',
                                          'tag': '{{.Name}}'}}
             if 'groups' in s[section]:
