@@ -5,7 +5,7 @@ falcon-cors==1.1.7
 npyscreen==4.10.5
 pika==1.0.1
 pytest==4.4.1
-pytest-cov==2.6.1
+pytest-cov==2.7.1
 python-magic==0.4.15
 pyyaml==5.1
 redis==3.2.1
