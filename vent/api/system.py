@@ -6,6 +6,7 @@ import tempfile
 from datetime import datetime
 from os import chdir
 from os import close
+from os import environ
 from os import getcwd
 from os import mkdir
 from os import remove
@@ -233,15 +234,49 @@ class System:
 
     def start(self):
         status = (True, None)
-        # startup based on startup file
-        if exists(self.startup_file):
-            status = self._startup()
-        else:
-            tools = Tools()
-            status = tools.new('core', None)
-            if status[0]:
-                status = tools.start(
-                    'https://github.com/cyberreboot/vent', None)
+        vent_bridge = None
+
+        # create vent network bridge if it doesn't already exist
+        try:
+            vent_bridge = self.d_client.networks.create(
+                'vent', check_duplicate=True, driver='bridge')
+        except docker.errors.APIError as e:  # pragma: no cover
+            if str(e) != '409 Client Error: Conflict ("network with name vent already exists")':
+                self.logger.error(
+                    'Unable to create network bridge because: {0}'.format(str(e)))
+                status = (False, str(e))
+            else:
+                vent_bridge = self.d_client.networks.list('vent')[0]
+
+        if status[0]:
+            # add vent to the vent network bridge
+            try:
+                vent_bridge.connect(environ['HOSTNAME'])
+            except Exception as e:  # pragma: no coverr
+                self.logger.error(
+                    'Unable to connect vent to the network bridge because: {0}'.format(str(e)))
+                status = (False, str(e))
+
+        if status[0]:
+            # remove vent to the default network bridge
+            try:
+                default_bridge = self.d_client.networks.list('bridge')[0]
+                default_bridge.disconnect(environ['HOSTNAME'])
+            except Exception as e:  # pragma: no coverr
+                self.logger.error(
+                    'Unable to disconnect vent from the default network bridge because: {0}'.format(str(e)))
+                status = (False, str(e))
+
+        if status[0]:
+            # startup based on startup file
+            if exists(self.startup_file):
+                status = self._startup()
+            else:
+                tools = Tools()
+                status = tools.new('core', None)
+                if status[0]:
+                    status = tools.start(
+                        'https://github.com/cyberreboot/vent', None)
         return status
 
     def _startup(self):
@@ -322,7 +357,7 @@ class System:
                     if 'image' in s_dict[repo][tool]:
                         t_image = s_dict[repo][tool]['image']
                     repository.add(
-                        repo, add_tools, branch=t_branch, version=t_version, image_name=t_image)
+                        repo, tools=add_tools, branch=t_branch, version=t_version, image_name=t_image)
                     manifest = Template(self.manifest)
                     # update the manifest with extra defined runtime settings
                     base_section = ':'.join([org, r_name, t_path,

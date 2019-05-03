@@ -1,3 +1,9 @@
+# v0.9.0 (2019-05-02)
+
+improvements:
+- moved containers to their own network bridge
+- upgraded version of falcon
+
 # v0.8.3 (2019-04-18)
 
 improvements:
