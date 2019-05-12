@@ -1,3 +1,11 @@
+# v0.9.1 (2019-05-12)
+
+improvements:
+- upgraded version of pytest-cov
+- upgraded version of pytest
+- upgraded version of elasticsearch
+- keep track of how many plugin plugins of each type are started
+
 # v0.9.0 (2019-05-02)
 
 improvements:
