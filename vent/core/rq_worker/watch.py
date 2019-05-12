@@ -147,6 +147,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
     import uuid
 
     from redis import Redis
+    from redis import StrictRedis
     from rq import Queue
     from subprocess import check_output, Popen, PIPE
     from string import punctuation
@@ -387,6 +388,7 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
         can_queue_gpu = True
         try:
             q = Queue(connection=Redis(host=r_host), default_timeout=86400)
+            r = StrictRedis(host=r_host, port=6379, db=0)
         except Exception as e:  # pragma: no cover
             can_queue_gpu = False
             logger.error('Unable to connect to redis: ' + str(e))
@@ -469,6 +471,11 @@ def file_queue(path, template_path='/vent/', r_host='redis'):
                                                                        'bridge'])
                             network_to_detach[0].disconnect(cont_id)
                     cont.start()
+                try:
+                    r.hincrby('vent_plugin_counts', image)
+                except Exception as e:  # pragma: no cover
+                    logger.error(
+                        'Failed to update count of plugins because: {0}'.format(str(e)))
         if failed_images:
             status = (False, failed_images)
         else:
