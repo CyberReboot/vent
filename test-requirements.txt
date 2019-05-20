@@ -1,4 +1,4 @@
-docker==3.7.2
+docker==4.0.1
 elasticsearch==7.0.1
 falcon==2.0.0
 falcon-cors==1.1.7
