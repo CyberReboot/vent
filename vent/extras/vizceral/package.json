@@ -19,7 +19,7 @@
     "source-sans-pro": "2.45.0",
     "superagent": "3.8.3",
     "tween.js": "16.6.0",
-    "vizceral-react": "4.5.7",
+    "vizceral-react": "4.6.5",
     "webfontloader": "1.6.28"
   },
   "description": "Vent workflow app",
