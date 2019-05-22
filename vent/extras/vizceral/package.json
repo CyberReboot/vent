@@ -51,7 +51,7 @@
     "webpack-dev-server": "1.16.5"
   },
   "engines": {
-    "node": "~4.4.0"
+    "node": "~4.9.0"
   },
   "license": "Apache-2.0",
   "name": "vent-workflow",
