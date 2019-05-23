@@ -15,7 +15,7 @@
     "react-bootstrap": "0.32.4",
     "react-dom": "15.6.2",
     "react-virtualized": "9.21.1",
-    "socket.io-client": "1.7.4",
+    "socket.io-client": "2.2.0",
     "source-sans-pro": "2.45.0",
     "superagent": "5.0.5",
     "tween.js": "16.6.0",
