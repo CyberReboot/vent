@@ -1,3 +1,12 @@
+# v0.9.2 (2019-05-30)
+
+improvements:
+- upgraded version of urllib3
+- upgraded version of flask
+- upgraded version of docker
+- upgraded node dependencies
+- upgraded version of elasticsearch
+
 # v0.9.1 (2019-05-12)
 
 improvements:
