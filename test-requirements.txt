@@ -1,5 +1,5 @@
 docker==4.0.1
-elasticsearch==7.0.1
+elasticsearch==7.0.2
 falcon==2.0.0
 falcon-cors==1.1.7
 npyscreen==4.10.5
@@ -11,5 +11,5 @@ pyyaml==5.1
 redis==3.2.1
 rq==1.0
 sphinx==2.0.1
-urllib3==1.25.2
+urllib3==1.25.3
 watchdog==0.9.0
