@@ -17,7 +17,7 @@
     "react-virtualized": "9.21.1",
     "socket.io-client": "2.2.0",
     "source-sans-pro": "2.45.0",
-    "superagent": "5.0.6",
+    "superagent": "5.0.7",
     "tween.js": "16.6.0",
     "vizceral-react": "4.7.0",
     "webfontloader": "1.6.28"
