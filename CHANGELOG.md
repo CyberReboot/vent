@@ -1,3 +1,18 @@
+# v0.9.3 (2019-06-13)
+
+improvements:
+- upgraded version of pyyaml
+- upgraded version of sphinx
+- upgraded version of pytest
+- upgraded version of webpack-dev-server
+- upgraded version of vizcerral-react
+- upgraded version of webpack
+- upgraded version of file-loader
+- upgraded version of url-loader
+- upgraded version of query-string
+- upgraded version of css-loader
+- upgraded version of superagent
+
 # v0.9.2 (2019-05-30)
 
 improvements:
