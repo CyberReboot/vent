@@ -1,4 +1,4 @@
-FROM elasticsearch:2-alpine
+FROM elasticsearch:5-alpine
 FROM rabbitmq:3-management
 FROM redis:alpine
 FROM ubuntu:18.10
