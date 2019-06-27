@@ -1,3 +1,21 @@
+# v0.9.4 (2019-06-27)
+
+improvements:
+- upgraded version of superagent
+- upgraded verison of babel-eslint
+- upgraded version of webpack-dev-server
+- upgraded version of ubuntu for Docker image
+- upgraded version of elasticsearch
+- upgraded version of sphinx
+- upgraded version of alpine for Docker image
+- upgraded version of docker
+- upgraded version of webpack
+- upgraded version of query-string
+- upgraded version of eslint
+- upgraded version of eslint-plugin-react
+- upgraded version of eslint-plugin-import
+- upgraded version of url-loader
+
 # v0.9.3 (2019-06-13)
 
 improvements:
