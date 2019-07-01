@@ -33,7 +33,7 @@
     "cpx": "1.5.0",
     "css-loader": "3.0.0",
     "eslint": "6.0.1",
-    "eslint-config-airbnb-base": "13.1.0",
+    "eslint-config-airbnb-base": "13.2.0",
     "eslint-loader": "2.1.2",
     "eslint-plugin-import": "2.18.0",
     "eslint-plugin-jsx-a11y": "6.2.3",
