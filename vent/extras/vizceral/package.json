@@ -7,7 +7,7 @@
     "jquery": "3.4.1",
     "keymirror": "0.1.1",
     "keypress.js": "2.1.5",
-    "lodash": "4.17.11",
+    "lodash": "4.17.14",
     "numeral": "2.0.6",
     "query-string": "6.8.1",
     "react": "16.8.6",
@@ -34,7 +34,7 @@
     "css-loader": "3.0.0",
     "eslint": "6.0.1",
     "eslint-config-airbnb-base": "13.2.0",
-    "eslint-loader": "2.2.0",
+    "eslint-loader": "2.2.1",
     "eslint-plugin-import": "2.18.0",
     "eslint-plugin-jsx-a11y": "6.2.3",
     "eslint-plugin-react": "7.14.2",
@@ -47,7 +47,7 @@
     "rimraf": "2.6.3",
     "style-loader": "0.23.1",
     "url-loader": "2.0.1",
-    "webpack": "4.35.2",
+    "webpack": "4.35.3",
     "webpack-dev-server": "3.7.2"
   },
   "engines": {
