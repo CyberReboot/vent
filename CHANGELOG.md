@@ -1,3 +1,13 @@
+# v0.9.5 (2019-07-11)
+
+improvements:
+- upgraded version of pytest
+- upgraded version of webpack
+- upgraded version of eslint-config-airbnb-base
+- upgraded version of eslint-loader
+- upgraded version of flask
+- upgraded version of lodash
+
 # v0.9.4 (2019-06-27)
 
 improvements:
