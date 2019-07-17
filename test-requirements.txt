@@ -3,7 +3,7 @@ elasticsearch==7.0.2
 falcon==2.0.0
 falcon-cors==1.1.7
 npyscreen==4.10.5
-pika==1.0.1
+pika==1.1.0
 pytest==5.0.1
 pytest-cov==2.7.1
 python-magic==0.4.15
