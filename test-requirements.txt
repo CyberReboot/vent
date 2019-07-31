@@ -7,7 +7,7 @@ pika==1.1.0
 pytest==5.0.1
 pytest-cov==2.7.1
 python-magic==0.4.15
-pyyaml==5.1.1
+pyyaml==5.1.2
 redis==3.3.4
 rq==1.1.0
 sphinx==2.1.2
