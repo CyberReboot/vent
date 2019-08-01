@@ -2,4 +2,4 @@ docker==4.0.2
 python-magic==0.4.15
 redis==3.3.4
 rq==1.1.0
-vent==0.9.5
+vent==0.9.6
