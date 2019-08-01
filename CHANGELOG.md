@@ -1,3 +1,22 @@
+# v0.9.6 (2019-08-01)
+
+improvements:
+- upgraded version of pika
+- upgraded version of webpack
+- upgraded version of css-loader
+- upgraded version of file-loader
+- upgraded version of url-loader
+- upgraded version of lodash
+- upgraded version of eslint-plugin-import
+- upgraded version of vizceral-react
+- upgraded version of rq
+- upgraded version of eslint
+- upgraded version of eslint-plugin-react
+- upgraded version of query-string
+- upgraded version of redis
+- upgraded version of elasticsearch
+- upgraded version of pyyaml
+
 # v0.9.5 (2019-07-11)
 
 improvements:
