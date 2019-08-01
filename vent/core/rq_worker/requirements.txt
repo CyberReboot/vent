@@ -1,5 +1,5 @@
 docker==4.0.2
 python-magic==0.4.15
-redis==3.2.1
-rq==1.0
-vent==0.9.4
+redis==3.3.4
+rq==1.1.0
+vent==0.9.5
