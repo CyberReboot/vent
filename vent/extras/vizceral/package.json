@@ -31,7 +31,7 @@
     "babel-preset-react": "6.24.1",
     "babel-preset-stage-0": "6.24.1",
     "cpx": "1.5.0",
-    "css-loader": "3.1.0",
+    "css-loader": "3.2.0",
     "eslint": "6.1.0",
     "eslint-config-airbnb-base": "13.2.0",
     "eslint-loader": "2.2.1",
