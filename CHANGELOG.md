@@ -1,3 +1,17 @@
+# v0.9.7 (2019-08-15)
+
+improvements:
+- upgraded version of redis
+- upgraded version of react
+- upgraded version of react-dom
+- upgraded version of css-loader
+- upgraded version of eslint-config-airbnb-base
+- upgraded version of file-loader
+- upgraded version of rimraf
+- upgraded version of style-loader
+- upgraded version of webpack
+- upgraded version of webpack-dev-server
+
 # v0.9.6 (2019-08-01)
 
 improvements:
