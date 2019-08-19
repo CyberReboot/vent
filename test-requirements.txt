@@ -4,12 +4,12 @@ falcon==2.0.0
 falcon-cors==1.1.7
 npyscreen==4.10.5
 pika==1.1.0
-pytest==5.0.1
+pytest==5.1.0
 pytest-cov==2.7.1
 python-magic==0.4.15
 pyyaml==5.1.2
-redis==3.3.4
+redis==3.3.7
 rq==1.1.0
-sphinx==2.1.2
+sphinx==2.2.0
 urllib3==1.25.3
 watchdog==0.9.0
