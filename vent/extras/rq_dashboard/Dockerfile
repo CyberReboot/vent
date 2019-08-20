@@ -23,7 +23,7 @@ HEALTHCHECK --interval=15s --timeout=15s \
  CMD curl --silent --fail http://localhost:5000/healthcheck || exit 1
 
 # get newer for worker list fix
-RUN pip3 install --no-cache-dir git+https://github.com/eoranged/rq-dashboard.git
+RUN pip3 install rq-dashboard==0.5.2
 
 COPY rq_dash_settings.py /rq_dash_settings.py
 
