@@ -101,16 +101,16 @@ class GZHandler(PatternMatchingEventHandler):
                         job, 'description').decode('utf-8')
                     print(uid + ' ' + description)
                     if description.startswith("watch.file_queue('"):
+                        description = description.split(
+                            "watch.file_queue('")[1]
                         print(uid + ' ' +
-                              description.split("watch.file_queue('" +
-                                                hostname + '_')[1][:-2])
+                              description.split('_')[1][:-2])
                         print(uid + ' ' + spath)
-                        if description.split("watch.file_queue('" +
-                                             hostname +
-                                             '_')[1][:-2] == spath:
+                        if description.split('_')[1][:-2] == spath:
                             print(uid + ' true')
                             exists = True
                     elif description.startswith("watch.gpu_queue('"):
+                        description = description.split("watch.gpu_queue('")[1]
                         print(uid + ' ' +
                               description.split('"file": "')[1].split('"')[0])
                         print(uid + ' ' + spath)
