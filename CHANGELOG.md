@@ -1,3 +1,16 @@
+# v0.9.8 (2019-08-20)
+
+improvements:
+- upgraded version of redis
+- upgraded version of pytest
+- upgraded version of eslint
+- upgraded version of sphinx
+- upgraded version of rq-dashboard
+
+bug fixes:
+- fixed issue where incorrect file path parsing was causing file drop to crash
+- fixed issue where older version of rq-dashboard wasn't working with the newer version of RQ
+
 # v0.9.7 (2019-08-15)
 
 improvements:
