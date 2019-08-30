@@ -1,3 +1,12 @@
+# v0.9.9 (2019-08-30)
+
+improvements:
+- upgraded version of elasticsearch
+- upgraded version of babel-eslint
+- upgraded version of eslint
+- upgraded version of eslist-loader
+- upgraded version of webpack
+
 # v0.9.8 (2019-08-20)
 
 improvements:
