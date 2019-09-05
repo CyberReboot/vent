@@ -16,7 +16,7 @@
     "react-dom": "16.9.0",
     "react-virtualized": "9.21.1",
     "socket.io-client": "2.2.0",
-    "source-sans-pro": "2.45.0",
+    "source-sans-pro": "3.6.0",
     "superagent": "5.1.0",
     "tween.js": "16.6.0",
     "vizceral-react": "4.8.0",
