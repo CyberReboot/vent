@@ -1,3 +1,11 @@
+# v0.9.10 (2019-09-12)
+
+improvements:
+- upgraded version of pytest
+- upgraded version of query-string
+- upgraded version of source-sans-pro
+- upgraded version of eslint
+
 # v0.9.9 (2019-08-30)
 
 improvements:
