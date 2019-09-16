@@ -47,7 +47,7 @@
     "rimraf": "3.0.0",
     "style-loader": "1.0.0",
     "url-loader": "2.1.0",
-    "webpack": "4.40.0",
+    "webpack": "4.40.2",
     "webpack-dev-server": "3.8.0"
   },
   "engines": {
