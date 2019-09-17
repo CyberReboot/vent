@@ -57,39 +57,45 @@ class GZHandler(PatternMatchingEventHandler):
                     historicalSize = os.path.getsize(spath)
                     time.sleep(0.1)
 
-                if os.path.getsize(spath) == 0:
-                    spath = str(spath)
-                    print('file drop ignoring empty file: {0}'.format(spath))
-                    if spath.startswith('/files/trace_'):
-                        key = spath.split('_')[1]
-                        # Rabbit settings
-                        exchange = 'topic-poseidon-internal'
-                        exchange_type = 'topic'
-                        routing_key = 'poseidon.algos.decider'
+                spath = str(spath)
+                if spath.startswith('/files/trace_'):
+                    key = spath.split('_')[1]
+                    # Rabbit settings
+                    exchange = 'topic-poseidon-internal'
+                    exchange_type = 'topic'
+                    routing_key = 'poseidon.algos.decider'
 
-                        message = {}
-                        message[key] = {'valid': False, 'source': 'file_drop'}
-                        message = json.dumps(message)
+                    message = {}
+                    if os.path.getsize(spath) == 0:
+                        print(
+                            'file drop ignoring empty file: {0}'.format(spath))
+                        message[key] = {
+                            'valid': False, 'source': 'file_drop', 'plugin': 'ncapture', 'file': spath}
+                    else:
+                        message[key] = {
+                            'valid': True, 'source': 'file_drop', 'plugin': 'ncapture', 'file': spath}
+                    message = json.dumps(message)
 
-                        # Send Rabbit message
-                        try:
-                            connection = pika.BlockingConnection(
-                                pika.ConnectionParameters(host='rabbit')
-                            )
+                    # Send Rabbit message
+                    try:
+                        connection = pika.BlockingConnection(
+                            pika.ConnectionParameters(host='rabbit')
+                        )
 
-                            channel = connection.channel()
-                            channel.exchange_declare(
-                                exchange=exchange, exchange_type=exchange_type
-                            )
-                            channel.basic_publish(exchange=exchange,
-                                                  routing_key=routing_key,
-                                                  body=message)
-                            connection.close()
-                        except Exception as e:
-                            print('failed to send rabbit message because: ' +
-                                  str(e))
+                        channel = connection.channel()
+                        channel.exchange_declare(
+                            exchange=exchange, exchange_type=exchange_type
+                        )
+                        channel.basic_publish(exchange=exchange,
+                                              routing_key=routing_key,
+                                              body=message)
+                        connection.close()
+                    except Exception as e:
+                        print('failed to send rabbit message because: ' +
+                              str(e))
 
-                    return
+                    if os.path.getsize(spath) == 0:
+                        return
 
                 # check if the file was already queued and ignore
                 exists = False
