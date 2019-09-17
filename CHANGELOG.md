@@ -1,3 +1,12 @@
+# v0.9.11 (2019-09-17)
+
+improvements:
+- upgraded version of webpack-dev-server
+- upgraded version of eslint
+- upgraded version of webpack
+- upgraded version of elasticsearch
+- send rabbit messages from file_drop for all trace files regardless of size for Poseidon
+
 # v0.9.10 (2019-09-12)
 
 improvements:
