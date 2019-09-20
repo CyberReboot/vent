@@ -11,5 +11,5 @@ pyyaml==5.1.2
 redis==3.3.8
 rq==1.1.0
 sphinx==2.2.0
-urllib3==1.25.4
+urllib3==1.25.5
 watchdog==0.9.0
