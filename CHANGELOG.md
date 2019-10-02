@@ -1,3 +1,18 @@
+# v0.9.12 (2019-10-02)
+
+improvements:
+- upgraded version of elasticsearch
+- upgraded version of pytest
+- upgraded version of urllib3
+- upgraded version of react
+- upgraded version of react-dom
+- upgraded version of socket.io-client
+- upgraded version of eslint
+- upgraded version of eslint-loader
+- upgraded version of eslint-plugin-react
+- upgraded version of webpack
+- upgraded version of webpack-dev-server
+
 # v0.9.11 (2019-09-17)
 
 improvements:
