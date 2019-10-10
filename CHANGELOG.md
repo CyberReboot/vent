@@ -1,3 +1,13 @@
+# v0.9.13 (2019-10-10)
+
+improvements:
+- upgraded version of docker
+- upgraded version of monorepo
+- upgraded version of url-loader
+- upgraded version of eslint-plugin-react
+- upgraded version of pytest-cov
+- upgraded version of pytest
+
 # v0.9.12 (2019-10-02)
 
 improvements:
