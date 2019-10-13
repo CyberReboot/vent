@@ -8,7 +8,7 @@ pytest==5.2.1
 pytest-cov==2.8.1
 python-magic==0.4.15
 pyyaml==5.1.2
-redis==3.3.10
+redis==3.3.11
 rq==1.1.0
 sphinx==2.2.0
 urllib3==1.25.6
