@@ -322,7 +322,7 @@ class Repository:
                                          'use_existing_images')
             if result[0]:
                 use_existing_image = result[1]
-            if use_existing_image == 'yes' and not config_override:
+            if use_existing_image == 'yes':
                 try:
                     self.d_client.images.get(image_name)
                     i_attrs = self.d_client.images.get(image_name).attrs
