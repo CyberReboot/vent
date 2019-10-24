@@ -1,3 +1,14 @@
+# v0.9.14 (2019-10-24)
+
+improvements:
+- upgraded version of elasticsearch
+- upgraded version of webpack
+- upgraded version of webpack-dev-server
+- upgraded version of monorepo
+- upgraded version of redis
+- upgraded version of react
+- ugpraded version of react-dom
+
 # v0.9.13 (2019-10-10)
 
 improvements:
