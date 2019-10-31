@@ -1,9 +1,0 @@
-[info]
-name = Vizceral
-groups = monitoring,visualization,workflow
-
-[settings]
-priority = 16
-
-[docker]
-publish_all_ports = True
