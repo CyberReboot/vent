@@ -9,7 +9,7 @@ from redis import Redis
 from redis import StrictRedis
 from rq import Queue
 from watchdog.events import PatternMatchingEventHandler
-from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 
 
 class GZHandler(PatternMatchingEventHandler):
@@ -158,7 +158,12 @@ if __name__ == '__main__':  # pragma: no cover
     if len(sys.argv) > 1:
         args = sys.argv[1:]
 
-    observer = Observer()
+    # TODO: counter-intuitively inotify observer uses a lot of resources
+    # for directories that have a lot of existing files. Rather than
+    # just adding more watchers, we should encourage archiving of old
+    # pcaps and use a polling observer instead so that file_drop
+    # doesn't silently break.
+    observer = PollingObserver()
     observer.schedule(GZHandler(), path=args[0] if args else '/files',
                       recursive=True)
     observer.start()
