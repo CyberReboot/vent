@@ -497,24 +497,23 @@ def Checkout(path, branch='master', version='HEAD', **kargs):
     status = (True, None)
     path_dirs = PathDirs(**kargs)
     status = path_dirs.apply_path(path)
+    git_stdout = ''
     if status[0]:
         try:
-            check_output(shlex.split('git checkout ' + branch),
-                         stderr=STDOUT,
-                         close_fds=True).decode('utf-8')
-            check_output(shlex.split('git pull origin ' + version), stderr=STDOUT,
-                         close_fds=True).decode('utf-8')
+            git_stdout += check_output(
+                    shlex.split('git checkout ' + branch), stderr=STDOUT, close_fds=True).decode('utf-8')
+            git_stdout += check_output(
+                    shlex.split('git pull origin ' + version), stderr=STDOUT, close_fds=True).decode('utf-8')
             if version:
-                check_output(shlex.split('git reset --hard ' + version),
-                             stderr=STDOUT,
-                             close_fds=True).decode('utf-8')
+                git_stdout += check_output(
+                    shlex.split('git reset --hard ' + version), stderr=STDOUT, close_fds=True).decode('utf-8')
             chdir(status[1])
         except Exception as e:  # pragma: no cover
             if str(e).endswith('exit status 128.'):
                 status = (True, 'Repo has already been checked out.')
             else:
                 logger.error(
-                    'Checkout failed with error: {0}'.format(str(e)))
+                    'Checkout failed with error: {0} {1}'.format(str(e), git_stdout))
                 status = (False, str(e))
     return status
 
