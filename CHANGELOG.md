@@ -1,3 +1,16 @@
+# v0.9.15 (2019-11-07)
+
+improvements:
+- upgraded version of pytest
+- upgraded version of sphinx
+- upgraded version of elasticsearch
+- upgraded version of six
+- removed unused components: vizercal and workflow
+- better logging of git errors
+
+bug fixes:
+- using pollingobserver to save kernel resources that inotify was leaking
+
 # v0.9.14 (2019-10-24)
 
 improvements:
