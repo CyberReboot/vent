@@ -1,5 +1,5 @@
 docker==4.1.0
-elasticsearch==7.0.5
+elasticsearch==7.1.0
 falcon==2.0.0
 falcon-cors==1.1.7
 npyscreen==4.10.5
