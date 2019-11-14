@@ -115,14 +115,6 @@ class GZHandler(PatternMatchingEventHandler):
                         if description.split('_')[1][:-2] == spath:
                             print(uid + ' true')
                             exists = True
-                    elif description.startswith("watch.gpu_queue('"):
-                        description = description.split("watch.gpu_queue('")[1]
-                        print(uid + ' ' +
-                              description.split('"file": "')[1].split('"')[0])
-                        print(uid + ' ' + spath)
-                        if description.split('"file": "')[1].split('"')[0] == spath:
-                            print(uid + ' true')
-                            exists = True
                     print(uid + ' ***')
 
                 if not exists:
