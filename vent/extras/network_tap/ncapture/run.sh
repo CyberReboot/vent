@@ -20,8 +20,7 @@ make_pcap_name() {
 run_tcpdump() {
     local nic=$1
     local filter=$2
-    echo tcpdump -ni $nic --no-tcpudp-payload -w $name $filter
-    $(tcpdump -ni $nic $name $filter) &
+    $(tcpdump -ni $nic --no-tcpudp-payload $name $filter) &
 }
 
 run_capture() {
