@@ -17,26 +17,38 @@ make_pcap_name() {
     echo trace_${id}_${dt}.pcap
 }
 
+run_tcpdump() {
+    local nic=$1
+    local filter=$2
+    echo tcpdump -ni $nic --no-tcpudp-payload -w $name $filter
+    $(tcpdump -ni $nic $name $filter) &
+}
+
+run_capture() {
+    local nic=$1
+    local id=$2
+    local interval=$3
+    local filter=$4
+
+    echo sleep: $interval
+
+    local name=$(make_pcap_name $id)
+    run_tcpdump $nic $filter
+    pid=$!
+    kill $pid
+    mv *.pcap /files/;
+}
+
 # if ITERS is non-negative then do the capture ITERS times
 if [ $ITERS -gt "0" ]; then
     COUNTER=0
     while [ $COUNTER -lt $ITERS ]; do
-	name=$(make_pcap_name $ID)
-        tcpdump -ni $NIC --no-tcpudp-payload -w $name $FILTER &
-        pid=$!
-        sleep $INTERVAL
-        kill $pid
-        mv *.pcap /files/;
+	run_capture $NIC $ID $INTERVAL "$FILTER"
         let COUNTER=COUNTER+1;
     done
 else  # else do the capture until killed
     while true
     do
-	name=$(make_pcap_name $ID)
-        tcpdump -ni $NIC --no-tcpudp-payload -w $name $FILTER &
-        pid=$!
-        sleep $INTERVAL
-        kill $pid
-        mv *.pcap /files/;
+        run_capture $NIC $ID $INTERVAL "$FILTER"
     done
 fi
