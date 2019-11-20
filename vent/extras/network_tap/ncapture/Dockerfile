@@ -25,6 +25,7 @@ RUN apk add --update \
     && git clone https://github.com/cglewis/tcpdump.git \
     && git clone https://github.com/wanduow/wandio.git \
     && git clone https://github.com/LibtraceTeam/libtrace.git \
+    && git clone https://github.com/wanduow/libwdcap.git \
     && cd /src/wandio \
     && ./bootstrap.sh \
     && ./configure \
@@ -34,6 +35,13 @@ RUN apk add --update \
     && ./configure \
     && make && make install \
     && apk del libpcap-dev libpcap \
+    && cd /src/libwdcap \
+    && ./bootstrap.sh \
+    && ./configure \
+    && make && make install \
+    && cd examples \
+    && gcc -o tracecapd tracecapd.c -ltrace -lwdcap \
+    && cp tracecapd /usr/local/bin \
     && cd /src/libpcap \
     && ./configure \
     && make && make install \
