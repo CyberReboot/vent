@@ -44,7 +44,7 @@ RUN apk add --update \
     && ./configure --disable-shared \
     && make && make install \
     && cd examples \
-    && gcc -o tracecapd tracecapd.c -ltrace -lwdcap \
+    && g++ -fpermissive -o tracecapd tracecapd.c -L/usr/local/lib -Wl,-Bstatic -ltrace -lwdcap -Wl,-Bdynamic -lpcap -lssl -lcrypto -lwandio -lyaml \
     && cp tracecapd /usr/local/bin \
     && apk del libpcap-dev libpcap \
     && cd /src/libpcap \
