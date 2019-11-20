@@ -11,6 +11,8 @@ if [[ $FILTER =~ ^\'.*\'$ ]]; then
     FILTER=${FILTER:1:${#FILTER}-2}
 fi
 
+CAPTMP=$(mktemp -d)
+
 make_pcap_name() {
     local id=$1
     local dt=$(date '+%Y-%m-%d_%H_%M_%S')
@@ -19,8 +21,24 @@ make_pcap_name() {
 
 run_tcpdump() {
     local nic=$1
-    local filter=$2
-    $(tcpdump -ni $nic --no-tcpudp-payload $name $filter) &
+    local name=$2
+    local interval=$3
+    local filter=$4
+    $(timeout -k2 ${interval}s tcpdump -ni $nic --no-tcpudp-payload $name $filter)
+}
+
+run_tracecapd() {
+    local nic=$1
+    local name=$2
+    local interval=$3
+    local filter=$4
+
+    local dwconf=${CAPTMP}/dw.yaml
+    local ppconf=${CAPTMP}/pp.yaml
+
+    echo -e "format: pcapfile\nnamingscheme: ${name}\ncompressmethod: none\nrotationperiod: day\n" > $dwconf
+    echo -e "anon: none\nchecksum: none\npayload: 4\ndnspayload: 12\n" > $ppconf
+    $(timeout -k2 ${interval}s tracecapd -t 1 -c $dwconf -p $ppconf -s int:$nic -f "$filter")
 }
 
 run_capture() {
@@ -29,12 +47,9 @@ run_capture() {
     local interval=$3
     local filter=$4
 
-    echo sleep: $interval
-
     local name=$(make_pcap_name $id)
-    run_tcpdump $nic $filter
-    pid=$!
-    kill $pid
+    # run_tcpdump $nic $name $interval "$filter"
+    run_tracecapd $nic $name $interval "$filter"
     mv *.pcap /files/;
 }
 
