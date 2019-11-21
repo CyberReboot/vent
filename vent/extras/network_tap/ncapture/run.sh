@@ -36,6 +36,7 @@ run_tracecapd() {
     local dwconf=${CAPTMP}/dw.yaml
     local ppconf=${CAPTMP}/pp.yaml
 
+    # See https://github.com/wanduow/libwdcap for processing options.
     echo -e "format: pcapfile\nnamingscheme: ${name}\ncompressmethod: none\nrotationperiod: day\n" > $dwconf
     echo -e "anon: none\nchecksum: none\npayload: 4\ndnspayload: 12\n" > $ppconf
     $(timeout -k2 ${interval}s tracecapd -t 1 -c $dwconf -p $ppconf -s int:$nic -f "$filter")
