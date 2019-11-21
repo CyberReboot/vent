@@ -1,3 +1,12 @@
+# v0.10.0 (2019-11-21)
+
+improvements:
+- upgraded version of urllib3
+- upgraded version of elasticsearch
+- upgraded version of pytest
+- removed unused code
+- move from tcpdump to tracepcapd for packet capture
+
 # v0.9.15 (2019-11-07)
 
 improvements:
