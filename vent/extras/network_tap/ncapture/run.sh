@@ -11,26 +11,58 @@ if [[ $FILTER =~ ^\'.*\'$ ]]; then
     FILTER=${FILTER:1:${#FILTER}-2}
 fi
 
+CAPTMP=$(mktemp -d)
+
+make_pcap_name() {
+    local id=$1
+    local dt=$(date '+%Y-%m-%d_%H_%M_%S')
+    echo trace_${id}_${dt}.pcap
+}
+
+run_tcpdump() {
+    local nic=$1
+    local name=$2
+    local interval=$3
+    local filter=$4
+    $(timeout -k2 ${interval}s tcpdump -ni $nic --no-tcpudp-payload -w $name $filter)
+}
+
+run_tracecapd() {
+    local nic=$1
+    local name=$2
+    local interval=$3
+    local filter=$4
+
+    local dwconf=${CAPTMP}/dw.yaml
+    local ppconf=${CAPTMP}/pp.yaml
+
+    echo -e "format: pcapfile\nnamingscheme: ${name}\ncompressmethod: none\nrotationperiod: day\n" > $dwconf
+    echo -e "anon: none\nchecksum: none\npayload: 4\ndnspayload: 12\n" > $ppconf
+    $(timeout -k2 ${interval}s tracecapd -t 1 -c $dwconf -p $ppconf -s int:$nic -f "$filter")
+}
+
+run_capture() {
+    local nic=$1
+    local id=$2
+    local interval=$3
+    local filter=$4
+
+    local name=$(make_pcap_name $id)
+    # run_tcpdump $nic $name $interval "$filter"
+    run_tracecapd $nic $name $interval "$filter"
+    mv *.pcap /files/;
+}
+
 # if ITERS is non-negative then do the capture ITERS times
 if [ $ITERS -gt "0" ]; then
     COUNTER=0
     while [ $COUNTER -lt $ITERS ]; do
-        dt=$(date '+%Y-%m-%d_%H_%M_%S')
-        tcpdump -ni $NIC --no-tcpudp-payload -w 'trace_'"$ID"'_'"$dt"'.pcap' $FILTER &
-        pid=$!
-        sleep $INTERVAL
-        kill $pid
-        mv *.pcap /files/;
+	run_capture $NIC $ID $INTERVAL "$FILTER"
         let COUNTER=COUNTER+1;
     done
 else  # else do the capture until killed
     while true
     do
-        dt=$(date '+%Y-%m-%d_%H_%M_%S')
-        tcpdump -ni $NIC --no-tcpudp-payload -w 'trace_'"$ID"'_'"$dt"'.pcap' $FILTER &
-        pid=$!
-        sleep $INTERVAL
-        kill $pid
-        mv *.pcap /files/;
+        run_capture $NIC $ID $INTERVAL "$FILTER"
     done
 fi

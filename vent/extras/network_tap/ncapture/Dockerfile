@@ -11,6 +11,7 @@ RUN apk add --update \
     bash \
     bison \
     build-base \
+    coreutils \
     flex \
     gcc \
     git \
@@ -62,7 +63,11 @@ RUN apk add --update \
     gcc \
     git \
     linux-headers \
-    musl-dev
+    musl-dev \
+    && apk add \
+    libstdc++ \
+    libgcc
+
 
 VOLUME /tmp
 WORKDIR /tmp
