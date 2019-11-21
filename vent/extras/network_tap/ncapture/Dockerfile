@@ -11,7 +11,6 @@ RUN apk add --update \
     bash \
     bison \
     build-base \
-    coreutils \
     flex \
     gcc \
     git \
