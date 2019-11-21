@@ -23,7 +23,7 @@ if [ ! -s $TMPDIR/greater.txt ] ; then
   echo "FAIL: no packets with original size $SIZE"
   exit 1
 fi
-CAPLEN=$(capinfos -l $TMPDIR/*cap|grep inferred|grep -o -E '[0-9]+')
+CAPLEN=$(capinfos -l $TMPDIR/*cap|grep -E 'Packet size limit:\s+inferred: [0-9]+ bytes'|grep -o -E '[0-9]+')
 if [ "$CAPLEN" == "" ] ; then
   echo "FAIL: capture length not limited"
   exit 1
