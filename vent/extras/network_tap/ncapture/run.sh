@@ -51,14 +51,15 @@ run_capture() {
     local name=$(make_pcap_name $id)
     # run_tcpdump $nic $name $interval "$filter"
     run_tracecapd $nic $name $interval "$filter"
-    mv *.pcap /files/;
+    mv $name /files/;
+    python3 send_message.py $name
 }
 
 # if ITERS is non-negative then do the capture ITERS times
 if [ $ITERS -gt "0" ]; then
     COUNTER=0
     while [ $COUNTER -lt $ITERS ]; do
-	run_capture $NIC $ID $INTERVAL "$FILTER"
+        run_capture $NIC $ID $INTERVAL "$FILTER"
         let COUNTER=COUNTER+1;
     done
 else  # else do the capture until killed

@@ -5,16 +5,11 @@ import pytest
 from falcon import testing
 
 from .ncontrol import api
-from .prestart import pull_ncapture
 
 
 @pytest.fixture
 def client():
     return testing.TestClient(api)
-
-
-def test_pull_ncapture():
-    pull_ncapture()
 
 
 def test_create_r(client):
