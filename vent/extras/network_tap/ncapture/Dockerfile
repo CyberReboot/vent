@@ -19,6 +19,8 @@ RUN apk add --update \
     libpcap-dev \
     linux-headers \
     musl-dev \
+    python3 \
+    python3-dev \
     yaml-dev \
     && rm -rf /var/cache/apk/* \
     && mkdir /src \
@@ -71,6 +73,6 @@ RUN apk add --update \
 
 VOLUME /tmp
 WORKDIR /tmp
-COPY run.sh run.sh
+COPY . /tmp
 
 CMD ["/tmp/run.sh"]
