@@ -9,12 +9,14 @@ import os
 
 import pika
 
+
 def connect_rabbit(host='messenger', port=5672, queue='task_queue'):
     params = pika.ConnectionParameters(host=host, port=port)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
     channel.queue_declare(queue=queue, durable=True)
     return channel
+
 
 def send_rabbit_msg(msg, channel, exchange='', routing_key='task_queue'):
     channel.basic_publish(exchange=exchange,
@@ -24,12 +26,14 @@ def send_rabbit_msg(msg, channel, exchange='', routing_key='task_queue'):
     print(" [X] %s UTC %r %r" % (str(datetime.datetime.utcnow()),
                                  str(msg['id']), str(msg['file_path'])))
 
+
 def get_version():
     version = ''
     with open('VERSION', 'r') as f:
         for line in f:
             version = line.strip()
     return version
+
 
 def get_path(paths):
     path = None
@@ -39,10 +43,12 @@ def get_path(paths):
         print("No path provided: {0}, quitting".format(str(e)))
     return path
 
+
 def parse_args(parser):
     parser.add_argument('paths', nargs='*')
     parsed_args = parser.parse_args()
     return parsed_args
+
 
 if __name__ == '__main__':  # pragma: no cover
     parsed_args = parse_args(argparse.ArgumentParser())
