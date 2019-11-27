@@ -75,4 +75,6 @@ VOLUME /tmp
 WORKDIR /tmp
 COPY . /tmp
 
+RUN pip3 install --no-cache-dir -r requirements.txt
+
 CMD ["/tmp/run.sh"]
