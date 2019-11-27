@@ -4,7 +4,6 @@ Sends message to RabbitMQ to notify capture is complete and written to a file
 Created on 27 November 2019
 @author: Charlie Lewis
 """
-
 import os
 
 import pika
@@ -23,7 +22,7 @@ def send_rabbit_msg(msg, channel, exchange='', routing_key='task_queue'):
                           routing_key=routing_key,
                           body=json.dumps(msg),
                           properties=pika.BasicProperties(delivery_mode=2,))
-    print(" [X] %s UTC %r %r" % (str(datetime.datetime.utcnow()),
+    print(' [X] %s UTC %r %r' % (str(datetime.datetime.utcnow()),
                                  str(msg['id']), str(msg['file_path'])))
 
 
@@ -40,7 +39,7 @@ def get_path(paths):
     try:
         path = paths[0]
     except Exception as e:
-        print("No path provided: {0}, quitting".format(str(e)))
+        print('No path provided: {0}, quitting'.format(str(e)))
     return path
 
 
