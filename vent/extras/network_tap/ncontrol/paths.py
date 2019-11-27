@@ -71,6 +71,7 @@ class CreateR(object):
         # spin up container with payload specifications
         if c:
             tool_d = {'network': 'host',
+                      'environment': ['PYTHONUNBUFFERED=0', 'rabbit=true'],
                       'volumes_from': [socket.gethostname()]}
 
             cmd = '/tmp/run.sh ' + payload['nic'] + ' ' + payload['interval']

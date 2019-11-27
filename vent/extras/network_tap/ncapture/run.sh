@@ -52,7 +52,7 @@ run_capture() {
     # run_tcpdump $nic $name $interval "$filter"
     run_tracecapd $nic $name $interval "$filter"
     mv $name /files/;
-    python3 send_message.py $name
+    python3 send_message.py $name;
 }
 
 # if ITERS is non-negative then do the capture ITERS times
