@@ -1,3 +1,15 @@
+# v0.10.1 (2019-12-04)
+
+improvements:
+- upgraded version of pytest
+- upgraded version of pyyaml
+- upgraded version of sphinx
+- upgraded version of elasticsearch
+- upgraded version of gunicorn
+- removed tcpdump fork
+- added RabbitMQ message upon completion of ncapture
+- added option to use ncapture with a file
+
 # v0.10.0 (2019-11-21)
 
 improvements:
