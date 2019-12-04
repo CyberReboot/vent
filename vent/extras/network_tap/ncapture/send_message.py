@@ -61,7 +61,8 @@ if __name__ == '__main__':  # pragma: no cover
     if os.environ.get('rabbit', False) == 'true':
         try:
             channel = connect_rabbit()
-            body = {'id': uid, 'type': 'metadata', 'file_path': path, 'data': '',
+            body = {'id': uid, 'type': 'metadata', 'file_path': path,
+                    'data': '', 'file_type': 'pcap',
                     'results': {'tool': 'ncapture', 'version': get_version()}}
             send_rabbit_msg(body, channel)
         except Exception as e:
