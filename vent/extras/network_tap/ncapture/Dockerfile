@@ -5,6 +5,7 @@ LABEL maintainer="Charlie Lewis <clewis@iqt.org>" \
       vent.groups="collection,hidden,network,network_tap_child"
 
 ENV BUILDDEPS="autoconf automake bison build-base flex gcc git libtool libpcap-dev libpcap linux-headers musl-dev python3-dev yaml-dev"
+WORKDIR /tmp
 
 # TODO: libwdcap currently requires openssl 1.0.2
 RUN apk add --update $BUILDDEPS \
@@ -44,9 +45,7 @@ RUN apk add --update $BUILDDEPS \
     libpcap \
     yaml
 
-
 VOLUME /tmp
-WORKDIR /tmp
 COPY . /tmp
 
 RUN pip3 install --no-cache-dir -r requirements.txt
