@@ -1,13 +1,13 @@
 #!/bin/bash
 
-NIC="$1"
+URI="$1"
 INTERVAL="$2"
 ID="$3"
 ITERS="$4"
 FILTER="$5"
 
 # check if filter has '' surrounding it
-if [[ $FILTER =~ ^\'.*\'$ ]]; then
+if [[ "$FILTER" =~ ^\'.*\'$ ]]; then
     FILTER=${FILTER:1:${#FILTER}-2}
 fi
 
@@ -19,16 +19,8 @@ make_pcap_name() {
     echo trace_${id}_${dt}.pcap
 }
 
-run_tcpdump() {
-    local nic=$1
-    local name=$2
-    local interval=$3
-    local filter=$4
-    $(timeout -k2 ${interval}s tcpdump -ni $nic --no-tcpudp-payload -w $name $filter)
-}
-
 run_tracecapd() {
-    local nic=$1
+    local uri=$1
     local name=$2
     local interval=$3
     local filter=$4
@@ -36,21 +28,26 @@ run_tracecapd() {
     local dwconf=${CAPTMP}/dw.yaml
     local ppconf=${CAPTMP}/pp.yaml
 
+    # default to interface URI if no prefix.
+    # See https://wand.net.nz/trac/libtrace/wiki/SupportedTraceFormats.
+    if [[ ! "$uri" =~ .+":".+ ]]; then
+        uri="int:$uri"
+    fi
+
     # See https://github.com/wanduow/libwdcap for processing options.
     echo -e "format: pcapfile\nnamingscheme: ${name}\ncompressmethod: none\nrotationperiod: day\n" > $dwconf
     echo -e "anon: none\nchecksum: none\npayload: 4\ndnspayload: 12\n" > $ppconf
-    $(timeout -k2 ${interval}s tracecapd -t 1 -c $dwconf -p $ppconf -s int:$nic -f "$filter")
+    $(timeout -k2 ${interval}s tracecapd -t 1 -c $dwconf -p $ppconf -s $uri -f "$filter")
 }
 
 run_capture() {
-    local nic=$1
+    local uri=$1
     local id=$2
     local interval=$3
     local filter=$4
 
     local name=$(make_pcap_name $id)
-    # run_tcpdump $nic $name $interval "$filter"
-    run_tracecapd $nic $name $interval "$filter"
+    run_tracecapd $uri $name $interval "$filter"
     mv $name /files/;
     python3 send_message.py $name;
 }
@@ -59,12 +56,12 @@ run_capture() {
 if [ $ITERS -gt "0" ]; then
     COUNTER=0
     while [ $COUNTER -lt $ITERS ]; do
-        run_capture $NIC $ID $INTERVAL "$FILTER"
+        run_capture $URI $ID $INTERVAL "$FILTER"
         let COUNTER=COUNTER+1;
     done
 else  # else do the capture until killed
     while true
     do
-        run_capture $NIC $ID $INTERVAL "$FILTER"
+        run_capture $URI $ID $INTERVAL "$FILTER"
     done
 fi
