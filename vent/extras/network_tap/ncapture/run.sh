@@ -19,14 +19,6 @@ make_pcap_name() {
     echo trace_${id}_${dt}.pcap
 }
 
-run_tcpdump() {
-    local nic=$1
-    local name=$2
-    local interval=$3
-    local filter=$4
-    $(timeout -k2 ${interval}s tcpdump -ni $nic --no-tcpudp-payload -w $name $filter)
-}
-
 run_tracecapd() {
     local nic=$1
     local name=$2
@@ -49,7 +41,6 @@ run_capture() {
     local filter=$4
 
     local name=$(make_pcap_name $id)
-    # run_tcpdump $nic $name $interval "$filter"
     run_tracecapd $nic $name $interval "$filter"
     mv $name /files/;
     python3 send_message.py $name;
