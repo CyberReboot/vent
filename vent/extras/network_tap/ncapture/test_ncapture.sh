@@ -3,7 +3,7 @@
 # smoke test for ncapture worker
 # requires tcpdump and tshark to be installed.
 
-NIC=lo
+URI=lo
 IP=127.0.0.1
 SIZE=1000
 MAXCAPLEN=50
@@ -12,7 +12,7 @@ TMPDIR=$(mktemp -d)
 
 docker build -f Dockerfile . -t cyberreboot/vent-ncapture
 echo starting ncapture
-docker run --privileged --net=host --cap-add=NET_ADMIN -v $TMPDIR:/files -t cyberreboot/vent-ncapture /tmp/run.sh $NIC 15 test 1 "host $IP and icmp" || exit 1 &
+docker run --privileged --net=host --cap-add=NET_ADMIN -v $TMPDIR:/files -t cyberreboot/vent-ncapture /tmp/run.sh $URI 15 test 1 "host $IP and icmp" || exit 1 &
 echo waiting for pcap
 while [ "$(find $TMPDIR -prune -empty)" ] ; do
   ping -q -n -i 0.1 -s $SIZE -c 10 $IP > /dev/null
