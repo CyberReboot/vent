@@ -56,7 +56,7 @@ run_capture() {
     local name=$(make_pcap_name $id)
     run_tracecapd $uri $name $interval "$filter"
     mv $name $out_path;
-    python3 send_message.py $name;
+    python3 send_message.py $out_path/$name;
 }
 
 # if ITERS is non-negative then do the capture ITERS times
