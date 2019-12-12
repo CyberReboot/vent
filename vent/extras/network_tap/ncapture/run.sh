@@ -6,6 +6,12 @@ ID="$3"
 ITERS="$4"
 FILTER="$5"
 
+if [ -z "$6" ]; then
+    OUT_PATH="/files/"
+else
+    OUT_PATH="$6"
+fi
+
 # check if filter has '' surrounding it
 if [[ "$FILTER" =~ ^\'.*\'$ ]]; then
     FILTER=${FILTER:1:${#FILTER}-2}
@@ -45,10 +51,11 @@ run_capture() {
     local id=$2
     local interval=$3
     local filter=$4
+    local out_path=$5
 
     local name=$(make_pcap_name $id)
     run_tracecapd $uri $name $interval "$filter"
-    mv $name /files/;
+    mv $name $out_path;
     python3 send_message.py $name;
 }
 
@@ -56,12 +63,12 @@ run_capture() {
 if [ $ITERS -gt "0" ]; then
     COUNTER=0
     while [ $COUNTER -lt $ITERS ]; do
-        run_capture $URI $ID $INTERVAL "$FILTER"
+        run_capture $URI $ID $INTERVAL "$FILTER" $OUT_PATH
         let COUNTER=COUNTER+1;
     done
 else  # else do the capture until killed
     while true
     do
-        run_capture $URI $ID $INTERVAL "$FILTER"
+        run_capture $URI $ID $INTERVAL "$FILTER" $OUT_PATH
     done
 fi
