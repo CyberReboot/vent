@@ -12,7 +12,7 @@ import os
 import pika
 
 
-def connect_rabbit(host='172.17.0.1', port=5672, queue='task_queue'):
+def connect_rabbit(host='messenger', port=5672, queue='task_queue'):
     params = pika.ConnectionParameters(host=host, port=port)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()
