@@ -10,6 +10,6 @@ python-magic==0.4.15
 pyyaml==5.2
 redis==3.3.11
 rq==1.1.0
-sphinx==2.2.2
+sphinx==2.3.0
 urllib3==1.25.7
 watchdog==0.9.0
