@@ -5,17 +5,44 @@ INTERVAL="$2"
 ID="$3"
 ITERS="$4"
 FILTER="$5"
-
-if [ -z "$6" ]; then
-    OUT_PATH="/files/"
-else
-    OUT_PATH="$6"
-fi
+# TODO: migrate above static args to getopt style.
 
 # check if filter has '' surrounding it
 if [[ "$FILTER" =~ ^\'.*\'$ ]]; then
     FILTER=${FILTER:1:${#FILTER}-2}
 fi
+
+# See https://github.com/wanduow/libwdcap for full flag documentation.
+# Set CryptoPAn IP anonymization (https://en.wikipedia.org/wiki/Crypto-PAn) with -a (default none).
+ANON="none"
+# Set checksum updating for anonymization.
+CSUM="check"
+# Set number of app payload size to keep in bytes.
+PAYS="4"
+# Set number of DNS payload size to keep in bytes
+DPAYS="12"
+
+OUT_PATH="/files/"
+
+while getopts "a:c:d:s:" arg; do
+  case $arg in
+    a)
+      ANON=$OPTARG
+      ;;
+    c)
+      CSUM=$OPTARG
+      ;;
+    d)
+      DPAYS=$OPTARG
+      ;;
+    o)
+      OUT_PATH=$OPTARG
+      ;;
+    s)
+      PAYS=$OPTARG
+      ;;
+  esac
+done
 
 CAPTMP=$(mktemp -d)
 
@@ -40,9 +67,8 @@ run_tracecapd() {
         uri="int:$uri"
     fi
 
-    # See https://github.com/wanduow/libwdcap for processing options.
     echo -e "format: pcapfile\nnamingscheme: ${name}\ncompressmethod: none\nrotationperiod: day\n" > $dwconf
-    echo -e "anon: none\nchecksum: none\npayload: 4\ndnspayload: 12\n" > $ppconf
+    echo -e "anon: $ANON\nchecksum: $CSUM\npayload: $PAYS\ndnspayload: $DPAYS\n" > $ppconf
     $(timeout -k2 ${interval}s tracecapd -t 1 -c $dwconf -p $ppconf -s $uri -f "$filter")
 }
 
