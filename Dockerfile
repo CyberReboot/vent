@@ -1,4 +1,4 @@
-FROM alpine:3.10
+FROM alpine:3.11
 LABEL maintainer="Charlie Lewis <clewis@iqt.org>"
 
 RUN apk --no-cache add --update \
