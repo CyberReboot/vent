@@ -58,9 +58,13 @@ if __name__ == '__main__':  # pragma: no cover
     uid = ''
     if 'id' in os.environ:
         uid = os.environ['id']
+    if 'external_host' in os.environ:
+        external_host = os.environ['external_host']
+    else:
+        external_host = 'messenger'
     if os.environ.get('rabbit', False) == 'true':
         try:
-            channel = connect_rabbit()
+            channel = connect_rabbit(host=external_host)
             body = {'id': uid, 'type': 'metadata', 'file_path': path,
                     'data': '', 'file_type': 'pcap_strip',
                     'results': {'tool': 'ncapture', 'version': get_version()}}
